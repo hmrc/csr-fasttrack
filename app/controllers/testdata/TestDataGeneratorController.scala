@@ -18,22 +18,22 @@ package controllers.testdata
 
 import java.io.File
 
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.ConfigFactory
 import connectors.testdata.ExchangeObjects.Implicits._
-import model.ApplicationStatuses
 import model.EvaluationResults.Result
 import model.ApplicationStatuses
 import play.api.Play
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import services.testdata._
+import uk.gov.hmrc.play.config.RunMode
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object TestDataGeneratorController extends TestDataGeneratorController
 
-trait TestDataGeneratorController extends BaseController {
+trait TestDataGeneratorController extends BaseController with RunMode {
   def clearDatabase() = Action.async { implicit request =>
     TestDataGeneratorService.clearDatabase().map { _ =>
       Ok(Json.parse("""{"message": "success"}"""))
@@ -46,12 +46,18 @@ trait TestDataGeneratorController extends BaseController {
     }
   }
 
-  lazy val cubiksUrlFromConfig = Play.current.configuration.getString("cubiks.url").getOrElse(fetchSecretConfigKeyFromFile("cubiks.url"))
+  val secretsFileCubiksUrlKey = s"$env.microservice.services.cubiks-gateway.testdata.url"
+  lazy val cubiksUrlFromConfig = Play.current.configuration.getString(secretsFileCubiksUrlKey)
+    .getOrElse(fetchSecretConfigKeyFromFile("cubiks.url"))
 
   private def fetchSecretConfigKeyFromFile(key: String): String = {
     val path = System.getProperty("user.home") + "/.csr/.secrets"
     val testConfig = ConfigFactory.parseFile(new File(path))
-    testConfig.getString(s"testdata.$key")
+    if (testConfig.isEmpty) {
+      throw new IllegalArgumentException(s"No key found at '$secretsFileCubiksUrlKey' and .secrets file does not exist.")
+    } else {
+      testConfig.getString(s"testdata.$key")
+    }
   }
 
   // scalastyle:off parameter.number
