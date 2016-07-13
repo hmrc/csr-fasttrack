@@ -20,8 +20,8 @@ import sbt._
 object MicroServiceBuild extends Build with MicroService {
   import scala.util.Properties.envOrElse
 
-  override val appName = "csr-fasttrack"
-  val appVersion = envOrElse("CSR_FASTTRACK_VERSION", "999-SNAPSHOT")
+  override val appName = "fset-fasttrack"
+  val appVersion = envOrElse("FSET_FASTTRACK_VERSION", "999-SNAPSHOT")
 
   override lazy val appDependencies: Seq[ModuleID] = AppDependencies()
 }
