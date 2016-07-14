@@ -1,5 +1,7 @@
 # Civil Service Fast Track Service
 
+[![Build Status](https://travis-ci.org/hmrc/fset-fasttrack.svg?branch=fset-580-run-integration-tests)](https://travis-ci.org/hmrc/fset-fasttrack)
+
 ### Summary
 This repository provides a service containing business logic and storage to support the Fast Track project
 
