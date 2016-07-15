@@ -36,8 +36,12 @@ trait MongoRepositorySpec extends PlaySpec with Inside with Inspectors with Scal
   import ImplicitBSONHandlers._
   import MongoRepositorySpec._
 
+  val timeout = 10 seconds
+
+  val collectionName: String
+
   // System-wide setting for integration test timeouts.
-  override implicit def patienceConfig = PatienceConfig(timeout = scaled(Span(5000, Millis)))
+  override implicit def patienceConfig = PatienceConfig(timeout = scaled(Span(timeout.toMillis, Millis)))
 
   implicit final def app: FakeApplication = fakeApplication
 
@@ -46,9 +50,6 @@ trait MongoRepositorySpec extends PlaySpec with Inside with Inspectors with Scal
   implicit def mongo: () => DefaultDB = {
     ReactiveMongoPlugin.mongoConnector.db
   }
-
-  val timeout = 10 seconds
-  val collectionName: String
 
   override def withFixture(test: NoArgTest) = {
     Helpers.running(app) {
