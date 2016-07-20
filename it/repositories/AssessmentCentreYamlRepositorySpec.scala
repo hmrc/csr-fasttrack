@@ -102,7 +102,7 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
   }
 
   val productionYAMLConfig  = Map(
-    "Test.scheduling.online-testing.assessment-centres.yamlFilePath" -> "assessment-centres-prod.yaml"
+    "scheduling.online-testing.assessment-centres.yamlFilePath" -> "assessment-centres-prod.yaml"
   )
 
   "Assessment centre production YAML file" should {

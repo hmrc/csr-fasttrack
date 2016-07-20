@@ -26,14 +26,13 @@ import play.api.Play
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import services.testdata._
-import uk.gov.hmrc.play.config.RunMode
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object TestDataGeneratorController extends TestDataGeneratorController
 
-trait TestDataGeneratorController extends BaseController with RunMode {
+trait TestDataGeneratorController extends BaseController {
   def clearDatabase() = Action.async { implicit request =>
     TestDataGeneratorService.clearDatabase().map { _ =>
       Ok(Json.parse("""{"message": "success"}"""))
@@ -46,7 +45,7 @@ trait TestDataGeneratorController extends BaseController with RunMode {
     }
   }
 
-  val secretsFileCubiksUrlKey = s"$env.microservice.services.cubiks-gateway.testdata.url"
+  val secretsFileCubiksUrlKey = "microservice.services.cubiks-gateway.testdata.url"
   lazy val cubiksUrlFromConfig = Play.current.configuration.getString(secretsFileCubiksUrlKey)
     .getOrElse(fetchSecretConfigKeyFromFile("cubiks.url"))
 
