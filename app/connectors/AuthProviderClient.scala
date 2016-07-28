@@ -39,7 +39,9 @@ trait AuthProviderClient {
 
   case object CandidateRole extends UserRole("candidate")
 
-  case object ServiceManagerRole extends UserRole("service-manager")
+  case object ServiceAdminRole extends UserRole("service-admin")
+
+  case object TechnicalAdminRole extends UserRole("tech-admin")
 
   val ServiceName = "fasttrack"
 

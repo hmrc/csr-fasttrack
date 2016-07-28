@@ -39,7 +39,7 @@ trait TestDataGeneratorService {
       removeAllUsers <- AuthProviderClient.removeAllUsers()
       makeAdminUser1 <- RegisteredStatusGenerator.createUser(
         1,
-        "test_service_manager_1@mailinator.com", "CSR Test", "Service Manager", AuthProviderClient.ServiceManagerRole
+        "test_service_manager_1@mailinator.com", "CSR Test", "Service Manager", AuthProviderClient.TechnicalAdminRole
       )
     } yield {
       ()
@@ -55,7 +55,7 @@ trait TestDataGeneratorService {
       parNumbers.map { candidateGenerationId =>
         val fut = RegisteredStatusGenerator.createUser(
           candidateGenerationId,
-          s"test_service_manager_$candidateGenerationId@mailinator.com", "CSR Test", "Service Manager", AuthProviderClient.ServiceManagerRole
+          s"test_service_manager_$candidateGenerationId@mailinator.com", "CSR Test", "Service Manager", AuthProviderClient.ServiceAdminRole
         )
         Await.result(fut, 5 seconds)
       }.toList
