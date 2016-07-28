@@ -17,6 +17,7 @@
 package services.testdata
 
 import connectors.AuthProviderClient
+import connectors.AuthProviderClient.UserRole
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import play.api.Play.current
 import play.modules.reactivemongo.ReactiveMongoPlugin
@@ -25,7 +26,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.collection.parallel.ForkJoinTaskSupport
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.{Await, Future}
 import scala.language.postfixOps
 
 object TestDataGeneratorService extends TestDataGeneratorService {
@@ -46,7 +47,7 @@ trait TestDataGeneratorService {
     }
   }
 
-  def createAdminUsers(numberToGenerate: Int)(implicit hc: HeaderCarrier): Future[List[DataGenerationResponse]] = {
+  def createAdminUsers(numberToGenerate: Int, role: UserRole)(implicit hc: HeaderCarrier): Future[List[DataGenerationResponse]] = {
     Future.successful {
       val parNumbers = (1 to numberToGenerate).par
       parNumbers.tasksupport = new ForkJoinTaskSupport(
@@ -55,7 +56,7 @@ trait TestDataGeneratorService {
       parNumbers.map { candidateGenerationId =>
         val fut = RegisteredStatusGenerator.createUser(
           candidateGenerationId,
-          s"test_service_manager_$candidateGenerationId@mailinator.com", "CSR Test", "Service Manager", AuthProviderClient.ServiceAdminRole
+          s"test_service_manager_$candidateGenerationId@mailinator.com", "CSR Test", "Service Manager", role
         )
         Await.result(fut, 5 seconds)
       }.toList

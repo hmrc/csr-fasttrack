@@ -19,6 +19,7 @@ package controllers.testdata
 import java.io.File
 
 import com.typesafe.config.ConfigFactory
+import connectors.AuthProviderClient
 import connectors.testdata.ExchangeObjects.Implicits._
 import model.EvaluationResults.Result
 import model.ApplicationStatuses
@@ -29,6 +30,7 @@ import services.testdata._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object TestDataGeneratorController extends TestDataGeneratorController
 
@@ -39,10 +41,10 @@ trait TestDataGeneratorController extends BaseController {
     }
   }
 
-  def createAdminUsers(numberToGenerate: Int) = Action.async { implicit request =>
-    TestDataGeneratorService.createAdminUsers(numberToGenerate).map { candidates =>
-      Ok(Json.toJson(candidates))
-    }
+  def createAdminUsers(numberToGenerate: Int, role: String = "service-admin") = Action.async { implicit request =>
+      TestDataGeneratorService.createAdminUsers(numberToGenerate, AuthProviderClient.getRole(role)).map { candidates =>
+        Ok(Json.toJson(candidates))
+      }
   }
 
   val secretsFileCubiksUrlKey = "microservice.services.cubiks-gateway.testdata.url"
