@@ -47,7 +47,8 @@ trait TestDataGeneratorService {
     }
   }
 
-  def createAdminUsers(numberToGenerate: Int, role: UserRole)(implicit hc: HeaderCarrier): Future[List[DataGenerationResponse]] = {
+  def createAdminUsers(numberToGenerate: Int, emailPrefix: String,
+                       role: UserRole)(implicit hc: HeaderCarrier): Future[List[DataGenerationResponse]] = {
     Future.successful {
       val parNumbers = (1 to numberToGenerate).par
       parNumbers.tasksupport = new ForkJoinTaskSupport(
@@ -56,7 +57,7 @@ trait TestDataGeneratorService {
       parNumbers.map { candidateGenerationId =>
         val fut = RegisteredStatusGenerator.createUser(
           candidateGenerationId,
-          s"test_service_manager_$candidateGenerationId@mailinator.com", "CSR Test", "Service Manager", role
+          s"test_service_manager_$emailPrefix$candidateGenerationId@mailinator.com", "CSR Test", "Service Manager", role
         )
         Await.result(fut, 5 seconds)
       }.toList

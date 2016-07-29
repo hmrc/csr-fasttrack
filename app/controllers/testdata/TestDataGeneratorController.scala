@@ -30,7 +30,6 @@ import services.testdata._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 object TestDataGeneratorController extends TestDataGeneratorController
 
@@ -41,8 +40,8 @@ trait TestDataGeneratorController extends BaseController {
     }
   }
 
-  def createAdminUsers(numberToGenerate: Int, role: String) = Action.async { implicit request =>
-      TestDataGeneratorService.createAdminUsers(numberToGenerate, AuthProviderClient.getRole(role)).map { candidates =>
+  def createAdminUsers(numberToGenerate: Int, emailPrefix: String, role: String) = Action.async { implicit request =>
+      TestDataGeneratorService.createAdminUsers(numberToGenerate, emailPrefix, AuthProviderClient.getRole(role)).map { candidates =>
         Ok(Json.toJson(candidates))
       }
   }
