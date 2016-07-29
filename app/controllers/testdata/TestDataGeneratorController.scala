@@ -41,7 +41,7 @@ trait TestDataGeneratorController extends BaseController {
     }
   }
 
-  def createAdminUsers(numberToGenerate: Int, role: String = "service-admin") = Action.async { implicit request =>
+  def createAdminUsers(numberToGenerate: Int, role: String) = Action.async { implicit request =>
       TestDataGeneratorService.createAdminUsers(numberToGenerate, AuthProviderClient.getRole(role)).map { candidates =>
         Ok(Json.toJson(candidates))
       }
