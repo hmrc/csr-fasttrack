@@ -41,9 +41,9 @@ trait TestDataGeneratorController extends BaseController {
   }
 
   def createAdminUsers(numberToGenerate: Int, emailPrefix: String, role: String) = Action.async { implicit request =>
-      TestDataGeneratorService.createAdminUsers(numberToGenerate, emailPrefix, AuthProviderClient.getRole(role)).map { candidates =>
-        Ok(Json.toJson(candidates))
-      }
+    TestDataGeneratorService.createAdminUsers(numberToGenerate, emailPrefix, AuthProviderClient.getRole(role)).map { candidates =>
+      Ok(Json.toJson(candidates))
+    }
   }
 
   val secretsFileCubiksUrlKey = "microservice.services.cubiks-gateway.testdata.url"
@@ -62,13 +62,13 @@ trait TestDataGeneratorController extends BaseController {
 
   // scalastyle:off parameter.number
   def createCandidatesInStatus(status: String, numberToGenerate: Int,
-    emailPrefix: String,
-    setGis: Boolean,
-    region: Option[String],
-    loc1scheme1EvaluationResult: Option[String],
-    loc1scheme2EvaluationResult: Option[String],
-    previousStatus: Option[String] = None,
-    confirmedAllocation: Boolean) = Action.async { implicit request =>
+                               emailPrefix: String,
+                               setGis: Boolean,
+                               region: Option[String],
+                               loc1scheme1EvaluationResult: Option[String],
+                               loc1scheme2EvaluationResult: Option[String],
+                               previousStatus: Option[String] = None,
+                               confirmedAllocation: Boolean) = Action.async { implicit request =>
 
     val initialConfig = GeneratorConfig(
       emailPrefix = emailPrefix,
