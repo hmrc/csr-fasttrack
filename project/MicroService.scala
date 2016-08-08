@@ -91,7 +91,7 @@ private object TestPhases {
     tests map {
       test => new Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions =
         Seq("-Dtest.name=" + test.name,
-          "-Dmongodb.uri=mongodb://localhost:27017/test-csr-fasttrack")
+          "-Dmongodb.uri=mongodb://localhost:27017/test-fset-fasttrack")
       )))
     }
 }
