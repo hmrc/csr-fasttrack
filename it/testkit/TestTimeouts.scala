@@ -21,7 +21,7 @@ import org.scalatest.time.{ Seconds, Span }
 
 import scala.concurrent.duration._
 
-private trait IntegrationTestTimeoutConfig extends AbstractPatienceConfiguration {
+trait IntegrationTestTimeoutConfig extends AbstractPatienceConfiguration {
   ScalaFutures =>
   val timeoutSecs: Int
   val timeout = FiniteDuration(timeoutSecs.toLong, SECONDS)
