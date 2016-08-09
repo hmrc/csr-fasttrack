@@ -28,6 +28,6 @@ private trait IntegrationTestTimeoutConfig extends AbstractPatienceConfiguration
   override implicit def patienceConfig = PatienceConfig(timeout = scaled(Span(timeoutSecs, Seconds)))
 }
 
-trait IntegrationTestShortTimeout extends TimeoutConfig {
+trait IntegrationTestShortTimeout extends IntegrationTestTimeoutConfig {
   val timeoutSecs = 3
 }
