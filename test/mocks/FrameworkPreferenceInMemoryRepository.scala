@@ -16,6 +16,7 @@
 
 package mocks
 
+import model.PersistedObjects.PreferencesWithQualification
 import model.{ Alternatives, LocationPreference, Preferences }
 import repositories.FrameworkPreferenceRepository
 
@@ -39,4 +40,6 @@ object FrameworkPreferenceInMemoryRepository extends FrameworkPreferenceReposito
     Future.successful(inMemoryRepo.get(applicationId))
 
   override def notFound(applicationId: String): Preferences = throw new RuntimeException
+
+  def tryGetPreferencesWithQualifications(applicationId: String): Future[Option[PreferencesWithQualification]] = ???
 }

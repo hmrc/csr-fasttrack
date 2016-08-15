@@ -17,21 +17,21 @@
 package services.applicationassessment
 
 import config.AssessmentEvaluationMinimumCompetencyLevel
-import connectors.{ CSREmailClient, EmailClient }
+import connectors.{CSREmailClient, EmailClient}
 import model.ApplicationStatuses
-import model.AssessmentEvaluationCommands.AssessmentPassmarkPreferencesAndScores
+import model.AssessmentEvaluationCommands.{AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores}
 import model.EvaluationResults._
 import model.Exceptions.IncorrectStatusInApplicationException
 import model.PersistedObjects.ApplicationForNotification
 import play.api.Logger
-import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
+import repositories.application.{GeneralApplicationRepository, OnlineTestRepository}
 import repositories._
 import services.AuditService
 import services.evaluation.AssessmentCentrePassmarkRulesEngine
 import services.passmarksettings.AssessmentCentrePassMarkSettingsService
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 object ApplicationAssessmentService extends ApplicationAssessmentService {
 
@@ -93,19 +93,23 @@ trait ApplicationAssessmentService {
     }
   }
 
-  def nextAssessmentCandidateScoreReadyForEvaluation: Future[Option[AssessmentPassmarkPreferencesAndScores]] = {
+  def nextAssessmentCandidateReadyForEvaluation: Future[Option[OnlineTestEvaluationAndAssessmentCentreScores]] = {
     passmarkService.getLatestVersion.flatMap {
       case passmark if passmark.schemes.forall(_.overallPassMarks.isDefined) =>
         aRepository.nextApplicationReadyForAssessmentScoreEvaluation(passmark.info.get.version).flatMap {
           case Some(appId) =>
             for {
               scoresOpt <- aasRepository.tryFind(appId)
-              preferencesOpt <- fpRepository.tryGetPreferences(appId)
+              prefsWithQualificationsOpt <- fpRepository.tryGetPreferencesWithQualifications(appId)
+              otEvaluation <- otRepository.findPassmarkEvaluation(appId)
             } yield {
               for {
                 scores <- scoresOpt
-                preferences <- preferencesOpt
-              } yield AssessmentPassmarkPreferencesAndScores(passmark, preferences, scores)
+                prefsWithQualifications <- prefsWithQualificationsOpt
+              } yield {
+                val assessmentResult = AssessmentPassmarkPreferencesAndScores(passmark, prefsWithQualifications, scores)
+                OnlineTestEvaluationAndAssessmentCentreScores(otEvaluation, assessmentResult)
+              }
             }
           case None => Future.successful(None)
         }
@@ -115,16 +119,16 @@ trait ApplicationAssessmentService {
     }
   }
 
-  def evaluateAssessmentCandidateScore(
-    scores: AssessmentPassmarkPreferencesAndScores,
-    config: AssessmentEvaluationMinimumCompetencyLevel
-  ): Future[Unit] = {
-    val result = passmarkRulesEngine.evaluate(scores, config)
-    val applicationStatus = determineStatus(result)
+  def evaluateAssessmentCandidate(onlineTestWithAssessmentCentreScores: OnlineTestEvaluationAndAssessmentCentreScores,
+                                  config: AssessmentEvaluationMinimumCompetencyLevel): Future[Unit] = {
+    val onlineTestEvaluation = onlineTestWithAssessmentCentreScores.onlineTestEvaluation
+    val assessmentScores = onlineTestWithAssessmentCentreScores.assessmentScores
+    val assessmentEvaluation = passmarkRulesEngine.evaluate(onlineTestEvaluation, assessmentScores, config)
+    val applicationStatus = determineStatus(assessmentEvaluation)
 
-    aRepository.saveAssessmentScoreEvaluation(scores.scores.applicationId, scores.passmark.info.get.version, result,
-      applicationStatus).map { _ =>
-      auditNewStatus(scores.scores.applicationId, applicationStatus)
+    aRepository.saveAssessmentScoreEvaluation(assessmentScores.scores.applicationId,
+      assessmentScores.passmark.info.get.version, assessmentEvaluation, applicationStatus).map { _ =>
+      auditNewStatus(assessmentScores.scores.applicationId, applicationStatus)
     }
   }
 

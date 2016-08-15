@@ -17,6 +17,7 @@
 package model
 
 import model.Commands.{ Address, PhoneNumber, PostCode }
+import model.EvaluationResults.Result
 import model.OnlineTestCommands.TestResult
 import org.joda.time.{ DateTime, LocalDate }
 import play.api.libs.json._
@@ -113,6 +114,12 @@ object PersistedObjects {
   case class ApplicationUser(applicationId: String, userId: String, frameworkId: String,
     applicationStatus: String, progressStatuses: ApplicationProgressStatuses)
 
+  case class OnlineTestPassmarkEvaluation(location1Scheme1: Result,
+                                          location1Scheme2: Option[Result], location2Scheme1: Option[Result],
+                                          location2Scheme2: Option[Result], alternativeScheme: Option[Result])
+
+  case class PreferencesWithQualification(preferences: Preferences, aLevel: Boolean, stemLevel: Boolean)
+
   object Implicits {
     implicit val persistedPersonalDetailsFormats = Json.format[PersonalDetails]
     implicit val applicationStatusFormats = Json.format[ApplicationStatus]
@@ -139,5 +146,6 @@ object PersistedObjects {
     implicit val applicationUserFormats = Json.format[ApplicationUser]
 
     implicit val onlineTestPdfReportFormats = Json.format[OnlineTestPDFReport]
+    implicit val preferencesWithQualificationFormats = Json.format[PreferencesWithQualification]
   }
 }

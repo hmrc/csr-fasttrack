@@ -20,15 +20,16 @@ import java.util.UUID
 
 import factories.DateTimeFactory
 import model.ApplicationStatuses
-import model.Exceptions.NotFoundException
-import model.OnlineTestCommands.{OnlineTestApplicationWithCubiksUser, OnlineTestProfile}
-import model.PersistedObjects.{ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest}
-import org.joda.time.{DateTime, DateTimeZone}
-import reactivemongo.bson.{BSONArray, BSONDocument}
+import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound }
+import model.OnlineTestCommands.{ OnlineTestApplicationWithCubiksUser, OnlineTestProfile }
+import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
+import org.joda.time.{ DateTime, DateTimeZone }
+import reactivemongo.bson.{ BSONArray, BSONDocument }
 import reactivemongo.json.ImplicitBSONHandlers
-import repositories.application.{GeneralApplicationMongoRepository, OnlineTestMongoRepository}
+import repositories.application.{ GeneralApplicationMongoRepository, OnlineTestMongoRepository }
 import services.GBTimeZoneService
 import testkit.MongoRepositorySpec
+import model.EvaluationResults._
 
 class OnlineTestRepositorySpec extends MongoRepositorySpec {
   import ImplicitBSONHandlers._
@@ -536,6 +537,51 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       val result = onlineTestRepo.nextApplicationPassMarkProcessing("currentVersion").futureValue
 
       result must be(empty)
+    }
+  }
+
+  "find passmark evaluation" should {
+    val appId = "AppId"
+
+    "return online test passmark evaluation" in {
+      helperRepo.collection.insert(BSONDocument(
+        "applicationId" -> appId,
+        "passmarkEvaluation" -> BSONDocument(
+          "passmarkVersion" -> "passmarkVersion",
+          "location1Scheme1" -> "Red",
+          "location1Scheme2" -> "Amber",
+          "location2Scheme1" -> "Green",
+          "location2Scheme2" -> "Green",
+          "alternativeScheme" -> "Amber"
+        )
+      )).futureValue
+
+      val result = onlineTestRepo.findPassmarkEvaluation(appId).futureValue
+
+      result mustBe OnlineTestPassmarkEvaluation(Red, Some(Amber), Some(Green), Some(Green), Some(Amber))
+    }
+
+    "throw an exception when there is no location1Scheme1 result" in {
+      helperRepo.collection.insert(BSONDocument(
+        "applicationId" -> appId,
+        "passmarkEvaluation" -> BSONDocument(
+          "passmarkVersion" -> "passmarkVersion"
+        )
+      )).futureValue
+
+      val exception = onlineTestRepo.findPassmarkEvaluation(appId).failed.futureValue
+
+      exception mustBe OnlineTestFirstLocationResultNotFound(appId)
+    }
+
+    "throw an exception when there is no passmarkEvaluation section" in {
+      helperRepo.collection.insert(BSONDocument(
+        "applicationId" -> appId
+      )).futureValue
+
+      val exception = onlineTestRepo.findPassmarkEvaluation(appId).failed.futureValue
+
+      exception mustBe OnlineTestPassmarkEvaluationNotFound(appId)
     }
   }
 

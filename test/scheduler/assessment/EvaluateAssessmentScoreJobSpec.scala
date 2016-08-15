@@ -17,9 +17,11 @@
 package scheduler.assessment
 
 import config.AssessmentEvaluationMinimumCompetencyLevel
-import model.AssessmentEvaluationCommands.AssessmentPassmarkPreferencesAndScores
+import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.Commands.AssessmentCentrePassMarkSettingsResponse
+import model.EvaluationResults._
+import model.PersistedObjects.{ OnlineTestPassmarkEvaluation, PreferencesWithQualification }
 import model.{ LocationPreference, Preferences }
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -35,7 +37,7 @@ class EvaluateAssessmentScoreJobSpec extends PlaySpec with MockitoSugar with Sca
   implicit val ec: ExecutionContext = ExecutionContext.global
 
   val applicationAssessmentServiceMock = mock[ApplicationAssessmentService]
-  val config = AssessmentEvaluationMinimumCompetencyLevel(false, None, None)
+  val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = false, None, None)
 
   object TestableEvaluateAssessmentScoreJob extends EvaluateAssessmentScoreJob {
     val applicationAssessmentService = applicationAssessmentServiceMock
@@ -44,21 +46,27 @@ class EvaluateAssessmentScoreJobSpec extends PlaySpec with MockitoSugar with Sca
 
   "application assessment service" should {
     "find a candidate and evaluate the score successfully" in new WithApplication {
-      val candidateScore = AssessmentPassmarkPreferencesAndScores(
+      val onlineTestEvaluation = OnlineTestPassmarkEvaluation(Green, None, None, None, None)
+      val assessmentEvaluation = AssessmentPassmarkPreferencesAndScores(
         AssessmentCentrePassMarkSettingsResponse(List(), None),
-        Preferences(LocationPreference("region", "location", "firstFramework", None)),
-        CandidateScoresAndFeedback("appId", None, false)
+        PreferencesWithQualification(
+          Preferences(LocationPreference("region", "location", "firstFramework", None)),
+          aLevel = true, stemLevel = true
+        ),
+        CandidateScoresAndFeedback("appId", None, assessmentIncomplete = false)
       )
-      when(applicationAssessmentServiceMock.nextAssessmentCandidateScoreReadyForEvaluation).thenReturn(
-        Future.successful(Some(candidateScore))
+      val evaluation = OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation, assessmentEvaluation)
+      when(applicationAssessmentServiceMock.nextAssessmentCandidateReadyForEvaluation).thenReturn(
+        Future.successful(Some(evaluation))
       )
-      when(applicationAssessmentServiceMock.evaluateAssessmentCandidateScore(candidateScore, config)).thenReturn(
+
+      when(applicationAssessmentServiceMock.evaluateAssessmentCandidate(evaluation, config)).thenReturn(
         Future.successful(())
       )
 
       TestableEvaluateAssessmentScoreJob.tryExecute().futureValue
 
-      verify(applicationAssessmentServiceMock).evaluateAssessmentCandidateScore(candidateScore, config)
+      verify(applicationAssessmentServiceMock).evaluateAssessmentCandidate(evaluation, config)
     }
   }
 }
