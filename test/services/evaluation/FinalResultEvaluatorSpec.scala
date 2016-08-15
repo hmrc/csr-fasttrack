@@ -26,7 +26,7 @@ class FinalResultEvaluatorSpec extends PropSpec with MustMatchers {
 
   val evaluator = new FinalResultEvaluator {}
 
-  property("Red or Amber in Online Test result in Red or Amber in final result - the assessment centre result is ignored") {
+  property("Red or Amber in Online Test stop further evaluation for the scheme and set the result to Red or Amber") {
     for {
       onlineTestResult <- AllPossibleOnlineTestResults
       onlineTestResultToUpdate <- List(Red, Amber)
@@ -48,7 +48,7 @@ class FinalResultEvaluatorSpec extends PropSpec with MustMatchers {
     }
   }
 
-  property("Green in Online Test set as the final evaluation Assessment Centre result") {
+  property("Green in Online Test takes final evaluation from assessment centre") {
     for (assessmentCentreResult <- AllPossibleAssessmentResults) {
       val result = mergeResults(GreenOnlineTestResult, assessmentCentreResult)
       result.location1Scheme1 mustBe assessmentCentreResult.location1Scheme1
