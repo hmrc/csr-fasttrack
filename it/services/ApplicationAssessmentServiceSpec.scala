@@ -66,9 +66,9 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
 
   val collectionName = "application"
   // set this test to run only one test - useful in debugging
-  val DebugTestNameAppId: Option[String] = Some("oneLocationSuite_Amber_App1")
+  val DebugTestNameAppId: Option[String] = None // Some("oneLocationSuite_Amber_App1")
   // set this test to load only one file with tests - useful in debugging
-  val DebugTestOnlySuffixPath: Option[String] = Some("1_oneLocation/suiteAmberOnly.conf")
+  val DebugTestOnlySuffixPath: Option[String] = Some("1_oneLocation/suiteRedOnly.conf")
 
   "Assessment Centre Passmark Service" should {
     "for each test in the path evaluate scores" in new WithApplication {
