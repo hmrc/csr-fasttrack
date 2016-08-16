@@ -65,10 +65,10 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
   }
 
   val collectionName = "application"
-  // set this test to run only one test - useful in debugging
+  // set this test framework to run only one test - useful in debugging
   val DebugTestNameAppId: Option[String] = None // Some("oneLocationSuite_Amber_App1")
-  // set this test to load only one file with tests - useful in debugging
-  val DebugTestOnlySuffixPath: Option[String] = Some("1_oneLocation/suiteRedOnly.conf")
+  // set this test framework to load only tests which contain the phrase in their path - useful in debugging
+  val DebugTestOnlyPathPattern: Option[String] = None // Some("5_2_oneLocationMclDisabledIncomplete/")
 
   "Assessment Centre Passmark Service" should {
     "for each test in the path evaluate scores" in new WithApplication {
@@ -116,8 +116,9 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
                       passmark: AssessmentCentrePassMarkSettingsResponse) = {
     log(s"File with tests: ${testCase.getAbsolutePath}")
 
-    if (DebugTestOnlySuffixPath.isEmpty || testCase.getAbsolutePath.endsWith(DebugTestOnlySuffixPath.get)) {
-      loadTests(testCase) foreach { t =>
+    if (DebugTestOnlyPathPattern.isEmpty || testCase.getAbsolutePath.contains(DebugTestOnlyPathPattern.get)) {
+      val tests = loadTests(testCase)
+      tests foreach { t =>
         val appId = t.scores.applicationId
         log(s"Loading test: $appId")
         if (DebugTestNameAppId.isEmpty || appId == DebugTestNameAppId.get) {
@@ -138,6 +139,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
           log("--> Skipped test")
         }
       }
+      log(s"Executed test cases: ${tests.size}")
     } else {
       log("--> Skipped file")
     }
@@ -146,7 +148,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
   "Debug flag" should {
     "must be disabled" in {
       DebugTestNameAppId must be (empty)
-      DebugTestOnlySuffixPath must be (empty)
+      DebugTestOnlyPathPattern must be (empty)
     }
   }
 
