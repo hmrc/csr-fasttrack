@@ -36,7 +36,7 @@ trait ApplicationStatusCalculator {
     amberOrGreenOnly.headOption match {
       case Some(Green) => ApplicationStatuses.AssessmentCentrePassed
       case Some(Amber) => ApplicationStatuses.AwaitingAssessmentCentreReevaluation
-      case None => ApplicationStatuses.AssessmentCentreFailed
+      case _ => ApplicationStatuses.AssessmentCentreFailed
     }
 
   }
