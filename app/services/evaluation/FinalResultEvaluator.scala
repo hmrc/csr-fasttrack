@@ -18,8 +18,10 @@ package services.evaluation
 
 import model.EvaluationResults._
 import model.PersistedObjects.OnlineTestPassmarkEvaluation
+import play.api.Logger
 
 trait FinalResultEvaluator {
+  case class OnlineTestAndAssessmentResultPairNotFound(msg: String) extends Exception(msg)
 
   def mergeResults(onlineTestResult: OnlineTestPassmarkEvaluation,
                    assessmentCentreResult: AssessmentRuleCategoryResult,
@@ -56,9 +58,13 @@ trait FinalResultEvaluator {
     (onlineTestResult, assessmentCentreResult) match {
       case (None, None) => None
       case (r1 @ Some(Red), _) => r1
-      case (r1 @ Some(Amber), _) => r1 // TODO LT: The gap has not been closed, log warning?
+      case (r1 @ Some(Amber), _) =>
+        Logger.warn("The Online Test passmark gap has not been closed _BEFORE_ the assessment centre passmark evaluation.")
+        r1
       case (Some(Green), r2) => r2
-      case _ => None // TODO LT: exception as there is no online test result
+      case (r1, r2) =>
+        throw OnlineTestAndAssessmentResultPairNotFound(s"The pair: Online Test [$r1] and Assessment Centre result [$r2] " +
+          s"are not in acceptable state: Red/Amber/Green or both None")
     }
   }
 
