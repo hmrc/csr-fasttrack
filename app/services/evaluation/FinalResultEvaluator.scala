@@ -59,7 +59,6 @@ trait FinalResultEvaluator {
       case (None, None) => None
       case (r1 @ Some(Red), _) => r1
       case (r1 @ Some(Amber), _) =>
-        Logger.warn("The Online Test passmark gap has not been closed _BEFORE_ the assessment centre passmark evaluation.")
         r1
       case (Some(Green), r2) => r2
       case (r1, r2) =>

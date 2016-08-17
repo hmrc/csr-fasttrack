@@ -49,7 +49,7 @@ object ApplicationAssessmentService extends ApplicationAssessmentService {
   val passmarkRulesEngine = AssessmentCentrePassmarkRulesEngine
 }
 
-trait ApplicationAssessmentService {
+trait ApplicationAssessmentService extends ApplicationStatusCalculator {
 
   implicit def headerCarrier = new HeaderCarrier()
 
@@ -133,8 +133,8 @@ trait ApplicationAssessmentService {
   }
 
   def processNextAssessmentCentrePassedOrFailedApplication: Future[Unit] = {
-    aRepository.nextAssessmentCentrePassedOrFailedApplication.flatMap {
-      case Some(application) => {
+    aRepository.nextAssessmentCentrePassedOrFailedApplication().flatMap {
+      case Some(application) =>
         Logger.debug(s"processAssessmentCentrePassedOrFailedApplication() with application id [${application.applicationId}] " +
           s"and status [${application.applicationStatus}]")
         for {
@@ -142,23 +142,8 @@ trait ApplicationAssessmentService {
           _ <- emailCandidate(application, emailAddress)
           _ <- commitNotifiedStatus(application)
         } yield ()
-      }
       case None => Future.successful(())
     }
-  }
-
-  private def determineStatus(result: AssessmentRuleCategoryResult): String = result.passedMinimumCompetencyLevel match {
-    case Some(false) =>
-      ApplicationStatuses.AssessmentCentreFailed
-    case _ =>
-      val allResults = List(result.location1Scheme1, result.location1Scheme2, result.location2Scheme1, result.location2Scheme2,
-        result.alternativeScheme).flatten
-
-      allResults match {
-        case _ if allResults.forall(_ == Red) => ApplicationStatuses.AssessmentCentreFailed
-        case _ if allResults.contains(Green) => ApplicationStatuses.AssessmentCentrePassed
-        case _ => ApplicationStatuses.AwaitingAssessmentCentreReevaluation
-      }
   }
 
   private def auditNewStatus(appId: String, newStatus: String): Unit = {
