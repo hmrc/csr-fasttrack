@@ -152,10 +152,11 @@ object Commands {
     dateOfBirth: LocalDate
   )
 
-  case class PhoneAndEmail(phone: Option[String], email: Option[String])
+  case class ContactDetails(phone: Option[String], email: String, address: Address, postCode: PostCode)
+
   case class PassMarkReport(application: Report, questionnaire: PassMarkReportQuestionnaireData, testResults: PassMarkReportTestResults)
   case class PassMarkReportWithPersonalData(application: ReportWithPersonalDetails,
-    testResults: PassMarkReportTestResults, contactDetails: PhoneAndEmail)
+    testResults: PassMarkReportTestResults, contactDetails: ContactDetails)
 
   case class PassMarkReportQuestionnaireData(
     gender: Option[String],
@@ -203,7 +204,7 @@ object Commands {
     onlineTestPassmarkEvaluations: OnlineTestPassmarkEvaluationSchemes)
 
   case class PersonalInfo(firstName: Option[String], lastName: Option[String], preferredName: Option[String],
-    aLevel: Option[String], stemLevel: Option[String])
+    aLevel: Option[String], stemLevel: Option[String], dateOfBirth: Option[String])
 
   case class CandidateScoresSummary(
     avgLeadingAndCommunicating: Option[Double],
@@ -239,9 +240,9 @@ object Commands {
     candidateScores: CandidateScoresAndFeedback
   )
 
-  case class AssessmentCentreCandidatesReport(
+  case class ApplicationPreferencesWithTestResultsAndContactDetails(
     application: ApplicationPreferencesWithTestResults,
-    phoneAndEmail: PhoneAndEmail
+    contactDetails: ContactDetails
   )
 
   case class ApplicationResponse(applicationId: String, applicationStatus: String, userId: String, progressResponse: ProgressResponse)
@@ -346,7 +347,7 @@ object Commands {
     implicit val candidateAwaitingAllocationFormat = Json.format[CandidateAwaitingAllocation]
 
     implicit val applicationAssessmentFormat = Json.format[ApplicationAssessment]
-    implicit val phoneAndEmailFormat = Json.format[PhoneAndEmail]
+    implicit val phoneAndEmailFormat = Json.format[ContactDetails]
     implicit val reportWithPersonalDetailsFormat = Json.format[ReportWithPersonalDetails]
     implicit val passMarkReportWithPersonalDetailsFormat = Json.format[PassMarkReportWithPersonalData]
     implicit val assessmentCentrePassMarkSettingsResponseFormat = Json.format[AssessmentCentrePassMarkSettingsResponse]
@@ -357,6 +358,6 @@ object Commands {
     implicit val schemeEvaluation = Json.format[SchemeEvaluation]
     implicit val candidateScoresSummaryFormat = Json.format[CandidateScoresSummary]
     implicit val applicationPreferencesWithTestResults = Json.format[ApplicationPreferencesWithTestResults]
-    implicit val assessmentCentreCandidatesReportFormat = Json.format[AssessmentCentreCandidatesReport]
+    implicit val assessmentCentreCandidatesReportFormat = Json.format[ApplicationPreferencesWithTestResultsAndContactDetails]
   }
 }

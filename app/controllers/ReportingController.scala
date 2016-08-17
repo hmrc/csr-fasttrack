@@ -148,9 +148,9 @@ trait ReportingController extends BaseController {
         a <- apps
         c <- candidates.get(a.userId)
       } yield {
-        AssessmentCentreCandidatesReport(
+        ApplicationPreferencesWithTestResultsAndContactDetails(
           a,
-          PhoneAndEmail(c.phone, Some(c.email))
+          ContactDetails(c.phone, c.email, c.address, c.postCode)
         )
       }
     }
@@ -191,7 +191,7 @@ trait ReportingController extends BaseController {
           a <- applications
           t <- testResults.get(a.applicationId)
           c <- cDetails.get(a.userId)
-        } yield PassMarkReportWithPersonalData(a, t, PhoneAndEmail(c.phone, Some(c.email)))
+        } yield PassMarkReportWithPersonalData(a, t, ContactDetails(c.phone, c.email, c.address, c.postCode))
       }
     reports.map { list =>
       Ok(Json.toJson(list))
