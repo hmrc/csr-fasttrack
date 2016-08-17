@@ -429,7 +429,7 @@ class ReportControllerSpec extends PlaySpec with Results with MockitoSugar {
       ApplicationPreferencesWithTestResults(userId, appId, someRnd("location"), someRnd("location1scheme1-"),
         someRnd("location1scheme2-"), someRnd("location"), someRnd("location2scheme1-"), someRnd("location2scheme2-"),
         yesNoRnd, yesNoRnd,
-        PersonalInfo(someRnd("firstname-"), someRnd("lastName-"), someRnd("preferredName-"), yesNoRnd, yesNoRnd, Some("2001-01-01")),
+        PersonalInfo(someRnd("firstname-"), someRnd("lastName-"), someRnd("preferredName-"), yesNoRnd, yesNoRnd, Some(new LocalDate("2001-01-01"))),
         summaryScores, schemeEvaluations)
 
     def newContactDetails = ContactDetailsWithId(

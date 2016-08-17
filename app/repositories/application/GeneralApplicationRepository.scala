@@ -528,7 +528,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         val preferredName = pd.flatMap(_.getAs[String]("preferredName"))
         val aLevel = pd.flatMap(_.getAs[Boolean]("aLevel").map(booleanTranslator))
         val stemLevel = pd.flatMap(_.getAs[Boolean]("stemLevel").map(booleanTranslator))
-        val dateOfBirth = pd.flatMap(_.getAs[String]("dateOfBirth"))
+        val dateOfBirth = pd.flatMap(_.getAs[LocalDate]("dateOfBirth"))
 
         ApplicationPreferencesWithTestResults(userId, applicationId, fr1FirstLocation, fr1FirstFramework,
           fr1SecondFramework, fr2FirstLocation, fr2FirstFramework, fr2SecondFramework, location, framework,

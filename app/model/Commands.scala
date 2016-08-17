@@ -204,7 +204,7 @@ object Commands {
     onlineTestPassmarkEvaluations: OnlineTestPassmarkEvaluationSchemes)
 
   case class PersonalInfo(firstName: Option[String], lastName: Option[String], preferredName: Option[String],
-    aLevel: Option[String], stemLevel: Option[String], dateOfBirth: Option[String])
+    aLevel: Option[String], stemLevel: Option[String], dateOfBirth: Option[LocalDate])
 
   case class CandidateScoresSummary(
     avgLeadingAndCommunicating: Option[Double],
