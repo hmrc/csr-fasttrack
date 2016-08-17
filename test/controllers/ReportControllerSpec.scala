@@ -337,22 +337,22 @@ class ReportControllerSpec extends PlaySpec with Results with MockitoSugar {
   "Successful candidates report" should {
     "return results report" in new SuccessfulCandidatesReportTestFixture {
       when(appRepo.applicationsPassedInAssessmentCentre(any())).thenReturnAsync(appPreferences)
-      when(cdRepo.findAll).thenReturnAsync(contactDetails)
+      when(cdRepo.findAll).thenReturnAsync(contactDetailsList)
 
       val response = controller.createSuccessfulCandidatesReport(frameworkId)(request).run
-      val result = contentAsJson(response).as[List[AssessmentCentreCandidatesReport]]
+      val result = contentAsJson(response).as[List[ApplicationPreferencesWithTestResultsAndContactDetails]]
 
       status(response) mustBe OK
 
-      result mustBe List(AssessmentCentreCandidatesReport(applicationPreference1, phoneAndEmail))
+      result mustBe List(ApplicationPreferencesWithTestResultsAndContactDetails(applicationPreference1, contactDetails))
     }
 
     "return nothing if no applications exist" in new SuccessfulCandidatesReportTestFixture {
       when(appRepo.applicationsPassedInAssessmentCentre(any())).thenReturnAsync(Nil)
-      when(cdRepo.findAll).thenReturnAsync(contactDetails)
+      when(cdRepo.findAll).thenReturnAsync(contactDetailsList)
 
       val response = controller.createSuccessfulCandidatesReport(frameworkId)(request).run
-      val result = contentAsJson(response).as[List[AssessmentCentreCandidatesReport]]
+      val result = contentAsJson(response).as[List[ApplicationPreferencesWithTestResultsAndContactDetails]]
 
       status(response) mustBe OK
 
@@ -364,7 +364,7 @@ class ReportControllerSpec extends PlaySpec with Results with MockitoSugar {
       when(cdRepo.findAll).thenReturnAsync(Nil)
 
       val response = controller.createSuccessfulCandidatesReport(frameworkId)(request).run
-      val result = contentAsJson(response).as[List[AssessmentCentreCandidatesReport]]
+      val result = contentAsJson(response).as[List[ApplicationPreferencesWithTestResultsAndContactDetails]]
 
       status(response) mustBe OK
 
@@ -416,8 +416,8 @@ class ReportControllerSpec extends PlaySpec with Results with MockitoSugar {
     lazy val contactDetails1 = newContactDetails
 
     lazy val appPreferences = List(applicationPreference1)
-    lazy val contactDetails = List(contactDetails1)
-    lazy val phoneAndEmail = newPhoneAndEmail(contactDetails1)
+    lazy val contactDetailsList = List(contactDetails1)
+    lazy val contactDetails = newContactDetails(contactDetails1)
     lazy val summaryScores = CandidateScoresSummary(Some(10d), Some(10d), Some(10d),
       Some(10d), Some(10d), Some(10d), Some(20d), Some(80d))
     lazy val schemeEvaluations = SchemeEvaluation(Some("Pass"), Some("Fail"), Some("Amber"), Some("Pass"),
@@ -429,7 +429,7 @@ class ReportControllerSpec extends PlaySpec with Results with MockitoSugar {
       ApplicationPreferencesWithTestResults(userId, appId, someRnd("location"), someRnd("location1scheme1-"),
         someRnd("location1scheme2-"), someRnd("location"), someRnd("location2scheme1-"), someRnd("location2scheme2-"),
         yesNoRnd, yesNoRnd,
-        PersonalInfo(someRnd("firstname-"), someRnd("lastName-"), someRnd("preferredName-"), yesNoRnd, yesNoRnd),
+        PersonalInfo(someRnd("firstname-"), someRnd("lastName-"), someRnd("preferredName-"), yesNoRnd, yesNoRnd, Some(new LocalDate("2001-01-01"))),
         summaryScores, schemeEvaluations)
 
     def newContactDetails = ContactDetailsWithId(
@@ -440,8 +440,8 @@ class ReportControllerSpec extends PlaySpec with Results with MockitoSugar {
       someRnd("Phone")
     )
 
-    def newPhoneAndEmail(cd: ContactDetailsWithId) = {
-      PhoneAndEmail(cd.phone, Some(cd.email))
+    def newContactDetails(cd: ContactDetailsWithId) = {
+      ContactDetails(cd.phone, cd.email, cd.address, cd.postCode)
     }
 
     def request = {
