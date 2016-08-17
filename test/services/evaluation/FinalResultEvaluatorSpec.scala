@@ -31,19 +31,28 @@ class FinalResultEvaluatorSpec extends PropSpec with MustMatchers {
       onlineTestResult <- AllPossibleOnlineTestResults
       onlineTestResultToUpdate <- List(Red, Amber)
     } {
-      val resultLoc1Sch1 = mergeResults(onlineTestResult.copy(location1Scheme1 = onlineTestResultToUpdate), GreenAssessmentCentreResult)
+      val location1Scheme1 = Green
+      val location1Scheme2 = onlineTestResult.location1Scheme2 map (_ => Green)
+      val location2Scheme1 = onlineTestResult.location2Scheme1 map (_ => Green)
+      val location2Scheme2 = onlineTestResult.location2Scheme2 map (_ => Green)
+      val alternativeScheme = onlineTestResult.alternativeScheme map (_ => Green)
+
+      val greenAssessmentCentreResult = AssessmentRuleCategoryResult(None, Some(location1Scheme1), location1Scheme2, location2Scheme1,
+        location2Scheme2, alternativeScheme, None, None)
+
+      val resultLoc1Sch1 = mergeResults(onlineTestResult.copy(location1Scheme1 = onlineTestResultToUpdate), greenAssessmentCentreResult)
       resultLoc1Sch1.location1Scheme1 mustBe Some(onlineTestResultToUpdate)
 
-      val resultLoc1Sch2 = mergeResults(onlineTestResult.copy(location1Scheme2 = Some(onlineTestResultToUpdate)), GreenAssessmentCentreResult)
+      val resultLoc1Sch2 = mergeResults(onlineTestResult.copy(location1Scheme2 = Some(onlineTestResultToUpdate)), greenAssessmentCentreResult)
       resultLoc1Sch2.location1Scheme2 mustBe Some(onlineTestResultToUpdate)
 
-      val resultLoc2Sch1 = mergeResults(onlineTestResult.copy(location2Scheme1 = Some(onlineTestResultToUpdate)), GreenAssessmentCentreResult)
+      val resultLoc2Sch1 = mergeResults(onlineTestResult.copy(location2Scheme1 = Some(onlineTestResultToUpdate)), greenAssessmentCentreResult)
       resultLoc2Sch1.location2Scheme1 mustBe Some(onlineTestResultToUpdate)
 
-      val resultLoc2Sch2 = mergeResults(onlineTestResult.copy(location2Scheme2 = Some(onlineTestResultToUpdate)), GreenAssessmentCentreResult)
+      val resultLoc2Sch2 = mergeResults(onlineTestResult.copy(location2Scheme2 = Some(onlineTestResultToUpdate)), greenAssessmentCentreResult)
       resultLoc2Sch2.location2Scheme2 mustBe Some(onlineTestResultToUpdate)
 
-      val alternative = mergeResults(onlineTestResult.copy(alternativeScheme = Some(onlineTestResultToUpdate)), GreenAssessmentCentreResult)
+      val alternative = mergeResults(onlineTestResult.copy(alternativeScheme = Some(onlineTestResultToUpdate)), greenAssessmentCentreResult)
       alternative.alternativeScheme mustBe Some(onlineTestResultToUpdate)
     }
   }
@@ -140,9 +149,6 @@ object FinalResultEvaluatorSpec {
   } yield AssessmentRuleCategoryResult(None, loc1Sch1, loc1Sch2, loc2Sch1, loc2Sch2, alternative, None, None)
 
   val GreenOnlineTestResult = OnlineTestPassmarkEvaluation(Green, Some(Green), Some(Green), Some(Green), Some(Green))
-
-  val GreenAssessmentCentreResult = AssessmentRuleCategoryResult(None, Some(Green), Some(Green), Some(Green),
-    Some(Green), Some(Green), None, None)
 
   val AllSchemePreferences = SchemePreferences(Business, Some(Commercial), Some(DigitalAndTechnology), Some(Finance))
 
