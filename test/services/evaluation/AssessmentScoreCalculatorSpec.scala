@@ -40,7 +40,7 @@ class AssessmentScoreCalculatorSpec extends PlaySpec with MustMatchers {
       //total: 26.85
       )
 
-      val result = calculator.countScores(Scores)
+      val result = calculator.countAverage(Scores)
 
       result must be(CompetencyAverageResult(4.00, 3.615, 3.015, 3.39, 3.095, 3.985, 5.75, 26.85))
     }

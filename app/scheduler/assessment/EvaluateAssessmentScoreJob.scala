@@ -31,9 +31,9 @@ trait EvaluateAssessmentScoreJob extends SingleInstanceScheduledJob with Evaluat
   val applicationAssessmentService: ApplicationAssessmentService
 
   def tryExecute()(implicit ec: ExecutionContext): Future[Unit] = {
-    applicationAssessmentService.nextAssessmentCandidateScoreReadyForEvaluation.flatMap { scoresOpt =>
-      scoresOpt.map { scores =>
-        applicationAssessmentService.evaluateAssessmentCandidateScore(scores, minimumCompetencyLevelConfig)
+    applicationAssessmentService.nextAssessmentCandidateReadyForEvaluation.flatMap { candidateResultsOpt =>
+      candidateResultsOpt.map { candidateResults =>
+        applicationAssessmentService.evaluateAssessmentCandidate(candidateResults, minimumCompetencyLevelConfig)
       }.getOrElse(Future.successful(()))
     }
   }

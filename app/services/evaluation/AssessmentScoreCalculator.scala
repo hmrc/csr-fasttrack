@@ -21,7 +21,7 @@ import model.EvaluationResults.CompetencyAverageResult
 
 trait AssessmentScoreCalculator {
 
-  def countScores(scores: CandidateScoresAndFeedback): CompetencyAverageResult = {
+  def countAverage(scores: CandidateScoresAndFeedback): CompetencyAverageResult = {
     val leadingAndCommunicating = average(scores.leadingAndCommunicating)
     val collaboratingAndPartnering = average(scores.collaboratingAndPartnering)
     val deliveringAtPace = average(scores.deliveringAtPace)

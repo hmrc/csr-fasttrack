@@ -16,6 +16,7 @@
 
 package repositories
 
+import model.PersistedObjects.PreferencesWithQualification
 import model.Preferences
 import reactivemongo.api.DB
 import reactivemongo.bson.{ BSONDocument, BSONObjectID, _ }
@@ -27,16 +28,18 @@ import scala.concurrent.Future
 
 trait FrameworkPreferenceRepository {
   def savePreferences(applicationId: String, preferences: Preferences): Future[Unit]
+
   def tryGetPreferences(applicationId: String): Future[Option[Preferences]]
+
+  def tryGetPreferencesWithQualifications(applicationId: String): Future[Option[PreferencesWithQualification]]
 }
 
 class FrameworkPreferenceMongoRepository(implicit mongo: () => DB)
   extends ReactiveRepository[Preferences, BSONObjectID](
     "application", mongo, Preferences.jsonFormat, ReactiveMongoFormats.objectIdFormats
-  )
-  with FrameworkPreferenceRepository {
+  ) with FrameworkPreferenceRepository {
 
-  override def savePreferences(applicationId: String, preferences: Preferences): Future[Unit] = {
+  def savePreferences(applicationId: String, preferences: Preferences): Future[Unit] = {
     require(preferences.isValid, "Preferences must be valid when saving to repository")
 
     val query = BSONDocument("applicationId" -> applicationId)
@@ -50,11 +53,29 @@ class FrameworkPreferenceMongoRepository(implicit mongo: () => DB)
     }
   }
 
-  override def tryGetPreferences(applicationId: String): Future[Option[Preferences]] = {
+  def tryGetPreferences(applicationId: String): Future[Option[Preferences]] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val projection = BSONDocument("framework-preferences" -> 1, "_id" -> 0)
     collection.find(query, projection).one[BSONDocument].map { rootDocument =>
       rootDocument.flatMap(_.getAs[Preferences]("framework-preferences"))
     }
   }
+
+  def tryGetPreferencesWithQualifications(applicationId: String): Future[Option[PreferencesWithQualification]] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    val projection = BSONDocument("framework-preferences" -> 1, "personal-details" -> 1, "_id" -> 0)
+
+    collection.find(query, projection).one[BSONDocument].map {
+      case Some(document) if document.getAs[BSONDocument]("framework-preferences").isDefined
+        && document.getAs[BSONDocument]("personal-details").isDefined =>
+        val preferences = document.getAs[Preferences]("framework-preferences").get
+        val personalDetailsDoc = document.getAs[BSONDocument]("personal-details").get
+        val aLevel = personalDetailsDoc.getAs[Boolean]("aLevel").get
+        val stemLevel = personalDetailsDoc.getAs[Boolean]("stemLevel").get
+
+        Some(PreferencesWithQualification(preferences, aLevel, stemLevel))
+      case _ => None
+    }
+  }
+
 }

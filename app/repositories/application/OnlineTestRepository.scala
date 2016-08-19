@@ -20,9 +20,9 @@ import config.MicroserviceAppConfig._
 import controllers.OnlineTestDetails
 import factories.DateTimeFactory
 import model.EvaluationResults._
-import model.Exceptions.{ NotFoundException, UnexpectedException }
+import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound, UnexpectedException }
 import model.OnlineTestCommands._
-import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest }
+import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
 import model.{ ApplicationStatuses, Commands }
 import org.joda.time.{ DateTime, LocalDate }
 import reactivemongo.api.DB
@@ -71,6 +71,8 @@ trait OnlineTestRepository {
   def removeCandidateAllocationStatus(applicationId: String): Future[Unit]
 
   def saveCandidateAllocationStatus(applicationId: String, applicationStatus: String, expireDate: Option[LocalDate]): Future[Unit]
+
+  def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation]
 }
 
 class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
@@ -476,6 +478,30 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
 
     collection.update(query, deAllocationSet, upsert = false).map(checkUpdateWriteResult).flatMap(_ =>
       collection.update(query, deAllocationUnset, upsert = false).map(checkUpdateWriteResult))
+  }
+
+  def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = {
+    val query = BSONDocument("applicationId" -> appId)
+    val projection = BSONDocument("passmarkEvaluation" -> 1)
+
+    collection.find(query, projection).one[BSONDocument] map {
+      case Some(doc) if doc.getAs[BSONDocument]("passmarkEvaluation").isDefined =>
+        val pe = doc.getAs[BSONDocument]("passmarkEvaluation").get
+        val otLocation1Scheme1Result = pe.getAs[String]("location1Scheme1").map(Result(_))
+        val otLocation1Scheme2Result = pe.getAs[String]("location1Scheme2").map(Result(_))
+        val otLocation2Scheme1Result = pe.getAs[String]("location2Scheme1").map(Result(_))
+        val otLocation2Scheme2Result = pe.getAs[String]("location2Scheme2").map(Result(_))
+        val otAlternativeResult = pe.getAs[String]("alternativeScheme").map(Result(_))
+
+        OnlineTestPassmarkEvaluation(
+          otLocation1Scheme1Result.getOrElse(throw OnlineTestFirstLocationResultNotFound(appId)),
+          otLocation1Scheme2Result,
+          otLocation2Scheme1Result,
+          otLocation2Scheme2Result,
+          otAlternativeResult
+        )
+      case _ => throw OnlineTestPassmarkEvaluationNotFound(appId)
+    }
   }
 
   private def checkUpdateWriteResult(writeResult: UpdateWriteResult): Unit = {
