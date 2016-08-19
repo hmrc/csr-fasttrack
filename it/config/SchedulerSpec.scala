@@ -19,9 +19,9 @@ package config
 import org.scalatestplus.play.PlaySpec
 import play.api.test.WithApplication
 import scheduler.onlinetesting.SendInvitationJob
-import testkit.ShortTimeout
+import testkit.IntegrationTestShortTimeout
 
-class SchedulerSpec extends PlaySpec with ShortTimeout {
+class SchedulerSpec extends PlaySpec with IntegrationTestShortTimeout {
 
   "Scheduler" should {
     "contain send invitation job if it is enabled" in new WithApplication {

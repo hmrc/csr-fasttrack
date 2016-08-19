@@ -477,7 +477,8 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       "personal-details.lastName" -> "1",
       "personal-details.preferredName" -> "1",
       "personal-details.aLevel" -> "1",
-      "personal-details.stemLevel" -> "1"
+      "personal-details.stemLevel" -> "1",
+      "personal-details.dateOfBirth" -> "1"
     )
 
     reportQueryWithProjections[BSONDocument](query, projection).map { list =>
@@ -527,10 +528,11 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         val preferredName = pd.flatMap(_.getAs[String]("preferredName"))
         val aLevel = pd.flatMap(_.getAs[Boolean]("aLevel").map(booleanTranslator))
         val stemLevel = pd.flatMap(_.getAs[Boolean]("stemLevel").map(booleanTranslator))
+        val dateOfBirth = pd.flatMap(_.getAs[LocalDate]("dateOfBirth"))
 
         ApplicationPreferencesWithTestResults(userId, applicationId, fr1FirstLocation, fr1FirstFramework,
           fr1SecondFramework, fr2FirstLocation, fr2FirstFramework, fr2SecondFramework, location, framework,
-          PersonalInfo(firstName, lastName, preferredName, aLevel, stemLevel),
+          PersonalInfo(firstName, lastName, preferredName, aLevel, stemLevel, dateOfBirth),
           CandidateScoresSummary(leadingAndCommunicatingAverage, collaboratingAndPartneringAverage,
             deliveringAtPaceAverage, makingEffectiveDecisionsAverage, changingAndImprovingAverage,
             buildingCapabilityForAllAverage, motivationFitAverage, overallScore),
