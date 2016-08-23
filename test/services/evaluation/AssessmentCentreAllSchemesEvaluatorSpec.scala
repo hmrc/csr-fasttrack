@@ -62,7 +62,7 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
   }
 
   "evaluate alternative schemes" should {
-    "return Green if at least one alternative schemes is Green (ignore preferrences)" in {
+    "return Green if at least one alternative schemes is Green (ignore Preferences)" in {
       val allSchemesEvaluation = Map(
         Business -> Red,
         Commercial -> Red,
@@ -77,7 +77,7 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
       evaluation mustBe Green
     }
 
-    "return Amber if there is no Green, and at least one Amber in alternative schemes (ignore preferrences)" in {
+    "return Amber if there is no Green, and at least one Amber in alternative schemes (ignore Preferences)" in {
       val allSchemesEvaluation = Map(
         Business -> Red,
         Commercial -> Red,
@@ -92,7 +92,7 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
       evaluation mustBe Amber
     }
 
-    "return Red if there is no Green and no Amber for alternative schemes (ignore preferrences)" in {
+    "return Red if there is no Green and no Amber for alternative schemes (ignore Preferences)" in {
       val allSchemesEvaluation = Map(
         Business -> Green,
         Commercial -> Amber,

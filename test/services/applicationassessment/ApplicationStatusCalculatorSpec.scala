@@ -50,7 +50,7 @@ class ApplicationStatusCalculatorSpec extends PlaySpec with TableDrivenPropertyC
     (result(            red,       notChosen, notChosen, notChosen, red),          AssessmentCentreFailed)
   )
   
-  val AmberForResidualPreferrences = Table(
+  val AmberForResidualPreferences = Table(
     ("Final evaluation [loc1sch1 | loc1sch2 | loc2sch1 | loc2sch2 | alternative]", "Expected Application status"),
     (result(            amber),                                                    AwaitingAssessmentCentreReevaluation),
     (result(            red,       amber),                                         AwaitingAssessmentCentreReevaluation),
@@ -64,7 +64,7 @@ class ApplicationStatusCalculatorSpec extends PlaySpec with TableDrivenPropertyC
     (result(            red,       notChosen, notChosen, notChosen, amber),        AwaitingAssessmentCentreReevaluation)
   )
 
-  val GreenForResidualPreferrences = Table(
+  val GreenForResidualPreferences = Table(
     ("Final evaluation [loc1sch1 | loc1sch2 | loc2sch1 | loc2sch2 | alternative]", "Expected Application status"),
     (result(            green),                                                    AssessmentCentrePassed),
     (result(            red,       green),                                         AssessmentCentrePassed),
@@ -91,14 +91,14 @@ class ApplicationStatusCalculatorSpec extends PlaySpec with TableDrivenPropertyC
       }
     }
 
-    "Set application status to Amber when candidate is amber in their residual preferrences" in {
-      forAll(AmberForResidualPreferrences) { (evaluation: AssessmentRuleCategoryResult, expectedApplicaitonStatus: String) =>
+    "Set application status to Amber when candidate is amber in their residual Preferences" in {
+      forAll(AmberForResidualPreferences) { (evaluation: AssessmentRuleCategoryResult, expectedApplicaitonStatus: String) =>
         calculator.determineStatus(evaluation) mustBe expectedApplicaitonStatus
       }
     }
 
-    "Set application status to Passed when candidate is green in their residual preferrences" in {
-      forAll(GreenForResidualPreferrences) { (evaluation: AssessmentRuleCategoryResult, expectedApplicaitonStatus: String) =>
+    "Set application status to Passed when candidate is green in their residual Preferences" in {
+      forAll(GreenForResidualPreferences) { (evaluation: AssessmentRuleCategoryResult, expectedApplicaitonStatus: String) =>
         calculator.determineStatus(evaluation) mustBe expectedApplicaitonStatus
       }
     }

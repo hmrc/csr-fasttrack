@@ -25,13 +25,13 @@ trait ApplicationStatusCalculator {
     case Some(false) =>
       ApplicationStatuses.AssessmentCentreFailed
     case _ =>
-      val allResultsOrderedByPreferrences = List(result.location1Scheme1, result.location1Scheme2,
+      val allResultsOrderedByPreferences = List(result.location1Scheme1, result.location1Scheme2,
         result.location2Scheme1, result.location2Scheme2, result.alternativeScheme).flatten
-      statusBasedOnFirstNonRedResult(allResultsOrderedByPreferrences)
+      statusBasedOnFirstNonRedResult(allResultsOrderedByPreferences)
   }
 
-  private def statusBasedOnFirstNonRedResult(allResultsInPreferrenceOrder: List[Result]) = {
-    val amberOrGreenOnly = allResultsInPreferrenceOrder filterNot (_ == Red)
+  private def statusBasedOnFirstNonRedResult(allResultsInPreferenceOrder: List[Result]) = {
+    val amberOrGreenOnly = allResultsInPreferenceOrder filterNot (_ == Red)
 
     amberOrGreenOnly.headOption match {
       case Some(Green) => ApplicationStatuses.AssessmentCentrePassed

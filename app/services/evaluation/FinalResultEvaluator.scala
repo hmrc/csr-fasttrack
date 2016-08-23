@@ -58,8 +58,7 @@ trait FinalResultEvaluator {
     (onlineTestResult, assessmentCentreResult) match {
       case (None, None) => None
       case (r1 @ Some(Red), _) => r1
-      case (r1 @ Some(Amber), _) =>
-        r1
+      case (r1 @ Some(Amber), _) => r1
       case (Some(Green), r2) => r2
       case (r1, r2) =>
         throw OnlineTestAndAssessmentResultPairNotFound(s"The pair: Online Test [$r1] and Assessment Centre result [$r2] " +

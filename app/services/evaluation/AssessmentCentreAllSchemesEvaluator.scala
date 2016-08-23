@@ -18,23 +18,22 @@ package services.evaluation
 
 import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.EvaluationResults._
-import model.PassmarkPersistedObjects.PassMarkSchemeThreshold
+import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
 
 trait AssessmentCentreAllSchemesEvaluator {
 
   def evaluateSchemes(passmark: AssessmentCentrePassMarkSettingsResponse, overallScore: Double,
                       eligibleSchemes: List[String]): List[PerSchemeEvaluation] = {
-    passmark.schemes.map(_.schemeName).map { schemeName =>
-      val result = if (eligibleSchemes.contains(schemeName)) evaluateScore(schemeName, passmark, overallScore) else Red
-      PerSchemeEvaluation(schemeName, result)
+    passmark.schemes.map { scheme =>
+      val result = if (eligibleSchemes.contains(scheme.schemeName)) evaluateScore(scheme, passmark, overallScore) else Red
+      PerSchemeEvaluation(scheme.schemeName, result)
     }
   }
 
-  private def evaluateScore(schemeName: String, passmark: AssessmentCentrePassMarkSettingsResponse, overallScore: Double): Result = {
-    val passmarkSetting = passmark.schemes.find(_.schemeName == schemeName)
-      .getOrElse(throw new IllegalStateException(s"schemeName=$schemeName is not set in Passmark settings"))
-      .overallPassMarks
-      .getOrElse(throw new IllegalStateException(s"Scheme threshold for $schemeName is not set in Passmark settings"))
+  private def evaluateScore(scheme: AssessmentCentrePassMarkScheme, passmark: AssessmentCentrePassMarkSettingsResponse,
+                            overallScore: Double): Result = {
+    val passmarkSetting = scheme.overallPassMarks
+      .getOrElse(throw new IllegalStateException(s"Scheme threshold for ${scheme.schemeName} is not set in Passmark settings"))
 
     determineSchemeResult(overallScore, passmarkSetting)
   }
