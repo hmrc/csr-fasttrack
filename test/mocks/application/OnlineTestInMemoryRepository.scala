@@ -18,9 +18,9 @@ package mocks.application
 
 import controllers.OnlineTestDetails
 import model.EvaluationResults._
-import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser, OnlineTestProfile }
-import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest }
-import org.joda.time.{ DateTime, LocalDate }
+import model.OnlineTestCommands.{OnlineTestApplication, OnlineTestApplicationWithCubiksUser, OnlineTestProfile}
+import model.PersistedObjects.{ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation}
+import org.joda.time.{DateTime, LocalDate}
 import repositories.application.OnlineTestRepository
 
 import scala.collection.mutable
@@ -85,4 +85,6 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
   def removeOnlineTestEvaluationAndReports(applicationId: String): Future[Unit] = ???
 
   def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, version: String, p: RuleCategoryResult): Future[Unit] = ???
+
+  def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = ???
 }

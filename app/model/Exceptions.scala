@@ -58,4 +58,10 @@ object Exceptions {
   case class DataFakingException(message: String) extends Exception(message)
 
   case class DataGenerationException(message: String) extends Exception(message)
+
+  case class OnlineTestPassmarkEvaluationNotFound(appId: String) extends Exception(s"Application id: $appId")
+
+  case class OnlineTestFirstLocationResultNotFound(appId: String) extends Exception(s"application Id: $appId")
+
+
 }

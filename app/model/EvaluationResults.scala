@@ -65,4 +65,13 @@ object EvaluationResults {
     competencyAverageResult: Option[CompetencyAverageResult], schemesEvaluation: Option[List[PerSchemeEvaluation]]
   )
 
+  case class SchemePreferences(location1Scheme1: String, location1Scheme2: Option[String],
+                               location2Scheme1: Option[String], location2Scheme2: Option[String])
+
+  /**
+    * Final evaluation after taking into account: Online Tests and Assessment Centre results
+    */
+  case class FinalEvaluationResult(location1Scheme1: Option[Result], location1Scheme2: Option[Result],
+                                   location2Scheme1: Option[Result], location2Scheme2: Option[Result],
+                                   alternativeScheme: Option[Result], schemesEvaluation: Option[List[PerSchemeEvaluation]])
 }

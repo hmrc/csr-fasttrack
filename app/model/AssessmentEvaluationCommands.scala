@@ -18,20 +18,23 @@ package model
 
 import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.Commands.AssessmentCentrePassMarkSettingsResponse
+import model.PersistedObjects.{ OnlineTestPassmarkEvaluation, PreferencesWithQualification }
 import play.api.libs.json.Json
 
 object AssessmentEvaluationCommands {
 
-  case class AssessmentPassmarkPreferencesAndScores(
-    passmark: AssessmentCentrePassMarkSettingsResponse,
-    preferences: Preferences,
-    scores: CandidateScoresAndFeedback
-  )
+  case class AssessmentPassmarkPreferencesAndScores(passmark: AssessmentCentrePassMarkSettingsResponse,
+                                                    preferencesWithQualification: PreferencesWithQualification,
+                                                    scores: CandidateScoresAndFeedback)
+
+  case class OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation: OnlineTestPassmarkEvaluation,
+                                                           assessmentScores: AssessmentPassmarkPreferencesAndScores)
 
   object Implicits {
     import CandidateScoresCommands.Implicits.CandidateScoresAndFeedbackFormats
     import model.Commands.Implicits.assessmentCentrePassMarkSettingsResponseFormat
     import PassmarkPersistedObjects.Implicits.PersistedAssessmentCentrePassMarkSettingsFormat
+    import PersistedObjects.Implicits.preferencesWithQualificationFormats
     implicit val AssessmentPassmarkPreferencesAndScoresFormats = Json.format[AssessmentPassmarkPreferencesAndScores]
   }
 }
