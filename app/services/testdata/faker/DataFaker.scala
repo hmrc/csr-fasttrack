@@ -43,6 +43,17 @@ object DataFaker {
 
     def bool: Boolean = randOne(List(true, false))
 
+    def randDouble(min: Double, max: Double) = {
+      val range = (min to max by 0.1).toList
+      randOne(range)
+    }
+
+    def randNumber = randOne(List(1,2,3,4,5,6,7,8,9))
+
+    def randomStreetSuffix = randOne(StreetSuffixes.list)
+
+    def addressLine: String = s"$randNumber$randNumber$randNumber ${Random.firstName} $randomStreetSuffix,"
+
     def passmark: Result = randOne(List(EvaluationResults.Green, EvaluationResults.Amber, EvaluationResults.Red))
 
     def availableAssessmentVenueAndDate: Future[AvailableAssessmentSlot] = {
@@ -136,8 +147,9 @@ object DataFaker {
       "Traditional professional"
     ))
 
+    def firstName = randOne(Firstnames.list)
+
     def getFirstname(userNumber: Int) = {
-      val firstName = randOne(Firstnames.list)
       s"$firstName$userNumber"
     }
 

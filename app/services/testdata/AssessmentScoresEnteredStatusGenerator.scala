@@ -21,6 +21,7 @@ import model.ApplicationStatuses
 import model.CandidateScoresCommands.{ CandidateScoreFeedback, CandidateScores, CandidateScoresAndFeedback }
 import repositories._
 import repositories.application.GeneralApplicationRepository
+import services.testdata.faker.DataFaker.Random
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -39,21 +40,23 @@ trait AssessmentScoresEnteredStatusGenerator extends ConstructiveGenerator {
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
 
     def getScoresAndFeedback(applicationId: String): CandidateScoresAndFeedback = {
-      CandidateScoresAndFeedback(applicationId, Some(true), false,
-        CandidateScores(Some(3.5), Some(3.5), Some(3.5)),
-        CandidateScores(Some(3.5), Some(3.5), Some(3.5)),
-        CandidateScores(Some(3.5), Some(3.5), Some(3.5)),
-        CandidateScores(Some(3.5), Some(3.5), Some(3.5)),
-        CandidateScores(Some(3.5), Some(3.5), Some(3.5)),
-        CandidateScores(Some(3.5), Some(3.5), Some(3.5)),
-        CandidateScores(Some(3.5), Some(3.5), Some(3.5)),
-        CandidateScoreFeedback(Some("Good interview"), Some("Group exercise excellent"), Some("Written exercise good")))
+      def randScore = Some(Random.randDouble(1,4))
+      // format: OFF
+      CandidateScoresAndFeedback(applicationId, attendancy = Some(true), assessmentIncomplete = false,
+        leadingAndCommunicating     = CandidateScores(randScore, randScore, randScore),
+        collaboratingAndPartnering  = CandidateScores(randScore, randScore, randScore),
+        deliveringAtPace            = CandidateScores(randScore, randScore, randScore),
+        makingEffectiveDecisions    = CandidateScores(randScore, randScore, randScore),
+        changingAndImproving        = CandidateScores(randScore, randScore, randScore),
+        buildingCapabilityForAll    = CandidateScores(randScore, randScore, randScore),
+        motivationFit               = CandidateScores(randScore, randScore, randScore),
+        feedback = CandidateScoreFeedback(Some("Good interview"), Some("Group exercise excellent"), Some("Written exercise good")))
+      // format: ON
     }
 
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       _ <- aasRepository.save(getScoresAndFeedback(candidateInPreviousStatus.applicationId.get))
-      _ <- aRepository.updateStatus(candidateInPreviousStatus.applicationId.get, ApplicationStatuses.AssessmentScoresEntered)
       _ <- aRepository.updateStatus(candidateInPreviousStatus.applicationId.get, ApplicationStatuses.AssessmentScoresEntered)
     } yield {
       candidateInPreviousStatus

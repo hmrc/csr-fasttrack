@@ -75,8 +75,16 @@ trait SubmittedStatusGenerator extends ConstructiveGenerator {
     }
 
     def getContactDetails(candidateInformation: DataGenerationResponse) = {
+
+      def makeRandAddressOption = if (Random.bool) { Some(Random.addressLine) } else { None }
+
       ContactDetails(
-        Address("123, Fake street"),
+        Address(
+          Random.addressLine,
+          makeRandAddressOption,
+          makeRandAddressOption,
+          makeRandAddressOption
+        ),
         "AB1 2CD",
         candidateInformation.email,
         Some("07770 774 914")

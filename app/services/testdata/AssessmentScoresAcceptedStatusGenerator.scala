@@ -18,8 +18,12 @@ package services.testdata
 
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.ApplicationStatuses
+import model.AssessmentEvaluationCommands.AssessmentPassmarkPreferencesAndScores
 import repositories._
 import repositories.application.GeneralApplicationRepository
+import scheduler.assessment.EvaluateAssessmentScoreJob
+import services.applicationassessment.ApplicationAssessmentService
+import services.passmarksettings.AssessmentCentrePassMarkSettingsService
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,10 +37,12 @@ object AssessmentScoresAcceptedStatusGenerator extends AssessmentScoresAcceptedS
 trait AssessmentScoresAcceptedStatusGenerator extends ConstructiveGenerator {
   val aRepository: GeneralApplicationRepository
 
+
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      _ <- aRepository.updateStatus(candidateInPreviousStatus.applicationId.get, ApplicationStatuses.AssessmentScoresAccepted)
+      appId = candidateInPreviousStatus.applicationId.get
+      _ <- aRepository.updateStatus(appId, ApplicationStatuses.AssessmentScoresAccepted)
     } yield {
       candidateInPreviousStatus
     }
