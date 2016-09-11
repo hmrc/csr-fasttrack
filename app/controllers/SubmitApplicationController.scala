@@ -27,7 +27,6 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scalaz.Scalaz._
 
 object SubmitApplicationController extends SubmitApplicationController {
   override val pdRepository: PersonalDetailsRepository = personalDetailsRepository
@@ -57,26 +56,27 @@ trait SubmitApplicationController extends BaseController {
     val contactDetailsFuture = cdRepository.find(userId)
     val schemesLocationsFuture = frameworkPrefRepository.tryGetPreferences(applicationId)
 
-    (for {
-      gd <- generalDetailsFuture
-      ad <- assistanceDetailsFuture
-      cd <- contactDetailsFuture
-    } yield {
-      schemesLocationsFuture.flatMap { sl =>
-        val criteriaMet = CandidateHighestQualification.from(gd)
-        frameworkRegionsRepository.getFrameworksByRegionFilteredByQualification(criteriaMet).map { availableRegions =>
-          ApplicationValidator(gd, ad, sl, availableRegions).validate match {
-            case true => appRepository.submit(applicationId).map { _ =>
-              emailClient.sendApplicationSubmittedConfirmation(cd.email, gd.preferredName).map { _ =>
-                auditService.logEvent("ApplicationSubmitted")
-                Ok
-              }
-            }.join
-            case false => Future.successful(BadRequest)
+    val result = for {
+        gd <- generalDetailsFuture
+        ad <- assistanceDetailsFuture
+        cd <- contactDetailsFuture
+        sl <- schemesLocationsFuture
+        availableRegions <- frameworkRegionsRepository.getFrameworksByRegionFilteredByQualification(CandidateHighestQualification.from(gd))
+      } yield {
+
+        if (ApplicationValidator(gd, ad, sl, availableRegions).validate) {
+          appRepository.submit(applicationId).flatMap { _ =>
+            emailClient.sendApplicationSubmittedConfirmation(cd.email, gd.preferredName).flatMap { _ =>
+              auditService.logEvent("ApplicationSubmitted")
+              Future.successful(Ok)
+            }
           }
+        } else {
+          Future.successful(BadRequest)
         }
-      }
-    }).join.join
+    }
+
+    result flatMap identity
   }
 
 }
