@@ -36,12 +36,12 @@ import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.{ ContactDetailsRepository, OnlineTestPDFReportRepository }
 import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
 import testkit.MockitoImplicits.OngoingStubbingExtensionUnit
-import testkit.MockitoSugar
+import testkit.{ MockitoSugar, UnitSpec, UnitWithAppSpec }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class OnlineTestControllerSpec extends PlaySpec with Results with MockitoSugar {
+class OnlineTestControllerSpec extends UnitWithAppSpec {
   "Get Online Test" should {
 
     "get an online test" in new TestFixture {

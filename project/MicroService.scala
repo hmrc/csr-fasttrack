@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-import de.heikoseeberger.sbtheader.{AutomateHeaderPlugin, HeaderPlugin}
+import de.heikoseeberger.sbtheader.{ AutomateHeaderPlugin, HeaderPlugin }
+import play.routes.compiler.StaticRoutesGenerator
 import sbt.Keys._
-import sbt.Tests.{Group, SubProcess}
+import sbt.Tests.{ Group, SubProcess }
 import sbt._
 import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.versioning.SbtGitVersioning
+import play.sbt.routes.RoutesKeys.routesGenerator
 
 trait MicroService {
 
@@ -41,11 +43,14 @@ trait MicroService {
   lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
 
   lazy val microservice = Project(appName, file("."))
-    .enablePlugins(Seq(play.PlayScala) ++ plugins : _*)
+    .enablePlugins(Seq(play.sbt.PlayScala) ++ plugins : _*)
     .settings(playSettings : _*)
     .settings(scalaSettings: _*)
     .settings(publishingSettings ++ (publishArtifact in(Compile, packageDoc) := false))
     .settings(defaultSettings(): _*)
+    .settings(
+      routesGenerator := StaticRoutesGenerator
+    )
     .settings(
       targetJvm := "jvm-1.8",
       scalaVersion := "2.11.8",
@@ -54,6 +59,7 @@ trait MicroService {
       fork in Test := false,
       retrieveManaged := true,
       scalacOptions += "-feature")
+      .settings(testGrouping in Test := oneForkedJvmPerUnitTest((definedTests in Test).value))
     .settings(HeaderPlugin.settingsFor(IntegrationTest))
     .configs(IntegrationTest)
     .settings(inConfig(IntegrationTest)((Defaults.testSettings ++ AutomateHeaderPlugin.automateFor(IntegrationTest))) : _*)
@@ -79,7 +85,8 @@ trait MicroService {
     .settings(
       resolvers := Seq(
         Resolver.bintrayRepo("hmrc", "releases"),
-        Resolver.typesafeRepo("releases")
+        Resolver.typesafeRepo("releases"),
+        Resolver.jcenterRepo
       )
     )
     .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
@@ -87,9 +94,17 @@ trait MicroService {
 
 private object TestPhases {
 
+  def oneForkedJvmPerUnitTest(tests: Seq[TestDefinition]) =
+    tests map {
+      test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions =
+        Seq("-Dtest.name=" + test.name,
+          "-Dlogger.resource=logback-test.xml")
+      )))
+    }
+
   def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
     tests map {
-      test => new Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions =
+      test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions =
         Seq("-Dtest.name=" + test.name,
           "-Dmongodb.uri=mongodb://localhost:27017/test-fset-fasttrack",
           "-DmaxNumberOfDocuments=10")

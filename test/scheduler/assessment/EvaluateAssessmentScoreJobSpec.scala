@@ -27,13 +27,13 @@ import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import play.api.test.WithApplication
+import play.test.WithApplication
 import services.applicationassessment.ApplicationAssessmentService
-import testkit.ShortTimeout
+import testkit.{ ShortTimeout, UnitWithAppSpec }
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class EvaluateAssessmentScoreJobSpec extends PlaySpec with MockitoSugar with ScalaFutures with ShortTimeout {
+class EvaluateAssessmentScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
   implicit val ec: ExecutionContext = ExecutionContext.global
 
   val applicationAssessmentServiceMock = mock[ApplicationAssessmentService]

@@ -22,7 +22,6 @@ import model.FlagCandidatePersistedObject.FlagCandidate
 import model.PassmarkPersistedObjects._
 import model.PersistedObjects.{ ContactDetails, PersistedAnswer, PersonalDetails, _ }
 import org.joda.time.{ DateTime, DateTimeZone, LocalDate }
-import play.modules.reactivemongo.ReactiveMongoPlugin
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.indexes.IndexType.Ascending
 import reactivemongo.bson._
@@ -38,8 +37,7 @@ import scala.language.postfixOps
 package object repositories {
   private val timeZoneService = GBTimeZoneService
   private implicit val connection = {
-    import play.api.Play.current
-    ReactiveMongoPlugin.mongoConnector.db
+    MongoDbConnection.mongoConnector.db
   }
 
   lazy val personalDetailsRepository = new PersonalDetailsMongoRepository()

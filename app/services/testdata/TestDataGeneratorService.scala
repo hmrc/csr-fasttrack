@@ -19,14 +19,13 @@ package services.testdata
 import connectors.AuthProviderClient
 import connectors.AuthProviderClient.UserRole
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import play.api.Play.current
-import play.modules.reactivemongo.ReactiveMongoPlugin
+import repositories.MongoDbConnection
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.collection.parallel.ForkJoinTaskSupport
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 import scala.language.postfixOps
 
 object TestDataGeneratorService extends TestDataGeneratorService {
@@ -36,7 +35,7 @@ trait TestDataGeneratorService {
 
   def clearDatabase()(implicit hc: HeaderCarrier): Future[Unit] = {
     for {
-      dropMainDatabase <- ReactiveMongoPlugin.mongoConnector.db().drop()
+      dropMainDatabase <- MongoDbConnection.mongoConnector.db().drop()
       removeAllUsers <- AuthProviderClient.removeAllUsers()
       makeAdminUser1 <- RegisteredStatusGenerator.createUser(
         1,

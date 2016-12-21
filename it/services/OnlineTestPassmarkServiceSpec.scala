@@ -31,7 +31,7 @@ import net.ceedubs.ficus.readers.ValueReader
 import org.joda.time.DateTime
 import org.scalatest.mock.MockitoSugar
 import play.Logger
-import play.api.test.WithApplication
+import play.test.WithApplication
 import repositories.{FrameworkPreferenceRepository, FrameworkRepository, PassMarkSettingsRepository, TestReportRepository}
 import services.onlinetesting.OnlineTestPassmarkService
 import services.passmarksettings.PassMarkSettingsService

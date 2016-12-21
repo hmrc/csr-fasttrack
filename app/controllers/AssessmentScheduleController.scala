@@ -23,6 +23,7 @@ import common.FutureEx
 import connectors.AssessmentScheduleExchangeObjects.Implicits._
 import connectors.AssessmentScheduleExchangeObjects._
 import connectors.ExchangeObjects.AllocationDetails
+import connectors.assessmentschedule.VenueDaySessionCandidate
 import connectors.{ CSREmailClient, EmailClient }
 import model.ApplicationStatuses._
 import model.AssessmentScheduleCommands.ApplicationForAssessmentAllocationResult

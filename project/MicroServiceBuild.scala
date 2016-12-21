@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import play.PlayImport._
+import play.sbt.PlayImport._
 import sbt._
 
 object MicroServiceBuild extends Build with MicroService {
@@ -25,20 +25,20 @@ object MicroServiceBuild extends Build with MicroService {
 
 private object Versions {
 
-  val microserviceBootstrapVersion  = "4.2.0"
+  val microserviceBootstrapVersion  = "5.8.0"
   val ficus                         = "1.1.2"
-  val playHealthVersion             = "1.1.0"
-  val playConfigVersion             = "2.1.0"
-  val hmrcScheduler                 = "3.0.0"
+  val playHealthVersion             = "2.0.0"
+  val playConfigVersion             = "3.0.0"
+  val hmrcScheduler                 = "4.0.0"
   val hmrcTestVersion               = "1.8.0"
-  val playReactivemongoVersion      = "4.8.0"
-  val playJsonLogger                = "2.1.1"
+  val playReactivemongoVersion      = "5.1.0"
+  val playJsonLogger                = "3.1.0"
   val guice                         = "4.0.0"
 
   val scalatest                     = "2.2.6"
   val pegdown                       = "1.6.0"
   val mockito                       = "1.10.19"
-  val scalatestplus                 = "1.2.0"
+  val scalatestplus                 = "1.5.1"
   val specs2                        = "3.6.5"
 }
 
@@ -52,7 +52,7 @@ private object AppDependencies {
     "uk.gov.hmrc" %% "microservice-bootstrap" % microserviceBootstrapVersion,
     "uk.gov.hmrc" %% "play-health" % playHealthVersion,
     "uk.gov.hmrc" %% "play-config" % playConfigVersion,
-    "uk.gov.hmrc" %% "play-json-logger" % playJsonLogger,
+    "uk.gov.hmrc" %% "logback-json-logger" % playJsonLogger,
     "uk.gov.hmrc" %% "play-scheduling" % hmrcScheduler,
     "org.webjars" %% "webjars-play" % "2.3.0",
     "org.webjars" % "bootstrap" % "3.1.1",
@@ -61,7 +61,7 @@ private object AppDependencies {
     "net.ceedubs" %% "ficus" % ficus,
     "org.yaml" % "snakeyaml" % "1.16",
     "com.jsuereth" %% "scala-arm" % "1.4",
-    "de.leanovate.play-mockws" %% "play-mockws" % "2.3.2" % "test",
+    "de.leanovate.play-mockws" %% "play-mockws" % "2.5.0" % "test",
     filters,
     cache,
     ws
@@ -71,7 +71,7 @@ private object AppDependencies {
     lazy val test: Seq[ModuleID] = Seq(
       "uk.gov.hmrc" %% "hmrctest" % hmrcTestVersion % scope,
       "org.mockito" % "mockito-all" % mockito % scope,
-      "org.scalatestplus" %% "play" % scalatestplus % scope,
+      "org.scalatestplus.play" %% "scalatestplus-play" % scalatestplus % scope,
       "org.scalatest" %% "scalatest" % scalatest % scope,
       "org.pegdown" % "pegdown" % pegdown % scope,
       "com.typesafe.play" %% "play-test" % PlayVersion.current % scope excludeAll (

@@ -20,7 +20,7 @@ import model.Exceptions.{NoSuchVenueDateException, NoSuchVenueException}
 import org.joda.time.LocalDate
 import org.scalatest.mock.MockitoSugar
 import play.Logger
-import play.api.test.WithApplication
+import play.test.WithApplication
 import testkit.IntegrationSpec
 
 class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSugar {

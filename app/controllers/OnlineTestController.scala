@@ -115,7 +115,10 @@ trait OnlineTestController extends BaseController {
     onlineTestPDFReportRepo.get(applicationId).map {
       case Some(report) => {
         Ok(report).as("application/pdf")
-          .withHeaders(("Content-Disposition", s"""attachment;filename="report-$applicationId.pdf""""))
+          .withHeaders(
+            "Content-type" -> "application/pdf",
+            "Content-Disposition" -> s"""attachment;filename="report-$applicationId.pdf""""
+          )
       }
       case _ => NotFound
     }

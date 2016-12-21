@@ -19,19 +19,19 @@ package scheduler.onlinetesting
 import connectors.PassMarkExchangeObjects.Settings
 import model.OnlineTestCommands.CandidateScoresWithPreferencesAndPassmarkSettings
 import model.PersistedObjects.CandidateTestReport
-import model.{ApplicationStatuses, LocationPreference, Preferences}
+import model.{ ApplicationStatuses, LocationPreference, Preferences }
 import org.joda.time.DateTime
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import play.api.test.WithApplication
+import play.test.WithApplication
 import services.onlinetesting.OnlineTestPassmarkService
-import testkit.ShortTimeout
+import testkit.{ ShortTimeout, UnitWithAppSpec }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
-class EvaluateCandidateScoreJobSpec extends PlaySpec with MockitoSugar with ScalaFutures with ShortTimeout {
+class EvaluateCandidateScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
   implicit val ec: ExecutionContext = ExecutionContext.global
   import EvaluateCandidateScoreJobSpec._
 

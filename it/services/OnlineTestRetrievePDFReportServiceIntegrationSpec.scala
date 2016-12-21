@@ -23,7 +23,7 @@ import model.OnlineTestCommands._
 import org.mockito.Matchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
-import play.api.test.WithApplication
+import play.test.WithApplication
 import play.modules.reactivemongo.ReactiveMongoPlugin
 import reactivemongo.api.DefaultDB
 import reactivemongo.bson.BSONDocument

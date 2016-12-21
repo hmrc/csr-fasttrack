@@ -33,7 +33,7 @@ import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import org.scalatest.mock.MockitoSugar
 import play.Logger
 import play.api.libs.json._
-import play.api.test.WithApplication
+import play.test.WithApplication
 import reactivemongo.bson.{ BSONDocument, BSONString }
 import reactivemongo.json.ImplicitBSONHandlers
 import repositories._

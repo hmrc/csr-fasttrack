@@ -17,7 +17,7 @@
 package services
 
 import org.scalatestplus.play.PlaySpec
-import play.api.test.WithApplication
+import play.test.WithApplication
 import repositories.FrameworkRepository.Region
 import repositories._
 import language.postfixOps
