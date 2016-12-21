@@ -16,9 +16,9 @@
 
 package testkit
 
-import org.scalatestplus.play.{OneServerPerSuite, PlaySpec, PortNumber}
-import play.api.http.{HeaderNames, HttpProtocol, MimeTypes, Status}
-import play.api.libs.ws.WS
+import org.scalatestplus.play.{ OneServerPerSuite, PlaySpec, PortNumber }
+import play.api.http.{ HeaderNames, HttpProtocol, MimeTypes, Status }
+import play.api.libs.ws.{ WS, WSRequest }
 import play.api.mvc.Results
 import play.api.test._
 
@@ -52,6 +52,6 @@ trait WireLevelHttpSpec
   val JSON_UTF8 = "application/json; charset=utf-8"
 
   // Overridden to inject our prefixed application route.
-  override def wsUrl(url: String)(implicit portNumber: PortNumber): play.api.libs.ws.WSRequestHolder =
+  def wsUrl(url: String)(implicit portNumber: PortNumber): WSRequest =
     WS.url(s"http://localhost:${portNumber.value}/candidate-application$url")
 }

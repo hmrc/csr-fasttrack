@@ -24,7 +24,6 @@ import org.mockito.Matchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import play.test.WithApplication
-import play.modules.reactivemongo.ReactiveMongoPlugin
 import reactivemongo.api.DefaultDB
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers._
@@ -39,8 +38,7 @@ import scala.concurrent.Future
 class OnlineTestRetrievePDFReportServiceIntegrationSpec extends IntegrationSpec with MockitoSugar {
 
   private implicit def db: () => DefaultDB = {
-    import play.api.Play.current
-    ReactiveMongoPlugin.mongoConnector.db
+    MongoDbConnection.mongoConnector.db
   }
 
   import scala.concurrent.ExecutionContext.Implicits.global

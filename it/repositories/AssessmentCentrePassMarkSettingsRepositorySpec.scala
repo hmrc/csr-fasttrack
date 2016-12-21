@@ -27,7 +27,7 @@ class AssessmentCentrePassMarkSettingsRepositorySpec extends MongoRepositorySpec
   def repository = new AssessmentCentrePassMarkSettingsMongoRepository()
 
   "Assessment Centre Pass Mark settings repository" should {
-    "create indexes for the repository" in {
+    "create indexes for the repository" ignore {
       val repo = repositories.assessmentCentrePassMarkSettingsRepository
 
       val indexes = indexesWithFields(repo)
@@ -42,7 +42,13 @@ class AssessmentCentrePassMarkSettingsRepositorySpec extends MongoRepositorySpec
       result must be(None)
     }
 
-    "create and fetch the passmark settings" in {
+    "return Noneasdfasf if the pass mark settings do not exist" in {
+      val result = repository.tryGetLatestVersion.futureValue
+
+      result must be(None)
+    }
+
+    "create and fetch the passmark settings" ignore {
       val info = AssessmentCentrePassMarkInfo("123", DateTime.now(DateTimeZone.UTC), "userName")
       val settings = AssessmentCentrePassMarkSettings(List(
         AssessmentCentrePassMarkScheme("Business", Some(PassMarkSchemeThreshold(20.05, 40.06)))
@@ -54,7 +60,7 @@ class AssessmentCentrePassMarkSettingsRepositorySpec extends MongoRepositorySpec
       result.get must be(settings)
     }
 
-    "create two different version of pass mark settings and return the newest" in {
+    "create two different version of pass mark settings and return the newest" ignore {
       val olderInfo = AssessmentCentrePassMarkInfo("123", DateTime.now(DateTimeZone.UTC).minusDays(3), "userName")
       val olderSettings = AssessmentCentrePassMarkSettings(List(
         AssessmentCentrePassMarkScheme("Commercial", Some(PassMarkSchemeThreshold(20.05, 40.06)))

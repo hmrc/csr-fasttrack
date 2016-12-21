@@ -107,7 +107,8 @@ private object TestPhases {
       test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions =
         Seq("-Dtest.name=" + test.name,
           "-Dmongodb.uri=mongodb://localhost:27017/test-fset-fasttrack",
-          "-DmaxNumberOfDocuments=10")
+          "-DmaxNumberOfDocuments=10",
+          "-Dlogger.resource=logback-test.xml")
       )))
     }
 }
