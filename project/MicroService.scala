@@ -59,7 +59,6 @@ trait MicroService {
       fork in Test := false,
       retrieveManaged := true,
       scalacOptions += "-feature")
-      .settings(testGrouping in Test := oneForkedJvmPerUnitTest((definedTests in Test).value))
     .settings(HeaderPlugin.settingsFor(IntegrationTest))
     .configs(IntegrationTest)
     .settings(inConfig(IntegrationTest)((Defaults.testSettings ++ AutomateHeaderPlugin.automateFor(IntegrationTest))) : _*)
