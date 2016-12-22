@@ -42,12 +42,6 @@ class AssessmentCentrePassMarkSettingsRepositorySpec extends MongoRepositorySpec
       result must be(None)
     }
 
-    "return Noneasdfasf if the pass mark settings do not exist" in {
-      val result = repository.tryGetLatestVersion.futureValue
-
-      result must be(None)
-    }
-
     "create and fetch the passmark settings" in {
       val info = AssessmentCentrePassMarkInfo("123", DateTime.now(DateTimeZone.UTC), "userName")
       val settings = AssessmentCentrePassMarkSettings(List(
