@@ -50,16 +50,14 @@ trait MongoRepositorySpec extends PlaySpec with Inside with Inspectors with Scal
   val collectionName: String
 
   implicit def mongo: () => DefaultDB = {
-    val conn = new MongoDbConnection() { }.db
-    conn
+    new MongoDbConnection() { }.db
   }
 
   override def withFixture(test: NoArgTest) = {
     Helpers.running(app) {
       val collection = mongo().collection[JSONCollection](collectionName)
       Await.ready(collection.remove(Json.obj()), timeout)
-      val res = super.withFixture(test)
-      res
+      super.withFixture(test)
     }
   }
 }
