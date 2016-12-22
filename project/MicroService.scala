@@ -16,10 +16,8 @@
 
 import de.heikoseeberger.sbtheader.{ AutomateHeaderPlugin, HeaderPlugin }
 import play.routes.compiler.StaticRoutesGenerator
-import sbt.Keys._
-import sbt.Tests.{ Group, SubProcess }
+import sbt.Keys.{ javaOptions, _ }
 import sbt._
-import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.versioning.SbtGitVersioning
@@ -29,7 +27,6 @@ trait MicroService {
 
   import uk.gov.hmrc._
   import DefaultBuildSettings._
-  import TestPhases._
   import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
   import scalariform.formatter.preferences._
@@ -56,11 +53,18 @@ trait MicroService {
       scalaVersion := "2.11.8",
       libraryDependencies ++= appDependencies,
       parallelExecution in Test := false,
-      fork in Test := false,
+      fork in Test := true,
+      javaOptions in Test += "-Dlogger.resource=logback-test.xml",
       retrieveManaged := true,
       scalacOptions += "-feature")
     .settings(HeaderPlugin.settingsFor(IntegrationTest))
     .configs(IntegrationTest)
+    .settings(
+      fork in IntegrationTest := true,
+      javaOptions in IntegrationTest += "-Dmongodb.uri=mongodb://localhost:27017/test-fset-fasttrack",
+      javaOptions in IntegrationTest += "-DmaxNumberOfDocuments=10",
+      javaOptions in IntegrationTest += "-Dlogger.resource=logback-test.xml"
+    )
     .settings(inConfig(IntegrationTest)((Defaults.testSettings ++ AutomateHeaderPlugin.automateFor(IntegrationTest))) : _*)
     .settings(inConfig(IntegrationTest)(Defaults.itSettings))
     // Disable Scalastyle & Scalariform temporarily, as it is currently intermittently failing when building
@@ -76,10 +80,8 @@ trait MicroService {
 //    .settings(compileScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).toTask("").value,
 //      (compile in Compile) <<= (compile in Compile) dependsOn compileScalastyle)
     .settings(
-      Keys.fork in IntegrationTest := false,
       unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest)(base => Seq(base / "it")),
       addTestReportOption(IntegrationTest, "int-test-reports"),
-      testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
       parallelExecution in IntegrationTest := false)
     .settings(
       resolvers := Seq(
@@ -89,25 +91,4 @@ trait MicroService {
       )
     )
     .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
-}
-
-private object TestPhases {
-
-  def oneForkedJvmPerUnitTest(tests: Seq[TestDefinition]) =
-    tests map {
-      test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions =
-        Seq("-Dtest.name=" + test.name,
-          "-Dlogger.resource=logback-test.xml")
-      )))
-    }
-
-  def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
-    tests map {
-      test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions =
-        Seq("-Dtest.name=" + test.name,
-          "-Dmongodb.uri=mongodb://localhost:27017/test-fset-fasttrack",
-          "-DmaxNumberOfDocuments=10",
-          "-Dlogger.resource=logback-test.xml")
-      )))
-    }
 }

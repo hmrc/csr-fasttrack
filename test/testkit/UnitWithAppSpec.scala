@@ -17,6 +17,7 @@
 package testkit
 
 import akka.stream.Materializer
+import com.codahale.metrics.json.MetricsModule
 import com.kenshoo.play.metrics.PlayModule
 import org.scalatestplus.play.OneAppPerSuite
 import play.api.{ Application, Play }
@@ -34,6 +35,7 @@ abstract class UnitWithAppSpec extends UnitSpec with OneAppPerSuite with Results
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
     .disable[PlayModule]
+    .disable[MetricsModule]
     .disable[ReactiveMongoHmrcModule]
     // Suppress logging during tests
     .configure("logger.resource" -> "logback-test.xml")

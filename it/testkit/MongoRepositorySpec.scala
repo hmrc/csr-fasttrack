@@ -16,11 +16,13 @@
 
 package testkit
 
+import com.codahale.metrics.json.MetricsModule
+import com.kenshoo.play.metrics.PlayModule
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{ Millis, Span }
 import org.scalatestplus.play.PlaySpec
-import play.api.Application
+import play.api.{ Application, Play }
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{ JsObject, JsValue, Json }
 import play.api.test.Helpers
@@ -36,13 +38,16 @@ import scala.concurrent.duration._
 import scala.concurrent.{ Await, ExecutionContext }
 import scala.language.postfixOps
 
-trait MongoRepositorySpec extends PlaySpec with Inside with Inspectors with ScalaFutures with IndexesReader {
+trait MongoRepositorySpec extends PlaySpec with Inside with Inspectors with ScalaFutures with IndexesReader
+  with BeforeAndAfterEach with BeforeAndAfterAll {
   import ImplicitBSONHandlers._
 
   // System-wide setting for integration test timeouts.
   override implicit def patienceConfig = PatienceConfig(timeout = scaled(Span(5000, Millis)))
 
-  implicit final def app: Application = new GuiceApplicationBuilder().build
+  implicit final def app: Application = new GuiceApplicationBuilder()
+      .disable[PlayModule]
+    .build
 
   implicit val context = play.api.libs.concurrent.Execution.Implicits.defaultContext
 
@@ -53,12 +58,17 @@ trait MongoRepositorySpec extends PlaySpec with Inside with Inspectors with Scal
     new MongoDbConnection() { }.db
   }
 
-  override def withFixture(test: NoArgTest) = {
-    Helpers.running(app) {
-      val collection = mongo().collection[JSONCollection](collectionName)
-      Await.ready(collection.remove(Json.obj()), timeout)
-      super.withFixture(test)
-    }
+  override def beforeAll() {
+    Play.start(app)
+  }
+
+  override def afterAll() {
+    Play.stop(app)
+  }
+
+  override def beforeEach {
+    val collection = mongo().collection[JSONCollection](collectionName)
+    Await.ready(collection.remove(Json.obj()), timeout)
   }
 }
 
