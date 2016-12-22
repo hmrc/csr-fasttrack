@@ -69,7 +69,7 @@ package object repositories {
     onlineTestRepository.collection.indexesManager.create(Index(Seq(("online-tests.invitationDate", Ascending)), unique = false)),
 
     contactDetailsRepository.collection.indexesManager.create(Index(Seq(("userId", Ascending)), unique = true)),
-
+    onlineTestPDFReportRepository.collection.indexesManager.create(Index(Seq(("applicationId", Ascending)), unique = true)),
     passMarkSettingsRepository.collection.indexesManager.create(Index(Seq(("createDate", Ascending)), unique = true)),
 
     assessmentCentrePassMarkSettingsRepository.collection.indexesManager.create(Index(Seq(("info.createDate", Ascending)), unique = true)),
@@ -78,9 +78,7 @@ package object repositories {
       ("session", Ascending), ("slot", Ascending)), unique = true)),
     applicationAssessmentRepository.collection.indexesManager.create(Index(Seq(("applicationId", Ascending)), unique = true)),
 
-    applicationAssessmentScoresRepository.collection.indexesManager.create(Index(Seq(("applicationId", Ascending)), unique = true)),
-
-    onlineTestPDFReportRepository.collection.indexesManager.create(Index(Seq(("applicationId", Ascending)), unique = true))
+    applicationAssessmentScoresRepository.collection.indexesManager.create(Index(Seq(("applicationId", Ascending)), unique = true))
   )), 20 seconds)
 
   implicit object BSONDateTimeHandler extends BSONHandler[BSONDateTime, DateTime] {

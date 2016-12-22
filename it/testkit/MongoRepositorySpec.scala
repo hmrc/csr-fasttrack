@@ -60,6 +60,8 @@ trait MongoRepositorySpec extends PlaySpec with Inside with Inspectors with Scal
 
   override def beforeAll() {
     Play.start(app)
+    val collection = mongo().collection[JSONCollection](collectionName)
+    Await.ready(collection.drop(), timeout)
   }
 
   override def afterAll() {
