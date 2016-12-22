@@ -31,8 +31,6 @@ object AssessmentScheduleExchangeObjects {
 
   case class VenueDayDetails(amSession: List[Option[VenueDaySessionCandidate]], pmSession: List[Option[VenueDaySessionCandidate]])
 
-
-
   case class ScheduledCandidateDetail(firstName: String, lastName: String, preferredName: Option[String], email: Option[String],
     phone: Option[String], venue: String, session: String, date: LocalDate, status: String)
 
