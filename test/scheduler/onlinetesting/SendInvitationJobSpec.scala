@@ -30,7 +30,7 @@ class SendInvitationJobSpec extends UnitWithAppSpec {
 
   "send invitation job" should {
 
-    "complete successfully when there is no application ready for online testing" in new WithApplication {
+    "complete successfully when there is no application ready for online testing" in {
       object TestableSendInvitationJob extends SendInvitationJob {
         val onlineTestingService = onlineTestingServiceMock
       }
@@ -38,7 +38,7 @@ class SendInvitationJobSpec extends UnitWithAppSpec {
       TestableSendInvitationJob.tryExecute().futureValue mustBe (_: Unit)
     }
 
-    "fail when there is an exception getting next application ready for online testing" in new WithApplication {
+    "fail when there is an exception getting next application ready for online testing" in {
       object TestableSendInvitationJob extends SendInvitationJob {
         val onlineTestingService = onlineTestingServiceMock
       }

@@ -147,7 +147,7 @@ class OnlineTestServiceIntegrationSpec extends IntegrationSpec with MockitoSugar
     }
 
     // TODO: Broken test. This works in isolation, but somehow the mongo connections get reset if run after another test
-//    "expect exception" in new WithApplication {
+//    "expect exception" in {
 //      pending
 //      clearDatabase()
 //      val application = mock[OnlineTestApplicationWithCubiksUser]

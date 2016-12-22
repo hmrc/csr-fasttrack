@@ -20,10 +20,10 @@ import _root_.services.onlinetesting.OnlineTestRetrievePDFReportService
 import config.MicroserviceAppConfig._
 import connectors.CubiksGatewayClient
 import model.OnlineTestCommands._
-import org.mockito.Matchers.{eq => eqTo, _}
+import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
-import play.test.WithApplication
+import org.scalatestplus.play.OneAppPerSuite
 import reactivemongo.api.DefaultDB
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers._
@@ -35,7 +35,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class OnlineTestRetrievePDFReportServiceIntegrationSpec extends IntegrationSpec with MockitoSugar {
+class OnlineTestRetrievePDFReportServiceIntegrationSpec extends IntegrationSpec with MockitoSugar with OneAppPerSuite {
 
   private implicit def db: () => DefaultDB = {
     MongoDbConnection.mongoConnector.db
@@ -67,7 +67,7 @@ class OnlineTestRetrievePDFReportServiceIntegrationSpec extends IntegrationSpec 
     }
   }
 
-  trait TestFixture extends WithApplication {
+  trait TestFixture {
     val auditMock = mock[AuditService]
     val gatewayClientMock = mock[CubiksGatewayClient]
 

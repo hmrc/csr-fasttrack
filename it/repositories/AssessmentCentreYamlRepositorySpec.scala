@@ -87,12 +87,12 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
   }
 
   "Assessment centre capacity by date" should {
-    "Throw NoSuchVenueException when a bad venue name is passed" in new WithApplication {
+    "Throw NoSuchVenueException when a bad venue name is passed" in {
         val exception = AssessmentCentreYamlRepository.assessmentCentreCapacityDate("Bleurgh", LocalDate.parse("2015-04-01")).failed.futureValue
         exception mustBe a[NoSuchVenueException]
     }
 
-    "Throw NoSuchVenueDateException when there are no sessions on the specified date" in new WithApplication {
+    "Throw NoSuchVenueDateException when there are no sessions on the specified date" in {
         val exception = AssessmentCentreYamlRepository.assessmentCentreCapacityDate("London (Berkeley House)",
           LocalDate.parse("2010-04-01")).failed.futureValue
         exception mustBe a[NoSuchVenueDateException]

@@ -26,7 +26,7 @@ import model.{ LocationPreference, Preferences }
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.{ OneAppPerSuite, PlaySpec }
 import play.test.WithApplication
 import services.applicationassessment.ApplicationAssessmentService
 import testkit.{ ShortTimeout, UnitWithAppSpec }
@@ -45,7 +45,7 @@ class EvaluateAssessmentScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
   }
 
   "application assessment service" should {
-    "find a candidate and evaluate the score successfully" in new WithApplication {
+    "find a candidate and evaluate the score successfully" in {
       val onlineTestEvaluation = OnlineTestPassmarkEvaluation(Green, None, None, None, None)
       val assessmentEvaluation = AssessmentPassmarkPreferencesAndScores(
         AssessmentCentrePassMarkSettingsResponse(List(), None),

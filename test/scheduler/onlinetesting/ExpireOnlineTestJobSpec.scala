@@ -17,6 +17,7 @@
 package scheduler.onlinetesting
 
 import org.mockito.Mockito._
+import org.scalatestplus.play.OneAppPerSuite
 import play.test.WithApplication
 import services.onlinetesting.OnlineTestExpiryService
 import testkit.{ ShortTimeout, UnitWithAppSpec }
@@ -30,7 +31,7 @@ class ExpireOnlineTestJobSpec extends UnitWithAppSpec with ShortTimeout {
 
   "send invitation job" should {
 
-    "complete successfully when service completes successfully" in new WithApplication {
+    "complete successfully when service completes successfully" in {
       object TestableExpireOnlineTestJob extends ExpireOnlineTestJob {
         val service = serviceMock
       }
@@ -38,7 +39,7 @@ class ExpireOnlineTestJobSpec extends UnitWithAppSpec with ShortTimeout {
       TestableExpireOnlineTestJob.tryExecute().futureValue mustBe unit
     }
 
-    "fail when the service fails" in new WithApplication {
+    "fail when the service fails" in {
       object TestableExpireOnlineTestJob extends ExpireOnlineTestJob {
         val service = serviceMock
       }

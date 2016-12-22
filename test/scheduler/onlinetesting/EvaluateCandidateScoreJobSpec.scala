@@ -24,7 +24,7 @@ import org.joda.time.DateTime
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.PlaySpec
+import org.scalatestplus.play.{ OneAppPerSuite, PlaySpec }
 import play.test.WithApplication
 import services.onlinetesting.OnlineTestPassmarkService
 import testkit.{ ShortTimeout, UnitWithAppSpec }
@@ -42,7 +42,7 @@ class EvaluateCandidateScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
   }
 
   "evaluate candidate score job" should {
-    "evaluate the score successfully for ONLINE_TEST_COMPLETED" in new WithApplication {
+    "evaluate the score successfully for ONLINE_TEST_COMPLETED" in {
       when(serviceMock.nextCandidateScoreReadyForEvaluation).thenReturn(
         Future.successful(Some(OnlineTestCompletedCandidateScore))
       )
@@ -53,7 +53,7 @@ class EvaluateCandidateScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
       verify(serviceMock).evaluateCandidateScore(OnlineTestCompletedCandidateScore)
     }
 
-    "evaluate the score without changing the application status for ASSESSMENT_SCORES_ACCEPTED" in new WithApplication {
+    "evaluate the score without changing the application status for ASSESSMENT_SCORES_ACCEPTED" in {
       when(serviceMock.nextCandidateScoreReadyForEvaluation).thenReturn(
         Future.successful(Some(AssessmentScoresAcceptedCandidateScore))
       )

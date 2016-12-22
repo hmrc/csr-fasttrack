@@ -89,7 +89,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
       // GET
       val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
       getResponse.status mustBe OK
-      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       getResponse.json mustBe Json.parse(s"""
         |{
         |  $prefsSubmittedResponsePrefix
@@ -146,7 +146,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
       // GET
       val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
       getResponse.status mustBe OK
-      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       getResponse.json mustBe Json.parse(s"""
         |{
         |  $prefsSubmittedResponsePrefix
@@ -186,7 +186,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
       // GET
       val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
       getResponse.status mustBe OK
-      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       getResponse.json mustBe Json.parse(s"""
         |{
         |  $prefsSubmittedResponsePrefix
@@ -230,7 +230,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
       // GET
       val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
       getResponse.status mustBe OK
-      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       getResponse.json mustBe Json.parse(s"""
         |{
         |  $responsePrefix
@@ -264,7 +264,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
       // GET
       val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
       getResponse.status mustBe OK
-      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       getResponse.json mustBe Json.parse(s"""
         |{
         |  $responsePrefix
@@ -298,7 +298,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
       // GET
       val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
       getResponse.status mustBe OK
-      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       getResponse.json mustBe Json.parse(s"""
       |{
       |  $responsePrefix
@@ -333,7 +333,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
       // GET
       val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
       getResponse.status mustBe OK
-      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       getResponse.json mustBe Json.parse(s"""
       |{
       |  $responsePrefix
@@ -368,7 +368,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
       // GET
       val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
       getResponse.status mustBe OK
-      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       getResponse.json mustBe Json.parse(s"""
       |{
       |  $responsePrefix
@@ -403,7 +403,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
       // GET
       val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
       getResponse.status mustBe OK
-      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       getResponse.json mustBe Json.parse(s"""
       |{
       |  $responsePrefix
@@ -438,7 +438,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
       // GET
       val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
       getResponse.status mustBe OK
-      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       getResponse.json mustBe Json.parse(s"""
       |{
       |  $responsePrefix
@@ -472,7 +472,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
       // GET
       val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
       getResponse.status mustBe OK
-      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       getResponse.json mustBe Json.parse(s"""
         |{
         |  $responsePrefix
@@ -505,7 +505,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
       // GET
       val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
       getResponse.status mustBe OK
-      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       getResponse.json mustBe Json.parse(s"""
         |{
         |  $responsePrefix
@@ -539,7 +539,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
       // GET
       val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
       getResponse.status mustBe OK
-      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       getResponse.json mustBe Json.parse(s"""
         |{
         |  $responsePrefix
@@ -574,7 +574,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
       // GET
       val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
       getResponse.status mustBe OK
-      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       getResponse.json mustBe Json.parse(s"""
         |{
         |  $responsePrefix
@@ -621,7 +621,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
         // GET
         val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
         getResponse.status mustBe OK
-        getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+        getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
         getResponse.json mustBe Json.parse(s"""
         |{
         |  "firstLocation": {
@@ -655,7 +655,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
         // GET
         val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
         getResponse.status mustBe OK
-        getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+        getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
         getResponse.json mustBe Json.parse(s"""
         |{
         |  "firstLocation": {
@@ -707,7 +707,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
         // GET
         val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
         getResponse.status mustBe OK
-        getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+        getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
         getResponse.json mustBe Json.parse(s"""
         |{
         |  "firstLocation": {
@@ -741,7 +741,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
         // GET
         val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
         getResponse.status mustBe OK
-        getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+        getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
         getResponse.json mustBe Json.parse(s"""
         |{
         |  "firstLocation": {
@@ -1054,7 +1054,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
         // GET
         val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
         getResponse.status mustBe OK
-        getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+        getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
         getResponse.json mustBe Json.parse(s"""
         |{
         |  "firstLocation": {
@@ -1081,7 +1081,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
         // GET
         val getResponse2 = await(wsUrl(s"/framework-preference/$applicationId").get())
         getResponse2.status mustBe OK
-        getResponse2.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+        getResponse2.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
         getResponse2.json mustBe Json.parse(s"""
         |{
         |  "firstLocation": {
@@ -1129,7 +1129,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
         // GET
         val getResponse = await(wsUrl(s"/framework-preference/$applicationId").get())
         getResponse.status mustBe OK
-        getResponse.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+        getResponse.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
         getResponse.json mustBe Json.parse(s"""
         |{
         |  "firstLocation": {
@@ -1157,7 +1157,7 @@ class FrameworkPreferenceControllerSpecIt extends WireLevelHttpSpec with CommonH
         // GET
         val getResponse2 = await(wsUrl(s"/framework-preference/$applicationId").get())
         getResponse2.status mustBe OK
-        getResponse2.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+        getResponse2.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
         getResponse2.json mustBe Json.parse(s"""
         |{
         |  "firstLocation": {

@@ -31,6 +31,7 @@ import model.Preferences
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
 import play.Logger
 import play.api.libs.json._
 import play.test.WithApplication
@@ -71,7 +72,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
   val DebugTestOnlyPathPattern: Option[String] = None // Some("5_2_oneLocationMclDisabledIncomplete/")
 
   "Assessment Centre Passmark Service" should {
-    "for each test in the path evaluate scores" in new WithApplication {
+    "for each test in the path evaluate scores" in {
       loadSuites foreach executeSuite
     }
   }

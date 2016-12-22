@@ -49,7 +49,7 @@ trait WireLevelHttpSpec
   with MimeTypes
   with Results {
 
-  val JSON_UTF8 = "application/json; charset=utf-8"
+  val JSON_CONTENT_TYPE = "application/json"
 
   // Overridden to inject our prefixed application route.
   def wsUrl(url: String)(implicit portNumber: PortNumber): WSRequest =
