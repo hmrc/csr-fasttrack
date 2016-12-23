@@ -39,13 +39,16 @@ trait LocationSchemeService {
       schemeInfo <- locationSchemeRepository.getSchemeInfo
       locationsWithSchemes <- locationSchemeRepository.getSchemesAndLocations
     } yield {
+
       val eligibleSchemes = schemeInfo.filterNot(s => s.requiresALevel && !hasALevels || s.requiresALevelInStem && !hasStemALevels)
       val eligibleSchemeNames = eligibleSchemes.map(_.schemeName)
+
       val selectedLocations = locationsWithSchemes.collect {
-        case LocationSchemes(locationName, lat, lng, schemes) if eligibleSchemeNames.intersect(schemes).length > 0 =>
+        case LocationSchemes(locationName, lat, lng, schemes) if eligibleSchemeNames.intersect(schemes).nonEmpty =>
           val distance = DistanceCalculator.calcKilometersBetween(latitude, longitude, lat, lng)
           GeoLocationSchemeResult(distance.toInt, locationName, eligibleSchemeNames.intersect(schemes))
       }
+
       selectedLocations.sortBy(r => r.distanceKm)
     }
   }

@@ -16,14 +16,22 @@
 
 package repositories
 
+import play.Play
+import play.api.libs.json.Json
+import resource._
+
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.Future
 
 case class LocationSchemes(locationName: String, latitude: Double, longitude: Double, schemes: IndexedSeq[String])
+
 case class SchemeInfo(schemeName: String, requiresALevel: Boolean, requiresALevelInStem: Boolean)
 
 trait LocationSchemeRepository {
+  implicit val locationReader = Json.reads[LocationSchemes]
+
   def getSchemesAndLocations: Future[IndexedSeq[LocationSchemes]] = {
+    // TODO Load from file
     Future.successful(
       IndexedSeq(LocationSchemes("Airdrie", 55.86602, 3.98025, IndexedSeq("Business", "Commercial")))
     )

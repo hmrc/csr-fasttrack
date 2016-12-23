@@ -26,6 +26,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 trait LocationSchemeController extends BaseController {
   def locationSchemeService: LocationSchemeService
 
+  // TODO Map the route to here
   def getSchemesAndLocationsByEligibility(latitude: Double, longitude: Double, hasALevels: Boolean,
                                           hasStemALevels: Boolean): Action[AnyContent] = Action.async { implicit request =>
     locationSchemeService.getSchemesAndLocationsByEligibility(latitude, longitude, hasALevels, hasStemALevels).map(r => Ok(Json.toJson(r)))
