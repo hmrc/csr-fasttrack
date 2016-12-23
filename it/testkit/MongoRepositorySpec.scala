@@ -62,7 +62,7 @@ trait MongoRepositorySpec extends PlaySpec with Inside with Inspectors with Scal
     Play.stop(app)
   }
 
-  override def beforeEach = {
+  override def beforeEach() = {
     val collection = mongo().collection[JSONCollection](collectionName)
     Await.ready(collection.remove(Json.obj()), timeout)
   }
