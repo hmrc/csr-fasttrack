@@ -54,15 +54,15 @@ trait MongoRepositorySpec extends PlaySpec with Inside with Inspectors with Scal
     MongoDbConnection.db
   }
 
-  override def beforeAll() = {
+  override def beforeAll(): Unit = {
     Play.start(app)
   }
 
-  override def afterAll() = {
+  override def afterAll(): Unit = {
     Play.stop(app)
   }
 
-  override def beforeEach() = {
+  override def beforeEach(): Unit = {
     val collection = mongo().collection[JSONCollection](collectionName)
     Await.ready(collection.remove(Json.obj()), timeout)
   }

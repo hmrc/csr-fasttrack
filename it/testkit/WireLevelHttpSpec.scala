@@ -16,11 +16,13 @@
 
 package testkit
 
+import config.WSHttp
 import org.scalatestplus.play.{ OneServerPerSuite, PlaySpec, PortNumber }
 import play.api.http.{ HeaderNames, HttpProtocol, MimeTypes, Status }
-import play.api.libs.ws.{ WS, WSRequest }
+import play.api.libs.ws.WSRequest
 import play.api.mvc.Results
 import play.api.test._
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 /**
  * Both PlaySpec and PlaySpecification (former maintained in the ScalaTestPlus lib, latter in Play Framework)
@@ -51,7 +53,9 @@ trait WireLevelHttpSpec
 
   val JSON_CONTENT_TYPE = "application/json"
 
+  implicit val hc: HeaderCarrier = new HeaderCarrier()
+
   // Overridden to inject our prefixed application route.
   def wsUrl(url: String)(implicit portNumber: PortNumber): WSRequest =
-    WS.url(s"http://localhost:${portNumber.value}/candidate-application$url")
+    WSHttp.buildRequest(s"http://localhost:${portNumber.value}/candidate-application$url")
 }
