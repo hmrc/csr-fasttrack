@@ -35,10 +35,7 @@ abstract class UnitWithAppSpec extends UnitSpec with OneAppPerSuite with Results
 
   override implicit lazy val app: Application = new GuiceApplicationBuilder()
     .disable[PlayModule]
-    .disable[MetricsModule]
     .disable[ReactiveMongoHmrcModule]
-    // Suppress logging during tests
-    .configure("logger.resource" -> "logback-test.xml")
     .build
 
   implicit def mat: Materializer = Play.materializer(app)
