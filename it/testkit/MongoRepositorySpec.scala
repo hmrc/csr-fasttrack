@@ -16,7 +16,6 @@
 
 package testkit
 
-import com.codahale.metrics.json.MetricsModule
 import com.kenshoo.play.metrics.PlayModule
 import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
@@ -24,11 +23,8 @@ import org.scalatest.time.{ Millis, Span }
 import org.scalatestplus.play.PlaySpec
 import play.api.{ Application, Play }
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{ JsObject, JsValue, Json }
-import play.api.test.Helpers
-import play.modules.reactivemongo.MongoDbConnection
+import play.api.libs.json.Json
 import reactivemongo.api.DefaultDB
-import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
 import reactivemongo.json.collection.JSONCollection
 import repositories.MongoDbConnection
