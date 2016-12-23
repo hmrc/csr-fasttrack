@@ -54,19 +54,19 @@ trait MongoRepositorySpec extends PlaySpec with Inside with Inspectors with Scal
   val timeout = 10 seconds
   val collectionName: String
 
-  implicit def mongo: () => DefaultDB = {
-    new MongoDbConnection() { }.db
+  implicit lazy val mongo: () => DefaultDB = {
+    MongoDbConnection.db
   }
 
-  override def beforeAll() {
+  override def beforeAll() = {
     Play.start(app)
   }
 
-  override def afterAll() {
+  override def afterAll() = {
     Play.stop(app)
   }
 
-  override def beforeEach {
+  override def beforeEach = {
     val collection = mongo().collection[JSONCollection](collectionName)
     Await.ready(collection.remove(Json.obj()), timeout)
   }

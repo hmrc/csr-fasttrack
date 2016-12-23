@@ -64,7 +64,10 @@ trait MicroService {
       fork in IntegrationTest := true,
       javaOptions in IntegrationTest += "-Dmongodb.uri=mongodb://localhost:27017/test-fset-fasttrack",
       javaOptions in IntegrationTest += "-DmaxNumberOfDocuments=10",
-      javaOptions in IntegrationTest += "-Dlogger.resource=logback-test.xml"
+      javaOptions in IntegrationTest += "-Dlogger.resource=logback-test.xml",
+      javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.retries=10",
+      javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.delay.function=fibonacci",
+      javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.delay.factor=1"
     )
     .settings(inConfig(IntegrationTest)((Defaults.testSettings ++ AutomateHeaderPlugin.automateFor(IntegrationTest))) : _*)
     .settings(inConfig(IntegrationTest)(Defaults.itSettings))

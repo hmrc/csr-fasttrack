@@ -24,6 +24,7 @@ import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
+import play.api.libs.json.Json
 import reactivemongo.api.DefaultDB
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers._
@@ -109,9 +110,9 @@ class OnlineTestRetrievePDFReportServiceIntegrationSpec extends IntegrationSpec 
 
     def clearDatabase() = {
       val reportCollection = db().collection[JSONCollection]("online-test-pdf-report")
-      reportCollection.drop().futureValue
+      reportCollection.remove(Json.obj()).futureValue
       val collection = db().collection[JSONCollection]("application")
-      collection.drop().futureValue
+      collection.remove(Json.obj()).futureValue
     }
   }
 }
