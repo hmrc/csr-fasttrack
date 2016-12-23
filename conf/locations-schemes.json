@@ -1,0 +1,494 @@
+{
+  "locations":[
+    {
+      "id":2657613,
+      "name":"Airdrie",
+      "lat":55.86602,
+      "lng":-3.98025,
+      "schemes":[
+        "Business",
+        "Commercial"
+      ]
+    },
+    {
+      "id":2657324,
+      "name":"Andover",
+      "lat":51.21135,
+      "lng":-1.49393,
+      "schemes":[
+        "Business",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2656169,
+      "name":"Bathgate",
+      "lat":55.90204,
+      "lng":-3.64398,
+      "schemes":[
+        "Business",
+        "Commercial",
+        "Digital and technology"
+      ]
+    },
+    {
+      "id":2655603,
+      "name":"Birmingham",
+      "lat":52.48142,
+      "lng":-1.89983,
+      "schemes":[
+        "Digital and technology",
+        "Finance",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2655459,
+      "name":"Blackpool",
+      "lat":53.81667,
+      "lng":-3.05,
+      "schemes":[
+        "Business"
+      ]
+    },
+    {
+      "id":2655198,
+      "name":"Bootle",
+      "lat":53.46667,
+      "lng":-3.01667,
+      "schemes":[
+        "Business",
+        "Commercial",
+        "Digital and technology",
+        "Finance"
+      ]
+    },
+    {
+      "id":2654993,
+      "name":"Bradford",
+      "lat":53.79391,
+      "lng":-1.75206,
+      "schemes":[
+        "Business",
+        "Commercial"
+      ]
+    },
+    {
+      "id":2654675,
+      "name":"Bristol",
+      "lat":51.45523,
+      "lng":-2.59665,
+      "schemes":[
+        "Business",
+        "Finance",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2653822,
+      "name":"Cardiff",
+      "lat":51.48,
+      "lng":-3.18,
+      "schemes":[
+        "Digital and technology",
+        "Finance",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2652318,
+      "name":"Corsham",
+      "lat":51.43433,
+      "lng":-2.18437,
+      "schemes":[
+        "Business"
+      ]
+    },
+    {
+      "id":2652221,
+      "name":"Coventry",
+      "lat":52.40656,
+      "lng":-1.51217,
+      "schemes":[
+        "Business",
+        "Finance",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2651817,
+      "name":"Croydon",
+      "lat":51.38333,
+      "lng":-0.1,
+      "schemes":[
+        "Business",
+        "Finance",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2651513,
+      "name":"Darlington",
+      "lat":54.52429,
+      "lng":-1.55039,
+      "schemes":[
+        "Business",
+        "Commercial",
+        "Digital and technology"
+      ]
+    },
+    {
+      "id":2650405,
+      "name":"East Kilbride",
+      "lat":55.76412,
+      "lng":-4.17669,
+      "schemes":[
+        "Business",
+        "Digital and technology",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2650225,
+      "name":"Edinburgh",
+      "lat":55.95206,
+      "lng":-3.19648,
+      "schemes":[
+        "Digital and technology",
+        "Finance",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2648579,
+      "name":"Glasgow",
+      "lat":55.86515,
+      "lng":-4.25763,
+      "schemes":[
+        "Business",
+        "Commercial",
+        "Digital and technology"
+      ]
+    },
+    {
+      "id":2648258,
+      "name":"Govan",
+      "lat":55.86326,
+      "lng":-4.31241,
+      "schemes":[
+        "Digital and technology",
+        "Finance",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2647570,
+      "name":"Hamilton",
+      "lat":55.76667,
+      "lng":-4.03333,
+      "schemes":[
+        "Business",
+        "Commercial",
+        "Digital and technology",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2647356,
+      "name":"Hastings",
+      "lat":50.85519,
+      "lng":0.57292,
+      "schemes":[
+        "Commercial",
+        "Digital and technology",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2646914,
+      "name":"High Wycombe",
+      "lat":51.62907,
+      "lng":-0.74934,
+      "schemes":[
+        "Commercial",
+        "Digital and technology",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2644688,
+      "name":"Leeds",
+      "lat":53.79648,
+      "lng":-1.54785,
+      "schemes":[
+        "Business",
+        "Commercial",
+        "Finance"
+      ]
+    },
+    {
+      "id":2644210,
+      "name":"Liverpool",
+      "lat":53.41058,
+      "lng":-2.97794,
+      "schemes":[
+        "Business",
+        "Commercial",
+        "Digital and technology"
+      ]
+    },
+    {
+      "id":2643743,
+      "name":"London",
+      "lat":51.50853,
+      "lng":-0.12574,
+      "schemes":[
+        "Business",
+        "Commercial",
+        "Digital and technology",
+        "Finance",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2643123,
+      "name":"Manchester",
+      "lat":53.48095,
+      "lng":-2.23743,
+      "schemes":[
+        "Business",
+        "Finance",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2642135,
+      "name":"Motherwell",
+      "lat":55.78924,
+      "lng":-3.99187,
+      "schemes":[
+        "Business",
+        "Commercial",
+        "Digital and technology",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2641773,
+      "name":"Netherton",
+      "lat":52.48333,
+      "lng":-2.08333,
+      "schemes":[
+        "Digital and technology",
+        "Finance",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2641673,
+      "name":"Newcastle",
+      "lat":54.97328,
+      "lng":-1.61396,
+      "schemes":[
+        "Business",
+        "Commercial",
+        "Digital and technology"
+      ]
+    },
+    {
+      "id":2641598,
+      "name":"Newport",
+      "lat":51.58774,
+      "lng":-2.99835,
+      "schemes":[
+        "Business",
+        "Digital and technology",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2641181,
+      "name":"Norwich",
+      "lat":52.62783,
+      "lng":1.29834,
+      "schemes":[
+        "Commercial",
+        "Digital and technology",
+        "Finance"
+      ]
+    },
+    {
+      "id":2641170,
+      "name":"Nottingham",
+      "lat":52.9536,
+      "lng":-1.15047,
+      "schemes":[
+        "Business",
+        "Commercial",
+        "Digital and technology"
+      ]
+    },
+    {
+      "id":2639996,
+      "name":"Portsmouth",
+      "lat":50.79899,
+      "lng":-1.09125,
+      "schemes":[
+        "Digital and technology",
+        "Finance",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2639577,
+      "name":"Reading",
+      "lat":51.45625,
+      "lng":-0.97113,
+      "schemes":[
+        "Commercial",
+        "Digital and technology",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2638671,
+      "name":"Salford",
+      "lat":53.48771,
+      "lng":-2.29042,
+      "schemes":[
+        "Business",
+        "Digital and technology",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":7302142,
+      "name":"Shawlands",
+      "lat":55.82912,
+      "lng":-4.28292,
+      "schemes":[
+        "Finance"
+      ]
+    },
+    {
+      "id":2638077,
+      "name":"Sheffield",
+      "lat":53.38297,
+      "lng":-1.4659,
+      "schemes":[
+        "Finance",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2637958,
+      "name":"Shipley",
+      "lat":53.83333,
+      "lng":-1.76667,
+      "schemes":[
+        "Business",
+        "Commercial",
+        "Digital and technology"
+      ]
+    },
+    {
+      "id":2637433,
+      "name":"Southend",
+      "lat":51.53782,
+      "lng":0.71433,
+      "schemes":[
+        "Finance",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2637197,
+      "name":"Springburn",
+      "lat":55.89015,
+      "lng":-4.23324,
+      "schemes":[
+        "Commercial",
+        "Digital and technology",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2638853,
+      "name":"St Austell",
+      "lat":50.3425,
+      "lng":-4.77442,
+      "schemes":[
+        "Business",
+        "Digital and technology",
+        "Finance"
+      ]
+    },
+    {
+      "id":2636882,
+      "name":"Stockport",
+      "lat":53.40979,
+      "lng":-2.15761,
+      "schemes":[
+        "Business",
+        "Digital and technology",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":3345439,
+      "name":"Telford",
+      "lat":52.67659,
+      "lng":-2.44926,
+      "schemes":[
+        "Business",
+        "Commercial",
+        "Digital and technology",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2635650,
+      "name":"Torquay",
+      "lat":50.46384,
+      "lng":-3.51434,
+      "schemes":[
+        "Digital and technology",
+        "Finance",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2634739,
+      "name":"Warrington",
+      "lat":53.39254,
+      "lng":-2.58024,
+      "schemes":[
+        "Business",
+        "Digital and technology",
+        "Project Delivery"
+      ]
+    },
+    {
+      "id":2634015,
+      "name":"Whittington",
+      "lat":52.68333,
+      "lng":-1.76667,
+      "schemes":[
+        "Business",
+        "Digital and technology",
+        "Finance"
+      ]
+    },
+    {
+      "id":2633521,
+      "name":"Worthing",
+      "lat":50.81795,
+      "lng":-0.37538,
+      "schemes":[
+        "Digital and technology",
+        "Finance",
+        "Project Delivery"
+      ]
+    }
+  ]
+}
