@@ -16,9 +16,13 @@
 
 package testkit
 
+import com.kenshoo.play.metrics.PlayModule
 import config.WSHttp
 import org.scalatestplus.play.{ OneServerPerSuite, PlaySpec, PortNumber }
+import play.api.Application
+import play.api.cache.EhCacheModule
 import play.api.http.{ HeaderNames, HttpProtocol, MimeTypes, Status }
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.ws.WSRequest
 import play.api.mvc.Results
 import play.api.test._
@@ -54,6 +58,9 @@ trait WireLevelHttpSpec
   val JSON_CONTENT_TYPE = "application/json"
 
   implicit val hc: HeaderCarrier = new HeaderCarrier()
+
+  implicit override lazy val app: Application =
+    new GuiceApplicationBuilder().disable[EhCacheModule].disable[PlayModule].build()
 
   // Overridden to inject our prefixed application route.
   def wsUrl(url: String)(implicit portNumber: PortNumber): WSRequest =
