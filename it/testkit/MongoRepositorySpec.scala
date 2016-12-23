@@ -24,6 +24,7 @@ import org.scalatestplus.play.PlaySpec
 import play.api.{ Application, Play }
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
+import play.modules.reactivemongo.MongoDbConnection
 import reactivemongo.api.DefaultDB
 import reactivemongo.json.ImplicitBSONHandlers
 import reactivemongo.json.collection.JSONCollection
@@ -51,7 +52,7 @@ trait MongoRepositorySpec extends PlaySpec with Inside with Inspectors with Scal
   val collectionName: String
 
   implicit lazy val mongo: () => DefaultDB = {
-    MongoDbConnection.db
+    new MongoDbConnection {}.mongoConnector.db
   }
 
   override def beforeAll(): Unit = {
