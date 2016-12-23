@@ -16,6 +16,7 @@
 
 package connectors
 
+import connectors.assessmentschedule.VenueDaySessionCandidate
 import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
@@ -29,9 +30,6 @@ object AssessmentScheduleExchangeObjects {
   case class VenueAllocations(allocations: List[VenueAllocation])
 
   case class VenueDayDetails(amSession: List[Option[VenueDaySessionCandidate]], pmSession: List[Option[VenueDaySessionCandidate]])
-
-  case class VenueDaySessionCandidate(userId: String, applicationId: String, firstName: String,
-    lastName: String, confirmed: Boolean)
 
   case class ScheduledCandidateDetail(firstName: String, lastName: String, preferredName: Option[String], email: Option[String],
     phone: Option[String], venue: String, session: String, date: LocalDate, status: String)
@@ -47,7 +45,7 @@ object AssessmentScheduleExchangeObjects {
     implicit val venueAllocationFormat = Json.format[VenueAllocation]
     implicit val venueAllocationsFormat = Json.format[VenueAllocations]
 
-    implicit val venueDaySessionCandidateFormat = Json.format[VenueDaySessionCandidate]
+    implicit val optionVenueDaySessionCandidateFormat = play.api.libs.json.Format.optionWithNull[VenueDaySessionCandidate]
     implicit val venueDayDetailsFormat = Json.format[VenueDayDetails]
 
     implicit val scheduledCandidateDetailFormat = Json.format[ScheduledCandidateDetail]

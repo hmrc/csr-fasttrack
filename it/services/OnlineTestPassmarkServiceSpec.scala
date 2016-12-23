@@ -18,21 +18,22 @@ package services
 
 import java.io.File
 
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.{ Config, ConfigFactory }
 import connectors.PassMarkExchangeObjects.Settings
-import mocks.{OnlineIntegrationTestInMemoryRepository, PassMarkSettingsInMemoryRepository}
+import mocks.{ OnlineIntegrationTestInMemoryRepository, PassMarkSettingsInMemoryRepository }
 import model.EvaluationResults._
 import model.OnlineTestCommands.CandidateScoresWithPreferencesAndPassmarkSettings
 import model.PersistedObjects.CandidateTestReport
-import model.{ApplicationStatuses, Preferences}
+import model.{ ApplicationStatuses, Preferences }
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.ceedubs.ficus.readers.ValueReader
 import org.joda.time.DateTime
 import org.scalatest.mock.MockitoSugar
+import org.scalatestplus.play.OneAppPerSuite
 import play.Logger
-import play.api.test.WithApplication
-import repositories.{FrameworkPreferenceRepository, FrameworkRepository, PassMarkSettingsRepository, TestReportRepository}
+import play.test.WithApplication
+import repositories.{ FrameworkPreferenceRepository, FrameworkRepository, PassMarkSettingsRepository, TestReportRepository }
 import services.onlinetesting.OnlineTestPassmarkService
 import services.passmarksettings.PassMarkSettingsService
 import testkit.IntegrationSpec
@@ -42,7 +43,7 @@ case class OnlineTestPassmarkServiceTest(preferences: Preferences,
                                          expected: ScoreEvaluationTestExpectation,
                                          previousEvaluation: Option[ScoreEvaluationTestExpectation] = None)
 
-class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar {
+class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar with OneAppPerSuite {
 
   lazy val service = new OnlineTestPassmarkService {
 
@@ -58,7 +59,7 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar {
   }
 
   "Online Test Passmark Service" should {
-    "for each test in the path evaluate scores" in new WithApplication {
+    "for each test in the path evaluate scores" in {
       implicit object DateTimeValueReader extends ValueReader[DateTime] {
         override def read(config: Config, path: String): DateTime = {
           DateTime.parse(config.getString(path))

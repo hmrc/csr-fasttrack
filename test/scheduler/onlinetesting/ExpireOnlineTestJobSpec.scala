@@ -16,33 +16,30 @@
 
 package scheduler.onlinetesting
 
-import org.mockito.Matchers.{ eq => eqTo }
 import org.mockito.Mockito._
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.PlaySpec
-import play.api.test.WithApplication
+import org.scalatestplus.play.OneAppPerSuite
+import play.test.WithApplication
 import services.onlinetesting.OnlineTestExpiryService
-import testkit.ShortTimeout
+import testkit.{ ShortTimeout, UnitWithAppSpec }
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class ExpireOnlineTestJobSpec extends PlaySpec with MockitoSugar with ScalaFutures with ShortTimeout {
+class ExpireOnlineTestJobSpec extends UnitWithAppSpec with ShortTimeout {
   implicit val ec: ExecutionContext = ExecutionContext.global
 
   val serviceMock = mock[OnlineTestExpiryService]
 
   "send invitation job" should {
 
-    "complete successfully when service completes successfully" in new WithApplication {
+    "complete successfully when service completes successfully" in {
       object TestableExpireOnlineTestJob extends ExpireOnlineTestJob {
         val service = serviceMock
       }
       when(serviceMock.processNextExpiredTest()).thenReturn(Future.successful(()))
-      TestableExpireOnlineTestJob.tryExecute().futureValue mustBe (())
+      TestableExpireOnlineTestJob.tryExecute().futureValue mustBe unit
     }
 
-    "fail when the service fails" in new WithApplication {
+    "fail when the service fails" in {
       object TestableExpireOnlineTestJob extends ExpireOnlineTestJob {
         val service = serviceMock
       }

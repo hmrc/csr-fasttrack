@@ -22,7 +22,6 @@ import model.FlagCandidatePersistedObject.FlagCandidate
 import model.PassmarkPersistedObjects._
 import model.PersistedObjects.{ ContactDetails, PersistedAnswer, PersonalDetails, _ }
 import org.joda.time.{ DateTime, DateTimeZone, LocalDate }
-import play.modules.reactivemongo.ReactiveMongoPlugin
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.indexes.IndexType.Ascending
 import reactivemongo.bson._
@@ -38,8 +37,7 @@ import scala.language.postfixOps
 package object repositories {
   private val timeZoneService = GBTimeZoneService
   private implicit val connection = {
-    import play.api.Play.current
-    ReactiveMongoPlugin.mongoConnector.db
+    MongoDbConnection.mongoConnector.db
   }
 
   lazy val personalDetailsRepository = new PersonalDetailsMongoRepository()
@@ -64,6 +62,7 @@ package object repositories {
 
   /** Create indexes */
   Await.result(Future.sequence(List(
+    onlineTestPDFReportRepository.collection.indexesManager.create(Index(Seq(("applicationId", Ascending)), unique = true)),
     applicationRepository.collection.indexesManager.create(Index(Seq(("applicationId", Ascending), ("userId", Ascending)), unique = true)),
     applicationRepository.collection.indexesManager.create(Index(Seq(("userId", Ascending), ("frameworkId", Ascending)), unique = true)),
     onlineTestRepository.collection.indexesManager.create(Index(Seq(("online-tests.token", Ascending)), unique = false)),
@@ -71,7 +70,6 @@ package object repositories {
     onlineTestRepository.collection.indexesManager.create(Index(Seq(("online-tests.invitationDate", Ascending)), unique = false)),
 
     contactDetailsRepository.collection.indexesManager.create(Index(Seq(("userId", Ascending)), unique = true)),
-
     passMarkSettingsRepository.collection.indexesManager.create(Index(Seq(("createDate", Ascending)), unique = true)),
 
     assessmentCentrePassMarkSettingsRepository.collection.indexesManager.create(Index(Seq(("info.createDate", Ascending)), unique = true)),
@@ -80,9 +78,7 @@ package object repositories {
       ("session", Ascending), ("slot", Ascending)), unique = true)),
     applicationAssessmentRepository.collection.indexesManager.create(Index(Seq(("applicationId", Ascending)), unique = true)),
 
-    applicationAssessmentScoresRepository.collection.indexesManager.create(Index(Seq(("applicationId", Ascending)), unique = true)),
-
-    onlineTestPDFReportRepository.collection.indexesManager.create(Index(Seq(("applicationId", Ascending)), unique = true))
+    applicationAssessmentScoresRepository.collection.indexesManager.create(Index(Seq(("applicationId", Ascending)), unique = true))
   )), 20 seconds)
 
   implicit object BSONDateTimeHandler extends BSONHandler[BSONDateTime, DateTime] {

@@ -29,11 +29,12 @@ import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.ContactDetailsRepository
 import repositories.application.PersonalDetailsRepository
 import services.AuditService
+import testkit.{ UnitSpec, UnitWithAppSpec }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.language.postfixOps
 
-class PersonalDetailsControllerSpec extends PlaySpec with Results {
+class PersonalDetailsControllerSpec extends UnitWithAppSpec {
 
   "Personal Details Controller" should {
 

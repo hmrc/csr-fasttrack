@@ -19,7 +19,6 @@ package scheduled
 import java.util.UUID
 
 import org.joda.time.Duration
-import play.modules.reactivemongo.ReactiveMongoPlugin
 import repositories._
 import uk.gov.hmrc.play.config.RunMode
 
@@ -39,7 +38,7 @@ trait LockKeeper {
       .flatMap { acquired =>
         if (acquired) {
           body.flatMap {
-            case x =>
+            x =>
               if (greedyLockingEnabled) {
                 Future.successful(Some(x))
               } else {
@@ -56,8 +55,7 @@ trait LockKeeper {
 
 object LockKeeper extends RunMode {
   private implicit val connection = {
-    import play.api.Play.current
-    ReactiveMongoPlugin.mongoConnector.db
+    MongoDbConnection.mongoConnector.db
   }
 
   lazy val generatedServerId = UUID.randomUUID().toString

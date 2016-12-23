@@ -22,26 +22,26 @@ import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import play.api.test.WithApplication
+import play.test.WithApplication
 import services.onlinetesting.{ OnlineTestRetrievePDFReportService, OnlineTestService }
-import testkit.ExtendedTimeout
+import testkit.{ ExtendedTimeout, UnitWithAppSpec }
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class RetrieveOnlineTestPDFReportJobSpec extends PlaySpec with MockitoSugar with ScalaFutures with ExtendedTimeout {
+class RetrieveOnlineTestPDFReportJobSpec extends UnitWithAppSpec with ExtendedTimeout {
   implicit val ec: ExecutionContext = ExecutionContext.global
 
   "retrieve online test PDF report job" should {
 
     "complete successfully when there is no application ready for pdf report retrieval" in new TestFixture {
       when(otRetrievePDFReportServiceMock.nextApplicationReadyForPDFReportRetrieving()).thenReturn(Future.successful(None))
-      Job.tryExecute().futureValue mustBe (())
+      Job.tryExecute().futureValue mustBe unit
     }
 
     "complete successfully when there is one application ready for pdf report retrieval" in new TestFixture {
       when(otRetrievePDFReportServiceMock.nextApplicationReadyForPDFReportRetrieving()).thenReturn(Future.successful(Some(application)))
       when(otRetrievePDFReportServiceMock.retrievePDFReport(eqTo(application), any())).thenReturn(Future.successful(()))
-      Job.tryExecute().futureValue mustBe (())
+      Job.tryExecute().futureValue mustBe unit
       verify(otRetrievePDFReportServiceMock, times(1)).retrievePDFReport(eqTo(application), any())
     }
 

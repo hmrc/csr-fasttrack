@@ -60,7 +60,7 @@ class ReportingMongoRepository(implicit mongo: () => DB)
   override def findLatest(): Future[Option[DiversityReport]] = {
     //db.reporting.find({}).sort({"timeStamp": -1}).limit(1)
     val query = BSONDocument("status" -> "COMPLETED")
-    val sort = new JsObject(Seq("timeStamp" -> JsNumber(-1)))
+    val sort = new JsObject(Map("timeStamp" -> JsNumber(-1)))
     collection.find(query).sort(sort).one[BSONDocument].map {
       case Some(document) =>
         val timeStamp = document.getAs[DateTime]("timeStamp").get

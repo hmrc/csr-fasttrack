@@ -20,11 +20,11 @@ import _root_.services.onlinetesting.OnlineTestRetrievePDFReportService
 import config.MicroserviceAppConfig._
 import connectors.CubiksGatewayClient
 import model.OnlineTestCommands._
-import org.mockito.Matchers.{eq => eqTo, _}
+import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
-import play.api.test.WithApplication
-import play.modules.reactivemongo.ReactiveMongoPlugin
+import org.scalatestplus.play.OneAppPerSuite
+import play.api.libs.json.Json
 import reactivemongo.api.DefaultDB
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers._
@@ -36,11 +36,10 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class OnlineTestRetrievePDFReportServiceIntegrationSpec extends IntegrationSpec with MockitoSugar {
+class OnlineTestRetrievePDFReportServiceIntegrationSpec extends IntegrationSpec with MockitoSugar with OneAppPerSuite {
 
   private implicit def db: () => DefaultDB = {
-    import play.api.Play.current
-    ReactiveMongoPlugin.mongoConnector.db
+    MongoDbConnection.mongoConnector.db
   }
 
   import scala.concurrent.ExecutionContext.Implicits.global
@@ -69,7 +68,7 @@ class OnlineTestRetrievePDFReportServiceIntegrationSpec extends IntegrationSpec 
     }
   }
 
-  trait TestFixture extends WithApplication {
+  trait TestFixture {
     val auditMock = mock[AuditService]
     val gatewayClientMock = mock[CubiksGatewayClient]
 
@@ -111,9 +110,9 @@ class OnlineTestRetrievePDFReportServiceIntegrationSpec extends IntegrationSpec 
 
     def clearDatabase() = {
       val reportCollection = db().collection[JSONCollection]("online-test-pdf-report")
-      reportCollection.drop().futureValue
+      reportCollection.remove(Json.obj()).futureValue
       val collection = db().collection[JSONCollection]("application")
-      collection.drop().futureValue
+      collection.remove(Json.obj()).futureValue
     }
   }
 }

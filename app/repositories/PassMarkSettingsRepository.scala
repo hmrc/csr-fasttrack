@@ -87,7 +87,7 @@ class PassMarkSettingsMongoRepository(implicit mongo: () => DB)
   override def tryGetLatestVersion(schemeNames: List[String]): Future[Option[Settings]] = {
 
     val query = BSONDocument()
-    val sort = new JsObject(Seq("createDate" -> JsNumber(-1)))
+    val sort = new JsObject(Map("createDate" -> JsNumber(-1)))
 
     collection.find(query).sort(sort).one[BSONDocument] map { docOpt =>
       docOpt.map(constructPassMarkSettingsFromBSONDocument(_, schemeNames))

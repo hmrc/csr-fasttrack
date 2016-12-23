@@ -30,7 +30,7 @@ class FrameworkControllerSpec extends WireLevelHttpSpec with CommonHttpWorkflows
       val response = await(wsUrl(s"/frameworks-available-to-application/$applicationId").get())
 
       response.status mustBe OK
-      response.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      response.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
 
       val firstRegion = response.json.getRegion("East")
       val firstLocation = firstRegion.getLocation("TestGCSE")
@@ -49,7 +49,7 @@ class FrameworkControllerSpec extends WireLevelHttpSpec with CommonHttpWorkflows
       val response = await(wsUrl(s"/frameworks-available-to-application/$applicationId").get())
 
       response.status mustBe OK
-      response.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      response.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       val firstRegion = response.json.getRegion("East")
       val firstLocation = firstRegion.getLocation("TestGCSE")
       val frameworks = firstLocation \ "frameworks"
@@ -68,7 +68,7 @@ class FrameworkControllerSpec extends WireLevelHttpSpec with CommonHttpWorkflows
       val response = await(wsUrl(s"/frameworks-available-to-application/$applicationId").get())
 
       response.status mustBe OK
-      response.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      response.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       val firstRegion = response.json.getRegion("East")
       val firstLocation = firstRegion.getLocation("TestGCSE")
       val frameworks = firstLocation \ "frameworks"
@@ -91,7 +91,7 @@ class FrameworkControllerSpec extends WireLevelHttpSpec with CommonHttpWorkflows
       val response = await(wsUrl(s"/frameworks-available-to-application/$applicationId").get())
 
       response.status mustBe OK
-      response.header(CONTENT_TYPE) mustBe Some(JSON_UTF8)
+      response.header(CONTENT_TYPE) mustBe Some(JSON_CONTENT_TYPE)
       val firstRegion = response.json.getRegion("East")
       val firstLocation = firstRegion.getLocation("TestGCSE")
       val frameworks = firstLocation \ "frameworks"

@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-import de.heikoseeberger.sbtheader.{AutomateHeaderPlugin, HeaderPlugin}
-import sbt.Keys._
-import sbt.Tests.{Group, SubProcess}
+import de.heikoseeberger.sbtheader.{ AutomateHeaderPlugin, HeaderPlugin }
+import play.routes.compiler.StaticRoutesGenerator
+import sbt.Keys.{ javaOptions, _ }
 import sbt._
-import uk.gov.hmrc.SbtAutoBuildPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.versioning.SbtGitVersioning
+import play.sbt.routes.RoutesKeys.routesGenerator
 
 trait MicroService {
 
   import uk.gov.hmrc._
   import DefaultBuildSettings._
-  import TestPhases._
   import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
   import scalariform.formatter.preferences._
@@ -41,21 +40,34 @@ trait MicroService {
   lazy val compileScalastyle = taskKey[Unit]("compileScalastyle")
 
   lazy val microservice = Project(appName, file("."))
-    .enablePlugins(Seq(play.PlayScala) ++ plugins : _*)
+    .enablePlugins(Seq(play.sbt.PlayScala) ++ plugins : _*)
     .settings(playSettings : _*)
     .settings(scalaSettings: _*)
     .settings(publishingSettings ++ (publishArtifact in(Compile, packageDoc) := false))
     .settings(defaultSettings(): _*)
     .settings(
+      routesGenerator := StaticRoutesGenerator
+    )
+    .settings(
       targetJvm := "jvm-1.8",
       scalaVersion := "2.11.8",
       libraryDependencies ++= appDependencies,
       parallelExecution in Test := false,
-      fork in Test := false,
+      fork in Test := true,
+      javaOptions in Test += "-Dlogger.resource=logback-test.xml",
       retrieveManaged := true,
       scalacOptions += "-feature")
     .settings(HeaderPlugin.settingsFor(IntegrationTest))
     .configs(IntegrationTest)
+    .settings(
+      fork in IntegrationTest := true,
+      javaOptions in IntegrationTest += "-Dmongodb.uri=mongodb://localhost:27017/test-fset-fasttrack",
+      javaOptions in IntegrationTest += "-DmaxNumberOfDocuments=10",
+      javaOptions in IntegrationTest += "-Dlogger.resource=logback-test.xml",
+      javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.retries=10",
+      javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.delay.function=fibonacci",
+      javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.delay.factor=1"
+    )
     .settings(inConfig(IntegrationTest)((Defaults.testSettings ++ AutomateHeaderPlugin.automateFor(IntegrationTest))) : _*)
     .settings(inConfig(IntegrationTest)(Defaults.itSettings))
     // Disable Scalastyle & Scalariform temporarily, as it is currently intermittently failing when building
@@ -71,28 +83,15 @@ trait MicroService {
 //    .settings(compileScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).toTask("").value,
 //      (compile in Compile) <<= (compile in Compile) dependsOn compileScalastyle)
     .settings(
-      Keys.fork in IntegrationTest := false,
       unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest)(base => Seq(base / "it")),
       addTestReportOption(IntegrationTest, "int-test-reports"),
-      testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
       parallelExecution in IntegrationTest := false)
     .settings(
       resolvers := Seq(
         Resolver.bintrayRepo("hmrc", "releases"),
-        Resolver.typesafeRepo("releases")
+        Resolver.typesafeRepo("releases"),
+        Resolver.jcenterRepo
       )
     )
     .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
-}
-
-private object TestPhases {
-
-  def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
-    tests map {
-      test => new Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions =
-        Seq("-Dtest.name=" + test.name,
-          "-Dmongodb.uri=mongodb://localhost:27017/test-fset-fasttrack",
-          "-DmaxNumberOfDocuments=10")
-      )))
-    }
 }

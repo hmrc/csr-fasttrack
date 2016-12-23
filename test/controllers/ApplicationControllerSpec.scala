@@ -30,12 +30,13 @@ import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.application.GeneralApplicationRepository
 import services.AuditService
 import services.application.ApplicationService
+import testkit.{ UnitSpec, UnitWithAppSpec }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-class ApplicationControllerSpec extends PlaySpec with MockitoSugar with Results {
+class ApplicationControllerSpec extends UnitWithAppSpec {
 
   val ApplicationId = "1111-1111"
   val aWithdrawApplicationRequest = WithdrawApplicationRequest("Something", Some("Else"), "Candidate")

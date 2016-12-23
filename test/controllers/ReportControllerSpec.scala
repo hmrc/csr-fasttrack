@@ -38,13 +38,13 @@ import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.application.GeneralApplicationRepository
 import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, QuestionnaireRepository, ReportingRepository, TestReportRepository }
 import testkit.MockitoImplicits.OngoingStubbingExtension
-import testkit.MockitoSugar
+import testkit.{ MockitoSugar, UnitSpec, UnitWithAppSpec }
 
 import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.Random
 
-class ReportControllerSpec extends PlaySpec with Results with MockitoSugar {
+class ReportControllerSpec extends UnitWithAppSpec {
 
   "Reporting controller create adjustment report" should {
     "return the adjustment report when we execute adjustment reports" in new TestFixture {

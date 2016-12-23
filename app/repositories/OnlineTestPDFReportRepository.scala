@@ -20,6 +20,7 @@ import model.PersistedObjects.Implicits._
 import model.PersistedObjects.OnlineTestPDFReport
 import reactivemongo.api.DB
 import reactivemongo.bson.{ BSONBinary, BSONDocument, BSONObjectID, Subtype }
+import reactivemongo.json.collection.JSONCollection
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 

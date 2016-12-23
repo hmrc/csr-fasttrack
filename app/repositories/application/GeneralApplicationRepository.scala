@@ -273,7 +273,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
           "assistance-details.needsAdjustment" -> 1,
           "online-tests.invitationDate" -> 1
         )
-        val sort = new JsObject(Seq("online-tests.invitationDate" -> JsNumber(1)))
+        val sort = new JsObject(Map("online-tests.invitationDate" -> JsNumber(1)))
 
         collection.find(query, projection).sort(sort).options(QueryOpts(skipN = start)).cursor[BSONDocument]().collect[List](end - start + 1).
           map { docList =>

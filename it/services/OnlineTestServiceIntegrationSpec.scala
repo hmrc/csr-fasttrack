@@ -16,17 +16,17 @@
 
 package services
 
-import _root_.services.onlinetesting.{CubiksSanitizer, OnlineTestService}
+import _root_.services.onlinetesting.{ CubiksSanitizer, OnlineTestService }
 import config.MicroserviceAppConfig._
-import connectors.{CSREmailClient, CubiksGatewayClient}
-import factories.{DateTimeFactory, UUIDFactory}
+import connectors.{ CSREmailClient, CubiksGatewayClient }
+import factories.{ DateTimeFactory, UUIDFactory }
 import model.OnlineTestCommands._
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
-import org.scalatest.time.{Seconds, Span}
-import play.api.test.WithApplication
-import play.modules.reactivemongo.ReactiveMongoPlugin
+import org.scalatest.time.{ Seconds, Span }
+import org.scalatestplus.play.OneAppPerSuite
+import play.test.WithApplication
 import reactivemongo.api.DefaultDB
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers._
@@ -39,11 +39,10 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 import scala.io.Source
 
-class OnlineTestServiceIntegrationSpec extends IntegrationSpec with MockitoSugar {
+class OnlineTestServiceIntegrationSpec extends IntegrationSpec with MockitoSugar with OneAppPerSuite {
 
   private implicit def db: () => DefaultDB = {
-    import play.api.Play.current
-    ReactiveMongoPlugin.mongoConnector.db
+    MongoDbConnection.mongoConnector.db
   }
 
   import scala.concurrent.ExecutionContext.Implicits.global
@@ -123,7 +122,7 @@ class OnlineTestServiceIntegrationSpec extends IntegrationSpec with MockitoSugar
   }
 
   "Online test service" should {
-    "retrieve online test result" in new WithApplication {
+    "retrieve online test result" in {
       clearDatabase()
       val application = mock[OnlineTestApplicationWithCubiksUser]
       when(application.applicationId).thenReturn("appId")
@@ -148,7 +147,7 @@ class OnlineTestServiceIntegrationSpec extends IntegrationSpec with MockitoSugar
     }
 
     // TODO: Broken test. This works in isolation, but somehow the mongo connections get reset if run after another test
-//    "expect exception" in new WithApplication {
+//    "expect exception" in {
 //      pending
 //      clearDatabase()
 //      val application = mock[OnlineTestApplicationWithCubiksUser]

@@ -16,21 +16,21 @@
 
 package services
 
-import org.scalatestplus.play.PlaySpec
-import play.api.test.WithApplication
+import org.scalatestplus.play.{ OneAppPerSuite, PlaySpec }
+import play.test.WithApplication
 import repositories.FrameworkRepository.Region
 import repositories._
-import language.postfixOps
 
+import language.postfixOps
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-class LoadLocationsSpec extends PlaySpec {
+class LoadLocationsSpec extends PlaySpec with OneAppPerSuite {
 
   val timeout: Duration = 1 second
 
   "load locations " should {
-    "load regions" in new WithApplication {
+    "load regions" in {
 
       val yamlRepository = frameworkRepository
 

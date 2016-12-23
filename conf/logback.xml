@@ -51,6 +51,12 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
+    <!-- <logger name="com.google.inject" level="INFO"/>
+    <logger name="akka.event" level="INFO"/>
+    <logger name="net.sf.ehcache" level="INFO"/>
+    <logger name="akka.event.slf4j.Slf4jLogger" level="WARN"/>
+    <logger name="play.api.libs.concurrent.ActorSystemProvider" level="INFO"/> -->
+
     <root level="DEBUG">
         <appender-ref ref="FILE"/>
         <appender-ref ref="STDOUT"/>
