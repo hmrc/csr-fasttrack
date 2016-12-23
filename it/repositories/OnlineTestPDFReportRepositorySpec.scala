@@ -35,7 +35,6 @@ class OnlineTestPDFReportRepositorySpec extends MongoRepositorySpec {
       val repo = repositories.onlineTestPDFReportRepository
 
       val indexes = indexesWithFields(repo)
-      println("Indexes = " + indexes)
       indexes must contain (List("_id"))
       indexes must contain (List("applicationId"))
       indexes.size must be (2)
