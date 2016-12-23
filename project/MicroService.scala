@@ -22,7 +22,6 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.versioning.SbtGitVersioning
 import play.sbt.routes.RoutesKeys.routesGenerator
-import sbt.Tests.{ Group, SubProcess }
 
 trait MicroService {
 
@@ -84,7 +83,6 @@ trait MicroService {
 //    .settings(compileScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).toTask("").value,
 //      (compile in Compile) <<= (compile in Compile) dependsOn compileScalastyle)
     .settings(
-      // testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
       unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest)(base => Seq(base / "it")),
       addTestReportOption(IntegrationTest, "int-test-reports"),
       parallelExecution in IntegrationTest := false)
@@ -96,18 +94,4 @@ trait MicroService {
       )
     )
     .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
-}
-
-private object TestPhases {
-
-  def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
-        tests map {
-            test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions =
-                Seq("-Dtest.name=" + test.name,
-                    "-Dmongodb.uri=mongodb://localhost:27017/test-fset-fasttrack",
-                    "-DmaxNumberOfDocuments=10",
-                    "-Dlogger.resource=logback-test.xml")
-                )))
-          }
-
 }
