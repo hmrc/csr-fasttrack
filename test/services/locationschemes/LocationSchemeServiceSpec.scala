@@ -26,26 +26,48 @@ import scala.concurrent.Future
 
 class LocationSchemeServiceSpec extends UnitSpec {
   "Location Scheme service" should {
-    "return a list of location/scheme combinations filtered by eligibility" in new TestFixture {
-      when(repo.getSchemesAndLocations).
-        thenReturn(Future.successful(
-          IndexedSeq(LocationSchemes("testLocation", 1.1, 2.2, schemes = IndexedSeq("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem")))))
 
-      when(repo.getSchemeInfo).thenReturn(Future.successful(
-        IndexedSeq(
-          SchemeInfo("SchemeNoALevels", requiresALevel = false, requiresALevelInStem = false),
-          SchemeInfo("SchemeALevels", requiresALevel = true, requiresALevelInStem = false),
-          SchemeInfo("SchemeALevelsStem", requiresALevel = true, requiresALevelInStem = true)
-        )
-      ))
-
+    "return a list of location/scheme combinations without A-level requirements" in new TestFixture {
       val result = service.getSchemesAndLocationsByEligibility(1.1, 2.2, hasALevels = false, hasStemALevels = false).futureValue
       result.head.schemes must contain theSameElementsAs(List("SchemeNoALevels"))
+    }
+
+    "return a list of location/scheme combinations with A-level requirements" in new TestFixture {
+      val result = service.getSchemesAndLocationsByEligibility(1.1, 2.2, hasALevels = true, hasStemALevels = false).futureValue
+      result.head.schemes must contain theSameElementsAs(List("SchemeNoALevels", "SchemeALevels"))
+    }
+
+    "return a list of location/scheme combinations with STEM A-level requirements" in new TestFixture {
+      val result = service.getSchemesAndLocationsByEligibility(1.1, 2.2, hasALevels = true, hasStemALevels = true).futureValue
+      result.head.schemes must contain theSameElementsAs(List("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem"))
+    }
+
+    "return a list of location/scheme combinations sorted closest first" in new TestFixture {
+      val result = service.getSchemesAndLocationsByEligibility(0.0, 0.0, hasALevels = true, hasStemALevels = true).futureValue
+      result.map(_.locationName) mustBe IndexedSeq("testLocation4", "testLocation3", "testLocation1", "testLocation2")
     }
   }
 
   trait TestFixture {
     val repo = mock[LocationSchemeRepository]
+
+    when(repo.getSchemesAndLocations).
+      thenReturn(Future.successful(
+        IndexedSeq(
+          LocationSchemes("testLocation1", 2.0, 5.0, schemes = IndexedSeq("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem")),
+          LocationSchemes("testLocation2", 6.0, 2.0, schemes = IndexedSeq("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem")),
+          LocationSchemes("testLocation3", 2.5, 2.6, schemes = IndexedSeq("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem")),
+          LocationSchemes("testLocation4", 1.0, 1.0, schemes = IndexedSeq("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem"))
+        )))
+
+    when(repo.getSchemeInfo).thenReturn(Future.successful(
+      IndexedSeq(
+        SchemeInfo("SchemeNoALevels", requiresALevel = false, requiresALevelInStem = false),
+        SchemeInfo("SchemeALevels", requiresALevel = true, requiresALevelInStem = false),
+        SchemeInfo("SchemeALevelsStem", requiresALevel = true, requiresALevelInStem = true)
+      )
+    ))
+
     val service = new LocationSchemeService {
       val locationSchemeRepository = repo
     }
