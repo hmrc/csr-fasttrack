@@ -30,6 +30,7 @@ import org.joda.time.DateTime
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
+import org.scalatest.Inside.inside
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
@@ -107,15 +108,15 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
   val ScheduleId = standardScheduleIdMock
 
   val inviteApplicant = InviteApplicant(ScheduleId, CubiksUserId,
-    onlineTestCompletedUrlMock + Token, None, None)
+    onlineTestCompletedUrlMock + Token, None)
   val inviteApplicantGisWithNoTimeAdjustments = InviteApplicant(ScheduleId, CubiksUserId,
-    onlineTestCompletedUrlMock + Token, None, None)
+    onlineTestCompletedUrlMock + Token, None)
   val inviteApplicantNoGisWithNoTimeAdjustments = InviteApplicant(ScheduleId, CubiksUserId,
-    onlineTestCompletedUrlMock + Token, None, None)
+    onlineTestCompletedUrlMock + Token, None)
   val timeAdjustmentsForInviteApplicant = TimeAdjustments(VerbalAndNumericalAssessmentId, VerbalSectionId, NumericalSectionId,
     7, 7)
   val inviteApplicantNoGisWithTimeAdjustments = InviteApplicant(ScheduleId, CubiksUserId,
-    onlineTestCompletedUrlMock + Token, None, Some(timeAdjustmentsForInviteApplicant))
+    onlineTestCompletedUrlMock + Token, None, List(timeAdjustmentsForInviteApplicant))
   val AccessCode = "fdkfdfj"
   val LogonUrl = "http://localhost/logonUrl"
   val AuthenticateUrl = "http://localhost/authenticate"
@@ -287,8 +288,9 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
       when(otprRepositoryMock.remove(ApplicationId)).thenReturn(Future.successful(()))
       when(trRepositoryMock.remove(ApplicationId)).thenReturn(Future.successful(()))
 
+      val unit = ()
       val result = onlineTestService.registerAndInviteApplicant(applicationForOnlineTestingWithNoTimeAdjustments)
-      result.futureValue mustBe (())
+      result.futureValue mustBe unit
 
       verify(emailClientMock).sendOnlineTestInvitation(eqTo(EmailContactDetails), eqTo(PreferredName), eqTo(ExpirationDate))(
         any[HeaderCarrier]
@@ -303,17 +305,21 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
 
   "get time adjustments" should {
     "return None if application's time adjustments are empty" in new OnlineTest {
-      onlineTestService.getTimeAdjustments(applicationForOnlineTestingWithNoTimeAdjustments) mustBe (None)
+      onlineTestService.getTimeAdjustments(applicationForOnlineTestingWithNoTimeAdjustments) mustBe Nil
     }
 
     "return Time Adjustments if application's time adjustments are not empty" in new OnlineTest {
       val result = onlineTestService.getTimeAdjustments(applicationForOnlineTestingWithTimeAdjustments)
-      result.isDefined mustBe (true)
-      result.get.numericalSectionId mustBe (NumericalSectionId)
-      result.get.numericalAbsoluteTime mustBe (7)
-      result.get.verbalAndNumericalAssessmentId mustBe (VerbalAndNumericalAssessmentId)
-      result.get.verbalSectionId mustBe (VerbalSectionId)
-      result.get.verbalAbsoluteTime mustBe (7)
+      result.isEmpty mustBe false
+      inside (result.head) { case TimeAdjustments(verbalAndNumericalAssessmentId, verbalSectionId, numericalSectionId,
+      verbalAbsoluteTime, numericalAbsoluteTime) =>
+
+        numericalSectionId mustBe NumericalSectionId
+        numericalAbsoluteTime mustBe 7
+        verbalAndNumericalAssessmentId mustBe VerbalAndNumericalAssessmentId
+        verbalSectionId mustBe VerbalSectionId
+        verbalAbsoluteTime mustBe 7
+      }
     }
   }
 

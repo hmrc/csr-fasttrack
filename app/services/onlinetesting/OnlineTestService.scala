@@ -224,12 +224,12 @@ trait OnlineTestService {
     }
   }
 
-  private[services] def getTimeAdjustments(application: OnlineTestApplication): Option[TimeAdjustments] = {
+  private[services] def getTimeAdjustments(application: OnlineTestApplication): List[TimeAdjustments] = {
     if (application.timeAdjustments.isEmpty) {
-      None
+      Nil
     } else {
       val config = gatewayConfig.verbalAndNumericalAssessment
-      Some(TimeAdjustments(
+      List(TimeAdjustments(
         config.assessmentId,
         config.verbalSectionId,
         config.numericalSectionId,
@@ -255,7 +255,7 @@ trait OnlineTestService {
   private[services] def buildInviteApplication(application: OnlineTestApplication, token: String, userId: Int, scheduleId: Int) = {
     val onlineTestCompletedUrl = gatewayConfig.candidateAppUrl + "/fset-fast-track/online-tests/complete/" + token
     if (application.guaranteedInterview) {
-      InviteApplicant(scheduleId, userId, onlineTestCompletedUrl, None, None)
+      InviteApplicant(scheduleId, userId, onlineTestCompletedUrl, None)
     } else {
       val timeAdjustments = getTimeAdjustments(application)
       InviteApplicant(scheduleId, userId, onlineTestCompletedUrl, None, timeAdjustments)
