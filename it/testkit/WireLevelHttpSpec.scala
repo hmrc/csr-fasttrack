@@ -59,8 +59,8 @@ trait WireLevelHttpSpec
 
   implicit val hc: HeaderCarrier = new HeaderCarrier()
 
-  // implicit override lazy val app: Application =
-    // new GuiceApplicationBuilder().disable[EhCacheModule].build()
+  implicit override lazy val app: Application =
+    new GuiceApplicationBuilder().disable[EhCacheModule].build()
 
   // Overridden to inject our prefixed application route.
   def wsUrl(url: String)(implicit portNumber: PortNumber): WSRequest =

@@ -66,7 +66,8 @@ trait MicroService {
       javaOptions in IntegrationTest += "-Dlogger.resource=logback-test.xml",
       javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.retries=10",
       javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.delay.function=fibonacci",
-      javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.delay.factor=1"
+      javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.delay.factor=1",
+      javaOptions in IntegrationTest += "-Dtestserver.port=19101"
     )
     .settings(inConfig(IntegrationTest)((Defaults.testSettings ++ AutomateHeaderPlugin.automateFor(IntegrationTest))) : _*)
     .settings(inConfig(IntegrationTest)(Defaults.itSettings))
