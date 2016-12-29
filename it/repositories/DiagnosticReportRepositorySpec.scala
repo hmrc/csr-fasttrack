@@ -106,10 +106,6 @@ class DiagnosticReportRepositorySpec extends MongoRepositorySpec {
       result must be(expectedApplicationUser)
     }
 
-    "filter out personal details" in {
-      helperRepo.collection.insert(UserWithAllDetails).futureValue
-      val result = diagnosticReportRepo.findAll()
-    }
   }
 
   val UserWithAllDetails = BSONDocument(
