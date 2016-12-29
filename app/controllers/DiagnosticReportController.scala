@@ -16,12 +16,12 @@
 
 package controllers
 
-import model.PersistedObjects
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import repositories._
 import repositories.application.DiagnosticReportingRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import model.PersistedObjects.Implicits.applicationUserFormats
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -30,7 +30,6 @@ object DiagnosticReportController extends DiagnosticReportController {
 }
 
 trait DiagnosticReportController extends BaseController {
-  import PersistedObjects.Implicits._
 
   val drRepository: DiagnosticReportingRepository
 
@@ -40,7 +39,11 @@ trait DiagnosticReportController extends BaseController {
     applicationUser.map { au =>
       Ok(Json.toJson(au))
     } recover {
-      case e => NotFound
+      case _ => NotFound
     }
+  }
+
+  def getAllApplications = Action { implicit request =>
+    Ok.chunked(drRepository.findAll())
   }
 }
