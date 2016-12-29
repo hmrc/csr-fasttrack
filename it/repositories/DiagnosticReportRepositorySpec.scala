@@ -105,6 +105,7 @@ class DiagnosticReportRepositorySpec extends MongoRepositorySpec {
       result.progressStatuses.questionnaireStatuses must be(expectedApplicationUser.progressStatuses.questionnaireStatuses)
       result must be(expectedApplicationUser)
     }
+
   }
 
   val UserWithAllDetails = BSONDocument(

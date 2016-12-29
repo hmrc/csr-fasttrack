@@ -20,7 +20,9 @@ import model.Commands.{ CreateApplicationRequest, ProgressResponse }
 import model.Exceptions.NotFoundException
 import model.PersistedObjects.{ ApplicationProgressStatus, ApplicationProgressStatuses, ApplicationUser }
 import model.{ ApplicationStatusOrder, Commands }
-import reactivemongo.api.DB
+import play.api.libs.iteratee.Enumerator
+import play.api.libs.json.{ JsValue, Json }
+import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.{ BSONBoolean, BSONDocument, BSONObjectID }
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
@@ -31,6 +33,7 @@ import scala.concurrent.Future
 trait DiagnosticReportingRepository {
 
   def findByUserId(userId: String): Future[ApplicationUser]
+  def findAll(): Enumerator[JsValue]
 }
 
 class DiagnosticReportingMongoRepository(implicit mongo: () => DB)
@@ -68,5 +71,23 @@ class DiagnosticReportingMongoRepository(implicit mongo: () => DB)
         ApplicationUser(appId, userId, frameworkId, applicationStatus, ApplicationProgressStatuses(statuses, questionnaireStatuses))
       case _ => throw new NotFoundException()
     }
+  }
+
+
+  private val defaultExclusions = Json.obj(
+    "_id" -> 0,
+    "personal-details" -> 0)  // these reports should not export personally identifiable data
+
+  private val largeFields = Json.obj(
+    "progress-status-timestamp" -> 0, // this is quite a bit of data, that is not really used for queries as progress-status is easier
+    "testGroups.PHASE1.tests.reportLinkURL" -> 0,
+    "testGroups.PHASE1.tests.testUrl" -> 0
+  )
+
+  def findAll(): Enumerator[JsValue] = {
+    val projection = defaultExclusions ++ largeFields
+    collection.find(Json.obj(), projection)
+      .cursor[JsValue](ReadPreference.primaryPreferred)
+      .enumerate()
   }
 }
