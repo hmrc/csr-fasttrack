@@ -22,13 +22,18 @@ import services.locationschemes.LocationSchemeService
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import scala.concurrent.ExecutionContext.Implicits.global
 
+object LocationSchemeController extends LocationSchemeController {
+  val locationSchemeService = LocationSchemeService
+}
 
 trait LocationSchemeController extends BaseController {
   def locationSchemeService: LocationSchemeService
 
-  // TODO Map the route to here
-  def getSchemesAndLocationsByEligibility(latitude: Double, longitude: Double, hasALevels: Boolean,
-                                          hasStemALevels: Boolean): Action[AnyContent] = Action.async { implicit request =>
-    locationSchemeService.getSchemesAndLocationsByEligibility(latitude, longitude, hasALevels, hasStemALevels).map(r => Ok(Json.toJson(r)))
+  def getSchemesAndLocationsByEligibility(): Action[AnyContent] = Action.async { implicit request =>
+    val lat = request.getQueryString("latitude").get.toDouble
+    val lng = request.getQueryString("longitude").get.toDouble
+    val hasALevels = request.getQueryString("hasALevels").get.toBoolean
+    val hasStemALevels = request.getQueryString("hasStemALevels").get.toBoolean
+    locationSchemeService.getSchemesAndLocationsByEligibility(lat, lng, hasALevels, hasStemALevels).map(r => Ok(Json.toJson(r)))
   }
 }

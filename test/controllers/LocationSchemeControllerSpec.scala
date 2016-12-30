@@ -35,8 +35,8 @@ class LocationSchemeControllerSpec extends UnitSpec {
       when(service.getSchemesAndLocationsByEligibility(eqTo(lat), eqTo(lng), eqTo(true), eqTo(true))).
         thenReturn(Future.successful(Vector(GeoLocationSchemeResult(1, "London", schemes = Vector("Business", "Digital")))))
 
-      val request = FakeRequest()
-      val response = controller.getSchemesAndLocationsByEligibility(lat, lng, hasALevels = true, hasStemALevels = true).apply(request)
+      val request = FakeRequest("GET", s"?latitude=$lat&longitude=$lng&hasALevels=true&hasStemALevels=true")
+      val response = controller.getSchemesAndLocationsByEligibility().apply(request)
       val json = contentAsJson(response)
 
       ((json \ 0) \ "distanceKm").get mustBe JsNumber(1)

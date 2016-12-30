@@ -19,6 +19,7 @@ PUT         /media/create                                                control
 
 GET         /frameworks-available-to-application/:applicationId          controllers.FrameworkController.getAvailableFrameworksWithLocations(applicationId: String)
 
+GET         /schemes-locations/by-eligibility                            controllers.LocationSchemeController.getSchemesAndLocationsByEligibility
 PUT         /framework-preference/first/:applicationId                   controllers.FrameworkPreferenceController.submitFirstPreference(applicationId: String)
 PUT         /framework-preference/second/:applicationId                  controllers.FrameworkPreferenceController.submitSecondPreference(applicationId: String)
 PUT         /framework-preference/second/intention/:applicationId        controllers.FrameworkPreferenceController.submitSecondPreferenceIntention(applicationId: String)

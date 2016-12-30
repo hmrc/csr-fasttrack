@@ -17,7 +17,7 @@
 package services.locationschemes
 
 import play.api.libs.json.Json
-import repositories.{ LocationSchemeRepository, LocationSchemes }
+import repositories.{ FileLocationSchemeRepository, LocationSchemeRepository, LocationSchemes }
 
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.Future
@@ -27,6 +27,10 @@ case class GeoLocationSchemeResult(distanceKm: Int, locationName: String, scheme
 
 object GeoLocationSchemeResult {
   implicit val jsonWriter = Json.writes[GeoLocationSchemeResult]
+}
+
+object LocationSchemeService extends LocationSchemeService {
+  val locationSchemeRepository = FileLocationSchemeRepository
 }
 
 trait LocationSchemeService {

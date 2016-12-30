@@ -54,10 +54,10 @@ class LocationSchemeServiceSpec extends UnitSpec {
     when(repo.getSchemesAndLocations).
       thenReturn(Future.successful(
         IndexedSeq(
-          LocationSchemes("testLocation1", 2.0, 5.0, schemes = IndexedSeq("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem")),
-          LocationSchemes("testLocation2", 6.0, 2.0, schemes = IndexedSeq("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem")),
-          LocationSchemes("testLocation3", 2.5, 2.6, schemes = IndexedSeq("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem")),
-          LocationSchemes("testLocation4", 1.0, 1.0, schemes = IndexedSeq("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem"))
+          LocationSchemes("testLocation1", 2.0, 5.0, schemes = List("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem")),
+          LocationSchemes("testLocation2", 6.0, 2.0, schemes = List("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem")),
+          LocationSchemes("testLocation3", 2.5, 2.6, schemes = List("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem")),
+          LocationSchemes("testLocation4", 1.0, 1.0, schemes = List("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem"))
         )))
 
     when(repo.getSchemeInfo).thenReturn(Future.successful(

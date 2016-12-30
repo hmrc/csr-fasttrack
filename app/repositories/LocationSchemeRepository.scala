@@ -17,25 +17,42 @@
 package repositories
 
 import play.Play
-import play.api.libs.json.Json
+import play.api.libs.json.{ Json, Reads }
 import resource._
+import play.api.libs.json._
+import play.api.libs.json.Reads._
+import play.api.libs.functional.syntax._
 
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.Future
 
-case class LocationSchemes(locationName: String, latitude: Double, longitude: Double, schemes: IndexedSeq[String])
+case class LocationSchemes(locationName: String, latitude: Double, longitude: Double, schemes: List[String])
+
+protected case class Locations(locations: List[LocationSchemes])
 
 case class SchemeInfo(schemeName: String, requiresALevel: Boolean, requiresALevelInStem: Boolean)
 
-trait LocationSchemeRepository {
-  implicit val locationReader = Json.reads[LocationSchemes]
+object FileLocationSchemeRepository extends LocationSchemeRepository
 
-  def getSchemesAndLocations: Future[IndexedSeq[LocationSchemes]] = {
-    // TODO Load from file
-    Future.successful(
-      IndexedSeq(LocationSchemes("Airdrie", 55.86602, 3.98025, IndexedSeq("Business", "Commercial")))
-    )
+trait LocationSchemeRepository {
+
+  implicit val locationReader: Reads[LocationSchemes] = (
+    (__ \ "name").read[String] and
+      (__ \ "lat").read[Double] and
+      (__ \ "lng").read[Double] and
+      (__ \ "schemes").read[List[String]]
+    )(LocationSchemes.apply _)
+
+  implicit val locationsReader: Reads[Locations] = Json.reads[Locations]
+
+  private lazy val cachedLocationSchemes =  {
+    val input = managed(Play.application.resourceAsStream("locations-schemes.json"))
+    val loaded = input.acquireAndGet(r => Json.parse(r).as[Locations])
+    Future.successful(loaded.locations.toIndexedSeq)
   }
+
+  def getSchemesAndLocations: Future[IndexedSeq[LocationSchemes]] = cachedLocationSchemes
+
   def getSchemeInfo: Future[IndexedSeq[SchemeInfo]] = {
     Future.successful(IndexedSeq(
       SchemeInfo("Business", requiresALevel = true, requiresALevelInStem = true),
