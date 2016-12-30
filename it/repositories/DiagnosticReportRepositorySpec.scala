@@ -32,22 +32,21 @@ class DiagnosticReportRepositorySpec extends MongoRepositorySpec {
   def diagnosticReportRepo = new DiagnosticReportingMongoRepository()
   def helperRepo = new GeneralApplicationMongoRepository(GBTimeZoneService)
 
-  "Find by user id" should {
+  "Find application by user id" should {
     "return ApplicationNotFound if there is nobody with this userId" in {
-      val result = diagnosticReportRepo.findByUserIdV2("123").failed.futureValue
+      val result = diagnosticReportRepo.findByUserId("123").failed.futureValue
       result mustBe an[ApplicationNotFound]
     }
 
-    "return user with the given user id with personal details excluded" in {
+    "return application with the given user id with personal details excluded" in {
       helperRepo.collection.insert(UserWithAllDetails).futureValue
 
-      val result = diagnosticReportRepo.findByUserIdV2("user1").futureValue
+      val result = diagnosticReportRepo.findByUserId("user1").futureValue
       result.size mustBe 1
       val msg = "Expected to find the userId in the result"
       result.head.value.get("userId").fold(fail(msg)){u => u mustBe JsString("user1")}
       result.head.value.get("personal-details") mustBe None
     }
-
   }
 
   private val UserWithAllDetails = BSONDocument(
