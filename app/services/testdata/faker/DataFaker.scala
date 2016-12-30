@@ -43,6 +43,8 @@ object DataFaker {
 
     def bool: Boolean = randOne(List(true, false))
 
+    def number(limit: Option[Int] = None): Int = util.Random.nextInt(limit.getOrElse(2000000000))
+
     def randDouble(min: Double, max: Double) = {
       val range = (min to max by 0.1).toList
       randOne(range)

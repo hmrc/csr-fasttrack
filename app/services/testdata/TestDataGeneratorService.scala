@@ -35,9 +35,9 @@ trait TestDataGeneratorService {
 
   def clearDatabase()(implicit hc: HeaderCarrier): Future[Unit] = {
     for {
-      dropMainDatabase <- MongoDbConnection.mongoConnector.db().drop()
-      removeAllUsers <- AuthProviderClient.removeAllUsers()
-      makeAdminUser1 <- RegisteredStatusGenerator.createUser(
+      _ <- MongoDbConnection.mongoConnector.db().drop()
+      _ <- AuthProviderClient.removeAllUsers()
+      _ <- RegisteredStatusGenerator.createUser(
         1,
         "test_service_manager_1@mailinator.com", "CSR Test", "Service Manager", AuthProviderClient.TechnicalAdminRole
       )
@@ -63,20 +63,28 @@ trait TestDataGeneratorService {
     }
   }
 
-  def createCandidatesInSpecificStatus(
-    numberToGenerate: Int,
-    generatorForStatus: BaseGenerator,
-    generatorConfig: GeneratorConfig
-  )(implicit hc: HeaderCarrier): Future[List[DataGenerationResponse]] = {
+  def createCandidatesInSpecificStatus(numberToGenerate: Int,
+                                       generatorForStatus: (GeneratorConfig) => BaseGenerator,
+                                       configGenerator: (Int) => GeneratorConfig
+                                      )(implicit hc: HeaderCarrier): Future[List[DataGenerationResponse]] = {
     Future.successful {
+
       val parNumbers = (1 to numberToGenerate).par
       parNumbers.tasksupport = new ForkJoinTaskSupport(
         new scala.concurrent.forkjoin.ForkJoinPool(2)
       )
+
+      // one wasted generation of config
+      val config = configGenerator(1)
+      val generator = generatorForStatus(config)
+
       parNumbers.map { candidateGenerationId =>
-        val fut = generatorForStatus.generate(candidateGenerationId, generatorConfig)
-        Await.result(fut, 5 seconds)
+        Await.result(
+          generator.generate(candidateGenerationId, configGenerator(candidateGenerationId)),
+          10 seconds
+        )
       }.toList
+
     }
   }
 }

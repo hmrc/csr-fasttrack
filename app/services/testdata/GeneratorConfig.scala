@@ -17,8 +17,37 @@
 package services.testdata
 
 import model.EvaluationResults.Result
-import play.api.Play
+import services.testdata.faker.DataFaker.Random
 
 case class GeneratorConfig(emailPrefix: String, setGis: Boolean = false, cubiksUrl: String, region: Option[String],
                            loc1scheme1Passmark: Option[Result], loc1scheme2Passmark: Option[Result],
                            previousStatus: Option[String], confirmedAllocation: Boolean = true)
+
+object GeneratorConfig {
+  def apply(cubiksUrlFromConfig: String, o: model.exchange.testdata.CreateCandidateInStatusRequest)(generatorId: Int): GeneratorConfig = {
+
+    val statusData = StatusData(o.statusData)
+
+    GeneratorConfig(
+      emailPrefix = s"tesf${Random.number()-1}",
+      previousStatus = statusData.previousApplicationStatus,
+      cubiksUrl = cubiksUrlFromConfig,
+      region = o.region,
+      loc1scheme1Passmark = o.loc1scheme1EvaluationResult.map(Result.apply),
+      loc1scheme2Passmark = o.loc1scheme2EvaluationResult.map(Result.apply)
+    )
+  }
+}
+
+case class StatusData(applicationStatus: String,
+                       previousApplicationStatus: Option[String] = None,
+                       progressStatus: Option[String] = None)
+
+object StatusData {
+  def apply(o: model.exchange.testdata.StatusDataRequest): StatusData = {
+    StatusData(applicationStatus = o.applicationStatus,
+      previousApplicationStatus = o.previousApplicationStatus,
+      progressStatus = o.progressStatus
+    )
+  }
+}
