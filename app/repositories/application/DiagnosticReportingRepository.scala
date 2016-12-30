@@ -16,14 +16,13 @@
 
 package repositories.application
 
-import model.Commands.{ CreateApplicationRequest, ProgressResponse }
-import model.Exceptions.NotFoundException
-import model.PersistedObjects.{ ApplicationProgressStatus, ApplicationProgressStatuses, ApplicationUser }
-import model.{ ApplicationStatusOrder, Commands }
+import model.Commands
+import model.Commands.CreateApplicationRequest
+import model.Exceptions.ApplicationNotFound
 import play.api.libs.iteratee.Enumerator
-import play.api.libs.json.{ JsValue, Json }
+import play.api.libs.json.{ JsObject, JsValue, Json }
 import reactivemongo.api.{ DB, ReadPreference }
-import reactivemongo.bson.{ BSONBoolean, BSONDocument, BSONObjectID }
+import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -32,47 +31,13 @@ import scala.concurrent.Future
 
 trait DiagnosticReportingRepository {
 
-  def findByUserId(userId: String): Future[ApplicationUser]
+  def findByUserId(userId: String): Future[List[JsObject]]
   def findAll(): Enumerator[JsValue]
 }
 
 class DiagnosticReportingMongoRepository(implicit mongo: () => DB)
   extends ReactiveRepository[CreateApplicationRequest, BSONObjectID]("application", mongo,
     Commands.Implicits.createApplicationRequestFormats, ReactiveMongoFormats.objectIdFormats) with DiagnosticReportingRepository {
-
-  def findByUserId(userId: String): Future[ApplicationUser] = {
-    val query = BSONDocument("userId" -> userId)
-    collection.find(query).one[BSONDocument] map {
-      case Some(doc) =>
-        val appId = doc.getAs[String]("applicationId").get
-        val userId = doc.getAs[String]("userId").get
-        val frameworkId = doc.getAs[String]("frameworkId").get
-        val applicationStatus = doc.getAs[String]("applicationStatus").get
-
-        val progressStatusRoot = doc.getAs[BSONDocument]("progress-status")
-        // The registered status is not in the global list of statuses
-        val statusesMap = ApplicationStatusOrder.statusMaps(ProgressResponse("unused")).map(s => s._3 -> s._2).toMap ++ Map("registered" -> 0)
-        val statusesOrdered = statusesMap.keys.toList.sortWith((s1, s2) => statusesMap(s1) <= statusesMap(s2))
-
-        val statuses = doc.getAs[BSONDocument]("progress-status").map { root =>
-          Some(root.elements.filterNot(_._1 == "questionnaire").collect {
-            case (name, BSONBoolean(value)) => ApplicationProgressStatus(name, value)
-          }.toList)
-        }.getOrElse(Some(List(ApplicationProgressStatus("registered", true))))
-
-        val questionnaireStatuses = doc.getAs[BSONDocument]("progress-status").flatMap { root =>
-          root.getAs[BSONDocument]("questionnaire").map { doc =>
-            Some(doc.elements.collect {
-              case (name, BSONBoolean(value)) => ApplicationProgressStatus(name, value)
-            }.toList)
-          }.getOrElse(None)
-        }
-
-        ApplicationUser(appId, userId, frameworkId, applicationStatus, ApplicationProgressStatuses(statuses, questionnaireStatuses))
-      case _ => throw new NotFoundException()
-    }
-  }
-
 
   private val defaultExclusions = Json.obj(
     "_id" -> 0,
@@ -84,7 +49,20 @@ class DiagnosticReportingMongoRepository(implicit mongo: () => DB)
     "testGroups.PHASE1.tests.testUrl" -> 0
   )
 
-  def findAll(): Enumerator[JsValue] = {
+  override def findByUserId(userId: String): Future[List[JsObject]] = {
+    val projection = defaultExclusions
+
+    val results = collection.find(Json.obj("userId" -> userId), projection)
+      .cursor[JsObject](ReadPreference.primaryPreferred)
+      .collect[List]()
+
+    results.map { r =>
+      if (r.isEmpty) { throw ApplicationNotFound(userId) }
+      else { r }
+    }
+  }
+
+  override def findAll(): Enumerator[JsValue] = {
     val projection = defaultExclusions ++ largeFields
     collection.find(Json.obj(), projection)
       .cursor[JsValue](ReadPreference.primaryPreferred)

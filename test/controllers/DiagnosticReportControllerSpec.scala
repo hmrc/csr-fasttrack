@@ -18,12 +18,8 @@ package controllers
 
 import config.TestFixtureBase
 import model.Exceptions.ApplicationNotFound
-import model.PersistedObjects.Implicits._
-import model.PersistedObjects.{ ApplicationProgressStatuses, ApplicationUser }
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.PlaySpec
-import play.api.mvc.Results
+import play.api.libs.json.{ JsArray, JsValue, Json }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.application.DiagnosticReportingRepository
@@ -33,42 +29,41 @@ import scala.concurrent.Future
 
 class DiagnosticReportControllerSpec extends UnitWithAppSpec {
 
-  val mockSecretReportRepository = mock[DiagnosticReportingRepository]
-
-  "Get user by id" should {
-    "return all information about the user" in new TestFixture {
-      val applicationUser = ApplicationUser("app1", "user1", "FastTrack-2015", "AWAITING_ALLOCATION",
-        ApplicationProgressStatuses(None, None))
-      when(mockSecretReportRepository.findByUserId("user1")).thenReturn(Future.successful(applicationUser))
-      val result = TestableSecretReportingController.getUserById(applicationUser.userId)(createOnlineTestRequest(
-        applicationUser.userId
+  "Get application by id" should {
+    "return all non-sensitive information about the user application" in new TestFixture {
+      val expectedApplications = List(Json.obj("applicationId" -> "app1", "userId" -> "user1", "frameworkId" -> "FastTrack-2017"))
+      when(mockDiagnosticReportRepository.findByUserId("user1")).thenReturn(Future.successful(expectedApplications))
+      val result = TestableDiagnosticReportingController.getApplicationByUserId("user1")(createOnlineTestRequest(
+        "user1"
       )).run
 
       val resultJson = contentAsJson(result)
 
-      val actualApplicationUser = resultJson.as[ApplicationUser]
-      status(result) must be(200)
-      actualApplicationUser must be(applicationUser)
+      val actualApplications = resultJson.as[JsValue]
+      status(result) mustBe OK
+      resultJson mustBe JsArray(expectedApplications)
     }
 
     "return NotFound if the user cannot be found" in new TestFixture {
       val IncorrectUserId = "1234"
-      when(mockSecretReportRepository.findByUserId(IncorrectUserId)).thenReturn(Future.failed(
-        new ApplicationNotFound(IncorrectUserId)
+      when(mockDiagnosticReportRepository.findByUserId(IncorrectUserId)).thenReturn(Future.failed(
+        ApplicationNotFound(IncorrectUserId)
       ))
-      val result = TestableSecretReportingController.getUserById(IncorrectUserId)(createOnlineTestRequest(IncorrectUserId)).run
+      val result = TestableDiagnosticReportingController.getApplicationByUserId(IncorrectUserId)(createOnlineTestRequest(IncorrectUserId)).run
 
-      status(result) must be(NOT_FOUND)
+      status(result) mustBe NOT_FOUND
     }
   }
 
   trait TestFixture extends TestFixtureBase {
-    object TestableSecretReportingController extends DiagnosticReportController {
-      val drRepository = mockSecretReportRepository
+    val mockDiagnosticReportRepository = mock[DiagnosticReportingRepository]
+
+    object TestableDiagnosticReportingController extends DiagnosticReportController {
+      val drRepository = mockDiagnosticReportRepository
     }
 
     def createOnlineTestRequest(userId: String) = {
-      FakeRequest(Helpers.GET, controllers.routes.DiagnosticReportController.getUserById(userId).url, FakeHeaders(), "")
+      FakeRequest(Helpers.GET, controllers.routes.DiagnosticReportController.getApplicationByUserId(userId).url, FakeHeaders(), "")
         .withHeaders("Content-Type" -> "application/json")
     }
   }

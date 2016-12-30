@@ -21,7 +21,6 @@ import play.api.mvc.Action
 import repositories._
 import repositories.application.DiagnosticReportingRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
-import model.PersistedObjects.Implicits.applicationUserFormats
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -33,7 +32,7 @@ trait DiagnosticReportController extends BaseController {
 
   val drRepository: DiagnosticReportingRepository
 
-  def getUserById(userId: String) = Action.async { implicit request =>
+  def getApplicationByUserId(userId: String) = Action.async { implicit request =>
     val applicationUser = drRepository.findByUserId(userId)
 
     applicationUser.map { au =>
