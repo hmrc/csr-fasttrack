@@ -21,19 +21,28 @@ import java.io.File
 import com.typesafe.config.ConfigFactory
 import connectors.AuthProviderClient
 import connectors.testdata.ExchangeObjects.Implicits._
-import model.EvaluationResults.Result
 import model.ApplicationStatuses
+import model.EvaluationResults.Result
+import model.Exceptions.EmailTakenException
+import model.exchange.testdata.CreateCandidateInStatusRequest
 import play.api.Play
-import play.api.libs.json.Json
-import play.api.mvc.Action
+import play.api.libs.json.{ JsObject, JsString, Json }
+import play.api.mvc.{ Action, RequestHeader }
 import services.testdata._
+import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object TestDataGeneratorController extends TestDataGeneratorController
 
 trait TestDataGeneratorController extends BaseController {
+
+  def ping = Action { implicit request =>
+    Ok("OK")
+  }
+
   def clearDatabase() = Action.async { implicit request =>
     TestDataGeneratorService.clearDatabase().map { _ =>
       Ok(Json.parse("""{"message": "success"}"""))
@@ -41,8 +50,13 @@ trait TestDataGeneratorController extends BaseController {
   }
 
   def createAdminUsers(numberToGenerate: Int, emailPrefix: String, role: String) = Action.async { implicit request =>
-    TestDataGeneratorService.createAdminUsers(numberToGenerate, emailPrefix, AuthProviderClient.getRole(role)).map { candidates =>
-      Ok(Json.toJson(candidates))
+    try {
+      TestDataGeneratorService.createAdminUsers(numberToGenerate, emailPrefix, AuthProviderClient.getRole(role)).map { candidates =>
+        Ok(Json.toJson(candidates))
+      }
+    } catch {
+      case _: EmailTakenException => Future.successful(Conflict(JsObject(List(("message",
+        JsString("Email has been already taken. Try with another one by changing the emailPrefix parameter"))))))
     }
   }
 
@@ -61,7 +75,9 @@ trait TestDataGeneratorController extends BaseController {
   }
 
   // scalastyle:off parameter.number
-  def createCandidatesInStatus(status: String, numberToGenerate: Int,
+  @deprecated("Use 'createCandidatesInStatusPOST' version instead", "30/12/2016")
+  def createCandidatesInStatus(status: String,
+                               numberToGenerate: Int,
                                emailPrefix: String,
                                setGis: Boolean,
                                region: Option[String],
@@ -86,9 +102,31 @@ trait TestDataGeneratorController extends BaseController {
     )
     // scalastyle:on
 
-    TestDataGeneratorService.createCandidatesInSpecificStatus(numberToGenerate, StatusGeneratorFactory.getGenerator(status),
-      initialConfig).map { candidates =>
+    TestDataGeneratorService.createCandidatesInSpecificStatus(numberToGenerate, _ => StatusGeneratorFactory.getGenerator(status),
+      _ => initialConfig).map { candidates =>
       Ok(Json.toJson(candidates))
+    }
+  }
+
+  def createCandidatesInStatusPOST(numberToGenerate: Int) = Action.async(parse.json) { implicit request =>
+    withJsonBody[CreateCandidateInStatusRequest] { body =>
+      createCandidateInStatus(body.statusData.applicationStatus, GeneratorConfig.apply(cubiksUrlFromConfig, body), numberToGenerate)
+    }
+  }
+
+  private def createCandidateInStatus(status: String, config: (Int) => GeneratorConfig, numberToGenerate: Int)
+                                     (implicit hc: HeaderCarrier, rh: RequestHeader) = {
+    try {
+      TestDataGeneratorService.createCandidatesInSpecificStatus(
+        numberToGenerate,
+        _ => StatusGeneratorFactory.getGenerator(status),
+        config
+      ).map { candidates =>
+        Ok(Json.toJson(candidates))
+      }
+    } catch {
+      case _: EmailTakenException => Future.successful(Conflict(JsObject(List(("message",
+        JsString("Email has been already taken. Try with another one by changing the emailPrefix parameter"))))))
     }
   }
 }
