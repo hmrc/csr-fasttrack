@@ -22,6 +22,7 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 import uk.gov.hmrc.versioning.SbtGitVersioning
 import play.sbt.routes.RoutesKeys.routesGenerator
+import sbt.Tests.{ Group, SubProcess }
 
 trait MicroService {
 
@@ -30,6 +31,8 @@ trait MicroService {
   import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin._
 
   import scalariform.formatter.preferences._
+
+  import TestPhases._
 
   val appName: String
   val appDependencies : Seq[ModuleID]
@@ -60,13 +63,14 @@ trait MicroService {
     .settings(HeaderPlugin.settingsFor(IntegrationTest))
     .configs(IntegrationTest)
     .settings(
-      fork in IntegrationTest := true,
+      fork in IntegrationTest := false,
       javaOptions in IntegrationTest += "-Dmongodb.uri=mongodb://localhost:27017/test-fset-fasttrack",
       javaOptions in IntegrationTest += "-DmaxNumberOfDocuments=10",
       javaOptions in IntegrationTest += "-Dlogger.resource=logback-test.xml",
       javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.retries=10",
       javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.delay.function=fibonacci",
-      javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.delay.factor=1"
+      javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.delay.factor=1",
+      javaOptions in IntegrationTest += "-Dtestserver.port=19101"
     )
     .settings(inConfig(IntegrationTest)((Defaults.testSettings ++ AutomateHeaderPlugin.automateFor(IntegrationTest))) : _*)
     .settings(inConfig(IntegrationTest)(Defaults.itSettings))
@@ -85,6 +89,7 @@ trait MicroService {
     .settings(
       unmanagedSourceDirectories in IntegrationTest <<= (baseDirectory in IntegrationTest)(base => Seq(base / "it")),
       addTestReportOption(IntegrationTest, "int-test-reports"),
+      testGrouping in IntegrationTest := oneForkedJvmPerTest((definedTests in IntegrationTest).value),
       parallelExecution in IntegrationTest := false)
     .settings(
       resolvers := Seq(
@@ -94,4 +99,20 @@ trait MicroService {
       )
     )
     .disablePlugins(sbt.plugins.JUnitXmlReportPlugin)
+}
+
+private object TestPhases {
+
+  def oneForkedJvmPerTest(tests: Seq[TestDefinition]) =
+    tests map {
+      test => new Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions =
+        Seq("-Dtest.name=" + test.name,
+          "-Dmongodb.uri=mongodb://localhost:27017/test-fset-fasttrack",
+          "-DmaxNumberOfDocuments=10",
+          "-Dlogger.resource=logback-test.xml",
+          "-Dmongodb.failoverStrategy.retries=10",
+          "-Dmongodb.failoverStrategy.delay.function=fibonacci",
+          "-Dmongodb.failoverStrategy.delay.factor=1"
+      ))))
+    }
 }

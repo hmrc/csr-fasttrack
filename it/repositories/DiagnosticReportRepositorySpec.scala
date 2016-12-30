@@ -47,6 +47,7 @@ class DiagnosticReportRepositorySpec extends MongoRepositorySpec {
       result.head.value.get("userId").fold(fail(msg)){u => u mustBe JsString("user1")}
       result.head.value.get("personal-details") mustBe None
     }
+
   }
 
   private val UserWithAllDetails = BSONDocument(

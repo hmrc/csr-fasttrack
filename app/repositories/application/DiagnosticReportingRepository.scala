@@ -19,7 +19,8 @@ package repositories.application
 import model.Commands
 import model.Commands.CreateApplicationRequest
 import model.Exceptions.ApplicationNotFound
-import play.api.libs.json.{ JsObject, Json }
+import play.api.libs.iteratee.Enumerator
+import play.api.libs.json.{ JsObject, JsValue, Json }
 import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.BSONObjectID
 import uk.gov.hmrc.mongo.ReactiveRepository
@@ -31,6 +32,7 @@ import scala.concurrent.Future
 trait DiagnosticReportingRepository {
 
   def findByUserId(userId: String): Future[List[JsObject]]
+  def findAll(): Enumerator[JsValue]
 }
 
 class DiagnosticReportingMongoRepository(implicit mongo: () => DB)
@@ -40,6 +42,12 @@ class DiagnosticReportingMongoRepository(implicit mongo: () => DB)
   private val defaultExclusions = Json.obj(
     "_id" -> 0,
     "personal-details" -> 0)  // these reports should not export personally identifiable data
+
+  private val largeFields = Json.obj(
+    "progress-status-timestamp" -> 0, // this is quite a bit of data, that is not really used for queries as progress-status is easier
+    "testGroups.PHASE1.tests.reportLinkURL" -> 0,
+    "testGroups.PHASE1.tests.testUrl" -> 0
+  )
 
   override def findByUserId(userId: String): Future[List[JsObject]] = {
     val projection = defaultExclusions
@@ -52,5 +60,12 @@ class DiagnosticReportingMongoRepository(implicit mongo: () => DB)
       if (r.isEmpty) { throw ApplicationNotFound(userId) }
       else { r }
     }
+  }
+
+  override def findAll(): Enumerator[JsValue] = {
+    val projection = defaultExclusions ++ largeFields
+    collection.find(Json.obj(), projection)
+      .cursor[JsValue](ReadPreference.primaryPreferred)
+      .enumerate()
   }
 }

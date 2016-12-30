@@ -41,4 +41,8 @@ trait DiagnosticReportController extends BaseController {
       case _ => NotFound
     }
   }
+
+  def getAllApplications = Action { implicit request =>
+    Ok.chunked(drRepository.findAll())
+  }
 }

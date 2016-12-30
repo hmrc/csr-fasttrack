@@ -64,6 +64,7 @@ GET         /report/successful-candidates/:frameworkId                   control
 GET         /report/:frameworkId                                         controllers.ReportingController.createReport(frameworkId: String)
 
 GET         /diagnostic/user/:userId                                     controllers.DiagnosticReportController.getApplicationByUserId(userId: String)
+GET         /diagnostic/all-users                                        controllers.DiagnosticReportController.getAllApplications
 
 GET         /online-test/candidate/:userId                               controllers.OnlineTestController.getOnlineTest(userId: String)
 POST        /online-test/candidate/:userId/status                        controllers.OnlineTestController.onlineTestStatusUpdate(userId: String)
