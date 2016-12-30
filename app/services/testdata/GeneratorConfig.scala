@@ -16,6 +16,7 @@
 
 package services.testdata
 
+import model.ApplicationStatuses
 import model.EvaluationResults.Result
 import services.testdata.faker.DataFaker.Random
 
@@ -27,14 +28,14 @@ object GeneratorConfig {
   def apply(cubiksUrlFromConfig: String, o: model.exchange.testdata.CreateCandidateInStatusRequest)(generatorId: Int): GeneratorConfig = {
 
     val statusData = StatusData(o.statusData)
-
     GeneratorConfig(
       emailPrefix = s"tesf${Random.number()-1}",
       previousStatus = statusData.previousApplicationStatus,
       cubiksUrl = cubiksUrlFromConfig,
       region = o.region,
       loc1scheme1Passmark = o.loc1scheme1EvaluationResult.map(Result.apply),
-      loc1scheme2Passmark = o.loc1scheme2EvaluationResult.map(Result.apply)
+      loc1scheme2Passmark = o.loc1scheme2EvaluationResult.map(Result.apply),
+      confirmedAllocation = statusData.applicationStatus == ApplicationStatuses.AllocationConfirmed
     )
   }
 }
