@@ -51,6 +51,8 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
+    <logger name="org.asynchttpclient.netty.channel.DefaultChannelPool" level="WARN"/>
+
     <!-- <logger name="com.google.inject" level="INFO"/>
     <logger name="akka.event" level="INFO"/>
     <logger name="net.sf.ehcache" level="INFO"/>
