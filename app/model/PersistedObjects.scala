@@ -111,8 +111,6 @@ object PersistedObjects {
     statuses: Option[List[ApplicationProgressStatus]],
     questionnaireStatuses: Option[List[ApplicationProgressStatus]]
   )
-  case class ApplicationUser(applicationId: String, userId: String, frameworkId: String,
-    applicationStatus: String, progressStatuses: ApplicationProgressStatuses)
 
   case class OnlineTestPassmarkEvaluation(location1Scheme1: Result,
                                           location1Scheme2: Option[Result], location2Scheme1: Option[Result],
@@ -143,7 +141,6 @@ object PersistedObjects {
     implicit val allocatedCandidateFormats = Json.format[AllocatedCandidate]
     implicit val applicationProgressStatusFormats = Json.format[ApplicationProgressStatus]
     implicit val applicationProgressStatusesFormats = Json.format[ApplicationProgressStatuses]
-    implicit val applicationUserFormats = Json.format[ApplicationUser]
 
     implicit val onlineTestPdfReportFormats = Json.format[OnlineTestPDFReport]
     implicit val preferencesWithQualificationFormats = Json.format[PreferencesWithQualification]

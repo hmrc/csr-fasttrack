@@ -16,7 +16,6 @@
 
 package controllers
 
-import model.PersistedObjects
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import repositories._
@@ -30,17 +29,16 @@ object DiagnosticReportController extends DiagnosticReportController {
 }
 
 trait DiagnosticReportController extends BaseController {
-  import PersistedObjects.Implicits._
 
   val drRepository: DiagnosticReportingRepository
 
-  def getUserById(userId: String) = Action.async { implicit request =>
+  def getApplicationByUserId(userId: String) = Action.async { implicit request =>
     val applicationUser = drRepository.findByUserId(userId)
 
     applicationUser.map { au =>
       Ok(Json.toJson(au))
     } recover {
-      case e => NotFound
+      case _ => NotFound
     }
   }
 }
