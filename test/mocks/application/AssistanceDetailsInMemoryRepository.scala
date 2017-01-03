@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,16 @@
 package mocks.application
 
 import mocks.InMemoryStorage
-import model.Commands.AssistanceDetailsExchange
 import model.Exceptions.AssistanceDetailsNotFound
+import model.exchange.AssistanceDetails$
+import model.persisted.AssistanceDetails
 import repositories.application.AssistanceDetailsRepository
 
-object AssistanceDetailsInMemoryRepository extends AssistanceDetailsRepository with InMemoryStorage[AssistanceDetailsExchange] {
+object AssistanceDetailsInMemoryRepository extends AssistanceDetailsRepository with InMemoryStorage[AssistanceDetails] {
   // Seed with test data.
   inMemoryRepo +=
     "111-111" ->
-    AssistanceDetailsExchange("No", None, None, None, None, None, None, None, None, None, None, None)
+    AssistanceDetails("No", None, None, None, None, None, None, None, None, None, None, None)
 
   override def notFound(applicationId: String) = throw new AssistanceDetailsNotFound(applicationId)
 }

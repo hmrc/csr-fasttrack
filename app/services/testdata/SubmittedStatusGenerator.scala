@@ -17,12 +17,13 @@
 package services.testdata
 
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import model.Commands.{ Address, AssistanceDetailsExchange }
-import model.PersistedObjects.{ ContactDetails, PersistedAnswer, PersistedQuestion, PersonalDetails }
-import model.{ Alternatives, LocationPreference, Preferences }
+import model.Commands.Address
+import model.PersistedObjects.{ContactDetails, PersistedAnswer, PersistedQuestion, PersonalDetails}
+import model.exchange.AssistanceDetails
+import model.{Alternatives, LocationPreference, Preferences}
 import org.joda.time.LocalDate
 import repositories._
-import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository, PersonalDetailsRepository }
+import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository, PersonalDetailsRepository}
 import services.testdata.faker.DataFaker._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -33,7 +34,7 @@ object SubmittedStatusGenerator extends SubmittedStatusGenerator {
   override val previousStatusGenerator = CreatedStatusGenerator
   override val appRepository = applicationRepository
   override val pdRepository = personalDetailsRepository
-  override val adRepository = assistanceRepository
+  override val adRepository = assistanceDetailsRepository
   override val cdRepository = contactDetailsRepository
   override val fpRepository = frameworkPreferenceRepository
   override val qRepository = questionnaireRepository
@@ -63,12 +64,12 @@ trait SubmittedStatusGenerator extends ConstructiveGenerator {
 
     def getAssistanceDetails(gis: Boolean) = {
       if (gis) {
-        AssistanceDetailsExchange(
+        AssistanceDetails(
           "yes", Some(List("Wheelchair")), Some("Wheelchair required"), Some("yes"),
           Some("yes"), Some(List()), None, None, None, None, None, None
         )
       } else {
-        AssistanceDetailsExchange(
+        AssistanceDetails(
           "no", Some(List()), None, None, Some("no"), Some(List()), None, None, None, None, None, None
         )
       }

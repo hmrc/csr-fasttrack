@@ -17,10 +17,11 @@
 package repositories
 
 import model.AssessmentScheduleCommands.ApplicationForAssessmentAllocationResult
-import model.Commands.{AdjustmentReport, AssistanceDetailsExchange, _}
+import model.Commands.{AdjustmentReport, _}
 import model.{ApplicationStatuses, EvaluationResults}
 import model.EvaluationResults.AssessmentRuleCategoryResult
 import model.Exceptions.ApplicationNotFound
+import model.persisted.AssistanceDetails
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
 import repositories.application.{AssistanceDetailsMongoRepository, GeneralApplicationMongoRepository, TestDataMongoRepository}
@@ -59,7 +60,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       val userId = "userId9876"
       val applicationId = applicationRepo.create(userId, "frameworkId").futureValue.applicationId
 
-      val details = AssistanceDetailsExchange("Yes", None, None, Some("Yes"), None, None, None, None, None, None, None, None)
+      val details = AssistanceDetails("Yes", None, None, Some("Yes"), None, None, None, None, None, None, None, None)
       assistanceRepo.update(applicationId, userId, details).futureValue
 
       applicationRepo.gisByApplication(applicationId).futureValue must be(true)
@@ -106,7 +107,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     "return an empty list when there are no applications" in {
       applicationRepo.applicationsReport(frameworkId).futureValue mustBe empty
     }
-  
+
     "return a list of non submitted applications when there are only non submitted applications" in {
       Await.ready({
         for {
@@ -124,7 +125,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
         userId must startWith("userId")
       }
     }
-  
+
     "return only submitted applications" in {
       Await.ready({
         for {
@@ -137,14 +138,14 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
         }
       }, timeout)
 
-    
+
       val results = applicationRepo.applicationsReport(frameworkId).futureValue
       results must have size 2
       results.foreach { case (_, isNonSubmitted, _) =>
         isNonSubmitted must be(false)
       }
     }
-    
+
     "return only the applications in a specific framework id" in {
       Await.ready({
         for {
@@ -158,7 +159,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       val results = applicationRepo.applicationsReport(frameworkId).futureValue
       results must have size 1
     }
-    
+
     "return a list of non submitted applications with submitted applications" in {
       Await.ready({
         for {
@@ -174,7 +175,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
           Unit
         }
       }, timeout)
-    
+
       val results = applicationRepo.applicationsReport(frameworkId).futureValue
       results must have size 5
       results.filter { case (_, isNonSubmitted, _) => isNonSubmitted } must have size 2

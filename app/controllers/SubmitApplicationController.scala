@@ -30,7 +30,7 @@ import scala.concurrent.Future
 
 object SubmitApplicationController extends SubmitApplicationController {
   override val pdRepository: PersonalDetailsRepository = personalDetailsRepository
-  override val adRepository: AssistanceDetailsRepository = assistanceRepository
+  override val adRepository: AssistanceDetailsRepository = assistanceDetailsRepository
   override val cdRepository = contactDetailsRepository
   override val frameworkPrefRepository: FrameworkPreferenceMongoRepository = frameworkPreferenceRepository
   override val frameworkRegionsRepository: FrameworkRepository = frameworkRepository

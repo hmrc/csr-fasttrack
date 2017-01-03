@@ -32,7 +32,7 @@ object DiversityMonitoringReport extends DiversityMonitoringReport {
   override val qRepository = questionnaireRepository
   override val reportRepository = diversityReportRepository
   override val appRepository = applicationRepository
-  override val asRepository = assistanceRepository
+  override val asRepository = assistanceDetailsRepository
 
   val yamlRepository = frameworkRepository
 

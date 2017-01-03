@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,12 +16,12 @@
 
 package services
 
-import model.Commands.AssistanceDetailsExchange
 import model.PersistedObjects.PersonalDetails
-import model.{ ApplicationValidator, LocationPreference, Preferences }
+import model.exchange.AssistanceDetails
+import model.{ApplicationValidator, LocationPreference, Preferences}
 import org.joda.time.LocalDate
 import org.scalatestplus.play.PlaySpec
-import repositories.FrameworkRepository.{ CandidateHighestQualification, Framework, Location, Region }
+import repositories.FrameworkRepository.{CandidateHighestQualification, Framework, Location, Region}
 
 class ApplicationValidatorSpec extends PlaySpec {
 
@@ -115,7 +115,7 @@ class ApplicationValidatorSpec extends PlaySpec {
 object ApplicationValidatorSpec {
   def personalDetails = PersonalDetails("firstName", "lastName", "preferredName", new LocalDate(), true, true)
 
-  def assistanceDetails = AssistanceDetailsExchange("Yes", Some(List("muscular pain", "neural pain")), Some("detailsOfDisability"),
+  def assistanceDetails = AssistanceDetails("Yes", Some(List("muscular pain", "neural pain")), Some("detailsOfDisability"),
     Some("Yes"), Some("Yes"),
     Some(List("Extra time", "Paper colour")), Some("otherAdjustments"), None, None, None, None, None)
 

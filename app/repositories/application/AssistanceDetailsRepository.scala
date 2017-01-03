@@ -16,12 +16,10 @@
 
 package repositories.application
 
-import model.Commands
-import model.Commands._
 import model.Exceptions.AssistanceDetailsNotFound
+import model.persisted.AssistanceDetails
 import reactivemongo.api.DB
-import reactivemongo.bson.{ BSONDocument, _ }
-import repositories._
+import reactivemongo.bson.{BSONDocument, _}
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -29,57 +27,37 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait AssistanceDetailsRepository {
+  def update(applicationId: String, userId: String, ad: AssistanceDetails): Future[Unit]
 
-  val errorCode = 500
-
-  def update(applicationId: String, userId: String, ad: AssistanceDetailsExchange): Future[Unit]
-
-  def find(applicationId: String): Future[AssistanceDetailsExchange]
+  def find(applicationId: String): Future[AssistanceDetails]
 }
 
 class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
-  extends ReactiveRepository[AssistanceDetailsExchange, BSONObjectID]("application", mongo,
-    Commands.Implicits.updateAssistanceDetailsRequestFormats, ReactiveMongoFormats.objectIdFormats) with AssistanceDetailsRepository {
+  extends ReactiveRepository[AssistanceDetails, BSONObjectID]("application", mongo,
+    AssistanceDetails.assistanceDetailsFormat, ReactiveMongoFormats.objectIdFormats) with AssistanceDetailsRepository {
 
-  override def update(applicationId: String, userId: String, ad: AssistanceDetailsExchange): Future[Unit] = {
+  val AssistanceDetailsCollection = "assistance-details"
 
+  override def update(applicationId: String, userId: String, ad: AssistanceDetails): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId, "userId" -> userId)
-
-    val assistanceDetailsBSON = BSONDocument("$set" -> BSONDocument(
+    val updateBSON = BSONDocument("$set" -> BSONDocument(
       "applicationStatus" -> "IN_PROGRESS",
-      s"progress-status.assistance" -> true,
-      "assistance-details" -> ad
+      s"progress-status.assistance" -> true, // TODO: rename to assistance-details
+      AssistanceDetailsCollection -> ad
     ))
 
-    collection.update(query, assistanceDetailsBSON, upsert = false) map {
+    collection.update(query, updateBSON, upsert = false) map {
       case _ => ()
     }
   }
 
-  override def find(applicationId: String): Future[AssistanceDetailsExchange] = {
-
+  override def find(applicationId: String): Future[AssistanceDetails] = {
     val query = BSONDocument("applicationId" -> applicationId)
-    val projection = BSONDocument("assistance-details" -> 1, "_id" -> 0)
+    val projection = BSONDocument(AssistanceDetailsCollection -> 1, "_id" -> 0)
 
     collection.find(query, projection).one[BSONDocument] map {
-      case Some(document) if document.getAs[BSONDocument]("assistance-details").isDefined => {
-        val root = document.getAs[BSONDocument]("assistance-details").get
-        val needsAssistance = root.getAs[String]("needsAssistance").get
-        val typeOfdisability = root.getAs[List[String]]("typeOfdisability")
-        val detailsOfdisability = root.getAs[String]("detailsOfdisability")
-        val guaranteedInterview = root.getAs[String]("guaranteedInterview")
-        val needsAdjustment = root.getAs[String]("needsAdjustment")
-        val typeOfAdjustments = root.getAs[List[String]]("typeOfAdjustments")
-        val otherAdjustments = root.getAs[String]("otherAdjustments")
-        val campaignReferrer = root.getAs[String]("campaignReferrer")
-        val campaignOther = root.getAs[String]("campaignOther")
-        val confirmation = root.getAs[Boolean]("adjustments-confirmed")
-        val verbalTimeAdjustmentPercentage = root.getAs[Int]("verbalTimeAdjustmentPercentage")
-        val numericalTimeAdjustmentPercentage = root.getAs[Int]("numericalTimeAdjustmentPercentage")
-
-        AssistanceDetailsExchange(needsAssistance, typeOfdisability, detailsOfdisability, guaranteedInterview,
-          needsAdjustment, typeOfAdjustments, otherAdjustments, campaignReferrer, campaignOther, confirmation,
-          numericalTimeAdjustmentPercentage, verbalTimeAdjustmentPercentage)
+      case Some(document) if document.getAs[BSONDocument](AssistanceDetailsCollection).isDefined => {
+        document.getAs[AssistanceDetails](AssistanceDetailsCollection).get
       }
       case _ => throw new AssistanceDetailsNotFound(applicationId)
     }

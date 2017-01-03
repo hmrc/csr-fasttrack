@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,15 +18,16 @@ package controllers
 
 import config.TestFixtureBase
 import mocks.application.AssistanceDetailsInMemoryRepository
-import org.mockito.Matchers.{ eq => eqTo, _ }
+import org.mockito.Matchers.{eq => eqTo, _}
 import org.mockito.Mockito._
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.Helpers._
-import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
+import play.api.test.{FakeHeaders, FakeRequest, Helpers}
 import repositories.application.AssistanceDetailsRepository
 import services.AuditService
+import services.assistancedetails.AssistanceDetailsService
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.language.postfixOps
@@ -36,7 +37,7 @@ class AssistanceDetailsControllerSpec extends PlaySpec with Results {
   "Update assistance details" should {
 
     "update then details when we have only assistance and no adjustments" in new TestFixture {
-      val result = TestAssistanceController.assistanceDetails("1234", "111-111")(updateAssistanceDetailsRequest("1234", "111-111")(
+      val result = TestAssistanceController.update("1234", "111-111")(updateAssistanceDetailsRequest("1234", "111-111")(
         s"""
            |{
            |  "needsAssistance":"Yes",
@@ -51,7 +52,7 @@ class AssistanceDetailsControllerSpec extends PlaySpec with Results {
     }
 
     "update then details when we have only assistance and adjustments" in new TestFixture {
-      val result = TestAssistanceController.assistanceDetails("1234", "111-111")(updateAssistanceDetailsRequest("1234", "111-111")(
+      val result = TestAssistanceController.update("1234", "111-111")(updateAssistanceDetailsRequest("1234", "111-111")(
         s"""
            |{
            |  "needsAssistance":"Yes",
@@ -69,7 +70,7 @@ class AssistanceDetailsControllerSpec extends PlaySpec with Results {
     }
 
     "return an error on invalid json" in new TestFixture {
-      val result = TestAssistanceController.assistanceDetails("1234", "111-111")(updateAssistanceDetailsRequest("1234", "111-111")(
+      val result = TestAssistanceController.update("1234", "111-111")(updateAssistanceDetailsRequest("1234", "111-111")(
         s"""
            |{
            |  "wrongField1":"some value",
@@ -83,14 +84,16 @@ class AssistanceDetailsControllerSpec extends PlaySpec with Results {
   }
 
   trait TestFixture extends TestFixtureBase {
-    object TestAssistanceController extends AssistanceController {
-      override val asRepository: AssistanceDetailsRepository = AssistanceDetailsInMemoryRepository
+    val mockAssistanceDetailsService = mock[AssistanceDetailsService]
+
+    object TestAssistanceController extends AssistanceDetailsController {
+      override val assistanceDetailsService: AssistanceDetailsService = mockAssistanceDetailsService
       override val auditService: AuditService = mockAuditService
     }
 
     def updateAssistanceDetailsRequest(userId: String, applicationId: String)(jsonString: String) = {
       val json = Json.parse(jsonString)
-      FakeRequest(Helpers.PUT, controllers.routes.AssistanceController.assistanceDetails(userId, applicationId).url, FakeHeaders(), json)
+      FakeRequest(Helpers.PUT, controllers.routes.AssistanceDetailsController.update(userId, applicationId).url, FakeHeaders(), json)
         .withHeaders("Content-Type" -> "application/json")
     }
   }
