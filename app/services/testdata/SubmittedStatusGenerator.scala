@@ -65,11 +65,11 @@ trait SubmittedStatusGenerator extends ConstructiveGenerator {
       if (gis) {
         AssistanceDetailsExchange(
           "yes", Some(List("Wheelchair")), Some("Wheelchair required"), Some("yes"),
-          Some("yes"), Some(List()), None, None, None, None, None, None
+          Some("yes"), Some(List()), None, None, None, None
         )
       } else {
         AssistanceDetailsExchange(
-          "no", Some(List()), None, None, Some("no"), Some(List()), None, None, None, None, None, None
+          "no", Some(List()), None, None, Some("no"), Some(List()), None, None, None, None
         )
       }
     }

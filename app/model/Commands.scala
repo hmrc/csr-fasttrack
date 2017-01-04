@@ -71,8 +71,6 @@ object Commands {
     needsAdjustment: Option[String],
     typeOfAdjustments: Option[List[String]],
     otherAdjustments: Option[String],
-    campaignReferrer: Option[String],
-    campaignOther: Option[String],
     confirmedAdjustments: Option[Boolean],
     numericalTimeAdjustmentPercentage: Option[Int],
     verbalTimeAdjustmentPercentage: Option[Int]

@@ -25,7 +25,7 @@ object AssistanceDetailsInMemoryRepository extends AssistanceDetailsRepository w
   // Seed with test data.
   inMemoryRepo +=
     "111-111" ->
-    AssistanceDetailsExchange("No", None, None, None, None, None, None, None, None, None, None, None)
+    AssistanceDetailsExchange("No", None, None, None, None, None, None, None, None, None)
 
   override def notFound(applicationId: String) = throw new AssistanceDetailsNotFound(applicationId)
 }
