@@ -113,10 +113,14 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
     onlineTestCompletedUrlMock + Token, None)
   val inviteApplicantNoGisWithNoTimeAdjustments = InviteApplicant(ScheduleId, CubiksUserId,
     onlineTestCompletedUrlMock + Token, None)
-  val timeAdjustmentsForInviteApplicant = TimeAdjustments(VerbalAndNumericalAssessmentId, VerbalSectionId, NumericalSectionId,
-    7, 7)
+
+  val timeAdjustmentsForInviteApplicant = List(
+    TimeAdjustments(VerbalAndNumericalAssessmentId, VerbalSectionId, 7),
+    TimeAdjustments(VerbalAndNumericalAssessmentId, NumericalSectionId, 7)
+  )
+
   val inviteApplicantNoGisWithTimeAdjustments = InviteApplicant(ScheduleId, CubiksUserId,
-    onlineTestCompletedUrlMock + Token, None, List(timeAdjustmentsForInviteApplicant))
+    onlineTestCompletedUrlMock + Token, None, timeAdjustmentsForInviteApplicant)
   val AccessCode = "fdkfdfj"
   val LogonUrl = "http://localhost/logonUrl"
   val AuthenticateUrl = "http://localhost/authenticate"
@@ -311,14 +315,16 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
     "return Time Adjustments if application's time adjustments are not empty" in new OnlineTest {
       val result = onlineTestService.getTimeAdjustments(applicationForOnlineTestingWithTimeAdjustments)
       result.isEmpty mustBe false
-      inside (result.head) { case TimeAdjustments(verbalAndNumericalAssessmentId, verbalSectionId, numericalSectionId,
-      verbalAbsoluteTime, numericalAbsoluteTime) =>
-
-        numericalSectionId mustBe NumericalSectionId
-        numericalAbsoluteTime mustBe 7
-        verbalAndNumericalAssessmentId mustBe VerbalAndNumericalAssessmentId
-        verbalSectionId mustBe VerbalSectionId
-        verbalAbsoluteTime mustBe 7
+      result.size mustBe 2
+      inside (result.head) { case TimeAdjustments(assessmentId, sectionId, absoluteTime) =>
+        assessmentId mustBe VerbalAndNumericalAssessmentId
+        sectionId mustBe VerbalSectionId
+        absoluteTime mustBe 7
+      }
+      inside (result(1)) { case TimeAdjustments(assessmentId, sectionId, absoluteTime) =>
+        assessmentId mustBe VerbalAndNumericalAssessmentId
+        sectionId mustBe NumericalSectionId
+        absoluteTime mustBe 7
       }
     }
   }
@@ -326,45 +332,45 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
   "get adjusted time" should {
     "return minimum if percentage is zero" in new OnlineTest {
       val result = onlineTestService.getAdjustedTime(minimum = 6, maximum = 12, percentageToIncrease = 0)
-      result must be(6)
+      result mustBe 6
     }
     "return maximum if percentage is 100%" in new OnlineTest {
       val result = onlineTestService.getAdjustedTime(minimum = 6, maximum = 12, percentageToIncrease = 100)
-      result must be(12)
+      result mustBe 12
     }
     "return maximum if percentage is over 100%" in new OnlineTest {
       val result = onlineTestService.getAdjustedTime(minimum = 6, maximum = 12, percentageToIncrease = 101)
-      result must be(12)
+      result mustBe 12
     }
     "return adjusted time if percentage is above zero and below 100%" in new OnlineTest {
       val result = onlineTestService.getAdjustedTime(minimum = 6, maximum = 12, percentageToIncrease = 50)
-      result must be(9)
+      result mustBe 9
     }
     "return adjusted time round up if percentage is above zero and below 100%" in new OnlineTest {
       val result = onlineTestService.getAdjustedTime(minimum = 6, maximum = 12, percentageToIncrease = 51)
-      result must be(10)
+      result mustBe 10
     }
   }
 
   "build invite application" should {
     "return an InviteApplication with no time adjustments if gis and application has no time adjustments" in new OnlineTest {
       onlineTestService.buildInviteApplication(applicationForOnlineTestingGisWithNoTimeAdjustments, Token, CubiksUserId,
-        ScheduleId) must be(inviteApplicantGisWithNoTimeAdjustments)
+        ScheduleId) mustBe inviteApplicantGisWithNoTimeAdjustments
     }
 
     "return an InviteApplication with no time adjustments if gis and application has time adjustments" in new OnlineTest {
       onlineTestService.buildInviteApplication(applicationForOnlineTestingGisWithTimeAdjustments, Token, CubiksUserId,
-        ScheduleId) must be(inviteApplicantGisWithNoTimeAdjustments)
+        ScheduleId) mustBe inviteApplicantGisWithNoTimeAdjustments
     }
 
     "return an InviteApplication with no time adjustments if no gis and application has no time adjustments" in new OnlineTest {
       onlineTestService.buildInviteApplication(applicationForOnlineTestingWithNoTimeAdjustments, Token, CubiksUserId,
-        ScheduleId) must be(inviteApplicantNoGisWithNoTimeAdjustments)
+        ScheduleId) mustBe inviteApplicantNoGisWithNoTimeAdjustments
     }
 
     "return an InviteApplication with time adjustments if no gis and application has time adjustments" in new OnlineTest {
       onlineTestService.buildInviteApplication(applicationForOnlineTestingWithTimeAdjustments, Token, CubiksUserId,
-        ScheduleId) must be(inviteApplicantNoGisWithTimeAdjustments)
+        ScheduleId) mustBe inviteApplicantNoGisWithTimeAdjustments
     }
   }
 
