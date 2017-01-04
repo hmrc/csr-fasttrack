@@ -31,32 +31,33 @@ case class ApplicationValidator(gd: PersonalDetails, ad: AssistanceDetails, sl: 
 
   def validateAssistanceDetails: Boolean = {
 
-    def ifNeeds(value: Option[String])(f: AssistanceDetails => Boolean) = value match {
-      case Some("Yes") => f(ad)
+    def ifNeeds(value: Option[Boolean])(f: AssistanceDetails => Boolean) = value match {
+      case Some(true) => f(ad)
       case _ => true
     }
 
-    val ifNeedsAssistance = ifNeeds(Some(ad.needsAssistance)) _
-    val ifNeedsAdjustment = ifNeeds(ad.needsAdjustment) _
+    val ifHasDisability = ifNeeds(Some(ad.hasDisability=="Yes")) _
+    val ifNeedsOnlineAdjustments = ifNeeds(ad.needsSupportForOnlineAssessment) _
+    val ifNeedsVenueAdjustments = ifNeeds(ad.needsSupportAtVenue) _
 
-    def hasAtLeastOneDisability(ad: AssistanceDetails): Boolean = ad.typeOfdisability match {
-      case Some(x) => x.nonEmpty
-      case _ => false
-
-    }
-
-    def hasAtLeastOneAdjustment(ad: AssistanceDetails): Boolean = ad.typeOfAdjustments match {
-      case Some(x) => x.nonEmpty
-      case _ => false
-    }
-
-    def hasDecidedGuaranteedInterview(ad: AssistanceDetails): Boolean = ad.guaranteedInterview match {
+    def hasGis(ad: AssistanceDetails): Boolean = ad.guaranteedInterview match {
       case Some(_) => true
       case _ => false
     }
 
-    ifNeedsAssistance(hasAtLeastOneDisability) && ifNeedsAdjustment(hasAtLeastOneAdjustment) &&
-      ifNeedsAssistance(hasDecidedGuaranteedInterview)
+    def hasOnlineAdjustmentDescription(ad: AssistanceDetails): Boolean = ad.needsSupportForOnlineAssessmentDescription match {
+      case Some(x) => x.nonEmpty
+      case _ => false
+    }
+
+
+    def hasVenueAdjustmentDescription(ad: AssistanceDetails): Boolean = ad.needsSupportAtVenueDescription match {
+      case Some(x) => x.nonEmpty
+      case _ => false
+    }
+
+    ifNeedsOnlineAdjustments(hasOnlineAdjustmentDescription) && ifNeedsVenueAdjustments(hasVenueAdjustmentDescription) &&
+      ifHasDisability(hasGis)
 
   }
 

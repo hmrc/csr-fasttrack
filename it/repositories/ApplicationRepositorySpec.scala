@@ -55,16 +55,6 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       indexes must contain (List("online-tests.invitationDate"))
       indexes.size must be (6)
     }
-
-    "return the gis parameter" in {
-      val userId = "userId9876"
-      val applicationId = applicationRepo.create(userId, "frameworkId").futureValue.applicationId
-
-      val details = AssistanceDetails("Yes", None, None, Some("Yes"), None, None, None, None, None, None, None, None)
-      assistanceRepo.update(applicationId, userId, details).futureValue
-
-      applicationRepo.gisByApplication(applicationId).futureValue must be(true)
-    }
   }
 
   "Finding an application by User Id" should {

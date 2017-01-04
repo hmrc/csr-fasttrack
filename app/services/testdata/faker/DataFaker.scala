@@ -159,5 +159,19 @@ object DataFaker {
       val lastName = randOne(Lastnames.list)
       s"$lastName$userNumber"
     }
+
+    def yesNoPreferNotToSay = randOne(List("Yes", "No", "I don't know/prefer not to say"))
+
+    def hasDisabilityDescription: String = randOne(List("I am too tall", "I am too good", "I get bored easily"))
+
+    def onlineAdjustmentsDescription: String = randOne(List(
+      "I am too sensitive to the light from screens",
+      "I am allergic to electronic-magnetic waves",
+      "I am a convicted cracker who was asked by the court to be away from computers for 5 years"))
+
+    def assessmentCentreAdjustmentDescription: String = randOne(List(
+      "I am very weak, I need constant support",
+      "I need a comfortable chair because of my back problem",
+      "I need to take a rest every 10 minutes"))
   }
 }

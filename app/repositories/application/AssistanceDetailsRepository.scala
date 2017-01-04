@@ -16,10 +16,11 @@
 
 package repositories.application
 
-import model.Exceptions.AssistanceDetailsNotFound
+import model.Exceptions.{AssistanceDetailsNotFound, CannotUpdateAssistanceDetails}
 import model.persisted.AssistanceDetails
 import reactivemongo.api.DB
 import reactivemongo.bson.{BSONDocument, _}
+import repositories.ReactiveRepositoryHelpers
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -34,7 +35,8 @@ trait AssistanceDetailsRepository {
 
 class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
   extends ReactiveRepository[AssistanceDetails, BSONObjectID]("application", mongo,
-    AssistanceDetails.assistanceDetailsFormat, ReactiveMongoFormats.objectIdFormats) with AssistanceDetailsRepository {
+    AssistanceDetails.assistanceDetailsFormat, ReactiveMongoFormats.objectIdFormats) with AssistanceDetailsRepository
+    with ReactiveRepositoryHelpers {
 
   val AssistanceDetailsCollection = "assistance-details"
 
@@ -46,9 +48,10 @@ class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
       AssistanceDetailsCollection -> ad
     ))
 
-    collection.update(query, updateBSON, upsert = false) map {
-      case _ => ()
-    }
+    val validator = singleUpdateValidator(applicationId, actionDesc = "updating assistance details",
+      CannotUpdateAssistanceDetails(userId))
+
+    collection.update(query, updateBSON, upsert = false) map validator
   }
 
   override def find(applicationId: String): Future[AssistanceDetails] = {

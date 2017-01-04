@@ -19,7 +19,6 @@ package services.testdata
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.Commands.Address
 import model.PersistedObjects.{ContactDetails, PersistedAnswer, PersistedQuestion, PersonalDetails}
-import model.exchange.AssistanceDetails
 import model.{Alternatives, LocationPreference, Preferences}
 import org.joda.time.LocalDate
 import repositories._
@@ -62,17 +61,46 @@ trait SubmittedStatusGenerator extends ConstructiveGenerator {
       )
     }
 
-    def getAssistanceDetails(gis: Boolean) = {
-      if (gis) {
-        AssistanceDetails(
-          "yes", Some(List("Wheelchair")), Some("Wheelchair required"), Some("yes"),
-          Some("yes"), Some(List()), None, None, None, None, None, None
-        )
-      } else {
-        AssistanceDetails(
-          "no", Some(List()), None, None, Some("no"), Some(List()), None, None, None, None, None, None
-        )
-      }
+    def getAssistanceDetails(config: GeneratorConfig): model.exchange.AssistanceDetails = {
+      val hasDisabilityFinalValue = config.assistanceDetails.hasDisability
+
+      val hasDisabilityDescriptionFinalValue =
+        if (hasDisabilityFinalValue == "Yes") {
+          Some(config.assistanceDetails.hasDisabilityDescription)
+        } else {
+          None
+        }
+      val gisFinalValue = if (hasDisabilityFinalValue == "Yes" && config.assistanceDetails.setGis) {
+        Some(true)
+      } else { Some(false) }
+
+      val onlineAdjustmentsFinalValue = config.assistanceDetails.onlineAdjustments
+      val onlineAdjustmentsDescriptionFinalValue =
+        if (onlineAdjustmentsFinalValue) {
+          Some(config.assistanceDetails.onlineAdjustmentsDescription)
+        } else {
+          None
+        }
+      val assessmentCentreAdjustmentsFinalValue = config.assistanceDetails.assessmentCentreAdjustments
+      val assessmentCentreAdjustmentsDescriptionFinalValue =
+        if (assessmentCentreAdjustmentsFinalValue) {
+          Some(config.assistanceDetails.assessmentCentreAdjustmentsDescription)
+        } else {
+          None
+        }
+
+      model.exchange.AssistanceDetails(
+        hasDisabilityFinalValue,
+        hasDisabilityDescriptionFinalValue,
+        gisFinalValue,
+        Some(onlineAdjustmentsFinalValue),
+        onlineAdjustmentsDescriptionFinalValue,
+        Some(assessmentCentreAdjustmentsFinalValue),
+        assessmentCentreAdjustmentsDescriptionFinalValue,
+        None,
+        None,
+        None
+      )
     }
 
     def getContactDetails(candidateInformation: DataGenerationResponse) = {
@@ -155,7 +183,7 @@ trait SubmittedStatusGenerator extends ConstructiveGenerator {
       _ <- pdRepository.update(candidateInPreviousStatus.applicationId.get, candidateInPreviousStatus.userId,
         getPersonalDetails(candidateInPreviousStatus))
       _ <- adRepository.update(candidateInPreviousStatus.applicationId.get, candidateInPreviousStatus.userId,
-        getAssistanceDetails(generatorConfig.setGis))
+        getAssistanceDetails(generatorConfig))
       _ <- cdRepository.update(candidateInPreviousStatus.userId, getContactDetails(candidateInPreviousStatus))
       frameworkPrefs <- getFrameworkPrefs
       _ <- fpRepository.savePreferences(candidateInPreviousStatus.applicationId.get, frameworkPrefs)

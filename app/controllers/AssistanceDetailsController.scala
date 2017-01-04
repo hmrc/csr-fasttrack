@@ -16,7 +16,7 @@
 
 package controllers
 
-import model.Exceptions.AssistanceDetailsNotFound
+import model.Exceptions.{AssistanceDetailsNotFound, CannotUpdateAssistanceDetails}
 import model.exchange.AssistanceDetails
 import play.api.libs.json.Json
 import play.api.mvc.Action
@@ -43,7 +43,7 @@ trait AssistanceDetailsController extends BaseController {
         auditService.logEvent("AssistanceDetailsSaved")
         Created
       }).recover {
-        case e: AssistanceDetailsNotFound => BadRequest(s"cannot update assistance details for user: ${e.id}")
+        case e: CannotUpdateAssistanceDetails => BadRequest(s"cannot update assistance details for user: ${e.userId}")
       }
     }
   }

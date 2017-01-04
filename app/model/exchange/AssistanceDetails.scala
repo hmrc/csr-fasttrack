@@ -20,15 +20,14 @@ import play.api.libs.json.Json
 
 import scala.language.implicitConversions
 
-case class AssistanceDetails(needsAssistance: String,
-                             typeOfdisability: Option[List[String]],
-                             detailsOfdisability: Option[String],
-                             guaranteedInterview: Option[String],
-                             needsAdjustment: Option[String],
-                             typeOfAdjustments: Option[List[String]],
-                             otherAdjustments: Option[String],
-                             campaignReferrer: Option[String],
-                             campaignOther: Option[String],
+case class AssistanceDetails(hasDisability: String,
+                             hasDisabilityDescription: Option[String],
+                             guaranteedInterview: Option[Boolean],
+                             needsSupportForOnlineAssessment: Option[Boolean],
+                             needsSupportForOnlineAssessmentDescription: Option[String],
+                             needsSupportAtVenue: Option[Boolean],
+                             needsSupportAtVenueDescription: Option[String],
+                              // TODO: Change adjustments
                              confirmedAdjustments: Option[Boolean],
                              numericalTimeAdjustmentPercentage: Option[Int],
                              verbalTimeAdjustmentPercentage: Option[Int])
@@ -37,15 +36,13 @@ object AssistanceDetails {
   implicit val assistanceDetailsExchangeFormat = Json.format[AssistanceDetails]
   implicit def fromPersisted(assistanceDetails: model.persisted.AssistanceDetails): AssistanceDetails = {
     AssistanceDetails(
-      needsAssistance = assistanceDetails.needsAssistance,
-      typeOfdisability = assistanceDetails.typeOfdisability,
-      detailsOfdisability = assistanceDetails.detailsOfdisability,
+      hasDisability = assistanceDetails.hasDisability,
+      hasDisabilityDescription = assistanceDetails.hasDisabilityDescription,
       guaranteedInterview = assistanceDetails.guaranteedInterview,
-      needsAdjustment = assistanceDetails.needsAdjustment,
-      typeOfAdjustments = assistanceDetails.typeOfAdjustments,
-      otherAdjustments = assistanceDetails.otherAdjustments,
-      campaignReferrer = assistanceDetails.campaignReferrer,
-      campaignOther = assistanceDetails.campaignOther,
+      needsSupportForOnlineAssessment = assistanceDetails.needsSupportForOnlineAssessment,
+      needsSupportForOnlineAssessmentDescription = assistanceDetails.needsSupportForOnlineAssessmentDescription,
+      needsSupportAtVenue = assistanceDetails.needsSupportAtVenue,
+      needsSupportAtVenueDescription = assistanceDetails.needsSupportAtVenueDescription,
       confirmedAdjustments = assistanceDetails.confirmedAdjustments,
       numericalTimeAdjustmentPercentage = assistanceDetails.numericalTimeAdjustmentPercentage,
       verbalTimeAdjustmentPercentage = assistanceDetails.verbalTimeAdjustmentPercentage

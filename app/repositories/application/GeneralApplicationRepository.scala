@@ -82,8 +82,6 @@ trait GeneralApplicationRepository {
 
   def rejectAdjustment(applicationId: String): Future[Unit]
 
-  def gisByApplication(applicationId: String): Future[Boolean]
-
   def allocationExpireDateByApplicationId(applicationId: String): Future[Option[LocalDate]]
 
   def updateStatus(applicationId: String, status: String): Future[Unit]
@@ -841,20 +839,6 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
     collection.update(query, adjustmentRejection, upsert = false) map {
       case _ => ()
-    }
-  }
-
-  def gisByApplication(applicationId: String): Future[Boolean] = {
-    val query = BSONDocument("applicationId" -> applicationId)
-
-    val projection = BSONDocument(
-      "assistance-details.guaranteedInterview" -> "1"
-    )
-
-    collection.find(query, projection).one[BSONDocument].map {
-      _.flatMap { doc =>
-        doc.getAs[BSONDocument]("assistance-details").map(_.getAs[String]("guaranteedInterview").contains("Yes"))
-      }.getOrElse(false)
     }
   }
 

@@ -20,8 +20,19 @@ import model.ApplicationStatuses
 import model.EvaluationResults.Result
 import services.testdata.faker.DataFaker.Random
 
+case class AssistanceDetails(
+                              hasDisability: String = Random.yesNoPreferNotToSay,
+                              hasDisabilityDescription: String = Random.hasDisabilityDescription,
+                              setGis: Boolean = Random.bool,
+                              onlineAdjustments: Boolean = Random.bool,
+                              onlineAdjustmentsDescription: String = Random.onlineAdjustmentsDescription,
+                              assessmentCentreAdjustments: Boolean = Random.bool,
+                              assessmentCentreAdjustmentsDescription: String = Random.assessmentCentreAdjustmentDescription
+                            )
+
 case class GeneratorConfig(emailPrefix: String, setGis: Boolean = false, cubiksUrl: String, region: Option[String],
                            loc1scheme1Passmark: Option[Result], loc1scheme2Passmark: Option[Result],
+                           assistanceDetails: AssistanceDetails = AssistanceDetails(),
                            previousStatus: Option[String], confirmedAllocation: Boolean = true)
 
 object GeneratorConfig {

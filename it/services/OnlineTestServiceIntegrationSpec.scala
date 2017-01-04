@@ -54,12 +54,12 @@ class OnlineTestServiceIntegrationSpec extends IntegrationSpec with MockitoSugar
   }
   val auditMock = mock[AuditService]
 
-  val gatewayClientMock = mock[CubiksGatewayClient]
+  val cubiksGatewayClientMock = mock[CubiksGatewayClient]
 
-  when(gatewayClientMock.getReport(any[OnlineTestApplicationForReportRetrieving])(any[HeaderCarrier]))
+  when(cubiksGatewayClientMock.getReport(any[OnlineTestApplicationForReportRetrieving])(any[HeaderCarrier]))
     .thenReturn(Future.successful(OnlineTestReportAvailability(1, false)))
 
-  when(gatewayClientMock.downloadXmlReport(any[Int])(any[HeaderCarrier]))
+  when(cubiksGatewayClientMock.downloadXmlReport(any[Int])(any[HeaderCarrier]))
     .thenReturn(Future.successful {
       val VerbalTestName = "Logiks Verbal and Numerical - Verbal"
       val NumericalTestName = "Logiks Verbal and Numerical - Numerical"
@@ -97,7 +97,8 @@ class OnlineTestServiceIntegrationSpec extends IntegrationSpec with MockitoSugar
     val otRepository = onlineTestRepository
     val otprRepository = onlineTestPDFReportRepository
     val trRepository = testReportRepository
-    val cubiksGatewayClient = gatewayClientMock
+    val adRepository = assistanceDetailsRepository
+    val cubiksGatewayClient = cubiksGatewayClientMock
     val cubiksSanitizer = CubiksSanitizer
     val tokenFactory = UUIDFactory
     val onlineTestInvitationDateFactory = DateTimeFactory
@@ -112,6 +113,7 @@ class OnlineTestServiceIntegrationSpec extends IntegrationSpec with MockitoSugar
     val otRepository = onlineTestRepository
     val otprRepository = onlineTestPDFReportRepository
     val trRepository = testReportRepository
+    val adRepository = assistanceDetailsRepository
     val cubiksGatewayClient = gatewayFailingClientMock
     val cubiksSanitizer = CubiksSanitizer
     val tokenFactory = UUIDFactory
@@ -178,7 +180,7 @@ class OnlineTestServiceIntegrationSpec extends IntegrationSpec with MockitoSugar
       "applicationStatus" -> appStatus,
       "personal-details" -> BSONDocument("preferredName" -> "Test Preferred Name"),
       "assistance-details" -> BSONDocument(
-        "needsAdjustment" -> "No"
+        "hasDisability" -> "No"
       )
     )).futureValue
   }
