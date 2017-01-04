@@ -58,9 +58,11 @@ class CubiksGatewayClientSpec extends PlaySpec with MockitoSugar with ScalaFutur
   val AccessCode = "ajajfjf"
   val LogonUrl = "http://cubiks.com/logonUrl"
   val AuthenticatedUrl = "http://cubiks/authenticatedUrl"
-  val timeAdjustments = TimeAdjustments(VerbalAndNumericalAssessmentId, VerbalSectionId, NumericalSectionId, verbalTimeAdjustment,
-    numericalTimeAdjustment)
-  val inviteApplicant = InviteApplicant(ScheduleId, CubiksUserId, ScheduleCompletionUrl, None, List(timeAdjustments))
+  val timeAdjustments = List(
+    TimeAdjustments(VerbalAndNumericalAssessmentId, VerbalSectionId, verbalTimeAdjustment),
+    TimeAdjustments(VerbalAndNumericalAssessmentId, NumericalSectionId, numericalTimeAdjustment)
+  )
+  val inviteApplicant = InviteApplicant(ScheduleId, CubiksUserId, ScheduleCompletionUrl, None, timeAdjustments)
   val invitation = Invitation(CubiksUserId, Email, AccessCode, LogonUrl, AuthenticatedUrl, ScheduleId)
   val invitationHttpResponse = HttpResponse(OK, Some(Json.toJson(invitation)))
 
@@ -83,7 +85,7 @@ class CubiksGatewayClientSpec extends PlaySpec with MockitoSugar with ScalaFutur
     "register an applicant and return a Registration when successful" in new GatewayTest {
       mockPost[RegisterApplicant].thenReturn(Future.successful(registrationHttpResponse))
       val result = cubiksGatewayClient.registerApplicant(registerApplicant)
-      result.futureValue.userId must be(CubiksUserId)
+      result.futureValue.userId mustBe CubiksUserId
     }
   }
 
@@ -101,7 +103,7 @@ class CubiksGatewayClientSpec extends PlaySpec with MockitoSugar with ScalaFutur
     "invite an applicant and return an Invitation when successful" in new GatewayTest {
       mockPost[InviteApplicant].thenReturn(Future.successful(invitationHttpResponse))
       val result = cubiksGatewayClient.inviteApplicant(inviteApplicant)
-      result.futureValue must be(invitation)
+      result.futureValue mustBe invitation
     }
   }
 
@@ -119,7 +121,7 @@ class CubiksGatewayClientSpec extends PlaySpec with MockitoSugar with ScalaFutur
     "request a report" in new GatewayTest {
       setupPDFWSMock()
       val result = cubiksGatewayClient.downloadPdfReport(66666)
-      result.futureValue must be(samplePDFValue)
+      result.futureValue mustBe samplePDFValue
     }
   }
 

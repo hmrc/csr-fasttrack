@@ -52,17 +52,17 @@ object Commands {
   type PhoneNumber = String
 
   case class UpdateGeneralDetails(
-                                   firstName: String,
-                                   lastName: String,
-                                   preferredName: String,
-                                   email: String,
-                                   dateOfBirth: LocalDate,
-                                   address: Address,
-                                   postCode: PostCode,
-                                   phone: Option[PhoneNumber],
-                                   aLevel: Boolean,
-                                   stemLevel: Boolean
-                                 )
+    firstName: String,
+    lastName: String,
+    preferredName: String,
+    email: String,
+    dateOfBirth: LocalDate,
+    address: Address,
+    postCode: PostCode,
+    phone: Option[PhoneNumber],
+    aLevel: Boolean,
+    stemLevel: Boolean
+  )
 
   case class AssessmentScores(
                                entered: Boolean = false,

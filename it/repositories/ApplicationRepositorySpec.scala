@@ -47,13 +47,13 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       val repo = repositories.applicationRepository
 
       val indexes = indexesWithFields(repo)
-      indexes must contain (List("_id"))
-      indexes must contain (List("applicationId", "userId"))
-      indexes must contain (List("userId", "frameworkId"))
-      indexes must contain (List("online-tests.token"))
-      indexes must contain (List("applicationStatus"))
-      indexes must contain (List("online-tests.invitationDate"))
-      indexes.size must be (6)
+      indexes must contain(List("_id"))
+      indexes must contain(List("applicationId", "userId"))
+      indexes must contain(List("userId", "frameworkId"))
+      indexes must contain(List("online-tests.token"))
+      indexes must contain(List("applicationStatus"))
+      indexes must contain(List("online-tests.invitationDate"))
+      indexes.size must be(6)
     }
   }
 

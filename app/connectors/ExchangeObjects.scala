@@ -33,8 +33,7 @@ object ExchangeObjects {
   case class RegisterApplicant(firstName: String, lastName: String, email: String)
   case class InviteApplicant(scheduleID: Int, userId: Int, scheduleCompletionURL: String, resultsURL: Option[String] = None,
     timeAdjustments: List[TimeAdjustments] = Nil)
-  case class TimeAdjustments(verbalAndNumericalAssessmentId: Int, verbalSectionId: Int,
-    numericalSectionId: Int, verbalAbsoluteTime: Int, numericalAbsoluteTime: Int)
+  case class TimeAdjustments(assessmentId: Int, sectionId: Int, absoluteTime: Int)
   case class ReportNorm(assessmentId: Int, normId: Int)
 
   // Cubiks Gateway Response
