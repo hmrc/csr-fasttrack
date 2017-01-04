@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -117,7 +117,7 @@ object ApplicationValidatorSpec {
 
   def assistanceDetails = AssistanceDetailsExchange("Yes", Some(List("muscular pain", "neural pain")), Some("detailsOfDisability"),
     Some("Yes"), Some("Yes"),
-    Some(List("Extra time", "Paper colour")), Some("otherAdjustments"), None, None, None, None, None)
+    Some(List("Extra time", "Paper colour")), Some("otherAdjustments"), None, None, None)
 
   def preferences: Option[Preferences] = Some(
     Preferences(LocationPreference("London", "London", "Business", Some("IT")), Some(LocationPreference("London", "Reading", "Logistics", None)))
