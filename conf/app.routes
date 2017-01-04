@@ -19,7 +19,8 @@ PUT         /media/create                                                control
 
 GET         /frameworks-available-to-application/:applicationId          controllers.FrameworkController.getAvailableFrameworksWithLocations(applicationId: String)
 
-GET         /schemes-locations/by-eligibility                            controllers.LocationSchemeController.getSchemesAndLocationsByEligibility
+GET         /schemes-locations/by-eligibility                            controllers.LocationSchemeController.getSchemesAndLocationsByEligibility(hasALevels: Boolean, hasStemALevels: Boolean)
+GET         /schemes-locations/by-eligibility-and-location               controllers.LocationSchemeController.getSchemesAndLocationsByEligibilityAndLocation(latitude: Double, longitude: Double, hasALevels: Boolean, hasStemALevels: Boolean)
 PUT         /framework-preference/first/:applicationId                   controllers.FrameworkPreferenceController.submitFirstPreference(applicationId: String)
 PUT         /framework-preference/second/:applicationId                  controllers.FrameworkPreferenceController.submitSecondPreference(applicationId: String)
 PUT         /framework-preference/second/intention/:applicationId        controllers.FrameworkPreferenceController.submitSecondPreferenceIntention(applicationId: String)

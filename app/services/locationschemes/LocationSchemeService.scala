@@ -16,18 +16,12 @@
 
 package services.locationschemes
 
-import play.api.libs.json.Json
 import repositories.{ FileLocationSchemeRepository, LocationSchemeRepository, LocationSchemes }
+import services.locationschemes.exchangeobjects.GeoLocationSchemeResult
 
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-
-case class GeoLocationSchemeResult(distanceKm: Int, locationName: String, schemes: IndexedSeq[String])
-
-object GeoLocationSchemeResult {
-  implicit val jsonWriter = Json.writes[GeoLocationSchemeResult]
-}
 
 object LocationSchemeService extends LocationSchemeService {
   val locationSchemeRepository = FileLocationSchemeRepository
@@ -36,8 +30,10 @@ object LocationSchemeService extends LocationSchemeService {
 trait LocationSchemeService {
   def locationSchemeRepository: LocationSchemeRepository
 
-  def getSchemesAndLocationsByEligibility(latitude: Double, longitude: Double, hasALevels: Boolean,
-                                          hasStemALevels: Boolean): Future[IndexedSeq[GeoLocationSchemeResult]] = {
+  def getSchemesAndLocationsByEligibility(hasALevels: Boolean, hasStemALevels: Boolean,
+                                          latitudeOpt: Option[Double] = None, longitudeOpt: Option[Double] = None)
+  : Future[IndexedSeq[GeoLocationSchemeResult]] = {
+
     // calculate distance and search
     for {
       schemeInfo <- locationSchemeRepository.getSchemeInfo
@@ -48,12 +44,18 @@ trait LocationSchemeService {
       val eligibleSchemeNames = eligibleSchemes.map(_.schemeName)
 
       val selectedLocations = locationsWithSchemes.collect {
-        case LocationSchemes(locationName, lat, lng, schemes) if eligibleSchemeNames.intersect(schemes).nonEmpty =>
-          val distance = DistanceCalculator.calcKilometersBetween(latitude, longitude, lat, lng)
-          GeoLocationSchemeResult(distance.toInt, locationName, eligibleSchemeNames.intersect(schemes))
+        case LocationSchemes(locationName, schemeLatitude, schemeLongitude, schemes) if eligibleSchemeNames.intersect(schemes).nonEmpty =>
+          val distance = for {
+            latitude <- latitudeOpt
+            longitude <- longitudeOpt
+          } yield {
+              DistanceCalculator.calcKilometersBetween(latitude, longitude, schemeLatitude, schemeLongitude)
+          }
+
+          GeoLocationSchemeResult(distance, locationName, eligibleSchemeNames.intersect(schemes))
       }
 
-      selectedLocations.sortBy(r => r.distanceKm)
+      selectedLocations.sortBy(r => r.distanceKm.getOrElse(0d))
     }
   }
 }

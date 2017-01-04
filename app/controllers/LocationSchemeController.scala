@@ -29,11 +29,13 @@ object LocationSchemeController extends LocationSchemeController {
 trait LocationSchemeController extends BaseController {
   def locationSchemeService: LocationSchemeService
 
-  def getSchemesAndLocationsByEligibility(): Action[AnyContent] = Action.async { implicit request =>
-    val lat = request.getQueryString("latitude").get.toDouble
-    val lng = request.getQueryString("longitude").get.toDouble
-    val hasALevels = request.getQueryString("hasALevels").get.toBoolean
-    val hasStemALevels = request.getQueryString("hasStemALevels").get.toBoolean
-    locationSchemeService.getSchemesAndLocationsByEligibility(lat, lng, hasALevels, hasStemALevels).map(r => Ok(Json.toJson(r)))
+  def getSchemesAndLocationsByEligibility(hasALevels: Boolean, hasStemALevels: Boolean): Action[AnyContent] = Action.async { implicit request =>
+    locationSchemeService.getSchemesAndLocationsByEligibility(hasALevels, hasStemALevels).map(r => Ok(Json.toJson(r)))
+  }
+
+  def getSchemesAndLocationsByEligibilityAndLocation(latitude: Double, longitude: Double, hasALevels: Boolean,
+                                          hasStemALevels: Boolean): Action[AnyContent] = Action.async { implicit request =>
+    locationSchemeService.getSchemesAndLocationsByEligibility(hasALevels, hasStemALevels,
+      Some(latitude), Some(longitude)).map(r => Ok(Json.toJson(r)))
   }
 }

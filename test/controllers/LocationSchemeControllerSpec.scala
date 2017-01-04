@@ -21,7 +21,8 @@ import org.mockito.Mockito._
 import play.api.libs.json.{ JsArray, JsNumber, JsString }
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.locationschemes.{ GeoLocationSchemeResult, LocationSchemeService }
+import services.locationschemes.LocationSchemeService
+import services.locationschemes.exchangeobjects.GeoLocationSchemeResult
 import testkit.UnitSpec
 
 import scala.concurrent.Future
