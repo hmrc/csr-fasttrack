@@ -56,7 +56,7 @@ class ApplicationValidatorSpec extends PlaySpec {
       validator.validateAssistanceDetails must be(false)
     }
 
-    "return false if we don't have gis setting and have disability" in {
+    "return false if we don't have gis setting and we have disability" in {
       val validator = ApplicationValidator(
         personalDetails,
         assistanceDetails.copy(guaranteedInterview = None), None, List()

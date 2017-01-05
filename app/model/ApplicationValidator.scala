@@ -31,12 +31,12 @@ case class ApplicationValidator(gd: PersonalDetails, ad: AssistanceDetails, sl: 
 
   def validateAssistanceDetails: Boolean = {
 
-    def ifNeeds(value: Option[Boolean])(f: AssistanceDetails => Boolean) = value match {
-      case Some(true) => f(ad)
+    def ifNeeds(value: Boolean)(f: AssistanceDetails => Boolean) = value match {
+      case true => f(ad)
       case _ => true
     }
 
-    val ifHasDisability = ifNeeds(Some(ad.hasDisability=="Yes")) _
+    val ifHasDisability = ifNeeds(ad.hasDisability=="Yes") _
     val ifNeedsOnlineAdjustments = ifNeeds(ad.needsSupportForOnlineAssessment) _
     val ifNeedsVenueAdjustments = ifNeeds(ad.needsSupportAtVenue) _
 

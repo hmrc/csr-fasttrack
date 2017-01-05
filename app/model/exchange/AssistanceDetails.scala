@@ -23,17 +23,18 @@ import scala.language.implicitConversions
 case class AssistanceDetails(hasDisability: String,
                              hasDisabilityDescription: Option[String],
                              guaranteedInterview: Option[Boolean],
-                             needsSupportForOnlineAssessment: Option[Boolean],
+                             needsSupportForOnlineAssessment: Boolean,
                              needsSupportForOnlineAssessmentDescription: Option[String],
-                             needsSupportAtVenue: Option[Boolean],
+                             needsSupportAtVenue: Boolean,
                              needsSupportAtVenueDescription: Option[String],
-                              // TODO: Change adjustments
+                             // TODO: Change adjustments
                              confirmedAdjustments: Option[Boolean],
                              numericalTimeAdjustmentPercentage: Option[Int],
                              verbalTimeAdjustmentPercentage: Option[Int])
 
 object AssistanceDetails {
-  implicit val assistanceDetailsExchangeFormat = Json.format[AssistanceDetails]
+  implicit val assistanceDetailsFormat = Json.format[AssistanceDetails]
+
   implicit def fromPersisted(assistanceDetails: model.persisted.AssistanceDetails): AssistanceDetails = {
     AssistanceDetails(
       hasDisability = assistanceDetails.hasDisability,

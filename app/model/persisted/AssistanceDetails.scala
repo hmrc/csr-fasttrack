@@ -18,25 +18,27 @@ package model.persisted
 
 import play.api.libs.json.Json
 import reactivemongo.bson.Macros
+
 import scala.language.implicitConversions
 
 
 case class AssistanceDetails(hasDisability: String,
                              hasDisabilityDescription: Option[String],
                              guaranteedInterview: Option[Boolean],
-                             needsSupportForOnlineAssessment: Option[Boolean],
+                             needsSupportForOnlineAssessment: Boolean,
                              needsSupportForOnlineAssessmentDescription: Option[String],
-                             needsSupportAtVenue: Option[Boolean],
+                             needsSupportAtVenue: Boolean,
                              needsSupportAtVenueDescription: Option[String],
                              // TODO: Change adjustments
                              confirmedAdjustments: Option[Boolean],
                              numericalTimeAdjustmentPercentage: Option[Int],
                              verbalTimeAdjustmentPercentage: Option[Int]
-)
+                            )
 
 object AssistanceDetails {
   implicit val assistanceDetailsFormat = Json.format[AssistanceDetails]
   implicit val assistanceDetailsHandler = Macros.handler[AssistanceDetails]
+
   implicit def fromExchange(assistanceDetails: model.exchange.AssistanceDetails): AssistanceDetails = {
     AssistanceDetails(
       hasDisability = assistanceDetails.hasDisability,
