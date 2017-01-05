@@ -300,7 +300,6 @@ object Commands {
     implicit val createApplicationRequestFormats: Format[CreateApplicationRequest] = Json.format[CreateApplicationRequest]
     implicit val withdrawApplicationRequestFormats: Format[WithdrawApplicationRequest] = Json.format[WithdrawApplicationRequest]
     implicit val updatePersonalDetailsRequestFormats: Format[UpdateGeneralDetails] = Json.format[UpdateGeneralDetails]
-    implicit val updateAssistanceDetailsRequestFormats: Format[AssistanceDetails] = Json.format[AssistanceDetails]
 
     implicit val answerFormats = Json.format[Answer]
     implicit val questionFormats = Json.format[Question]

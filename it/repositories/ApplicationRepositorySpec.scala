@@ -40,7 +40,6 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
   val collectionName = "application"
 
   def applicationRepo = new GeneralApplicationMongoRepository(GBTimeZoneService)
-  def assistanceRepo = new AssistanceDetailsMongoRepository()
 
   "Application repository" should {
     "create indexes for the repository" in {

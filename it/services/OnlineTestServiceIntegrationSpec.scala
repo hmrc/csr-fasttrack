@@ -180,7 +180,9 @@ class OnlineTestServiceIntegrationSpec extends IntegrationSpec with MockitoSugar
       "applicationStatus" -> appStatus,
       "personal-details" -> BSONDocument("preferredName" -> "Test Preferred Name"),
       "assistance-details" -> BSONDocument(
-        "hasDisability" -> "No"
+        "hasDisability" -> "No",
+        "needsSupportForOnlineAssessment" -> false,
+        "needsSupportAtVenue" -> false
       )
     )).futureValue
   }

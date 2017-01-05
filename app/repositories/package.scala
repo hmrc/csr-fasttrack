@@ -156,7 +156,6 @@ package object repositories {
   implicit val withdrawHandler: BSONHandler[BSONDocument, WithdrawApplicationRequest] = Macros.handler[WithdrawApplicationRequest]
   implicit val cdHandler: BSONHandler[BSONDocument, ContactDetails] = Macros.handler[ContactDetails]
   implicit val addressHandler: BSONHandler[BSONDocument, Address] = Macros.handler[Address]
-  implicit val assistanceHandler: BSONHandler[BSONDocument, AssistanceDetails] = Macros.handler[AssistanceDetails]
   implicit val answerHandler: BSONHandler[BSONDocument, PersistedAnswer] = Macros.handler[PersistedAnswer]
   implicit val diversityEthnicityHandler: BSONHandler[BSONDocument, DiversityEthnicity] = Macros.handler[DiversityEthnicity]
   implicit val diversitySocioEconomicsHandler: BSONHandler[BSONDocument, DiversitySocioEconomic] = Macros.handler[DiversitySocioEconomic]
