@@ -18,6 +18,8 @@ package services.locationschemes
 
 import repositories.{ FileLocationSchemeRepository, LocationSchemeRepository, LocationSchemes }
 import services.locationschemes.exchangeobjects.GeoLocationSchemeResult
+import repositories._
+import repositories.application.GeneralApplicationRepository
 
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.Future
@@ -25,10 +27,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object LocationSchemeService extends LocationSchemeService {
   val locationSchemeRepository = FileLocationSchemeRepository
+  val appRepository = applicationRepository
 }
 
 trait LocationSchemeService {
-  def locationSchemeRepository: LocationSchemeRepository
+  val locationSchemeRepository: LocationSchemeRepository
+  val appRepository: GeneralApplicationRepository
 
   def getSchemesAndLocationsByEligibility(hasALevels: Boolean, hasStemALevels: Boolean,
                                           latitudeOpt: Option[Double] = None, longitudeOpt: Option[Double] = None)
@@ -44,7 +48,8 @@ trait LocationSchemeService {
       val eligibleSchemeNames = eligibleSchemes.map(_.schemeName)
 
       val selectedLocations = locationsWithSchemes.collect {
-        case LocationSchemes(locationName, schemeLatitude, schemeLongitude, schemes) if eligibleSchemeNames.intersect(schemes).nonEmpty =>
+        case LocationSchemes(locationId, locationName, schemeLatitude, schemeLongitude, schemes)
+          if eligibleSchemeNames.intersect(schemes).nonEmpty =>
           val distance = for {
             latitude <- latitudeOpt
             longitude <- longitudeOpt
@@ -52,10 +57,14 @@ trait LocationSchemeService {
               DistanceCalculator.calcKilometersBetween(latitude, longitude, schemeLatitude, schemeLongitude)
           }
 
-          GeoLocationSchemeResult(distance, locationName, eligibleSchemeNames.intersect(schemes))
+          GeoLocationSchemeResult(distance, locationId, locationName, eligibleSchemeNames.intersect(schemes))
       }
 
       selectedLocations.sortBy(r => r.distanceKm.getOrElse(0d))
     }
+  }
+
+  def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit] = {
+    appRepository.updateSchemeLocations(applicationId, locationIds)
   }
 }

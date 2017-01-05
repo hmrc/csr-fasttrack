@@ -20,7 +20,7 @@ import play.api.libs.json.Json
 
 import scala.collection.immutable.IndexedSeq
 
-case class GeoLocationSchemeResult(distanceKm: Option[Double], locationName: String, schemes: IndexedSeq[String])
+case class GeoLocationSchemeResult(distanceKm: Option[Double], locationId: String, locationName: String, schemes: IndexedSeq[String])
 
 object GeoLocationSchemeResult {
   implicit val jsonWriter = Json.writes[GeoLocationSchemeResult]

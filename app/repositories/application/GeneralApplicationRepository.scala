@@ -101,6 +101,7 @@ trait GeneralApplicationRepository {
   def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String,
     evaluationResult: AssessmentRuleCategoryResult, newApplicationStatus: String): Future[Unit]
 
+  def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit]
 }
 
 // scalastyle:off number.of.methods
@@ -968,6 +969,19 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       ))
 
     collection.update(query, passMarkEvaluation, upsert = false) map {
+      case _ => ()
+    }
+  }
+
+  def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit] = {
+    require(locationIds.nonEmpty, "Scheme location preferences cannot be empty")
+
+    val query = BSONDocument("applicationId" -> applicationId)
+    val schemeLocationsBSON = BSONDocument("$set" -> BSONDocument(
+      "progress-status.scheme-location" -> true,
+      "scheme-locations" -> locationIds
+    ))
+    collection.update(query, schemeLocationsBSON, upsert = false) map {
       case _ => ()
     }
   }

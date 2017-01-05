@@ -26,9 +26,23 @@ import play.api.libs.functional.syntax._
 import scala.collection.immutable.IndexedSeq
 import scala.concurrent.Future
 
-case class LocationSchemes(locationName: String, latitude: Double, longitude: Double, schemes: List[String])
+case class LocationSchemes(id: String, locationName: String, latitude: Double, longitude: Double, schemes: List[String])
+
+object LocationSchemes {
+  implicit val locationReader: Reads[LocationSchemes] = (
+    (__ \ "id").read[String] and
+    (__ \ "name").read[String] and
+      (__ \ "lat").read[Double] and
+      (__ \ "lng").read[Double] and
+      (__ \ "schemes").read[List[String]]
+    ) (LocationSchemes.apply _)
+}
 
 protected case class Locations(locations: List[LocationSchemes])
+
+object Locations {
+  implicit val locationsReader: Reads[Locations] = Json.reads[Locations]
+}
 
 case class SchemeInfo(schemeName: String, requiresALevel: Boolean, requiresALevelInStem: Boolean)
 
@@ -36,16 +50,8 @@ object FileLocationSchemeRepository extends LocationSchemeRepository
 
 trait LocationSchemeRepository {
 
-  implicit val locationReader: Reads[LocationSchemes] = (
-    (__ \ "name").read[String] and
-      (__ \ "lat").read[Double] and
-      (__ \ "lng").read[Double] and
-      (__ \ "schemes").read[List[String]]
-    )(LocationSchemes.apply _)
-
-  implicit val locationsReader: Reads[Locations] = Json.reads[Locations]
-
   private lazy val cachedLocationSchemes =  {
+    // TODO: File needs updating with correct scheme and location data
     val input = managed(Play.application.resourceAsStream("locations-schemes.json"))
     val loaded = input.acquireAndGet(r => Json.parse(r).as[Locations])
     Future.successful(loaded.locations.toIndexedSeq)
@@ -53,13 +59,14 @@ trait LocationSchemeRepository {
 
   def getSchemesAndLocations: Future[IndexedSeq[LocationSchemes]] = cachedLocationSchemes
 
+  // TODO: Needs updating with correct scheme data
   def getSchemeInfo: Future[IndexedSeq[SchemeInfo]] = {
     Future.successful(IndexedSeq(
       SchemeInfo("Business", requiresALevel = true, requiresALevelInStem = true),
       SchemeInfo("Commercial", requiresALevel = true, requiresALevelInStem = true),
-      SchemeInfo("Digital and technology", requiresALevel = true, requiresALevelInStem = true),
-      SchemeInfo("Finance", requiresALevel = true, requiresALevelInStem = true),
-      SchemeInfo("Project Delivery", requiresALevel = true, requiresALevelInStem = true)
+      SchemeInfo("Digital and technology", requiresALevel = false, requiresALevelInStem = true),
+      SchemeInfo("Finance", requiresALevel = true, requiresALevelInStem = false),
+      SchemeInfo("Project Delivery", requiresALevel = false, requiresALevelInStem = false)
     ))
   }
 }

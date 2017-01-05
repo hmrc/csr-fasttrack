@@ -16,11 +16,14 @@
 
 package controllers
 
-import play.api.libs.json.Json
+import model.Commands.CreateApplicationRequest
+import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent }
 import services.locationschemes.LocationSchemeService
 import uk.gov.hmrc.play.microservice.controller.BaseController
+
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object LocationSchemeController extends LocationSchemeController {
   val locationSchemeService = LocationSchemeService
@@ -29,13 +32,17 @@ object LocationSchemeController extends LocationSchemeController {
 trait LocationSchemeController extends BaseController {
   def locationSchemeService: LocationSchemeService
 
-  def getSchemesAndLocationsByEligibility(hasALevels: Boolean, hasStemALevels: Boolean): Action[AnyContent] = Action.async { implicit request =>
-    locationSchemeService.getSchemesAndLocationsByEligibility(hasALevels, hasStemALevels).map(r => Ok(Json.toJson(r)))
+  def getSchemesAndLocationsByEligibility(hasALevels: Boolean, hasStemALevels: Boolean,
+                                                    latitude: Option[Double], longitude: Option[Double]): Action[AnyContent] =
+    Action.async { implicit request =>
+    locationSchemeService.getSchemesAndLocationsByEligibility(hasALevels, hasStemALevels,
+      latitude, longitude).map(r => Ok(Json.toJson(r)))
   }
 
-  def getSchemesAndLocationsByEligibilityAndLocation(latitude: Double, longitude: Double, hasALevels: Boolean,
-                                          hasStemALevels: Boolean): Action[AnyContent] = Action.async { implicit request =>
-    locationSchemeService.getSchemesAndLocationsByEligibility(hasALevels, hasStemALevels,
-      Some(latitude), Some(longitude)).map(r => Ok(Json.toJson(r)))
-  }
+  def updateSchemeLocations(applicationId: String): Action[JsValue] =
+    Action.async(parse.json) { implicit request =>
+      withJsonBody[List[String]] { locationIds =>
+        locationSchemeService.updateSchemeLocations(applicationId, locationIds).map { _ => Ok }
+      }
+    }
 }
