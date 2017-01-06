@@ -25,6 +25,7 @@ import model.OnlineTestCommands.Implicits._
 import model.OnlineTestCommands.TestResult
 import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme }
 import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
+import model.commands.OnlineTestProgressResponse
 import org.joda.time.{ DateTime, LocalDate, LocalTime }
 import play.api.libs.json._
 
@@ -91,28 +92,22 @@ object Commands {
     failedNotified: Boolean = false
   )
 
+
+
   case class ProgressResponse(
-    applicationId: String,
-    personalDetails: Boolean = false,
-    frameworksLocation: Boolean = false,
-    assistance: Boolean = false,
-    review: Boolean = false,
-    questionnaire: List[String] = Nil,
-    submitted: Boolean = false,
-    withdrawn: Boolean = false,
-    onlineTestInvited: Boolean = false,
-    onlineTestStarted: Boolean = false,
-    onlineTestCompleted: Boolean = false,
-    onlineTestExpired: Boolean = false,
-    onlineTestAwaitingReevaluation: Boolean = false,
-    onlineTestFailed: Boolean = false,
-    onlineTestFailedNotified: Boolean = false,
-    onlineTestAwaitingAllocation: Boolean = false,
-    onlineTestAllocationConfirmed: Boolean = false,
-    onlineTestAllocationUnconfirmed: Boolean = false,
-    failedToAttend: Boolean = false,
-    assessmentScores: AssessmentScores = AssessmentScores(),
-    assessmentCentre: AssessmentCentre = AssessmentCentre()
+                               applicationId: String,
+                               personalDetails: Boolean = false,
+                               hasLocations: Boolean = false,
+                               hasSchemes: Boolean = false,
+                               assistance: Boolean = false,
+                               review: Boolean = false,
+                               questionnaire: List[String] = Nil,
+                               submitted: Boolean = false,
+                               withdrawn: Boolean = false,
+                               onlineTest: OnlineTestProgressResponse = OnlineTestProgressResponse(),
+                               failedToAttend: Boolean = false,
+                               assessmentScores: AssessmentScores = AssessmentScores(),
+                               assessmentCentre: AssessmentCentre = AssessmentCentre()
   )
 
   case class Report(applicationId: String, progress: Option[String], firstLocation: Option[String],

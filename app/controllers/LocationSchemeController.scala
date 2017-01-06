@@ -39,10 +39,21 @@ trait LocationSchemeController extends BaseController {
       latitude, longitude).map(r => Ok(Json.toJson(r)))
   }
 
+  def getAvailableSchemesInSelectedLocations(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    locationSchemeService.getAvailableSchemesInSelectedLocations(applicationId).map(r => Ok(Json.toJson(r)))
+  }
+
   def updateSchemeLocations(applicationId: String): Action[JsValue] =
     Action.async(parse.json) { implicit request =>
       withJsonBody[List[String]] { locationIds =>
         locationSchemeService.updateSchemeLocations(applicationId, locationIds).map { _ => Ok }
+      }
+    }
+
+  def updateSchemes(applicationId: String): Action[JsValue] =
+    Action.async(parse.json) { implicit request =>
+      withJsonBody[List[String]] { schemeNames =>
+        locationSchemeService.updateSchemes(applicationId, schemeNames).map { _ => Ok }
       }
     }
 }

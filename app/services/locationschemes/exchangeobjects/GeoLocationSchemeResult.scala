@@ -17,10 +17,9 @@
 package services.locationschemes.exchangeobjects
 
 import play.api.libs.json.Json
+import repositories.SchemeInfo
 
-import scala.collection.immutable.IndexedSeq
-
-case class GeoLocationSchemeResult(distanceKm: Option[Double], locationId: String, locationName: String, schemes: IndexedSeq[String])
+case class GeoLocationSchemeResult(locationId: String, locationName: String, distanceKm: Option[Double], schemes: List[SchemeInfo])
 
 object GeoLocationSchemeResult {
   implicit val jsonWriter = Json.writes[GeoLocationSchemeResult]

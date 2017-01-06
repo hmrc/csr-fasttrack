@@ -44,7 +44,11 @@ object Locations {
   implicit val locationsReader: Reads[Locations] = Json.reads[Locations]
 }
 
-case class SchemeInfo(schemeName: String, requiresALevel: Boolean, requiresALevelInStem: Boolean)
+case class SchemeInfo(name: String, requiresALevel: Boolean, requiresALevelInStem: Boolean)
+
+object SchemeInfo {
+  implicit val schemeInfoFormat = Json.format[SchemeInfo]
+}
 
 object FileLocationSchemeRepository extends LocationSchemeRepository
 
@@ -54,14 +58,14 @@ trait LocationSchemeRepository {
     // TODO: File needs updating with correct scheme and location data
     val input = managed(Play.application.resourceAsStream("locations-schemes.json"))
     val loaded = input.acquireAndGet(r => Json.parse(r).as[Locations])
-    Future.successful(loaded.locations.toIndexedSeq)
+    Future.successful(loaded.locations)
   }
 
-  def getSchemesAndLocations: Future[IndexedSeq[LocationSchemes]] = cachedLocationSchemes
+  def getSchemesAndLocations: Future[List[LocationSchemes]] = cachedLocationSchemes
 
   // TODO: Needs updating with correct scheme data
-  def getSchemeInfo: Future[IndexedSeq[SchemeInfo]] = {
-    Future.successful(IndexedSeq(
+  def getSchemeInfo: Future[List[SchemeInfo]] = {
+    Future.successful(List(
       SchemeInfo("Business", requiresALevel = true, requiresALevelInStem = true),
       SchemeInfo("Commercial", requiresALevel = true, requiresALevelInStem = true),
       SchemeInfo("Digital and technology", requiresALevel = false, requiresALevelInStem = true),

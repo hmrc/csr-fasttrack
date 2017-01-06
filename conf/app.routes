@@ -19,15 +19,9 @@ PUT         /media/create                                                control
 
 
 GET         /scheme-locations/by-eligibility                             controllers.LocationSchemeController.getSchemesAndLocationsByEligibility(hasALevels: Boolean, hasStemALevels: Boolean, latitude: Option[Double] ?= None, longitude: Option[Double] ?= None)
-
 PUT         /scheme-locations/:applicationId                             controllers.LocationSchemeController.updateSchemeLocations(applicationId: String)
-
-PUT         /framework-preference/first/:applicationId                   controllers.FrameworkPreferenceController.submitFirstPreference(applicationId: String)
-PUT         /framework-preference/second/:applicationId                  controllers.FrameworkPreferenceController.submitSecondPreference(applicationId: String)
-PUT         /framework-preference/second/intention/:applicationId        controllers.FrameworkPreferenceController.submitSecondPreferenceIntention(applicationId: String)
-PUT         /framework-preference/alternatives/:applicationId            controllers.FrameworkPreferenceController.submitAlternatives(applicationId: String)
-
-GET         /framework-preference/:applicationId                         controllers.FrameworkPreferenceController.getPreferences(applicationId: String)
+GET         /schemes/available/:applicationId                            controllers.LocationSchemeController.getAvailableSchemesInSelectedLocations(applicationId: String)
+PUT         /schemes/:applicationId                                      controllers.LocationSchemeController.updateSchemes(applicationId: String)
 
 PUT         /pass-mark-settings/create                                   controllers.OnlineTestPassMarkSettingsController.createPassMarkSettings
 GET         /pass-mark-settings/getLatestVersion                         controllers.OnlineTestPassMarkSettingsController.getLatestVersion

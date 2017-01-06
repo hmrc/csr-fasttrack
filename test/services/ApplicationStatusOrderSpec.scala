@@ -64,7 +64,7 @@ class ApplicationStatusOrderSpec extends PlaySpec {
 
   "an application in framework and locations" should {
     "return schemes_and_locations_completed" in {
-      val customProgress = emptyProgress.copy(personalDetails = true, frameworksLocation = true)
+      val customProgress = emptyProgress.copy(personalDetails = true, hasLocationsAndSchemes = true)
       ApplicationStatusOrder.getStatus(customProgress) must be("schemes_and_locations_completed")
     }
   }
@@ -75,7 +75,7 @@ class ApplicationStatusOrderSpec extends PlaySpec {
       ApplicationStatusOrder.getStatus(customProgress) must be("personal_details_completed")
     }
     "return personal_details_completed when sections are not completed" in {
-      val customProgress = emptyProgress.copy(personalDetails = true, frameworksLocation = false)
+      val customProgress = emptyProgress.copy(personalDetails = true, hasLocationsAndSchemes = false)
       ApplicationStatusOrder.getStatus(customProgress) must be("personal_details_completed")
     }
   }
