@@ -54,7 +54,7 @@ trait AssistanceDetailsController extends BaseController {
     } yield {
       Ok(Json.toJson(ad))
     }).recover {
-      case e: AssistanceDetailsNotFound => NotFound(s"cannot find assistance details for user: ${e.id}")
+      case e: AssistanceDetailsNotFound => NotFound(s"cannot find assistance details for application: ${e.id}")
     }
   }
 }

@@ -44,7 +44,7 @@ class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
     val query = BSONDocument("applicationId" -> applicationId, "userId" -> userId)
     val updateBSON = BSONDocument("$set" -> BSONDocument(
       "applicationStatus" -> "IN_PROGRESS",
-      s"progress-status.assistance" -> true, // TODO: rename to assistance-details
+      s"progress-status.assistance-details" -> true,
       AssistanceDetailsCollection -> ad
     ))
 

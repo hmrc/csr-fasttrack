@@ -39,6 +39,8 @@ trait MongoRepositorySpec extends PlaySpec with Inside with Inspectors with Scal
   with BeforeAndAfterEach with BeforeAndAfterAll {
   import ImplicitBSONHandlers._
 
+  val FrameworkId = "FrameworkId"
+
   // System-wide setting for integration test timeouts.
   override implicit def patienceConfig = PatienceConfig(timeout = scaled(Span(5000, Millis)))
 
