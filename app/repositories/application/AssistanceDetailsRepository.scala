@@ -71,14 +71,12 @@ class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
         val needsAdjustment = root.getAs[String]("needsAdjustment")
         val typeOfAdjustments = root.getAs[List[String]]("typeOfAdjustments")
         val otherAdjustments = root.getAs[String]("otherAdjustments")
-        val campaignReferrer = root.getAs[String]("campaignReferrer")
-        val campaignOther = root.getAs[String]("campaignOther")
         val confirmation = root.getAs[Boolean]("adjustments-confirmed")
         val verbalTimeAdjustmentPercentage = root.getAs[Int]("verbalTimeAdjustmentPercentage")
         val numericalTimeAdjustmentPercentage = root.getAs[Int]("numericalTimeAdjustmentPercentage")
 
         AssistanceDetailsExchange(needsAssistance, typeOfdisability, detailsOfdisability, guaranteedInterview,
-          needsAdjustment, typeOfAdjustments, otherAdjustments, campaignReferrer, campaignOther, confirmation,
+          needsAdjustment, typeOfAdjustments, otherAdjustments, confirmation,
           numericalTimeAdjustmentPercentage, verbalTimeAdjustmentPercentage)
       }
       case _ => throw new AssistanceDetailsNotFound(applicationId)
