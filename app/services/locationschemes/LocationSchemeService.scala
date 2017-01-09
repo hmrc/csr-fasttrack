@@ -84,6 +84,10 @@ trait LocationSchemeService {
     appRepository.updateSchemeLocations(applicationId, locationIds)
   }
 
+  def getSchemes(applicationId: String): Future[List[String]] = {
+    appRepository.getSchemes(applicationId)
+  }
+
   def updateSchemes(applicationId: String, schemeNames: List[String]): Future[Unit] = {
     appRepository.updateSchemes(applicationId, schemeNames)
   }

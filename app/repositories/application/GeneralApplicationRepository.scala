@@ -107,6 +107,8 @@ trait GeneralApplicationRepository {
 
   def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit]
 
+  def getSchemes(applicationId: String): Future[List[String]]
+
   def updateSchemes(applicationId: String, schemeNames: List[String]): Future[Unit]
 }
 // scalastyle:on number.of.methods
@@ -1003,6 +1005,16 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     ))
     collection.update(query, schemeLocationsBSON, upsert = false) map {
       case _ => ()
+    }
+  }
+
+  def getSchemes(applicationId: String): Future[List[String]] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    val projection = BSONDocument("schemes" -> 1)
+
+    collection.find(query, projection).one[BSONDocument] map {
+      case Some(document) => document.getAs[List[String]]("schemes").get
+      case None => Nil
     }
   }
 
