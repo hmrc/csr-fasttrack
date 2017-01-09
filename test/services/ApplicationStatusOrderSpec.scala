@@ -66,7 +66,7 @@ class ApplicationStatusOrderSpec extends PlaySpec {
   "an application in framework and locations" should {
     "return schemes_completed" in {
       val customProgress = emptyProgress.copy(personalDetails = true, hasLocations = true, hasSchemes = true)
-      ApplicationStatusOrder.getStatus(customProgress) must be("schemes-preferences_completed")
+      ApplicationStatusOrder.getStatus(customProgress) must be("schemes_preferences_completed")
     }
   }
 
