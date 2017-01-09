@@ -25,6 +25,7 @@ import model.EvaluationResults._
 import model.Exceptions.ApplicationNotFound
 import model.PersistedObjects.ApplicationForNotification
 import model._
+import model.commands.OnlineTestProgressResponse
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{ DateTime, LocalDate }
 import play.api.Logger
@@ -40,6 +41,7 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+// scalastyle:off number.of.methods
 trait GeneralApplicationRepository {
 
   def create(userId: String, frameworkId: String): Future[ApplicationResponse]
@@ -101,7 +103,15 @@ trait GeneralApplicationRepository {
   def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String,
     evaluationResult: AssessmentRuleCategoryResult, newApplicationStatus: String): Future[Unit]
 
+  def getSchemeLocations(applicationId: String): Future[List[String]]
+
+  def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit]
+
+  def getSchemes(applicationId: String): Future[List[String]]
+
+  def updateSchemes(applicationId: String, schemeNames: List[String]): Future[Unit]
 }
+// scalastyle:on number.of.methods
 
 // scalastyle:off number.of.methods
 // scalastyle:off file.size.limit
@@ -163,22 +173,25 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       ProgressResponse(
         applicationId,
         personalDetails = getProgress("personal-details"),
-        frameworksLocation = getProgress("frameworks-location"),
+        hasLocations = getProgress("scheme-locations"),
+        hasSchemes = getProgress("scheme-preferences"),
         assistance = getProgress("assistance"),
         review = getProgress("review"),
         questionnaire = questionnaire,
         submitted = getProgress("submitted"),
         withdrawn = getProgress("withdrawn"),
-        onlineTestInvited = getProgress("online_test_invited"),
-        onlineTestStarted = getProgress("online_test_started"),
-        onlineTestCompleted = getProgress("online_test_completed"),
-        onlineTestExpired = getProgress("online_test_expired"),
-        onlineTestAwaitingReevaluation = getProgress("awaiting_online_test_re_evaluation"),
-        onlineTestFailed = getProgress("online_test_failed"),
-        onlineTestFailedNotified = getProgress("online_test_failed_notified"),
-        onlineTestAwaitingAllocation = getProgress("awaiting_online_test_allocation"),
-        onlineTestAllocationConfirmed = getProgress("allocation_confirmed"),
-        onlineTestAllocationUnconfirmed = getProgress("allocation_unconfirmed"),
+        OnlineTestProgressResponse(
+          invited = getProgress("online_test_invited"),
+          started = getProgress("online_test_started"),
+          completed = getProgress("online_test_completed"),
+          expired = getProgress("online_test_expired"),
+          awaitingReevaluation = getProgress("awaiting_online_test_re_evaluation"),
+          failed = getProgress("online_test_failed"),
+          failedNotified = getProgress("online_test_failed_notified"),
+          awaitingAllocation = getProgress("awaiting_online_test_allocation"),
+          allocationConfirmed = getProgress("allocation_confirmed"),
+          allocationUnconfirmed = getProgress("allocation_unconfirmed")
+        ),
         failedToAttend = getProgress("failed_to_attend"),
         assessmentScores = AssessmentScores(getProgress("assessment_scores_entered"), getProgress("assessment_scores_accepted")),
         assessmentCentre = AssessmentCentre(
@@ -968,6 +981,50 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       ))
 
     collection.update(query, passMarkEvaluation, upsert = false) map {
+      case _ => ()
+    }
+  }
+
+  def getSchemeLocations(applicationId: String): Future[List[String]] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    val projection = BSONDocument("scheme-locations" -> 1)
+
+    collection.find(query, projection).one[BSONDocument] map {
+      case Some(document) => document.getAs[List[String]]("scheme-locations").get
+      case None => Nil
+    }
+  }
+
+  def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit] = {
+    require(locationIds.nonEmpty, "Scheme location preferences cannot be empty")
+
+    val query = BSONDocument("applicationId" -> applicationId)
+    val schemeLocationsBSON = BSONDocument("$set" -> BSONDocument(
+      "progress-status.scheme-locations" -> true,
+      "scheme-locations" -> locationIds
+    ))
+    collection.update(query, schemeLocationsBSON, upsert = false) map {
+      case _ => ()
+    }
+  }
+
+  def getSchemes(applicationId: String): Future[List[String]] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    val projection = BSONDocument("schemes" -> 1)
+
+    collection.find(query, projection).one[BSONDocument] map {
+      case Some(document) => document.getAs[List[String]]("schemes").get
+      case None => Nil
+    }
+  }
+
+  def updateSchemes(applicationId: String, schemeNames: List[String]): Future[Unit] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    val schemePreferencesBSON = BSONDocument("$set" -> BSONDocument(
+      "progress-status.scheme-preferences" -> true,
+      "schemes" -> schemeNames
+    ))
+    collection.update(query, schemePreferencesBSON, upsert = false) map {
       case _ => ()
     }
   }
