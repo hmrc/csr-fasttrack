@@ -162,7 +162,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         applicationId,
         personalDetails = getProgress("personal-details"),
         frameworksLocation = getProgress("frameworks-location"),
-        assistanceDetails = getProgress("assistance"),
+        assistanceDetails = getProgress("assistance-details"),
         review = getProgress("review"),
         questionnaire = questionnaire,
         submitted = getProgress("submitted"),
