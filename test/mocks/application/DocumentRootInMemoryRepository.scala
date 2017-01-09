@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ object DocumentRootInMemoryRepository extends DocumentRootInMemoryRepository
 /**
  * @deprecated Please use Mockito
  */
+// scalastyle:off number.of.methods
 class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
 
   override def find(applicationIds: List[String]): Future[List[Candidate]] = ???
@@ -144,4 +145,11 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
 
   def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResult,
     newApplicationStatus: String): Future[Unit] = ???
+
+  def getSchemeLocations(applicationId: String): Future[List[String]] = ???
+
+  def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit] = ???
+
+  def updateSchemes(applicationId: String, schemeNames: List[String]): Future[Unit] = ???
 }
+// scalastyle:on number.of.methods

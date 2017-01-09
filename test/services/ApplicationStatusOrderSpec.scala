@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package services
 
 import model.ApplicationStatusOrder
 import model.Commands.ProgressResponse
+import model.commands.OnlineTestProgressResponse
 import org.scalatestplus.play.PlaySpec
 
 class ApplicationStatusOrderSpec extends PlaySpec {
@@ -32,8 +33,8 @@ class ApplicationStatusOrderSpec extends PlaySpec {
 
   "a registered application" should {
     "return registered" in {
-      val status = ApplicationStatusOrder.getStatus(new ProgressResponse("id", false, false, false, false, Nil,
-        false, false, false, false, false, false))
+      val status = ApplicationStatusOrder.getStatus(new ProgressResponse("id", false, false, false, false, false, Nil,
+        false, false, OnlineTestProgressResponse()))
       status must be("registered")
     }
   }
@@ -63,9 +64,9 @@ class ApplicationStatusOrderSpec extends PlaySpec {
   }
 
   "an application in framework and locations" should {
-    "return schemes_and_locations_completed" in {
-      val customProgress = emptyProgress.copy(personalDetails = true, hasLocationsAndSchemes = true)
-      ApplicationStatusOrder.getStatus(customProgress) must be("schemes_and_locations_completed")
+    "return schemes_completed" in {
+      val customProgress = emptyProgress.copy(personalDetails = true, hasLocations = true, hasSchemes = true)
+      ApplicationStatusOrder.getStatus(customProgress) must be("schemes-preferences_completed")
     }
   }
 
@@ -75,7 +76,7 @@ class ApplicationStatusOrderSpec extends PlaySpec {
       ApplicationStatusOrder.getStatus(customProgress) must be("personal_details_completed")
     }
     "return personal_details_completed when sections are not completed" in {
-      val customProgress = emptyProgress.copy(personalDetails = true, hasLocationsAndSchemes = false)
+      val customProgress = emptyProgress.copy(personalDetails = true, hasLocations = false, hasSchemes = false)
       ApplicationStatusOrder.getStatus(customProgress) must be("personal_details_completed")
     }
   }
@@ -100,12 +101,12 @@ class ApplicationStatusOrderSpec extends PlaySpec {
 
 object ApplicationStatusOrderSpec {
 
-  val progress = ProgressResponse("1", true, true, true, true,
+  val progress = ProgressResponse("1", true, true, true, true, true,
     List("start_questionnaire", "diversity_questionnaire", "education_questionnaire", "occupation_questionnaire"), true, true)
 
   val emptyProgress = ProgressResponse("1")
 
-  val completeProgress = ProgressResponse("1", true, true, true, true,
+  val completeProgress = ProgressResponse("1", true, true, true, true, true,
     List("start_questionnaire", "diversity_questionnaire", "education_questionnaire",
-      "occupation_questionnaire"), true, true, true, true, true, true)
+      "occupation_questionnaire"), true, true, OnlineTestProgressResponse(true, true, true, false, false, false, false, false, true))
 }
