@@ -150,6 +150,8 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
 
   def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit] = ???
 
+  def getSchemes(applicationId: String): Future[List[String]] = ???
+
   def updateSchemes(applicationId: String, schemeNames: List[String]): Future[Unit] = ???
 }
 // scalastyle:on number.of.methods
