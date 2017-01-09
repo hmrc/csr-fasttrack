@@ -81,7 +81,7 @@ object Commands {
                                applicationId: String,
                                personalDetails: Boolean = false,
                                frameworksLocation: Boolean = false,
-                               assistance: Boolean = false,
+                               assistanceDetails: Boolean = false,
                                review: Boolean = false,
                                questionnaire: List[String] = Nil,
                                submitted: Boolean = false,
