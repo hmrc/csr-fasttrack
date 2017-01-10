@@ -17,6 +17,7 @@
 package repositories.application
 
 import java.util.UUID
+import java.util.regex.Pattern
 
 import model.ApplicationStatusOrder._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
@@ -28,7 +29,6 @@ import model._
 import model.commands.OnlineTestProgressResponse
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{ DateTime, LocalDate }
-import play.api.Logger
 import play.api.libs.json.{ Format, JsNumber, JsObject }
 import reactivemongo.api.{ DB, QueryOpts, ReadPreference }
 import reactivemongo.bson.{ BSONDocument, _ }
@@ -54,7 +54,8 @@ trait GeneralApplicationRepository {
 
   def findCandidateByUserId(userId: String): Future[Option[Candidate]]
 
-  def findByCriteria(lastName: Option[String], dateOfBirth: Option[LocalDate]): Future[List[Candidate]]
+  def findByCriteria(firstOrPreferredName: Option[String], lastName: Option[String], dateOfBirth: Option[LocalDate],
+                     userIds: List[String] = List.empty): Future[List[Candidate]]
 
   def findApplicationIdsByLocation(location: String): Future[List[String]]
 
@@ -149,6 +150,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
     Candidate(userId, applicationId, None, firstName, lastName, dateOfBirth, None, None)
   }
+
   def find(applicationIds: List[String]): Future[List[Candidate]] = {
 
     val query = BSONDocument("applicationId" -> BSONDocument("$in" -> applicationIds))
@@ -237,11 +239,34 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     collection.find(query).one[BSONDocument].map(_.map(docToCandidate))
   }
 
-  def findByCriteria(lastName: Option[String], dateOfBirth: Option[LocalDate]): Future[List[Candidate]] = {
+  def findByCriteria(firstOrPreferredNameOpt: Option[String],
+                     lastNameOpt: Option[String],
+                     dateOfBirthOpt: Option[LocalDate],
+                     filterToUserIds: List[String]): Future[List[Candidate]] = {
 
-    val query = BSONDocument("personal-details.lastName" -> lastName, "personal-details.dateOfBirth" -> dateOfBirth)
+    def matchIfSomeCaseInsensitive(value: Option[String]) = value.map(v => BSONRegex("^" + Pattern.quote(v) + "$", "i"))
 
-    collection.find(query).cursor[BSONDocument]().collect[List]().map(_.map(docToCandidate))
+    val innerQuery = BSONArray(
+      BSONDocument("$or" -> BSONArray(
+        BSONDocument("personal-details.firstName" -> matchIfSomeCaseInsensitive(firstOrPreferredNameOpt)),
+        BSONDocument("personal-details.preferredName" -> matchIfSomeCaseInsensitive(firstOrPreferredNameOpt))
+      )),
+      BSONDocument("personal-details.lastName" -> matchIfSomeCaseInsensitive(lastNameOpt)),
+      BSONDocument("personal-details.dateOfBirth" -> dateOfBirthOpt)
+    )
+
+    val fullQuery = if (filterToUserIds.isEmpty) {
+      innerQuery
+    } else {
+      innerQuery ++ BSONDocument("userId" -> BSONDocument("$in" -> filterToUserIds))
+    }
+
+    val query = BSONDocument("$and" -> fullQuery)
+
+    val projection = BSONDocument("userId" -> true, "applicationId" -> true, "applicationRoute" -> true,
+      "applicationStatus" -> true, "personal-details" -> true)
+
+    collection.find(query, projection).cursor[BSONDocument]().collect[List]().map(_.map(docToCandidate))
   }
 
   override def findApplicationIdsByLocation(location: String): Future[List[String]] = {
