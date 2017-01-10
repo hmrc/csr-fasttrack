@@ -16,129 +16,26 @@
 
 package services.testdata
 
-import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import model.Commands.Address
-import model.PersistedObjects.{ContactDetails, PersistedAnswer, PersistedQuestion, PersonalDetails}
-import model.{Alternatives, LocationPreference, Preferences}
-import org.joda.time.LocalDate
+import model.PersistedObjects.{PersistedAnswer, PersistedQuestion}
 import repositories._
-import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository, PersonalDetailsRepository}
+import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository}
 import services.testdata.faker.DataFaker._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 object SubmittedStatusGenerator extends SubmittedStatusGenerator {
-  override val previousStatusGenerator = CreatedStatusGenerator
+  override val previousStatusGenerator = InProgressAssistanceDetailsStatusGenerator
   override val appRepository = applicationRepository
-  override val pdRepository = personalDetailsRepository
-  override val adRepository = assistanceDetailsRepository
-  override val cdRepository = contactDetailsRepository
-  override val fpRepository = frameworkPreferenceRepository
   override val qRepository = questionnaireRepository
-
 }
 
 trait SubmittedStatusGenerator extends ConstructiveGenerator {
   val appRepository: GeneralApplicationRepository
-  val pdRepository: PersonalDetailsRepository
-  val adRepository: AssistanceDetailsRepository
-  val cdRepository: ContactDetailsRepository
-  val fpRepository: FrameworkPreferenceRepository
   val qRepository: QuestionnaireRepository
 
   // scalastyle:off method.length
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
-    def getPersonalDetails(candidateInformation: DataGenerationResponse) = {
-      PersonalDetails(
-        candidateInformation.firstName,
-        candidateInformation.lastName,
-        "Pref" + candidateInformation.firstName,
-        new LocalDate(2015, 5, 21),
-        Random.bool,
-        Random.bool
-      )
-    }
-
-    def getAssistanceDetails(config: GeneratorConfig): model.exchange.AssistanceDetails = {
-      val hasDisabilityFinalValue = config.assistanceDetails.hasDisability
-
-      val hasDisabilityDescriptionFinalValue =
-        if (hasDisabilityFinalValue == "Yes") {
-          Some(config.assistanceDetails.hasDisabilityDescription)
-        } else {
-          None
-        }
-      val gisFinalValue = if (hasDisabilityFinalValue == "Yes" && config.assistanceDetails.setGis) {
-        Some(true)
-      } else { Some(false) }
-
-      val onlineAdjustmentsFinalValue = config.assistanceDetails.onlineAdjustments
-      val onlineAdjustmentsDescriptionFinalValue =
-        if (onlineAdjustmentsFinalValue) {
-          Some(config.assistanceDetails.onlineAdjustmentsDescription)
-        } else {
-          None
-        }
-      val assessmentCentreAdjustmentsFinalValue = config.assistanceDetails.assessmentCentreAdjustments
-      val assessmentCentreAdjustmentsDescriptionFinalValue =
-        if (assessmentCentreAdjustmentsFinalValue) {
-          Some(config.assistanceDetails.assessmentCentreAdjustmentsDescription)
-        } else {
-          None
-        }
-
-      model.exchange.AssistanceDetails(
-        hasDisabilityFinalValue,
-        hasDisabilityDescriptionFinalValue,
-        gisFinalValue,
-        onlineAdjustmentsFinalValue,
-        onlineAdjustmentsDescriptionFinalValue,
-        assessmentCentreAdjustmentsFinalValue,
-        assessmentCentreAdjustmentsDescriptionFinalValue,
-        None,
-        None,
-        None
-      )
-    }
-
-    def getContactDetails(candidateInformation: DataGenerationResponse) = {
-
-      def makeRandAddressOption = if (Random.bool) { Some(Random.addressLine) } else { None }
-
-      ContactDetails(
-        Address(
-          Random.addressLine,
-          makeRandAddressOption,
-          makeRandAddressOption,
-          makeRandAddressOption
-        ),
-        "AB1 2CD",
-        candidateInformation.email,
-        Some("07770 774 914")
-      )
-    }
-
-    def getFrameworkPrefs: Future[Preferences] = {
-      for {
-        randomRegion <- Random.region
-        region = generatorConfig.region.getOrElse(randomRegion)
-        firstLocation <- Random.location(region)
-        secondLocation <- Random.location(region, List(firstLocation))
-      } yield {
-        Preferences(
-          LocationPreference(region, firstLocation, "Commercial", None),
-          None,
-          None,
-          Some(Alternatives(
-            Random.bool,
-            Random.bool
-          ))
-        )
-      }
-    }
-
     def getAllQuestionnaireQuestions = List(
       PersistedQuestion("What is your gender identity?", PersistedAnswer(Some(Random.gender), None, None)),
       PersistedQuestion("What is your sexual orientation?", PersistedAnswer(Some(Random.sexualOrientation), None, None)),
@@ -180,13 +77,6 @@ trait SubmittedStatusGenerator extends ConstructiveGenerator {
 
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      _ <- pdRepository.update(candidateInPreviousStatus.applicationId.get, candidateInPreviousStatus.userId,
-        getPersonalDetails(candidateInPreviousStatus))
-      _ <- adRepository.update(candidateInPreviousStatus.applicationId.get, candidateInPreviousStatus.userId,
-        getAssistanceDetails(generatorConfig))
-      _ <- cdRepository.update(candidateInPreviousStatus.userId, getContactDetails(candidateInPreviousStatus))
-      frameworkPrefs <- getFrameworkPrefs
-      _ <- fpRepository.savePreferences(candidateInPreviousStatus.applicationId.get, frameworkPrefs)
       _ <- qRepository.addQuestions(candidateInPreviousStatus.applicationId.get, getAllQuestionnaireQuestions)
       _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get, "start_questionnaire")
       _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get, "education_questionnaire")
@@ -194,9 +84,7 @@ trait SubmittedStatusGenerator extends ConstructiveGenerator {
       _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get, "occupation_questionnaire")
       submit <- appRepository.submit(candidateInPreviousStatus.applicationId.get)
     } yield {
-      candidateInPreviousStatus.copy(
-        preferences = Some(frameworkPrefs)
-      )
+      candidateInPreviousStatus
     }
   }
   // scalastyle:on method.length
