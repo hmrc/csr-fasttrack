@@ -18,7 +18,6 @@ package controllers
 
 import config.TestFixtureBase
 import connectors.AuthProviderClient
-import controllers.SearchForApplicantsController.MAX_RESULTS
 import model.Commands.{ Candidate, SearchCandidate }
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -54,8 +53,10 @@ class SearchForApplicantsControllerSpec extends UnitWithAppSpec {
     }
 
     "return 413 REQUEST_ENTITY_TOO_LARGE if the max result set is exceeded" in new TestFixture {
-      val candidates = List.fill(MAX_RESULTS + 1)(Candidate(userId = "userId", applicationId = None, email = None,
-        firstName = None, lastName = None, dateOfBirth = None, address = None, postCode = None))
+      val candidates = List.fill(TestSearchForApplicantsController.MAX_RESULTS + 1)(
+        Candidate(userId = "userId", applicationId = None, email = None, firstName = None, lastName = None,
+          dateOfBirth = None, address = None, postCode = None)
+      )
 
       when(mockSearchForApplicantService.findByCriteria(any[SearchCandidate])(any[HeaderCarrier]))
         .thenReturn(Future.successful(candidates))
