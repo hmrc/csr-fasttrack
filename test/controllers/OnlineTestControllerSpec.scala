@@ -28,15 +28,13 @@ import model.PersistedObjects.ContactDetails
 import org.joda.time.DateTime
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
-import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
-import play.api.mvc.Results
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.{ ContactDetailsRepository, OnlineTestPDFReportRepository }
 import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
 import testkit.MockitoImplicits.OngoingStubbingExtensionUnit
-import testkit.{ MockitoSugar, UnitSpec, UnitWithAppSpec }
+import testkit.UnitWithAppSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -209,7 +207,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
         override def getOnlineTestApplication(appId: String): Future[Option[OnlineTestApplication]] = {
           Future.successful(
             Some(
-              OnlineTestApplication(appId, "", "", false, false, "", None)
+              OnlineTestApplication(appId, "", "", guaranteedInterview = false, needsAdjustments = false, "", None)
             )
           )
         }
