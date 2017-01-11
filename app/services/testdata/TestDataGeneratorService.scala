@@ -37,9 +37,9 @@ trait TestDataGeneratorService {
     for {
       _ <- MongoDbConnection.mongoConnector.db().drop()
       _ <- AuthProviderClient.removeAllUsers()
-      _ <- RegisteredStatusGenerator.createUser(
-        1,
-        "test_service_manager_1@mailinator.com", "CSR Test", "Service Manager", AuthProviderClient.TechnicalAdminRole
+      _ <- RegisteredStatusGenerator.createUser(generationId = 1,
+        firstName = "Service", lastName = "Manager", email = "test_service_manager_1@mailinator.com",
+        preferredName = None, role = AuthProviderClient.TechnicalAdminRole
       )
     } yield {
       ()
@@ -54,9 +54,9 @@ trait TestDataGeneratorService {
         new scala.concurrent.forkjoin.ForkJoinPool(2)
       )
       parNumbers.map { candidateGenerationId =>
-        val fut = RegisteredStatusGenerator.createUser(
-          candidateGenerationId,
-          s"test_service_manager_$emailPrefix$candidateGenerationId@mailinator.com", "CSR Test", "Service Manager", role
+        val fut = RegisteredStatusGenerator.createUser(generationId = candidateGenerationId, firstName = "CSR Test",
+         lastName = "Service Manager", email = s"test_service_manager_$emailPrefix$candidateGenerationId@mailinator.com",
+          preferredName = None, role = role
         )
         Await.result(fut, 5 seconds)
       }.toList
