@@ -175,7 +175,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         personalDetails = getProgress("personal-details"),
         hasLocations = getProgress("scheme-locations"),
         hasSchemes = getProgress("scheme-preferences"),
-        assistanceDetails = getProgress("assistance"),
+        assistanceDetails = getProgress("assistance-details"),
         review = getProgress("review"),
         questionnaire = questionnaire,
         submitted = getProgress("submitted"),

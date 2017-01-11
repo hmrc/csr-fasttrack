@@ -19,6 +19,7 @@ package services.testdata
 import model._
 import play.api.mvc.RequestHeader
 import repositories._
+import repositories.application.GeneralApplicationRepository
 import services.testdata.faker.DataFaker._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -27,11 +28,11 @@ import scala.concurrent.Future
 
 object InProgressSchemePreferencesStatusGenerator extends InProgressSchemePreferencesStatusGenerator {
   override val previousStatusGenerator = InProgressPersonalDetailsStatusGenerator
-  override val fpRepository = frameworkPreferenceRepository
+  override val appRepository = applicationRepository
 }
 
 trait InProgressSchemePreferencesStatusGenerator extends ConstructiveGenerator {
-  val fpRepository: FrameworkPreferenceMongoRepository
+  val appRepository: GeneralApplicationRepository
 
   // scalastyle:off method.length
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
@@ -57,7 +58,8 @@ trait InProgressSchemePreferencesStatusGenerator extends ConstructiveGenerator {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       frameworkPrefs <- getFrameworkPrefs
-      _ <- fpRepository.savePreferences(candidateInPreviousStatus.applicationId.get, frameworkPrefs)
+      _ <- appRepository.updateSchemeLocations(candidateInPreviousStatus.applicationId.get, List("2643743", "2657613"))
+      _ <- appRepository.updateSchemes(candidateInPreviousStatus.applicationId.get, List("Commercial", "Businness"))
     } yield {
       candidateInPreviousStatus.copy(
         schemePreferences = Some(frameworkPrefs)

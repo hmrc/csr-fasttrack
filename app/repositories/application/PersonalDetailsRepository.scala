@@ -79,7 +79,8 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
       BSONDocument(
         "progress-status.personal-details" -> true,
         "progress-status-timestamp.personal-details" -> DateTime.now(),
-        PersonalDetailsCollection -> personalDetails
+        PersonalDetailsCollection -> personalDetails,
+        "applicationStatus" -> newApplicationStatus
       )
     )
 
