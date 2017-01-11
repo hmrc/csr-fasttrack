@@ -39,7 +39,7 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
       )
 
       val actual = searchForApplicantService.findByCriteria(SearchCandidate(firstOrPreferredName = Some("Leia"),
-        lastName = None, dateOfBirth = None, postCode = None)).futureValue
+        lastName = None, dateOfBirth = None, postCode = None), MaxResults).futureValue
 
       actual mustBe List(expected)
     }
@@ -50,7 +50,7 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
       )
 
       val actual = searchForApplicantService.findByCriteria(SearchCandidate(firstOrPreferredName = None,
-        lastName = Some("Amadala"), dateOfBirth = None, postCode = None)).futureValue
+        lastName = Some("Amadala"), dateOfBirth = None, postCode = None), MaxResults).futureValue
 
       actual mustBe List(expected)
     }
@@ -62,7 +62,7 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
       )
 
       val actual = searchForApplicantService.findByCriteria(SearchCandidate(firstOrPreferredName = Some("Leia"),
-        lastName = Some("Amadala"), dateOfBirth = None, postCode = None)).futureValue
+        lastName = Some("Amadala"), dateOfBirth = None, postCode = None), MaxResults).futureValue
 
       actual mustBe List(expected)
     }
@@ -74,7 +74,7 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
         Some(new LocalDate("1990-11-25")), None, None))))
 
       val actual = searchForApplicantService.findByCriteria(SearchCandidate(firstOrPreferredName = None,
-        lastName = None, dateOfBirth = Some(new LocalDate("1990-11-25")), postCode = None)).futureValue
+        lastName = None, dateOfBirth = Some(new LocalDate("1990-11-25")), postCode = None), MaxResults).futureValue
 
       val expectedWithDateOfBirth = expected.copy(dateOfBirth = Some(new LocalDate("1990-11-25")))
       actual mustBe List(expectedWithDateOfBirth)
@@ -87,9 +87,26 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
       )
 
       val actual = searchForApplicantService.findByCriteria(SearchCandidate(firstOrPreferredName = Some("Leia"),
-        lastName = Some("Amadala"), dateOfBirth = None, postCode = Some("QQ1 1QQ"))).futureValue
+        lastName = Some("Amadala"), dateOfBirth = None, postCode = Some("QQ1 1QQ")), MaxResults).futureValue
 
       actual mustBe List(expected)
+    }
+
+    "return the number of candidates from auth provider even if more candidates are in the application repository" in new TestFixture {
+      val candidate = Candidate("123", None, None, Some("Leia"), Some("Amadala"), Some(new LocalDate("1990-11-25")), None, None)
+      val candidates = List(candidate, candidate, candidate, candidate)
+      when(appRepositoryMock.findByCriteria(any[Option[String]], any[Option[String]], any[Option[LocalDate]],
+        any[List[String]])).thenReturn(Future.successful(candidates))
+
+      val authProviderCandidate = connectors.ExchangeObjects.Candidate("Leia", "Amadala", None, "email@test.com", "userId")
+      val authProviderCandidates = List(authProviderCandidate, authProviderCandidate, authProviderCandidate)
+      when(authProviderClientMock.findByFirstNameAndLastName(any[String], any[String], any[List[String]])
+      (any[HeaderCarrier])).thenReturn(Future.successful(authProviderCandidates))
+
+      val actual = searchForApplicantService.findByCriteria(SearchCandidate(firstOrPreferredName = Some("Leia"),
+        lastName = Some("Amadala"), dateOfBirth = None, postCode = None), MaxResults).futureValue
+
+      actual.size mustBe authProviderCandidates.size
     }
   }
 
@@ -98,6 +115,8 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
     val psRepositoryMock = mock[PersonalDetailsRepository]
     val cdRepositoryMock = mock[ContactDetailsRepository]
     val authProviderClientMock = mock[AuthProviderClient]
+
+    val MaxResults = 1
 
     val searchForApplicantService = new SearchForApplicantService {
       override val appRepository = appRepositoryMock

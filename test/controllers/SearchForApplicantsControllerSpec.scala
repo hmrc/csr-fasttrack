@@ -34,10 +34,9 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 
 class SearchForApplicantsControllerSpec extends UnitWithAppSpec {
-
   "Search for applicants controller" should {
     "return 404 NOT_FOUND if no applicants are found" in new TestFixture {
-      when(mockSearchForApplicantService.findByCriteria(any[SearchCandidate])(any[HeaderCarrier]))
+      when(mockSearchForApplicantService.findByCriteria(any[SearchCandidate], any[Int])(any[HeaderCarrier]))
         .thenReturn(Future.successful(List.empty))
 
       val requestJson =
@@ -57,7 +56,7 @@ class SearchForApplicantsControllerSpec extends UnitWithAppSpec {
       val candidates = List.fill(MAX_RESULTS + 1)(Candidate(userId = "userId", applicationId = None, email = None,
         firstName = None, lastName = None, dateOfBirth = None, address = None, postCode = None))
 
-      when(mockSearchForApplicantService.findByCriteria(any[SearchCandidate])(any[HeaderCarrier]))
+      when(mockSearchForApplicantService.findByCriteria(any[SearchCandidate], any[Int])(any[HeaderCarrier]))
         .thenReturn(Future.successful(candidates))
 
       val requestJson = "{\"lastName\":\"Kent\"}"
@@ -69,7 +68,7 @@ class SearchForApplicantsControllerSpec extends UnitWithAppSpec {
       val candidates = List(Candidate(userId = "userId", applicationId = Some("appId"), email = Some("super@man.com"),
         firstName = Some("Clark"), lastName = Some("Kent"), dateOfBirth = None, address = None, postCode = Some("H0H 0H0")))
 
-      when(mockSearchForApplicantService.findByCriteria(any[SearchCandidate])(any[HeaderCarrier]))
+      when(mockSearchForApplicantService.findByCriteria(any[SearchCandidate], any[Int])(any[HeaderCarrier]))
         .thenReturn(Future.successful(candidates))
 
       val requestJson = "{\"lastName\":\"Kent\"}"

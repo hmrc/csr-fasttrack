@@ -17,12 +17,12 @@
 package services.search
 
 import connectors.AuthProviderClient
-import model.Commands.{ Candidate, SearchCandidate }
+import model.Commands.{ Candidate, PostCode, SearchCandidate }
 import model.Exceptions.ContactDetailsNotFound
 import model.PersistedObjects.ContactDetailsWithId
 import org.joda.time.LocalDate
 import repositories._
-import repositories.application.{ PersonalDetailsRepository, GeneralApplicationRepository }
+import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -36,17 +36,17 @@ object SearchForApplicantService extends SearchForApplicantService {
 }
 
 trait SearchForApplicantService {
-
   val appRepository: GeneralApplicationRepository
   val psRepository: PersonalDetailsRepository
   val cdRepository: ContactDetailsRepository
   val authProviderClient: AuthProviderClient
 
-  def findByCriteria(searchCandidate: SearchCandidate)(implicit hc: HeaderCarrier): Future[List[Candidate]] = searchCandidate match {
-    case SearchCandidate(None, None, None, Some(postCode)) => searchByPostCode(postCode)
-
+  def findByCriteria(searchCandidate: SearchCandidate, maxResults: Int)
+                    (implicit hc: HeaderCarrier): Future[List[Candidate]] = searchCandidate match {
+    case SearchCandidate(None, None, None, Some(postCode)) =>
+      searchByPostCode(postCode)
     case SearchCandidate(firstOrPreferredName, lastName, dateOfBirth, postCode) =>
-      searchByAllNamesOrDobAndFilterPostCode(firstOrPreferredName, lastName, dateOfBirth, postCode)
+      search(firstOrPreferredName, lastName, dateOfBirth, postCode, maxResults)
   }
 
   private def searchByPostCode(postCode: String): Future[List[Candidate]] =
@@ -60,7 +60,23 @@ trait SearchForApplicantService {
       })
     }.map(_.flatten)
 
-  private def searchByAllNamesOrDobAndFilterPostCode(firstOrPreferredNameOpt: Option[String],
+  private def search(firstOrPreferredName: Option[String], lastName: Option[String],
+                     dateOfBirth: Option[LocalDate], postCode: Option[PostCode], maxResults: Int)
+                    (implicit hc: HeaderCarrier) = {
+    def joinCandidatesWithApplicationsIfInTheLimit(candidates: List[Candidate]) = {
+      if (candidates.size > maxResults) {
+        Future.successful(candidates)
+      } else {
+        searchByAllNamesOrDobAndFilterPostCode(candidates, firstOrPreferredName, lastName, dateOfBirth, postCode)
+      }
+    }
+
+    val authProviderResults = searchAuthProviderByFirstAndLastName(firstOrPreferredName, lastName)
+    authProviderResults flatMap joinCandidatesWithApplicationsIfInTheLimit
+  }
+
+  private def searchByAllNamesOrDobAndFilterPostCode(authProviderResults: List[Candidate],
+                                                     firstOrPreferredNameOpt: Option[String],
                                                      lastNameOpt: Option[String],
                                                      dateOfBirthOpt: Option[LocalDate],
                                                      postCodeOpt: Option[String])
@@ -68,7 +84,6 @@ trait SearchForApplicantService {
     for {
       contactDetailsFromPostcode <- postCodeOpt.map(cdRepository.findByPostCode).getOrElse(Future.successful(List.empty))
       candidates <- appRepository.findByCriteria(firstOrPreferredNameOpt, lastNameOpt, dateOfBirthOpt, contactDetailsFromPostcode.map(_.userId))
-      authProviderResults <- searchAuthProviderByFirstAndLastName(firstOrPreferredNameOpt, lastNameOpt)
       combinedCandidates = candidates ++ authProviderResults.filter(
         authProviderCandidate => !candidates.exists(_.userId == authProviderCandidate.userId)
       )
