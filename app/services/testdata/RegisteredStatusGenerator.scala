@@ -20,43 +20,45 @@ import connectors.AuthProviderClient
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
-import services.testdata.faker.DataFaker._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 object RegisteredStatusGenerator extends RegisteredStatusGenerator {
   override val appRepository = applicationRepository
   override val pdRepository = personalDetailsRepository
   override val qRepository = questionnaireRepository
+  override val authProviderClient = AuthProviderClient
 }
 
 trait RegisteredStatusGenerator extends BaseGenerator {
   import scala.concurrent.ExecutionContext.Implicits.global
 
+  val authProviderClient: AuthProviderClient.type
   val appRepository: GeneralApplicationRepository
   val pdRepository: PersonalDetailsRepository
   val qRepository: QuestionnaireRepository
 
+
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
-    val firstName = Random.getFirstname(generationId)
-    val lastName = Random.getLastname(generationId + 4000)
-    val email = s"${generatorConfig.emailPrefix}${generationId + 4000}@mailinator.com"
+
+    val firstName = generatorConfig.personalData.firstName
+    val lastName = generatorConfig.personalData.lastName
+    val preferredName = generatorConfig.personalData.preferredName
+    val email = s"${generatorConfig.personalData.emailPrefix}@mailinator.com"
 
     for {
-      user <- createUser(generationId, email, firstName, lastName, AuthProviderClient.CandidateRole)
+      user <- createUser(generationId, email, firstName, lastName, preferredName, AuthProviderClient.CandidateRole)
     } yield {
       DataGenerationResponse(generationId, user.userId, None, email, firstName, lastName)
     }
   }
 
-  def createUser(
-    generationId: Int,
-    email: String,
-    firstName: String, lastName: String, role: AuthProviderClient.UserRole
-  )(implicit hc: HeaderCarrier) = {
+  def createUser( generationId: Int, email: String, firstName: String, lastName: String, preferredName: Option[String],
+    role: AuthProviderClient.UserRole)
+    (implicit hc: HeaderCarrier) = {
     for {
-      user <- AuthProviderClient.addUser(email, "Service01", firstName, lastName, role)
-      token <- AuthProviderClient.getToken(email)
-      activateUser <- AuthProviderClient.activate(email, token)
+      user <- authProviderClient.addUser(email, "Service01", firstName, lastName, role)
+      token <- authProviderClient.getToken(email)
+      _ <- authProviderClient.activate(email, token)
     } yield {
       DataGenerationResponse(generationId, user.userId.toString, None, email, firstName, lastName)
     }

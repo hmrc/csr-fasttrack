@@ -87,7 +87,7 @@ trait TestDataGeneratorController extends BaseController {
                                confirmedAllocation: Boolean) = Action.async { implicit request =>
 
     val initialConfig = GeneratorConfig(
-      emailPrefix = emailPrefix,
+      personalData = PersonalData(emailPrefix = emailPrefix),
       setGis = setGis,
       cubiksUrl = cubiksUrlFromConfig,
       region = region,
