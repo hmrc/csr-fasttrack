@@ -71,7 +71,8 @@ trait SearchForApplicantsController extends BaseController {
 
   def findByCriteria = Action.async(parse.json) { implicit request =>
     withJsonBody[SearchCandidate] { searchCandidate =>
-      createResult(searchForApplicantService.findByCriteria(searchCandidate))
+      val foundApplications = searchForApplicantService.findByCriteria(searchCandidate, MAX_RESULTS)
+      createResult(foundApplications)
     }
   }
 
