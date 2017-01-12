@@ -82,6 +82,7 @@ trait InProgressAssistanceDetailsStatusGenerator extends ConstructiveGenerator {
       assessmentCentreAdjustmentsDescriptionFinalValue,
       None,
       None,
+      None,
       None
     )
   }

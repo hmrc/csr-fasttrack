@@ -18,7 +18,7 @@ package model.exchange
 
 object AssistanceDetailsExamples {
   val OnlyDisabilityNoGisNoAdjustments = AssistanceDetails("Yes", Some(""), Some(false), false, None, false,
-    None, None, None, None)
+    None, None, None, None, None)
   val DisabilityGisAndAdjustments = AssistanceDetails("Yes", Some("disability description"), Some(true), true,
-    Some("online adjustment description"), true, Some("venue adjustment description"), None, None, None)
+    Some("online adjustment description"), true, Some("venue adjustment description"), None, None, None, None)
 }

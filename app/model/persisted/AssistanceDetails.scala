@@ -30,6 +30,7 @@ case class AssistanceDetails(hasDisability: String,
                              needsSupportAtVenue: Boolean,
                              needsSupportAtVenueDescription: Option[String],
                              // TODO: Change adjustments
+                             typeOfAdjustments: Option[List[String]],
                              confirmedAdjustments: Option[Boolean],
                              numericalTimeAdjustmentPercentage: Option[Int],
                              verbalTimeAdjustmentPercentage: Option[Int]
@@ -48,6 +49,7 @@ object AssistanceDetails {
       needsSupportForOnlineAssessmentDescription = assistanceDetails.needsSupportForOnlineAssessmentDescription,
       needsSupportAtVenue = assistanceDetails.needsSupportAtVenue,
       needsSupportAtVenueDescription = assistanceDetails.needsSupportAtVenueDescription,
+      typeOfAdjustments = assistanceDetails.typeOfAdjustments,
       confirmedAdjustments = assistanceDetails.confirmedAdjustments,
       numericalTimeAdjustmentPercentage = assistanceDetails.numericalTimeAdjustmentPercentage,
       verbalTimeAdjustmentPercentage = assistanceDetails.verbalTimeAdjustmentPercentage
