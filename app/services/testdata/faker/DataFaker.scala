@@ -41,6 +41,8 @@ object DataFaker {
       }
     }
 
+    def upperLetter: Char = randOne(('A' to 'Z').toList)
+
     def bool: Boolean = randOne(List(true, false))
 
     def number(limit: Option[Int] = None): Int = util.Random.nextInt(limit.getOrElse(2000000000))
@@ -159,5 +161,10 @@ object DataFaker {
       val lastName = randOne(Lastnames.list)
       s"$lastName$userNumber"
     }
+
+    def postCode: String = {
+      s"${Random.upperLetter}${Random.upperLetter}1 2${Random.upperLetter}${Random.upperLetter}"
+    }
+
   }
 }
