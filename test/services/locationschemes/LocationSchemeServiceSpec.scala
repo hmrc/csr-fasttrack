@@ -16,14 +16,13 @@
 
 package services.locationschemes
 
-import repositories.{ LocationSchemeRepository, LocationSchemes, SchemeInfo }
-import testkit.UnitSpec
 import org.mockito.Matchers.{ eq => eqTo }
 import org.mockito.Mockito._
+import model.Scheme._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
-import services.locationschemes.exchangeobjects.GeoLocationSchemeResult
+import repositories.{ LocationSchemeRepository, LocationSchemes, SchemeInfo }
+import testkit.UnitSpec
 
-import scala.collection.immutable.IndexedSeq
 import scala.concurrent.Future
 
 class LocationSchemeServiceSpec extends UnitSpec {
@@ -81,9 +80,9 @@ class LocationSchemeServiceSpec extends UnitSpec {
 
     when(repo.getSchemeInfo).thenReturn(Future.successful(
       List(
-        SchemeInfo("SchemeNoALevels", requiresALevel = false, requiresALevelInStem = false),
-        SchemeInfo("SchemeALevels", requiresALevel = true, requiresALevelInStem = false),
-        SchemeInfo("SchemeALevelsStem", requiresALevel = true, requiresALevelInStem = true)
+        SchemeInfo(Business, "SchemeNoALevels", requiresALevel = false, requiresALevelInStem = false),
+        SchemeInfo(Commercial, "SchemeALevels", requiresALevel = true, requiresALevelInStem = false),
+        SchemeInfo(ProjectDelivery, "SchemeALevelsStem", requiresALevel = true, requiresALevelInStem = true)
       )
     ))
 

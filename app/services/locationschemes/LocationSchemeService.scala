@@ -16,14 +16,12 @@
 
 package services.locationschemes
 
-import repositories.{ FileLocationSchemeRepository, LocationSchemeRepository, LocationSchemes }
-import services.locationschemes.exchangeobjects.GeoLocationSchemeResult
-import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
+import repositories.{ FileLocationSchemeRepository, LocationSchemeRepository, LocationSchemes, _ }
+import services.locationschemes.exchangeobjects.GeoLocationSchemeResult
 
-import scala.collection.immutable.IndexedSeq
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object LocationSchemeService extends LocationSchemeService {
   val locationSchemeRepository = FileLocationSchemeRepository
@@ -40,7 +38,6 @@ trait LocationSchemeService {
                                           latitudeOpt: Option[Double] = None, longitudeOpt: Option[Double] = None)
   : Future[List[GeoLocationSchemeResult]] = {
 
-    // calculate distance and search
     for {
       schemeInfo <- locationSchemeRepository.getSchemeInfo
       locationsWithSchemes <- locationSchemeRepository.getSchemesAndLocations
@@ -60,8 +57,7 @@ trait LocationSchemeService {
 
           GeoLocationSchemeResult(locationId, locationName, distance, eligibleSchemes.filter(eScheme => schemes.contains(eScheme.name)))
       }
-
-      selectedLocations.sortBy(r => r.distanceKm.getOrElse(0d))
+      sortLocations(selectedLocations, latitudeOpt.isDefined && longitudeOpt.isDefined)
     }
   }
 
@@ -90,5 +86,12 @@ trait LocationSchemeService {
 
   def updateSchemes(applicationId: String, schemeNames: List[String]): Future[Unit] = {
     appRepository.updateSchemes(applicationId, schemeNames)
+  }
+
+  private def sortLocations(locations: List[GeoLocationSchemeResult], sortByDistance: Boolean) = {
+    sortByDistance match {
+      case true => locations.sortBy(r => r.distanceKm.getOrElse(0d))
+      case false => locations.sortBy(_.locationName)
+    }
   }
 }

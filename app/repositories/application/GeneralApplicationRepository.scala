@@ -990,7 +990,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val projection = BSONDocument("scheme-locations" -> 1)
 
     collection.find(query, projection).one[BSONDocument] map {
-      case Some(document) => document.getAs[List[String]]("scheme-locations").get
+      case Some(document) => document.getAs[List[String]]("scheme-locations").getOrElse(Nil)
       case None => Nil
     }
   }
@@ -1013,7 +1013,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val projection = BSONDocument("schemes" -> 1)
 
     collection.find(query, projection).one[BSONDocument] map {
-      case Some(document) => document.getAs[List[String]]("schemes").get
+      case Some(document) => document.getAs[List[String]]("schemes").getOrElse(Nil)
       case None => Nil
     }
   }
