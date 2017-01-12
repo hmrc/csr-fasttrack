@@ -29,13 +29,15 @@ import scala.concurrent.Future
 case class LocationSchemes(id: String, locationName: String, latitude: Double, longitude: Double, schemes: List[String])
 
 object LocationSchemes {
-  implicit val locationReader: Reads[LocationSchemes] = (
+  implicit val locationSchemesReader: Reads[LocationSchemes] = (
     (__ \ "id").read[String] and
     (__ \ "name").read[String] and
       (__ \ "lat").read[Double] and
       (__ \ "lng").read[Double] and
       (__ \ "schemes").read[List[String]]
     ) (LocationSchemes.apply _)
+
+  implicit val locationSchemesWriter = Json.writes[LocationSchemes]
 }
 
 protected case class Locations(locations: List[LocationSchemes])

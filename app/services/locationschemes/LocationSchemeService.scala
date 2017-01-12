@@ -16,6 +16,7 @@
 
 package services.locationschemes
 
+import model.Exceptions.NotFoundException
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import repositories.{ FileLocationSchemeRepository, LocationSchemeRepository, LocationSchemes, _ }
 import services.locationschemes.exchangeobjects.GeoLocationSchemeResult
@@ -64,7 +65,7 @@ trait LocationSchemeService {
   def getAvailableSchemesInSelectedLocations(applicationId: String): Future[List[SchemeInfo]] = {
     for {
       personalDetails <- pdRepository.find(applicationId)
-      selectedLocationIds <- getSchemeLocations(applicationId)
+      selectedLocationIds <- appRepository.getSchemeLocations(applicationId)
       eligibleSchemeLocations <- getSchemesAndLocationsByEligibility(personalDetails.aLevel, personalDetails.stemLevel)
     } yield {
       val selectedLocationSchemes = eligibleSchemeLocations.filter(schemeLocation => selectedLocationIds.contains(schemeLocation.locationId))
@@ -72,16 +73,28 @@ trait LocationSchemeService {
     }
   }
 
-  def getSchemeLocations(applicationId: String): Future[List[String]] = {
-    appRepository.getSchemeLocations(applicationId)
+  def getSchemeLocations(applicationId: String): Future[List[LocationSchemes]] = {
+    for {
+      locationIds <- appRepository.getSchemeLocations(applicationId)
+      locationSchemes <- locationSchemeRepository.getSchemesAndLocations
+    } yield {
+      locationIds.map(locId =>
+        locationSchemes.find(_.id == locId).getOrElse(throw NotFoundException(Some(s"Location $locId not found"))))
+    }
   }
 
   def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit] = {
     appRepository.updateSchemeLocations(applicationId, locationIds)
   }
 
-  def getSchemes(applicationId: String): Future[List[String]] = {
-    appRepository.getSchemes(applicationId)
+  def getSchemes(applicationId: String): Future[List[SchemeInfo]] = {
+    for {
+      schemeIds <- appRepository.getSchemes(applicationId)
+      schemes <- locationSchemeRepository.getSchemeInfo
+    } yield {
+      schemeIds.map(schemeId =>
+        schemes.find(_.id == schemeId).getOrElse(throw NotFoundException(Some(s"Scheme $schemeId not found"))))
+    }
   }
 
   def updateSchemes(applicationId: String, schemeNames: List[String]): Future[Unit] = {
