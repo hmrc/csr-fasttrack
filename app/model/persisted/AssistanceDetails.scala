@@ -23,17 +23,17 @@ import scala.language.implicitConversions
 
 
 case class AssistanceDetails(hasDisability: String,
-                             hasDisabilityDescription: Option[String],
-                             guaranteedInterview: Option[Boolean],
-                             needsSupportForOnlineAssessment: Boolean,
-                             needsSupportForOnlineAssessmentDescription: Option[String],
-                             needsSupportAtVenue: Boolean,
-                             needsSupportAtVenueDescription: Option[String],
+                              hasDisabilityDescription: Option[String],
+                              guaranteedInterview: Option[Boolean],
+                              needsSupportForOnlineAssessment: Boolean,
+                              needsSupportForOnlineAssessmentDescription: Option[String],
+                              needsSupportAtVenue: Boolean,
+                              needsSupportAtVenueDescription: Option[String],
                              // TODO: Change adjustments
-                             typeOfAdjustments: Option[List[String]],
-                             confirmedAdjustments: Option[Boolean],
-                             numericalTimeAdjustmentPercentage: Option[Int],
-                             verbalTimeAdjustmentPercentage: Option[Int]
+                              typeOfAdjustments: Option[List[String]],
+                              confirmedAdjustments: Option[Boolean],
+                              numericalTimeAdjustmentPercentage: Option[Int],
+                              verbalTimeAdjustmentPercentage: Option[Int]
                             )
 
 object AssistanceDetails {

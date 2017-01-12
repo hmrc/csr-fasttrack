@@ -29,8 +29,8 @@ case class ProcessDiversityReport(location: String, applicationIds: List[String]
 case class LocationFinished(location: String)
 
 class DiversityReportSupervisor(val timestamp: DateTime, val locationAndRegions: List[(String, String)],
-  val questionnaireRepository: QuestionnaireRepository, val asRepository: AssistanceDetailsRepository,
-  val reportingRepository: ReportingRepository) extends Actor with DiversityReportSupervisorTrait {
+                                val questionnaireRepository: QuestionnaireRepository, val adRepository: AssistanceDetailsRepository,
+                                val reportingRepository: ReportingRepository) extends Actor with DiversityReportSupervisorTrait {
 
   var startTime: Long = 0
 
@@ -56,7 +56,7 @@ class DiversityReportSupervisor(val timestamp: DateTime, val locationAndRegions:
       val locationAndRegion = locationAndRegions.find(p => p._1 == location).getOrElse(location -> "")
       val locationProcessor =
         context.actorOf(
-          LocationProcessor.props(locationAndRegion, timestamp, questionnaireRepository, asRepository, reportingRepository, self)
+          LocationProcessor.props(locationAndRegion, timestamp, questionnaireRepository, adRepository, reportingRepository, self)
         )
 
       val message = Process(appIds)
@@ -82,7 +82,7 @@ trait DiversityReportSupervisorTrait {
   val timestamp: DateTime
   val locationAndRegions: List[(String, String)]
   val questionnaireRepository: QuestionnaireRepository
-  val asRepository: AssistanceDetailsRepository
+  val adRepository: AssistanceDetailsRepository
   val reportingRepository: ReportingRepository
 
   val locationWatcher = collection.mutable.Map.empty[String, Boolean]
@@ -101,6 +101,6 @@ trait DiversityReportSupervisorTrait {
 
 object DiversityReportSupervisor {
   def props(timestamp: DateTime, locations: List[(String, String)], questionnaireRepository: QuestionnaireRepository,
-    asRepository: AssistanceDetailsRepository, reportingRepository: ReportingRepository) =
-    Props(new DiversityReportSupervisor(timestamp, locations, questionnaireRepository, asRepository, reportingRepository))
+            adRepository: AssistanceDetailsRepository, reportingRepository: ReportingRepository) =
+    Props(new DiversityReportSupervisor(timestamp, locations, questionnaireRepository, adRepository, reportingRepository))
 }

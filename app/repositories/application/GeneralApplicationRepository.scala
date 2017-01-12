@@ -20,18 +20,19 @@ import java.util.UUID
 import java.util.regex.Pattern
 
 import model.ApplicationStatusOrder._
-import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
+import model.AssessmentScheduleCommands.{ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult}
 import model.Commands._
 import model.EvaluationResults._
 import model.Exceptions.ApplicationNotFound
 import model.PersistedObjects.ApplicationForNotification
 import model._
 import model.commands.OnlineTestProgressResponse
+import model.persisted.AssistanceDetails
 import org.joda.time.format.DateTimeFormat
-import org.joda.time.{ DateTime, LocalDate }
-import play.api.libs.json.{ Format, JsNumber, JsObject }
-import reactivemongo.api.{ DB, QueryOpts, ReadPreference }
-import reactivemongo.bson.{ BSONDocument, _ }
+import org.joda.time.{DateTime, LocalDate}
+import play.api.libs.json.{Format, JsNumber, JsObject}
+import reactivemongo.api.{DB, QueryOpts, ReadPreference}
+import reactivemongo.bson.{BSONDocument, _}
 import reactivemongo.json.collection.JSONBatchCommands.JSONCountCommand
 import repositories._
 import services.TimeZoneService
@@ -764,6 +765,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         val typesOfAdjustments = assistance.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
 
         val otherAdjustments = extract("otherAdjustments")(assistance)
+
         val adjustments = typesOfAdjustments.getOrElse(Nil) ::: otherAdjustments.toList
         val finalTOA = if (adjustments.isEmpty) None else Some(adjustments.mkString("|"))
 

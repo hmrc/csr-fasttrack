@@ -24,9 +24,7 @@ case class AssistanceDetailsRequest(hasDisability: Option[String] = None,
                                     onlineAdjustments: Option[Boolean] = None,
                                     onlineAdjustmentsDescription: Option[String] = None,
                                     assessmentCentreAdjustments: Option[Boolean] = None,
-                                    assessmentCentreAdjustmentsDescription: Option[String] = None,
-                                    phoneAdjustments: Option[Boolean] = None,
-                                    phoneAdjustmentsDescription: Option[String] = None
+                                    assessmentCentreAdjustmentsDescription: Option[String] = None
                                    )
 
 object AssistanceDetailsRequest {
