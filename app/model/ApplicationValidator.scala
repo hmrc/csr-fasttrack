@@ -32,7 +32,7 @@ case class ApplicationValidator(gd: PersonalDetails, ad: AssistanceDetailsExchan
   def validateAssistanceDetails: Boolean = {
 
     def ifNeeds(value: Option[String])(f: AssistanceDetailsExchange => Boolean) = value match {
-      case Some("Yes") => f(ad)
+      case Some(common.Constants.Yes) => f(ad)
       case _ => true
     }
 

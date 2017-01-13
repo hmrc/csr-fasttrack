@@ -14,20 +14,10 @@
  * limitations under the License.
  */
 
-package config
+package common
 
-import common.Constants.{ Yes, No }
-import org.scalatest.mock.MockitoSugar
-import services.AuditService
+object Constants {
 
-import scala.util.Random
-
-abstract class TestFixtureBase extends MockitoSugar {
-  val mockAuditService = mock[AuditService]
-
-  def rnd(prefix: String) = s"$prefix-${Random.nextInt(100)}"
-  def maybe[A](value: => A) = if (Random.nextBoolean()) Some(value) else None
-  def maybeRnd(prefix: String) = maybe(rnd(prefix))
-  def someRnd(prefix: String) = Some(rnd(prefix))
-  def yesNoRnd = if (Random.nextBoolean()) Some(Yes) else Some(No)
+  val Yes: String = "Yes"
+  val No: String = "No"
 }

@@ -178,7 +178,7 @@ class OnlineTestServiceIntegrationSpec extends IntegrationSpec with MockitoSugar
       "applicationStatus" -> appStatus,
       "personal-details" -> BSONDocument("preferredName" -> "Test Preferred Name"),
       "assistance-details" -> BSONDocument(
-        "needsAdjustment" -> "No"
+        "needsAdjustment" -> common.Constants.No
       )
     )).futureValue
   }

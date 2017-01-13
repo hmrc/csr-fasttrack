@@ -19,6 +19,7 @@ package repositories.application
 import java.util.UUID
 import java.util.regex.Pattern
 
+import common.Constants.{ Yes, No }
 import model.ApplicationStatusOrder._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
@@ -693,8 +694,8 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         BSONDocument("applicationStatus" -> BSONDocument("$ne" -> "WITHDRAWN")),
         BSONDocument("$or" ->
           BSONArray(
-            BSONDocument("assistance-details.needsAdjustment" -> "Yes"),
-            BSONDocument("assistance-details.guaranteedInterview" -> "Yes")
+            BSONDocument("assistance-details.needsAdjustment" -> Yes),
+            BSONDocument("assistance-details.guaranteedInterview" -> Yes)
           ))
       ))
 
@@ -827,8 +828,8 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     timeZoneService.localize(utcMillis).toString("yyyy-MM-dd HH:mm:ss")
 
   private def booleanTranslator(bool: Boolean) = bool match {
-    case true => "Yes"
-    case false => "No"
+    case true => Yes
+    case false => No
   }
 
   private def reportQueryWithProjections[A](
@@ -874,7 +875,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
     val adjustmentRejection = BSONDocument("$set" -> BSONDocument(
       "assistance-details.typeOfAdjustments" -> List.empty[String],
-      "assistance-details.needsAdjustment" -> "No"
+      "assistance-details.needsAdjustment" -> No
     ))
 
     collection.update(query, adjustmentRejection, upsert = false) map {
@@ -891,7 +892,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
     collection.find(query, projection).one[BSONDocument].map {
       _.flatMap { doc =>
-        doc.getAs[BSONDocument]("assistance-details").map(_.getAs[String]("guaranteedInterview").contains("Yes"))
+        doc.getAs[BSONDocument]("assistance-details").map(_.getAs[String]("guaranteedInterview").contains(Yes))
       }.getOrElse(false)
     }
   }

@@ -16,6 +16,7 @@
 
 package repositories
 
+import common.Constants.{ Yes, No }
 import model.AssessmentScheduleCommands.ApplicationForAssessmentAllocationResult
 import model.Commands.{AdjustmentReport, AssistanceDetailsExchange, _}
 import model.{ApplicationStatuses, EvaluationResults}
@@ -59,7 +60,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       val userId = "userId9876"
       val applicationId = applicationRepo.create(userId, "frameworkId").futureValue.applicationId
 
-      val details = AssistanceDetailsExchange("Yes", None, None, Some("Yes"), None, None, None, None, None, None)
+      val details = AssistanceDetailsExchange(Yes, None, None, Some(Yes), None, None, None, None, None, None)
       assistanceRepo.update(applicationId, userId, details).futureValue
 
       applicationRepo.gisByApplication(applicationId).futureValue must be(true)

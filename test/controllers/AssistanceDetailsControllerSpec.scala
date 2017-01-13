@@ -16,6 +16,7 @@
 
 package controllers
 
+import common.Constants.{ Yes, No }
 import config.TestFixtureBase
 import mocks.application.AssistanceDetailsInMemoryRepository
 import org.mockito.Matchers.{ eq => eqTo, _ }
@@ -35,13 +36,13 @@ class AssistanceDetailsControllerSpec extends PlaySpec with Results {
 
   "Update assistance details" should {
 
-    "update then details when we have only assistance and no adjustments" in new TestFixture {
+    "update their details when we have only assistance and no adjustments" in new TestFixture {
       val result = TestAssistanceController.assistanceDetails("1234", "111-111")(updateAssistanceDetailsRequest("1234", "111-111")(
         s"""
            |{
-           |  "needsAssistance":"Yes",
+           |  "needsAssistance":"$Yes",
            |  "typeOfdisability": ["Some disability"],
-           |  "needsAdjustment":"No"
+           |  "needsAdjustment":"$No"
            |}
         """.stripMargin
       ))
@@ -54,9 +55,9 @@ class AssistanceDetailsControllerSpec extends PlaySpec with Results {
       val result = TestAssistanceController.assistanceDetails("1234", "111-111")(updateAssistanceDetailsRequest("1234", "111-111")(
         s"""
            |{
-           |  "needsAssistance":"Yes",
+           |  "needsAssistance":"$Yes",
            |  "typeOfdisability": ["Some disability"],
-           |  "needsAdjustment":"Yes",
+           |  "needsAdjustment":"$Yes",
            |  "extraTime": true,
            |  "screenMagnification": true,
            |  "printCopies": true
