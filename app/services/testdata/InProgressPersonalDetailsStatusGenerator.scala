@@ -20,13 +20,16 @@ import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.Commands.Address
 import model.PersistedObjects.{ContactDetails, PersonalDetails}
 import org.joda.time.LocalDate
-import play.api.mvc.RequestHeader
 import repositories._
 import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository, PersonalDetailsRepository}
+import model.PersistedObjects.{ ContactDetails, PersonalDetails }
+import play.api.mvc.RequestHeader
+import repositories._
 import services.testdata.faker.DataFaker.Random
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object InProgressPersonalDetailsStatusGenerator extends InProgressPersonalDetailsStatusGenerator {
   override val previousStatusGenerator = CreatedStatusGenerator
@@ -42,15 +45,15 @@ trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
 
 
   //scalastyle:off method.length
-  def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
+  def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
     def getPersonalDetails(candidateInformation: DataGenerationResponse) = {
       PersonalDetails(
         candidateInformation.firstName,
         candidateInformation.lastName,
-        "Pref" + candidateInformation.firstName,
-        new LocalDate(2015, 5, 21),
-        Random.bool,
-        Random.bool
+        generatorConfig.personalData.getPreferredName,
+        generatorConfig.personalData.dob,
+        aLevel = false,
+        stemLevel = false
       )
     }
 
@@ -65,7 +68,7 @@ trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
           makeRandAddressOption,
           makeRandAddressOption
         ),
-        "AB1 2CD",
+        generatorConfig.personalData.postCode.getOrElse(Random.postCode),
         candidateInformation.email,
         Some("07770 774 914")
       )
@@ -80,6 +83,7 @@ trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
       _ <- cdRepository.update(candidateInPreviousStatus.userId, cd)
     } yield {
       candidateInPreviousStatus.copy(personalDetails = Some(pd), contactDetails = Some(cd))
+
     }
   }
   //scalastyle:off method.length

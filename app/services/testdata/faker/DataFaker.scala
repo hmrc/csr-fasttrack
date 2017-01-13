@@ -26,6 +26,7 @@ import services.testdata.faker.DataFaker.ExchangeObjects.AvailableAssessmentSlot
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+//scalastyle:off number.of.methods
 object DataFaker {
   object ExchangeObjects {
     case class AvailableAssessmentSlot(venue: AssessmentCentreVenue, date: LocalDate, session: String)
@@ -40,6 +41,8 @@ object DataFaker {
         util.Random.shuffle(filtered).head
       }
     }
+
+    def upperLetter: Char = randOne(('A' to 'Z').toList)
 
     def bool: Boolean = randOne(List(true, false))
 
@@ -173,5 +176,10 @@ object DataFaker {
       "I am very weak, I need constant support",
       "I need a comfortable chair because of my back problem",
       "I need to take a rest every 10 minutes"))
+    def postCode: String = {
+      s"${Random.upperLetter}${Random.upperLetter}1 2${Random.upperLetter}${Random.upperLetter}"
+    }
+
   }
 }
+//scalastyle:on number.of.methods

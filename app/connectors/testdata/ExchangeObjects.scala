@@ -19,8 +19,8 @@ package connectors.testdata
 import model.Commands.ApplicationAssessment
 import model.EvaluationResults.SchemePreferences
 import model.PersistedObjects.{ContactDetails, PersonalDetails}
-import model.{Preferences}
 import model.persisted.AssistanceDetails
+import model.Preferences
 import play.api.libs.json.Json
 
 object ExchangeObjects {
@@ -38,7 +38,8 @@ object ExchangeObjects {
     contactDetails: Option[ContactDetails] = None,
     personalDetails: Option[PersonalDetails] = None,
     assistanceDetails: Option[AssistanceDetails] = None,
-    schemePreferences: Option[Preferences] = None)
+    schemePreferences: Option[Preferences] = None
+  )
 
   case class OnlineTestProfileResponse(cubiksUserId: Int, token: String, onlineTestUrl: String)
 

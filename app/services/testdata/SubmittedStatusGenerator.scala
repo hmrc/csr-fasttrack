@@ -36,6 +36,7 @@ trait SubmittedStatusGenerator extends ConstructiveGenerator {
 
   // scalastyle:off method.length
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
+
     def getAllQuestionnaireQuestions = List(
       PersistedQuestion("What is your gender identity?", PersistedAnswer(Some(Random.gender), None, None)),
       PersistedQuestion("What is your sexual orientation?", PersistedAnswer(Some(Random.sexualOrientation), None, None)),
