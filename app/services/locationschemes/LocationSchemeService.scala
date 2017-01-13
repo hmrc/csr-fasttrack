@@ -17,6 +17,7 @@
 package services.locationschemes
 
 import model.Exceptions.NotFoundException
+import model.Scheme.Scheme
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import repositories.{ FileLocationSchemeRepository, LocationSchemeRepository, LocationSchemes, _ }
 import services.locationschemes.exchangeobjects.GeoLocationSchemeResult
@@ -97,7 +98,7 @@ trait LocationSchemeService {
     }
   }
 
-  def updateSchemes(applicationId: String, schemeNames: List[String]): Future[Unit] = {
+  def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit] = {
     appRepository.updateSchemes(applicationId, schemeNames)
   }
 
