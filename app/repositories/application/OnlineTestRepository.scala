@@ -20,14 +20,15 @@ import config.MicroserviceAppConfig._
 import controllers.OnlineTestDetails
 import factories.DateTimeFactory
 import model.EvaluationResults._
-import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound, UnexpectedException }
+import model.Exceptions.{NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound, UnexpectedException}
 import model.OnlineTestCommands._
-import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
-import model.{ ApplicationStatuses, Commands }
-import org.joda.time.{ DateTime, LocalDate }
+import model.PersistedObjects.{ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation}
+import model.persisted.AssistanceDetails
+import model.{ApplicationStatuses, Commands}
+import org.joda.time.{DateTime, LocalDate}
 import reactivemongo.api.DB
 import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID, BSONString }
+import reactivemongo.bson.{BSONArray, BSONDocument, BSONObjectID, BSONString}
 import repositories._
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
@@ -230,10 +231,10 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationStatus" -> "SUBMITTED"),
       BSONDocument("$or" -> BSONArray(
-        BSONDocument("assistance-details.needsAdjustment" -> "No"),
+        BSONDocument("assistance-details.needsSupportForOnlineAssessment" -> false),
         BSONDocument("$and" -> BSONArray(
-          BSONDocument("assistance-details.needsAdjustment" -> "Yes"),
-          BSONDocument("assistance-details.adjustments-confirmed" -> true)
+          BSONDocument("assistance-details.needsSupportForOnlineAssessment" -> true),
+          BSONDocument("assistance-details.confirmedAdjustments" -> true)
         ))
       ))
     ))
@@ -283,32 +284,32 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     val personalDetailsRoot = doc.getAs[BSONDocument]("personal-details").get
     val preferredName = personalDetailsRoot.getAs[String]("preferredName").get
 
-    val assistanceDetailsRoot = doc.getAs[BSONDocument]("assistance-details").get
-    val guaranteedInterview = assistanceDetailsRoot.getAs[String]("guaranteedInterview").contains("Yes")
-    val needsAdjustment = assistanceDetailsRoot.getAs[String]("needsAdjustment").contains("Yes")
 
-    if (needsAdjustment) {
-      val typeOfAdjustmentsRoot = assistanceDetailsRoot.getAs[BSONArray]("typeOfAdjustments").get
-      val timeExtension = typeOfAdjustmentsRoot.values.contains(BSONString("time extension"))
-      if (timeExtension) {
-        val verbalTimeAdjustmentPercentage = assistanceDetailsRoot.getAs[Int]("verbalTimeAdjustmentPercentage").get
-        val numericalTimeAdjustmentPercentage = assistanceDetailsRoot.getAs[Int]("numericalTimeAdjustmentPercentage").get
-        val timeAdjustments = TimeAdjustmentsOnlineTestApplication(verbalTimeAdjustmentPercentage, numericalTimeAdjustmentPercentage)
-        OnlineTestApplication(applicationId, applicationStatus, userId, guaranteedInterview, needsAdjustment, preferredName,
-          Some(timeAdjustments))
-      } else {
-        OnlineTestApplication(applicationId, applicationStatus, userId, guaranteedInterview, needsAdjustment, preferredName, None)
-      }
+    val ad = doc.getAs[BSONDocument]("assistance-details")
+    val hasDisability = ad.flatMap(_.getAs[String]("hasDisability")).get
+    val needsSupportForOnlineAssessment = ad.flatMap(_.getAs[Boolean]("needsSupportForOnlineAssessment")).get
+    val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).get
+    val typesOfAdjustments = ad.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
+    val hasTimeExtension = typesOfAdjustments.exists(_.contains("time extension"))
+
+    val timeExtensionOpt: Option[TimeAdjustmentsOnlineTestApplication] = if (needsSupportForOnlineAssessment && hasTimeExtension) {
+      val verbalTimeAdjustmentPercentage = ad.flatMap(_.getAs[Int]("verbalTimeAdjustmentPercentage"))
+      val numericalTimeAdjustmentPercentage = ad.flatMap(_.getAs[Int]("numericalTimeAdjustmentPercentage"))
+      Some(TimeAdjustmentsOnlineTestApplication(verbalTimeAdjustmentPercentage.get, numericalTimeAdjustmentPercentage.get))
     } else {
-      OnlineTestApplication(applicationId, applicationStatus, userId, guaranteedInterview, needsAdjustment, preferredName, None)
+      None
     }
 
+    OnlineTestApplication(applicationId, applicationStatus, userId, guaranteedInterview,
+      needsSupportForOnlineAssessment, preferredName, timeExtensionOpt)
   }
 
   private def bsonDocToOnlineTestApplicationForReportRetrieving(doc: BSONDocument) = {
     val applicationId = doc.getAs[String]("applicationId").get
     val userId = doc.getAs[String]("userId").get
+
     def errorMsg(attr: String) = s"Error retrieving $attr for user with applicationId:$applicationId ${doc.toString()}"
+
     val onlineTests = doc.getAs[BSONDocument]("online-tests")
       .getOrElse(throw new Exception(errorMsg("online-tests")))
     val cubiksUserId = onlineTests.getAs[Int]("cubiksUserId")
@@ -386,10 +387,10 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       BSONDocument(
         "passmarkEvaluation" ->
           BSONDocument("passmarkVersion" -> version, "location1Scheme1" -> p.location1Scheme1.toString).
-          add(schemeToBSON("location1Scheme2" -> p.location1Scheme2)).
-          add(schemeToBSON("location2Scheme1" -> p.location2Scheme1)).
-          add(schemeToBSON("location2Scheme2" -> p.location2Scheme2)).
-          add(schemeToBSON("alternativeScheme" -> p.alternativeScheme)),
+            add(schemeToBSON("location1Scheme2" -> p.location1Scheme2)).
+            add(schemeToBSON("location2Scheme1" -> p.location2Scheme1)).
+            add(schemeToBSON("location2Scheme2" -> p.location2Scheme2)).
+            add(schemeToBSON("alternativeScheme" -> p.alternativeScheme)),
         "applicationStatus" -> applicationStatus,
         s"progress-status.$progressStatus" -> true
       ))

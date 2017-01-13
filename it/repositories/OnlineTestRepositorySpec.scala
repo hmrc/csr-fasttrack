@@ -74,7 +74,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     }
 
 
-    "return one application if there is one submitted application with no time adjustment needed and confirmed" in {
+    "return one application if there is one submitted application with no time adjustment needed and adjustments confirmed" in {
       createApplication("appId", "userId1", "frameworkId1", "SUBMITTED", needsAdjustment = true, adjustmentsConfirmed = true,
         timeExtensionAdjustments = false)
 
@@ -602,29 +602,41 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       if (adjustmentsConfirmed) {
         if (timeExtensionAdjustments) {
           BSONDocument(
-            "needsAdjustment" -> "Yes",
+            "needsSupportForOnlineAssessment" -> true,
+            "needsSupportAtVenue" -> true,
             "typeOfAdjustments" -> BSONArray("time extension", "room alone"),
-            "adjustments-confirmed" -> true,
+            "confirmedAdjustments" -> true,
             "verbalTimeAdjustmentPercentage" -> 9,
-            "numericalTimeAdjustmentPercentage" -> 11
+            "numericalTimeAdjustmentPercentage" -> 11,
+            "guaranteedInterview" -> false,
+            "hasDisability" -> "No"
           )
         } else {
           BSONDocument(
-            "needsAdjustment" -> "Yes",
+            "needsSupportForOnlineAssessment" -> true,
+            "needsSupportAtVenue" -> true,
             "typeOfAdjustments" -> BSONArray("room alone"),
-            "adjustments-confirmed" -> true
+            "confirmedAdjustments" -> true,
+            "guaranteedInterview" -> false,
+            "hasDisability" -> "No"
           )
         }
       } else {
         BSONDocument(
-          "needsAdjustment" -> "Yes",
+          "needsSupportForOnlineAssessment" -> true,
+          "needsSupportAtVenue" -> true,
           "typeOfAdjustments" -> BSONArray("time extension", "room alone"),
-          "adjustments-confirmed" -> false
+          "confirmedAdjustments" -> false,
+          "guaranteedInterview" -> false,
+          "hasDisability" -> "No"
         )
       }
     } else {
       BSONDocument(
-        "needsAdjustment" -> "No"
+        "needsSupportForOnlineAssessment" -> false,
+        "needsSupportAtVenue" -> false,
+        "guaranteedInterview" -> false,
+        "hasDisability" -> "No"
       )
     }
   }
@@ -701,8 +713,10 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       "online-tests" -> onlineTests,
       "progress-status-dates" -> BSONDocument("allocation_unconfirmed" -> "2016-04-05"),
       "assistance-details" -> BSONDocument(
-        "guaranteedInterview" -> "Yes",
-        "needsAdjustment" -> "No",
+        "hasDisability" -> "No",
+        "guaranteedInterview" -> true,
+        "needsSupportForOnlineAssessment" -> false,
+        "needsSupportAtVenue" -> false,
         "expirationDate" -> expirationDate.get,
         "token" -> token
       )

@@ -123,12 +123,12 @@ class TestDataMongoRepository(implicit mongo: () => DB)
   private def buildSingleApplication(id: Int, onlyAwaitingAllocation: Boolean = false) = {
     val personalDetails = createPersonalDetails(id, onlyAwaitingAllocation)
     val frameworks = createLocations(id, onlyAwaitingAllocation)
-    val assistance = createAssistance(id, onlyAwaitingAllocation)
+    val assistanceDetails = createAssistanceDetails(id, onlyAwaitingAllocation)
     val onlineTests = createOnlineTests(id, onlyAwaitingAllocation)
-    val submitted = isSubmitted(id)(personalDetails, frameworks, assistance)
-    val withdrawn = isWithdrawn(id)(personalDetails, frameworks, assistance)
+    val submitted = isSubmitted(id)(personalDetails, frameworks, assistanceDetails)
+    val withdrawn = isWithdrawn(id)(personalDetails, frameworks, assistanceDetails)
 
-    val progress = createProgress(personalDetails, frameworks, assistance, submitted, withdrawn)
+    val progress = createProgress(personalDetails, frameworks, assistanceDetails, submitted, withdrawn)
 
     val applicationStatus = if (onlyAwaitingAllocation) "AWAITING_ALLOCATION" else chooseOne(applicationStatuses)
     var document = BSONDocument(
@@ -139,7 +139,7 @@ class TestDataMongoRepository(implicit mongo: () => DB)
     )
     document = buildDocument(document)(personalDetails.map(d => "personal-details" -> d))
     document = buildDocument(document)(frameworks.map(d => "framework-preferences" -> d))
-    document = buildDocument(document)(assistance.map(d => "assistance-details" -> d))
+    document = buildDocument(document)(assistanceDetails.map(d => "assistance-details" -> d))
     document = buildDocument(document)(onlineTests.map(d => "online-tests" -> d))
     document = document ++ ("progress-status" -> progress)
 
@@ -151,15 +151,17 @@ class TestDataMongoRepository(implicit mongo: () => DB)
     f.map(d => document ++ d).getOrElse(document)
   }
 
-  private def createAssistance(id: Int, buildAlways: Boolean = false) = id match {
+  private def createAssistanceDetails(id: Int, buildAlways: Boolean = false) = id match {
     case x if x % 7 == 0 && !buildAlways => None
     case _ =>
       Some(BSONDocument(
-        "needsAssistance" -> "No",
-        "needsAdjustment" -> "Yes",
-        "guaranteedInterview" -> "Yes",
-        "typeOfAdjustments" -> BSONArray("Time extension", "Braille test paper", "Stand up and move around", "Other"),
-        "otherAdjustments" -> "Other adjustments test text"
+        "hasDisability" -> "No",
+        "guaranteedInterview" -> true,
+        "needsSupportForOnlineAssessment" -> true,
+        "needsSupportForOnlineAssessmentDescription" -> "needsSupportForOnlineAssessment description",
+        "needsSupportAtVenue" -> true,
+        "needsSupportAtVenueDescription" -> "needsSupportAtVenue description",
+        "typeOfAdjustments" -> BSONArray("Time extension", "Braille test paper", "Stand up and move around", "Other")
       ))
   }
 

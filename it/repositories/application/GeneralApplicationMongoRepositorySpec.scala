@@ -91,9 +91,10 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
         "stemLevel" -> true
       ),
       "assistance-details" -> BSONDocument(
-        "needsAssistance" -> "No",
-        "needsAdjustment" -> "No",
-        "guaranteedInterview" -> "No"
+        "hasDisability" -> "No",
+        "needsSupportForOnlineAssessment" -> false,
+        "needsSupportAtVenue" -> false,
+        "guaranteedInterview" -> false
       ),
       "issue" -> "this candidate has changed the email",
       "progress-status" -> BSONDocument(
