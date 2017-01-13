@@ -18,10 +18,15 @@ package repositories.application
 
 import factories.UUIDFactory
 import model.Commands.Report
+import model.Exceptions.{ LocationPreferencesNotFound, SchemePreferencesNotFound }
+import model.Scheme
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
 import services.GBTimeZoneService
 import testkit.MongoRepositorySpec
+
+import scala.concurrent.Await
+import scala.concurrent.duration._
 
 class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory {
 
@@ -62,6 +67,51 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
       )
 
     }
+
+    "Update schemes locations and retrieve" in {
+      val userId = generateUUID()
+      val appId = generateUUID()
+      createMinimumApplication(userId, appId, "FastTrack")
+      val schemeLocations = List("3", "1", "2")
+
+      repository.updateSchemeLocations(appId, schemeLocations).futureValue
+      val result = repository.getSchemeLocations(appId).futureValue
+
+      result must contain theSameElementsInOrderAs schemeLocations
+    }
+
+    "Update schemes and retrieve" in {
+      val userId = generateUUID()
+      val appId = generateUUID()
+      createMinimumApplication(userId, appId, "FastTrack")
+      val schemes = List(Scheme.DigitalAndTechnology, Scheme.ProjectDelivery, Scheme.Business)
+
+      repository.updateSchemes(appId, schemes).futureValue
+      val result = repository.getSchemes(appId).futureValue
+
+      result must contain theSameElementsInOrderAs schemes
+    }
+
+    "return scheme preferences not found exception" in {
+      val userId = generateUUID()
+      val appId = generateUUID()
+      createMinimumApplication(userId, appId, "FastTrack")
+
+      an[SchemePreferencesNotFound] must be thrownBy {
+        Await.result(repository.getSchemes(appId), 5 seconds)
+      }
+    }
+
+    "return location preferences not found exception" in {
+      val userId = generateUUID()
+      val appId = generateUUID()
+      createMinimumApplication(userId, appId, "FastTrack")
+
+      an[LocationPreferencesNotFound] must be thrownBy {
+        Await.result(repository.getSchemeLocations(appId), 5 seconds)
+      }
+    }
+
   }
 
   def createApplicationWithAllFields(userId: String, appId: String, frameworkId: String) = {

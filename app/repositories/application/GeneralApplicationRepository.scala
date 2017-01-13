@@ -111,7 +111,7 @@ trait GeneralApplicationRepository {
 
   def getSchemes(applicationId: String): Future[List[Scheme]]
 
-  def updateSchemes(applicationId: String, schemeNames: List[String]): Future[Unit]
+  def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit]
 }
 // scalastyle:on number.of.methods
 
@@ -1046,7 +1046,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     }
   }
 
-  def updateSchemes(applicationId: String, schemeNames: List[String]): Future[Unit] = {
+  def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val schemePreferencesBSON = BSONDocument("$set" -> BSONDocument(
       "progress-status.scheme-preferences" -> true,
