@@ -603,7 +603,8 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       if (adjustmentsConfirmed) {
         if (timeExtensionAdjustments) {
           BSONDocument(
-            "needsAdjustment" -> Yes,
+            "needsSupportForOnlineAssessment" -> true,
+            "needsSupportAtVenue" -> true,
             "typeOfAdjustments" -> BSONArray("time extension", "room alone"),
             "confirmedAdjustments" -> true,
             "verbalTimeAdjustmentPercentage" -> 9,
