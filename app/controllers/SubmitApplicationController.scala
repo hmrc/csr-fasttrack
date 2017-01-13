@@ -52,7 +52,7 @@ trait SubmitApplicationController extends BaseController {
 
   def submitApplication(userId: String, applicationId: String) = Action.async { implicit request =>
     val generalDetailsFuture = pdRepository.find(applicationId)
-    val assistanceDetailsFuture = adService.find(userId, applicationId)
+    val assistanceDetailsFuture = adService.find(applicationId, userId)
     val contactDetailsFuture = cdRepository.find(userId)
     val schemesLocationsFuture = frameworkPrefRepository.tryGetPreferences(applicationId)
 
