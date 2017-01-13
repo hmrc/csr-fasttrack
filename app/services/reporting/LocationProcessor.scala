@@ -97,7 +97,7 @@ trait LocationProcessorTrait {
     questionnaireRepository.findQuestions(applicationId)
 
   def haveDisabilities(applicationId: String): Future[Boolean] = {
-    assistanceDetailsRepository.find(applicationId).map(ans => if (ans.hasDisability == "Yes") true else false)
+    assistanceDetailsRepository.find(applicationId).map(ans => ans.hasDisability == "Yes")
   }
 
   def createTotals(appIds: List[String], countDisabilities: Future[List[Boolean]]): Future[Totals] = {
