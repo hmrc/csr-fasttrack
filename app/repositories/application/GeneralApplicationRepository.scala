@@ -19,9 +19,9 @@ package repositories.application
 import java.util.UUID
 import java.util.regex.Pattern
 
-import common.Constants.{ Yes, No }
+import common.Constants.{ No, Yes }
 import model.ApplicationStatusOrder._
-import model.AssessmentScheduleCommands.{ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult}
+import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.EvaluationResults._
 import model.Exceptions.{ ApplicationNotFound, LocationPreferencesNotFound, SchemePreferencesNotFound }
@@ -31,10 +31,6 @@ import model._
 import model.commands.OnlineTestProgressResponse
 import model.persisted.AssistanceDetails
 import org.joda.time.format.DateTimeFormat
-import org.joda.time.{DateTime, LocalDate}
-import play.api.libs.json.{Format, JsNumber, JsObject}
-import reactivemongo.api.{DB, QueryOpts, ReadPreference}
-import reactivemongo.bson.{BSONDocument, _}
 import org.joda.time.{ DateTime, LocalDate }
 import play.api.libs.json.{ Format, JsNumber, JsObject }
 import reactivemongo.api.{ DB, QueryOpts, ReadPreference }
