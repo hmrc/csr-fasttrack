@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package testkit
+package services
 
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.play.PlaySpec
+import org.joda.time.{ DateTime, DateTimeZone }
+import testkit.{ FutureHelper, UnitSpec }
+import uk.gov.hmrc.play.http.HeaderCarrier
 
-class UnitSpec extends PlaySpec with testkit.MockitoSugar with ScalaFutures {
-  val unit = () // This approach avoids both scala compiler and intellij warnings
+/**
+  * Common base class for all service tests
+  */
+class BaseServiceSpec extends UnitSpec with FutureHelper {
+  implicit val now: DateTime = DateTime.now().withZone(DateTimeZone.UTC)
+  implicit val hc = new HeaderCarrier()
 }

@@ -17,6 +17,7 @@
 package connectors.testdata
 
 import model.Commands.ApplicationAssessment
+import model.PersistedObjects.PersonalDetails
 import model.Preferences
 import play.api.libs.json.Json
 
@@ -31,13 +32,15 @@ object ExchangeObjects {
     lastName: String,
     onlineTestProfile: Option[OnlineTestProfileResponse] = None,
     applicationAssessment: Option[ApplicationAssessment] = None,
-    preferences: Option[Preferences] = None
+    preferences: Option[Preferences] = None,
+    personalDetails: Option[PersonalDetails] = None
   )
 
   case class OnlineTestProfileResponse(cubiksUserId: Int, token: String, onlineTestUrl: String)
 
   object Implicits {
     import model.Commands.Implicits._
+    import model.PersistedObjects.Implicits._
     implicit val onlineTestProfileResponseFormat = Json.format[OnlineTestProfileResponse]
     implicit val dataGenerationResponseFormat = Json.format[DataGenerationResponse]
   }

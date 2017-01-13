@@ -50,17 +50,6 @@ trait SubmittedStatusGenerator extends ConstructiveGenerator {
 
   // scalastyle:off method.length
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
-    def getPersonalDetails(candidateInformation: DataGenerationResponse) = {
-      PersonalDetails(
-        candidateInformation.firstName,
-        candidateInformation.lastName,
-        "Pref" + candidateInformation.firstName,
-        new LocalDate(2015, 5, 21),
-        Random.bool,
-        Random.bool
-      )
-    }
-
     def getAssistanceDetails(gis: Boolean) = {
       if (gis) {
         AssistanceDetailsExchange(
@@ -152,7 +141,7 @@ trait SubmittedStatusGenerator extends ConstructiveGenerator {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       _ <- pdRepository.update(candidateInPreviousStatus.applicationId.get, candidateInPreviousStatus.userId,
-        getPersonalDetails(candidateInPreviousStatus))
+        generatorConfig.personalData.personalDetails)
       _ <- adRepository.update(candidateInPreviousStatus.applicationId.get, candidateInPreviousStatus.userId,
         getAssistanceDetails(generatorConfig.setGis))
       _ <- cdRepository.update(candidateInPreviousStatus.userId, getContactDetails(candidateInPreviousStatus))

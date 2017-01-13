@@ -17,10 +17,10 @@
 package connectors
 
 import config.WSHttp
-import connectors.AuthProviderClient.{ErrorRetrievingReportException, TokenEmailPairInvalidException, TokenExpiredException, UserRoleDoesNotExist}
+import connectors.AuthProviderClient._
 import connectors.ExchangeObjects.Implicits._
-import connectors.ExchangeObjects.{ActivateEmailRequest, AddUserRequest, Candidate, UserResponse}
-import model.Exceptions.{ConnectorException, EmailTakenException}
+import connectors.ExchangeObjects._
+import model.Exceptions.{ ConnectorException, EmailTakenException }
 import play.api.http.Status._
 import uk.gov.hmrc.play.http._
 
@@ -32,6 +32,7 @@ object AuthProviderClient extends AuthProviderClient {
   sealed class TokenExpiredException() extends Exception
   sealed class TokenEmailPairInvalidException() extends Exception
   sealed class UserRoleDoesNotExist(message: String) extends Exception(message)
+  sealed class TooManyResultsException(message: String) extends Exception(message)
 }
 
 trait AuthProviderClient {
@@ -95,4 +96,40 @@ trait AuthProviderClient {
         case Upstream4xxResponse(_, 410, _, _) => throw new TokenExpiredException()
         case e: NotFoundException => throw new TokenEmailPairInvalidException()
       }
+
+  def findByFirstName(name: String, roles: List[String])(implicit hc: HeaderCarrier): Future[List[Candidate]] = {
+    WSHttp.POST(s"$url/service/$ServiceName/findByFirstName", FindByFirstNameRequest(roles, name)).map { response =>
+      response.json.as[List[Candidate]]
+    }.recover {
+      case Upstream4xxResponse(_, REQUEST_ENTITY_TOO_LARGE, _, _) =>
+        throw new TooManyResultsException(s"Too many results were returned, narrow your search parameters")
+      case errorResponse =>
+        throw new ConnectorException(s"Bad response received when getting token for user: $errorResponse")
+    }
+  }
+
+  def findByLastName(name: String, roles: List[String])(implicit hc: HeaderCarrier): Future[List[Candidate]] = {
+    WSHttp.POST(s"$url/service/$ServiceName/findByLastName", FindByLastNameRequest(roles, name)).map { response =>
+      response.json.as[List[Candidate]]
+    }.recover {
+      case Upstream4xxResponse(_, REQUEST_ENTITY_TOO_LARGE, _, _) =>
+        throw new TooManyResultsException(s"Too many results were returned, narrow your search parameters")
+      case errorResponse =>
+        throw new ConnectorException(s"Bad response received when getting token for user: $errorResponse")
+    }
+  }
+
+  def findByFirstNameAndLastName(firstName: String, lastName: String, roles: List[String])
+                                (implicit hc: HeaderCarrier): Future[List[Candidate]] = {
+    WSHttp.POST(s"$url/service/$ServiceName/findByFirstNameLastName",
+      FindByFirstNameLastNameRequest(roles, firstName, lastName)
+    ).map { response =>
+      response.json.as[List[Candidate]]
+    }.recover {
+      case Upstream4xxResponse(_, REQUEST_ENTITY_TOO_LARGE, _, _) =>
+        throw new TooManyResultsException(s"Too many results were returned, narrow your search parameters")
+      case errorResponse =>
+        throw new ConnectorException(s"Bad response received when getting token for user: $errorResponse")
+    }
+  }
 }
