@@ -16,10 +16,8 @@
 
 package testkit
 
-import akka.stream.Materializer
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
-import play.api.Play
 
 class UnitSpec extends PlaySpec with testkit.MockitoSugar with ScalaFutures {
   val unit = () // This approach avoids both scala compiler and intellij warnings

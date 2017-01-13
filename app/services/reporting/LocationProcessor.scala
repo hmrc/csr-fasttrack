@@ -19,6 +19,7 @@ package services.reporting
 import java.util.concurrent.TimeUnit
 
 import akka.actor.{ Actor, ActorRef, Props }
+import common.Constants.{ Yes, No }
 import org.joda.time.DateTime
 import play.api.Logger
 import repositories.application.AssistanceDetailsRepository
@@ -35,8 +36,8 @@ case class Totals(totalApplications: Int, haveDisability: Int)
 case object TimeoutMessage
 
 class LocationProcessor(val locationAndRegion: (String, String), val timeStamp: DateTime, val questionnaireRepository: QuestionnaireRepository,
-  val asRepository: AssistanceDetailsRepository, val reportingRepository: ReportingRepository,
-  reportSupervisor: ActorRef) extends Actor with LocationProcessorTrait {
+                        val assistanceDetailsRepository: AssistanceDetailsRepository, val reportingRepository: ReportingRepository,
+                        reportSupervisor: ActorRef) extends Actor with LocationProcessorTrait {
 
   import config.MicroserviceAppConfig.diversityMonitoringJobConfig
 
@@ -90,14 +91,14 @@ trait LocationProcessorTrait {
   val locationAndRegion: (String, String)
   val timeStamp: DateTime
   val questionnaireRepository: QuestionnaireRepository
-  val asRepository: AssistanceDetailsRepository
+  val assistanceDetailsRepository: AssistanceDetailsRepository
   val reportingRepository: ReportingRepository
 
   def findQuestionnaire(applicationId: String): Future[Map[String, String]] =
     questionnaireRepository.findQuestions(applicationId)
 
   def haveDisabilities(applicationId: String): Future[Boolean] = {
-    asRepository.find(applicationId).map(ans => if (ans.needsAssistance == "Yes") true else false)
+    assistanceDetailsRepository.find(applicationId).map(ans => ans.hasDisability == "Yes")
   }
 
   def createTotals(appIds: List[String], countDisabilities: Future[List[Boolean]]): Future[Totals] = {

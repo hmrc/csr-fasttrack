@@ -16,6 +16,7 @@
 
 package config
 
+import common.Constants.{ Yes, No }
 import org.scalatest.mock.MockitoSugar
 import services.AuditService
 
@@ -28,5 +29,5 @@ abstract class TestFixtureBase extends MockitoSugar {
   def maybe[A](value: => A) = if (Random.nextBoolean()) Some(value) else None
   def maybeRnd(prefix: String) = maybe(rnd(prefix))
   def someRnd(prefix: String) = Some(rnd(prefix))
-  def yesNoRnd = if (Random.nextBoolean()) Some("Yes") else Some("No")
+  def yesNoRnd = if (Random.nextBoolean()) Some(Yes) else Some(No)
 }

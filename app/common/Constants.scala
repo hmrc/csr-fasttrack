@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-package mocks.application
+package common
 
-import mocks.InMemoryStorage
-import model.Commands.AssistanceDetailsExchange
-import model.Exceptions.AssistanceDetailsNotFound
-import repositories.application.AssistanceDetailsRepository
+object Constants {
 
-object AssistanceDetailsInMemoryRepository extends AssistanceDetailsRepository with InMemoryStorage[AssistanceDetailsExchange] {
-  // Seed with test data.
-  inMemoryRepo +=
-    "111-111" ->
-    AssistanceDetailsExchange("No", None, None, None, None, None, None, None, None, None)
-
-  override def notFound(applicationId: String) = throw new AssistanceDetailsNotFound(applicationId)
+  val Yes: String = "Yes"
+  val No: String = "No"
 }

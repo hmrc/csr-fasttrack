@@ -18,25 +18,24 @@ package controllers
 
 import config._
 import connectors.ExchangeObjects._
-import connectors.{ CubiksGatewayClient, EmailClient }
-import factories.{ DateTimeFactory, UUIDFactory }
+import connectors.{CubiksGatewayClient, EmailClient}
+import factories.{DateTimeFactory, UUIDFactory}
 import mocks._
-import mocks.application.{ DocumentRootInMemoryRepository, OnlineTestInMemoryRepository }
+import mocks.application.{DocumentRootInMemoryRepository, OnlineTestInMemoryRepository}
 import model.Commands.Address
 import model.OnlineTestCommands.OnlineTestApplication
 import model.PersistedObjects.ContactDetails
 import org.joda.time.DateTime
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
-import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
-import play.api.mvc.Results
 import play.api.test.Helpers._
-import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories.{ ContactDetailsRepository, OnlineTestPDFReportRepository }
-import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
+import play.api.test.{FakeHeaders, FakeRequest, Helpers}
+import repositories.application.AssistanceDetailsRepository
+import repositories.{ContactDetailsRepository, OnlineTestPDFReportRepository}
+import services.onlinetesting.{OnlineTestExtensionService, OnlineTestService}
 import testkit.MockitoImplicits.OngoingStubbingExtensionUnit
-import testkit.{ MockitoSugar, UnitSpec, UnitWithAppSpec }
+import testkit.UnitWithAppSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -173,6 +172,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
       val otRepository = OnlineTestInMemoryRepository
       val otprRepository = onlineTestPDFReportRepoMock
       val trRepository = TestReportInMemoryRepository
+      val adRepository = mock[AssistanceDetailsRepository]
       val cubiksGatewayClient = cubiksGatewayClientMock
       val tokenFactory = UUIDFactory
       val onlineTestInvitationDateFactory = DateTimeFactory
@@ -209,7 +209,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
         override def getOnlineTestApplication(appId: String): Future[Option[OnlineTestApplication]] = {
           Future.successful(
             Some(
-              OnlineTestApplication(appId, "", "", false, false, "", None)
+              OnlineTestApplication(appId, "", "", guaranteedInterview = false, needsAdjustments = false, "", None)
             )
           )
         }

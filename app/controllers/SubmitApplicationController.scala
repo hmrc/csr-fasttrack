@@ -16,21 +16,22 @@
 
 package controllers
 
-import connectors.{ CSREmailClient, EmailClient }
+import connectors.{CSREmailClient, EmailClient}
 import model.ApplicationValidator
 import play.api.mvc.Action
 import repositories.FrameworkRepository.CandidateHighestQualification
 import repositories._
-import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository, PersonalDetailsRepository }
+import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository, PersonalDetailsRepository}
 import services.AuditService
+import services.assistancedetails.AssistanceDetailsService
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object SubmitApplicationController extends SubmitApplicationController {
+  override val adService: AssistanceDetailsService = AssistanceDetailsService
   override val pdRepository: PersonalDetailsRepository = personalDetailsRepository
-  override val adRepository: AssistanceDetailsRepository = assistanceRepository
   override val cdRepository = contactDetailsRepository
   override val frameworkPrefRepository: FrameworkPreferenceMongoRepository = frameworkPreferenceRepository
   override val frameworkRegionsRepository: FrameworkRepository = frameworkRepository
@@ -40,9 +41,8 @@ object SubmitApplicationController extends SubmitApplicationController {
 }
 
 trait SubmitApplicationController extends BaseController {
-
+  val adService: AssistanceDetailsService
   val pdRepository: PersonalDetailsRepository
-  val adRepository: AssistanceDetailsRepository
   val cdRepository: ContactDetailsRepository
   val frameworkPrefRepository: FrameworkPreferenceRepository
   val frameworkRegionsRepository: FrameworkRepository
@@ -52,7 +52,7 @@ trait SubmitApplicationController extends BaseController {
 
   def submitApplication(userId: String, applicationId: String) = Action.async { implicit request =>
     val generalDetailsFuture = pdRepository.find(applicationId)
-    val assistanceDetailsFuture = adRepository.find(applicationId)
+    val assistanceDetailsFuture = adService.find(applicationId, userId)
     val contactDetailsFuture = cdRepository.find(userId)
     val schemesLocationsFuture = frameworkPrefRepository.tryGetPreferences(applicationId)
 

@@ -17,12 +17,12 @@
 package repositories.application
 
 import model.Exceptions.PersonalDetailsNotFound
-import model.PersistedObjects
-import model.PersistedObjects.{ PersonalDetails, PersonalDetailsWithUserId }
-import org.joda.time.LocalDate
+import model.{ApplicationStatuses, PersistedObjects}
+import model.PersistedObjects.{ApplicationStatus, PersonalDetails, PersonalDetailsWithUserId}
+import org.joda.time.{DateTime, LocalDate}
 import reactivemongo.api.DB
-import reactivemongo.bson.{ BSONDocument, _ }
-import repositories._
+import reactivemongo.bson.{BSONDocument, _}
+import repositories.{_}
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -35,6 +35,9 @@ trait PersonalDetailsRepository {
 
   def update(applicationId: String, userId: String, personalDetails: PersonalDetails): Future[Unit]
 
+  def update(appId: String, userId: String, personalDetails: PersonalDetails,
+             requiredStatuses: Seq[String], newApplicationStatus: String): Future[Unit]
+
   def find(applicationId: String): Future[PersonalDetails]
 
   def findPersonalDetailsWithUserId(applicationId: String): Future[PersonalDetailsWithUserId]
@@ -42,7 +45,8 @@ trait PersonalDetailsRepository {
 
 class PersonalDetailsMongoRepository(implicit mongo: () => DB)
   extends ReactiveRepository[PersonalDetails, BSONObjectID]("application", mongo,
-    PersistedObjects.Implicits.persistedPersonalDetailsFormats, ReactiveMongoFormats.objectIdFormats) with PersonalDetailsRepository {
+    PersistedObjects.Implicits.persistedPersonalDetailsFormats, ReactiveMongoFormats.objectIdFormats)
+    with PersonalDetailsRepository with ReactiveRepositoryHelpers {
 
   override def update(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
 
@@ -59,6 +63,31 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
     collection.update(query, personalDetailsBSON, upsert = false) map {
       case _ => ()
     }
+  }
+
+  def update(applicationId: String, userId: String, personalDetails: PersonalDetails,
+             requiredStatuses: Seq[String], newApplicationStatus: String): Future[Unit] = {
+    val PersonalDetailsCollection = "personal-details"
+
+
+    val query = BSONDocument("$and" -> BSONArray(
+      BSONDocument("applicationId" -> applicationId, "userId" -> userId),
+      BSONDocument("applicationStatus" -> BSONDocument("$in" -> requiredStatuses))
+    ))
+
+    val personalDetailsBSON = BSONDocument("$set" ->
+      BSONDocument(
+        "progress-status.personal-details" -> true,
+        "progress-status-timestamp.personal-details" -> DateTime.now(),
+        PersonalDetailsCollection -> personalDetails,
+        "applicationStatus" -> newApplicationStatus
+      )
+    )
+
+    val validator = singleUpdateValidator(applicationId, actionDesc = "updating personal details",
+      PersonalDetailsNotFound(applicationId))
+
+    collection.update(query, personalDetailsBSON) map validator
   }
 
   override def find(applicationId: String): Future[PersonalDetails] = {

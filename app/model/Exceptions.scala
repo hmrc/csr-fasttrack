@@ -41,6 +41,8 @@ object Exceptions {
 
   case class AssistanceDetailsNotFound(id: String) extends Exception(id)
 
+  case class CannotUpdateAssistanceDetails(userId: String) extends Exception(userId)
+
   case class TooManyEntries(msg: String) extends Exception(msg)
 
   case class NoResultsReturned(reason: String) extends Exception(reason)

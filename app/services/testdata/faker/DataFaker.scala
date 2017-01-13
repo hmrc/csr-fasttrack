@@ -16,6 +16,7 @@
 
 package services.testdata.faker
 
+import common.Constants.{ Yes, No }
 import model.EvaluationResults
 import model.EvaluationResults.Result
 import model.Exceptions.DataFakingException
@@ -26,6 +27,7 @@ import services.testdata.faker.DataFaker.ExchangeObjects.AvailableAssessmentSlot
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+//scalastyle:off number.of.methods
 object DataFaker {
   object ExchangeObjects {
     case class AvailableAssessmentSlot(venue: AssessmentCentreVenue, date: LocalDate, session: String)
@@ -40,6 +42,8 @@ object DataFaker {
         util.Random.shuffle(filtered).head
       }
     }
+
+    def upperLetter: Char = randOne(('A' to 'Z').toList)
 
     def bool: Boolean = randOne(List(true, false))
 
@@ -133,7 +137,7 @@ object DataFaker {
     def age11to16School = randOne(List("Blue Bees School", "Green Goblins School", "Magenta Monkeys School", "Zany Zebras School"))
     def age16to18School = randOne(List("Advanced Skills School", "Extremely Advanced School", "A-Level Specialist School", "16 to 18 School"))
     def homePostcode = randOne(List("AB1 2CD", "BC11 4DE", "CD6 2EF", "DE2F 1GH"))
-    def yesNo = randOne(List("Yes", "No"))
+    def yesNo = randOne(List(Yes, No))
     def employeeOrSelf = randOne(List(Some("Employee"), None))
     def sizeOfPlaceOfWork = randOne(List("Small (1 - 24 employees)", "Large (over 24 employees)"))
     def parentsOccupation = randOne(List(
@@ -159,5 +163,24 @@ object DataFaker {
       val lastName = randOne(Lastnames.list)
       s"$lastName$userNumber"
     }
+
+    def yesNoPreferNotToSay = randOne(List("Yes", "No", "I don't know/prefer not to say"))
+
+    def hasDisabilityDescription: String = randOne(List("I am too tall", "I am too good", "I get bored easily"))
+
+    def onlineAdjustmentsDescription: String = randOne(List(
+      "I am too sensitive to the light from screens",
+      "I am allergic to electronic-magnetic waves",
+      "I am a convicted cracker who was asked by the court to be away from computers for 5 years"))
+
+    def assessmentCentreAdjustmentDescription: String = randOne(List(
+      "I am very weak, I need constant support",
+      "I need a comfortable chair because of my back problem",
+      "I need to take a rest every 10 minutes"))
+    def postCode: String = {
+      s"${Random.upperLetter}${Random.upperLetter}1 2${Random.upperLetter}${Random.upperLetter}"
+    }
+
   }
 }
+//scalastyle:on number.of.methods

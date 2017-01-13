@@ -28,7 +28,7 @@ class DiagnosticReportRepositorySpec extends MongoRepositorySpec {
   import ImplicitBSONHandlers._
 
   override val collectionName = "application"
-  
+
   def diagnosticReportRepo = new DiagnosticReportingMongoRepository()
   def helperRepo = new GeneralApplicationMongoRepository(GBTimeZoneService)
 
@@ -58,7 +58,7 @@ class DiagnosticReportRepositorySpec extends MongoRepositorySpec {
       "registered" -> BSONBoolean(true),
       "personal_details_completed" -> BSONBoolean(true),
       "schemes_and_locations_completed" -> BSONBoolean(true),
-      "assistance_completed" -> BSONBoolean(true),
+      "assistance_details_completed" -> BSONBoolean(true),
       "review_completed" -> BSONBoolean(true),
       "questionnaire" -> BSONDocument(
         "start_diversity_questionnaire" -> BSONBoolean(true),

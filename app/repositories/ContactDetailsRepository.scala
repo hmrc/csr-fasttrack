@@ -40,6 +40,8 @@ trait ContactDetailsRepository {
   def findByPostCode(postCode: String): Future[List[ContactDetailsWithId]]
 
   def findAll: Future[List[ContactDetailsWithId]]
+
+  def findByUserIds(userIds: List[String]): Future[List[ContactDetailsWithId]]
 }
 
 class ContactDetailsMongoRepository(implicit mongo: () => DB)
@@ -66,14 +68,13 @@ class ContactDetailsMongoRepository(implicit mongo: () => DB)
     val projection = BSONDocument("contact-details" -> 1, "_id" -> 0)
 
     collection.find(query, projection).one[BSONDocument] map {
-      case Some(document) if document.getAs[BSONDocument]("contact-details").isDefined => {
+      case Some(document) if document.getAs[BSONDocument]("contact-details").isDefined =>
         val root = document.getAs[BSONDocument]("contact-details").get
         val address = root.getAs[Address]("address").get
         val postCode = root.getAs[PostCode]("postCode").getOrElse("")
         val phone = root.getAs[PhoneNumber]("phone")
         val email = root.getAs[String]("email").getOrElse("")
         ContactDetails(address, postCode, email, phone)
-      }
       case None => throw new ContactDetailsNotFound(userId)
     }
   }
@@ -81,6 +82,21 @@ class ContactDetailsMongoRepository(implicit mongo: () => DB)
   override def findByPostCode(postCode: String) = {
 
     val query = BSONDocument("contact-details.postCode" -> postCode)
+
+    collection.find(query).cursor[BSONDocument]().collect[List]().map(_.map { doc =>
+      val id = doc.getAs[String]("userId").get
+      val root = doc.getAs[BSONDocument]("contact-details").get
+      val address = root.getAs[Address]("address").get
+      val postCode = root.getAs[PostCode]("postCode").get
+      val phone = root.getAs[PhoneNumber]("phone")
+      val email = root.getAs[String]("email").get
+
+      ContactDetailsWithId(id, address, postCode, email, phone)
+    })
+  }
+
+  override def findByUserIds(userIds: List[String]): Future[List[ContactDetailsWithId]] = {
+    val query = BSONDocument("userId" -> BSONDocument("$in" -> userIds))
 
     collection.find(query).cursor[BSONDocument]().collect[List]().map(_.map { doc =>
       val id = doc.getAs[String]("userId").get

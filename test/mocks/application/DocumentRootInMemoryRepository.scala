@@ -16,6 +16,7 @@
 
 package mocks.application
 
+import common.Constants.{ Yes, No }
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.EvaluationResults.AssessmentRuleCategoryResult
@@ -49,7 +50,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
 
   override def findProgress(applicationId: String): Future[ProgressResponse] = applicationId match {
     case "1111-1234" => Future.failed(new ApplicationNotFound(applicationId))
-    case _ => Future.successful(ProgressResponse(applicationId, true))
+    case _ => Future.successful(ProgressResponse(applicationId, personalDetails = true))
   }
 
   val inMemoryRepo = new mutable.HashMap[String, ApplicationResponse]
@@ -66,7 +67,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   override def findApplicationsForAssessmentAllocation(locations: List[String], start: Int,
     end: Int): Future[ApplicationForAssessmentAllocationResult] = {
     Future.successful(ApplicationForAssessmentAllocationResult(List(ApplicationForAssessmentAllocation("firstName", "lastName", "userId1",
-      "applicationId1", "No", DateTime.now)), 1))
+      "applicationId1", No, DateTime.now)), 1))
   }
 
   override def submit(applicationId: String): Future[Unit] = Future.successful(Unit)
@@ -77,7 +78,8 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
 
   override def review(applicationId: String): Future[Unit] = Future.successful(Unit)
 
-  override def findByCriteria(lastName: Option[String], dateOfBirth: Option[LocalDate]): Future[List[Candidate]] =
+  override def findByCriteria(firstOrPreferredName: Option[String], lastName: Option[String],
+                              dateOfBirth: Option[LocalDate], userIds: List[String]): Future[List[Candidate]] =
     Future.successful(List.empty[Candidate])
 
   override def applicationsReport(frameworkId: String): Future[List[(String, IsNonSubmitted, PreferencesWithContactDetails)]] = {
@@ -95,19 +97,19 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
 
   override def overallReport(frameworkId: String): Future[List[Report]] = Future.successful(List(
     Report("123", Some("SUBMITTED"), Some("London"), Some("Business"), None, None, None, None,
-      Some("Yes"), Some("Yes"), Some("Yes"), Some("No"), Some("No"), Some("No"), Some("No"), None),
+      Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None),
     Report("456", Some("IN_PROGRESS"), Some("London"), Some("Business"), None, None, None, None,
-      Some("Yes"), Some("Yes"), Some("Yes"), Some("No"), Some("No"), Some("No"), Some("No"), None),
+      Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None),
     Report("789", Some("SUBMITTED"), Some("London"), Some("Business"), None, None, None, None,
-      Some("Yes"), Some("Yes"), Some("Yes"), Some("No"), Some("No"), Some("No"), Some("No"), None)
+      Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None)
   ))
 
   override def adjustmentReport(frameworkId: String): Future[List[AdjustmentReport]] =
     Future.successful(
       List(
-        AdjustmentReport("1", Some("John"), Some("Smith"), Some("Spiderman"), None, None, Some("Some adjustments"), Some("Yes"), Some("Yes")),
-        AdjustmentReport("2", Some("James"), Some("Jones"), Some("Batman"), None, None, Some("Some adjustments"), Some("Yes"), Some("No")),
-        AdjustmentReport("3", Some("Kathrine"), Some("Jones"), Some("Supergirl"), None, None, Some("Some adjustments"), Some("Yes"), Some("No"))
+        AdjustmentReport("1", Some("John"), Some("Smith"), Some("Spiderman"), None, None, Some("Some adjustments"), Some(Yes), Some(Yes)),
+        AdjustmentReport("2", Some("James"), Some("Jones"), Some("Batman"), None, None, Some("Some adjustments"), Some(Yes), Some(No)),
+        AdjustmentReport("3", Some("Kathrine"), Some("Jones"), Some("Supergirl"), None, None, Some("Some adjustments"), Some(Yes), Some(No))
       )
     )
 
@@ -125,8 +127,6 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
         CandidateAwaitingAllocation("3", "Katherine", "Jones", "Supergirl", "Queer Camel", None, new LocalDate(1990, 2, 12))
       )
     )
-
-  override def gisByApplication(userId: String): Future[Boolean] = ???
 
   override def overallReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]] = ???
 
