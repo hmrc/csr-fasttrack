@@ -16,6 +16,7 @@
 
 package controllers
 
+import common.Constants.{ Yes, No }
 import config.TestFixtureBase
 import model.Exceptions.{AssistanceDetailsNotFound, CannotUpdateAssistanceDetails}
 import model.exchange.AssistanceDetailsExamples

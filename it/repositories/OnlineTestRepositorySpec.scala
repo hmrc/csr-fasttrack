@@ -18,6 +18,7 @@ package repositories
 
 import java.util.UUID
 
+import common.Constants.{ Yes, No }
 import factories.DateTimeFactory
 import model.ApplicationStatuses
 import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound }
@@ -602,8 +603,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       if (adjustmentsConfirmed) {
         if (timeExtensionAdjustments) {
           BSONDocument(
-            "needsSupportForOnlineAssessment" -> true,
-            "needsSupportAtVenue" -> true,
+            "needsAdjustment" -> Yes,
             "typeOfAdjustments" -> BSONArray("time extension", "room alone"),
             "confirmedAdjustments" -> true,
             "verbalTimeAdjustmentPercentage" -> 9,

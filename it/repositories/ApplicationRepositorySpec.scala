@@ -16,6 +16,7 @@
 
 package repositories
 
+import common.Constants.{ Yes, No }
 import model.AssessmentScheduleCommands.ApplicationForAssessmentAllocationResult
 import model.Commands.{AdjustmentReport, _}
 import model.{ApplicationStatuses, EvaluationResults}

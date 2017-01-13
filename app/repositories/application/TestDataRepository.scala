@@ -16,6 +16,7 @@
 
 package repositories.application
 
+import common.Constants.{ Yes, No }
 import model.Commands._
 import model.PersistedObjects
 import model.PersistedObjects.ContactDetails

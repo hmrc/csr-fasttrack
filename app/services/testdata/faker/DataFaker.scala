@@ -16,6 +16,7 @@
 
 package services.testdata.faker
 
+import common.Constants.{ Yes, No }
 import model.EvaluationResults
 import model.EvaluationResults.Result
 import model.Exceptions.DataFakingException
@@ -136,7 +137,7 @@ object DataFaker {
     def age11to16School = randOne(List("Blue Bees School", "Green Goblins School", "Magenta Monkeys School", "Zany Zebras School"))
     def age16to18School = randOne(List("Advanced Skills School", "Extremely Advanced School", "A-Level Specialist School", "16 to 18 School"))
     def homePostcode = randOne(List("AB1 2CD", "BC11 4DE", "CD6 2EF", "DE2F 1GH"))
-    def yesNo = randOne(List("Yes", "No"))
+    def yesNo = randOne(List(Yes, No))
     def employeeOrSelf = randOne(List(Some("Employee"), None))
     def sizeOfPlaceOfWork = randOne(List("Small (1 - 24 employees)", "Large (over 24 employees)"))
     def parentsOccupation = randOne(List(

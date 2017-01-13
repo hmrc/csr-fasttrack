@@ -16,6 +16,7 @@
 
 package services
 
+import common.Constants.{ Yes, No }
 import model.PersistedObjects.PersonalDetails
 import model.exchange.AssistanceDetailsExamples
 import model.{ApplicationValidator, LocationPreference, Preferences}

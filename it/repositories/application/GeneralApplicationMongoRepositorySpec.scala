@@ -16,6 +16,7 @@
 
 package repositories.application
 
+import common.Constants.{ Yes, No }
 import factories.UUIDFactory
 import model.Commands.Report
 import reactivemongo.bson.BSONDocument
@@ -43,8 +44,8 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
       result.head must be(Report(
         appId, Some("registered"), Some("Location1"), Some("Commercial"), Some("Digital and technology"),
         Some("Location2"), Some("Business"), Some("Finance"),
-        Some("Yes"), Some("Yes"), Some("Yes"), Some("Yes"),
-        Some("No"), Some("No"), Some("No"),
+        Some(Yes), Some(Yes), Some(Yes), Some(Yes),
+        Some(No), Some(No), Some(No),
         Some("this candidate has changed the email")
       ))
     }

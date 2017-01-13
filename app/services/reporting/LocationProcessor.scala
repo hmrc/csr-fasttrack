@@ -19,6 +19,7 @@ package services.reporting
 import java.util.concurrent.TimeUnit
 
 import akka.actor.{ Actor, ActorRef, Props }
+import common.Constants.{ Yes, No }
 import org.joda.time.DateTime
 import play.api.Logger
 import repositories.application.AssistanceDetailsRepository

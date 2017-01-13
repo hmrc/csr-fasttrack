@@ -16,6 +16,7 @@
 
 package repositories.application
 
+import common.Constants.{ Yes, No }
 import config.MicroserviceAppConfig._
 import controllers.OnlineTestDetails
 import factories.DateTimeFactory
@@ -283,7 +284,6 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
 
     val personalDetailsRoot = doc.getAs[BSONDocument]("personal-details").get
     val preferredName = personalDetailsRoot.getAs[String]("preferredName").get
-
 
     val ad = doc.getAs[BSONDocument]("assistance-details")
     val hasDisability = ad.flatMap(_.getAs[String]("hasDisability")).get

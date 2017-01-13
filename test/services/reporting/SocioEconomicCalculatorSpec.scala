@@ -16,6 +16,7 @@
 
 package services.reporting
 
+import common.Constants.{ Yes, No }
 import org.scalatestplus.play.PlaySpec
 
 class SocioEconomicCalculatorSpec extends PlaySpec {
@@ -149,7 +150,7 @@ class SocioEconomicCalculatorSpec extends PlaySpec {
       "Did they work as an employee or were they self-employed?" -> "Employee",
       "Which type of occupation did they have?" -> "Semi-routine manual and service",
       "Which size would best describe their place of work?" -> "N/A",
-      "Did they supervise any other employees?" -> "Yes"
+      "Did they supervise any other employees?" -> Yes
     )
 
     val otherEmployees: Map[String, String] = Map(
@@ -157,7 +158,7 @@ class SocioEconomicCalculatorSpec extends PlaySpec {
       "Did they work as an employee or were they self-employed?" -> "Employee",
       "Which type of occupation did they have?" -> "Routine manual and service",
       "Which size would best describe their place of work?" -> "N/A",
-      "Did they supervise any other employees?" -> "No"
+      "Did they supervise any other employees?" -> No
     )
 
     val unemployed: Map[String, String] = Map(

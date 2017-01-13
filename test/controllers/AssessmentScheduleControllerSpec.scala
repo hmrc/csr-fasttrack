@@ -19,6 +19,7 @@ package controllers
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 
+import common.Constants.{ Yes, No }
 import config._
 import connectors.EmailClient
 import model.AssessmentScheduleCommands.Implicits._
@@ -650,10 +651,10 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         ApplicationForAssessmentAllocationResult(
           List(
             ApplicationForAssessmentAllocation(
-              "firstName1", "lastName1", "userId1", "applicationId1", "No", DateTime.now
+              "firstName1", "lastName1", "userId1", "applicationId1", No, DateTime.now
             ),
             ApplicationForAssessmentAllocation(
-              "firstName2", "lastName2", "userId2", "applicationId2", "Yes", DateTime.now.minusDays(2)
+              "firstName2", "lastName2", "userId2", "applicationId2", Yes, DateTime.now.minusDays(2)
             )
           ), 2
         )
