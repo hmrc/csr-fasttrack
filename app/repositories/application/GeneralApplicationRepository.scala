@@ -22,14 +22,13 @@ import model.ApplicationStatusOrder._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.EvaluationResults._
-import model.Exceptions.ApplicationNotFound
+import model.Exceptions.{ ApplicationNotFound, LocationPreferencesNotFound, SchemePreferencesNotFound }
 import model.PersistedObjects.ApplicationForNotification
 import model.Scheme.Scheme
 import model._
 import model.commands.OnlineTestProgressResponse
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{ DateTime, LocalDate }
-import play.api.Logger
 import play.api.libs.json.{ Format, JsNumber, JsObject }
 import reactivemongo.api.{ DB, QueryOpts, ReadPreference }
 import reactivemongo.bson.{ BSONDocument, _ }
@@ -991,8 +990,9 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val projection = BSONDocument("scheme-locations" -> 1)
 
     collection.find(query, projection).one[BSONDocument] map {
-      case Some(document) => document.getAs[List[String]]("scheme-locations").getOrElse(Nil)
-      case None => Nil
+      case Some(document) if document.getAs[List[String]]("scheme-locations").isDefined =>
+        document.getAs[List[String]]("scheme-locations").get
+      case _ => throw LocationPreferencesNotFound(applicationId)
     }
   }
 
@@ -1014,8 +1014,9 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val projection = BSONDocument("schemes" -> 1)
 
     collection.find(query, projection).one[BSONDocument] map {
-      case Some(document) => document.getAs[List[Scheme]]("schemes").getOrElse(Nil)
-      case None => Nil
+      case Some(document) if document.getAs[List[Scheme]]("schemes").isDefined =>
+        document.getAs[List[Scheme]]("schemes").get
+      case _ => throw SchemePreferencesNotFound(applicationId)
     }
   }
 

@@ -63,5 +63,7 @@ object Exceptions {
 
   case class OnlineTestFirstLocationResultNotFound(appId: String) extends Exception(s"application Id: $appId")
 
+  case class SchemePreferencesNotFound(applicationId: String) extends Exception(applicationId)
 
+  case class LocationPreferencesNotFound(applicationId: String) extends Exception(applicationId)
 }

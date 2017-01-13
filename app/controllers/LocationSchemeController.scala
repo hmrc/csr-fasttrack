@@ -16,6 +16,7 @@
 
 package controllers
 
+import model.Exceptions.{ LocationPreferencesNotFound, SchemePreferencesNotFound }
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent }
 import services.locationschemes.LocationSchemeService
@@ -43,7 +44,12 @@ trait LocationSchemeController extends BaseController {
 
   def getSchemeLocations(applicationId: String): Action[AnyContent] =
     Action.async { implicit request =>
-        locationSchemeService.getSchemeLocations(applicationId).map { locations => Ok(Json.toJson(locations)) }
+        locationSchemeService.getSchemeLocations(applicationId)
+          .map {
+            locations => Ok(Json.toJson(locations))
+          }.recover {
+            case ex: LocationPreferencesNotFound => NotFound("Locations not found")
+          }
     }
 
   def updateSchemeLocations(applicationId: String): Action[JsValue] =
@@ -55,7 +61,12 @@ trait LocationSchemeController extends BaseController {
 
   def getSchemes(applicationId: String): Action[AnyContent] =
     Action.async { implicit request =>
-      locationSchemeService.getSchemes(applicationId).map { schemes => Ok(Json.toJson(schemes)) }
+      locationSchemeService.getSchemes(applicationId)
+        .map {
+          schemes => Ok(Json.toJson(schemes))
+        }.recover {
+          case ex: SchemePreferencesNotFound => NotFound("Schemes not found")
+        }
     }
 
   def updateSchemes(applicationId: String): Action[JsValue] =
