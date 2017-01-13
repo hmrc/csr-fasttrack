@@ -22,90 +22,82 @@ import model.PersistedObjects.PersonalDetails
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 import services.testdata.faker.DataFaker.Random
+import model.commands.exchange.testdata.AssistanceDetailsData
 
-case class AssistanceDetails(
-                              hasDisability: String = Random.yesNoPreferNotToSay,
-                              hasDisabilityDescription: String = Random.hasDisabilityDescription,
-                              setGis: Boolean = Random.bool,
-                              onlineAdjustments: Boolean = Random.bool,
-                              onlineAdjustmentsDescription: String = Random.onlineAdjustmentsDescription,
-                              assessmentCentreAdjustments: Boolean = Random.bool,
-                              assessmentCentreAdjustmentsDescription: String = Random.assessmentCentreAdjustmentDescription
+  case class PersonalData(
+                           emailPrefix: String = s"tesf${Random.number() - 1}",
+                           firstName: String = Random.getFirstname(1),
+                           lastName: String = Random.getLastname(1),
+                           preferredName: Option[String] = None,
+                           dob: LocalDate = new LocalDate(1981, 5, 21),
+                           postCode: Option[String] = None,
+                           country: Option[String] = None,
+                           edipCompleted: Option[Boolean] = None
+                         ) {
+    def getPreferredName: String = preferredName.getOrElse(s"Pref$firstName")
+
+    def personalDetails: PersonalDetails = {
+      PersonalDetails(firstName, lastName, preferredName.getOrElse(firstName), dob, aLevel = false, stemLevel = false)
+    }
+  }
+
+  object PersonalData {
+
+    def apply(o: model.exchange.testdata.PersonalDataRequest, generatorId: Int): PersonalData = {
+      val default = PersonalData()
+      val fname = o.firstName.getOrElse(Random.getFirstname(generatorId))
+      val emailPrefix = o.emailPrefix.map(e => s"$e-$generatorId")
+
+      PersonalData(
+        emailPrefix = emailPrefix.getOrElse(s"tesf${Random.number()}-$generatorId"),
+        firstName = fname,
+        lastName = o.lastName.getOrElse(Random.getLastname(generatorId)),
+        preferredName = o.preferredName,
+        dob = o.dateOfBirth.map(x => LocalDate.parse(x, DateTimeFormat.forPattern("yyyy-MM-dd"))).getOrElse(default.dob),
+        postCode = o.postCode,
+        country = o.country
+      )
+    }
+  }
+
+  case class GeneratorConfig(
+                              personalData: PersonalData = PersonalData(),
+                              setGis: Boolean = false,
+                              cubiksUrl: String,
+                              region: Option[String] = None,
+                              loc1scheme1Passmark: Option[Result] = None,
+                              loc1scheme2Passmark: Option[Result] = None,
+                              assistanceDetails: AssistanceDetailsData = AssistanceDetailsData(),
+                              previousStatus: Option[String] = None,
+                              confirmedAllocation: Boolean = true
                             )
 
-case class PersonalData(
-  emailPrefix: String = s"tesf${Random.number()-1}",
-  firstName: String = Random.getFirstname(1),
-  lastName: String = Random.getLastname(1),
-  preferredName: Option[String] = None,
-  dob: LocalDate = new LocalDate(1981, 5, 21),
-  postCode: Option[String] = None,
-  country: Option[String] = None,
-  edipCompleted: Option[Boolean] = None
-) {
-  def getPreferredName: String = preferredName.getOrElse(s"Pref$firstName")
+  object GeneratorConfig {
+    def apply(cubiksUrlFromConfig: String, o: model.exchange.testdata.CreateCandidateInStatusRequest)(generatorId: Int): GeneratorConfig = {
 
-  def personalDetails: PersonalDetails = {
-    PersonalDetails(firstName, lastName, preferredName.getOrElse(firstName), dob, aLevel = false, stemLevel = false)
+      val statusData = StatusData(o.statusData)
+      GeneratorConfig(
+        personalData = o.personalData.map(PersonalData(_, generatorId)).getOrElse(PersonalData()),
+        assistanceDetails = o.assistanceDetails.map(AssistanceDetailsData(_, generatorId)).getOrElse(AssistanceDetailsData()),
+        previousStatus = statusData.previousApplicationStatus,
+        cubiksUrl = cubiksUrlFromConfig,
+        region = o.region,
+        loc1scheme1Passmark = o.loc1scheme1EvaluationResult.map(Result.apply),
+        loc1scheme2Passmark = o.loc1scheme2EvaluationResult.map(Result.apply),
+        confirmedAllocation = statusData.applicationStatus == ApplicationStatuses.AllocationConfirmed
+      )
+    }
   }
-}
 
-object PersonalData {
+  case class StatusData(applicationStatus: String,
+                        previousApplicationStatus: Option[String] = None,
+                        progressStatus: Option[String] = None)
 
-  def apply(o: model.exchange.testdata.PersonalDataRequest, generatorId: Int): PersonalData = {
-    val default = PersonalData()
-    val fname = o.firstName.getOrElse(Random.getFirstname(generatorId))
-    val emailPrefix = o.emailPrefix.map( e => s"$e-$generatorId")
-
-    PersonalData(
-      emailPrefix = emailPrefix.getOrElse(s"tesf${Random.number()}-$generatorId"),
-      firstName = fname,
-      lastName = o.lastName.getOrElse(Random.getLastname(generatorId)),
-      preferredName = o.preferredName,
-      dob = o.dateOfBirth.map(x => LocalDate.parse(x, DateTimeFormat.forPattern("yyyy-MM-dd"))).getOrElse(default.dob),
-      postCode = o.postCode,
-      country = o.country
-    )
+  object StatusData {
+    def apply(o: model.exchange.testdata.StatusDataRequest): StatusData = {
+      StatusData(applicationStatus = o.applicationStatus,
+        previousApplicationStatus = o.previousApplicationStatus,
+        progressStatus = o.progressStatus
+      )
+    }
   }
-}
-
-case class GeneratorConfig(
-  personalData: PersonalData = PersonalData(),
-  setGis: Boolean = false,
-  cubiksUrl: String,
-  region: Option[String] = None,
-  loc1scheme1Passmark: Option[Result] = None,
-  loc1scheme2Passmark: Option[Result] = None,
-  assistanceDetails: AssistanceDetails = AssistanceDetails(),
-  previousStatus: Option[String] = None,
-  confirmedAllocation: Boolean = true
-)
-
-object GeneratorConfig {
-  def apply(cubiksUrlFromConfig: String, o: model.exchange.testdata.CreateCandidateInStatusRequest)(generatorId: Int): GeneratorConfig = {
-
-    val statusData = StatusData(o.statusData)
-    GeneratorConfig(
-      personalData = o.personalData.map(PersonalData(_, generatorId)).getOrElse(PersonalData()),
-      previousStatus = statusData.previousApplicationStatus,
-      cubiksUrl = cubiksUrlFromConfig,
-      region = o.region,
-      loc1scheme1Passmark = o.loc1scheme1EvaluationResult.map(Result.apply),
-      loc1scheme2Passmark = o.loc1scheme2EvaluationResult.map(Result.apply),
-      confirmedAllocation = statusData.applicationStatus == ApplicationStatuses.AllocationConfirmed
-    )
-  }
-}
-
-case class StatusData(applicationStatus: String,
-                       previousApplicationStatus: Option[String] = None,
-                       progressStatus: Option[String] = None)
-
-object StatusData {
-  def apply(o: model.exchange.testdata.StatusDataRequest): StatusData = {
-    StatusData(applicationStatus = o.applicationStatus,
-      previousApplicationStatus = o.previousApplicationStatus,
-      progressStatus = o.progressStatus
-    )
-  }
-}

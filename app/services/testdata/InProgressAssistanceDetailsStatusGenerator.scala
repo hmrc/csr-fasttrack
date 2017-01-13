@@ -33,7 +33,7 @@ trait InProgressAssistanceDetailsStatusGenerator extends ConstructiveGenerator {
   val adRepository: AssistanceDetailsRepository
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
-    val assistanceDetails = getAssistanceDetails(generatorConfig)
+    val assistanceDetails = generatorConfig.assistanceDetails.getAssistanceDetails()
 
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
@@ -44,46 +44,4 @@ trait InProgressAssistanceDetailsStatusGenerator extends ConstructiveGenerator {
     }
   }
 
-  def getAssistanceDetails(config: GeneratorConfig): model.exchange.AssistanceDetails = {
-    val hasDisabilityFinalValue = config.assistanceDetails.hasDisability
-
-    val hasDisabilityDescriptionFinalValue =
-      if (hasDisabilityFinalValue == "Yes") {
-        Some(config.assistanceDetails.hasDisabilityDescription)
-      } else {
-        None
-      }
-    val gisFinalValue = if (hasDisabilityFinalValue == "Yes" && config.assistanceDetails.setGis) {
-      Some(true)
-    } else { Some(false) }
-
-    val onlineAdjustmentsFinalValue = config.assistanceDetails.onlineAdjustments
-    val onlineAdjustmentsDescriptionFinalValue =
-      if (onlineAdjustmentsFinalValue) {
-        Some(config.assistanceDetails.onlineAdjustmentsDescription)
-      } else {
-        None
-      }
-    val assessmentCentreAdjustmentsFinalValue = config.assistanceDetails.assessmentCentreAdjustments
-    val assessmentCentreAdjustmentsDescriptionFinalValue =
-      if (assessmentCentreAdjustmentsFinalValue) {
-        Some(config.assistanceDetails.assessmentCentreAdjustmentsDescription)
-      } else {
-        None
-      }
-
-    model.exchange.AssistanceDetails(
-      hasDisabilityFinalValue,
-      hasDisabilityDescriptionFinalValue,
-      gisFinalValue,
-      onlineAdjustmentsFinalValue,
-      onlineAdjustmentsDescriptionFinalValue,
-      assessmentCentreAdjustmentsFinalValue,
-      assessmentCentreAdjustmentsDescriptionFinalValue,
-      None,
-      None,
-      None,
-      None
-    )
-  }
 }

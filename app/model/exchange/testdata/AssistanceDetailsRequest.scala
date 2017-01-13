@@ -16,7 +16,7 @@
 
 package model.exchange.testdata
 
-import play.api.libs.json.Json
+import play.api.libs.json._
 
 case class AssistanceDetailsRequest(hasDisability: Option[String] = None,
                                     hasDisabilityDescription: Option[String] = None,
