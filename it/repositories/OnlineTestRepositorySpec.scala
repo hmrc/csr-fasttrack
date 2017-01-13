@@ -18,6 +18,7 @@ package repositories
 
 import java.util.UUID
 
+import common.Constants.{ Yes, No }
 import factories.DateTimeFactory
 import model.ApplicationStatuses
 import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound }
@@ -602,7 +603,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       if (adjustmentsConfirmed) {
         if (timeExtensionAdjustments) {
           BSONDocument(
-            "needsAdjustment" -> "Yes",
+            "needsAdjustment" -> Yes,
             "typeOfAdjustments" -> BSONArray("time extension", "room alone"),
             "adjustments-confirmed" -> true,
             "verbalTimeAdjustmentPercentage" -> 9,
@@ -610,21 +611,21 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
           )
         } else {
           BSONDocument(
-            "needsAdjustment" -> "Yes",
+            "needsAdjustment" -> Yes,
             "typeOfAdjustments" -> BSONArray("room alone"),
             "adjustments-confirmed" -> true
           )
         }
       } else {
         BSONDocument(
-          "needsAdjustment" -> "Yes",
+          "needsAdjustment" -> Yes,
           "typeOfAdjustments" -> BSONArray("time extension", "room alone"),
           "adjustments-confirmed" -> false
         )
       }
     } else {
       BSONDocument(
-        "needsAdjustment" -> "No"
+        "needsAdjustment" -> No
       )
     }
   }
@@ -701,8 +702,8 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       "online-tests" -> onlineTests,
       "progress-status-dates" -> BSONDocument("allocation_unconfirmed" -> "2016-04-05"),
       "assistance-details" -> BSONDocument(
-        "guaranteedInterview" -> "Yes",
-        "needsAdjustment" -> "No",
+        "guaranteedInterview" -> Yes,
+        "needsAdjustment" -> No,
         "expirationDate" -> expirationDate.get,
         "token" -> token
       )

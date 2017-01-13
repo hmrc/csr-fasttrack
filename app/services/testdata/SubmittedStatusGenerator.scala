@@ -16,6 +16,7 @@
 
 package services.testdata
 
+import common.Constants.{ Yes, No }
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.Commands.{ Address, AssistanceDetailsExchange }
 import model.PersistedObjects.{ ContactDetails, PersistedAnswer, PersistedQuestion, PersonalDetails }
@@ -53,12 +54,12 @@ trait SubmittedStatusGenerator extends ConstructiveGenerator {
     def getAssistanceDetails(gis: Boolean) = {
       if (gis) {
         AssistanceDetailsExchange(
-          "yes", Some(List("Wheelchair")), Some("Wheelchair required"), Some("yes"),
-          Some("yes"), Some(List()), None, None, None, None
+          Yes, Some(List("Wheelchair")), Some("Wheelchair required"), Some(Yes),
+          Some(Yes), Some(List()), None, None, None, None
         )
       } else {
         AssistanceDetailsExchange(
-          "no", Some(List()), None, None, Some("no"), Some(List()), None, None, None, None
+          No, Some(List()), None, None, Some(No), Some(List()), None, None, None, None
         )
       }
     }

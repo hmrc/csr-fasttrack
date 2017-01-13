@@ -16,6 +16,7 @@
 
 package repositories.application
 
+import common.Constants.{ Yes, No }
 import config.MicroserviceAppConfig._
 import controllers.OnlineTestDetails
 import factories.DateTimeFactory
@@ -230,9 +231,9 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationStatus" -> "SUBMITTED"),
       BSONDocument("$or" -> BSONArray(
-        BSONDocument("assistance-details.needsAdjustment" -> "No"),
+        BSONDocument("assistance-details.needsAdjustment" -> No),
         BSONDocument("$and" -> BSONArray(
-          BSONDocument("assistance-details.needsAdjustment" -> "Yes"),
+          BSONDocument("assistance-details.needsAdjustment" -> Yes),
           BSONDocument("assistance-details.adjustments-confirmed" -> true)
         ))
       ))
@@ -284,8 +285,8 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     val preferredName = personalDetailsRoot.getAs[String]("preferredName").get
 
     val assistanceDetailsRoot = doc.getAs[BSONDocument]("assistance-details").get
-    val guaranteedInterview = assistanceDetailsRoot.getAs[String]("guaranteedInterview").contains("Yes")
-    val needsAdjustment = assistanceDetailsRoot.getAs[String]("needsAdjustment").contains("Yes")
+    val guaranteedInterview = assistanceDetailsRoot.getAs[String]("guaranteedInterview").contains(Yes)
+    val needsAdjustment = assistanceDetailsRoot.getAs[String]("needsAdjustment").contains(Yes)
 
     if (needsAdjustment) {
       val typeOfAdjustmentsRoot = assistanceDetailsRoot.getAs[BSONArray]("typeOfAdjustments").get

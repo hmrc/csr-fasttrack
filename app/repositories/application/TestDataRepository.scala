@@ -16,6 +16,7 @@
 
 package repositories.application
 
+import common.Constants.{ Yes, No }
 import model.Commands._
 import model.PersistedObjects
 import model.PersistedObjects.ContactDetails
@@ -155,9 +156,9 @@ class TestDataMongoRepository(implicit mongo: () => DB)
     case x if x % 7 == 0 && !buildAlways => None
     case _ =>
       Some(BSONDocument(
-        "needsAssistance" -> "No",
-        "needsAdjustment" -> "Yes",
-        "guaranteedInterview" -> "Yes",
+        "needsAssistance" -> No,
+        "needsAdjustment" -> Yes,
+        "guaranteedInterview" -> Yes,
         "typeOfAdjustments" -> BSONArray("Time extension", "Braille test paper", "Stand up and move around", "Other"),
         "otherAdjustments" -> "Other adjustments test text"
       ))

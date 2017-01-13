@@ -17,6 +17,8 @@
 package services.reporting
 
 import akka.actor.{ Actor, ActorRef, Props }
+
+import common.Constants.{ Yes, No }
 import model.PersistedObjects.DiversitySocioEconomic
 
 class SocioEconomicCalculator(aggregator: ActorRef) extends Actor with AnswerProcessorTrait
@@ -119,7 +121,7 @@ trait SocioEconomicScoreCalculatorTrait extends Calculable {
             response = ManagersLargeOrganisations
           }
         } else {
-          if (answer("Did they supervise any other employees?") == "Yes") {
+          if (answer("Did they supervise any other employees?") == Yes) {
             response = Supervisors
           } else {
             response = OtherEmployees
