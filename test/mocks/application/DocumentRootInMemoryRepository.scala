@@ -127,8 +127,6 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
       )
     )
 
-  override def gisByApplication(userId: String): Future[Boolean] = ???
-
   override def overallReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]] = ???
 
   override def allocationExpireDateByApplicationId(applicationId: String): Future[Option[LocalDate]] = ???

@@ -103,7 +103,9 @@ class OnlineTestRetrievePDFReportServiceIntegrationSpec extends IntegrationSpec 
         "applicationStatus" -> appStatus,
         "personal-details" -> BSONDocument("preferredName" -> "Test Preferred Name"),
         "assistance-details" -> BSONDocument(
-          "needsAdjustment" -> common.Constants.No
+          "hasDisability" -> "No",
+          "needsSupportForOnlineAssessment" -> false,
+          "needsSupportAtVenue" -> false
         )
       )).futureValue
     }

@@ -16,48 +16,45 @@
 
 package controllers
 
-import model.Commands.{ AssistanceDetailsExchange, Implicits }
-import model.Exceptions.AssistanceDetailsNotFound
+import model.Exceptions.{AssistanceDetailsNotFound, CannotUpdateAssistanceDetails}
+import model.exchange.AssistanceDetails
 import play.api.libs.json.Json
 import play.api.mvc.Action
-import repositories._
-import repositories.application.AssistanceDetailsRepository
 import services.AuditService
+import services.assistancedetails.AssistanceDetailsService
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object AssistanceController extends AssistanceController {
-  val asRepository = assistanceRepository
+object AssistanceDetailsController extends AssistanceDetailsController {
+  val assistanceDetailsService = AssistanceDetailsService
   val auditService = AuditService
 }
 
-trait AssistanceController extends BaseController {
-  import Implicits._
-
-  val asRepository: AssistanceDetailsRepository
+trait AssistanceDetailsController extends BaseController {
+  val assistanceDetailsService: AssistanceDetailsService
   val auditService: AuditService
 
-  def assistanceDetails(userId: String, applicationId: String) = Action.async(parse.json) { implicit request =>
-    withJsonBody[AssistanceDetailsExchange] { req =>
+  def update(userId: String, applicationId: String) = Action.async(parse.json) { implicit request =>
+    withJsonBody[AssistanceDetails] { req =>
       (for {
-        _ <- asRepository.update(applicationId, userId, req)
+        _ <- assistanceDetailsService.update(applicationId, userId, req)
       } yield {
         auditService.logEvent("AssistanceDetailsSaved")
         Created
       }).recover {
-        case e: AssistanceDetailsNotFound => BadRequest(s"cannot update assistance details for user: ${e.id}")
+        case e: CannotUpdateAssistanceDetails => BadRequest(s"cannot update assistance details for user: ${e.userId}")
       }
     }
   }
 
-  def findAssistanceDetails(userId: String, applicationId: String) = Action.async { implicit request =>
+  def find(userId: String, applicationId: String) = Action.async { implicit request =>
     (for {
-      ad <- asRepository.find(applicationId)
+      ad <- assistanceDetailsService.find(applicationId, userId)
     } yield {
       Ok(Json.toJson(ad))
     }).recover {
-      case e: AssistanceDetailsNotFound => NotFound(s"cannot find assistance details for user: ${e.id}")
+      case e: AssistanceDetailsNotFound => NotFound(s"cannot find assistance details for application: ${e.id}")
     }
   }
 }

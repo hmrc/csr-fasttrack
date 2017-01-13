@@ -32,7 +32,7 @@ object DiversityMonitoringReport extends DiversityMonitoringReport {
   override val qRepository = questionnaireRepository
   override val reportRepository = diversityReportRepository
   override val appRepository = applicationRepository
-  override val asRepository = assistanceRepository
+  override val adRepository = assistanceDetailsRepository
 
   val yamlRepository = frameworkRepository
 
@@ -48,7 +48,7 @@ trait DiversityMonitoringReport {
   val qRepository: QuestionnaireRepository
   val reportRepository: ReportingRepository
   val appRepository: GeneralApplicationRepository
-  val asRepository: AssistanceDetailsRepository
+  val adRepository: AssistanceDetailsRepository
 
   import play.api.Play.current
 
@@ -70,7 +70,7 @@ trait DiversityMonitoringReport {
     locationAndRegions.flatMap { locationAndRegionsList =>
 
       val supervisor = Akka.system.actorOf(
-        DiversityReportSupervisor.props(DateTime.now, locationAndRegionsList, qRepository, asRepository, reportRepository),
+        DiversityReportSupervisor.props(DateTime.now, locationAndRegionsList, qRepository, adRepository, reportRepository),
         "diversity_report_supervisor"
       )
 

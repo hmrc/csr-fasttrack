@@ -19,21 +19,23 @@ package services.onlinetesting
 import _root_.services.AuditService
 import config.CubiksGatewayConfig
 import connectors.ExchangeObjects._
-import connectors.{ CSREmailClient, CubiksGatewayClient, EmailClient }
+import connectors.{CSREmailClient, CubiksGatewayClient, EmailClient}
 import controllers.OnlineTest
-import factories.{ DateTimeFactory, UUIDFactory }
+import factories.{DateTimeFactory, UUIDFactory}
+import model.Exceptions.AssistanceDetailsNotFound
 import model.OnlineTestCommands._
 import model.PersistedObjects.CandidateTestReport
 import org.joda.time.DateTime
 import play.api.Logger
 import play.libs.Akka
 import repositories._
-import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
+import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository, OnlineTestRepository}
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.duration._
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
+import scala.util.{Failure, Success, Try}
 
 object OnlineTestService extends OnlineTestService {
   import config.MicroserviceAppConfig._
@@ -42,6 +44,7 @@ object OnlineTestService extends OnlineTestService {
   val otRepository = onlineTestRepository
   val otprRepository = onlineTestPDFReportRepository
   val trRepository = testReportRepository
+  val adRepository = assistanceDetailsRepository
   val cubiksGatewayClient = CubiksGatewayClient
   val tokenFactory = UUIDFactory
   val onlineTestInvitationDateFactory = DateTimeFactory
@@ -59,6 +62,7 @@ trait OnlineTestService {
   val otRepository: OnlineTestRepository
   val otprRepository: OnlineTestPDFReportRepository
   val trRepository: TestReportRepository
+  val adRepository: AssistanceDetailsRepository
   val cubiksGatewayClient: CubiksGatewayClient
   val emailClient: EmailClient
   val auditService: AuditService
@@ -136,7 +140,8 @@ trait OnlineTestService {
       akka.pattern.after(waitSecs.getOrElse(5) seconds, Akka.system.scheduler) {
         Logger.debug(s"Delayed downloading XML report from Cubiks")
 
-        appRepository.gisByApplication(application.applicationId).flatMap { gis =>
+        adRepository.find(application.applicationId).flatMap { assistanceDetails =>
+          val gis = assistanceDetails.guaranteedInterview.getOrElse(false)
           Logger.debug(s"Retrieved GIS for user ${application.userId}: application ${application.userId}: GIS: $gis")
           cubiksGatewayClient.downloadXmlReport(reportId) flatMap { results: Map[String, TestResult] =>
             val cr = toCandidateTestReport(application.applicationId, results)

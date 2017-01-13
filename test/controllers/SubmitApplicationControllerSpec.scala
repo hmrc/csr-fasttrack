@@ -18,15 +18,16 @@ package controllers
 
 import config.TestFixtureBase
 import connectors.EmailClient
-import mocks.application.{ AssistanceDetailsInMemoryRepository, DocumentRootInMemoryRepository, PersonalDetailsInMemoryRepository }
-import mocks.{ ContactDetailsInMemoryRepository, _ }
-import org.mockito.Matchers.{ eq => eqTo }
+import mocks.application.{ DocumentRootInMemoryRepository, PersonalDetailsInMemoryRepository}
+import mocks.{ContactDetailsInMemoryRepository, _}
+import org.mockito.Matchers.{eq => eqTo}
 import org.scalatestplus.play.PlaySpec
 import play.api.mvc._
-import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
+import play.api.test.{FakeHeaders, FakeRequest, Helpers}
 import repositories._
-import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository, PersonalDetailsRepository }
+import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository, PersonalDetailsRepository}
 import services.AuditService
+import services.assistancedetails.AssistanceDetailsService
 
 import scala.language.postfixOps
 
@@ -60,10 +61,11 @@ class SubmitApplicationControllerSpec extends PlaySpec with Results {
   }
 
   trait TestFixture extends TestFixtureBase {
+    val mockAssistanceDetailsService = mock[AssistanceDetailsService]
     object TestSubmitApplicationController extends SubmitApplicationController {
       override val appRepository: GeneralApplicationRepository = DocumentRootInMemoryRepository
       override val pdRepository: PersonalDetailsRepository = PersonalDetailsInMemoryRepository
-      override val adRepository: AssistanceDetailsRepository = AssistanceDetailsInMemoryRepository
+      override val adService: AssistanceDetailsService = mockAssistanceDetailsService
       override val frameworkPrefRepository: FrameworkPreferenceRepository = FrameworkPreferenceInMemoryRepository
       override val frameworkRegionsRepository: FrameworkRepository = FrameworkInMemoryRepository
       override val cdRepository: ContactDetailsRepository = ContactDetailsInMemoryRepository

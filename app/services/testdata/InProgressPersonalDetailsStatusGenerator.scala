@@ -18,10 +18,13 @@ package services.testdata
 
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.Commands.Address
+import model.PersistedObjects.{ContactDetails, PersonalDetails}
+import org.joda.time.LocalDate
+import repositories._
+import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository, PersonalDetailsRepository}
 import model.PersistedObjects.{ ContactDetails, PersonalDetails }
 import play.api.mvc.RequestHeader
 import repositories._
-import repositories.application.PersonalDetailsRepository
 import services.testdata.faker.DataFaker.Random
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -30,13 +33,16 @@ import scala.concurrent.Future
 
 object InProgressPersonalDetailsStatusGenerator extends InProgressPersonalDetailsStatusGenerator {
   override val previousStatusGenerator = CreatedStatusGenerator
+  override val appRepository = applicationRepository
   override val pdRepository = personalDetailsRepository
   override val cdRepository = contactDetailsRepository
 }
 
 trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
+  val appRepository: GeneralApplicationRepository
   val pdRepository: PersonalDetailsRepository
   val cdRepository: ContactDetailsRepository
+
 
   //scalastyle:off method.length
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
@@ -52,8 +58,16 @@ trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
     }
 
     def getContactDetails(candidateInformation: DataGenerationResponse) = {
+
+      def makeRandAddressOption = if (Random.bool) { Some(Random.addressLine) } else { None }
+
       ContactDetails(
-        Address("123, Fake street"),
+        Address(
+          Random.addressLine,
+          makeRandAddressOption,
+          makeRandAddressOption,
+          makeRandAddressOption
+        ),
         generatorConfig.personalData.postCode.getOrElse(Random.postCode),
         candidateInformation.email,
         Some("07770 774 914")
@@ -64,10 +78,12 @@ trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       pd = getPersonalDetails(candidateInPreviousStatus)
       cd = getContactDetails(candidateInPreviousStatus)
-      _ <- pdRepository.update(candidateInPreviousStatus.applicationId.get, candidateInPreviousStatus.userId, pd)
+      _ <- pdRepository.update(candidateInPreviousStatus.applicationId.get, candidateInPreviousStatus.userId,
+        pd, List(model.ApplicationStatuses.Created), model.ApplicationStatuses.InProgress)
       _ <- cdRepository.update(candidateInPreviousStatus.userId, cd)
     } yield {
-      candidateInPreviousStatus.copy(personalDetails = Some(pd))
+      candidateInPreviousStatus.copy(personalDetails = Some(pd), contactDetails = Some(cd))
+
     }
   }
   //scalastyle:off method.length

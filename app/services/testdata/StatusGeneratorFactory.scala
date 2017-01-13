@@ -26,6 +26,8 @@ object StatusGeneratorFactory {
       case "REGISTERED" => RegisteredStatusGenerator
       case ApplicationStatuses.Created => CreatedStatusGenerator
       case "IN_PROGRESS_PERSONAL_DETAILS" => InProgressPersonalDetailsStatusGenerator
+      case "IN_PROGRESS_SCHEME_PREFERENCES" => InProgressSchemePreferencesStatusGenerator
+      case "IN_PROGRESS_ASSISTANCE_DETAILS" => InProgressAssistanceDetailsStatusGenerator
       case ApplicationStatuses.Submitted => SubmittedStatusGenerator
       case ApplicationStatuses.OnlineTestInvited => OnlineTestInvitedStatusGenerator
       case ApplicationStatuses.OnlineTestStarted => OnlineTestStartedStatusGenerator
@@ -51,3 +53,4 @@ object StatusGeneratorFactory {
   }
   // scalastyle:on cyclomatic.complexity
 }
+

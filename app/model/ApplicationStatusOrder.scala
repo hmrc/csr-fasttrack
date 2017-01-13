@@ -57,7 +57,7 @@ object ApplicationStatusOrder {
     (progress.personalDetails, 10, PersonalDetailsCompletedProgress),
     (progress.hasLocations, 20, LocationsCompletedProgress),
     (progress.hasSchemes, 25, SchemesCompletedProgress),
-    (progress.assistance, 30, AssistanceCompletedProgress),
+    (progress.assistanceDetails, 30, AssistanceDetailsCompletedProgress),
     (progress.review, 40, ReviewCompletedProgress),
     (progress.questionnaire.contains("start_questionnaire"), 50, StartDiversityQuestionnaireProgress),
     (progress.questionnaire.contains("diversity_questionnaire"), 60, DiversityQuestionsCompletedProgress),
