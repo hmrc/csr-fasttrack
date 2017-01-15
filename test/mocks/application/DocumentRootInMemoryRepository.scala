@@ -22,6 +22,7 @@ import model.Commands._
 import model.EvaluationResults.AssessmentRuleCategoryResult
 import model.Exceptions.ApplicationNotFound
 import model.PersistedObjects.ApplicationForNotification
+import model.Scheme.Scheme
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.GeneralApplicationRepository
 
@@ -150,8 +151,8 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
 
   def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit] = ???
 
-  def getSchemes(applicationId: String): Future[List[String]] = ???
+  def getSchemes(applicationId: String): Future[List[Scheme]] = ???
 
-  def updateSchemes(applicationId: String, schemeNames: List[String]): Future[Unit] = ???
+  def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit] = ???
 }
 // scalastyle:on number.of.methods

@@ -16,14 +16,14 @@
 
 package controllers
 
-import model.Commands.CreateApplicationRequest
+import model.Exceptions.{ LocationPreferencesNotFound, SchemePreferencesNotFound }
+import model.Scheme.Scheme
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent }
 import services.locationschemes.LocationSchemeService
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 object LocationSchemeController extends LocationSchemeController {
   val locationSchemeService = LocationSchemeService
@@ -45,7 +45,12 @@ trait LocationSchemeController extends BaseController {
 
   def getSchemeLocations(applicationId: String): Action[AnyContent] =
     Action.async { implicit request =>
-        locationSchemeService.getSchemeLocations(applicationId).map { locations => Ok(Json.toJson(locations)) }
+        locationSchemeService.getSchemeLocations(applicationId)
+          .map {
+            locations => Ok(Json.toJson(locations))
+          }.recover {
+            case ex: LocationPreferencesNotFound => NotFound("Locations not found")
+          }
     }
 
   def updateSchemeLocations(applicationId: String): Action[JsValue] =
@@ -57,12 +62,17 @@ trait LocationSchemeController extends BaseController {
 
   def getSchemes(applicationId: String): Action[AnyContent] =
     Action.async { implicit request =>
-      locationSchemeService.getSchemes(applicationId).map { schemes => Ok(Json.toJson(schemes)) }
+      locationSchemeService.getSchemes(applicationId)
+        .map {
+          schemes => Ok(Json.toJson(schemes))
+        }.recover {
+          case ex: SchemePreferencesNotFound => NotFound("Schemes not found")
+        }
     }
 
   def updateSchemes(applicationId: String): Action[JsValue] =
     Action.async(parse.json) { implicit request =>
-      withJsonBody[List[String]] { schemeNames =>
+      withJsonBody[List[Scheme]] { schemeNames =>
         locationSchemeService.updateSchemes(applicationId, schemeNames).map { _ => Ok }
       }
     }

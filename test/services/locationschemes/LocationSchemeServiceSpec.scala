@@ -16,59 +16,49 @@
 
 package services.locationschemes
 
-import repositories.{ LocationSchemeRepository, LocationSchemes, SchemeInfo }
-import testkit.UnitSpec
-import org.mockito.Matchers.{ eq => eqTo }
+import model.Scheme._
 import org.mockito.Mockito._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
-import services.locationschemes.exchangeobjects.GeoLocationSchemeResult
+import repositories.{ LocationSchemeRepository, LocationSchemes, SchemeInfo }
+import testkit.UnitSpec
 
-import scala.collection.immutable.IndexedSeq
 import scala.concurrent.Future
 
 class LocationSchemeServiceSpec extends UnitSpec {
+
   "Location Scheme service" should {
 
-    // TODO
-    "return a list of location/scheme combinations without A-level requirements" ignore {
-      /*val result = service.getSchemesAndLocationsByEligibility(hasALevels = false, hasStemALevels = false,
+    "return a list of location/scheme combinations without A-level requirements" in new TestFixture {
+      val result = service.getSchemesAndLocationsByEligibility(hasALevels = false, hasStemALevels = true,
         latitudeOpt = Some(1.1), longitudeOpt = Some(2.2)).futureValue
-      result.head.schemes must contain theSameElementsAs(List(SchemeInfo("SchemeNoALevels", false, false)))
-      */
+      result.head.schemes must contain theSameElementsAs List(NoALevelsScheme)
     }
 
-    // TODO
-    "return a list of location/scheme combinations with A-level requirements" ignore {
-      /*val result = service.getSchemesAndLocationsByEligibility(hasALevels = false, hasStemALevels = false,
+    "return a list of location/scheme combinations with A-level requirements" in new TestFixture {
+      val result = service.getSchemesAndLocationsByEligibility(hasALevels = true, hasStemALevels = false,
         latitudeOpt = Some(1.1), longitudeOpt = Some(2.2)).futureValue
-      result.head.schemes must contain theSameElementsAs(List(
-        SchemeInfo("SchemeNoALevels", false, false),
-        SchemeInfo("SchemeNoALevels", true, false)
-        ))*/
+      result.head.schemes must contain theSameElementsAs List(NoALevelsScheme, ALevelsScheme)
     }
 
-    // TODO
-    "return a list of location/scheme combinations with STEM A-level requirements" ignore {
-      /* val result = service.getSchemesAndLocationsByEligibility(hasALevels = false, hasStemALevels = false,
+    "return a list of location/scheme combinations with STEM A-level requirements" in new TestFixture {
+      val result = service.getSchemesAndLocationsByEligibility(hasALevels = true, hasStemALevels = true,
         latitudeOpt = Some(1.1), longitudeOpt = Some(2.2)).futureValue
-      result.head.schemes must contain theSameElementsAs(List(
-        SchemeInfo("SchemeNoALevels", false, false),
-        SchemeInfo("SchemeNoALevels", true, false),
-        SchemeInfo("SchemeALevelsStem", true, true)
-      ))
-      */
+      result.head.schemes must contain theSameElementsAs List(NoALevelsScheme, ALevelsScheme, ALevelsStemScheme)
     }
 
-    "return a list of location/scheme combinations sorted closest first" ignore {
-      /*val result = service.getSchemesAndLocationsByEligibility(hasALevels = false, hasStemALevels = false,
+    "return a list of location/scheme combinations sorted closest first" in new TestFixture {
+      val result = service.getSchemesAndLocationsByEligibility(hasALevels = false, hasStemALevels = false,
         latitudeOpt = Some(1.1), longitudeOpt = Some(2.2)).futureValue
       result.map(_.locationName) mustBe List("testLocation4", "testLocation3", "testLocation1", "testLocation2")
-      */
     }
   }
 
   trait TestFixture {
     val repo = mock[LocationSchemeRepository]
+    val NoALevelsScheme = SchemeInfo(Business, "SchemeNoALevels", requiresALevel = false, requiresALevelInStem = false)
+    val ALevelsScheme = SchemeInfo(Commercial, "SchemeALevels", requiresALevel = true, requiresALevelInStem = false)
+    val ALevelsStemScheme = SchemeInfo(ProjectDelivery, "SchemeALevelsStem", requiresALevel = true, requiresALevelInStem = true)
+
 
     when(repo.getSchemesAndLocations).
       thenReturn(Future.successful(
@@ -80,11 +70,7 @@ class LocationSchemeServiceSpec extends UnitSpec {
         )))
 
     when(repo.getSchemeInfo).thenReturn(Future.successful(
-      List(
-        SchemeInfo("SchemeNoALevels", requiresALevel = false, requiresALevelInStem = false),
-        SchemeInfo("SchemeALevels", requiresALevel = true, requiresALevelInStem = false),
-        SchemeInfo("SchemeALevelsStem", requiresALevel = true, requiresALevelInStem = true)
-      )
+      List(NoALevelsScheme, ALevelsScheme, ALevelsStemScheme)
     ))
 
     val service = new LocationSchemeService {

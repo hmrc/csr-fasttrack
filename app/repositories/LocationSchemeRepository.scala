@@ -23,19 +23,21 @@ import play.api.libs.json._
 import play.api.libs.json.Reads._
 import play.api.libs.functional.syntax._
 
-import scala.collection.immutable.IndexedSeq
+import model.Scheme._
 import scala.concurrent.Future
 
 case class LocationSchemes(id: String, locationName: String, latitude: Double, longitude: Double, schemes: List[String])
 
 object LocationSchemes {
-  implicit val locationReader: Reads[LocationSchemes] = (
+  implicit val locationSchemesReader: Reads[LocationSchemes] = (
     (__ \ "id").read[String] and
     (__ \ "name").read[String] and
       (__ \ "lat").read[Double] and
       (__ \ "lng").read[Double] and
       (__ \ "schemes").read[List[String]]
     ) (LocationSchemes.apply _)
+
+  implicit val locationSchemesWriter = Json.writes[LocationSchemes]
 }
 
 protected case class Locations(locations: List[LocationSchemes])
@@ -44,7 +46,7 @@ object Locations {
   implicit val locationsReader: Reads[Locations] = Json.reads[Locations]
 }
 
-case class SchemeInfo(name: String, requiresALevel: Boolean, requiresALevelInStem: Boolean)
+case class SchemeInfo(id: Scheme, name: String, requiresALevel: Boolean, requiresALevelInStem: Boolean)
 
 object SchemeInfo {
   implicit val schemeInfoFormat = Json.format[SchemeInfo]
@@ -66,11 +68,11 @@ trait LocationSchemeRepository {
   // TODO: Needs updating with correct scheme data
   def getSchemeInfo: Future[List[SchemeInfo]] = {
     Future.successful(List(
-      SchemeInfo("Business", requiresALevel = true, requiresALevelInStem = true),
-      SchemeInfo("Commercial", requiresALevel = true, requiresALevelInStem = true),
-      SchemeInfo("Digital and technology", requiresALevel = false, requiresALevelInStem = true),
-      SchemeInfo("Finance", requiresALevel = true, requiresALevelInStem = false),
-      SchemeInfo("Project Delivery", requiresALevel = false, requiresALevelInStem = false)
+      SchemeInfo(Business, "Business", requiresALevel = true, requiresALevelInStem = true),
+      SchemeInfo(Commercial, "Commercial", requiresALevel = true, requiresALevelInStem = true),
+      SchemeInfo(DigitalAndTechnology, "Digital and technology", requiresALevel = false, requiresALevelInStem = true),
+      SchemeInfo(Finance, "Finance", requiresALevel = true, requiresALevelInStem = false),
+      SchemeInfo(ProjectDelivery, "Project Delivery", requiresALevel = false, requiresALevelInStem = false)
     ))
   }
 }

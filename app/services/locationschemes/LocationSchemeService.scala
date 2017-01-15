@@ -16,14 +16,14 @@
 
 package services.locationschemes
 
-import repositories.{ FileLocationSchemeRepository, LocationSchemeRepository, LocationSchemes }
-import services.locationschemes.exchangeobjects.GeoLocationSchemeResult
-import repositories._
+import model.Exceptions.NotFoundException
+import model.Scheme.Scheme
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
+import repositories.{ FileLocationSchemeRepository, LocationSchemeRepository, LocationSchemes, _ }
+import services.locationschemes.exchangeobjects.GeoLocationSchemeResult
 
-import scala.collection.immutable.IndexedSeq
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object LocationSchemeService extends LocationSchemeService {
   val locationSchemeRepository = FileLocationSchemeRepository
@@ -40,7 +40,6 @@ trait LocationSchemeService {
                                           latitudeOpt: Option[Double] = None, longitudeOpt: Option[Double] = None)
   : Future[List[GeoLocationSchemeResult]] = {
 
-    // calculate distance and search
     for {
       schemeInfo <- locationSchemeRepository.getSchemeInfo
       locationsWithSchemes <- locationSchemeRepository.getSchemesAndLocations
@@ -60,15 +59,14 @@ trait LocationSchemeService {
 
           GeoLocationSchemeResult(locationId, locationName, distance, eligibleSchemes.filter(eScheme => schemes.contains(eScheme.name)))
       }
-
-      selectedLocations.sortBy(r => r.distanceKm.getOrElse(0d))
+      sortLocations(selectedLocations, latitudeOpt.isDefined && longitudeOpt.isDefined)
     }
   }
 
   def getAvailableSchemesInSelectedLocations(applicationId: String): Future[List[SchemeInfo]] = {
     for {
       personalDetails <- pdRepository.find(applicationId)
-      selectedLocationIds <- getSchemeLocations(applicationId)
+      selectedLocationIds <- appRepository.getSchemeLocations(applicationId)
       eligibleSchemeLocations <- getSchemesAndLocationsByEligibility(personalDetails.aLevel, personalDetails.stemLevel)
     } yield {
       val selectedLocationSchemes = eligibleSchemeLocations.filter(schemeLocation => selectedLocationIds.contains(schemeLocation.locationId))
@@ -76,19 +74,38 @@ trait LocationSchemeService {
     }
   }
 
-  def getSchemeLocations(applicationId: String): Future[List[String]] = {
-    appRepository.getSchemeLocations(applicationId)
+  def getSchemeLocations(applicationId: String): Future[List[LocationSchemes]] = {
+    for {
+      locationIds <- appRepository.getSchemeLocations(applicationId)
+      locationSchemes <- locationSchemeRepository.getSchemesAndLocations
+    } yield {
+      locationIds.map(locId =>
+        locationSchemes.find(_.id == locId).getOrElse(throw NotFoundException(Some(s"Location $locId not found"))))
+    }
   }
 
   def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit] = {
     appRepository.updateSchemeLocations(applicationId, locationIds)
   }
 
-  def getSchemes(applicationId: String): Future[List[String]] = {
-    appRepository.getSchemes(applicationId)
+  def getSchemes(applicationId: String): Future[List[SchemeInfo]] = {
+    for {
+      schemeIds <- appRepository.getSchemes(applicationId)
+      schemes <- locationSchemeRepository.getSchemeInfo
+    } yield {
+      schemeIds.map(schemeId =>
+        schemes.find(_.id == schemeId).getOrElse(throw NotFoundException(Some(s"Scheme $schemeId not found"))))
+    }
   }
 
-  def updateSchemes(applicationId: String, schemeNames: List[String]): Future[Unit] = {
+  def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit] = {
     appRepository.updateSchemes(applicationId, schemeNames)
+  }
+
+  private def sortLocations(locations: List[GeoLocationSchemeResult], sortByDistance: Boolean) = {
+    sortByDistance match {
+      case true => locations.sortBy(r => r.distanceKm.getOrElse(0d))
+      case false => locations.sortBy(_.locationName)
+    }
   }
 }

@@ -19,21 +19,22 @@ package repositories.application
 import java.util.UUID
 import java.util.regex.Pattern
 
-import common.Constants.{ Yes, No }
+import common.Constants.{ No, Yes }
 import model.ApplicationStatusOrder._
-import model.AssessmentScheduleCommands.{ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult}
+import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.EvaluationResults._
-import model.Exceptions.ApplicationNotFound
+import model.Exceptions.{ ApplicationNotFound, LocationPreferencesNotFound, SchemePreferencesNotFound }
 import model.PersistedObjects.ApplicationForNotification
+import model.Scheme.Scheme
 import model._
 import model.commands.OnlineTestProgressResponse
 import model.persisted.AssistanceDetails
 import org.joda.time.format.DateTimeFormat
-import org.joda.time.{DateTime, LocalDate}
-import play.api.libs.json.{Format, JsNumber, JsObject}
-import reactivemongo.api.{DB, QueryOpts, ReadPreference}
-import reactivemongo.bson.{BSONDocument, _}
+import org.joda.time.{ DateTime, LocalDate }
+import play.api.libs.json.{ Format, JsNumber, JsObject }
+import reactivemongo.api.{ DB, QueryOpts, ReadPreference }
+import reactivemongo.bson.{ BSONDocument, _ }
 import reactivemongo.json.collection.JSONBatchCommands.JSONCountCommand
 import repositories._
 import services.TimeZoneService
@@ -108,9 +109,9 @@ trait GeneralApplicationRepository {
 
   def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit]
 
-  def getSchemes(applicationId: String): Future[List[String]]
+  def getSchemes(applicationId: String): Future[List[Scheme]]
 
-  def updateSchemes(applicationId: String, schemeNames: List[String]): Future[Unit]
+  def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit]
 }
 
 // scalastyle:on number.of.methods
@@ -1050,8 +1051,9 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val projection = BSONDocument("scheme-locations" -> 1)
 
     collection.find(query, projection).one[BSONDocument] map {
-      case Some(document) => document.getAs[List[String]]("scheme-locations").get
-      case None => Nil
+      case Some(document) if document.getAs[List[String]]("scheme-locations").isDefined =>
+        document.getAs[List[String]]("scheme-locations").get
+      case _ => throw LocationPreferencesNotFound(applicationId)
     }
   }
 
@@ -1068,17 +1070,18 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     }
   }
 
-  def getSchemes(applicationId: String): Future[List[String]] = {
+  def getSchemes(applicationId: String): Future[List[Scheme]] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val projection = BSONDocument("schemes" -> 1)
 
     collection.find(query, projection).one[BSONDocument] map {
-      case Some(document) => document.getAs[List[String]]("schemes").get
-      case None => Nil
+      case Some(document) if document.getAs[List[Scheme]]("schemes").isDefined =>
+        document.getAs[List[Scheme]]("schemes").get
+      case _ => throw SchemePreferencesNotFound(applicationId)
     }
   }
 
-  def updateSchemes(applicationId: String, schemeNames: List[String]): Future[Unit] = {
+  def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val schemePreferencesBSON = BSONDocument("$set" -> BSONDocument(
       "progress-status.scheme-preferences" -> true,
