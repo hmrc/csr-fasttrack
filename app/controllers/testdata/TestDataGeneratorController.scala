@@ -21,14 +21,15 @@ import java.io.File
 import com.typesafe.config.ConfigFactory
 import connectors.AuthProviderClient
 import connectors.testdata.ExchangeObjects.Implicits._
-import model.ApplicationStatuses
+import model._
 import model.EvaluationResults.Result
 import model.Exceptions.EmailTakenException
-import model.exchange.testdata.CreateCandidateInStatusRequest
+import model.exchange.testdata._
 import play.api.Play
-import play.api.libs.json.{ JsObject, JsString, Json }
-import play.api.mvc.{ Action, RequestHeader }
+import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.mvc.{Action, RequestHeader}
 import services.testdata._
+import services.testdata.faker.DataFaker.Random
 import uk.gov.hmrc.play.http.HeaderCarrier
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -49,7 +50,44 @@ trait TestDataGeneratorController extends BaseController {
     }
   }
 
-  def createAdminUsers(numberToGenerate: Int, emailPrefix: String, role: String) = Action.async { implicit request =>
+  def requestExample = Action { implicit request =>
+    val example = CreateCandidateInStatusRequest(
+      statusData = StatusDataRequest(
+        applicationStatus = "SUBMITTED",
+        previousApplicationStatus = Some("REGISTERED"),
+        progressStatus = Some("SUBMITTED")
+      ),
+      personalData = Some(PersonalDataRequest(
+        emailPrefix = Some(s"testf${Random.number()}"),
+        firstName = Some("Kathryn"),
+        lastName = Some("Janeway"),
+        preferredName = Some("Captain"),
+        dateOfBirth = Some("2328-05-20"),
+        postCode = Some("QQ1 1QQ"),
+        country = Some("America")
+      )),
+      assistanceDetailsData = Some(AssistanceDetailsRequest(
+        hasDisability = Some("false"),
+        hasDisabilityDescription = Some(Random.hasDisabilityDescription),
+        setGis = Some(false),
+        onlineAdjustments = Some(false),
+        onlineAdjustmentsDescription = Some(Random.onlineAdjustmentsDescription),
+        assessmentCentreAdjustments = Some(false),
+        assessmentCentreAdjustmentsDescription = Some(Random.assessmentCentreAdjustmentDescription)
+      )),
+      schemeTypes = Some(List(Scheme.Commercial.toString(), Scheme.Business.toString())),
+      isCivilServant = Some(Random.bool),
+      hasDegree = Some(Random.bool),
+      region = Some("region"),
+      loc1scheme1EvaluationResult = Some("loc1 scheme1 result1"),
+      loc1scheme2EvaluationResult = Some("loc1 scheme2 result2"),
+      confirmedAllocation = Some(Random.bool)
+    )
+    Ok(Json.toJson(example))
+  }
+  // scalastyle:on method.length
+
+  def createAdminUsers(numberToGenerate: Int, emailPrefix: Option[String], role: String) = Action.async { implicit request =>
     try {
       TestDataGeneratorService.createAdminUsers(numberToGenerate, emailPrefix, AuthProviderClient.getRole(role)).map { candidates =>
         Ok(Json.toJson(candidates))

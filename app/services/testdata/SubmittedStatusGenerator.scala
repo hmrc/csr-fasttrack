@@ -31,68 +31,19 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object SubmittedStatusGenerator extends SubmittedStatusGenerator {
-  override val previousStatusGenerator = InProgressAssistanceDetailsStatusGenerator
+  override val previousStatusGenerator = InProgressQuestionnaireStatusGenerator
   override val appRepository = applicationRepository
-  override val qRepository = questionnaireRepository
 }
 
 trait SubmittedStatusGenerator extends ConstructiveGenerator {
   val appRepository: GeneralApplicationRepository
-  val qRepository: QuestionnaireRepository
 
-  // scalastyle:off method.length
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
-
-    def getAllQuestionnaireQuestions = List(
-      PersistedQuestion("What is your gender identity?", PersistedAnswer(Some(Random.gender), None, None)),
-      PersistedQuestion("What is your sexual orientation?", PersistedAnswer(Some(Random.sexualOrientation), None, None)),
-      PersistedQuestion("What is your ethnic group?", PersistedAnswer(Some(Random.ethnicGroup), None, None)),
-      PersistedQuestion(
-        "Between the ages of 11 to 16, in which school did you spend most of your education?",
-        PersistedAnswer(Some(Random.age11to16School), None, None)
-      ),
-      PersistedQuestion(
-        "Between the ages of 16 to 18, in which school did you spend most of your education?",
-        PersistedAnswer(Some(Random.age16to18School), None, None)
-      ),
-      PersistedQuestion("What was your home postcode when you were 14?", PersistedAnswer(Some(Random.homePostcode), None, None)),
-      PersistedQuestion(
-        "During your school years, were you at any time eligible for free school meals?",
-        PersistedAnswer(Some(Random.yesNo), None, None)
-      ),
-      PersistedQuestion(
-        "Did any of your parent(s) or guardian(s) complete a university degree course or equivalent?",
-        PersistedAnswer(Some(Random.yesNo), None, None)
-      ),
-      PersistedQuestion(
-        "Which type of occupation did they have?",
-        PersistedAnswer(Some(Random.parentsOccupation), None, None)
-      ),
-      PersistedQuestion(
-        "Did they work as an employee or were they self-employed?",
-        PersistedAnswer(Random.employeeOrSelf, None, None)
-      ),
-      PersistedQuestion(
-        "Which size would best describe their place of work?",
-        PersistedAnswer(Some(Random.sizeOfPlaceOfWork), None, None)
-      ),
-      PersistedQuestion(
-        "Did they supervise any other employees?",
-        PersistedAnswer(Some(Random.yesNo), None, None)
-      )
-    )
-
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      _ <- qRepository.addQuestions(candidateInPreviousStatus.applicationId.get, getAllQuestionnaireQuestions)
-      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get, "start_questionnaire")
-      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get, "education_questionnaire")
-      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get, "diversity_questionnaire")
-      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get, "occupation_questionnaire")
       submit <- appRepository.submit(candidateInPreviousStatus.applicationId.get)
     } yield {
       candidateInPreviousStatus
     }
   }
-  // scalastyle:on method.length
 }

@@ -20,7 +20,7 @@ import play.api.libs.json.Json
 
 case class CreateCandidateInStatusRequest(statusData: StatusDataRequest = new StatusDataRequest,
                                           personalData: Option[PersonalDataRequest],
-                                          assistanceDetails: Option[AssistanceDetailsRequest],
+                                          assistanceDetailsData: Option[AssistanceDetailsRequest],
                                           schemeTypes: Option[List[String]],
                                           isCivilServant: Option[Boolean],
                                           hasDegree: Option[Boolean],
@@ -35,7 +35,7 @@ object CreateCandidateInStatusRequest {
   def create(status: String, progressStatus: Option[String]): CreateCandidateInStatusRequest = {
     CreateCandidateInStatusRequest(
       statusData = StatusDataRequest(applicationStatus = status, progressStatus = progressStatus),
-      assistanceDetails = None,
+      assistanceDetailsData = None,
       personalData = None,
       schemeTypes = None,
       isCivilServant = None,
