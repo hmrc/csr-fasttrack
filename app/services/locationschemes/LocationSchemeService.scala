@@ -36,20 +36,18 @@ trait LocationSchemeService {
   val appRepository: GeneralApplicationRepository
   val pdRepository: PersonalDetailsRepository
 
-  def getSchemesAndLocationsByEligibility(hasALevels: Boolean, hasStemALevels: Boolean,
-                                          latitudeOpt: Option[Double] = None, longitudeOpt: Option[Double] = None)
+  def getEligibleSchemeLocations(applicationId: String, latitudeOpt: Option[Double] = None, longitudeOpt: Option[Double] = None)
   : Future[List[GeoLocationSchemeResult]] = {
 
     for {
-      schemeInfo <- locationSchemeRepository.getSchemeInfo
+      personalDetails <- pdRepository.find(applicationId)
+      schemeChoices <- getSchemes(applicationId)
       locationsWithSchemes <- locationSchemeRepository.getSchemesAndLocations
     } yield {
 
-      val eligibleSchemes = schemeInfo.filterNot(s => s.requiresALevel && !hasALevels || s.requiresALevelInStem && !hasStemALevels)
-
       val selectedLocations = locationsWithSchemes.collect {
-        case LocationSchemes(locationId, locationName, schemeLatitude, schemeLongitude, schemes)
-          if eligibleSchemes.map(_.name).intersect(schemes).nonEmpty =>
+        case LocationSchemes(locationId, locationName, schemeLatitude, schemeLongitude, availableSchemes)
+          if schemeChoices.map(_.name).intersect(availableSchemes).nonEmpty =>
           val distance = for {
             latitude <- latitudeOpt
             longitude <- longitudeOpt
@@ -57,21 +55,19 @@ trait LocationSchemeService {
               DistanceCalculator.calcKilometersBetween(latitude, longitude, schemeLatitude, schemeLongitude)
           }
 
-          GeoLocationSchemeResult(locationId, locationName, distance, eligibleSchemes.filter(eScheme => schemes.contains(eScheme.name)))
+          GeoLocationSchemeResult(locationId, locationName, distance, schemeChoices.filter(scheme => availableSchemes.contains(scheme.name)))
       }
       sortLocations(selectedLocations, latitudeOpt.isDefined && longitudeOpt.isDefined)
     }
   }
 
-  def getAvailableSchemesInSelectedLocations(applicationId: String): Future[List[SchemeInfo]] = {
-    for {
-      personalDetails <- pdRepository.find(applicationId)
-      selectedLocationIds <- appRepository.getSchemeLocations(applicationId)
-      eligibleSchemeLocations <- getSchemesAndLocationsByEligibility(personalDetails.aLevel, personalDetails.stemLevel)
-    } yield {
-      val selectedLocationSchemes = eligibleSchemeLocations.filter(schemeLocation => selectedLocationIds.contains(schemeLocation.locationId))
-      selectedLocationSchemes.flatMap(_.schemes)
-    }
+  def getEligibleSchemes(applicationId: String): Future[List[SchemeInfo]] = {
+      for {
+        personalDetails <- pdRepository.find(applicationId)
+        schemes <- locationSchemeRepository.getSchemeInfo
+      } yield {
+        schemes.filterNot(s => s.requiresALevel && !personalDetails.aLevel || s.requiresALevelInStem && !personalDetails.stemLevel)
+      }
   }
 
   def getSchemeLocations(applicationId: String): Future[List[LocationSchemes]] = {

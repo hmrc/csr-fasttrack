@@ -32,48 +32,40 @@ object LocationSchemeController extends LocationSchemeController {
 trait LocationSchemeController extends BaseController {
   def locationSchemeService: LocationSchemeService
 
-  def getSchemesAndLocationsByEligibility(hasALevels: Boolean, hasStemALevels: Boolean,
-                                                    latitude: Option[Double], longitude: Option[Double]): Action[AnyContent] =
-    Action.async { implicit request =>
-    locationSchemeService.getSchemesAndLocationsByEligibility(hasALevels, hasStemALevels,
-      latitude, longitude).map(r => Ok(Json.toJson(r)))
+  def getEligibleSchemes(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    locationSchemeService.getEligibleSchemes(applicationId).map(r => Ok(Json.toJson(r)))
   }
 
-  def getAvailableSchemesInSelectedLocations(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
-    locationSchemeService.getAvailableSchemesInSelectedLocations(applicationId).map(r => Ok(Json.toJson(r)))
+  def getSchemes(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    locationSchemeService.getSchemes(applicationId).map {
+      schemes => Ok(Json.toJson(schemes))
+    }.recover {
+      case ex: SchemePreferencesNotFound => NotFound("Schemes not found")
+    }
   }
 
-  def getSchemeLocations(applicationId: String): Action[AnyContent] =
-    Action.async { implicit request =>
-        locationSchemeService.getSchemeLocations(applicationId)
-          .map {
-            locations => Ok(Json.toJson(locations))
-          }.recover {
-            case ex: LocationPreferencesNotFound => NotFound("Locations not found")
-          }
-    }
+  def getEligibleSchemeLocations(applicationId: String,
+                                 latitude: Option[Double], longitude: Option[Double]): Action[AnyContent] = Action.async { implicit request =>
+    locationSchemeService.getEligibleSchemeLocations(applicationId, latitude, longitude).map(r => Ok(Json.toJson(r)))
+  }
 
-  def updateSchemeLocations(applicationId: String): Action[JsValue] =
-    Action.async(parse.json) { implicit request =>
-      withJsonBody[List[String]] { locationIds =>
-        locationSchemeService.updateSchemeLocations(applicationId, locationIds).map { _ => Ok }
-      }
+  def getSchemeLocations(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    locationSchemeService.getSchemeLocations(applicationId).map {
+        locations => Ok(Json.toJson(locations))
+    }.recover {
+        case ex: LocationPreferencesNotFound => NotFound("Locations not found")
     }
+  }
 
-  def getSchemes(applicationId: String): Action[AnyContent] =
-    Action.async { implicit request =>
-      locationSchemeService.getSchemes(applicationId)
-        .map {
-          schemes => Ok(Json.toJson(schemes))
-        }.recover {
-          case ex: SchemePreferencesNotFound => NotFound("Schemes not found")
-        }
+  def updateSchemeLocations(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    withJsonBody[List[String]] { locationIds =>
+      locationSchemeService.updateSchemeLocations(applicationId, locationIds).map { _ => Ok }
     }
+  }
 
-  def updateSchemes(applicationId: String): Action[JsValue] =
-    Action.async(parse.json) { implicit request =>
-      withJsonBody[List[Scheme]] { schemeNames =>
-        locationSchemeService.updateSchemes(applicationId, schemeNames).map { _ => Ok }
-      }
+  def updateSchemes(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    withJsonBody[List[Scheme]] { schemeNames =>
+      locationSchemeService.updateSchemes(applicationId, schemeNames).map { _ => Ok }
     }
+  }
 }
