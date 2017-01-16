@@ -16,24 +16,26 @@
 
 package repositories.application
 
-import common.Constants.{ Yes, No }
+import common.Constants.{ No, Yes }
 import factories.UUIDFactory
 import model.Commands.Report
 import model.Exceptions.{ LocationPreferencesNotFound, SchemePreferencesNotFound }
 import model.Scheme
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
+import repositories.CollectionNames
 import services.GBTimeZoneService
 import testkit.MongoRepositorySpec
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import language.postfixOps
 
 class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory {
 
   import ImplicitBSONHandlers._
 
-  val collectionName = "application"
+  val collectionName = CollectionNames.APPLICATION
 
   def repository = new GeneralApplicationMongoRepository(GBTimeZoneService)
 

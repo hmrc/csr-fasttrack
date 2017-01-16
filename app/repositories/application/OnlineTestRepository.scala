@@ -78,7 +78,7 @@ trait OnlineTestRepository {
 }
 
 class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
-  extends ReactiveRepository[OnlineTestDetails, BSONObjectID]("application", mongo,
+  extends ReactiveRepository[OnlineTestDetails, BSONObjectID](CollectionNames.APPLICATION, mongo,
     Commands.Implicits.onlineTestDetailsFormat, ReactiveMongoFormats.objectIdFormats) with OnlineTestRepository with RandomSelection {
 
   private def applicationStatus(status: String): BSONDocument = {
@@ -288,7 +288,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     val ad = doc.getAs[BSONDocument]("assistance-details")
     val hasDisability = ad.flatMap(_.getAs[String]("hasDisability")).get
     val needsSupportForOnlineAssessment = ad.flatMap(_.getAs[Boolean]("needsSupportForOnlineAssessment")).get
-    val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).get
+    val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).getOrElse(false)
     val typesOfAdjustments = ad.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
     val hasTimeExtension = typesOfAdjustments.exists(_.contains("time extension"))
 

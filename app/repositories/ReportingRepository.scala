@@ -40,7 +40,7 @@ trait ReportingRepository {
 }
 
 class ReportingMongoRepository(implicit mongo: () => DB)
-  extends ReactiveRepository[DiversityReport, BSONObjectID]("diversity_reporting", mongo,
+  extends ReactiveRepository[DiversityReport, BSONObjectID](CollectionNames.DIVERSITY_REPORTING, mongo,
     PersistedObjects.Implicits.diversityReportFormats, ReactiveMongoFormats.objectIdFormats) with ReportingRepository {
 
   override def update(location: String, timeStamp: DateTime, data: DiversityReportRow): Future[Unit] = {

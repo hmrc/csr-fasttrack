@@ -35,7 +35,7 @@ import model.EvaluationResults._
 class OnlineTestRepositorySpec extends MongoRepositorySpec {
   import ImplicitBSONHandlers._
 
-  override val collectionName = "application"
+  override val collectionName = CollectionNames.APPLICATION
 
   def helperRepo = new GeneralApplicationMongoRepository(GBTimeZoneService)
   def onlineTestRepo = new OnlineTestMongoRepository(DateTimeFactory)

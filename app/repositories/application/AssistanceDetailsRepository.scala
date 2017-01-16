@@ -21,6 +21,7 @@ import model.persisted.AssistanceDetails
 import reactivemongo.api.DB
 import reactivemongo.bson.{BSONDocument, _}
 import repositories.ReactiveRepositoryHelpers
+import repositories._
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -34,7 +35,7 @@ trait AssistanceDetailsRepository {
 }
 
 class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
-  extends ReactiveRepository[AssistanceDetails, BSONObjectID]("application", mongo,
+  extends ReactiveRepository[AssistanceDetails, BSONObjectID](CollectionNames.APPLICATION, mongo,
     AssistanceDetails.assistanceDetailsFormat, ReactiveMongoFormats.objectIdFormats) with AssistanceDetailsRepository
     with ReactiveRepositoryHelpers {
 

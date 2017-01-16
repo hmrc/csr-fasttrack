@@ -20,7 +20,7 @@ import testkit.MongoRepositorySpec
 
 class OnlineTestPDFReportRepositorySpec extends MongoRepositorySpec {
 
-  override val collectionName = "online-test-pdf-report"
+  override val collectionName = CollectionNames.ONLINE_TEST_PDF_REPORT
 
   val ApplicationId1 = "1111-1111"
   val ApplicationId2 = "2222-2222"
