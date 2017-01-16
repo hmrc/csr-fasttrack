@@ -53,11 +53,11 @@
 
     <logger name="org.asynchttpclient.netty.channel.DefaultChannelPool" level="WARN"/>
 
-    <!-- <logger name="com.google.inject" level="INFO"/>
+    <logger name="javax.management.mbeanserver" level="WARN"/>
     <logger name="akka.event" level="INFO"/>
     <logger name="net.sf.ehcache" level="INFO"/>
     <logger name="akka.event.slf4j.Slf4jLogger" level="WARN"/>
-    <logger name="play.api.libs.concurrent.ActorSystemProvider" level="INFO"/> -->
+    <logger name="play.api.libs.concurrent.ActorSystemProvider" level="INFO"/>
 
     <root level="DEBUG">
         <appender-ref ref="FILE"/>
