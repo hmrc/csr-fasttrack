@@ -119,7 +119,7 @@ trait GeneralApplicationRepository {
 // scalastyle:off number.of.methods
 // scalastyle:off file.size.limit
 class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implicit mongo: () => DB)
-  extends ReactiveRepository[CreateApplicationRequest, BSONObjectID]("application", mongo,
+  extends ReactiveRepository[CreateApplicationRequest, BSONObjectID](CollectionNames.APPLICATION, mongo,
     Commands.Implicits.createApplicationRequestFormats,
     ReactiveMongoFormats.objectIdFormats) with GeneralApplicationRepository with RandomSelection {
 

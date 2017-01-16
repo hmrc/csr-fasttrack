@@ -78,7 +78,7 @@ trait OnlineTestRepository {
 }
 
 class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
-  extends ReactiveRepository[OnlineTestDetails, BSONObjectID]("application", mongo,
+  extends ReactiveRepository[OnlineTestDetails, BSONObjectID](CollectionNames.APPLICATION, mongo,
     Commands.Implicits.onlineTestDetailsFormat, ReactiveMongoFormats.objectIdFormats) with OnlineTestRepository with RandomSelection {
 
   private def applicationStatus(status: String): BSONDocument = {

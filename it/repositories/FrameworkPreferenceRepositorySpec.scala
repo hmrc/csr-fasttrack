@@ -10,7 +10,7 @@ import testkit.MongoRepositorySpec
 class FrameworkPreferenceRepositorySpec extends MongoRepositorySpec {
   import ImplicitBSONHandlers._
 
-  override val collectionName = "application"
+  override val collectionName = CollectionNames.APPLICATION
 
   def frameworkPreferenceRepo = new FrameworkPreferenceMongoRepository()
 

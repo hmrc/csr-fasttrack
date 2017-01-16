@@ -38,7 +38,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
 
   val frameworkId = "FastTrack-2015"
 
-  val collectionName = "application"
+  val collectionName = CollectionNames.APPLICATION
 
   def applicationRepo = new GeneralApplicationMongoRepository(GBTimeZoneService)
 
