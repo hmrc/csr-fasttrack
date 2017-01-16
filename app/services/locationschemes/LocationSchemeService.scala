@@ -40,7 +40,6 @@ trait LocationSchemeService {
   : Future[List[GeoLocationSchemeResult]] = {
 
     for {
-      personalDetails <- pdRepository.find(applicationId)
       schemeChoices <- getSchemes(applicationId)
       locationsWithSchemes <- locationSchemeRepository.getSchemesAndLocations
     } yield {
