@@ -27,7 +27,7 @@ import testkit.MongoRepositorySpec
 class DiagnosticReportRepositorySpec extends MongoRepositorySpec {
   import ImplicitBSONHandlers._
 
-  override val collectionName = "application"
+  override val collectionName = CollectionNames.APPLICATION
 
   def diagnosticReportRepo = new DiagnosticReportingMongoRepository()
   def helperRepo = new GeneralApplicationMongoRepository(GBTimeZoneService)

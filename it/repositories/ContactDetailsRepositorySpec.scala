@@ -23,7 +23,7 @@ import testkit.MongoRepositorySpec
 
 class ContactDetailsRepositorySpec extends MongoRepositorySpec {
 
-  override val collectionName = "contact-details"
+  override val collectionName = CollectionNames.CONTACT_DETAILS
 
   def repo = new ContactDetailsMongoRepository()
 

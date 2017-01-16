@@ -19,7 +19,7 @@ package repositories
 import testkit.MongoRepositorySpec
 
 class PassMarkSettingsRepositorySpec extends MongoRepositorySpec {
-  val collectionName = "pass-mark-settings"
+  val collectionName = CollectionNames.PASS_MARK_SETTINGS
 
   "Pass-mark-settings collection" should {
     "create indexes for the repository" in {

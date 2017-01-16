@@ -36,7 +36,7 @@ trait FrameworkPreferenceRepository {
 
 class FrameworkPreferenceMongoRepository(implicit mongo: () => DB)
   extends ReactiveRepository[Preferences, BSONObjectID](
-    "application", mongo, Preferences.jsonFormat, ReactiveMongoFormats.objectIdFormats
+    CollectionNames.APPLICATION, mongo, Preferences.jsonFormat, ReactiveMongoFormats.objectIdFormats
   ) with FrameworkPreferenceRepository {
 
   def savePreferences(applicationId: String, preferences: Preferences): Future[Unit] = {

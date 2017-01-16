@@ -21,13 +21,14 @@ import model.Exceptions.NotFoundException
 import model.FlagCandidatePersistedObject.FlagCandidate
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
+import repositories.CollectionNames
 import services.GBTimeZoneService
 import testkit.MongoRepositorySpec
 
 class FlagCandidateMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory {
   import ImplicitBSONHandlers._
 
-  val collectionName = "application"
+  val collectionName = CollectionNames.APPLICATION
   def repository = new FlagCandidateMongoRepository
   def helperRepo = new GeneralApplicationMongoRepository(GBTimeZoneService)
 

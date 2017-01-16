@@ -24,7 +24,7 @@ import testkit.MongoRepositorySpec
 class TestReportRepositorySpec extends MongoRepositorySpec {
   import TestReportRepositorySpec._
 
-  override val collectionName = "online-test-report"
+  override val collectionName = CollectionNames.ONLINE_TEST_REPORT
 
   def repo = new TestReportMongoRepository()
 
