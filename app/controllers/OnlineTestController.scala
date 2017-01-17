@@ -16,7 +16,7 @@
 
 package controllers
 
-import model.Commands
+import model.{ ApplicationStatuses, Commands }
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import play.api.mvc._
@@ -24,6 +24,7 @@ import repositories._
 import repositories.application.OnlineTestRepository
 import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import model.ApplicationStatuses.EnumVal._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -38,7 +39,7 @@ case class OnlineTest(
   cubiksEmailAddress: String, isOnlineTestEnabled: Boolean, pdfReportAvailable: Boolean
 )
 
-case class OnlineTestStatus(status: String)
+case class OnlineTestStatus(status: ApplicationStatuses.ApplicationStatus)
 
 case class OnlineTestExtension(extraDays: Int)
 
@@ -70,9 +71,7 @@ trait OnlineTestController extends BaseController {
 
   def onlineTestStatusUpdate(userId: String) = Action.async(parse.json) { implicit request =>
     withJsonBody[OnlineTestStatus] { onlineTestStatus =>
-      onlineRepository.updateStatus(userId, onlineTestStatus.status).map { _ =>
-        Ok
-      }
+      onlineRepository.updateStatus(userId, onlineTestStatus.status).map { _ => Ok }
     }
   }
 
@@ -92,9 +91,7 @@ trait OnlineTestController extends BaseController {
 
     onlineRepository.getOnlineTestApplication(appId).flatMap {
       case Some(onlineTestApp) =>
-        onlineTestingService.registerAndInviteApplicant(onlineTestApp).map { _ =>
-          Ok
-        }
+        onlineTestingService.registerAndInviteApplicant(onlineTestApp).map { _ => Ok }
       case _ => Future.successful(NotFound)
     }
   }
@@ -103,9 +100,7 @@ trait OnlineTestController extends BaseController {
     withJsonBody[OnlineTestExtension] { extension =>
       onlineRepository.getOnlineTestApplication(appId).flatMap {
         case Some(onlineTestApp) =>
-          onlineTestExtensionService.extendExpiryTime(onlineTestApp, extension.extraDays).map { _ =>
-            Ok
-          }
+          onlineTestExtensionService.extendExpiryTime(onlineTestApp, extension.extraDays).map { _ => Ok }
         case _ => Future.successful(NotFound)
       }
     }

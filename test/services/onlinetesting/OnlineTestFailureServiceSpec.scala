@@ -17,6 +17,7 @@
 package services.onlinetesting
 
 import connectors.EmailClient
+import model.ApplicationStatuses
 import model.Commands.Address
 import model.PersistedObjects.{ ApplicationForNotification, ContactDetails }
 import org.mockito.Matchers.{ any, eq => eqTo }
@@ -115,7 +116,7 @@ class OnlineTestFailureServiceSpec extends PlaySpec with ScalaFutures with Mocki
     "mark the relevant application as failed" in new CommitFailedStatusFixture {
       service.commitNotifiedStatus(failedTest).futureValue mustBe (())
 
-      verify(otRepository).updateStatus(userId, "ONLINE_TEST_FAILED_NOTIFIED")
+      verify(otRepository).updateStatus(userId, ApplicationStatuses.OnlineTestFailedNotified)
     }
 
     "audit an event after updating the application status" in new CommitFailedStatusFixture {
@@ -138,7 +139,7 @@ class OnlineTestFailureServiceSpec extends PlaySpec with ScalaFutures with Mocki
     val preferredName = "Jon"
     val emailAddress = "jon@test.com"
     val contactDetails = ContactDetails(Address("line 1"), "HP27 9JU", emailAddress, None)
-    val failedTest = ApplicationForNotification(applicationId, userId, preferredName, "ONLINE_TEST_FAILED")
+    val failedTest = ApplicationForNotification(applicationId, userId, preferredName, ApplicationStatuses.OnlineTestFailed)
     def hc = HeaderCarrier()
 
     val ec = scala.concurrent.ExecutionContext.Implicits.global

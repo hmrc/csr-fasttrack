@@ -27,14 +27,12 @@ import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.Commands.Implicits._
 import model.EvaluationResults._
 import model.PersistedObjects.{ OnlineTestPassmarkEvaluation, PreferencesWithQualification }
-import model.Preferences
+import model.ApplicationStatuses
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
 import play.Logger
 import play.api.libs.json._
-import play.test.WithApplication
 import reactivemongo.bson.{ BSONDocument, BSONString }
 import reactivemongo.json.ImplicitBSONHandlers
 import repositories._
@@ -214,7 +212,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
         BSONDocument(
           "applicationId" -> appId,
           "userId" -> ("user" + appId),
-          "applicationStatus" -> "ASSESSMENT_SCORES_ACCEPTED")
+          "applicationStatus" -> ApplicationStatuses.AssessmentScoresAccepted)
       ).futureValue
   }
 

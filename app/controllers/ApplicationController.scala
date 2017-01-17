@@ -63,7 +63,15 @@ trait ApplicationController extends BaseController {
     appRepository.findProgress(applicationId).map { result =>
       Ok(Json.toJson(ApplicationStatusOrder.getStatus(result)))
     }.recover {
-      case e: ApplicationNotFound => NotFound(s"cannot find application for user with id: ${e.id}")
+      case e: ApplicationNotFound => NotFound(s"cannot find application for id: ${e.id}")
+    }
+  }
+
+  def applicationStatusDetails(appId: String) = Action.async { implicit requst =>
+    appRepository.findStatusDetails(appId).map { statusDetails =>
+      Ok(Json.toJson(statusDetails))
+    } recover {
+      case _: ApplicationNotFound => NotFound(s"No application found for ID $appId")
     }
   }
 

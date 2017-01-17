@@ -16,7 +16,9 @@
 
 package model
 
-object ProgressStatuses {
+
+object ProgressStatuses extends Enumeration {
+
   val RegisteredProgress = "registered"
   val PersonalDetailsCompletedProgress = "personal_details_completed"
   val LocationsCompletedProgress = "scheme_locations_completed"
@@ -27,24 +29,25 @@ object ProgressStatuses {
   val DiversityQuestionsCompletedProgress = "diversity_questions_completed"
   val EducationQuestionsCompletedProgress = "education_questions_completed"
   val OccupationQuestionsCompletedProgress = "occupation_questions_completed"
-  val SubmittedProgress = "submitted"
-  val WithdrawnProgress = "withdrawn"
-  val OnlineTestInvitedProgress = "online_test_invited"
-  val OnlineTestStartedProgress = "online_test_started"
-  val OnlineTestCompletedProgress = "online_test_completed"
-  val OnlineTestExpiredProgress = "online_test_expired"
-  val AwaitingOnlineTestReevaluationProgress = "awaiting_online_test_re_evaluation"
-  val OnlineTestFailedProgress = "online_test_failed"
-  val OnlineTestFailedNotifiedProgress = "online_test_failed_notified"
-  val AwaitingOnlineTestAllocationProgress = "awaiting_online_test_allocation"
-  val AllocationConfirmedProgress = "allocation_confirmed"
-  val AllocationUnconfirmedProgress = "allocation_unconfirmed"
-  val FailedToAttendProgress = ApplicationStatuses.FailedToAttend.toLowerCase()
-  val AssessmentScoresEnteredProgress = ApplicationStatuses.AssessmentScoresEntered.toLowerCase()
-  val AssessmentScoresAcceptedProgress = ApplicationStatuses.AssessmentScoresAccepted.toLowerCase()
-  val AwaitingAssessmentCentreReevaluationProgress = ApplicationStatuses.AwaitingAssessmentCentreReevaluation.toLowerCase()
-  val AssessmentCentrePassedProgress = ApplicationStatuses.AssessmentCentrePassed.toLowerCase()
-  val AssessmentCentreFailedProgress = ApplicationStatuses.AssessmentCentreFailed.toLowerCase()
-  val AssessmentCentrePassedNotifiedProgress = ApplicationStatuses.AssessmentCentrePassedNotified.toLowerCase()
-  val AssessmentCentreFailedNotifiedProgress = ApplicationStatuses.AssessmentCentreFailedNotified.toLowerCase()
+
+  val SubmittedProgress = ApplicationStatuses.Submitted.name.toLowerCase
+  val WithdrawnProgress = ApplicationStatuses.Withdrawn.name.toLowerCase
+  val OnlineTestInvitedProgress = ApplicationStatuses.OnlineTestInvited.name.toLowerCase
+  val OnlineTestStartedProgress = ApplicationStatuses.OnlineTestStarted.name.toLowerCase
+  val OnlineTestCompletedProgress = ApplicationStatuses.OnlineTestCompleted.name.toLowerCase
+  val OnlineTestExpiredProgress = ApplicationStatuses.OnlineTestExpired.name.toLowerCase
+  val AwaitingOnlineTestReevaluationProgress = ApplicationStatuses.AwaitingOnlineTestReevaluation.name.toLowerCase
+  val OnlineTestFailedProgress = ApplicationStatuses.OnlineTestFailed.name.toLowerCase
+  val OnlineTestFailedNotifiedProgress = ApplicationStatuses.OnlineTestFailedNotified.name.toLowerCase
+  val AwaitingOnlineTestAllocationProgress = ApplicationStatuses.AwaitingAllocation.name.toLowerCase
+  val AllocationConfirmedProgress = ApplicationStatuses.AllocationConfirmed.name.toLowerCase
+  val AllocationUnconfirmedProgress = ApplicationStatuses.AllocationUnconfirmed.name.toLowerCase
+  val FailedToAttendProgress = ApplicationStatuses.FailedToAttend.name.toLowerCase
+  val AssessmentScoresEnteredProgress = ApplicationStatuses.AssessmentScoresEntered.name.toLowerCase
+  val AssessmentScoresAcceptedProgress = ApplicationStatuses.AssessmentScoresAccepted.name.toLowerCase
+  val AwaitingAssessmentCentreReevaluationProgress = ApplicationStatuses.AwaitingAssessmentCentreReevaluation.name.toLowerCase
+  val AssessmentCentrePassedProgress = ApplicationStatuses.AssessmentCentrePassed.name.toLowerCase
+  val AssessmentCentreFailedProgress = ApplicationStatuses.AssessmentCentreFailed.name.toLowerCase
+  val AssessmentCentrePassedNotifiedProgress = ApplicationStatuses.AssessmentCentrePassedNotified.name.toLowerCase
+  val AssessmentCentreFailedNotifiedProgress = ApplicationStatuses.AssessmentCentreFailedNotified.name.toLowerCase
 }

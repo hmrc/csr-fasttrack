@@ -21,7 +21,7 @@ import model.EvaluationResults._
 
 trait ApplicationStatusCalculator {
 
-  def determineStatus(result: AssessmentRuleCategoryResult): String = result.passedMinimumCompetencyLevel match {
+  def determineStatus(result: AssessmentRuleCategoryResult): ApplicationStatuses.ApplicationStatus = result.passedMinimumCompetencyLevel match {
     case Some(false) =>
       ApplicationStatuses.AssessmentCentreFailed
     case _ =>

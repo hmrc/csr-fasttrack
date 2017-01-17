@@ -17,8 +17,9 @@
 package mocks.application
 
 import mocks.InMemoryStorage
+import model.ApplicationStatuses
 import model.Exceptions.PersonalDetailsNotFound
-import model.PersistedObjects.{PersonalDetails, PersonalDetailsWithUserId}
+import model.PersistedObjects.{ PersonalDetails, PersonalDetailsWithUserId }
 import org.joda.time.LocalDate
 import repositories.application.PersonalDetailsRepository
 
@@ -42,9 +43,10 @@ object PersonalDetailsInMemoryRepository extends PersonalDetailsRepository with 
   }
 
   override def update(appId: String, userId: String, personalDetails: PersonalDetails,
-             requiredStatuses: Seq[String], newApplicationStatus: String) = Future.successful(())
+    requiredStatuses: Seq[ApplicationStatuses.ApplicationStatus], newApplicationStatus: ApplicationStatuses.ApplicationStatus
+  ): Future[Unit] = Future.successful(())
 
-  override def notFound(applicationId: String) = throw new PersonalDetailsNotFound(applicationId)
+  override def notFound(applicationId: String) = throw PersonalDetailsNotFound(applicationId)
 
   def findPersonalDetailsWithUserId(applicationId: String): Future[PersonalDetailsWithUserId] = ???
 }

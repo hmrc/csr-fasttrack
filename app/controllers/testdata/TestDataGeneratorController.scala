@@ -86,6 +86,8 @@ trait TestDataGeneratorController extends BaseController {
                                previousStatus: Option[String] = None,
                                confirmedAllocation: Boolean) = Action.async { implicit request =>
 
+    import model.ApplicationStatuses._
+
     val initialConfig = GeneratorConfig(
       personalData = PersonalData(emailPrefix = emailPrefix),
       setGis = setGis,
@@ -95,8 +97,8 @@ trait TestDataGeneratorController extends BaseController {
       loc1scheme2Passmark = loc1scheme2EvaluationResult.map(Result(_)),
       previousStatus = previousStatus,
       confirmedAllocation = status match {
-        case ApplicationStatuses.AllocationUnconfirmed => false
-        case ApplicationStatuses.AllocationConfirmed => true
+        case ApplicationStatuses.AllocationUnconfirmed.name => false
+        case ApplicationStatuses.AllocationConfirmed.name => true
         case _ => confirmedAllocation
       }
     )

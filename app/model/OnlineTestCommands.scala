@@ -39,7 +39,7 @@ object OnlineTestCommands {
     passmarkSettings: Settings, // pass and fail mark
     preferences: Preferences, // preferences which scheme candidates like
     scores: CandidateTestReport, // applicationId + scores
-    applicationStatus: String
+    applicationStatus: ApplicationStatuses.ApplicationStatus
   )
 
   case class TimeAdjustmentsOnlineTestApplication(verbalTimeAdjustmentPercentage: Int, numericalTimeAdjustmentPercentage: Int)

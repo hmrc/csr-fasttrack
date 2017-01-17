@@ -62,10 +62,10 @@ object PersistedObjects {
     applicationId: String,
     userId: String,
     preferredName: String,
-    applicationStatus: String
+    applicationStatus: ApplicationStatuses.ApplicationStatus
   )
 
-  case class ApplicationIdWithUserIdAndStatus(applicationId: String, userId: String, applicationStatus: String)
+  case class ApplicationIdWithUserIdAndStatus(applicationId: String, userId: String, applicationStatus: ApplicationStatuses.ApplicationStatus)
 
   case class PersistedAnswer(answer: Option[String], otherDetails: Option[String], unknown: Option[Boolean])
   case class PersistedQuestion(question: String, answer: PersistedAnswer)

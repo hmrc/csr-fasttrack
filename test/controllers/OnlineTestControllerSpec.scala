@@ -59,7 +59,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
         "1234",
         s"""
            |{
-           |  "status":"Started"
+           |  "status":"ONLINE_TEST_STARTED"
            |}
         """.stripMargin
       ))

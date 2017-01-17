@@ -16,26 +16,25 @@
 
 package repositories.application
 
-import common.Constants.{ Yes, No }
 import config.MicroserviceAppConfig._
 import controllers.OnlineTestDetails
 import factories.DateTimeFactory
 import model.EvaluationResults._
-import model.Exceptions.{NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound, UnexpectedException}
+import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound, UnexpectedException }
 import model.OnlineTestCommands._
-import model.PersistedObjects.{ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation}
-import model.persisted.AssistanceDetails
-import model.{ApplicationStatuses, Commands}
-import org.joda.time.{DateTime, LocalDate}
+import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
+import model.{ ApplicationStatuses, Commands, ProgressStatuses }
+import org.joda.time.{ DateTime, LocalDate }
 import reactivemongo.api.DB
 import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.bson.{BSONArray, BSONDocument, BSONObjectID, BSONString}
+import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID }
 import repositories._
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.Try
 
 trait OnlineTestRepository {
   def nextApplicationPendingExpiry: Future[Option[ExpiringOnlineTest]]
@@ -50,7 +49,7 @@ trait OnlineTestRepository {
 
   def getOnlineTestDetails(userId: String): Future[OnlineTestDetails]
 
-  def updateStatus(userId: String, status: String): Future[Unit]
+  def updateStatus(userId: String, status: ApplicationStatuses.ApplicationStatus): Future[Unit]
 
   def updateExpiryTime(userId: String, expirationDate: DateTime): Future[Unit]
 
@@ -66,13 +65,15 @@ trait OnlineTestRepository {
 
   def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]]
 
-  def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult, applicationStatus: String): Future[Unit]
+  def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult,
+    applicationStatus: ApplicationStatuses.ApplicationStatus): Future[Unit]
 
   def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, version: String, p: RuleCategoryResult): Future[Unit]
 
   def removeCandidateAllocationStatus(applicationId: String): Future[Unit]
 
-  def saveCandidateAllocationStatus(applicationId: String, applicationStatus: String, expireDate: Option[LocalDate]): Future[Unit]
+  def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.ApplicationStatus,
+    expireDate: Option[LocalDate]): Future[Unit]
 
   def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation]
 }
@@ -81,15 +82,16 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   extends ReactiveRepository[OnlineTestDetails, BSONObjectID](CollectionNames.APPLICATION, mongo,
     Commands.Implicits.onlineTestDetailsFormat, ReactiveMongoFormats.objectIdFormats) with OnlineTestRepository with RandomSelection {
 
-  private def applicationStatus(status: String): BSONDocument = {
+  private def applicationStatus(status: ApplicationStatuses.ApplicationStatus): BSONDocument = {
+    import model.ApplicationStatuses._
 
     val flag = status match {
-      case "ONLINE_TEST_INVITED" => "online_test_invited"
-      case "ONLINE_TEST_STARTED" => "online_test_started"
-      case "ONLINE_TEST_COMPLETED" => "online_test_completed"
-      case "ONLINE_TEST_EXPIRED" => "online_test_expired"
-      case "ONLINE_TEST_FAILED" => "online_test_failed"
-      case "ONLINE_TEST_FAILED_NOTIFIED" => "online_test_failed_notified"
+      case OnlineTestInvited => "online_test_invited"
+      case OnlineTestStarted => "online_test_started"
+      case OnlineTestCompleted => "online_test_completed"
+      case OnlineTestExpired => "online_test_expired"
+      case OnlineTestFailed => "online_test_failed"
+      case OnlineTestFailedNotified => "online_test_failed_notified"
     }
 
     if (flag == "online_test_completed") {
@@ -112,40 +114,42 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     val projection = BSONDocument("online-tests" -> 1, "_id" -> 0)
 
     collection.find(query, projection).one[BSONDocument] map {
-      case Some(document) if document.getAs[BSONDocument]("online-tests").isDefined => {
+      case Some(document) if document.getAs[BSONDocument]("online-tests").isDefined =>
         val root = document.getAs[BSONDocument]("online-tests").get
         val onlineTestUrl = root.getAs[String]("onlineTestUrl").get
         val token = root.getAs[String]("token").get
         val invitationDate = root.getAs[DateTime]("invitationDate").get
         val expirationDate = root.getAs[DateTime]("expirationDate").get
 
-        OnlineTestDetails(invitationDate, expirationDate, onlineTestUrl, s"$token@${cubiksGatewayConfig.emailDomain}", true)
-      }
-      case _ => throw new NotFoundException()
+        OnlineTestDetails(invitationDate, expirationDate, onlineTestUrl, s"$token@${cubiksGatewayConfig.emailDomain}",
+          isOnlineTestEnabled = true
+        )
+
+      case _ => throw NotFoundException()
     }
   }
 
-  override def updateStatus(userId: String, status: String) = {
+  override def updateStatus(userId: String, status: ApplicationStatuses.ApplicationStatus): Future[Unit] = {
     val query = BSONDocument("userId" -> userId)
     val applicationStatusBSON = applicationStatus(status)
 
     collection.update(query, applicationStatusBSON, upsert = false) map {
       case r if r.n == 0 => throw new NotFoundException(s"updateStatus didn't update anything for userId:$userId")
-      case r if r.n > 1 => throw new UnexpectedException(s"updateStatus somehow updated more than one record for userId:$userId")
+      case r if r.n > 1 => throw UnexpectedException(s"updateStatus somehow updated more than one record for userId:$userId")
       case _ =>
     }
   }
 
   override def updateExpiryTime(userId: String, expirationDate: DateTime): Future[Unit] = {
     val queryUser = BSONDocument("userId" -> userId)
-    val queryUserExpired = BSONDocument("userId" -> userId, "applicationStatus" -> "ONLINE_TEST_EXPIRED")
+    val queryUserExpired = BSONDocument("userId" -> userId, "applicationStatus" -> ApplicationStatuses.OnlineTestExpired)
     val newExpiryTime = BSONDocument("$set" -> BSONDocument(
       "online-tests.expirationDate" -> expirationDate
     ))
     val newStatus = BSONDocument("$set" -> BSONDocument(
-      "progress-status.online_test_expired" -> false,
-      "progress-status.online_test_invited" -> true,
-      "applicationStatus" -> "ONLINE_TEST_INVITED"
+      s"progress-status.${ProgressStatuses.OnlineTestExpiredProgress}" -> false,
+      s"progress-status.${ProgressStatuses.OnlineTestInvitedProgress}" -> true,
+      "applicationStatus" -> ApplicationStatuses.OnlineTestInvited
     ))
 
     for {
@@ -153,19 +157,19 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       _ <- collection.update(queryUserExpired, newStatus, upsert = false)
     } yield {
       if (status.n == 0) throw new NotFoundException(s"updateStatus didn't update anything for userId:$userId")
-      if (status.n > 1) throw new UnexpectedException(s"updateStatus somehow updated more than one record for userId:$userId")
+      if (status.n > 1) throw UnexpectedException(s"updateStatus somehow updated more than one record for userId:$userId")
     }
   }
 
-  override def consumeToken(token: String) = {
+  override def consumeToken(token: String): Future[Unit] = {
     val query = BSONDocument("online-tests.token" -> token)
 
-    val applicationStatusBSON = applicationStatus("ONLINE_TEST_COMPLETED")
+    val applicationStatusBSON = applicationStatus(ApplicationStatuses.OnlineTestCompleted)
 
     collection.update(query, applicationStatusBSON, upsert = false).map { _ => () }
   }
 
-  override def storeOnlineTestProfileAndUpdateStatusToInvite(applicationId: String, onlineTestProfile: OnlineTestProfile) = {
+  override def storeOnlineTestProfileAndUpdateStatusToInvite(applicationId: String, onlineTestProfile: OnlineTestProfile): Future[Unit] = {
     import model.ProgressStatuses._
 
     val query = BSONDocument("applicationId" -> applicationId)
@@ -182,8 +186,8 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       s"online-tests.pdfReportSaved" -> "",
       s"passmarkEvaluation" -> ""
     )) ++ BSONDocument("$set" -> BSONDocument(
-      "progress-status.online_test_invited" -> true,
-      "applicationStatus" -> "ONLINE_TEST_INVITED",
+      s"progress-status.$OnlineTestInvitedProgress" -> true,
+      "applicationStatus" -> ApplicationStatuses.OnlineTestInvited,
       "online-tests.cubiksUserId" -> onlineTestProfile.cubiksUserId,
       "online-tests.token" -> onlineTestProfile.token,
       "online-tests.onlineTestUrl" -> onlineTestProfile.onlineTestUrl,
@@ -192,9 +196,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       "online-tests.participantScheduleId" -> onlineTestProfile.participantScheduleId
     ))
 
-    collection.update(query, applicationStatusBSON, upsert = false) map {
-      case _ => ()
-    }
+    collection.update(query, applicationStatusBSON, upsert = false) map { _ => () }
   }
 
   def getOnlineTestApplication(appId: String): Future[Option[OnlineTestApplication]] = {
@@ -212,8 +214,8 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
         "online-tests.expirationDate" -> BSONDocument("$lte" -> dateTime.nowLocalTimeZone) // Serialises to UTC.
       ),
       BSONDocument("$or" -> BSONArray(
-        BSONDocument("applicationStatus" -> "ONLINE_TEST_INVITED"),
-        BSONDocument("applicationStatus" -> "ONLINE_TEST_STARTED")
+        BSONDocument("applicationStatus" -> ApplicationStatuses.OnlineTestInvited),
+        BSONDocument("applicationStatus" -> ApplicationStatuses.OnlineTestStarted)
       ))
     ))
 
@@ -222,7 +224,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
 
   def nextApplicationPendingFailure: Future[Option[ApplicationForNotification]] = {
     val query = BSONDocument("$and" -> BSONArray(
-      BSONDocument("applicationStatus" -> "ONLINE_TEST_FAILED"),
+      BSONDocument("applicationStatus" -> ApplicationStatuses.OnlineTestFailed),
       BSONDocument("online-tests.pdfReportSaved" -> true)
     ))
     selectRandom(query).map(_.map(bsonDocToApplicationForNotification))
@@ -230,7 +232,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
 
   def nextApplicationReadyForOnlineTesting: Future[Option[OnlineTestApplication]] = {
     val query = BSONDocument("$and" -> BSONArray(
-      BSONDocument("applicationStatus" -> "SUBMITTED"),
+      BSONDocument("applicationStatus" -> ApplicationStatuses.Submitted),
       BSONDocument("$or" -> BSONArray(
         BSONDocument("assistance-details.needsSupportForOnlineAssessment" -> false),
         BSONDocument("$and" -> BSONArray(
@@ -244,7 +246,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
 
   def nextApplicationReadyForReportRetriving: Future[Option[OnlineTestApplicationWithCubiksUser]] = {
     val query = BSONDocument("$and" -> BSONArray(
-      BSONDocument("applicationStatus" -> "ONLINE_TEST_COMPLETED"),
+      BSONDocument("applicationStatus" -> ApplicationStatuses.OnlineTestCompleted),
       BSONDocument("online-tests.xmlReportSaved" ->
         BSONDocument("$ne" -> true))
     ))
@@ -271,7 +273,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   private def bsonDocToApplicationForNotification(doc: BSONDocument) = {
     val applicationId = doc.getAs[String]("applicationId").get
     val userId = doc.getAs[String]("userId").get
-    val applicationStatus = doc.getAs[String]("applicationStatus").get
+    val applicationStatus = doc.getAs[ApplicationStatuses.ApplicationStatus]("applicationStatus").get
     val personalDetailsRoot = doc.getAs[BSONDocument]("personal-details").get
     val preferredName = personalDetailsRoot.getAs[String]("preferredName").get
     ApplicationForNotification(applicationId, userId, preferredName, applicationStatus)
@@ -286,7 +288,6 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     val preferredName = personalDetailsRoot.getAs[String]("preferredName").get
 
     val ad = doc.getAs[BSONDocument]("assistance-details")
-    val hasDisability = ad.flatMap(_.getAs[String]("hasDisability")).get
     val needsSupportForOnlineAssessment = ad.flatMap(_.getAs[Boolean]("needsSupportForOnlineAssessment")).get
     val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).getOrElse(false)
     val typesOfAdjustments = ad.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
@@ -319,11 +320,11 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   def updateXMLReportSaved(applicationId: String): Future[Unit] = {
-    updateFlag(applicationId, "online-tests.xmlReportSaved", true)
+    updateFlag(applicationId, "online-tests.xmlReportSaved", value = true)
   }
 
   def updatePDFReportSaved(applicationId: String): Future[Unit] = {
-    updateFlag(applicationId, "online-tests.pdfReportSaved", true)
+    updateFlag(applicationId, "online-tests.pdfReportSaved", value = true)
   }
 
   private def updateFlag(applicationId: String, flag: String, value: Boolean): Future[Unit] = {
@@ -336,7 +337,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       status <- collection.update(query, MRAReportGenerated, upsert = false)
     } yield {
       if (status.n == 0) throw new NotFoundException(s"updateStatus didn't update anything for applicationId:$applicationId")
-      if (status.n > 1) throw new UnexpectedException(s"updateStatus updated more than one record for applicationId:$applicationId")
+      if (status.n > 1) throw UnexpectedException(s"updateStatus updated more than one record for applicationId:$applicationId")
     }
   }
 
@@ -367,14 +368,15 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     selectRandom(query).map(_.map { doc =>
       val applicationId = doc.getAs[String]("applicationId").getOrElse("")
       val userId = doc.getAs[String]("userId").getOrElse("")
-      val applicationStatus = doc.getAs[String]("applicationStatus")
+      val applicationStatus = doc.getAs[ApplicationStatuses.ApplicationStatus]("applicationStatus")
         .getOrElse(throw new IllegalStateException("applicationStatus must be defined"))
 
       ApplicationIdWithUserIdAndStatus(applicationId, userId, applicationStatus)
     })
   }
 
-  def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult, applicationStatus: String): Future[Unit] = {
+  def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult,
+    applicationStatus: ApplicationStatuses.ApplicationStatus): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
 
     val progressStatus = applicationStatus match {
@@ -419,16 +421,19 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     collection.update(query, passMarkEvaluation, upsert = false).map(checkUpdateWriteResult)
   }
 
-  def saveCandidateAllocationStatus(applicationId: String, applicationStatus: String, expireDate: Option[LocalDate]): Future[Unit] = {
+  def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.ApplicationStatus,
+    expireDate: Option[LocalDate]
+  ): Future[Unit] = {
     import ApplicationStatuses._
-
-    require(List(AllocationConfirmed, AllocationUnconfirmed).contains(applicationStatus))
 
     val query = BSONDocument("applicationId" -> applicationId)
 
-    val progressStatus = applicationStatus.toLowerCase()
+    val progressStatus = Try(applicationStatus match {
+      case AllocationConfirmed => ProgressStatuses.AllocationConfirmedProgress
+      case AllocationUnconfirmed => ProgressStatuses.AllocationUnconfirmedProgress
+    })
 
-    val allocation = BSONDocument("$set" -> {
+    val update = (progressStatus: String) => BSONDocument("$set" -> {
       def withExpireDate =
         BSONDocument(
           "applicationStatus" -> applicationStatus,
@@ -451,28 +456,28 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       }
     })
 
-    collection.update(query, allocation, upsert = false).map(checkUpdateWriteResult)
+    Future.fromTry(progressStatus).flatMap { progress =>
+      collection.update(query, update(progress), upsert = false).map(checkUpdateWriteResult)
+    }
   }
 
   def removeCandidateAllocationStatus(applicationId: String): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
 
-    val progressStatus = "awaiting_online_test_allocation"
-
     val deAllocationSet = BSONDocument("$set" -> {
       BSONDocument(
-        "applicationStatus" -> "AWAITING_ALLOCATION",
-        s"progress-status.$progressStatus" -> true,
-        s"progress-status-dates.$progressStatus" -> LocalDate.now()
+        "applicationStatus" -> ApplicationStatuses.AwaitingAllocation,
+        s"progress-status.${ProgressStatuses.AwaitingOnlineTestAllocationProgress}" -> true,
+        s"progress-status-dates.${ProgressStatuses.AwaitingOnlineTestAllocationProgress}" -> LocalDate.now()
       )
     })
 
     val deAllocationUnset = BSONDocument("$unset" -> {
       BSONDocument(
-        "progress-status.allocation_confirmed" -> "",
-        "progress-status.allocation_unconfirmed" -> "",
-        "progress-status-dates.allocation_confirmed" -> "",
-        "progress-status-dates.allocation_unconfirmed" -> "",
+        s"progress-status.${ProgressStatuses.AllocationConfirmedProgress}" -> "",
+        s"progress-status.${ProgressStatuses.AllocationUnconfirmedProgress}" -> "",
+        s"progress-status-dates.${ProgressStatuses.AllocationConfirmedProgress}" -> "",
+        s"progress-status-dates.${ProgressStatuses.AllocationUnconfirmedProgress}" -> "",
         "allocation-expire-date" -> ""
       )
     })
@@ -506,6 +511,6 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   private def checkUpdateWriteResult(writeResult: UpdateWriteResult): Unit = {
-    writeResult.errmsg.map(msg => throw new UnexpectedException(s"Database update failed: $msg"))
+    writeResult.errmsg.map(msg => throw UnexpectedException(s"Database update failed: $msg"))
   }
 }

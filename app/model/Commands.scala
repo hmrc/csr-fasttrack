@@ -23,10 +23,6 @@ import model.CandidateScoresCommands.Implicits._
 import model.Exceptions.{ NoResultsReturned, TooManyEntries }
 import model.OnlineTestCommands.Implicits._
 import model.OnlineTestCommands.TestResult
-import model.PassmarkPersistedObjects.{AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme}
-import model.PersistedObjects.{PersistedAnswer, PersistedQuestion}
-import model.exchange.AssistanceDetails
-import org.joda.time.{DateTime, LocalDate, LocalTime}
 import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme }
 import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
 import model.commands.OnlineTestProgressResponse
@@ -46,7 +42,7 @@ object Commands {
 
   case class PassMarkSettingsRequest(settings: Settings)
 
-  case class ApplicationCreated(applicationId: String, applicationStatus: String, userId: String)
+  case class ApplicationCreated(applicationId: String, applicationStatus: ApplicationStatuses.ApplicationStatus, userId: String)
 
   case class PersonalDetailsAdded(applicationId: String, userId: String)
 
@@ -69,34 +65,34 @@ object Commands {
   )
 
   case class AssessmentScores(
-                               entered: Boolean = false,
-                               accepted: Boolean = false
-                             )
+    entered: Boolean = false,
+    accepted: Boolean = false
+  )
 
   case class AssessmentCentre(
-                               awaitingReevaluation: Boolean = false,
-                               passed: Boolean = false,
-                               failed: Boolean = false,
-                               passedNotified: Boolean = false,
-                               failedNotified: Boolean = false
-                             )
+    awaitingReevaluation: Boolean = false,
+    passed: Boolean = false,
+    failed: Boolean = false,
+    passedNotified: Boolean = false,
+    failedNotified: Boolean = false
+  )
 
 
 
   case class ProgressResponse(
-                               applicationId: String,
-                               personalDetails: Boolean = false,
-                               hasLocations: Boolean = false,
-                               hasSchemes: Boolean = false,
-                               assistanceDetails: Boolean = false,
-                               review: Boolean = false,
-                               questionnaire: List[String] = Nil,
-                               submitted: Boolean = false,
-                               withdrawn: Boolean = false,
-                               onlineTest: OnlineTestProgressResponse = OnlineTestProgressResponse(),
-                               failedToAttend: Boolean = false,
-                               assessmentScores: AssessmentScores = AssessmentScores(),
-                               assessmentCentre: AssessmentCentre = AssessmentCentre()
+    applicationId: String,
+    personalDetails: Boolean = false,
+    hasLocations: Boolean = false,
+    hasSchemes: Boolean = false,
+    assistanceDetails: Boolean = false,
+    review: Boolean = false,
+    questionnaire: List[String] = Nil,
+    submitted: Boolean = false,
+    withdrawn: Boolean = false,
+    onlineTest: OnlineTestProgressResponse = OnlineTestProgressResponse(),
+    failedToAttend: Boolean = false,
+    assessmentScores: AssessmentScores = AssessmentScores(),
+    assessmentCentre: AssessmentCentre = AssessmentCentre()
   )
 
   case class Report(applicationId: String, progress: Option[String], firstLocation: Option[String],
@@ -116,25 +112,25 @@ object Commands {
                               email: Option[String], telephone: Option[String], adjustments: Option[String], gis: Option[String], adjustmentsConfirmed: Option[String])
 
   case class CandidateAwaitingAllocation(
-                                          userId: String,
-                                          firstName: String,
-                                          lastName: String,
-                                          preferredName: String,
-                                          preferredLocation1: String,
-                                          adjustments: Option[String],
-                                          dateOfBirth: LocalDate
-                                        )
+    userId: String,
+    firstName: String,
+    lastName: String,
+    preferredName: String,
+    preferredLocation1: String,
+    adjustments: Option[String],
+    dateOfBirth: LocalDate
+  )
 
   case class AssessmentCentreAllocationReport(
-                                               firstName: String,
-                                               lastName: String,
-                                               preferredName: String,
-                                               emailAddress: String,
-                                               phoneNumber: String,
-                                               preferredLocation1: String,
-                                               adjustments: Option[String],
-                                               dateOfBirth: LocalDate
-                                             )
+    firstName: String,
+    lastName: String,
+    preferredName: String,
+    emailAddress: String,
+    phoneNumber: String,
+    preferredLocation1: String,
+    adjustments: Option[String],
+    dateOfBirth: LocalDate
+  )
 
   case class ContactDetails(phone: Option[String], email: String, address: Address, postCode: PostCode)
 
@@ -144,15 +140,15 @@ object Commands {
                                             testResults: PassMarkReportTestResults, contactDetails: ContactDetails)
 
   case class PassMarkReportQuestionnaireData(
-                                              gender: Option[String],
-                                              sexualOrientation: Option[String],
-                                              ethnicity: Option[String],
-                                              parentEmploymentStatus: Option[String],
-                                              parentOccupation: Option[String],
-                                              parentEmployedOrSelf: Option[String],
-                                              parentCompanySize: Option[String],
-                                              socioEconomicScore: String
-                                            )
+    gender: Option[String],
+    sexualOrientation: Option[String],
+    ethnicity: Option[String],
+    parentEmploymentStatus: Option[String],
+    parentOccupation: Option[String],
+    parentEmployedOrSelf: Option[String],
+    parentCompanySize: Option[String],
+    socioEconomicScore: String
+  )
 
   case class PassMarkReportTestResults(
                                         competency: Option[TestResult],
@@ -169,12 +165,12 @@ object Commands {
                                            location2Scheme2: Option[String], progress: Option[String], timeApplicationCreated: Option[String])
 
   case class OnlineTestPassmarkEvaluationSchemes(
-                                                  location1Scheme1: Option[String] = None,
-                                                  location1Scheme2: Option[String] = None,
-                                                  location2Scheme1: Option[String] = None,
-                                                  location2Scheme2: Option[String] = None,
-                                                  alternativeScheme: Option[String] = None
-                                                )
+    location1Scheme1: Option[String] = None,
+    location1Scheme2: Option[String] = None,
+    location2Scheme1: Option[String] = None,
+    location2Scheme2: Option[String] = None,
+    alternativeScheme: Option[String] = None
+  )
 
   case class ApplicationPreferences(userId: String, applicationId: String, location1: Option[String],
                                     location1Scheme1: Option[String], location1Scheme2: Option[String],
@@ -192,23 +188,23 @@ object Commands {
                           aLevel: Option[String], stemLevel: Option[String], dateOfBirth: Option[LocalDate])
 
   case class CandidateScoresSummary(
-                                     avgLeadingAndCommunicating: Option[Double],
-                                     avgCollaboratingAndPartnering: Option[Double],
-                                     avgDeliveringAtPace: Option[Double],
-                                     avgMakingEffectiveDecisions: Option[Double],
-                                     avgChangingAndImproving: Option[Double],
-                                     avgBuildingCapabilityForAll: Option[Double],
-                                     avgMotivationFit: Option[Double],
-                                     totalScore: Option[Double]
-                                   )
+    avgLeadingAndCommunicating: Option[Double],
+    avgCollaboratingAndPartnering: Option[Double],
+    avgDeliveringAtPace: Option[Double],
+    avgMakingEffectiveDecisions: Option[Double],
+    avgChangingAndImproving: Option[Double],
+    avgBuildingCapabilityForAll: Option[Double],
+    avgMotivationFit: Option[Double],
+    totalScore: Option[Double]
+  )
 
   case class SchemeEvaluation(
-                               commercial: Option[String] = None,
-                               digitalAndTechnology: Option[String] = None,
-                               business: Option[String] = None,
-                               projectDelivery: Option[String] = None,
-                               finance: Option[String] = None
-                             )
+    commercial: Option[String] = None,
+    digitalAndTechnology: Option[String] = None,
+    business: Option[String] = None,
+    projectDelivery: Option[String] = None,
+    finance: Option[String] = None
+  )
 
   case class ApplicationPreferencesWithTestResults(userId: String, applicationId: String, location1: Option[String],
                                                    location1Scheme1: Option[String], location1Scheme2: Option[String],
@@ -220,17 +216,22 @@ object Commands {
                                                    passmarks: SchemeEvaluation)
 
   case class AssessmentResultsReport(
-                                      appPreferences: ApplicationPreferences,
-                                      questionnaire: PassMarkReportQuestionnaireData,
-                                      candidateScores: CandidateScoresAndFeedback
-                                    )
+    appPreferences: ApplicationPreferences,
+    questionnaire: PassMarkReportQuestionnaireData,
+    candidateScores: CandidateScoresAndFeedback
+  )
 
   case class ApplicationPreferencesWithTestResultsAndContactDetails(
-                                                                     application: ApplicationPreferencesWithTestResults,
-                                                                     contactDetails: ContactDetails
-                                                                   )
+    application: ApplicationPreferencesWithTestResults,
+    contactDetails: ContactDetails
+  )
 
-  case class ApplicationResponse(applicationId: String, applicationStatus: String, userId: String, progressResponse: ProgressResponse)
+  case class ApplicationResponse(
+    applicationId: String,
+    applicationStatus: ApplicationStatuses.ApplicationStatus,
+    userId: String,
+    progressResponse: ProgressResponse
+  )
 
   case class PassMarkSettingsCreateResponse(passMarkSettingsVersion: String, passMarkSettingsCreateDate: DateTime)
 
@@ -282,9 +283,9 @@ object Commands {
   }
 
   case class AssessmentCentrePassMarkSettingsResponse(
-                                                       schemes: List[AssessmentCentrePassMarkScheme],
-                                                       info: Option[AssessmentCentrePassMarkInfo]
-                                                     )
+    schemes: List[AssessmentCentrePassMarkScheme],
+    info: Option[AssessmentCentrePassMarkInfo]
+  )
 
   object Implicits {
     implicit val mediaFormats = Json.format[AddMedia]
