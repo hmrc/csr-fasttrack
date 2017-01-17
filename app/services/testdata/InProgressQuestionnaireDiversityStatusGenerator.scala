@@ -17,31 +17,35 @@
 package services.testdata
 
 import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
-import common.Constants.{ Yes, No }
-import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import model.Commands.{ Address }
-import model.PersistedObjects.{ ContactDetails, PersistedAnswer, PersistedQuestion, PersonalDetails }
-import model.{ Alternatives, LocationPreference, Preferences }
-import org.joda.time.LocalDate
 import repositories._
-import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository }
+import repositories.application.GeneralApplicationRepository
 import services.testdata.faker.DataFaker._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object SubmittedStatusGenerator extends SubmittedStatusGenerator {
-  override val previousStatusGenerator = InProgressReviewStatusGenerator
+object InProgressQuestionnaireDiversityStatusGenerator extends InProgressQuestionnaireDiversityStatusGenerator {
+  override val previousStatusGenerator = InProgressQuestionnaireStartStatusGenerator
   override val appRepository = applicationRepository
+  override val qRepository = questionnaireRepository
 }
 
-trait SubmittedStatusGenerator extends ConstructiveGenerator {
+trait InProgressQuestionnaireDiversityStatusGenerator extends ConstructiveGenerator {
   val appRepository: GeneralApplicationRepository
+  val qRepository: QuestionnaireRepository
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
+
+    def getDiversityQuestionnaireQuestions = List(
+      PersistedQuestion("What is your gender identity?", PersistedAnswer(Some(Random.gender), None, None)),
+      PersistedQuestion("What is your sexual orientation?", PersistedAnswer(Some(Random.sexualOrientation), None, None)),
+      PersistedQuestion("What is your ethnic group?", PersistedAnswer(Some(Random.ethnicGroup), None, None))
+    )
+
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      submit <- appRepository.submit(candidateInPreviousStatus.applicationId.get)
+      _ <- qRepository.addQuestions(candidateInPreviousStatus.applicationId.get, getDiversityQuestionnaireQuestions)
+      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get, "diversity_questionnaire")
     } yield {
       candidateInPreviousStatus
     }

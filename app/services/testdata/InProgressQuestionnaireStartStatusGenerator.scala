@@ -16,7 +16,7 @@
 
 package services.testdata
 
-import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
+import model.PersistedObjects.{PersistedAnswer, PersistedQuestion}
 import common.Constants.{ Yes, No }
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.Commands.{ Address }
@@ -24,26 +24,30 @@ import model.PersistedObjects.{ ContactDetails, PersistedAnswer, PersistedQuesti
 import model.{ Alternatives, LocationPreference, Preferences }
 import org.joda.time.LocalDate
 import repositories._
-import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository }
+import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository}
 import services.testdata.faker.DataFaker._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object SubmittedStatusGenerator extends SubmittedStatusGenerator {
-  override val previousStatusGenerator = InProgressReviewStatusGenerator
+object InProgressQuestionnaireStartStatusGenerator extends InProgressQuestionnaireStartStatusGenerator {
+  override val previousStatusGenerator = InProgressAssistanceDetailsStatusGenerator
   override val appRepository = applicationRepository
+  override val qRepository = questionnaireRepository
 }
 
-trait SubmittedStatusGenerator extends ConstructiveGenerator {
+trait InProgressQuestionnaireStartStatusGenerator extends ConstructiveGenerator {
   val appRepository: GeneralApplicationRepository
+  val qRepository: QuestionnaireRepository
 
+  // scalastyle:off method.length
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      submit <- appRepository.submit(candidateInPreviousStatus.applicationId.get)
+      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get, "start_questionnaire")
     } yield {
       candidateInPreviousStatus
     }
   }
+  // scalastyle:on method.length
 }

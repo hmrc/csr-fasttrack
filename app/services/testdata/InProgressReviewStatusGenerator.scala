@@ -16,32 +16,25 @@
 
 package services.testdata
 
-import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
-import common.Constants.{ Yes, No }
-import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import model.Commands.{ Address }
-import model.PersistedObjects.{ ContactDetails, PersistedAnswer, PersistedQuestion, PersonalDetails }
-import model.{ Alternatives, LocationPreference, Preferences }
-import org.joda.time.LocalDate
+import play.api.mvc.RequestHeader
 import repositories._
-import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository }
-import services.testdata.faker.DataFaker._
+import repositories.application.GeneralApplicationRepository
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object SubmittedStatusGenerator extends SubmittedStatusGenerator {
-  override val previousStatusGenerator = InProgressReviewStatusGenerator
+object InProgressReviewStatusGenerator extends InProgressReviewStatusGenerator {
+  override val previousStatusGenerator = InProgressQuestionnaireParentalOccupationStatusGenerator
   override val appRepository = applicationRepository
 }
 
-trait SubmittedStatusGenerator extends ConstructiveGenerator {
+trait InProgressReviewStatusGenerator extends ConstructiveGenerator {
   val appRepository: GeneralApplicationRepository
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      submit <- appRepository.submit(candidateInPreviousStatus.applicationId.get)
+      _ <- appRepository.review(candidateInPreviousStatus.applicationId.get)
     } yield {
       candidateInPreviousStatus
     }
