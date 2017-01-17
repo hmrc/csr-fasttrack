@@ -33,6 +33,7 @@ object StatusGeneratorFactory {
       case "IN_PROGRESS_QUESTIONNAIRE_EDUCATION" => InProgressQuestionnaireEducationStatusGenerator
       case "IN_PROGRESS_QUESTIONNAIRE_PARENTAL_OCCUPATION" | "IN_PROGRESS_QUESTIONNAIRE" =>
         InProgressQuestionnaireParentalOcuppationGenerator
+      case "IN_PROGRESS_REVIEW" => InProgressReviewStatusGenerator
       case ApplicationStatuses.Submitted => SubmittedStatusGenerator
       case ApplicationStatuses.OnlineTestInvited => OnlineTestInvitedStatusGenerator
       case ApplicationStatuses.OnlineTestStarted => OnlineTestStartedStatusGenerator
