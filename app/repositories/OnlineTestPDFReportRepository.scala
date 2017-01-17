@@ -38,7 +38,7 @@ trait OnlineTestPDFReportRepository {
 }
 
 class OnlineTestPDFReportMongoRepository(implicit mongo: () => DB)
-  extends ReactiveRepository[OnlineTestPDFReport, BSONObjectID]("online-test-pdf-report", mongo,
+  extends ReactiveRepository[OnlineTestPDFReport, BSONObjectID](CollectionNames.ONLINE_TEST_PDF_REPORT, mongo,
     onlineTestPdfReportFormats, ReactiveMongoFormats.objectIdFormats) with OnlineTestPDFReportRepository with RandomSelection {
 
   override def hasReport(applicationId: String): Future[Boolean] = {

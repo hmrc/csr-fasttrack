@@ -44,7 +44,7 @@ trait PersonalDetailsRepository {
 }
 
 class PersonalDetailsMongoRepository(implicit mongo: () => DB)
-  extends ReactiveRepository[PersonalDetails, BSONObjectID]("application", mongo,
+  extends ReactiveRepository[PersonalDetails, BSONObjectID](CollectionNames.APPLICATION, mongo,
     PersistedObjects.Implicits.persistedPersonalDetailsFormats, ReactiveMongoFormats.objectIdFormats)
     with PersonalDetailsRepository with ReactiveRepositoryHelpers {
 

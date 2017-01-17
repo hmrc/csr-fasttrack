@@ -18,12 +18,12 @@ PUT         /application/confirm/adjustment/:applicationId               control
 PUT         /media/create                                                controllers.MediaController.addMedia()
 
 
-GET         /scheme-locations/available/by-eligibility                   controllers.LocationSchemeController.getSchemesAndLocationsByEligibility(hasALevels: Boolean, hasStemALevels: Boolean, latitude: Option[Double] ?= None, longitude: Option[Double] ?= None)
+GET         /scheme-locations/eligible                                   controllers.LocationSchemeController.getEligibleSchemeLocations(applicationId: String, latitude: Option[Double] ?= None, longitude: Option[Double] ?= None)
 GET         /scheme-locations/:applicationId                             controllers.LocationSchemeController.getSchemeLocations(applicationId: String)
 PUT         /scheme-locations/:applicationId                             controllers.LocationSchemeController.updateSchemeLocations(applicationId: String)
 GET         /schemes/:applicationId                                      controllers.LocationSchemeController.getSchemes(applicationId: String)
 PUT         /schemes/:applicationId                                      controllers.LocationSchemeController.updateSchemes(applicationId: String)
-GET         /schemes/available/:applicationId                            controllers.LocationSchemeController.getAvailableSchemesInSelectedLocations(applicationId: String)
+GET         /schemes/eligible/:applicationId                             controllers.LocationSchemeController.getEligibleSchemes(applicationId: String)
 
 PUT         /pass-mark-settings/create                                   controllers.OnlineTestPassMarkSettingsController.createPassMarkSettings
 GET         /pass-mark-settings/getLatestVersion                         controllers.OnlineTestPassMarkSettingsController.getLatestVersion

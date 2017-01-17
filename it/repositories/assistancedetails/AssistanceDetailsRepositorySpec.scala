@@ -4,13 +4,14 @@ import model.Exceptions.AssistanceDetailsNotFound
 import model.exchange.AssistanceDetailsExamples
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
+import repositories.CollectionNames
 import repositories.application.AssistanceDetailsMongoRepository
 import testkit.MongoRepositorySpec
 
 class AssistanceDetailsRepositorySpec extends MongoRepositorySpec {
   import ImplicitBSONHandlers._
 
-  override val collectionName = "application"
+  override val collectionName = CollectionNames.APPLICATION
 
   def repository = new AssistanceDetailsMongoRepository
 

@@ -111,9 +111,9 @@ class OnlineTestRetrievePDFReportServiceIntegrationSpec extends IntegrationSpec 
     }
 
     def clearDatabase() = {
-      val reportCollection = db().collection[JSONCollection]("online-test-pdf-report")
+      val reportCollection = db().collection[JSONCollection](CollectionNames.ONLINE_TEST_PDF_REPORT)
       reportCollection.remove(Json.obj()).futureValue
-      val collection = db().collection[JSONCollection]("application")
+      val collection = db().collection[JSONCollection](CollectionNames.APPLICATION)
       collection.remove(Json.obj()).futureValue
     }
   }
