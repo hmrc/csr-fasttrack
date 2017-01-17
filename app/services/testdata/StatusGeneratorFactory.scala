@@ -28,6 +28,12 @@ object StatusGeneratorFactory {
       case "IN_PROGRESS_PERSONAL_DETAILS" => InProgressPersonalDetailsStatusGenerator
       case "IN_PROGRESS_SCHEME_PREFERENCES" => InProgressSchemePreferencesStatusGenerator
       case "IN_PROGRESS_ASSISTANCE_DETAILS" => InProgressAssistanceDetailsStatusGenerator
+      case "IN_PROGRESS_QUESTIONNAIRE_START" => InProgressQuestionnaireStartStatusGenerator
+      case "IN_PROGRESS_QUESTIONNAIRE_DIVERSITY" => InProgressQuestionnaireDiversityStatusGenerator
+      case "IN_PROGRESS_QUESTIONNAIRE_EDUCATION" => InProgressQuestionnaireEducationStatusGenerator
+      case "IN_PROGRESS_QUESTIONNAIRE_PARENTAL_OCCUPATION" | "IN_PROGRESS_QUESTIONNAIRE" =>
+        InProgressQuestionnaireParentalOccupationStatusGenerator
+      case "IN_PROGRESS_REVIEW" => InProgressReviewStatusGenerator
       case ApplicationStatuses.Submitted.name => SubmittedStatusGenerator
       case ApplicationStatuses.OnlineTestInvited.name => OnlineTestInvitedStatusGenerator
       case ApplicationStatuses.OnlineTestStarted.name => OnlineTestStartedStatusGenerator
