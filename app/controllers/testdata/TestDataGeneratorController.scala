@@ -26,8 +26,8 @@ import model.EvaluationResults.Result
 import model.Exceptions.EmailTakenException
 import model.exchange.testdata._
 import play.api.Play
-import play.api.libs.json.{JsObject, JsString, Json}
-import play.api.mvc.{Action, RequestHeader}
+import play.api.libs.json.{ JsObject, JsString, Json }
+import play.api.mvc.{ Action, RequestHeader }
 import services.testdata._
 import services.testdata.faker.DataFaker.Random
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -75,7 +75,7 @@ trait TestDataGeneratorController extends BaseController {
         assessmentCentreAdjustments = Some(false),
         assessmentCentreAdjustmentsDescription = Some(Random.assessmentCentreAdjustmentDescription)
       )),
-      schemeTypes = Some(List(Scheme.Commercial.toString(), Scheme.Business.toString())),
+      schemeTypes = Some(List(Scheme.Commercial, Scheme.Business)),
       isCivilServant = Some(Random.bool),
       hasDegree = Some(Random.bool),
       region = Some("region"),
@@ -85,6 +85,7 @@ trait TestDataGeneratorController extends BaseController {
     )
     Ok(Json.toJson(example))
   }
+
   // scalastyle:on method.length
 
   def createAdminUsers(numberToGenerate: Int, emailPrefix: Option[String], role: String) = Action.async { implicit request =>

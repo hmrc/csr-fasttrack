@@ -16,15 +16,9 @@
 
 package services.testdata
 
-import model.PersistedObjects.{PersistedAnswer, PersistedQuestion}
-import common.Constants.{ Yes, No }
-import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import model.Commands.{ Address }
-import model.PersistedObjects.{ ContactDetails, PersistedAnswer, PersistedQuestion, PersonalDetails }
-import model.{ Alternatives, LocationPreference, Preferences }
-import org.joda.time.LocalDate
+import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
 import repositories._
-import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository}
+import repositories.application.GeneralApplicationRepository
 import services.testdata.faker.DataFaker._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -43,10 +37,10 @@ trait InProgressQuestionnaireDiversityStatusGenerator extends ConstructiveGenera
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
 
     def getDiversityQuestionnaireQuestions = List(
-      Some(PersistedQuestion("What is your gender identity?", PersistedAnswer(Some(Random.gender), None, None))),
-      Some(PersistedQuestion("What is your sexual orientation?", PersistedAnswer(Some(Random.sexualOrientation), None, None))),
-      Some(PersistedQuestion("What is your ethnic group?", PersistedAnswer(Some(Random.ethnicGroup), None, None)))
-    ).filter(_.isDefined).map { someItem => someItem.get }
+      PersistedQuestion("What is your gender identity?", PersistedAnswer(Some(Random.gender), None, None)),
+      PersistedQuestion("What is your sexual orientation?", PersistedAnswer(Some(Random.sexualOrientation), None, None)),
+      PersistedQuestion("What is your ethnic group?", PersistedAnswer(Some(Random.ethnicGroup), None, None))
+    )
 
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)

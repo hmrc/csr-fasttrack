@@ -16,7 +16,7 @@
 
 package services.testdata
 
-import model.PersistedObjects.{PersistedAnswer, PersistedQuestion}
+import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
 import common.Constants.{ Yes, No }
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.Commands.{ Address }
@@ -24,7 +24,7 @@ import model.PersistedObjects.{ ContactDetails, PersistedAnswer, PersistedQuesti
 import model.{ Alternatives, LocationPreference, Preferences }
 import org.joda.time.LocalDate
 import repositories._
-import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository}
+import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository }
 import services.testdata.faker.DataFaker._
 import uk.gov.hmrc.play.http.HeaderCarrier
 

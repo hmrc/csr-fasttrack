@@ -26,7 +26,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.collection.parallel.ForkJoinTaskSupport
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 import scala.language.postfixOps
 
 object TestDataGeneratorService extends TestDataGeneratorService {

@@ -16,12 +16,13 @@
 
 package model.exchange.testdata
 
+import model.Scheme.Scheme
 import play.api.libs.json.Json
 
 case class CreateCandidateInStatusRequest(statusData: StatusDataRequest = new StatusDataRequest,
                                           personalData: Option[PersonalDataRequest],
                                           assistanceDetailsData: Option[AssistanceDetailsRequest],
-                                          schemeTypes: Option[List[String]],
+                                          schemeTypes: Option[List[Scheme]],
                                           isCivilServant: Option[Boolean],
                                           hasDegree: Option[Boolean],
                                           region: Option[String],

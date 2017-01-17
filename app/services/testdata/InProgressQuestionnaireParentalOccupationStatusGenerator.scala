@@ -30,21 +30,18 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object InProgressQuestionnaireParentalOcuppationGenerator extends InProgressQuestionnaireParentalOcuppationGenerator {
+object InProgressQuestionnaireParentalOccupationStatusGenerator extends InProgressQuestionnaireParentalOccupationStatusGenerator {
   override val previousStatusGenerator = InProgressQuestionnaireEducationStatusGenerator
   override val appRepository = applicationRepository
   override val qRepository = questionnaireRepository
 }
 
-trait InProgressQuestionnaireParentalOcuppationGenerator extends ConstructiveGenerator {
+trait InProgressQuestionnaireParentalOccupationStatusGenerator extends ConstructiveGenerator {
   val appRepository: GeneralApplicationRepository
   val qRepository: QuestionnaireRepository
 
-  //scalastyle:off   //scalastyle:on method.length
-
+  //scalastyle:off method.length
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
-
-
     def getParentalOccupationQuestionnaireQuestions: List[PersistedQuestion] = {
       val parentsOccupation = Random.parentsOccupation
 
@@ -93,7 +90,7 @@ trait InProgressQuestionnaireParentalOcuppationGenerator extends ConstructiveGen
         getEmployeedOrSelfEmployeed(parentsOccupation),
         getSizeParentsEmployeer(parentsOccupation),
         getSuperviseEmployees(parentsOccupation)
-      ).filter(_.isDefined).map { someItem => someItem.get }
+      ).flatten
     }
 
     for {

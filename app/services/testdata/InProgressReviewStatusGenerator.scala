@@ -24,7 +24,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object InProgressReviewStatusGenerator extends InProgressReviewStatusGenerator {
-  override val previousStatusGenerator = InProgressQuestionnaireParentalOcuppationGenerator
+  override val previousStatusGenerator = InProgressQuestionnaireParentalOccupationStatusGenerator
   override val appRepository = applicationRepository
 }
 

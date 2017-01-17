@@ -16,15 +16,9 @@
 
 package services.testdata
 
-import model.PersistedObjects.{PersistedAnswer, PersistedQuestion}
-import common.Constants.{ Yes, No }
-import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import model.Commands.{ Address }
-import model.PersistedObjects.{ ContactDetails, PersistedAnswer, PersistedQuestion, PersonalDetails }
-import model.{ Alternatives, LocationPreference, Preferences }
-import org.joda.time.LocalDate
+import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
 import repositories._
-import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository}
+import repositories.application.GeneralApplicationRepository
 import services.testdata.faker.DataFaker._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -89,7 +83,7 @@ trait InProgressQuestionnaireEducationStatusGenerator extends ConstructiveGenera
         getSchoolName14to16Answer,
         getSchoolName16to18Answer,
         getFreeSchoolMealsAnswer
-      ).filter(_.isDefined).map { someItem => someItem.get }
+      ).flatten
     }
 
     for {
