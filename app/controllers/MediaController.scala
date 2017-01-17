@@ -46,9 +46,7 @@ trait MediaController extends BaseController {
         Created
       }).recover {
         case e: CannotAddMedia => BadRequest(s"cannot add media details for user: ${e.userId}")
-
       }
     }
   }
-
 }

@@ -34,7 +34,6 @@ import scala.language.postfixOps
 class MediaControllerSpec extends PlaySpec with Results {
 
   "Add Media" should {
-
     "add media entry" in new TestFixture {
       val result = TestMediaController.addMedia()(createMedia(
         s"""
@@ -60,7 +59,6 @@ class MediaControllerSpec extends PlaySpec with Results {
       ))
 
       status(result) must be(400)
-
     }
   }
 
