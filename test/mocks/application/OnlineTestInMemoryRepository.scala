@@ -39,8 +39,8 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
   val inMemoryRepo = new mutable.HashMap[String, RuleCategoryResult]
 
   def nextApplicationReadyForOnlineTesting: Future[Option[OnlineTestApplication]] =
-    Future.successful(Some(OnlineTestApplication("appId", "appStatus", "userId", guaranteedInterview = false, needsAdjustments = false,
-      "Test Preferred Name", None
+    Future.successful(Some(OnlineTestApplication("appId", ApplicationStatuses.Submitted, "userId", guaranteedInterview = false,
+     needsAdjustments = false, "Test Preferred Name", None
     )))
 
   def getOnlineTestDetails(userId: String): Future[OnlineTestDetails] = Future.successful {
@@ -48,7 +48,7 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
     OnlineTestDetails(date, date.plusDays(4), "http://www.google.co.uk", "123@test.com", isOnlineTestEnabled = true)
   }
 
-  def updateStatus(userId: String, status: ApplicationStatuses.ApplicationStatus): Future[Unit] = Future.successful(Unit)
+  def updateStatus(userId: String, status: ApplicationStatuses.EnumVal): Future[Unit] = Future.successful(Unit)
 
   def updateExpiryTime(userId: String, expirationDate: DateTime): Future[Unit] = Future.successful(Unit)
 
@@ -76,12 +76,12 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
   override def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = ???
 
   override def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult,
-    applicationStatus: ApplicationStatuses.ApplicationStatus): Future[Unit] = {
+    applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
     inMemoryRepo += applicationId -> p
     Future.successful(())
   }
 
-  def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.ApplicationStatus,
+  def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal,
     expireDate: Option[LocalDate]): Future[Unit] = Future.successful(())
 
   override def removeCandidateAllocationStatus(applicationId: String): Future[Unit] = Future.successful(())

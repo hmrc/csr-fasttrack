@@ -18,6 +18,7 @@ package services.applicationassessment
 
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import connectors.EmailClient
+import model.ApplicationStatuses.Implicits._
 import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import model.CandidateScoresCommands.{ CandidateScores, CandidateScoresAndFeedback }
 import model.Commands._
@@ -26,7 +27,6 @@ import model.Exceptions.{ IncorrectStatusInApplicationException, NotFoundExcepti
 import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
 import model.PersistedObjects.{ ApplicationForNotification, ContactDetails, OnlineTestPassmarkEvaluation, PreferencesWithQualification }
 import model.{ ApplicationStatuses, EvaluationResults, LocationPreference, Preferences }
-import model.ApplicationStatuses.appStatusToString
 import org.joda.time.DateTime
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._

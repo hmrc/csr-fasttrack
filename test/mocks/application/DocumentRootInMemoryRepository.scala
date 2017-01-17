@@ -134,7 +134,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
 
   override def allocationExpireDateByApplicationId(applicationId: String): Future[Option[LocalDate]] = ???
 
-  override def updateStatus(applicationId: String, status: ApplicationStatuses.ApplicationStatus): Future[Unit] = ???
+  override def updateStatus(applicationId: String, status: ApplicationStatuses.EnumVal): Future[Unit] = ???
 
   override def applicationsWithAssessmentScoresAccepted(frameworkId: String): Future[List[ApplicationPreferences]] = ???
 
@@ -147,7 +147,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   def nextApplicationReadyForAssessmentScoreEvaluation(currentPassmarkVersion: String): Future[Option[String]] = ???
 
   def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResult,
-    newApplicationStatus: ApplicationStatuses.ApplicationStatus): Future[Unit] = ???
+    newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = ???
 
   def getSchemeLocations(applicationId: String): Future[List[String]] = ???
 

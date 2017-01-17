@@ -24,7 +24,7 @@ import repositories._
 import repositories.application.OnlineTestRepository
 import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
 import uk.gov.hmrc.play.microservice.controller.BaseController
-import model.ApplicationStatuses.EnumVal._
+import model.ApplicationStatuses.Implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -39,7 +39,7 @@ case class OnlineTest(
   cubiksEmailAddress: String, isOnlineTestEnabled: Boolean, pdfReportAvailable: Boolean
 )
 
-case class OnlineTestStatus(status: ApplicationStatuses.ApplicationStatus)
+case class OnlineTestStatus(status: ApplicationStatuses.EnumVal)
 
 case class OnlineTestExtension(extraDays: Int)
 

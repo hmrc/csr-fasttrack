@@ -20,6 +20,7 @@ import java.util.UUID
 import java.util.regex.Pattern
 
 import common.Constants.{ No, Yes }
+import model.ApplicationStatuses.Implicits._
 import model.ApplicationStatusOrder._
 import model._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
@@ -92,7 +93,7 @@ trait GeneralApplicationRepository {
 
   def allocationExpireDateByApplicationId(applicationId: String): Future[Option[LocalDate]]
 
-  def updateStatus(applicationId: String, status: ApplicationStatuses.ApplicationStatus): Future[Unit]
+  def updateStatus(applicationId: String, status: ApplicationStatuses.EnumVal): Future[Unit]
 
   def allApplicationAndUserIds(frameworkId: String): Future[List[PersonalDetailsAdded]]
 
@@ -105,7 +106,7 @@ trait GeneralApplicationRepository {
   def nextAssessmentCentrePassedOrFailedApplication(): Future[Option[ApplicationForNotification]]
 
   def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResult,
-    newApplicationStatus: ApplicationStatuses.ApplicationStatus): Future[Unit]
+    newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit]
 
   def getSchemeLocations(applicationId: String): Future[List[String]]
 
@@ -127,7 +128,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
   override def create(userId: String, frameworkId: String): Future[ApplicationResponse] = {
     val applicationId = UUID.randomUUID().toString
-
+    import model.ApplicationStatuses.Implicits.BSONEnumHandler
     val applicationBSON = BSONDocument(
       "applicationId" -> applicationId,
       "userId" -> userId,
@@ -236,7 +237,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
       collection.find(query, projection).one[BSONDocument] map {
         case Some(document) =>
-          val applicationStatus = document.getAs[ApplicationStatuses.ApplicationStatus]("applicationStatus").get
+          val applicationStatus = document.getAs[ApplicationStatuses.EnumVal]("applicationStatus").get
           val progressStatusTimeStamp = document.getAs[BSONDocument]("progress-status-timestamp").flatMap(_.getAs[DateTime](latestProgress))
           val submissionDeadline = document.getAs[DateTime]("submissionDeadline")
           ApplicationStatusDetails(applicationStatus, progressStatusTimeStamp, submissionDeadline)
@@ -252,7 +253,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val resp: Future[Future[ApplicationResponse]] = collection.find(query).one[BSONDocument] map {
       case Some(document) =>
         val applicationId = document.getAs[String]("applicationId").get
-        val applicationStatus = document.getAs[ApplicationStatuses.ApplicationStatus]("applicationStatus").get
+        val applicationStatus = document.getAs[ApplicationStatuses.EnumVal]("applicationStatus").get
         findProgress(applicationId).map { (p: ProgressResponse) =>
           ApplicationResponse(applicationId, applicationStatus, userId, p)
         }
@@ -948,7 +949,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     }
   }
 
-  def updateStatus(applicationId: String, status: ApplicationStatuses.ApplicationStatus): Future[Unit] = {
+  def updateStatus(applicationId: String, status: ApplicationStatuses.EnumVal): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val lowercaseStatus = status.toLowerCase
     val applicationStatusBSON = BSONDocument("$set" -> BSONDocument(
@@ -1013,7 +1014,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   }
 
   def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResult,
-    newApplicationStatus: ApplicationStatuses.ApplicationStatus
+    newApplicationStatus: ApplicationStatuses.EnumVal
   ): Future[Unit] = {
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId),
@@ -1125,7 +1126,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   private def bsonDocToApplicationForNotification(doc: BSONDocument) = {
     val applicationId = doc.getAs[String]("applicationId").get
     val userId = doc.getAs[String]("userId").get
-    val applicationStatus = doc.getAs[ApplicationStatuses.ApplicationStatus]("applicationStatus").get
+    val applicationStatus = doc.getAs[ApplicationStatuses.EnumVal]("applicationStatus").get
     val personalDetailsRoot = doc.getAs[BSONDocument]("personal-details").get
     val preferredName = personalDetailsRoot.getAs[String]("preferredName").get
     ApplicationForNotification(applicationId, userId, preferredName, applicationStatus)

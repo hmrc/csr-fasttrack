@@ -19,6 +19,7 @@ package repositories.application
 import config.MicroserviceAppConfig._
 import controllers.OnlineTestDetails
 import factories.DateTimeFactory
+import model.ApplicationStatuses.Implicits._
 import model.EvaluationResults._
 import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound, UnexpectedException }
 import model.OnlineTestCommands._
@@ -49,7 +50,7 @@ trait OnlineTestRepository {
 
   def getOnlineTestDetails(userId: String): Future[OnlineTestDetails]
 
-  def updateStatus(userId: String, status: ApplicationStatuses.ApplicationStatus): Future[Unit]
+  def updateStatus(userId: String, status: ApplicationStatuses.EnumVal): Future[Unit]
 
   def updateExpiryTime(userId: String, expirationDate: DateTime): Future[Unit]
 
@@ -66,13 +67,13 @@ trait OnlineTestRepository {
   def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]]
 
   def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult,
-    applicationStatus: ApplicationStatuses.ApplicationStatus): Future[Unit]
+    applicationStatus: ApplicationStatuses.EnumVal): Future[Unit]
 
   def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, version: String, p: RuleCategoryResult): Future[Unit]
 
   def removeCandidateAllocationStatus(applicationId: String): Future[Unit]
 
-  def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.ApplicationStatus,
+  def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal,
     expireDate: Option[LocalDate]): Future[Unit]
 
   def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation]
@@ -82,7 +83,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   extends ReactiveRepository[OnlineTestDetails, BSONObjectID](CollectionNames.APPLICATION, mongo,
     Commands.Implicits.onlineTestDetailsFormat, ReactiveMongoFormats.objectIdFormats) with OnlineTestRepository with RandomSelection {
 
-  private def applicationStatus(status: ApplicationStatuses.ApplicationStatus): BSONDocument = {
+  private def applicationStatus(status: ApplicationStatuses.EnumVal): BSONDocument = {
     import model.ApplicationStatuses._
 
     val flag = status match {
@@ -129,7 +130,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     }
   }
 
-  override def updateStatus(userId: String, status: ApplicationStatuses.ApplicationStatus): Future[Unit] = {
+  override def updateStatus(userId: String, status: ApplicationStatuses.EnumVal): Future[Unit] = {
     val query = BSONDocument("userId" -> userId)
     val applicationStatusBSON = applicationStatus(status)
 
@@ -141,6 +142,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   override def updateExpiryTime(userId: String, expirationDate: DateTime): Future[Unit] = {
+
     val queryUser = BSONDocument("userId" -> userId)
     val queryUserExpired = BSONDocument("userId" -> userId, "applicationStatus" -> ApplicationStatuses.OnlineTestExpired)
     val newExpiryTime = BSONDocument("$set" -> BSONDocument(
@@ -171,6 +173,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
 
   override def storeOnlineTestProfileAndUpdateStatusToInvite(applicationId: String, onlineTestProfile: OnlineTestProfile): Future[Unit] = {
     import model.ProgressStatuses._
+    import model.ApplicationStatuses.Implicits.BSONEnumHandler
 
     val query = BSONDocument("applicationId" -> applicationId)
 
@@ -273,7 +276,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   private def bsonDocToApplicationForNotification(doc: BSONDocument) = {
     val applicationId = doc.getAs[String]("applicationId").get
     val userId = doc.getAs[String]("userId").get
-    val applicationStatus = doc.getAs[ApplicationStatuses.ApplicationStatus]("applicationStatus").get
+    val applicationStatus = doc.getAs[ApplicationStatuses.EnumVal]("applicationStatus").get
     val personalDetailsRoot = doc.getAs[BSONDocument]("personal-details").get
     val preferredName = personalDetailsRoot.getAs[String]("preferredName").get
     ApplicationForNotification(applicationId, userId, preferredName, applicationStatus)
@@ -368,7 +371,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     selectRandom(query).map(_.map { doc =>
       val applicationId = doc.getAs[String]("applicationId").getOrElse("")
       val userId = doc.getAs[String]("userId").getOrElse("")
-      val applicationStatus = doc.getAs[ApplicationStatuses.ApplicationStatus]("applicationStatus")
+      val applicationStatus = doc.getAs[ApplicationStatuses.EnumVal]("applicationStatus")
         .getOrElse(throw new IllegalStateException("applicationStatus must be defined"))
 
       ApplicationIdWithUserIdAndStatus(applicationId, userId, applicationStatus)
@@ -376,7 +379,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult,
-    applicationStatus: ApplicationStatuses.ApplicationStatus): Future[Unit] = {
+    applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
 
     val progressStatus = applicationStatus match {
@@ -421,7 +424,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     collection.update(query, passMarkEvaluation, upsert = false).map(checkUpdateWriteResult)
   }
 
-  def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.ApplicationStatus,
+  def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal,
     expireDate: Option[LocalDate]
   ): Future[Unit] = {
     import ApplicationStatuses._

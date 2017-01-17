@@ -17,11 +17,12 @@
 package model.commands
 
 import model.ApplicationStatuses
+import model.ApplicationStatuses.Implicits._
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 
 case class ApplicationStatusDetails(
-  status: ApplicationStatuses.ApplicationStatus,
+  status: ApplicationStatuses.EnumVal,
   statusDate: Option[DateTime] = None,
   overrideSubmissionDeadline: Option[DateTime] = None
 )

@@ -16,35 +16,10 @@
 
 package model
 
-import play.api.libs.json.{ Format, JsString, JsSuccess, JsValue }
-import reactivemongo.bson.{ BSON, BSONHandler, BSONString }
-
-import scala.language.implicitConversions
 
 object ApplicationStatuses extends Enum {
 
-  type ApplicationStatus = EnumVal
-
-  case class EnumVal private[ApplicationStatuses](name: String) extends Value
-
-  implicit def appStatusToString(appStatus: EnumVal): String = appStatus.name
-
-  object EnumVal {
-    implicit val applicationStatusFormat = new Format[EnumVal] {
-      def reads(json: JsValue) = JsSuccess(ApplicationStatuses.values.find(_.name == json.as[String].toUpperCase)
-        .getOrElse(throw NoEnumWithNameException(json.as[String])))
-
-      def writes(appStatus: EnumVal) = JsString(appStatus.name)
-    }
-
-    implicit object BSONEnumHandler extends BSONHandler[BSONString, EnumVal] {
-      def read(doc: BSONString) = ApplicationStatuses.values.find(_.name == doc.value.toUpperCase)
-          .getOrElse(throw NoEnumWithNameException(doc.value.toUpperCase))
-
-      def write(appStatus: EnumVal) = BSON.write(appStatus.name)
-    }
-  }
-
+  sealed case class EnumVal(name: String) extends Value
 
   val Created = EnumVal("CREATED")
 

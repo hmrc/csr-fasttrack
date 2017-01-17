@@ -18,6 +18,7 @@ package repositories.application
 
 import model.Exceptions.PersonalDetailsNotFound
 import model.{ApplicationStatuses, PersistedObjects}
+import model.ApplicationStatuses.Implicits._
 import model.PersistedObjects.{PersonalDetails, PersonalDetailsWithUserId}
 import org.joda.time.{DateTime, LocalDate}
 import reactivemongo.api.DB
@@ -36,8 +37,8 @@ trait PersonalDetailsRepository {
   def update(applicationId: String, userId: String, personalDetails: PersonalDetails): Future[Unit]
 
   def update(appId: String, userId: String, personalDetails: PersonalDetails,
-    requiredApplicationStatuses: Seq[ApplicationStatuses.ApplicationStatus],
-    newApplicationStatus: ApplicationStatuses.ApplicationStatus): Future[Unit]
+    requiredApplicationStatuses: Seq[ApplicationStatuses.EnumVal],
+    newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit]
 
   def find(applicationId: String): Future[PersonalDetails]
 
@@ -65,8 +66,8 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
   }
 
   def update(applicationId: String, userId: String, personalDetails: PersonalDetails,
-    requiredApplicationStatuses: Seq[ApplicationStatuses.ApplicationStatus],
-    newApplicationStatus: ApplicationStatuses.ApplicationStatus
+    requiredApplicationStatuses: Seq[ApplicationStatuses.EnumVal],
+    newApplicationStatus: ApplicationStatuses.EnumVal
   ): Future[Unit] = {
     val PersonalDetailsCollection = "personal-details"
 

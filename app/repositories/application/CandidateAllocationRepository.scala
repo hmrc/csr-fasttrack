@@ -19,6 +19,7 @@ package repositories.application
 import factories.DateTimeFactory
 import model.PersistedObjects.{ AllocatedCandidate, PersonalDetailsWithUserId }
 import model.{ ApplicationStatuses, PersistedObjects }
+import model.ApplicationStatuses.Implicits._
 import org.joda.time.{ DateTime, LocalDate }
 import reactivemongo.api.DB
 import reactivemongo.bson.{ BSONArray, BSONBoolean, BSONDocument, BSONObjectID }

@@ -18,6 +18,7 @@ package model
 
 import connectors.PassMarkExchangeObjects.Settings
 import controllers._
+import model.ApplicationStatuses.Implicits._
 import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.CandidateScoresCommands.Implicits._
 import model.Exceptions.{ NoResultsReturned, TooManyEntries }
@@ -42,7 +43,7 @@ object Commands {
 
   case class PassMarkSettingsRequest(settings: Settings)
 
-  case class ApplicationCreated(applicationId: String, applicationStatus: ApplicationStatuses.ApplicationStatus, userId: String)
+  case class ApplicationCreated(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal, userId: String)
 
   case class PersonalDetailsAdded(applicationId: String, userId: String)
 
@@ -151,11 +152,11 @@ object Commands {
   )
 
   case class PassMarkReportTestResults(
-                                        competency: Option[TestResult],
-                                        numerical: Option[TestResult],
-                                        verbal: Option[TestResult],
-                                        situational: Option[TestResult]
-                                      )
+    competency: Option[TestResult],
+    numerical: Option[TestResult],
+    verbal: Option[TestResult],
+    situational: Option[TestResult]
+  )
 
   type IsNonSubmitted = Boolean
 
@@ -228,7 +229,7 @@ object Commands {
 
   case class ApplicationResponse(
     applicationId: String,
-    applicationStatus: ApplicationStatuses.ApplicationStatus,
+    applicationStatus: ApplicationStatuses.EnumVal,
     userId: String,
     progressResponse: ProgressResponse
   )
@@ -288,6 +289,7 @@ object Commands {
   )
 
   object Implicits {
+
     implicit val mediaFormats = Json.format[AddMedia]
 
     implicit val addressFormat = Json.format[Address]

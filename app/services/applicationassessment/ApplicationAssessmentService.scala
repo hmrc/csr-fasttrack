@@ -19,6 +19,7 @@ package services.applicationassessment
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import connectors.{ CSREmailClient, EmailClient }
 import model.ApplicationStatuses
+import model.ApplicationStatuses.Implicits._
 import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import model.EvaluationResults._
 import model.Exceptions.IncorrectStatusInApplicationException
@@ -140,12 +141,12 @@ trait ApplicationAssessmentService extends ApplicationStatusCalculator {
     }
   }
 
-  private def auditNewStatus(appId: String, newStatus: ApplicationStatuses.ApplicationStatus): Unit = {
+  private def auditNewStatus(appId: String, newStatus: ApplicationStatuses.EnumVal): Unit = {
     val event = newStatus match {
       case ApplicationStatuses.AssessmentCentrePassedNotified => "ApplicationAssessmentPassedNotified"
       case ApplicationStatuses.AssessmentCentreFailedNotified => "ApplicationAssessmentFailedNotified"
       case ApplicationStatuses.AssessmentCentreFailed | ApplicationStatuses.AssessmentCentrePassed |
-        ApplicationStatuses.AwaitingAssessmentCentreReevaluation => "ApplicationAssessmentEvaluated"
+           ApplicationStatuses.AwaitingAssessmentCentreReevaluation => "ApplicationAssessmentEvaluated"
     }
     Logger.info(s"$event for $appId. The new status: $newStatus")
     auditService.logEventNoRequest( event, Map("applicationId" -> appId, "applicationStatus" -> newStatus)

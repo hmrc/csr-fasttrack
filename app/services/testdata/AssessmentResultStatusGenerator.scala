@@ -116,7 +116,7 @@ trait AssessmentResultStatusGenerator extends ConstructiveGenerator {
   val aRepository: GeneralApplicationRepository
   val fwRepository: FrameworkYamlRepository
 
-  val status: ApplicationStatuses.ApplicationStatus
+  val status: ApplicationStatuses.EnumVal
   def getAssessmentRuleCategoryResult: AssessmentRuleCategoryResult
 
   lazy val schemeNames = Await.result(fwRepository.getFrameworkNames, 5 seconds)

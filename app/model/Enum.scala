@@ -16,6 +16,12 @@
 
 package model
 
+import com.typesafe.config.Config
+import net.ceedubs.ficus.readers.ValueReader
+import play.api.libs.json.{ Format, JsString, JsSuccess, JsValue }
+import reactivemongo.bson.{ BSON, BSONHandler, BSONString }
+
+import scala.language.implicitConversions
 /*
  * Taken from https://gist.github.com/viktorklang/1057513
  * Credit to viktorlang
@@ -49,4 +55,30 @@ trait Enum { //DIY enum type
   }
 
   case class NoEnumWithNameException(e: String) extends Exception(s"No Enumeration value found with name $e")
+
+
+  object Implicits {
+    implicit val enumFormat = new Format[EnumVal] {
+      def reads(json: JsValue) = JsSuccess(values.find(_.name == json.as[String].toUpperCase)
+        .getOrElse(throw NoEnumWithNameException(json.as[String])))
+
+      def writes(o: EnumVal) = JsString(o.name)
+    }
+
+    implicit object BSONEnumHandler extends BSONHandler[BSONString, EnumVal] {
+      def read(doc: BSONString) = values.find(_.name == doc.value.toUpperCase) .getOrElse(throw NoEnumWithNameException(doc.value.toUpperCase))
+      def write(o: EnumVal) = BSON.write(o.name)
+    }
+
+
+    implicit object configReader extends ValueReader[EnumVal] {
+      override def read(config: Config, path: String): EnumVal = {
+        val key = config.getString(path)
+        values.find(_.name == key) .getOrElse(throw NoEnumWithNameException(key))
+      }
+    }
+
+    implicit def enumToString(o: EnumVal): String = o.name
+    implicit def stringToEnum(s: String): EnumVal = values.find(_.name == s).getOrElse(throw NoEnumWithNameException(s))
+  }
 }
