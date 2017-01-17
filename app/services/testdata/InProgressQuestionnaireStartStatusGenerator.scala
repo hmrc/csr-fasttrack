@@ -30,20 +30,24 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object SubmittedStatusGenerator extends SubmittedStatusGenerator {
-  override val previousStatusGenerator = InProgressQuestionnaireParentalOcuppationGenerator
+object InProgressQuestionnaireStartStatusGenerator extends InProgressQuestionnaireStartStatusGenerator {
+  override val previousStatusGenerator = InProgressAssistanceDetailsStatusGenerator
   override val appRepository = applicationRepository
+  override val qRepository = questionnaireRepository
 }
 
-trait SubmittedStatusGenerator extends ConstructiveGenerator {
+trait InProgressQuestionnaireStartStatusGenerator extends ConstructiveGenerator {
   val appRepository: GeneralApplicationRepository
+  val qRepository: QuestionnaireRepository
 
+  // scalastyle:off method.length
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      submit <- appRepository.submit(candidateInPreviousStatus.applicationId.get)
+      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get, "start_questionnaire")
     } yield {
       candidateInPreviousStatus
     }
   }
+  // scalastyle:on method.length
 }

@@ -30,18 +30,28 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object SubmittedStatusGenerator extends SubmittedStatusGenerator {
-  override val previousStatusGenerator = InProgressQuestionnaireParentalOcuppationGenerator
+object InProgressQuestionnaireDiversityStatusGenerator extends InProgressQuestionnaireDiversityStatusGenerator {
+  override val previousStatusGenerator = InProgressQuestionnaireStartStatusGenerator
   override val appRepository = applicationRepository
+  override val qRepository = questionnaireRepository
 }
 
-trait SubmittedStatusGenerator extends ConstructiveGenerator {
+trait InProgressQuestionnaireDiversityStatusGenerator extends ConstructiveGenerator {
   val appRepository: GeneralApplicationRepository
+  val qRepository: QuestionnaireRepository
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
+
+    def getDiversityQuestionnaireQuestions = List(
+      Some(PersistedQuestion("What is your gender identity?", PersistedAnswer(Some(Random.gender), None, None))),
+      Some(PersistedQuestion("What is your sexual orientation?", PersistedAnswer(Some(Random.sexualOrientation), None, None))),
+      Some(PersistedQuestion("What is your ethnic group?", PersistedAnswer(Some(Random.ethnicGroup), None, None)))
+    ).filter(_.isDefined).map { someItem => someItem.get }
+
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      submit <- appRepository.submit(candidateInPreviousStatus.applicationId.get)
+      _ <- qRepository.addQuestions(candidateInPreviousStatus.applicationId.get, getDiversityQuestionnaireQuestions)
+      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get, "diversity_questionnaire")
     } yield {
       candidateInPreviousStatus
     }
