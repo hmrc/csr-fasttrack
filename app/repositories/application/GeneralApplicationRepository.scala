@@ -54,7 +54,7 @@ trait GeneralApplicationRepository {
 
   def findProgress(applicationId: String): Future[ProgressResponse]
 
-  def findStatusDetails(applicationId: String): Future[ApplicationStatusDetails]
+  def findApplicationStatusDetails(applicationId: String): Future[ApplicationStatusDetails]
 
   def findByUserId(userId: String, frameworkId: String): Future[ApplicationResponse]
 
@@ -223,7 +223,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
 
 
-  def findStatusDetails(applicationId: String): Future[ApplicationStatusDetails] = {
+  def findApplicationStatusDetails(applicationId: String): Future[ApplicationStatusDetails] = {
 
     findProgress(applicationId).flatMap { progress =>
       val latestProgress = ApplicationStatusOrder.getStatus(progress)

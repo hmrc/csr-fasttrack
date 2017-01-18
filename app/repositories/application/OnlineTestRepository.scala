@@ -87,15 +87,15 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     import model.ApplicationStatuses._
 
     val flag = status match {
-      case OnlineTestInvited => "online_test_invited"
-      case OnlineTestStarted => "online_test_started"
-      case OnlineTestCompleted => "online_test_completed"
-      case OnlineTestExpired => "online_test_expired"
-      case OnlineTestFailed => "online_test_failed"
-      case OnlineTestFailedNotified => "online_test_failed_notified"
+      case OnlineTestInvited => ProgressStatuses.OnlineTestInvitedProgress
+      case OnlineTestStarted => ProgressStatuses.OnlineTestStartedProgress
+      case OnlineTestCompleted => ProgressStatuses.OnlineTestCompletedProgress
+      case OnlineTestExpired => ProgressStatuses.OnlineTestExpiredProgress
+      case OnlineTestFailed => ProgressStatuses.OnlineTestFailedProgress
+      case OnlineTestFailedNotified => ProgressStatuses.OnlineTestFailedNotifiedProgress
     }
 
-    if (flag == "online_test_completed") {
+    if (flag == ProgressStatuses.OnlineTestCompletedProgress) {
       BSONDocument("$set" -> BSONDocument(
         s"progress-status.$flag" -> true,
         "applicationStatus" -> status,
