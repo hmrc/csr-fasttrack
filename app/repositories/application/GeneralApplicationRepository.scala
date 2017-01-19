@@ -20,7 +20,7 @@ import java.util.UUID
 import java.util.regex.Pattern
 
 import common.Constants.{ No, Yes }
-import model.ApplicationStatuses.Implicits._
+import model.ApplicationStatuses.BSONEnumHandler
 import model.ApplicationStatusOrder._
 import model._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
@@ -28,6 +28,7 @@ import model.Commands._
 import model.EvaluationResults._
 import model.Exceptions.{ ApplicationNotFound, LocationPreferencesNotFound, SchemePreferencesNotFound }
 import model.PersistedObjects.ApplicationForNotification
+import model.ProgressStatuses.BSONEnumHandler
 import model.Scheme.Scheme
 import model.commands.{ ApplicationStatusDetails, OnlineTestProgressResponse }
 import model.persisted.AssistanceDetails
@@ -128,7 +129,6 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
   override def create(userId: String, frameworkId: String): Future[ApplicationResponse] = {
     val applicationId = UUID.randomUUID().toString
-    import model.ApplicationStatuses.Implicits.BSONEnumHandler
     val applicationBSON = BSONDocument(
       "applicationId" -> applicationId,
       "userId" -> userId,
@@ -217,7 +217,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
     collection.find(query, projection).one[BSONDocument] map {
       case Some(document) => findProgress(document, applicationId)
-      case None => ProgressResponse(applicationId)
+      case None => throw ApplicationNotFound(applicationId)
     }
   }
 

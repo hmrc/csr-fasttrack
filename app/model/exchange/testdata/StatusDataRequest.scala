@@ -18,7 +18,7 @@ package model.exchange.testdata
 
 import play.api.libs.json.Json
 
-case class StatusDataRequest(applicationStatus: String = "REGISTERED",
+case class StatusDataRequest(applicationStatus: String = "SUBMITTED",
                              previousApplicationStatus: Option[String] = None,
                              progressStatus: Option[String] = None)
 

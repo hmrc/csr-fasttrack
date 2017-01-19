@@ -18,7 +18,6 @@ package services.applicationassessment
 
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import connectors.EmailClient
-import model.ApplicationStatuses.Implicits._
 import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import model.CandidateScoresCommands.{ CandidateScores, CandidateScoresAndFeedback }
 import model.Commands._

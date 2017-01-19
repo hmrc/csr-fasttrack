@@ -18,7 +18,6 @@ package services.applicationassessment
 
 import model.ApplicationStatuses
 import model.ApplicationStatuses._
-import model.ApplicationStatuses.Implicits._
 import model.EvaluationResults.{ AssessmentRuleCategoryResult, _ }
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.play.PlaySpec

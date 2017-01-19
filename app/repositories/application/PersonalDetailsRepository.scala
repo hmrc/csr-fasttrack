@@ -18,7 +18,7 @@ package repositories.application
 
 import model.Exceptions.PersonalDetailsNotFound
 import model.{ApplicationStatuses, PersistedObjects}
-import model.ApplicationStatuses.Implicits._
+import model.ApplicationStatuses.BSONEnumHandler
 import model.PersistedObjects.{PersonalDetails, PersonalDetailsWithUserId}
 import org.joda.time.{DateTime, LocalDate}
 import reactivemongo.api.DB
