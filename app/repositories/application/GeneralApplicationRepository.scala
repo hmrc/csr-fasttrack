@@ -26,7 +26,7 @@ import model._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.EvaluationResults._
-import model.Exceptions.{ ApplicationNotFound, LocationPreferencesNotFound, SchemePreferencesNotFound }
+import model.Exceptions.{ ApplicationNotFound, CannotUpdateReview, LocationPreferencesNotFound, SchemePreferencesNotFound }
 import model.PersistedObjects.ApplicationForNotification
 import model.Scheme.Scheme
 import model.commands.{ ApplicationStatusDetails, OnlineTestProgressResponse }
@@ -124,7 +124,7 @@ trait GeneralApplicationRepository {
 class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implicit mongo: () => DB)
   extends ReactiveRepository[CreateApplicationRequest, BSONObjectID](CollectionNames.APPLICATION, mongo,
     Commands.Implicits.createApplicationRequestFormats,
-    ReactiveMongoFormats.objectIdFormats) with GeneralApplicationRepository with RandomSelection {
+    ReactiveMongoFormats.objectIdFormats) with GeneralApplicationRepository with ReactiveRepositoryHelpers with RandomSelection {
 
   override def create(userId: String, frameworkId: String): Future[ApplicationResponse] = {
     val applicationId = UUID.randomUUID().toString
@@ -390,11 +390,14 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
   override def review(applicationId: String): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
-    val applicationStatusBSON = BSONDocument("$set" -> BSONDocument(
+    val progressStatusBSON = BSONDocument("$set" -> BSONDocument(
       "progress-status.review" -> true
     ))
 
-    collection.update(query, applicationStatusBSON, upsert = false) map { _ => () }
+    val validator = singleUpdateValidator(applicationId, actionDesc = "review",
+      CannotUpdateReview(s"review $applicationId"))
+
+    collection.update(query, progressStatusBSON) map validator
   }
 
   override def overallReportNotWithdrawn(frameworkId: String): Future[List[Report]] =

@@ -18,6 +18,7 @@ package services.locationschemes
 
 import model.PersistedObjects.PersonalDetails
 import model.Scheme._
+import model.exchange.{ LocationSchemesExamples, SchemeInfoExamples }
 import org.joda.time.LocalDate
 import org.mockito.Mockito._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
@@ -33,19 +34,20 @@ class LocationSchemeServiceSpec extends UnitSpec {
     "return a list of location/scheme combinations without A-level requirements" in new TestFixture {
       when(pdRepoMock.find(appId)).thenReturn(Future.successful(personalDetailsMock.copy(aLevel = false, stemLevel = true)))
       val result = service.getEligibleSchemes(appId).futureValue
-      result must contain theSameElementsAs List(NoALevelsScheme)
+      result must contain theSameElementsAs List(SchemeInfoExamples.NoALevelsScheme)
     }
 
     "return a list of location/scheme combinations with A-level requirements" in new TestFixture {
       when(pdRepoMock.find(appId)).thenReturn(Future.successful(personalDetailsMock.copy(aLevel = true, stemLevel = false)))
       val result = service.getEligibleSchemes(appId).futureValue
-      result must contain theSameElementsAs List(NoALevelsScheme, ALevelsScheme)
+      result must contain theSameElementsAs List(SchemeInfoExamples.NoALevelsScheme, SchemeInfoExamples.ALevelsScheme)
     }
 
     "return a list of location/scheme combinations with STEM A-level requirements" in new TestFixture {
       when(pdRepoMock.find(appId)).thenReturn(Future.successful(personalDetailsMock.copy(aLevel = true, stemLevel = true)))
       val result = service.getEligibleSchemes(appId).futureValue
-      result must contain theSameElementsAs List(NoALevelsScheme, ALevelsScheme, ALevelsStemScheme)
+      result must contain theSameElementsAs List(SchemeInfoExamples.NoALevelsScheme, SchemeInfoExamples.ALevelsScheme,
+        SchemeInfoExamples.ALevelsStemScheme)
     }
 
     "return a list of location/scheme combinations sorted closest first" in new TestFixture {
@@ -59,24 +61,18 @@ class LocationSchemeServiceSpec extends UnitSpec {
     val locationSchemeRepoMock = mock[LocationSchemeRepository]
     val pdRepoMock = mock[PersonalDetailsRepository]
     val appRepoMock = mock[GeneralApplicationRepository]
-    val NoALevelsScheme = SchemeInfo(Business, "SchemeNoALevels", requiresALevel = false, requiresALevelInStem = false)
-    val ALevelsScheme = SchemeInfo(Commercial, "SchemeALevels", requiresALevel = true, requiresALevelInStem = false)
-    val ALevelsStemScheme = SchemeInfo(ProjectDelivery, "SchemeALevelsStem", requiresALevel = true, requiresALevelInStem = true)
     val appId = "application-1"
     val personalDetailsMock = PersonalDetails("", "", "", LocalDate.now(), aLevel = false, stemLevel = false)
-
 
     when(locationSchemeRepoMock.getSchemesAndLocations).
       thenReturn(Future.successful(
         List(
-          LocationSchemes("id1", "testLocation1", 2.0, 5.0, schemes = List("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem")),
-          LocationSchemes("id2", "testLocation2", 6.0, 2.0, schemes = List("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem")),
-          LocationSchemes("id3", "testLocation3", 2.5, 2.6, schemes = List("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem")),
-          LocationSchemes("id4", "testLocation4", 1.0, 1.0, schemes = List("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem"))
+          LocationSchemesExamples.LocationSchemes1, LocationSchemesExamples.LocationSchemes2,
+          LocationSchemesExamples.LocationSchemes3, LocationSchemesExamples.LocationSchemes4
         )))
 
     when(locationSchemeRepoMock.getSchemeInfo).thenReturn(Future.successful(
-      List(NoALevelsScheme, ALevelsScheme, ALevelsStemScheme)
+      List(SchemeInfoExamples.NoALevelsScheme, SchemeInfoExamples.ALevelsScheme, SchemeInfoExamples.ALevelsStemScheme)
     ))
 
     when(appRepoMock.getSchemes(appId)).thenReturn(Future.successful(

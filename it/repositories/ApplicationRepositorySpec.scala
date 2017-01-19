@@ -18,8 +18,8 @@ package repositories
 
 import model.ApplicationStatuses.Implicits._
 import model.AssessmentScheduleCommands.ApplicationForAssessmentAllocationResult
-import model.Commands.{AdjustmentReport, _}
-import model.{ApplicationStatuses, EvaluationResults}
+import model.Commands.{ AdjustmentReport, _ }
+import model.{ ApplicationStatuses, EvaluationResults }
 import model.EvaluationResults.AssessmentRuleCategoryResult
 import model.Exceptions.ApplicationNotFound
 import reactivemongo.bson.BSONDocument
@@ -384,6 +384,28 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       val updatedResult = applicationRepo.candidatesAwaitingAllocation(frameworkId).futureValue
       updatedResult must be (empty)
     }
+  }
+
+  "review" should {
+    "change progress status to review" in {
+      createApplication("app1", ApplicationStatuses.InProgress)
+
+      applicationRepo.review("app1").futureValue
+
+      val status = getApplicationStatus("app1")
+      status mustBe ApplicationStatuses.InProgress.name
+
+      val progressResponse = applicationRepo.findProgress("app1").futureValue
+      progressResponse.review mustBe true
+    }
+  }
+
+  def getApplicationStatus(appId: String) = {
+    applicationRepo.collection.find(BSONDocument("applicationId" -> "app1")).one[BSONDocument].map { docOpt =>
+      docOpt must not be empty
+      val doc = docOpt.get
+      doc.getAs[String]("applicationStatus").get
+    }.futureValue
   }
 
   def createApplication(appId: String, appStatus: ApplicationStatuses.EnumVal): Unit = {
