@@ -84,7 +84,7 @@ import model.commands.exchange.testdata.AssistanceDetailsData
         region = o.region,
         loc1scheme1Passmark = o.loc1scheme1EvaluationResult.map(Result.apply),
         loc1scheme2Passmark = o.loc1scheme2EvaluationResult.map(Result.apply),
-        confirmedAllocation = statusData.applicationStatus == ApplicationStatuses.AllocationConfirmed
+        confirmedAllocation = statusData.applicationStatus == ApplicationStatuses.AllocationConfirmed.name
       )
     }
   }
