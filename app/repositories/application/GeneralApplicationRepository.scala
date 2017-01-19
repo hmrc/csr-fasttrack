@@ -20,15 +20,16 @@ import java.util.UUID
 import java.util.regex.Pattern
 
 import common.Constants.{ No, Yes }
+import model.ApplicationStatuses.Implicits._
 import model.ApplicationStatusOrder._
+import model._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.EvaluationResults._
 import model.Exceptions.{ ApplicationNotFound, LocationPreferencesNotFound, SchemePreferencesNotFound }
 import model.PersistedObjects.ApplicationForNotification
 import model.Scheme.Scheme
-import model._
-import model.commands.OnlineTestProgressResponse
+import model.commands.{ ApplicationStatusDetails, OnlineTestProgressResponse }
 import model.persisted.AssistanceDetails
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{ DateTime, LocalDate }
@@ -52,6 +53,8 @@ trait GeneralApplicationRepository {
   def find(applicationIds: List[String]): Future[List[Candidate]]
 
   def findProgress(applicationId: String): Future[ProgressResponse]
+
+  def findApplicationStatusDetails(applicationId: String): Future[ApplicationStatusDetails]
 
   def findByUserId(userId: String, frameworkId: String): Future[ApplicationResponse]
 
@@ -90,7 +93,7 @@ trait GeneralApplicationRepository {
 
   def allocationExpireDateByApplicationId(applicationId: String): Future[Option[LocalDate]]
 
-  def updateStatus(applicationId: String, status: String): Future[Unit]
+  def updateStatus(applicationId: String, status: ApplicationStatuses.EnumVal): Future[Unit]
 
   def allApplicationAndUserIds(frameworkId: String): Future[List[PersonalDetailsAdded]]
 
@@ -102,8 +105,8 @@ trait GeneralApplicationRepository {
 
   def nextAssessmentCentrePassedOrFailedApplication(): Future[Option[ApplicationForNotification]]
 
-  def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String,
-                                    evaluationResult: AssessmentRuleCategoryResult, newApplicationStatus: String): Future[Unit]
+  def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResult,
+    newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit]
 
   def getSchemeLocations(applicationId: String): Future[List[String]]
 
@@ -125,18 +128,17 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
   override def create(userId: String, frameworkId: String): Future[ApplicationResponse] = {
     val applicationId = UUID.randomUUID().toString
-    val createdStatus = "CREATED"
-
+    import model.ApplicationStatuses.Implicits.BSONEnumHandler
     val applicationBSON = BSONDocument(
       "applicationId" -> applicationId,
       "userId" -> userId,
       "frameworkId" -> frameworkId,
-      "applicationStatus" -> createdStatus
+      "applicationStatus" -> ApplicationStatuses.Created
     )
 
     collection.insert(applicationBSON) flatMap { _ =>
       findProgress(applicationId).map { p =>
-        ApplicationResponse(applicationId, createdStatus, userId, p)
+        ApplicationResponse(applicationId, ApplicationStatuses.Created, userId, p)
       }
     }
   }
@@ -219,17 +221,43 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     }
   }
 
+
+
+  def findApplicationStatusDetails(applicationId: String): Future[ApplicationStatusDetails] = {
+
+    findProgress(applicationId).flatMap { progress =>
+      val latestProgress = ApplicationStatusOrder.getStatus(progress)
+      val query = BSONDocument("applicationId" -> applicationId)
+      val projection = BSONDocument(
+        "applicationStatus" -> true,
+        "progress-status-timestamp" -> true,
+        "submissionDeadline" -> true,
+        "_id" -> false
+      )
+
+      collection.find(query, projection).one[BSONDocument] map {
+        case Some(document) =>
+          val applicationStatus = document.getAs[ApplicationStatuses.EnumVal]("applicationStatus").get
+          val progressStatusTimeStamp = document.getAs[BSONDocument]("progress-status-timestamp").flatMap(_.getAs[DateTime](latestProgress))
+          val submissionDeadline = document.getAs[DateTime]("submissionDeadline")
+          ApplicationStatusDetails(applicationStatus, progressStatusTimeStamp, submissionDeadline)
+
+        case None => throw ApplicationNotFound(applicationId)
+      }
+    }
+  }
+
   def findByUserId(userId: String, frameworkId: String): Future[ApplicationResponse] = {
     val query = BSONDocument("userId" -> userId, "frameworkId" -> frameworkId)
 
     val resp: Future[Future[ApplicationResponse]] = collection.find(query).one[BSONDocument] map {
       case Some(document) =>
         val applicationId = document.getAs[String]("applicationId").get
-        val applicationStatus = document.getAs[String]("applicationStatus").get
+        val applicationStatus = document.getAs[ApplicationStatuses.EnumVal]("applicationStatus").get
         findProgress(applicationId).map { (p: ProgressResponse) =>
           ApplicationResponse(applicationId, applicationStatus, userId, p)
         }
-      case None => throw new ApplicationNotFound(userId)
+      case None => throw ApplicationNotFound(userId)
     }
     resp.flatMap(identity)
   }
@@ -296,7 +324,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   override def findApplicationsForAssessmentAllocation(locations: List[String], start: Int,
                                                        end: Int): Future[ApplicationForAssessmentAllocationResult] = {
     val query = BSONDocument("$and" -> BSONArray(
-      BSONDocument("applicationStatus" -> "AWAITING_ALLOCATION"),
+      BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingAllocation),
       BSONDocument("framework-preferences.firstLocation.location" -> BSONDocument("$in" -> locations))
     ))
 
@@ -331,26 +359,24 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   override def submit(applicationId: String): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val applicationStatusBSON = BSONDocument("$set" -> BSONDocument(
-      "applicationStatus" -> "SUBMITTED",
-      "progress-status.submitted" -> true
+      "applicationStatus" -> ApplicationStatuses.Submitted,
+      "progress-status.submitted" -> true,
+      "progress-status-timestamp.submitted" -> DateTime.now()
     ))
 
-    collection.update(query, applicationStatusBSON, upsert = false) map {
-      case _ => ()
-    }
+    collection.update(query, applicationStatusBSON, upsert = false) map { _ => () }
   }
 
   override def withdraw(applicationId: String, reason: WithdrawApplicationRequest): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val applicationStatusBSON = BSONDocument("$set" -> BSONDocument(
       "withdraw" -> reason,
-      "applicationStatus" -> "WITHDRAWN",
-      "progress-status.withdrawn" -> true
+      "applicationStatus" -> ApplicationStatuses.Withdrawn,
+      s"progress-status.${ProgressStatuses.WithdrawnProgress}" -> true,
+      "progress-status-timestamp.withdrawn" -> DateTime.now()
     ))
 
-    collection.update(query, applicationStatusBSON, upsert = false) map {
-      case _ => ()
-    }
+    collection.update(query, applicationStatusBSON, upsert = false) map { _ => () }
   }
 
   override def updateQuestionnaireStatus(applicationId: String, sectionKey: String): Future[Unit] = {
@@ -359,9 +385,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       s"progress-status.questionnaire.$sectionKey" -> true
     ))
 
-    collection.update(query, applicationStatusBSON, upsert = false) map {
-      case _ => ()
-    }
+    collection.update(query, applicationStatusBSON, upsert = false) map { _ => () }
   }
 
   override def review(applicationId: String): Future[Unit] = {
@@ -370,21 +394,19 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       "progress-status.review" -> true
     ))
 
-    collection.update(query, applicationStatusBSON, upsert = false) map {
-      case _ => ()
-    }
+    collection.update(query, applicationStatusBSON, upsert = false) map { _ => () }
   }
 
   override def overallReportNotWithdrawn(frameworkId: String): Future[List[Report]] =
     overallReport(BSONDocument("$and" -> BSONArray(
       BSONDocument("frameworkId" -> frameworkId),
-      BSONDocument("applicationStatus" -> BSONDocument("$ne" -> "WITHDRAWN"))
+      BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn))
     )))
 
   override def overallReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]] =
     overallReportWithPersonalDetails(BSONDocument("$and" -> BSONArray(
       BSONDocument("frameworkId" -> frameworkId),
-      BSONDocument("applicationStatus" -> BSONDocument("$ne" -> "WITHDRAWN"))
+      BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn))
     )))
 
   override def overallReport(frameworkId: String): Future[List[Report]] =
@@ -420,7 +442,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   override def applicationsWithAssessmentScoresAccepted(frameworkId: String): Future[List[ApplicationPreferences]] =
     applicationPreferences(BSONDocument("$and" -> BSONArray(
       BSONDocument("frameworkId" -> frameworkId),
-      BSONDocument(s"progress-status.${ApplicationStatuses.AssessmentScoresAccepted.toLowerCase}" -> true),
+      BSONDocument(s"progress-status.${ProgressStatuses.AssessmentScoresAcceptedProgress}" -> true),
       BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn))
     )))
 
@@ -507,7 +529,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   override def applicationsPassedInAssessmentCentre(frameworkId: String): Future[List[ApplicationPreferencesWithTestResults]] =
     applicationPreferencesWithTestResults(BSONDocument("$and" -> BSONArray(
       BSONDocument("frameworkId" -> frameworkId),
-      BSONDocument(s"progress-status.${ApplicationStatuses.AssessmentCentrePassed.toLowerCase}" -> true),
+      BSONDocument(s"progress-status.${ProgressStatuses.AssessmentCentrePassedProgress}" -> true),
       BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn))
     )))
 
@@ -661,7 +683,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       case (_, Some(true)) => Some("Yes")
       case _ => Some("No")
     }
-    val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).map { gis => if (gis) "Yes" else "No"}
+    val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).map { gis => if (gis) Yes else No}
 
     Report(
       applicationId, Some(getStatus(progress)), frLocation(fr1), frScheme1(fr1), frScheme2(fr1),
@@ -700,11 +722,11 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     // TODO: Revisit this and check if we want to return both fields. If we want to keep one decide what to do if both values are None
     val needsAdjustment: Option[String] = (needsSupportForOnlineAssessment, needsSupportAtVenue) match {
       case (None, None) => None
-      case (Some(true), _) => Some("Yes")
-      case (_, Some(true)) => Some("Yes")
-      case _ => Some("No")
+      case (Some(true), _) => Some(Yes)
+      case (_, Some(true)) => Some(Yes)
+      case _ => Some(No)
     }
-    val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).map { gis => if (gis) "Yes" else "No"}
+    val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).map { gis => if (gis) Yes else No }
 
     val applicationId = document.getAs[String]("applicationId").getOrElse("")
     val userId = document.getAs[String]("userId").getOrElse("")
@@ -725,8 +747,8 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val query = BSONDocument("$and" ->
       BSONArray(
         BSONDocument("frameworkId" -> frameworkId),
-        BSONDocument("applicationStatus" -> BSONDocument("$ne" -> "IN_PROGRESS")),
-        BSONDocument("applicationStatus" -> BSONDocument("$ne" -> "WITHDRAWN")),
+        BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.InProgress)),
+        BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn)),
         BSONDocument("$or" ->
           BSONArray(
             BSONDocument("$or" -> BSONArray(
@@ -758,17 +780,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         val preferredName = extract("preferredName")(personalDetails)
 
         val ad = document.getAs[BSONDocument]("assistance-details")
-        val hasDisability = ad.flatMap(_.getAs[String]("hasDisability"))
-        val needsSupportForOnlineAssessment = ad.flatMap(_.getAs[Boolean]("needsSupportForOnlineAssessment"))
-        val needsSupportAtVenue = ad.flatMap(_.getAs[Boolean]("needsSupportAtVenue"))
-        // TODO: Revisit this and check if we want to return both fields. If we want to keep one decide what to do if both values are None
-        val needsAdjustment: Option[String] = (needsSupportForOnlineAssessment, needsSupportAtVenue) match {
-          case (None, None) => None
-          case (Some(true), _) => Some("Yes")
-          case (_, Some(true)) => Some("Yes")
-          case _ => Some("No")
-        }
-        val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).map { gis => if (gis) "Yes" else "No"}
+        val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).map { gis => if (gis) Yes else No }
         val adjustmentsConfirmed = getAdjustmentsConfirmed(ad)
         val typesOfAdjustments = ad.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
         val adjustments = typesOfAdjustments.getOrElse(Nil)
@@ -783,7 +795,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val query = BSONDocument("$and" ->
       BSONArray(
         BSONDocument("frameworkId" -> frameworkId),
-        BSONDocument("applicationStatus" -> "AWAITING_ALLOCATION")
+        BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingAllocation)
       ))
 
     val projection = BSONDocument(
@@ -874,10 +886,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   private def isoTimeToPrettyDateTime(utcMillis: Long): String =
     timeZoneService.localize(utcMillis).toString("yyyy-MM-dd HH:mm:ss")
 
-  private def booleanTranslator(bool: Boolean) = bool match {
-    case true => Yes
-    case false => No
-  }
+  private def booleanTranslator(bool: Boolean) = if (bool) Yes else No
 
   private def reportQueryWithProjections[A](
                                              query: BSONDocument,
@@ -903,17 +912,13 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       .getOrElse(BSONDocument.empty)
     val numericalAdjustment = data.timeNeededNum.map(i => BSONDocument("assistance-details.numericalTimeAdjustmentPercentage" -> i))
       .getOrElse(BSONDocument.empty)
-    //val otherAdjustments = data.otherAdjustments.map(s => BSONDocument("assistance-details.otherAdjustments" -> s))
-    //  .getOrElse(BSONDocument.empty)
 
     val adjustmentsConfirmationBSON = BSONDocument("$set" -> BSONDocument(
       "assistance-details.typeOfAdjustments" -> data.adjustments.getOrElse(List.empty[String]),
       "assistance-details.confirmedAdjustments" -> true
     ).add(verbalAdjustment).add(numericalAdjustment))
 
-    collection.update(query, adjustmentsConfirmationBSON, upsert = false) map {
-      case _ => ()
-    }
+    collection.update(query, adjustmentsConfirmationBSON, upsert = false) map { _ => () }
   }
 
   def rejectAdjustment(applicationId: String): Future[Unit] = {
@@ -927,9 +932,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       //"assistance-details.needsAdjustment" -> "No"
     ))
 
-    collection.update(query, adjustmentRejection, upsert = false) map {
-      case _ => ()
-    }
+    collection.update(query, adjustmentRejection, upsert = false) map { _ => () }
   }
 
   def allocationExpireDateByApplicationId(applicationId: String): Future[Option[LocalDate]] = {
@@ -946,7 +949,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     }
   }
 
-  def updateStatus(applicationId: String, status: String): Future[Unit] = {
+  def updateStatus(applicationId: String, status: ApplicationStatuses.EnumVal): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val lowercaseStatus = status.toLowerCase
     val applicationStatusBSON = BSONDocument("$set" -> BSONDocument(
@@ -955,9 +958,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       s"progress-status-dates.$lowercaseStatus" -> LocalDate.now()
     ))
 
-    collection.update(query, applicationStatusBSON, upsert = false) map {
-      case _ => ()
-    }
+    collection.update(query, applicationStatusBSON, upsert = false) map { _ => () }
   }
 
   def allApplicationAndUserIds(frameworkId: String): Future[List[PersonalDetailsAdded]] = {
@@ -1012,8 +1013,9 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     selectRandom(query).map(_.map(bsonDocToApplicationForNotification))
   }
 
-  def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String,
-                                    evaluationResult: AssessmentRuleCategoryResult, newApplicationStatus: String): Future[Unit] = {
+  def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResult,
+    newApplicationStatus: ApplicationStatuses.EnumVal
+  ): Future[Unit] = {
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId),
       BSONDocument(
@@ -1023,7 +1025,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         )
       )
     ))
-    val progressStatus = newApplicationStatus.toLowerCase
+    val progressStatus = newApplicationStatus.name.toLowerCase
 
     val passMarkEvaluation = BSONDocument("$set" ->
       BSONDocument(
@@ -1041,9 +1043,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
           .add(perSchemeToBSON("schemes-evaluation", evaluationResult.schemesEvaluation))
       ))
 
-    collection.update(query, passMarkEvaluation, upsert = false) map {
-      case _ => ()
-    }
+    collection.update(query, passMarkEvaluation, upsert = false) map { _ => () }
   }
 
   def getSchemeLocations(applicationId: String): Future[List[String]] = {
@@ -1065,9 +1065,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       "progress-status.scheme-locations" -> true,
       "scheme-locations" -> locationIds
     ))
-    collection.update(query, schemeLocationsBSON, upsert = false) map {
-      case _ => ()
-    }
+    collection.update(query, schemeLocationsBSON, upsert = false) map { _ => () }
   }
 
   def getSchemes(applicationId: String): Future[List[Scheme]] = {
@@ -1087,9 +1085,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       "progress-status.scheme-preferences" -> true,
       "schemes" -> schemeNames
     ))
-    collection.update(query, schemePreferencesBSON, upsert = false) map {
-      case _ => ()
-    }
+    collection.update(query, schemePreferencesBSON, upsert = false) map { _ => () }
   }
 
   private def resultToBSON(schemeName: String, result: Option[EvaluationResults.Result]): BSONDocument = result match {
@@ -1121,18 +1117,16 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val personalDetails = doc.getAs[BSONDocument]("personal-details").get
     val firstName = personalDetails.getAs[String]("firstName").get
     val lastName = personalDetails.getAs[String]("lastName").get
-    val needsAdjustment = doc.getAs[AssistanceDetails]("assistance-details").map { assistanceDetails =>
-      assistanceDetails.needsSupportAtVenue
-    }.getOrElse(false)
+    val needsAdjustment = doc.getAs[AssistanceDetails]("assistance-details").exists(_.needsSupportAtVenue)
     val onlineTestDetails = doc.getAs[BSONDocument]("online-tests").get
     val invitationDate = onlineTestDetails.getAs[DateTime]("invitationDate").get
-    ApplicationForAssessmentAllocation(firstName, lastName, userId, applicationId, (if (needsAdjustment) "Yes" else "No"), invitationDate)
+    ApplicationForAssessmentAllocation(firstName, lastName, userId, applicationId, if (needsAdjustment) Yes else No, invitationDate)
   }
 
   private def bsonDocToApplicationForNotification(doc: BSONDocument) = {
     val applicationId = doc.getAs[String]("applicationId").get
     val userId = doc.getAs[String]("userId").get
-    val applicationStatus = doc.getAs[String]("applicationStatus").get
+    val applicationStatus = doc.getAs[ApplicationStatuses.EnumVal]("applicationStatus").get
     val personalDetailsRoot = doc.getAs[BSONDocument]("personal-details").get
     val preferredName = personalDetailsRoot.getAs[String]("preferredName").get
     ApplicationForNotification(applicationId, userId, preferredName, applicationStatus)

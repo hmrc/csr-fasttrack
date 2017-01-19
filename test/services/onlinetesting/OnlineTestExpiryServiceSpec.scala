@@ -17,6 +17,7 @@
 package services.onlinetesting
 
 import connectors.EmailClient
+import model.ApplicationStatuses
 import model.Commands.Address
 import model.PersistedObjects.{ ContactDetails, ExpiringOnlineTest }
 import org.mockito.Matchers.{ any, eq => eqTo }
@@ -115,7 +116,7 @@ class OnlineTestExpiryServiceSpec extends PlaySpec with ScalaFutures with Mockit
     "mark the relevant application as expired" in new CommitExpiredStatusFixture {
       service.commitExpiredStatus(expiringTest).futureValue mustBe (())
 
-      verify(otRepository).updateStatus(userId, "ONLINE_TEST_EXPIRED")
+      verify(otRepository).updateStatus(userId, ApplicationStatuses.OnlineTestExpired)
     }
 
     "audit an event after updating the application status" in new CommitExpiredStatusFixture {

@@ -18,6 +18,7 @@ package repositories
 
 import factories.DateTimeFactory
 import model.ApplicationStatuses
+import model.ApplicationStatuses.Implicits._
 import org.joda.time.{DateTime, LocalDate}
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers

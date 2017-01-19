@@ -21,20 +21,19 @@ import java.io.File
 import com.typesafe.config.ConfigFactory
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import connectors.CSREmailClient
+import model.ApplicationStatuses.Implicits._
 import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.Commands.Implicits._
 import model.EvaluationResults._
 import model.PersistedObjects.{ OnlineTestPassmarkEvaluation, PreferencesWithQualification }
-import model.Preferences
+import model.ApplicationStatuses
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
 import play.Logger
 import play.api.libs.json._
-import play.test.WithApplication
 import reactivemongo.bson.{ BSONDocument, BSONString }
 import reactivemongo.json.ImplicitBSONHandlers
 import repositories._
@@ -158,45 +157,45 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
 
     val Message = s"Test location: $testMessage\n"
     withClue(s"$Message applicationStatus") {
-      a.applicationStatus must be(expected.applicationStatus)
+      a.applicationStatus mustBe expected.applicationStatus
     }
     withClue(s"$Message minimumCompetencyLevel") {
-      a.passedMinimumCompetencyLevel must be(expected.passedMinimumCompetencyLevel)
+      a.passedMinimumCompetencyLevel mustBe expected.passedMinimumCompetencyLevel
     }
     withClue(s"$Message competencyAverage") {
-      a.competencyAverageResult must be(expected.competencyAverage)
+      a.competencyAverageResult mustBe expected.competencyAverage
     }
     withClue(s"$Message competencyAverage overallScore") {
       expected.overallScore.foreach { overallScore =>
-        a.competencyAverageResult.get.overallScore must be(overallScore)
+        a.competencyAverageResult.get.overallScore mustBe overallScore
       }
     }
     withClue(s"$Message passmarkVersion") {
-      a.passmarkVersion must be(expected.passmarkVersion)
+      a.passmarkVersion mustBe expected.passmarkVersion
     }
     withClue(s"$Message location1Scheme1") {
-      a.location1Scheme1 must be(expected.location1Scheme1)
+      a.location1Scheme1 mustBe expected.location1Scheme1
     }
     withClue(s"$Message location1Scheme2") {
-      a.location1Scheme2 must be(expected.location1Scheme2)
+      a.location1Scheme2 mustBe expected.location1Scheme2
     }
     withClue(s"$Message location2Scheme1") {
-      a.location2Scheme1 must be(expected.location2Scheme1)
+      a.location2Scheme1 mustBe expected.location2Scheme1
     }
     withClue(s"$Message location2Scheme2") {
-      a.location2Scheme2 must be(expected.location2Scheme2)
+      a.location2Scheme2 mustBe expected.location2Scheme2
     }
     withClue(s"$Message alternativeScheme") {
-      a.alternativeScheme must be(expected.alternativeScheme)
+      a.alternativeScheme mustBe expected.alternativeScheme
     }
     val actualSchemes = a.schemesEvaluation.getOrElse(List()).map(x => (x.schemeName, x.result)).toMap
-    val expectedSchemes = expected.allSchemesEvaluationExpectatons.getOrElse(List()).map(x => (x.schemeName, x.result)).toMap
+    val expectedSchemes = expected.allSchemesEvaluationExpectations.getOrElse(List()).map(x => (x.schemeName, x.result)).toMap
 
     val allSchemes = actualSchemes.keys ++ expectedSchemes.keys
 
     allSchemes.foreach { s =>
       withClue(s"$Message schemesEvaluation for scheme: " + s) {
-        actualSchemes(s) must be(expectedSchemes(s))
+        actualSchemes(s) mustBe expectedSchemes(s)
       }
     }
   }
@@ -214,7 +213,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
         BSONDocument(
           "applicationId" -> appId,
           "userId" -> ("user" + appId),
-          "applicationStatus" -> "ASSESSMENT_SCORES_ACCEPTED")
+          "applicationStatus" -> ApplicationStatuses.AssessmentScoresAccepted)
       ).futureValue
   }
 
@@ -258,7 +257,7 @@ object ApplicationAssessmentServiceSpec {
                                    expected: AssessmentScoreEvaluationTestExpectation)
 
   case class ActualResult(passedMinimumCompetencyLevel: Option[Boolean], passmarkVersion: Option[String],
-                          applicationStatus: String, location1Scheme1: Option[String],
+                          applicationStatus: ApplicationStatuses.EnumVal, location1Scheme1: Option[String],
                           location1Scheme2: Option[String], location2Scheme1: Option[String],
                           location2Scheme2: Option[String], alternativeScheme: Option[String],
                           competencyAverageResult: Option[CompetencyAverageResult], schemesEvaluation: Option[List[PerSchemeEvaluation]])

@@ -16,7 +16,9 @@
 
 package services.applicationassessment
 
+import model.ApplicationStatuses
 import model.ApplicationStatuses._
+import model.ApplicationStatuses.Implicits._
 import model.EvaluationResults.{ AssessmentRuleCategoryResult, _ }
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.play.PlaySpec
@@ -80,25 +82,25 @@ class ApplicationStatusCalculatorSpec extends PlaySpec with TableDrivenPropertyC
 
   "Final (with online test result) assessment centre" should {
     "Set application status to Failed when candidate failed min competency level" in {
-      forAll(FailedMinCompetencyLevel) { (evaluation: AssessmentRuleCategoryResult, expectedApplicaitonStatus: String) =>
+      forAll(FailedMinCompetencyLevel) { (evaluation: AssessmentRuleCategoryResult, expectedApplicaitonStatus: ApplicationStatuses.EnumVal) =>
         calculator.determineStatus(evaluation) mustBe expectedApplicaitonStatus
       }
     }
 
     "Set application status to Failed when candidate failed all preferences" in {
-      forAll(FailedAllPreferences) { (evaluation: AssessmentRuleCategoryResult, expectedApplicaitonStatus: String) =>
+      forAll(FailedAllPreferences) { (evaluation: AssessmentRuleCategoryResult, expectedApplicaitonStatus: ApplicationStatuses.EnumVal) =>
         calculator.determineStatus(evaluation) mustBe expectedApplicaitonStatus
       }
     }
 
     "Set application status to Amber when candidate is amber in their residual Preferences" in {
-      forAll(AmberForResidualPreferences) { (evaluation: AssessmentRuleCategoryResult, expectedApplicaitonStatus: String) =>
+      forAll(AmberForResidualPreferences) { (evaluation: AssessmentRuleCategoryResult, expectedApplicaitonStatus: ApplicationStatuses.EnumVal) =>
         calculator.determineStatus(evaluation) mustBe expectedApplicaitonStatus
       }
     }
 
     "Set application status to Passed when candidate is green in their residual Preferences" in {
-      forAll(GreenForResidualPreferences) { (evaluation: AssessmentRuleCategoryResult, expectedApplicaitonStatus: String) =>
+      forAll(GreenForResidualPreferences) { (evaluation: AssessmentRuleCategoryResult, expectedApplicaitonStatus: ApplicationStatuses.EnumVal) =>
         calculator.determineStatus(evaluation) mustBe expectedApplicaitonStatus
       }
     }

@@ -18,6 +18,7 @@ package mocks
 
 import controllers.OnlineTestDetails
 import model.EvaluationResults._
+import model.ApplicationStatuses
 import model.OnlineTestCommands.{OnlineTestApplication, OnlineTestApplicationWithCubiksUser, OnlineTestProfile}
 import model.PersistedObjects.{ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation}
 import org.joda.time.{DateTime, LocalDate}
@@ -29,7 +30,7 @@ import scala.concurrent.Future
 /**
   * @deprecated Please use Mockito
   */
-case class TestableResult(result: RuleCategoryResult, version: String, applicationStatus: String)
+case class TestableResult(result: RuleCategoryResult, version: String, applicationStatus: ApplicationStatuses.EnumVal)
 
 /**
   * @deprecated Please use Mockito
@@ -40,14 +41,16 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
   val inMemoryRepo = new mutable.HashMap[String, TestableResult]
 
   def nextApplicationReadyForOnlineTesting: Future[Option[OnlineTestApplication]] =
-    Future.successful(Some(OnlineTestApplication("appId", "appStatus", "userId", false, false, "Test Preferred Name", None)))
+    Future.successful(Some(OnlineTestApplication("appId", ApplicationStatuses.Submitted, "userId", guaranteedInterview = false,
+      needsAdjustments = false, "Test Preferred Name", None
+    )))
 
   def getOnlineTestDetails(userId: String): Future[OnlineTestDetails] = Future.successful {
     val date = DateTime.now
-    OnlineTestDetails(date, date.plusDays(4), "http://www.google.co.uk", "123@test.com", true)
+    OnlineTestDetails(date, date.plusDays(4), "http://www.google.co.uk", "123@test.com", isOnlineTestEnabled = true)
   }
 
-  def updateStatus(userId: String, status: String): Future[Unit] = Future.successful(Unit)
+  def updateStatus(userId: String, status: ApplicationStatuses.EnumVal): Future[Unit] = Future.successful(Unit)
 
   def updateExpiryTime(userId: String, expirationDate: DateTime): Future[Unit] = Future.successful(Unit)
 
@@ -72,7 +75,9 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
 
   override def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = ???
 
-  override def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult, applicationStatus: String): Future[Unit] = {
+  override def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult,
+    applicationStatus: ApplicationStatuses.EnumVal
+  ): Future[Unit] = {
     inMemoryRepo += applicationId -> TestableResult(p, version, applicationStatus)
     Future.successful(())
   }
@@ -85,8 +90,8 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
 
   override def nextApplicationPendingFailure: Future[Option[ApplicationForNotification]] = Future.successful(None)
 
-  def saveCandidateAllocationStatus(applicationId: String, applicationStatus: String, expireDate: Option[LocalDate]): Future[Unit] =
-    Future.successful(())
+  def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal,
+    expireDate: Option[LocalDate]): Future[Unit] = Future.successful(())
 
   def removeCandidateAllocationStatus(applicationId: String): Future[Unit] = ???
 

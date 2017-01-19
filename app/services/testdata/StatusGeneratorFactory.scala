@@ -24,7 +24,7 @@ object StatusGeneratorFactory {
   def getGenerator(status: String) = {
     status match {
       case "REGISTERED" => RegisteredStatusGenerator
-      case ApplicationStatuses.Created => CreatedStatusGenerator
+      case ApplicationStatuses.Created.name => CreatedStatusGenerator
       case "IN_PROGRESS_PERSONAL_DETAILS" => InProgressPersonalDetailsStatusGenerator
       case "IN_PROGRESS_SCHEME_PREFERENCES" => InProgressSchemePreferencesStatusGenerator
       case "IN_PROGRESS_ASSISTANCE_DETAILS" => InProgressAssistanceDetailsStatusGenerator
@@ -34,26 +34,26 @@ object StatusGeneratorFactory {
       case "IN_PROGRESS_QUESTIONNAIRE_PARENTAL_OCCUPATION" | "IN_PROGRESS_QUESTIONNAIRE" =>
         InProgressQuestionnaireParentalOccupationStatusGenerator
       case "IN_PROGRESS_REVIEW" => InProgressReviewStatusGenerator
-      case ApplicationStatuses.Submitted => SubmittedStatusGenerator
-      case ApplicationStatuses.OnlineTestInvited => OnlineTestInvitedStatusGenerator
-      case ApplicationStatuses.OnlineTestStarted => OnlineTestStartedStatusGenerator
-      case ApplicationStatuses.OnlineTestCompleted => OnlineTestCompletedWithPDFReportStatusGenerator
-      case ApplicationStatuses.OnlineTestExpired => OnlineTestExpiredStatusGenerator
-      case ApplicationStatuses.AwaitingOnlineTestReevaluation => AwaitingOnlineTestReevaluationStatusGenerator
-      case ApplicationStatuses.OnlineTestFailed => OnlineTestFailedStatusGenerator
-      case ApplicationStatuses.OnlineTestFailedNotified => OnlineTestFailedNotifiedStatusGenerator
-      case ApplicationStatuses.AwaitingAllocation => AwaitingAllocationStatusGenerator
-      case ApplicationStatuses.AllocationConfirmed => AllocationStatusGenerator
-      case ApplicationStatuses.AllocationUnconfirmed => AllocationStatusGenerator
-      case ApplicationStatuses.FailedToAttend => FailedToAttendStatusGenerator
-      case ApplicationStatuses.AssessmentScoresEntered => AssessmentScoresEnteredStatusGenerator
-      case ApplicationStatuses.AssessmentScoresAccepted => AssessmentScoresAcceptedStatusGenerator
-      case ApplicationStatuses.AwaitingAssessmentCentreReevaluation => AwaitingAssessmentCentreReevalationStatusGenerator
-      case ApplicationStatuses.AssessmentCentrePassed => AssessmentCentrePassedStatusGenerator
-      case ApplicationStatuses.AssessmentCentreFailed => AssessmentCentreFailedStatusGenerator
-      case ApplicationStatuses.AssessmentCentrePassedNotified => AssessmentCentrePassedNotifiedStatusGenerator
-      case ApplicationStatuses.AssessmentCentreFailedNotified => AssessmentCentreFailedNotifiedStatusGenerator
-      case ApplicationStatuses.Withdrawn => WithdrawnStatusGenerator
+      case ApplicationStatuses.Submitted.name => SubmittedStatusGenerator
+      case ApplicationStatuses.OnlineTestInvited.name => OnlineTestInvitedStatusGenerator
+      case ApplicationStatuses.OnlineTestStarted.name => OnlineTestStartedStatusGenerator
+      case ApplicationStatuses.OnlineTestCompleted.name => OnlineTestCompletedWithPDFReportStatusGenerator
+      case ApplicationStatuses.OnlineTestExpired.name => OnlineTestExpiredStatusGenerator
+      case ApplicationStatuses.AwaitingOnlineTestReevaluation.name => AwaitingOnlineTestReevaluationStatusGenerator
+      case ApplicationStatuses.OnlineTestFailed.name => OnlineTestFailedStatusGenerator
+      case ApplicationStatuses.OnlineTestFailedNotified.name => OnlineTestFailedNotifiedStatusGenerator
+      case ApplicationStatuses.AwaitingAllocation.name => AwaitingAllocationStatusGenerator
+      case ApplicationStatuses.AllocationConfirmed.name => AllocationStatusGenerator
+      case ApplicationStatuses.AllocationUnconfirmed.name => AllocationStatusGenerator
+      case ApplicationStatuses.FailedToAttend.name => FailedToAttendStatusGenerator
+      case ApplicationStatuses.AssessmentScoresEntered.name => AssessmentScoresEnteredStatusGenerator
+      case ApplicationStatuses.AssessmentScoresAccepted.name => AssessmentScoresAcceptedStatusGenerator
+      case ApplicationStatuses.AwaitingAssessmentCentreReevaluation.name => AwaitingAssessmentCentreReevalationStatusGenerator
+      case ApplicationStatuses.AssessmentCentrePassed.name => AssessmentCentrePassedStatusGenerator
+      case ApplicationStatuses.AssessmentCentreFailed.name => AssessmentCentreFailedStatusGenerator
+      case ApplicationStatuses.AssessmentCentrePassedNotified.name => AssessmentCentrePassedNotifiedStatusGenerator
+      case ApplicationStatuses.AssessmentCentreFailedNotified.name => AssessmentCentreFailedNotifiedStatusGenerator
+      case ApplicationStatuses.Withdrawn.name => WithdrawnStatusGenerator
       case _ => throw InvalidStatusException(s"$status is not valid or not supported")
     }
   }

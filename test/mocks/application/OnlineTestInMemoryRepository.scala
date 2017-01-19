@@ -17,10 +17,11 @@
 package mocks.application
 
 import controllers.OnlineTestDetails
+import model.ApplicationStatuses
 import model.EvaluationResults._
-import model.OnlineTestCommands.{OnlineTestApplication, OnlineTestApplicationWithCubiksUser, OnlineTestProfile}
-import model.PersistedObjects.{ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation}
-import org.joda.time.{DateTime, LocalDate}
+import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser, OnlineTestProfile }
+import model.PersistedObjects._
+import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.OnlineTestRepository
 
 import scala.collection.mutable
@@ -38,14 +39,16 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
   val inMemoryRepo = new mutable.HashMap[String, RuleCategoryResult]
 
   def nextApplicationReadyForOnlineTesting: Future[Option[OnlineTestApplication]] =
-    Future.successful(Some(OnlineTestApplication("appId", "appStatus", "userId", false, false, "Test Preferred Name", None)))
+    Future.successful(Some(OnlineTestApplication("appId", ApplicationStatuses.Submitted, "userId", guaranteedInterview = false,
+     needsAdjustments = false, "Test Preferred Name", None
+    )))
 
   def getOnlineTestDetails(userId: String): Future[OnlineTestDetails] = Future.successful {
     val date = DateTime.now
     OnlineTestDetails(date, date.plusDays(4), "http://www.google.co.uk", "123@test.com", isOnlineTestEnabled = true)
   }
 
-  def updateStatus(userId: String, status: String): Future[Unit] = Future.successful(Unit)
+  def updateStatus(userId: String, status: ApplicationStatuses.EnumVal): Future[Unit] = Future.successful(Unit)
 
   def updateExpiryTime(userId: String, expirationDate: DateTime): Future[Unit] = Future.successful(Unit)
 
@@ -72,13 +75,14 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
 
   override def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = ???
 
-  override def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult, applicationStatus: String): Future[Unit] = {
+  override def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult,
+    applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
     inMemoryRepo += applicationId -> p
     Future.successful(())
   }
 
-  def saveCandidateAllocationStatus(applicationId: String, applicationStatus: String, expireDate: Option[LocalDate]): Future[Unit] =
-    Future.successful(())
+  def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal,
+    expireDate: Option[LocalDate]): Future[Unit] = Future.successful(())
 
   override def removeCandidateAllocationStatus(applicationId: String): Future[Unit] = Future.successful(())
 

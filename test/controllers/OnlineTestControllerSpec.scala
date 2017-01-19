@@ -18,10 +18,12 @@ package controllers
 
 import config._
 import connectors.ExchangeObjects._
-import connectors.{CubiksGatewayClient, EmailClient}
-import factories.{DateTimeFactory, UUIDFactory}
+import connectors.{ CubiksGatewayClient, EmailClient }
+import factories.{ DateTimeFactory, UUIDFactory }
 import mocks._
-import mocks.application.{DocumentRootInMemoryRepository, OnlineTestInMemoryRepository}
+import mocks.application.{ DocumentRootInMemoryRepository, OnlineTestInMemoryRepository }
+import model.ApplicationStatuses
+import model.ApplicationStatuses.Implicits._
 import model.Commands.Address
 import model.OnlineTestCommands.OnlineTestApplication
 import model.PersistedObjects.ContactDetails
@@ -30,10 +32,10 @@ import org.mockito.Matchers.any
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.Helpers._
-import play.api.test.{FakeHeaders, FakeRequest, Helpers}
+import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.application.AssistanceDetailsRepository
-import repositories.{ContactDetailsRepository, OnlineTestPDFReportRepository}
-import services.onlinetesting.{OnlineTestExtensionService, OnlineTestService}
+import repositories.{ ContactDetailsRepository, OnlineTestPDFReportRepository }
+import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
 import testkit.MockitoImplicits.OngoingStubbingExtensionUnit
 import testkit.UnitWithAppSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -59,7 +61,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
         "1234",
         s"""
            |{
-           |  "status":"Started"
+           |  "status":"ONLINE_TEST_STARTED"
            |}
         """.stripMargin
       ))
@@ -122,17 +124,17 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     "return a valid report if one exists" in new TestFixture {
       val result = TestOnlineTestController.getPDFReport(hasPDFReportApplicationId)(FakeRequest())
 
-      status(result) must be(OK)
-      headers(result).get("Content-Type").get must equal("application/pdf")
+      status(result) mustBe OK
+      headers(result).get("Content-Type").get mustEqual "application/pdf"
       headers(result).get("Content-Disposition").get must startWith("attachment;")
       headers(result).get("Content-Disposition").get must include("""filename="report-""")
-      contentAsBytes(result) must equal(testPDFContents)
+      contentAsBytes(result) mustEqual testPDFContents
     }
 
     "return not found if one does not exist" in new TestFixture {
       val result = TestOnlineTestController.getPDFReport(hasNoPDFReportApplicationId)(FakeRequest())
 
-      status(result) must be(NOT_FOUND)
+      status(result) mustBe NOT_FOUND
     }
   }
 
@@ -209,7 +211,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
         override def getOnlineTestApplication(appId: String): Future[Option[OnlineTestApplication]] = {
           Future.successful(
             Some(
-              OnlineTestApplication(appId, "", "", guaranteedInterview = false, needsAdjustments = false, "", None)
+              OnlineTestApplication(appId, ApplicationStatuses.Submitted, "", guaranteedInterview = false, needsAdjustments = false, "", None)
             )
           )
         }

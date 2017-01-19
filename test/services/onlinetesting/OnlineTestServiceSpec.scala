@@ -21,6 +21,7 @@ import connectors.ExchangeObjects._
 import connectors.{CSREmailClient, CubiksGatewayClient}
 import controllers.OnlineTestDetails
 import factories.{DateTimeFactory, UUIDFactory}
+import model.ApplicationStatuses.Implicits._
 import model.Commands
 import model.Commands._
 import model.Exceptions.{ConnectorException, NotFoundException}

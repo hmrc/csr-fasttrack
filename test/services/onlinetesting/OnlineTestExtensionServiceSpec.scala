@@ -18,6 +18,7 @@ package services.onlinetesting
 
 import controllers.OnlineTestDetails
 import factories.DateTimeFactory
+import model.ApplicationStatuses
 import model.OnlineTestCommands.OnlineTestApplication
 import org.joda.time.DateTime
 import org.mockito.Matchers.{ eq => eqTo, _ }
@@ -54,7 +55,7 @@ class OnlineTestExtensionServiceSpec extends PlaySpec with ScalaFutures with Moc
   }
 
   trait TestFixture {
-    val applicationStatus = "ONLINE_TEST_EXPIRED"
+    val applicationStatus = ApplicationStatuses.OnlineTestExpired
     val applicationId = "abc"
     val userId = "xyz"
     val preferredName = "Jon"

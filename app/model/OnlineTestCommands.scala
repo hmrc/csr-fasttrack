@@ -18,6 +18,7 @@ package model
 
 import connectors.ExchangeObjects.ReportNorm
 import connectors.PassMarkExchangeObjects.Settings
+import model.ApplicationStatuses.Implicits._
 import model.PersistedObjects.CandidateTestReport
 import org.joda.time.DateTime
 import play.api.libs.json.Json
@@ -26,7 +27,7 @@ object OnlineTestCommands {
   case class OnlineTestProfile(cubiksUserId: Int, token: String, onlineTestUrl: String,
     invitationDate: DateTime, expirationDate: DateTime, participantScheduleId: Int)
 
-  case class OnlineTestApplication(applicationId: String, applicationStatus: String, userId: String,
+  case class OnlineTestApplication(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal, userId: String,
     guaranteedInterview: Boolean, needsAdjustments: Boolean, preferredName: String,
     timeAdjustments: Option[TimeAdjustmentsOnlineTestApplication])
 
@@ -39,7 +40,7 @@ object OnlineTestCommands {
     passmarkSettings: Settings, // pass and fail mark
     preferences: Preferences, // preferences which scheme candidates like
     scores: CandidateTestReport, // applicationId + scores
-    applicationStatus: String
+    applicationStatus: ApplicationStatuses.EnumVal
   )
 
   case class TimeAdjustmentsOnlineTestApplication(verbalTimeAdjustmentPercentage: Int, numericalTimeAdjustmentPercentage: Int)
@@ -47,6 +48,7 @@ object OnlineTestCommands {
     tScore: Option[Double], percentile: Option[Double], raw: Option[Double], sten: Option[Double])
 
   object Implicits {
+
     implicit val TimeAdjustmentsOnlineTestApplicationFormats = Json.format[TimeAdjustmentsOnlineTestApplication]
     implicit val ApplicationForOnlineTestingFormats = Json.format[OnlineTestApplication]
     implicit val OnlineTestReportNormFormats = Json.format[ReportNorm]

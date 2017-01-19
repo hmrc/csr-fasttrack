@@ -16,6 +16,7 @@
 
 package model
 
+import model.ApplicationStatuses.Implicits._
 import model.Commands.{ Address, PhoneNumber, PostCode }
 import model.EvaluationResults.Result
 import model.OnlineTestCommands.TestResult
@@ -24,7 +25,7 @@ import play.api.libs.json._
 
 object PersistedObjects {
 
-  case class ApplicationStatus(applicationId: String, applicationStatus: String)
+  case class ApplicationStatus(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal)
 
   case class PersonalDetails(
     firstName: String,
@@ -62,10 +63,10 @@ object PersistedObjects {
     applicationId: String,
     userId: String,
     preferredName: String,
-    applicationStatus: String
+    applicationStatus: ApplicationStatuses.EnumVal
   )
 
-  case class ApplicationIdWithUserIdAndStatus(applicationId: String, userId: String, applicationStatus: String)
+  case class ApplicationIdWithUserIdAndStatus(applicationId: String, userId: String, applicationStatus: ApplicationStatuses.EnumVal)
 
   case class PersistedAnswer(answer: Option[String], otherDetails: Option[String], unknown: Option[Boolean])
   case class PersistedQuestion(question: String, answer: PersistedAnswer)

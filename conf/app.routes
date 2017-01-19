@@ -9,6 +9,7 @@ GET         /assistance-details/:userId/:applicationId                   control
 PUT         /application/create                                          controllers.ApplicationController.createApplication
 GET         /application/progress/:applicationId                         controllers.ApplicationController.applicationProgress(applicationId: String)
 GET         /application/status/:applicationId                           controllers.ApplicationController.applicationStatus(applicationId: String)
+GET         /application/status-details/:applicationId                   controllers.ApplicationController.applicationStatusDetails(applicationId: String)
 GET         /application/find/user/:userId/framework/:frameworkId        controllers.ApplicationController.findApplication(userId: String, frameworkId: String)
 PUT         /application/review/:applicationId                           controllers.ApplicationController.review(applicationId: String)
 PUT         /application/submit/:userId/:applicationId                   controllers.SubmitApplicationController.submitApplication(userId: String, applicationId: String)
