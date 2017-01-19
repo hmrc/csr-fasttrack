@@ -20,6 +20,7 @@ import connectors.AuthProviderClient
 import connectors.AuthProviderClient.UserRole
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import repositories.MongoDbConnection
+import services.testdata.faker.DataFaker.Random
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.collection.parallel.ForkJoinTaskSupport
@@ -46,7 +47,7 @@ trait TestDataGeneratorService {
     }
   }
 
-  def createAdminUsers(numberToGenerate: Int, emailPrefix: String,
+  def createAdminUsers(numberToGenerate: Int, emailPrefix: Option[String],
                        role: UserRole)(implicit hc: HeaderCarrier): Future[List[DataGenerationResponse]] = {
     Future.successful {
       val parNumbers = (1 to numberToGenerate).par
@@ -54,8 +55,11 @@ trait TestDataGeneratorService {
         new scala.concurrent.forkjoin.ForkJoinPool(2)
       )
       parNumbers.map { candidateGenerationId =>
-        val fut = RegisteredStatusGenerator.createUser(generationId = candidateGenerationId, firstName = "CSR Test",
-         lastName = "Service Manager", email = s"test_service_manager_$emailPrefix$candidateGenerationId@mailinator.com",
+        val fut = RegisteredStatusGenerator.createUser(
+          generationId = candidateGenerationId,
+          firstName = "CSR Test",
+          lastName = "Service Manager",
+          email = s"test_service_manager_${emailPrefix.getOrElse(Random.number(Some(10000)))}a$candidateGenerationId@mailinator.com",
           preferredName = None, role = role
         )
         Await.result(fut, 5 seconds)

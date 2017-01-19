@@ -112,8 +112,12 @@ object DataFaker {
       }
     }
 
-    def gender = randOne(List("Male", "Female"))
-    def sexualOrientation = randOne(List("Heterosexual/straight", "Gay woman/lesbian", "Gay man", "Bisexual", "Other"))
+    def gender = randOne(List("Male", "Female", "Other", "I don't know/prefer not to say"))
+    def sexualOrientation = randOne(List("Heterosexual/straight",
+      "Gay/lesbian",
+      "Bisexual",
+      "Other",
+      "I don't know/prefer not to say"))
     def ethnicGroup = randOne(List(
       "English/Welsh/Scottish/Northern Irish/British",
       "Irish",
@@ -132,25 +136,43 @@ object DataFaker {
       "Caribbean",
       "Other Black/African/Caribbean background",
       "Arab",
-      "Other ethnic group"
+      "Other ethnic group",
+      "I don't know/prefer not to say"
     ))
-    def age11to16School = randOne(List("Blue Bees School", "Green Goblins School", "Magenta Monkeys School", "Zany Zebras School"))
+    def age14to16School = randOne(List("Blue Bees School", "Green Goblins School", "Magenta Monkeys School", "Zany Zebras School"))
     def age16to18School = randOne(List("Advanced Skills School", "Extremely Advanced School", "A-Level Specialist School", "16 to 18 School"))
-    def homePostcode = randOne(List("AB1 2CD", "BC11 4DE", "CD6 2EF", "DE2F 1GH"))
+    def homePostcode = randOne(List("AB1 2CD", "BC11 4DE", "CD6 2EF", "DE2F 1GH", "I don't know/prefer not to say"))
     def yesNo = randOne(List(Yes, No))
-    def employeeOrSelf = randOne(List(Some("Employee"), None))
-    def sizeOfPlaceOfWork = randOne(List("Small (1 - 24 employees)", "Large (over 24 employees)"))
+    def employeeOrSelf = randOne(List(
+      "Employee",
+      "Self-employed with employees",
+      "Self-employed/freelancer without employees",
+      "I don't know/prefer not to say"))
+
+    def sizeOfPlaceOfWork = randOne(List("Small (1 - 24 employees)", "Large (over 24 employees)", "I don't know/prefer not to say"))
+
     def parentsOccupation = randOne(List(
       "Unemployed but seeking work",
       "Unemployed",
+      "Employed",
+      "Unknown"
+    ))
+
+    def parentsOccupationDetails = randOne(List(
       "Modern professional",
-      "Clerical and intermediate",
+      "Clerical (office work) and intermediate",
       "Senior managers and administrators",
       "Technical and craft",
       "Semi-routine manual and service",
       "Routine manual and service",
       "Middle or junior managers",
       "Traditional professional"
+    ))
+
+    def sizeParentsEmployeer = randOne(List(
+      "Small (1 to 24 employees)",
+      "Large (over 24 employees)",
+      "I don't know/prefer not to say"
     ))
 
     def firstName = randOne(Firstnames.list)

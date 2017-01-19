@@ -78,7 +78,7 @@ import model.commands.exchange.testdata.AssistanceDetailsData
       val statusData = StatusData(o.statusData)
       GeneratorConfig(
         personalData = o.personalData.map(PersonalData(_, generatorId)).getOrElse(PersonalData()),
-        assistanceDetails = o.assistanceDetails.map(AssistanceDetailsData(_, generatorId)).getOrElse(AssistanceDetailsData()),
+        assistanceDetails = o.assistanceDetailsData.map(AssistanceDetailsData(_, generatorId)).getOrElse(AssistanceDetailsData()),
         previousStatus = statusData.previousApplicationStatus,
         cubiksUrl = cubiksUrlFromConfig,
         region = o.region,
