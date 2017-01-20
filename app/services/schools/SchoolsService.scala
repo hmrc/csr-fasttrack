@@ -34,8 +34,7 @@ trait SchoolsService {
     for {
       allSchools <- schoolsRepo.schools
     } yield {
-      val sanitizedTerm = sanitize(term)
-      applyLimit(allSchools.filter(s => sanitize(s.name).contains(sanitizedTerm)))
+      allSchools.filter(s => sanitize(s.name).contains(sanitize(term))).take(MaxNumberOfSchools)
     }
   }
 
@@ -45,5 +44,4 @@ trait SchoolsService {
       .toLowerCase()
   }
 
-  private def applyLimit(allSchools: List[School]) = allSchools.take(MaxNumberOfSchools)
 }
