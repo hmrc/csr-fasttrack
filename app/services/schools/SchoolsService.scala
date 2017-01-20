@@ -30,12 +30,7 @@ trait SchoolsService {
   val schoolsRepo : SchoolsRepository
 
   def getSchools(term: String) = {
-
-    for {
-      allSchools <- schoolsRepo.schools
-    } yield {
-      allSchools.filter(s => sanitize(s.name).contains(sanitize(term))).take(MaxNumberOfSchools)
-    }
+    schoolsRepo.schools.map(_.filter(s => sanitize(s.name).contains(sanitize(term))).take(MaxNumberOfSchools))
   }
 
   private def sanitize(str: String) = {
@@ -43,5 +38,4 @@ trait SchoolsService {
       .replaceAll("""\s*""","")
       .toLowerCase()
   }
-
 }
