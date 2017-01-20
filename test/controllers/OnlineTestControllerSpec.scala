@@ -23,7 +23,6 @@ import factories.{ DateTimeFactory, UUIDFactory }
 import mocks._
 import mocks.application.{ DocumentRootInMemoryRepository, OnlineTestInMemoryRepository }
 import model.ApplicationStatuses
-import model.ApplicationStatuses.Implicits._
 import model.Commands.Address
 import model.OnlineTestCommands.OnlineTestApplication
 import model.PersistedObjects.ContactDetails

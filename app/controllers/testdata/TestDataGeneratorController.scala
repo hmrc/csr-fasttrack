@@ -25,6 +25,7 @@ import model._
 import model.EvaluationResults.Result
 import model.Exceptions.EmailTakenException
 import model.exchange.testdata._
+import model.ProgressStatuses._
 import play.api.Play
 import play.api.libs.json.{ JsObject, JsString, Json }
 import play.api.mvc.{ Action, RequestHeader }
@@ -50,12 +51,12 @@ trait TestDataGeneratorController extends BaseController {
     }
   }
 
-  def requestExample = Action { implicit request =>
+  def requestExample = Action {
     val example = CreateCandidateInStatusRequest(
       statusData = StatusDataRequest(
         applicationStatus = "SUBMITTED",
-        previousApplicationStatus = Some("REGISTERED"),
-        progressStatus = Some("SUBMITTED")
+        previousApplicationStatus = Some("CREATED"),
+        progressStatus = Some(ProgressStatuses.SubmittedProgress)
       ),
       personalData = Some(PersonalDataRequest(
         emailPrefix = Some(s"testf${Random.number()}"),
@@ -124,8 +125,6 @@ trait TestDataGeneratorController extends BaseController {
                                loc1scheme2EvaluationResult: Option[String],
                                previousStatus: Option[String] = None,
                                confirmedAllocation: Boolean) = Action.async { implicit request =>
-
-    import model.ApplicationStatuses._
 
     val initialConfig = GeneratorConfig(
       personalData = PersonalData(emailPrefix = emailPrefix),

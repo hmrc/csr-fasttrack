@@ -16,7 +16,6 @@
 
 package services.testdata
 
-import play.api.mvc.RequestHeader
 import repositories._
 import repositories.application.GeneralApplicationRepository
 import uk.gov.hmrc.play.http.HeaderCarrier

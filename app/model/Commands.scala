@@ -18,7 +18,7 @@ package model
 
 import connectors.PassMarkExchangeObjects.Settings
 import controllers._
-import model.ApplicationStatuses.Implicits._
+import model.ApplicationStatuses.enumFormat
 import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.CandidateScoresCommands.Implicits._
 import model.Exceptions.{ NoResultsReturned, TooManyEntries }

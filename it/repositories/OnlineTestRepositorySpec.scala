@@ -20,7 +20,7 @@ import java.util.UUID
 
 import factories.DateTimeFactory
 import model.{ ApplicationStatuses, ProgressStatuses }
-import model.ApplicationStatuses.Implicits._
+import model.ApplicationStatuses._
 import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound }
 import model.OnlineTestCommands.{ OnlineTestApplicationWithCubiksUser, OnlineTestProfile }
 import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
@@ -339,13 +339,13 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
         "applicationId" -> "appId",
         "applicationStatus" -> ApplicationStatuses.OnlineTestFailedNotified,
         "progress-status" -> BSONDocument(
-          ProgressStatuses.OnlineTestStartedProgress -> true,
-          ProgressStatuses.OnlineTestCompletedProgress -> true,
-          ProgressStatuses.OnlineTestExpiredProgress -> true,
-          ProgressStatuses.AwaitingOnlineTestReevaluationProgress -> true,
-          ProgressStatuses.OnlineTestFailedProgress -> true,
-          ProgressStatuses.OnlineTestFailedNotifiedProgress -> true,
-          ProgressStatuses.AwaitingOnlineTestAllocationProgress -> true
+          s"${ProgressStatuses.OnlineTestStartedProgress}" -> true,
+          s"${ProgressStatuses.OnlineTestCompletedProgress}" -> true,
+          s"${ProgressStatuses.OnlineTestExpiredProgress}" -> true,
+          s"${ProgressStatuses.AwaitingOnlineTestReevaluationProgress}" -> true,
+          s"${ProgressStatuses.OnlineTestFailedProgress}" -> true,
+          s"${ProgressStatuses.OnlineTestFailedNotifiedProgress}" -> true,
+          s"${ProgressStatuses.AwaitingOnlineTestAllocationProgress}" -> true
         ),
         "online-tests" -> BSONDocument(
           "cubiksUserId" -> 1111,
@@ -369,7 +369,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
           val progressStatus = doc.getAs[BSONDocument]("progress-status").get
           val allProgressStatuses = progressStatus.elements.map(_._1).toList
-          allProgressStatuses mustBe List(ProgressStatuses.OnlineTestInvitedProgress)
+          allProgressStatuses mustBe List(ProgressStatuses.OnlineTestInvitedProgress.name)
 
           val onlineTests = doc.getAs[BSONDocument]("online-tests").get
           onlineTests.getAs[Int]("cubiksUserId") mustBe Some(1234)

@@ -61,16 +61,16 @@ import model.commands.exchange.testdata.AssistanceDetailsData
   }
 
   case class GeneratorConfig(
-                              personalData: PersonalData = PersonalData(),
-                              setGis: Boolean = false,
-                              cubiksUrl: String,
-                              region: Option[String] = None,
-                              loc1scheme1Passmark: Option[Result] = None,
-                              loc1scheme2Passmark: Option[Result] = None,
-                              assistanceDetails: AssistanceDetailsData = AssistanceDetailsData(),
-                              previousStatus: Option[String] = None,
-                              confirmedAllocation: Boolean = true
-                            )
+    personalData: PersonalData = PersonalData(),
+    setGis: Boolean = false,
+    cubiksUrl: String,
+    region: Option[String] = None,
+    loc1scheme1Passmark: Option[Result] = None,
+    loc1scheme2Passmark: Option[Result] = None,
+    assistanceDetails: AssistanceDetailsData = AssistanceDetailsData(),
+    previousStatus: Option[String] = None,
+    confirmedAllocation: Boolean = true
+  )
 
   object GeneratorConfig {
     def apply(cubiksUrlFromConfig: String, o: model.exchange.testdata.CreateCandidateInStatusRequest)(generatorId: Int): GeneratorConfig = {

@@ -16,7 +16,7 @@
 
 package model
 
-import model.ApplicationStatuses.Implicits._
+import model.ApplicationStatuses.enumFormat
 import model.Commands.{ Address, PhoneNumber, PostCode }
 import model.EvaluationResults.Result
 import model.OnlineTestCommands.TestResult

@@ -19,7 +19,7 @@ package services.applicationassessment
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import connectors.{ CSREmailClient, EmailClient }
 import model.ApplicationStatuses
-import model.ApplicationStatuses.Implicits._
+import model.ApplicationStatuses.BSONEnumHandler
 import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import model.EvaluationResults._
 import model.Exceptions.IncorrectStatusInApplicationException
