@@ -55,9 +55,9 @@ object ApplicationStatusOrder {
 
   def statusMaps(progress: ProgressResponse) = Seq(
     (progress.personalDetails, PersonalDetailsCompletedProgress.weight, PersonalDetailsCompletedProgress),
-    (progress.hasLocations, LocationsCompletedProgress.weight, LocationsCompletedProgress),
-    (progress.hasSchemes, SchemesCompletedProgress.weight, SchemesCompletedProgress),
-    (progress.assistanceDetails, SchemesCompletedProgress.weight, AssistanceDetailsCompletedProgress),
+    (progress.hasSchemeLocations, SchemeLocationsCompletedProgress.weight, SchemeLocationsCompletedProgress),
+    (progress.hasSchemes, SchemesPreferencesCompletedProgress.weight, SchemesPreferencesCompletedProgress),
+    (progress.assistanceDetails, SchemesPreferencesCompletedProgress.weight, AssistanceDetailsCompletedProgress),
     (progress.review, ReviewCompletedProgress.weight, ReviewCompletedProgress),
 
     (progress.questionnaire.contains("start_questionnaire"), StartDiversityQuestionnaireProgress.weight,

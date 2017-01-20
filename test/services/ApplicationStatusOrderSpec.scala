@@ -33,7 +33,7 @@ class ApplicationStatusOrderSpec extends PlaySpec {
 
   "a registered application" should {
     "return registered" in {
-      val status = ApplicationStatusOrder.getStatus(ProgressResponse("id", personalDetails = false, hasLocations = false, hasSchemes = false,
+      val status = ApplicationStatusOrder.getStatus(ProgressResponse("id", personalDetails = false, hasSchemeLocations = false, hasSchemes = false,
         assistanceDetails = false, review = false, Nil,
         submitted = false, withdrawn = false, OnlineTestProgressResponse()
       ))
@@ -68,8 +68,8 @@ class ApplicationStatusOrderSpec extends PlaySpec {
 
   "an application in framework and locations" should {
     "return schemes_completed" in {
-      val customProgress = emptyProgress.copy(personalDetails = true, hasLocations = true, hasSchemes = true)
-      ApplicationStatusOrder.getStatus(customProgress) must be(ProgressStatuses.SchemesCompletedProgress)
+      val customProgress = emptyProgress.copy(personalDetails = true, hasSchemeLocations = true, hasSchemes = true)
+      ApplicationStatusOrder.getStatus(customProgress) must be(ProgressStatuses.SchemesPreferencesCompletedProgress)
     }
   }
 
@@ -79,7 +79,7 @@ class ApplicationStatusOrderSpec extends PlaySpec {
       ApplicationStatusOrder.getStatus(customProgress) must be(ProgressStatuses.PersonalDetailsCompletedProgress)
     }
     "return personal_details_completed when sections are not completed" in {
-      val customProgress = emptyProgress.copy(personalDetails = true, hasLocations = false, hasSchemes = false)
+      val customProgress = emptyProgress.copy(personalDetails = true, hasSchemeLocations = false, hasSchemes = false)
       ApplicationStatusOrder.getStatus(customProgress) must be(ProgressStatuses.PersonalDetailsCompletedProgress)
     }
   }
@@ -104,14 +104,14 @@ class ApplicationStatusOrderSpec extends PlaySpec {
 
 object ApplicationStatusOrderSpec {
 
-  val progress = ProgressResponse("1", personalDetails = true, hasLocations = true, hasSchemes = true, assistanceDetails = true, review = true,
+  val progress = ProgressResponse("1", personalDetails = true, hasSchemeLocations = true, hasSchemes = true, assistanceDetails = true, review = true,
     List("start_questionnaire", "diversity_questionnaire", "education_questionnaire", "occupation_questionnaire"),
     submitted = true, withdrawn = true
   )
 
   val emptyProgress = ProgressResponse("1")
 
-  val completeProgress = ProgressResponse("1", personalDetails = true, hasLocations = true, hasSchemes = true, assistanceDetails = true,
+  val completeProgress = ProgressResponse("1", personalDetails = true, hasSchemeLocations = true, hasSchemes = true, assistanceDetails = true,
     review = true, List("start_questionnaire", "diversity_questionnaire", "education_questionnaire", "occupation_questionnaire"),
     submitted = true, withdrawn = true,
     OnlineTestProgressResponse(invited = true, started = true, completed = true, allocationConfirmed = true)

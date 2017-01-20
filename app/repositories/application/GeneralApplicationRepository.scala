@@ -179,8 +179,8 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       ProgressResponse(
         applicationId,
         personalDetails = getProgress(ProgressStatuses.PersonalDetailsCompletedProgress),
-        hasLocations = getProgress(ProgressStatuses.LocationsCompletedProgress),
-        hasSchemes = getProgress(ProgressStatuses.SchemesCompletedProgress),
+        hasSchemeLocations = getProgress(ProgressStatuses.SchemeLocationsCompletedProgress),
+        hasSchemes = getProgress(ProgressStatuses.SchemesPreferencesCompletedProgress),
         assistanceDetails = getProgress(ProgressStatuses.AssistanceDetailsCompletedProgress),
         review = getProgress(ProgressStatuses.ReviewCompletedProgress),
         questionnaire = questionnaire,
@@ -1059,7 +1059,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
   def getSchemeLocations(applicationId: String): Future[List[String]] = {
     val query = BSONDocument("applicationId" -> applicationId)
-    val projection = BSONDocument("scheme-locations" -> 1)
+    val projection = BSONDocument( "scheme-locations" -> 1)
 
     collection.find(query, projection).one[BSONDocument] map {
       case Some(document) if document.getAs[List[String]]("scheme-locations").isDefined =>
@@ -1073,7 +1073,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
     val query = BSONDocument("applicationId" -> applicationId)
     val schemeLocationsBSON = BSONDocument("$set" -> BSONDocument(
-      "progress-status.scheme-locations" -> true,
+      s"progress-status.${ProgressStatuses.SchemeLocationsCompletedProgress}" -> true,
       "scheme-locations" -> locationIds
     ))
     collection.update(query, schemeLocationsBSON, upsert = false) map { _ => () }
@@ -1093,7 +1093,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val schemePreferencesBSON = BSONDocument("$set" -> BSONDocument(
-      "progress-status.scheme-preferences" -> true,
+      s"progress-status.${ProgressStatuses.SchemesPreferencesCompletedProgress}" -> true,
       "schemes" -> schemeNames
     ))
     collection.update(query, schemePreferencesBSON, upsert = false) map { _ => () }

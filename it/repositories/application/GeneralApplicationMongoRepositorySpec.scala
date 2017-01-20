@@ -126,8 +126,8 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
       val progressStatuses = Map (
         ProgressStatuses.RegisteredProgress -> DateTime.now.minusDays(12),
         ProgressStatuses.PersonalDetailsCompletedProgress -> DateTime.now.minusDays(11),
-        ProgressStatuses.LocationsCompletedProgress -> DateTime.now.minusDays(10),
-        ProgressStatuses.SchemesCompletedProgress -> DateTime.now.minusDays(9),
+        ProgressStatuses.SchemeLocationsCompletedProgress -> DateTime.now.minusDays(10),
+        ProgressStatuses.SchemesPreferencesCompletedProgress -> DateTime.now.minusDays(9),
         ProgressStatuses.AssistanceDetailsCompletedProgress -> DateTime.now.minusDays(9),
         ProgressStatuses.ReviewCompletedProgress -> DateTime.now.minusDays(8),
         ProgressStatuses.StartDiversityQuestionnaireProgress -> DateTime.now.minusDays(7),
@@ -152,8 +152,8 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
       val progressStatuses = Map (
         ProgressStatuses.RegisteredProgress -> DateTime.now.minusDays(12),
         ProgressStatuses.PersonalDetailsCompletedProgress -> DateTime.now.minusDays(11),
-        ProgressStatuses.LocationsCompletedProgress -> DateTime.now.minusDays(10),
-        ProgressStatuses.SchemesCompletedProgress -> DateTime.now.minusDays(9),
+        ProgressStatuses.SchemeLocationsCompletedProgress -> DateTime.now.minusDays(10),
+        ProgressStatuses.SchemesPreferencesCompletedProgress -> DateTime.now.minusDays(9),
         ProgressStatuses.AssistanceDetailsCompletedProgress -> DateTime.now.minusDays(9),
         ProgressStatuses.ReviewCompletedProgress -> DateTime.now.minusDays(8),
         ProgressStatuses.StartDiversityQuestionnaireProgress -> DateTime.now.minusDays(7),

@@ -16,10 +16,11 @@
 
 package repositories.application
 
-import model.Exceptions.{AssistanceDetailsNotFound, CannotUpdateAssistanceDetails}
+import model.Exceptions.{ AssistanceDetailsNotFound, CannotUpdateAssistanceDetails }
+import model.ProgressStatuses
 import model.persisted.AssistanceDetails
 import reactivemongo.api.DB
-import reactivemongo.bson.{BSONDocument, _}
+import reactivemongo.bson.{ BSONDocument, _ }
 import repositories.ReactiveRepositoryHelpers
 import repositories._
 import uk.gov.hmrc.mongo.ReactiveRepository
@@ -45,7 +46,7 @@ class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
     val query = BSONDocument("applicationId" -> applicationId, "userId" -> userId)
     val updateBSON = BSONDocument("$set" -> BSONDocument(
       "applicationStatus" -> "IN_PROGRESS",
-      s"progress-status.assistance-details" -> true,
+      s"progress-status.${ProgressStatuses.AssistanceDetailsCompletedProgress}" -> true,
       AssistanceDetailsCollection -> ad
     ))
 
