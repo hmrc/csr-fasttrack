@@ -59,6 +59,7 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
     val personalDetailsBSON = BSONDocument("$set" -> BSONDocument(
       "applicationStatus" -> ApplicationStatuses.InProgress,
       s"progress-status.${ProgressStatuses.PersonalDetailsCompletedProgress}" -> true,
+      s"progress-status-timestamp.${ProgressStatuses.PersonalDetailsCompletedProgress}" -> DateTime.now(),
       "personal-details" -> persistedPersonalDetails
     ))
 

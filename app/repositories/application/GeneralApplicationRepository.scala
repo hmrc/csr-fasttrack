@@ -228,7 +228,6 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   def findApplicationStatusDetails(applicationId: String): Future[ApplicationStatusDetails] = {
 
     findProgress(applicationId).flatMap { progress =>
-      play.api.Logger.error(s"\n\n======= $progress")
       val latestProgress = ApplicationStatusOrder.getStatus(progress)
       val query = BSONDocument("applicationId" -> applicationId)
       val projection = BSONDocument(
@@ -242,9 +241,6 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         (latestProgress isBefore ProgressStatuses.SubmittedProgress)) {
         ProgressStatuses.PersonalDetailsCompletedProgress
       } else { latestProgress }
-
-      play.api.Logger.error(s"\n\n======== $latestProgress")
-      play.api.Logger.error(s"\n\n======== $statusToGetDateFor")
 
       collection.find(query, projection).one[BSONDocument] map {
         case Some(document) =>
@@ -402,7 +398,8 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   override def review(applicationId: String): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val applicationStatusBSON = BSONDocument("$set" -> BSONDocument(
-      "progress-status.review" -> true
+      s"progress-status.${ProgressStatuses.ReviewCompletedProgress}" -> true,
+      s"progress-status-timestamp.${ProgressStatuses.ReviewCompletedProgress}" -> DateTime.now
     ))
 
     collection.update(query, applicationStatusBSON, upsert = false) map { _ => () }
