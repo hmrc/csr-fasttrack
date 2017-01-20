@@ -228,6 +228,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   def findApplicationStatusDetails(applicationId: String): Future[ApplicationStatusDetails] = {
 
     findProgress(applicationId).flatMap { progress =>
+      play.api.Logger.error(s"\n\n======= $progress")
       val latestProgress = ApplicationStatusOrder.getStatus(progress)
       val query = BSONDocument("applicationId" -> applicationId)
       val projection = BSONDocument(
@@ -241,6 +242,9 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         (latestProgress isBefore ProgressStatuses.SubmittedProgress)) {
         ProgressStatuses.PersonalDetailsCompletedProgress
       } else { latestProgress }
+
+      play.api.Logger.error(s"\n\n======== $latestProgress")
+      play.api.Logger.error(s"\n\n======== $statusToGetDateFor")
 
       collection.find(query, projection).one[BSONDocument] map {
         case Some(document) =>

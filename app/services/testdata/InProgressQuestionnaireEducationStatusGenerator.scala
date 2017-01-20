@@ -17,6 +17,7 @@
 package services.testdata
 
 import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
+import model.ProgressStatuses
 import repositories._
 import repositories.application.GeneralApplicationRepository
 import services.testdata.faker.DataFaker._
@@ -89,7 +90,8 @@ trait InProgressQuestionnaireEducationStatusGenerator extends ConstructiveGenera
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       _ <- qRepository.addQuestions(candidateInPreviousStatus.applicationId.get, getEducationQuestionnaireQuestions)
-      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get, "education_questionnaire")
+      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get,
+        ProgressStatuses.EducationQuestionsCompletedProgress)
     } yield {
       candidateInPreviousStatus
     }

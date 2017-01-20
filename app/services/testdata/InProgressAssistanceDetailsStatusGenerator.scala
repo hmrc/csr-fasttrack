@@ -16,9 +16,9 @@
 
 package services.testdata
 
-import play.api.mvc.RequestHeader
+import model.ProgressStatuses
 import repositories._
-import repositories.application.AssistanceDetailsRepository
+import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -26,11 +26,13 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object InProgressAssistanceDetailsStatusGenerator extends InProgressAssistanceDetailsStatusGenerator {
   val previousStatusGenerator = InProgressSchemePreferencesStatusGenerator
   override val adRepository = assistanceDetailsRepository
+  override val appRepository = applicationRepository
 }
 
 // scalastyle:off method.length
 trait InProgressAssistanceDetailsStatusGenerator extends ConstructiveGenerator {
   val adRepository: AssistanceDetailsRepository
+  val appRepository: GeneralApplicationRepository
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
     val assistanceDetails = generatorConfig.assistanceDetails.getAssistanceDetails()
@@ -39,6 +41,8 @@ trait InProgressAssistanceDetailsStatusGenerator extends ConstructiveGenerator {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       appId = candidateInPreviousStatus.applicationId.get
       _ <- adRepository.update(appId, candidateInPreviousStatus.userId, assistanceDetails)
+      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get,
+        ProgressStatuses.AssistanceDetailsCompletedProgress)
     } yield {
       candidateInPreviousStatus.copy(assistanceDetails = Some(assistanceDetails))
     }

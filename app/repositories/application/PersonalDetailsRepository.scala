@@ -17,12 +17,12 @@
 package repositories.application
 
 import model.Exceptions.PersonalDetailsNotFound
-import model.{ApplicationStatuses, PersistedObjects}
+import model.{ ApplicationStatuses, PersistedObjects, ProgressStatuses }
 import model.ApplicationStatuses.BSONEnumHandler
-import model.PersistedObjects.{PersonalDetails, PersonalDetailsWithUserId}
-import org.joda.time.{DateTime, LocalDate}
+import model.PersistedObjects.{ PersonalDetails, PersonalDetailsWithUserId }
+import org.joda.time.{ DateTime, LocalDate }
 import reactivemongo.api.DB
-import reactivemongo.bson.{BSONDocument, _}
+import reactivemongo.bson.{ BSONDocument, _ }
 import repositories._
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
@@ -58,7 +58,7 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
 
     val personalDetailsBSON = BSONDocument("$set" -> BSONDocument(
       "applicationStatus" -> ApplicationStatuses.InProgress,
-      s"progress-status.personal-details" -> true,
+      s"progress-status.${ProgressStatuses.PersonalDetailsCompletedProgress}" -> true,
       "personal-details" -> persistedPersonalDetails
     ))
 
@@ -79,8 +79,8 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
 
     val personalDetailsBSON = BSONDocument("$set" ->
       BSONDocument(
-        "progress-status.personal-details" -> true,
-        "progress-status-timestamp.personal-details" -> DateTime.now(),
+        s"progress-status.${ProgressStatuses.PersonalDetailsCompletedProgress}" -> true,
+        s"progress-status-timestamp.${ProgressStatuses.PersonalDetailsCompletedProgress}" -> DateTime.now(),
         PersonalDetailsCollection -> personalDetails,
         "applicationStatus" -> newApplicationStatus
       )
