@@ -16,37 +16,23 @@
 
 package controllers
 
-import model.Commands._
-import model.Exceptions.CannotAddMedia
+import play.api.libs.json.Json
 import play.api.mvc.Action
-import repositories._
-import services.AuditService
+import services.schools.SchoolsService
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object MediaController extends MediaController {
-  val mRepository = mediaRepository
-  val auditService = AuditService
+object SchoolsController extends SchoolsController{
+  val schoolsService = SchoolsService
 }
 
-trait MediaController extends BaseController {
-  import Implicits._
+trait SchoolsController extends BaseController {
+  val schoolsService: SchoolsService
 
-  val mRepository: MediaRepository
-  val auditService: AuditService
-
-  def addMedia() = Action.async(parse.json) { implicit request =>
-    withJsonBody[AddMedia] { media =>
-
-      (for {
-        _ <- mRepository.create(media)
-      } yield {
-        auditService.logEvent("CampaignReferrerSaved")
-        Created
-      }).recover {
-        case e: CannotAddMedia => BadRequest(s"cannot add media details for user: ${e.userId}")
-      }
+  def getSchools(term: String) = Action.async { implicit request =>
+    schoolsService.getSchools(term).map { schools =>
+      Ok(Json.toJson(schools))
     }
   }
 }
