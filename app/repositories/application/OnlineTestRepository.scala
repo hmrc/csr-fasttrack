@@ -16,20 +16,19 @@
 
 package repositories.application
 
-import common.Constants.{ Yes, No }
 import config.MicroserviceAppConfig._
 import controllers.OnlineTestDetails
 import factories.DateTimeFactory
 import model.EvaluationResults._
-import model.Exceptions.{NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound, UnexpectedException}
+import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound, UnexpectedException }
 import model.OnlineTestCommands._
-import model.PersistedObjects.{ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation}
-import model.persisted.AssistanceDetails
-import model.{ApplicationStatuses, Commands}
-import org.joda.time.{DateTime, LocalDate}
+import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
+import model.Adjustments._
+import model.{ AdjustmentDetail, ApplicationStatuses, Commands }
+import org.joda.time.{ DateTime, LocalDate }
 import reactivemongo.api.DB
 import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.bson.{BSONArray, BSONDocument, BSONObjectID, BSONString}
+import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID }
 import repositories._
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
@@ -286,22 +285,13 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     val preferredName = personalDetailsRoot.getAs[String]("preferredName").get
 
     val ad = doc.getAs[BSONDocument]("assistance-details")
-    val hasDisability = ad.flatMap(_.getAs[String]("hasDisability")).get
     val needsSupportForOnlineAssessment = ad.flatMap(_.getAs[Boolean]("needsSupportForOnlineAssessment")).get
     val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).getOrElse(false)
-    val typesOfAdjustments = ad.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
-    val hasTimeExtension = typesOfAdjustments.exists(_.contains("time extension"))
 
-    val timeExtensionOpt: Option[TimeAdjustmentsOnlineTestApplication] = if (needsSupportForOnlineAssessment && hasTimeExtension) {
-      val verbalTimeAdjustmentPercentage = ad.flatMap(_.getAs[Int]("verbalTimeAdjustmentPercentage"))
-      val numericalTimeAdjustmentPercentage = ad.flatMap(_.getAs[Int]("numericalTimeAdjustmentPercentage"))
-      Some(TimeAdjustmentsOnlineTestApplication(verbalTimeAdjustmentPercentage.get, numericalTimeAdjustmentPercentage.get))
-    } else {
-      None
-    }
+    val onlineTestsAdjustments = ad.flatMap(_.getAs[AdjustmentDetail]("onlineTests"))
 
     OnlineTestApplication(applicationId, applicationStatus, userId, guaranteedInterview,
-      needsSupportForOnlineAssessment, preferredName, timeExtensionOpt)
+      needsSupportForOnlineAssessment, preferredName, onlineTestsAdjustments)
   }
 
   private def bsonDocToOnlineTestApplicationForReportRetrieving(doc: BSONDocument) = {

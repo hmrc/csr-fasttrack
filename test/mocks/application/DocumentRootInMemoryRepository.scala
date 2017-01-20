@@ -16,7 +16,8 @@
 
 package mocks.application
 
-import common.Constants.{ Yes, No }
+import common.Constants.{ No, Yes }
+import model.{ Adjustments, AdjustmentsComment }
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.EvaluationResults.AssessmentRuleCategoryResult
@@ -115,7 +116,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
 
   override def findApplicationIdsByLocation(location: String): Future[List[String]] = Future.successful(List())
 
-  override def confirmAdjustment(applicationId: String, data: AdjustmentManagement): Future[Unit] = Future.successful(Unit)
+  override def confirmAdjustments(applicationId: String, data: Adjustments): Future[Unit] = Future.successful(Unit)
 
   override def rejectAdjustment(applicationId: String): Future[Unit] = Future.successful(Unit)
 
@@ -154,5 +155,13 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   def getSchemes(applicationId: String): Future[List[Scheme]] = ???
 
   def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit] = ???
+
+  override def findAdjustments(applicationId: String): Future[Option[Adjustments]] = ???
+
+  override def updateAdjustmentsComment(applicationId: String, adjustmentsComment: AdjustmentsComment): Future[Unit] = ???
+
+  override def findAdjustmentsComment(applicationId: String): Future[AdjustmentsComment] = ???
+
+  override def removeAdjustmentsComment(applicationId: String): Future[Unit] = ???
 }
 // scalastyle:on number.of.methods

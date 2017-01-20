@@ -17,7 +17,7 @@
 package repositories.application
 
 import model.Exceptions.{AssistanceDetailsNotFound, CannotUpdateAssistanceDetails}
-import model.persisted.AssistanceDetails
+import model.exchange.AssistanceDetails
 import reactivemongo.api.DB
 import reactivemongo.bson.{BSONDocument, _}
 import repositories.ReactiveRepositoryHelpers

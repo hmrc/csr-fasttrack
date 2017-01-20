@@ -21,7 +21,7 @@ import model.EvaluationResults._
 import model.FlagCandidatePersistedObject.FlagCandidate
 import model.PassmarkPersistedObjects._
 import model.PersistedObjects.{ContactDetails, PersistedAnswer, PersonalDetails, _}
-import model.persisted.AssistanceDetails
+import model.exchange.AssistanceDetails
 import org.joda.time.{DateTime, DateTimeZone, LocalDate}
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.indexes.IndexType.Ascending

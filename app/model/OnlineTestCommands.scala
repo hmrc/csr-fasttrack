@@ -19,6 +19,7 @@ package model
 import connectors.ExchangeObjects.ReportNorm
 import connectors.PassMarkExchangeObjects.Settings
 import model.PersistedObjects.CandidateTestReport
+import model.Adjustments._
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 
@@ -27,8 +28,7 @@ object OnlineTestCommands {
     invitationDate: DateTime, expirationDate: DateTime, participantScheduleId: Int)
 
   case class OnlineTestApplication(applicationId: String, applicationStatus: String, userId: String,
-    guaranteedInterview: Boolean, needsAdjustments: Boolean, preferredName: String,
-    timeAdjustments: Option[TimeAdjustmentsOnlineTestApplication])
+    guaranteedInterview: Boolean, needsAdjustments: Boolean, preferredName: String, adjustmentDetail: Option[AdjustmentDetail])
 
   case class OnlineTestApplicationWithCubiksUser(applicationId: String, userId: String, cubiksUserId: Int)
   case class OnlineTestApplicationForReportRetrieving(userId: Int, locale: String, reportId: Int, norms: List[ReportNorm])
