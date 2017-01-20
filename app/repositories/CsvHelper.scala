@@ -16,11 +16,13 @@
 
 package repositories
 
-trait CsvHelper {
+trait Parser {
+  private[repositories] def parseLine(line: String, expectedNumberOfHeaders: Int): Array[String]
+}
 
-  def expectedNumberOfHeaders: Int
+object CsvHelper extends Parser{
 
-  private[repositories] def parseLine(line: String): Array[String] = {
+  private[repositories] def parseLine(line: String, expectedNumberOfHeaders: Int): Array[String] = {
     if (line.split(",").length != expectedNumberOfHeaders) {
       val sanitized = line.split("\"")
       require(sanitized.length == 3, "Line cannot have more than one value with quotation")
@@ -37,3 +39,4 @@ trait CsvHelper {
     }
   }
 }
+

@@ -27,8 +27,8 @@ trait SchoolsRepository {
   def schools: Future[List[School]]
 }
 
-object SchoolsCSVRepository extends SchoolsRepository with CsvHelper {
-  override def expectedNumberOfHeaders = 10
+class SchoolsCSVRepository(parser: Parser) extends SchoolsRepository{
+  val expectedNumberOfHeaders = 10
 
   import play.api.Play.current
 
@@ -36,7 +36,7 @@ object SchoolsCSVRepository extends SchoolsRepository with CsvHelper {
 
     val input = managed(Play.application.resourceAsStream("UK_schools_data_v2.csv").get)
     input.acquireAndGet { inputStream =>
-      val rawData = Source.fromInputStream(inputStream).getLines.map(parseLine).toList
+      val rawData = Source.fromInputStream(inputStream).getLines.map(parser.parseLine(_, expectedNumberOfHeaders)).toList
       val headers = rawData.head
       val values = rawData.tail
       val schools = values map { columns =>
@@ -53,3 +53,5 @@ object SchoolsCSVRepository extends SchoolsRepository with CsvHelper {
 
   def schools: Future[List[School]] = schoolsCached
 }
+
+object SchoolsCSVRepository extends SchoolsCSVRepository(CsvHelper)
