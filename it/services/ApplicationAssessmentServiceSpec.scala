@@ -21,7 +21,7 @@ import java.io.File
 import com.typesafe.config.ConfigFactory
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import connectors.CSREmailClient
-import model.ApplicationStatuses.Implicits._
+import model.ApplicationStatuses._
 import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.Commands.AssessmentCentrePassMarkSettingsResponse
@@ -221,7 +221,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
     applicationRepository.collection.find(BSONDocument("applicationId" -> appId)).one[BSONDocument].map { docOpt =>
       require(docOpt.isDefined)
       val doc = docOpt.get
-      val applicationStatus = doc.getAs[String]("applicationStatus").get
+      val applicationStatus = doc.getAs[ApplicationStatuses.EnumVal]("applicationStatus").get
       val evaluationDoc = doc.getAs[BSONDocument]("assessment-centre-passmark-evaluation").get
       val passedMinimumCompetencyLevel = evaluationDoc.getAs[Boolean]("passedMinimumCompetencyLevel")
       val passmarkVersion = evaluationDoc.getAs[String]("passmarkVersion")

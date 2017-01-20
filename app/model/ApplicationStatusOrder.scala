@@ -21,16 +21,16 @@ import model.ProgressStatuses._
 
 object ApplicationStatusOrder {
 
-  def getStatus(progress: Option[ProgressResponse]): String = progress match {
+  def getStatus(progress: Option[ProgressResponse]): ProgressStatuses.EnumVal = progress match {
     case Some(p) => getStatus(p)
     case None => RegisteredProgress
   }
 
-  def getStatus(progress: ProgressResponse): String = {
-    val default = 0 -> RegisteredProgress
+  def getStatus(progress: ProgressResponse): ProgressStatuses.EnumVal = {
+    val default = RegisteredProgress.weight -> RegisteredProgress
 
-    type StatusMap = (Boolean, Int, String)
-    type HighestStatus = (Int, String)
+    type StatusMap = (Boolean, Int, ProgressStatuses.EnumVal)
+    type HighestStatus = (Int, ProgressStatuses.EnumVal)
 
     def combineStatuses(statusMap: Seq[StatusMap]): HighestStatus = {
       statusMap.foldLeft(default) { (highest, current) =>
@@ -54,35 +54,47 @@ object ApplicationStatusOrder {
   }
 
   def statusMaps(progress: ProgressResponse) = Seq(
-    (progress.personalDetails, 10, PersonalDetailsCompletedProgress),
-    (progress.hasLocations, 20, LocationsCompletedProgress),
-    (progress.hasSchemes, 25, SchemesCompletedProgress),
-    (progress.assistanceDetails, 30, AssistanceDetailsCompletedProgress),
-    (progress.review, 40, ReviewCompletedProgress),
-    (progress.questionnaire.contains("start_questionnaire"), 50, StartDiversityQuestionnaireProgress),
-    (progress.questionnaire.contains("diversity_questionnaire"), 60, DiversityQuestionsCompletedProgress),
-    (progress.questionnaire.contains("education_questionnaire"), 70, EducationQuestionsCompletedProgress),
-    (progress.questionnaire.contains("occupation_questionnaire"), 80, OccupationQuestionsCompletedProgress),
-    (progress.submitted, 90, SubmittedProgress),
-    (progress.onlineTest.invited, 100, OnlineTestInvitedProgress),
-    (progress.onlineTest.started, 110, OnlineTestStartedProgress),
-    (progress.onlineTest.completed, 120, OnlineTestCompletedProgress),
-    (progress.onlineTest.expired, 130, OnlineTestExpiredProgress),
-    (progress.onlineTest.awaitingReevaluation, 140, AwaitingOnlineTestReevaluationProgress),
-    (progress.onlineTest.failed, 150, OnlineTestFailedProgress),
-    (progress.onlineTest.failedNotified, 160, OnlineTestFailedNotifiedProgress),
-    (progress.onlineTest.awaitingAllocation, 170, AwaitingOnlineTestAllocationProgress),
-    (progress.onlineTest.allocationUnconfirmed, 180, AllocationUnconfirmedProgress),
-    (progress.onlineTest.allocationConfirmed, 190, AllocationConfirmedProgress),
-    (progress.assessmentScores.entered, 200, AssessmentScoresEnteredProgress),
-    (progress.failedToAttend, 210, FailedToAttendProgress),
-    (progress.assessmentScores.accepted, 220, AssessmentScoresAcceptedProgress),
-    (progress.assessmentCentre.awaitingReevaluation, 230, AwaitingAssessmentCentreReevaluationProgress),
-    (progress.assessmentCentre.failed, 240, AssessmentCentreFailedProgress),
-    (progress.assessmentCentre.failedNotified, 245, AssessmentCentreFailedNotifiedProgress),
-    (progress.assessmentCentre.passed, 250, AssessmentCentrePassedProgress),
-    (progress.assessmentCentre.passedNotified, 255, AssessmentCentrePassedNotifiedProgress),
+    (progress.personalDetails, PersonalDetailsCompletedProgress.weight, PersonalDetailsCompletedProgress),
+    (progress.hasLocations, LocationsCompletedProgress.weight, LocationsCompletedProgress),
+    (progress.hasSchemes, SchemesCompletedProgress.weight, SchemesCompletedProgress),
+    (progress.assistanceDetails, SchemesCompletedProgress.weight, AssistanceDetailsCompletedProgress),
+    (progress.review, ReviewCompletedProgress.weight, ReviewCompletedProgress),
 
-    (progress.withdrawn, 999, WithdrawnProgress)
+    (progress.questionnaire.contains("start_questionnaire"), StartDiversityQuestionnaireProgress.weight,
+      StartDiversityQuestionnaireProgress),
+
+    (progress.questionnaire.contains("diversity_questionnaire"), DiversityQuestionsCompletedProgress.weight,
+      DiversityQuestionsCompletedProgress),
+
+    (progress.questionnaire.contains("education_questionnaire"), EducationQuestionsCompletedProgress.weight,
+      EducationQuestionsCompletedProgress),
+
+    (progress.questionnaire.contains("occupation_questionnaire"), OccupationQuestionsCompletedProgress.weight,
+      OccupationQuestionsCompletedProgress),
+
+    (progress.submitted, SubmittedProgress.weight, SubmittedProgress),
+    (progress.onlineTest.invited, OnlineTestInvitedProgress.weight, OnlineTestInvitedProgress),
+    (progress.onlineTest.started, OnlineTestStartedProgress.weight, OnlineTestStartedProgress),
+    (progress.onlineTest.completed, OnlineTestCompletedProgress.weight, OnlineTestCompletedProgress),
+    (progress.onlineTest.expired, OnlineTestExpiredProgress.weight, OnlineTestExpiredProgress),
+    (progress.onlineTest.awaitingReevaluation, AwaitingOnlineTestReevaluationProgress.weight, AwaitingOnlineTestReevaluationProgress),
+    (progress.onlineTest.failed, OnlineTestFailedProgress.weight, OnlineTestFailedProgress),
+    (progress.onlineTest.failedNotified, OnlineTestFailedNotifiedProgress.weight, OnlineTestFailedNotifiedProgress),
+    (progress.onlineTest.awaitingAllocation, AwaitingOnlineTestAllocationProgress.weight, AwaitingOnlineTestAllocationProgress),
+    (progress.onlineTest.allocationUnconfirmed, AllocationUnconfirmedProgress.weight, AllocationUnconfirmedProgress),
+    (progress.onlineTest.allocationConfirmed, AllocationConfirmedProgress.weight, AllocationConfirmedProgress),
+    (progress.assessmentScores.entered, AssessmentScoresEnteredProgress.weight, AssessmentScoresEnteredProgress),
+    (progress.failedToAttend, FailedToAttendProgress.weight, FailedToAttendProgress),
+    (progress.assessmentScores.accepted, AssessmentScoresAcceptedProgress.weight, AssessmentScoresAcceptedProgress),
+
+    (progress.assessmentCentre.awaitingReevaluation, AwaitingAssessmentCentreReevaluationProgress.weight,
+      AwaitingAssessmentCentreReevaluationProgress),
+
+    (progress.assessmentCentre.failed, AssessmentCentreFailedProgress.weight, AssessmentCentreFailedProgress),
+    (progress.assessmentCentre.failedNotified, AssessmentCentreFailedNotifiedProgress.weight, AssessmentCentreFailedNotifiedProgress),
+    (progress.assessmentCentre.passed, AssessmentCentrePassedProgress.weight, AssessmentCentrePassedProgress),
+    (progress.assessmentCentre.passedNotified, AssessmentCentrePassedNotifiedProgress.weight, AssessmentCentrePassedNotifiedProgress),
+
+    (progress.withdrawn, WithdrawnProgress.weight, WithdrawnProgress)
   )
 }

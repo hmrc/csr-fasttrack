@@ -16,7 +16,7 @@
 
 package repositories
 
-import model.ApplicationStatuses.Implicits._
+import model.ApplicationStatuses._
 import model.AssessmentScheduleCommands.ApplicationForAssessmentAllocationResult
 import model.Commands.{ AdjustmentReport, _ }
 import model.{ ApplicationStatuses, EvaluationResults }

@@ -17,7 +17,7 @@
 package model.commands
 
 import model.ApplicationStatuses
-import model.ApplicationStatuses.Implicits._
+import model.ApplicationStatuses.enumFormat
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 

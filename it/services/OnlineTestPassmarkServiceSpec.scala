@@ -21,7 +21,7 @@ import java.io.File
 import com.typesafe.config.{ Config, ConfigFactory }
 import connectors.PassMarkExchangeObjects.Settings
 import mocks.{ OnlineIntegrationTestInMemoryRepository, PassMarkSettingsInMemoryRepository }
-import model.ApplicationStatuses.Implicits._
+import model.ApplicationStatuses._
 import model.EvaluationResults._
 import model.OnlineTestCommands.CandidateScoresWithPreferencesAndPassmarkSettings
 import model.PersistedObjects.CandidateTestReport

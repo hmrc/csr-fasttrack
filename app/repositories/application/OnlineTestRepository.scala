@@ -19,7 +19,7 @@ package repositories.application
 import config.MicroserviceAppConfig._
 import controllers.OnlineTestDetails
 import factories.DateTimeFactory
-import model.ApplicationStatuses.Implicits._
+import model.ApplicationStatuses.BSONEnumHandler
 import model.EvaluationResults._
 import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound, UnexpectedException }
 import model.OnlineTestCommands._
@@ -173,7 +173,6 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
 
   override def storeOnlineTestProfileAndUpdateStatusToInvite(applicationId: String, onlineTestProfile: OnlineTestProfile): Future[Unit] = {
     import model.ProgressStatuses._
-    import model.ApplicationStatuses.Implicits.BSONEnumHandler
 
     val query = BSONDocument("applicationId" -> applicationId)
 

@@ -17,37 +17,52 @@
 package model
 
 
-object ProgressStatuses extends Enumeration {
+object ProgressStatuses extends Enum {
 
-  val RegisteredProgress = "registered"
-  val PersonalDetailsCompletedProgress = "personal_details_completed"
-  val LocationsCompletedProgress = "scheme_locations_completed"
-  val SchemesCompletedProgress = "schemes_preferences_completed"
-  val AssistanceDetailsCompletedProgress = "assistance_details_completed"
-  val ReviewCompletedProgress = "review_completed"
-  val StartDiversityQuestionnaireProgress = "start_diversity_questionnaire"
-  val DiversityQuestionsCompletedProgress = "diversity_questions_completed"
-  val EducationQuestionsCompletedProgress = "education_questions_completed"
-  val OccupationQuestionsCompletedProgress = "occupation_questions_completed"
+  sealed case class EnumVal(name: String, weight: Int) extends Value with Ordered[EnumVal] {
 
-  val SubmittedProgress = ApplicationStatuses.Submitted.name.toLowerCase
-  val WithdrawnProgress = ApplicationStatuses.Withdrawn.name.toLowerCase
-  val OnlineTestInvitedProgress = ApplicationStatuses.OnlineTestInvited.name.toLowerCase
-  val OnlineTestStartedProgress = ApplicationStatuses.OnlineTestStarted.name.toLowerCase
-  val OnlineTestCompletedProgress = ApplicationStatuses.OnlineTestCompleted.name.toLowerCase
-  val OnlineTestExpiredProgress = ApplicationStatuses.OnlineTestExpired.name.toLowerCase
-  val AwaitingOnlineTestReevaluationProgress = ApplicationStatuses.AwaitingOnlineTestReevaluation.name.toLowerCase
-  val OnlineTestFailedProgress = ApplicationStatuses.OnlineTestFailed.name.toLowerCase
-  val OnlineTestFailedNotifiedProgress = ApplicationStatuses.OnlineTestFailedNotified.name.toLowerCase
-  val AwaitingOnlineTestAllocationProgress = ApplicationStatuses.AwaitingAllocation.name.toLowerCase
-  val AllocationConfirmedProgress = ApplicationStatuses.AllocationConfirmed.name.toLowerCase
-  val AllocationUnconfirmedProgress = ApplicationStatuses.AllocationUnconfirmed.name.toLowerCase
-  val FailedToAttendProgress = ApplicationStatuses.FailedToAttend.name.toLowerCase
-  val AssessmentScoresEnteredProgress = ApplicationStatuses.AssessmentScoresEntered.name.toLowerCase
-  val AssessmentScoresAcceptedProgress = ApplicationStatuses.AssessmentScoresAccepted.name.toLowerCase
-  val AwaitingAssessmentCentreReevaluationProgress = ApplicationStatuses.AwaitingAssessmentCentreReevaluation.name.toLowerCase
-  val AssessmentCentrePassedProgress = ApplicationStatuses.AssessmentCentrePassed.name.toLowerCase
-  val AssessmentCentreFailedProgress = ApplicationStatuses.AssessmentCentreFailed.name.toLowerCase
-  val AssessmentCentrePassedNotifiedProgress = ApplicationStatuses.AssessmentCentrePassedNotified.name.toLowerCase
-  val AssessmentCentreFailedNotifiedProgress = ApplicationStatuses.AssessmentCentreFailedNotified.name.toLowerCase
+    override def compare(that: EnumVal): Int = this.weight compare that.weight
+
+    def isBefore(that: EnumVal): Boolean = this.weight < that.weight
+    def isAfter(that: EnumVal): Boolean = this.weight > that.weight
+  }
+
+
+  val RegisteredProgress = EnumVal("registered", 0)
+  val PersonalDetailsCompletedProgress = EnumVal("personal_details_completed", 10)
+  val LocationsCompletedProgress = EnumVal("scheme_locations_completed", 20)
+  val SchemesCompletedProgress = EnumVal("schemes_preferences_completed", 30)
+  val AssistanceDetailsCompletedProgress = EnumVal("assistance_details_completed", 40)
+  val ReviewCompletedProgress = EnumVal("review_completed", 50)
+  val StartDiversityQuestionnaireProgress = EnumVal("start_diversity_questionnaire", 60)
+  val DiversityQuestionsCompletedProgress = EnumVal("diversity_questions_completed", 70)
+  val EducationQuestionsCompletedProgress = EnumVal("education_questions_completed", 80)
+  val OccupationQuestionsCompletedProgress = EnumVal("occupation_questions_completed", 90)
+
+  val SubmittedProgress = EnumVal(ApplicationStatuses.Submitted.name.toLowerCase, 100)
+
+  val OnlineTestInvitedProgress = EnumVal(ApplicationStatuses.OnlineTestInvited.name.toLowerCase, 110)
+  val OnlineTestStartedProgress = EnumVal(ApplicationStatuses.OnlineTestStarted.name.toLowerCase, 120)
+  val OnlineTestCompletedProgress = EnumVal(ApplicationStatuses.OnlineTestCompleted.name.toLowerCase, 130)
+  val OnlineTestExpiredProgress = EnumVal(ApplicationStatuses.OnlineTestExpired.name.toLowerCase, 140)
+
+  val AwaitingOnlineTestReevaluationProgress = EnumVal(ApplicationStatuses.AwaitingOnlineTestReevaluation.name.toLowerCase, 150)
+
+  val OnlineTestFailedProgress = EnumVal(ApplicationStatuses.OnlineTestFailed.name.toLowerCase, 160)
+  val OnlineTestFailedNotifiedProgress = EnumVal(ApplicationStatuses.OnlineTestFailedNotified.name.toLowerCase, 170)
+
+  val AwaitingOnlineTestAllocationProgress = EnumVal(ApplicationStatuses.AwaitingAllocation.name.toLowerCase, 180)
+  val AllocationUnconfirmedProgress = EnumVal(ApplicationStatuses.AllocationUnconfirmed.name.toLowerCase, 190)
+
+  val AllocationConfirmedProgress = EnumVal(ApplicationStatuses.AllocationConfirmed.name.toLowerCase, 200)
+  val AssessmentScoresEnteredProgress = EnumVal(ApplicationStatuses.AssessmentScoresEntered.name.toLowerCase, 210)
+  val FailedToAttendProgress = EnumVal(ApplicationStatuses.FailedToAttend.name.toLowerCase, 220)
+  val AssessmentScoresAcceptedProgress = EnumVal(ApplicationStatuses.AssessmentScoresAccepted.name.toLowerCase, 230)
+  val AwaitingAssessmentCentreReevaluationProgress = EnumVal(ApplicationStatuses.AwaitingAssessmentCentreReevaluation.name.toLowerCase, 240)
+  val AssessmentCentreFailedProgress = EnumVal(ApplicationStatuses.AssessmentCentreFailed.name.toLowerCase, 250)
+  val AssessmentCentreFailedNotifiedProgress = EnumVal(ApplicationStatuses.AssessmentCentreFailedNotified.name.toLowerCase, 260)
+  val AssessmentCentrePassedProgress = EnumVal(ApplicationStatuses.AssessmentCentrePassed.name.toLowerCase, 270)
+  val AssessmentCentrePassedNotifiedProgress = EnumVal(ApplicationStatuses.AssessmentCentrePassedNotified.name.toLowerCase, 280)
+
+  val WithdrawnProgress = EnumVal(ApplicationStatuses.Withdrawn.name.toLowerCase, 999)
 }

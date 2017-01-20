@@ -20,10 +20,14 @@ import common.Constants.{ No, Yes }
 import factories.UUIDFactory
 import model.Commands.Report
 import model.Exceptions.{ LocationPreferencesNotFound, SchemePreferencesNotFound }
-import model.Scheme
+import model.{ ApplicationStatuses, ProgressStatuses, Scheme }
+import model.ApplicationStatuses._
+import model.commands.ApplicationStatusDetails
+import org.joda.time.{ DateTime, DateTimeZone }
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
 import repositories.CollectionNames
+import repositories.BSONDateTimeHandler
 import services.GBTimeZoneService
 import testkit.MongoRepositorySpec
 
@@ -39,7 +43,7 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
 
   def repository = new GeneralApplicationMongoRepository(GBTimeZoneService)
 
-  "General Application repository" should {
+  "General Application repository" must {
     "Get overall report for an application with all fields" in {
       val userId = generateUUID()
       val appId = generateUUID()
@@ -117,11 +121,71 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
 
   }
 
-  def createApplicationWithAllFields(userId: String, appId: String, frameworkId: String) = {
-    repository.collection.insert(BSONDocument(
+  "get progress status dates" must {
+    "correctly return the latest application status and progress status date" in {
+      val progressStatuses = Map (
+        ProgressStatuses.RegisteredProgress -> DateTime.now.minusDays(12),
+        ProgressStatuses.PersonalDetailsCompletedProgress -> DateTime.now.minusDays(11),
+        ProgressStatuses.LocationsCompletedProgress -> DateTime.now.minusDays(10),
+        ProgressStatuses.SchemesCompletedProgress -> DateTime.now.minusDays(9),
+        ProgressStatuses.AssistanceDetailsCompletedProgress -> DateTime.now.minusDays(9),
+        ProgressStatuses.ReviewCompletedProgress -> DateTime.now.minusDays(8),
+        ProgressStatuses.StartDiversityQuestionnaireProgress -> DateTime.now.minusDays(7),
+        ProgressStatuses.DiversityQuestionsCompletedProgress -> DateTime.now.minusDays(6),
+        ProgressStatuses.EducationQuestionsCompletedProgress -> DateTime.now.minusDays(5),
+        ProgressStatuses.OccupationQuestionsCompletedProgress -> DateTime.now.minusDays(4),
+        ProgressStatuses.SubmittedProgress -> DateTime.now.minusDays(3)
+      )
+      createApplicationWithAllFields("userId", "appId", "frameworkId", ApplicationStatuses.Submitted, buildProgressStatusBSON(progressStatuses))
+
+      val result = repository.findApplicationStatusDetails("appId").futureValue
+
+      inside (result) {
+        case ApplicationStatusDetails(status, statusDate, overrideSubmissionDeadline) =>
+          status mustBe ApplicationStatuses.Submitted
+          statusDate mustEqual Some(progressStatuses(ProgressStatuses.SubmittedProgress).withZone(DateTimeZone.UTC))
+          overrideSubmissionDeadline mustBe None
+      }
+    }
+
+    "return the date the personal details were completed if the application is not submitted yet" in {
+      val progressStatuses = Map (
+        ProgressStatuses.RegisteredProgress -> DateTime.now.minusDays(12),
+        ProgressStatuses.PersonalDetailsCompletedProgress -> DateTime.now.minusDays(11),
+        ProgressStatuses.LocationsCompletedProgress -> DateTime.now.minusDays(10),
+        ProgressStatuses.SchemesCompletedProgress -> DateTime.now.minusDays(9),
+        ProgressStatuses.AssistanceDetailsCompletedProgress -> DateTime.now.minusDays(9),
+        ProgressStatuses.ReviewCompletedProgress -> DateTime.now.minusDays(8),
+        ProgressStatuses.StartDiversityQuestionnaireProgress -> DateTime.now.minusDays(7),
+        ProgressStatuses.DiversityQuestionsCompletedProgress -> DateTime.now.minusDays(6),
+        ProgressStatuses.EducationQuestionsCompletedProgress -> DateTime.now.minusDays(5),
+        ProgressStatuses.OccupationQuestionsCompletedProgress -> DateTime.now.minusDays(4)
+     )
+
+     createApplicationWithAllFields("userId", "appId", "frameworkId", ApplicationStatuses.Created,
+        buildProgressStatusBSON(progressStatuses))
+
+      val result = repository.findApplicationStatusDetails("appId").futureValue
+
+      inside (result) {
+        case ApplicationStatusDetails(status, statusDate, overrideSubmissionDeadline) =>
+          status mustBe ApplicationStatuses.Created
+          statusDate mustBe Some(progressStatuses(ProgressStatuses.PersonalDetailsCompletedProgress).withZone(DateTimeZone.UTC))
+          overrideSubmissionDeadline mustBe None
+      }
+    }
+
+  }
+
+  def createApplicationWithAllFields(userId: String, appId: String, frameworkId: String,
+    appStatus: ApplicationStatuses.EnumVal = ApplicationStatuses.Submitted,
+    progressStatusBSON: BSONDocument = buildProgressStatusBSON()
+  ) = {
+    val application = BSONDocument(
       "applicationId" -> appId,
       "userId" -> userId,
       "frameworkId" -> frameworkId,
+      "applicationStatus" -> appStatus,
       "framework-preferences" -> BSONDocument(
         "firstLocation" -> BSONDocument(
           "region" -> "Region1",
@@ -149,11 +213,27 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
         "needsSupportAtVenue" -> false,
         "guaranteedInterview" -> false
       ),
-      "issue" -> "this candidate has changed the email",
-      "progress-status" -> BSONDocument(
-        "registered" -> "true"
-      )
-    )).futureValue
+      "issue" -> "this candidate has changed the email"
+    ) ++ progressStatusBSON
+
+    repository.collection.insert(application).futureValue
+  }
+
+  private def buildProgressStatusBSON(statusesAndDates: Map[ProgressStatuses.EnumVal, DateTime] =
+    Map((ProgressStatuses.RegisteredProgress, DateTime.now))
+  ): BSONDocument = {
+    val dates = statusesAndDates.foldLeft(BSONDocument()) { (doc, map) =>
+     doc ++ BSONDocument(s"${map._1}" -> map._2)
+    }
+
+    val statuses = statusesAndDates.keys.foldLeft(BSONDocument()) { (doc, status) =>
+      doc ++ BSONDocument(s"$status" -> true)
+    }
+
+    BSONDocument(
+      "progress-status" -> statuses,
+      "progress-status-timestamp" -> dates
+    )
   }
 
   def createMinimumApplication(userId: String, appId: String, frameworkId: String) = {

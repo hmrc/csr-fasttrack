@@ -16,7 +16,6 @@
 
 package services.passmarksettings
 
-import model.ApplicationStatuses.Implicits
 import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.PassmarkPersistedObjects._
 import org.joda.time.DateTime

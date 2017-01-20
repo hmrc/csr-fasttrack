@@ -24,7 +24,6 @@ import repositories._
 import repositories.application.OnlineTestRepository
 import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
 import uk.gov.hmrc.play.microservice.controller.BaseController
-import model.ApplicationStatuses.Implicits._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future

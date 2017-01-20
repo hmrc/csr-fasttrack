@@ -20,7 +20,7 @@ import java.util.UUID
 import java.util.regex.Pattern
 
 import common.Constants.{ No, Yes }
-import model.ApplicationStatuses.Implicits._
+import model.ApplicationStatuses.BSONEnumHandler
 import model.ApplicationStatusOrder._
 import model._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
@@ -28,6 +28,7 @@ import model.Commands._
 import model.EvaluationResults._
 import model.Exceptions.{ ApplicationNotFound, CannotUpdateReview, LocationPreferencesNotFound, SchemePreferencesNotFound }
 import model.PersistedObjects.ApplicationForNotification
+import model.ProgressStatuses.BSONEnumHandler
 import model.Scheme.Scheme
 import model.commands.{ ApplicationStatusDetails, OnlineTestProgressResponse }
 import model.persisted.AssistanceDetails
@@ -128,7 +129,6 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
   override def create(userId: String, frameworkId: String): Future[ApplicationResponse] = {
     val applicationId = UUID.randomUUID().toString
-    import model.ApplicationStatuses.Implicits.BSONEnumHandler
     val applicationBSON = BSONDocument(
       "applicationId" -> applicationId,
       "userId" -> userId,
@@ -178,34 +178,36 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
       ProgressResponse(
         applicationId,
-        personalDetails = getProgress("personal-details"),
-        hasLocations = getProgress("scheme-locations"),
-        hasSchemes = getProgress("scheme-preferences"),
-        assistanceDetails = getProgress("assistance-details"),
-        review = getProgress("review"),
+        personalDetails = getProgress(ProgressStatuses.PersonalDetailsCompletedProgress),
+        hasLocations = getProgress(ProgressStatuses.LocationsCompletedProgress),
+        hasSchemes = getProgress(ProgressStatuses.SchemesCompletedProgress),
+        assistanceDetails = getProgress(ProgressStatuses.AssistanceDetailsCompletedProgress),
+        review = getProgress(ProgressStatuses.ReviewCompletedProgress),
         questionnaire = questionnaire,
-        submitted = getProgress("submitted"),
-        withdrawn = getProgress("withdrawn"),
+        submitted = getProgress(ProgressStatuses.SubmittedProgress),
+        withdrawn = getProgress(ProgressStatuses.WithdrawnProgress),
         OnlineTestProgressResponse(
-          invited = getProgress("online_test_invited"),
-          started = getProgress("online_test_started"),
-          completed = getProgress("online_test_completed"),
-          expired = getProgress("online_test_expired"),
-          awaitingReevaluation = getProgress("awaiting_online_test_re_evaluation"),
-          failed = getProgress("online_test_failed"),
-          failedNotified = getProgress("online_test_failed_notified"),
-          awaitingAllocation = getProgress("awaiting_online_test_allocation"),
-          allocationConfirmed = getProgress("allocation_confirmed"),
-          allocationUnconfirmed = getProgress("allocation_unconfirmed")
+          invited = getProgress(ProgressStatuses.OnlineTestInvitedProgress),
+          started = getProgress(ProgressStatuses.OnlineTestStartedProgress),
+          completed = getProgress(ProgressStatuses.OnlineTestCompletedProgress),
+          expired = getProgress(ProgressStatuses.OnlineTestExpiredProgress),
+          awaitingReevaluation = getProgress(ProgressStatuses.AwaitingOnlineTestReevaluationProgress),
+          failed = getProgress(ProgressStatuses.OnlineTestFailedProgress),
+          failedNotified = getProgress(ProgressStatuses.OnlineTestFailedNotifiedProgress),
+          awaitingAllocation = getProgress(ProgressStatuses.AwaitingOnlineTestAllocationProgress),
+          allocationConfirmed = getProgress(ProgressStatuses.AllocationConfirmedProgress),
+          allocationUnconfirmed = getProgress(ProgressStatuses.AllocationUnconfirmedProgress)
         ),
-        failedToAttend = getProgress("failed_to_attend"),
-        assessmentScores = AssessmentScores(getProgress("assessment_scores_entered"), getProgress("assessment_scores_accepted")),
+        failedToAttend = getProgress(ProgressStatuses.FailedToAttendProgress),
+        assessmentScores = AssessmentScores(getProgress(ProgressStatuses.AssessmentScoresEnteredProgress),
+          getProgress(ProgressStatuses.AssessmentScoresAcceptedProgress)
+        ),
         assessmentCentre = AssessmentCentre(
-          getProgress("awaiting_assessment_centre_re_evaluation"),
-          getProgress("assessment_centre_passed"),
-          getProgress("assessment_centre_failed"),
-          getProgress("assessment_centre_passed_notified"),
-          getProgress("assessment_centre_failed_notified")
+          getProgress(ProgressStatuses.AwaitingAssessmentCentreReevaluationProgress),
+          getProgress(ProgressStatuses.AssessmentCentrePassedProgress),
+          getProgress(ProgressStatuses.AssessmentCentreFailedProgress),
+          getProgress(ProgressStatuses.AssessmentCentrePassedNotifiedProgress),
+          getProgress(ProgressStatuses.AssessmentCentreFailedNotifiedProgress)
         )
       )
     }).getOrElse(ProgressResponse(applicationId))
@@ -217,7 +219,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
     collection.find(query, projection).one[BSONDocument] map {
       case Some(document) => findProgress(document, applicationId)
-      case None => ProgressResponse(applicationId)
+      case None => throw ApplicationNotFound(applicationId)
     }
   }
 
@@ -235,10 +237,15 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         "_id" -> false
       )
 
+      val statusToGetDateFor = if ((latestProgress isAfter ProgressStatuses.PersonalDetailsCompletedProgress) &&
+        (latestProgress isBefore ProgressStatuses.SubmittedProgress)) {
+        ProgressStatuses.PersonalDetailsCompletedProgress
+      } else { latestProgress }
+
       collection.find(query, projection).one[BSONDocument] map {
         case Some(document) =>
           val applicationStatus = document.getAs[ApplicationStatuses.EnumVal]("applicationStatus").get
-          val progressStatusTimeStamp = document.getAs[BSONDocument]("progress-status-timestamp").flatMap(_.getAs[DateTime](latestProgress))
+          val progressStatusTimeStamp = document.getAs[BSONDocument]("progress-status-timestamp").flatMap(_.getAs[DateTime](statusToGetDateFor))
           val submissionDeadline = document.getAs[DateTime]("submissionDeadline")
           ApplicationStatusDetails(applicationStatus, progressStatusTimeStamp, submissionDeadline)
 
@@ -302,9 +309,9 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   override def findApplicationIdsByLocation(location: String): Future[List[String]] = {
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("$and" -> BSONArray(
-        BSONDocument("applicationStatus" -> BSONDocument("$ne" -> "CREATED")),
-        BSONDocument("applicationStatus" -> BSONDocument("$ne" -> "WITHDRAWN")),
-        BSONDocument("applicationStatus" -> BSONDocument("$ne" -> "IN_PROGRESS"))
+        BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Created)),
+        BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn)),
+        BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.InProgress))
       )),
       BSONDocument("$or" -> BSONArray(
         BSONDocument("framework-preferences.firstLocation.location" -> location),
@@ -360,8 +367,8 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val query = BSONDocument("applicationId" -> applicationId)
     val applicationStatusBSON = BSONDocument("$set" -> BSONDocument(
       "applicationStatus" -> ApplicationStatuses.Submitted,
-      "progress-status.submitted" -> true,
-      "progress-status-timestamp.submitted" -> DateTime.now()
+      s"progress-status.${ProgressStatuses.SubmittedProgress}" -> true,
+      s"progress-status-timestamp.${ProgressStatuses.SubmittedProgress}" -> DateTime.now()
     ))
 
     collection.update(query, applicationStatusBSON, upsert = false) map { _ => () }
@@ -373,7 +380,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       "withdraw" -> reason,
       "applicationStatus" -> ApplicationStatuses.Withdrawn,
       s"progress-status.${ProgressStatuses.WithdrawnProgress}" -> true,
-      "progress-status-timestamp.withdrawn" -> DateTime.now()
+      s"progress-status-timestamp.${ProgressStatuses.WithdrawnProgress}" -> DateTime.now()
     ))
 
     collection.update(query, applicationStatusBSON, upsert = false) map { _ => () }
@@ -391,7 +398,8 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   override def review(applicationId: String): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val progressStatusBSON = BSONDocument("$set" -> BSONDocument(
-      "progress-status.review" -> true
+      s"progress-status.${ProgressStatuses.ReviewCompletedProgress}" -> true,
+      s"progress-status-timestamp.${ProgressStatuses.ReviewCompletedProgress}" -> DateTime.now
     ))
 
     val validator = singleUpdateValidator(applicationId, actionDesc = "review",
