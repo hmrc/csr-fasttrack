@@ -62,7 +62,7 @@ class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
     collection.find(query, projection).one[BSONDocument] map {
       case Some(document) if document.getAs[BSONDocument](AssistanceDetailsCollection).isDefined =>
         document.getAs[AssistanceDetails](AssistanceDetailsCollection).get
-      
+
       case _ => throw AssistanceDetailsNotFound(applicationId)
     }
   }
