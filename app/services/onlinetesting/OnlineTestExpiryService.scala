@@ -17,6 +17,7 @@
 package services.onlinetesting
 
 import connectors.EmailClient
+import model.ApplicationStatuses
 import model.PersistedObjects.ExpiringOnlineTest
 import play.api.Logger
 import repositories._
@@ -41,7 +42,7 @@ class OnlineTestExpiryServiceImpl(
   newHeaderCarrier: => HeaderCarrier
 )(implicit executor: ExecutionContext) extends OnlineTestExpiryService {
 
-  private final val ExpiredStatus = "ONLINE_TEST_EXPIRED"
+  private final val ExpiredStatus = ApplicationStatuses.OnlineTestExpired
   private implicit def headerCarrier = newHeaderCarrier
 
   override def processNextExpiredTest(): Future[Unit] =

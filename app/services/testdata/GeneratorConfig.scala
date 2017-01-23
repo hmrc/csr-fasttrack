@@ -61,16 +61,16 @@ import model.commands.exchange.testdata.AssistanceDetailsData
   }
 
   case class GeneratorConfig(
-                              personalData: PersonalData = PersonalData(),
-                              setGis: Boolean = false,
-                              cubiksUrl: String,
-                              region: Option[String] = None,
-                              loc1scheme1Passmark: Option[Result] = None,
-                              loc1scheme2Passmark: Option[Result] = None,
-                              assistanceDetails: AssistanceDetailsData = AssistanceDetailsData(),
-                              previousStatus: Option[String] = None,
-                              confirmedAllocation: Boolean = true
-                            )
+    personalData: PersonalData = PersonalData(),
+    setGis: Boolean = false,
+    cubiksUrl: String,
+    region: Option[String] = None,
+    loc1scheme1Passmark: Option[Result] = None,
+    loc1scheme2Passmark: Option[Result] = None,
+    assistanceDetails: AssistanceDetailsData = AssistanceDetailsData(),
+    previousStatus: Option[String] = None,
+    confirmedAllocation: Boolean = true
+  )
 
   object GeneratorConfig {
     def apply(cubiksUrlFromConfig: String, o: model.exchange.testdata.CreateCandidateInStatusRequest)(generatorId: Int): GeneratorConfig = {
@@ -84,7 +84,7 @@ import model.commands.exchange.testdata.AssistanceDetailsData
         region = o.region,
         loc1scheme1Passmark = o.loc1scheme1EvaluationResult.map(Result.apply),
         loc1scheme2Passmark = o.loc1scheme2EvaluationResult.map(Result.apply),
-        confirmedAllocation = statusData.applicationStatus == ApplicationStatuses.AllocationConfirmed
+        confirmedAllocation = statusData.applicationStatus == ApplicationStatuses.AllocationConfirmed.name
       )
     }
   }

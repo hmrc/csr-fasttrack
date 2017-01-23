@@ -31,7 +31,7 @@ import model.AssessmentScheduleCommands.Implicits.ApplicationForAssessmentAlloca
 import model.Commands.ApplicationAssessment
 import model.Commands.Implicits.applicationAssessmentFormat
 import model.Exceptions.NotFoundException
-import model.{ ApplicationStatusOrder, Commands }
+import model.{ ApplicationStatusOrder, Commands, ProgressStatuses }
 import org.joda.time.LocalDate
 import play.api.libs.json.Json
 import play.api.mvc.{ Action, Result }
@@ -390,7 +390,7 @@ trait AssessmentScheduleController extends BaseController {
   def deleteApplicationAssessment(applicationId: String) = Action.async { implicit request =>
     aRepository.findProgress(applicationId).flatMap { result =>
       ApplicationStatusOrder.getStatus(result) match {
-        case "assessment_scores_accepted" =>
+        case ProgressStatuses.AssessmentScoresAcceptedProgress =>
           Future.successful(Conflict(""))
         case _ =>
           aaService.removeFromApplicationAssessmentSlot(applicationId).map { _ =>

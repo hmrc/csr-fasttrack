@@ -20,6 +20,9 @@ import config._
 import connectors.ExchangeObjects._
 import connectors.{ CSREmailClient, CubiksGatewayClient }
 import controllers.OnlineTestDetails
+import factories.{DateTimeFactory, UUIDFactory}
+import model.ApplicationStatuses._
+import model.Commands
 import factories.{ DateTimeFactory, UUIDFactory }
 import model.{ AdjustmentDetail, Commands }
 import model.Commands._

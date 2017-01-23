@@ -16,15 +16,10 @@
 
 package services.testdata
 
-import model.PersistedObjects.{PersistedAnswer, PersistedQuestion}
-import common.Constants.{Yes, No}
-import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import model.Commands.{Address}
-import model.PersistedObjects.{ContactDetails, PersistedAnswer, PersistedQuestion, PersonalDetails}
-import model.{Alternatives, LocationPreference, Preferences}
-import org.joda.time.LocalDate
+import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
+import model.ProgressStatuses
 import repositories._
-import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository}
+import repositories.application.GeneralApplicationRepository
 import services.testdata.faker.DataFaker._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -96,7 +91,8 @@ trait InProgressQuestionnaireParentalOccupationStatusGenerator extends Construct
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       _ <- qRepository.addQuestions(candidateInPreviousStatus.applicationId.get, getParentalOccupationQuestionnaireQuestions)
-      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get, "occupation_questionnaire")
+      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get,
+        ProgressStatuses.OccupationQuestionsCompletedProgress)
     } yield {
       candidateInPreviousStatus
     }

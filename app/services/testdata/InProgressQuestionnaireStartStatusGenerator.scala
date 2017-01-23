@@ -16,16 +16,9 @@
 
 package services.testdata
 
-import model.PersistedObjects.{PersistedAnswer, PersistedQuestion}
-import common.Constants.{ Yes, No }
-import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import model.Commands.{ Address }
-import model.PersistedObjects.{ ContactDetails, PersistedAnswer, PersistedQuestion, PersonalDetails }
-import model.{ Alternatives, LocationPreference, Preferences }
-import org.joda.time.LocalDate
+import model.ProgressStatuses
 import repositories._
-import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository}
-import services.testdata.faker.DataFaker._
+import repositories.application.GeneralApplicationRepository
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -44,7 +37,8 @@ trait InProgressQuestionnaireStartStatusGenerator extends ConstructiveGenerator 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get, "start_questionnaire")
+      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get,
+        ProgressStatuses.StartDiversityQuestionnaireProgress)
     } yield {
       candidateInPreviousStatus
     }

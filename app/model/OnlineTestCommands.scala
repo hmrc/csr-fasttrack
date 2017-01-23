@@ -18,6 +18,7 @@ package model
 
 import connectors.ExchangeObjects.ReportNorm
 import connectors.PassMarkExchangeObjects.Settings
+import model.ApplicationStatuses.enumFormat
 import model.PersistedObjects.CandidateTestReport
 import model.Adjustments._
 import org.joda.time.DateTime
@@ -39,7 +40,7 @@ object OnlineTestCommands {
     passmarkSettings: Settings, // pass and fail mark
     preferences: Preferences, // preferences which scheme candidates like
     scores: CandidateTestReport, // applicationId + scores
-    applicationStatus: String
+    applicationStatus: ApplicationStatuses.EnumVal
   )
 
   case class TimeAdjustmentsOnlineTestApplication(verbalTimeAdjustmentPercentage: Int, numericalTimeAdjustmentPercentage: Int)
@@ -47,6 +48,7 @@ object OnlineTestCommands {
     tScore: Option[Double], percentile: Option[Double], raw: Option[Double], sten: Option[Double])
 
   object Implicits {
+
     implicit val TimeAdjustmentsOnlineTestApplicationFormats = Json.format[TimeAdjustmentsOnlineTestApplication]
     implicit val ApplicationForOnlineTestingFormats = Json.format[OnlineTestApplication]
     implicit val OnlineTestReportNormFormats = Json.format[ReportNorm]

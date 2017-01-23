@@ -39,7 +39,7 @@ object AssessmentCentreFailedNotifiedStatusGenerator extends AssessmentResultNot
 
 trait AssessmentResultNotifiedStatusGenerator extends ConstructiveGenerator {
   val aRepository: GeneralApplicationRepository
-  val status: String
+  val status: ApplicationStatuses.EnumVal
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
     for {

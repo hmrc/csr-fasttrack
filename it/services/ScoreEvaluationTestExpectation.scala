@@ -16,15 +16,22 @@
 
 package services
 
-import model.EvaluationResults.{CompetencyAverageResult, PerSchemeEvaluation, Result}
+import model.ApplicationStatuses
+import model.EvaluationResults.{ CompetencyAverageResult, PerSchemeEvaluation, Result }
 
-case class ScoreEvaluationTestExpectation(location1Scheme1: String, location1Scheme2: Option[String], location2Scheme1: Option[String],
-                                          location2Scheme2: Option[String], alternativeScheme: Option[String], applicationStatus: String,
-                                          passmarkVersion: Option[String])
+case class ScoreEvaluationTestExpectation(
+  location1Scheme1: String,
+  location1Scheme2: Option[String],
+  location2Scheme1: Option[String],
+  location2Scheme2: Option[String],
+  alternativeScheme: Option[String],
+  applicationStatus: ApplicationStatuses.EnumVal,
+  passmarkVersion: Option[String]
+)
 
 case class AssessmentScoreEvaluationTestExpectation(location1Scheme1: Option[String], location1Scheme2: Option[String],
                                                     location2Scheme1: Option[String], location2Scheme2: Option[String],
-                                                    alternativeScheme: Option[String], applicationStatus: String,
+                                                    alternativeScheme: Option[String], applicationStatus: ApplicationStatuses.EnumVal,
                                                     passmarkVersion: Option[String], passedMinimumCompetencyLevel: Option[Boolean],
                                                     leadingAndCommunicatingAverage: Option[Double],
                                                     collaboratingAndPartneringAverage: Option[Double],
@@ -58,7 +65,7 @@ case class AssessmentScoreEvaluationTestExpectation(location1Scheme1: Option[Str
     }
   }
 
-  def allSchemesEvaluationExpectatons = schemesEvaluation.map { s =>
+  def allSchemesEvaluationExpectations: Option[List[PerSchemeEvaluation]] = schemesEvaluation.map { s =>
     s.split("\\|").map { schemeAndResult =>
       val Array(scheme, result) = schemeAndResult.split(":")
       PerSchemeEvaluation(scheme, Result(result))

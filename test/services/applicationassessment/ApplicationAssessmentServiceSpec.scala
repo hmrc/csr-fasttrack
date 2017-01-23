@@ -25,7 +25,7 @@ import model.EvaluationResults._
 import model.Exceptions.{ IncorrectStatusInApplicationException, NotFoundException }
 import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
 import model.PersistedObjects.{ ApplicationForNotification, ContactDetails, OnlineTestPassmarkEvaluation, PreferencesWithQualification }
-import model.{ EvaluationResults, LocationPreference, Preferences }
+import model.{ ApplicationStatuses, EvaluationResults, LocationPreference, Preferences }
 import org.joda.time.DateTime
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
@@ -149,15 +149,16 @@ class ApplicationAssessmentServiceSpec extends PlaySpec with MockitoSugar with S
       val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = false, None, None)
       val result = AssessmentRuleCategoryResult(None, Some(EvaluationResults.Green), None, None, None, None, None, None)
       when(passmarkRulesEngineMock.evaluate(onlineTestEvaluation, scores, config)).thenReturn(result)
-      when(aRepositoryMock.saveAssessmentScoreEvaluation("app1", "1", result, "ASSESSMENT_CENTRE_PASSED")).thenReturn(Future.successful(()))
+      when(aRepositoryMock.saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AssessmentCentrePassed))
+        .thenReturn(Future.successful(()))
 
       applicationAssessmentService.evaluateAssessmentCandidate(
         OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation, scores), config).futureValue
 
-      verify(aRepositoryMock).saveAssessmentScoreEvaluation("app1", "1", result, "ASSESSMENT_CENTRE_PASSED")
+      verify(aRepositoryMock).saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AssessmentCentrePassed)
       verify(auditServiceMock).logEventNoRequest(
         "ApplicationAssessmentEvaluated",
-        Map("applicationId" -> "app1", "applicationStatus" -> "ASSESSMENT_CENTRE_PASSED")
+        Map("applicationId" -> "app1", "applicationStatus" -> ApplicationStatuses.AssessmentCentrePassed)
       )
     }
   }
@@ -172,19 +173,21 @@ class ApplicationAssessmentServiceSpec extends PlaySpec with MockitoSugar with S
       "ASSESSMENT_CENTRE_PASSED_NOTIFIED and audit AssessmentCentrePassedEmailed event and audit new status " +
       "with event ApplicationAssessmentPassedNotified" in new ApplicationAssessmentServiceFixture {
         when(aRepositoryMock.nextAssessmentCentrePassedOrFailedApplication()).thenReturn(Future.successful(
-          Some(ApplicationForNotification("appId1", "userId1", "preferredName1", "ASSESSMENT_CENTRE_PASSED"))
+          Some(ApplicationForNotification("appId1", "userId1", "preferredName1", ApplicationStatuses.AssessmentCentrePassed))
         ))
         when(emailClientMock.sendAssessmentCentrePassed(eqTo("email@mailinator.com"), eqTo("preferredName1"))(any[HeaderCarrier]))
           .thenReturn(Future.successful(()))
-        when(aRepositoryMock.updateStatus(eqTo("appId1"), eqTo("ASSESSMENT_CENTRE_PASSED_NOTIFIED"))).thenReturn(Future.successful(()))
+        when(aRepositoryMock.updateStatus(eqTo("appId1"), eqTo(ApplicationStatuses.AssessmentCentrePassedNotified)))
+          .thenReturn(Future.successful(()))
 
         applicationAssessmentService.processNextAssessmentCentrePassedOrFailedApplication.futureValue must be(())
 
         verify(emailClientMock).sendAssessmentCentrePassed(eqTo("email@mailinator.com"), eqTo("preferredName1"))(any[HeaderCarrier])
-        verify(aRepositoryMock).updateStatus("appId1", "ASSESSMENT_CENTRE_PASSED_NOTIFIED")
+        verify(aRepositoryMock).updateStatus("appId1", ApplicationStatuses.AssessmentCentrePassedNotified)
         val auditDetails = Map("userId" -> "userId1", "email" -> "email@mailinator.com")
         verify(auditServiceMock).logEventNoRequest(eqTo("AssessmentCentrePassedEmailed"), eqTo(auditDetails))
-        val auditDetailsNewStatus = Map("applicationId" -> "appId1", "applicationStatus" -> "ASSESSMENT_CENTRE_PASSED_NOTIFIED")
+        val auditDetailsNewStatus = Map("applicationId" -> "appId1",
+          "applicationStatus" -> ApplicationStatuses.AssessmentCentrePassedNotified.name)
         verify(auditServiceMock).logEventNoRequest("ApplicationAssessmentPassedNotified", auditDetailsNewStatus)
       }
 
@@ -192,26 +195,29 @@ class ApplicationAssessmentServiceSpec extends PlaySpec with MockitoSugar with S
       "ASSESSMENT_CENTRE_FAILED_NOTIFIED and audit AssessmentCentreFailedEmailed event and audit new status with event " +
       "ApplicationAssessmentPassedNotified" in new ApplicationAssessmentServiceFixture {
         when(aRepositoryMock.nextAssessmentCentrePassedOrFailedApplication()).thenReturn(Future.successful(
-          Some(ApplicationForNotification("appId1", "userId1", "preferredName1", "ASSESSMENT_CENTRE_FAILED"))
+          Some(ApplicationForNotification("appId1", "userId1", "preferredName1", ApplicationStatuses.AssessmentCentreFailed))
         ))
         when(emailClientMock.sendAssessmentCentreFailed(eqTo("email@mailinator.com"), eqTo("preferredName1"))(any[HeaderCarrier]))
           .thenReturn(Future.successful(()))
-        when(aRepositoryMock.updateStatus(eqTo("appId1"), eqTo("ASSESSMENT_CENTRE_FAILED_NOTIFIED"))).thenReturn(Future.successful(()))
+        when(aRepositoryMock.updateStatus(eqTo("appId1"), eqTo(ApplicationStatuses.AssessmentCentreFailedNotified)))
+          .thenReturn(Future.successful(()))
 
         applicationAssessmentService.processNextAssessmentCentrePassedOrFailedApplication.futureValue must be(())
 
         verify(emailClientMock).sendAssessmentCentreFailed(eqTo("email@mailinator.com"), eqTo("preferredName1"))(any[HeaderCarrier])
-        verify(aRepositoryMock).updateStatus("appId1", "ASSESSMENT_CENTRE_FAILED_NOTIFIED")
+        verify(aRepositoryMock).updateStatus("appId1", ApplicationStatuses.AssessmentCentreFailedNotified)
         val auditDetails = Map("userId" -> "userId1", "email" -> "email@mailinator.com")
         verify(auditServiceMock).logEventNoRequest(eqTo("AssessmentCentreFailedEmailed"), eqTo(auditDetails))
-        val auditDetailsNewStatus = Map("applicationId" -> "appId1", "applicationStatus" -> "ASSESSMENT_CENTRE_FAILED_NOTIFIED")
+        val auditDetailsNewStatus = Map("applicationId" -> "appId1",
+          "applicationStatus" -> ApplicationStatuses.AssessmentCentreFailedNotified.name
+        )
         verify(auditServiceMock).logEventNoRequest("ApplicationAssessmentFailedNotified", auditDetailsNewStatus)
       }
   }
 
   "email candidate" should {
     "throw IncorrectStatusInApplicationException when we pass ONLINE_TEST_COMPLETED" in new ApplicationAssessmentServiceFixture {
-      val application = ApplicationForNotification("appId1", "userId1", "preferredName1", "ONLINE_TEST_COMPLETED")
+      val application = ApplicationForNotification("appId1", "userId1", "preferredName1", ApplicationStatuses.OnlineTestCompleted)
       val result = applicationAssessmentService.emailCandidate(application, "email@mailinator.com")
       result.failed.futureValue mustBe a[IncorrectStatusInApplicationException]
     }

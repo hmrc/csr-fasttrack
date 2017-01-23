@@ -18,12 +18,14 @@ package mocks.application
 
 import common.Constants.{ No, Yes }
 import model.{ Adjustments, AdjustmentsComment }
+import model.ApplicationStatuses
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.EvaluationResults.AssessmentRuleCategoryResult
 import model.Exceptions.ApplicationNotFound
 import model.PersistedObjects.ApplicationForNotification
 import model.Scheme.Scheme
+import model.commands.ApplicationStatusDetails
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.GeneralApplicationRepository
 
@@ -42,7 +44,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   override def create(userId: String, frameworkId: String): Future[ApplicationResponse] = {
 
     val applicationId = java.util.UUID.randomUUID().toString
-    val applicationCreated = ApplicationResponse(applicationId, "CREATED", userId,
+    val applicationCreated = ApplicationResponse(applicationId, ApplicationStatuses.Created, userId,
       ProgressResponse(applicationId))
 
     inMemoryRepo += applicationId -> applicationCreated
@@ -50,17 +52,17 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   }
 
   override def findProgress(applicationId: String): Future[ProgressResponse] = applicationId match {
-    case "1111-1234" => Future.failed(new ApplicationNotFound(applicationId))
+    case "1111-1234" => Future.failed(ApplicationNotFound(applicationId))
     case _ => Future.successful(ProgressResponse(applicationId, personalDetails = true))
   }
 
   val inMemoryRepo = new mutable.HashMap[String, ApplicationResponse]
 
   override def findByUserId(userId: String, frameworkId: String): Future[ApplicationResponse] = userId match {
-    case "invalidUser" => Future.failed(new ApplicationNotFound("invalidUser"))
+    case "invalidUser" => Future.failed(ApplicationNotFound("invalidUser"))
     case _ =>
       val applicationId = "1111-1111"
-      val applicationCreated = ApplicationResponse(applicationId, "CREATED", userId,
+      val applicationCreated = ApplicationResponse(applicationId, ApplicationStatuses.Created, userId,
         ProgressResponse(applicationId))
       Future.successful(applicationCreated)
   }
@@ -133,7 +135,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
 
   override def allocationExpireDateByApplicationId(applicationId: String): Future[Option[LocalDate]] = ???
 
-  override def updateStatus(applicationId: String, status: String): Future[Unit] = ???
+  override def updateStatus(applicationId: String, status: ApplicationStatuses.EnumVal): Future[Unit] = ???
 
   override def applicationsWithAssessmentScoresAccepted(frameworkId: String): Future[List[ApplicationPreferences]] = ???
 
@@ -146,7 +148,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   def nextApplicationReadyForAssessmentScoreEvaluation(currentPassmarkVersion: String): Future[Option[String]] = ???
 
   def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResult,
-    newApplicationStatus: String): Future[Unit] = ???
+    newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = ???
 
   def getSchemeLocations(applicationId: String): Future[List[String]] = ???
 
@@ -163,5 +165,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   override def findAdjustmentsComment(applicationId: String): Future[AdjustmentsComment] = ???
 
   override def removeAdjustmentsComment(applicationId: String): Future[Unit] = ???
+
+  override def findApplicationStatusDetails(applicationId: String): Future[ApplicationStatusDetails] = ???
 }
 // scalastyle:on number.of.methods

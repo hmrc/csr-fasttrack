@@ -14,14 +14,19 @@
  * limitations under the License.
  */
 
-package model.exchange.testdata
+package model.commands
 
+import model.ApplicationStatuses
+import model.ApplicationStatuses.enumFormat
+import org.joda.time.DateTime
 import play.api.libs.json.Json
 
-case class StatusDataRequest(applicationStatus: String = "SUBMITTED",
-                             previousApplicationStatus: Option[String] = None,
-                             progressStatus: Option[String] = None)
+case class ApplicationStatusDetails(
+  status: ApplicationStatuses.EnumVal,
+  statusDate: Option[DateTime] = None,
+  overrideSubmissionDeadline: Option[DateTime] = None
+)
 
-object StatusDataRequest{
-  implicit def statusDataRequestFormat = Json.format[StatusDataRequest]
+object ApplicationStatusDetails {
+  implicit val applicationStatusDetailsFormat = Json.format[ApplicationStatusDetails]
 }

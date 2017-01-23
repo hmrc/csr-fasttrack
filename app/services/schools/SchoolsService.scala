@@ -14,14 +14,28 @@
  * limitations under the License.
  */
 
-package model.exchange.testdata
+package services.schools
 
-import play.api.libs.json.Json
+import model.School
+import repositories._
 
-case class StatusDataRequest(applicationStatus: String = "SUBMITTED",
-                             previousApplicationStatus: Option[String] = None,
-                             progressStatus: Option[String] = None)
+import scala.concurrent.ExecutionContext.Implicits.global
 
-object StatusDataRequest{
-  implicit def statusDataRequestFormat = Json.format[StatusDataRequest]
+object SchoolsService extends SchoolsService{
+  val schoolsRepo = schoolsRepository
+}
+
+trait SchoolsService {
+  val MaxNumberOfSchools = 16
+  val schoolsRepo : SchoolsRepository
+
+  def getSchools(term: String) = {
+    schoolsRepo.schools.map(_.filter(s => sanitize(s.name).contains(sanitize(term))).take(MaxNumberOfSchools))
+  }
+
+  private def sanitize(str: String) = {
+    str.replaceAll("""([\p{Punct}])*""", "")
+      .replaceAll("""\s*""","")
+      .toLowerCase()
+  }
 }

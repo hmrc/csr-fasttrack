@@ -16,30 +16,27 @@
 
 package services.testdata
 
-import java.util.UUID
-
-import connectors.testdata.ExchangeObjects.OnlineTestProfileResponse
+import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.ApplicationStatuses
-import model.OnlineTestCommands.OnlineTestProfile
-import org.joda.time.DateTime
 import repositories._
-import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
+import repositories.application.{ GeneralApplicationMongoRepository, GeneralApplicationRepository }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object WithdrawnStatusGenerator extends WithdrawnStatusGenerator {
-  override val appRepository = applicationRepository
+  override val appRepository: GeneralApplicationMongoRepository = applicationRepository
 }
 
 trait WithdrawnStatusGenerator extends BaseGenerator {
   val appRepository: GeneralApplicationRepository
 
-  def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
+  def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
 
     for {
       candidateInPreviousStatus <- StatusGeneratorFactory.getGenerator(generatorConfig.previousStatus.getOrElse(
-        ApplicationStatuses.Submitted
+        ApplicationStatuses.Submitted.name
       )).generate(generationId, generatorConfig)
       _ <- appRepository.withdraw(candidateInPreviousStatus.applicationId.get, model.Commands.WithdrawApplicationRequest("test", Some("test"),
         "test"))

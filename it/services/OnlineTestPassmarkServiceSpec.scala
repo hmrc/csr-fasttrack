@@ -21,6 +21,7 @@ import java.io.File
 import com.typesafe.config.{ Config, ConfigFactory }
 import connectors.PassMarkExchangeObjects.Settings
 import mocks.{ OnlineIntegrationTestInMemoryRepository, PassMarkSettingsInMemoryRepository }
+import model.ApplicationStatuses._
 import model.EvaluationResults._
 import model.OnlineTestCommands.CandidateScoresWithPreferencesAndPassmarkSettings
 import model.PersistedObjects.CandidateTestReport
@@ -32,7 +33,6 @@ import org.joda.time.DateTime
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.Logger
-import play.test.WithApplication
 import repositories.{ FrameworkPreferenceRepository, FrameworkRepository, PassMarkSettingsRepository, TestReportRepository }
 import services.onlinetesting.OnlineTestPassmarkService
 import services.passmarksettings.PassMarkSettingsService

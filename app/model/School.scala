@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
-package model.exchange.testdata
+package model
 
 import play.api.libs.json.Json
 
-case class StatusDataRequest(applicationStatus: String = "SUBMITTED",
-                             previousApplicationStatus: Option[String] = None,
-                             progressStatus: Option[String] = None)
+case class School(typeId: String,
+                  id: String,
+                  name: String,
+                  address1: Option[String],
+                  address2: Option[String],
+                  address3: Option[String],
+                  address4: Option[String],
+                  postCode: Option[String],
+                  phaseOfEducation: Option[String],
+                  typeOfEstablishment: Option[String])
 
-object StatusDataRequest{
-  implicit def statusDataRequestFormat = Json.format[StatusDataRequest]
+
+object School {
+  implicit val schoolFormat = Json.format[School]
 }

@@ -16,16 +16,15 @@
 
 package repositories
 
-import common.Constants.{ Yes, No }
+import model.ApplicationStatuses._
 import model.AssessmentScheduleCommands.ApplicationForAssessmentAllocationResult
 import model.Commands.{AdjustmentReport, _}
 import model.{ApplicationStatuses, EvaluationResults}
 import model.EvaluationResults.AssessmentRuleCategoryResult
 import model.Exceptions.ApplicationNotFound
-import model.persisted.AssistanceDetails
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
-import repositories.application.{AssistanceDetailsMongoRepository, GeneralApplicationMongoRepository, TestDataMongoRepository}
+import repositories.application.{ GeneralApplicationMongoRepository, TestDataMongoRepository }
 import services.GBTimeZoneService
 import testkit.MongoRepositorySpec
 
@@ -86,9 +85,9 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
 
       val result = applicationRepo.find(List(appResponse.applicationId)).futureValue
 
-      result.size must be(1)
-      result.head.applicationId.get must be(appResponse.applicationId)
-      result.head.userId must be("userId1")
+      result.size mustBe 1
+      result.head.applicationId.get mustBe appResponse.applicationId
+      result.head.userId mustBe "userId1"
     }
   }
 
@@ -111,7 +110,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       val results = applicationRepo.applicationsReport(frameworkId).futureValue
       results must have size 2
       results.foreach { case (userId, isNonSubmitted, _) =>
-        isNonSubmitted must be(true)
+        isNonSubmitted mustBe true
         userId must startWith("userId")
       }
     }
@@ -132,7 +131,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       val results = applicationRepo.applicationsReport(frameworkId).futureValue
       results must have size 2
       results.foreach { case (_, isNonSubmitted, _) =>
-        isNonSubmitted must be(false)
+        isNonSubmitted mustBe false
       }
     }
 
@@ -253,7 +252,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       val result = applicationRepo.nextApplicationReadyForAssessmentScoreEvaluation("1").futureValue
 
       result must not be empty
-      result.get must be ("app1")
+      result.get mustBe "app1"
     }
 
     "return the next application when the passmark is different" in {
@@ -269,15 +268,15 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
 
       val result = applicationRepo.nextApplicationReadyForAssessmentScoreEvaluation("1").futureValue
 
-      result must be (empty)
+      result mustBe empty
     }
 
-    "return none when there is no candidates in ASSESSMENT_SCORES_ACCEPTED status" in {
-      createApplication("app1", "ASSESSMENT_SCORES_UNACCEPTED")
+    "return none when there are no candidates in ASSESSMENT_SCORES_ACCEPTED status" in {
+      createApplication("app1", ApplicationStatuses.AssessmentScoresEntered)
 
       val result = applicationRepo.nextApplicationReadyForAssessmentScoreEvaluation("1").futureValue
 
-      result must be (empty)
+      result mustBe empty
     }
   }
 
@@ -289,7 +288,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       applicationRepo.saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AwaitingAssessmentCentreReevaluation).futureValue
 
       val status = getApplicationStatus("app1")
-      status must be (ApplicationStatuses.AwaitingAssessmentCentreReevaluation)
+      status mustBe ApplicationStatuses.AwaitingAssessmentCentreReevaluation
     }
 
     "save a score evaluation and update the application status when the application is in AWAITING_ASSESSMENT_CENTRE_RE_EVALUATION" in {
@@ -299,7 +298,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       applicationRepo.saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AssessmentScoresAccepted).futureValue
 
       val status = getApplicationStatus("app1")
-      status must be (ApplicationStatuses.AssessmentScoresAccepted)
+      status mustBe ApplicationStatuses.AssessmentScoresAccepted
     }
 
     "fail to save a score evaluation when candidate has been withdrawn" in {
@@ -309,14 +308,14 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       applicationRepo.saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AssessmentScoresAccepted).futureValue
 
       val status = getApplicationStatus("app1")
-      status must be (ApplicationStatuses.Withdrawn)
+      status mustBe ApplicationStatuses.Withdrawn
     }
 
     def getApplicationStatus(appId: String) = {
       applicationRepo.collection.find(BSONDocument("applicationId" -> "app1")).one[BSONDocument].map { docOpt =>
         docOpt must not be empty
         val doc = docOpt.get
-        doc.getAs[String]("applicationStatus").get
+        doc.getAs[ApplicationStatuses.EnumVal]("applicationStatus").get
       }.futureValue
     }
   }
@@ -387,7 +386,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  def createApplication(appId: String, appStatus: String): Unit = {
+  def createApplication(appId: String, appStatus: ApplicationStatuses.EnumVal): Unit = {
     applicationRepo.collection.insert(BSONDocument(
       "applicationId" -> appId,
       "applicationStatus" -> appStatus

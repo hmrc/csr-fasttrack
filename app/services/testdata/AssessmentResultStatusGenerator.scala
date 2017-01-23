@@ -18,7 +18,6 @@ package services.testdata
 
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.ApplicationStatuses
-import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import model.EvaluationResults._
 import repositories._
 import repositories.application.GeneralApplicationRepository
@@ -117,7 +116,7 @@ trait AssessmentResultStatusGenerator extends ConstructiveGenerator {
   val aRepository: GeneralApplicationRepository
   val fwRepository: FrameworkYamlRepository
 
-  val status: String
+  val status: ApplicationStatuses.EnumVal
   def getAssessmentRuleCategoryResult: AssessmentRuleCategoryResult
 
   lazy val schemeNames = Await.result(fwRepository.getFrameworkNames, 5 seconds)

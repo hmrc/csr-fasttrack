@@ -17,12 +17,13 @@
 package repositories.application
 
 import model.Exceptions.PersonalDetailsNotFound
-import model.{ApplicationStatuses, PersistedObjects}
-import model.PersistedObjects.{ApplicationStatus, PersonalDetails, PersonalDetailsWithUserId}
-import org.joda.time.{DateTime, LocalDate}
+import model.{ ApplicationStatuses, PersistedObjects, ProgressStatuses }
+import model.ApplicationStatuses.BSONEnumHandler
+import model.PersistedObjects.{ PersonalDetails, PersonalDetailsWithUserId }
+import org.joda.time.{ DateTime, LocalDate }
 import reactivemongo.api.DB
-import reactivemongo.bson.{BSONDocument, _}
-import repositories.{_}
+import reactivemongo.bson.{ BSONDocument, _ }
+import repositories._
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -36,7 +37,8 @@ trait PersonalDetailsRepository {
   def update(applicationId: String, userId: String, personalDetails: PersonalDetails): Future[Unit]
 
   def update(appId: String, userId: String, personalDetails: PersonalDetails,
-             requiredStatuses: Seq[String], newApplicationStatus: String): Future[Unit]
+    requiredApplicationStatuses: Seq[ApplicationStatuses.EnumVal],
+    newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit]
 
   def find(applicationId: String): Future[PersonalDetails]
 
@@ -55,30 +57,31 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
     val query = BSONDocument("applicationId" -> applicationId, "userId" -> userId)
 
     val personalDetailsBSON = BSONDocument("$set" -> BSONDocument(
-      "applicationStatus" -> "IN_PROGRESS",
-      s"progress-status.personal-details" -> true,
+      "applicationStatus" -> ApplicationStatuses.InProgress,
+      s"progress-status.${ProgressStatuses.PersonalDetailsCompletedProgress}" -> true,
+      s"progress-status-timestamp.${ProgressStatuses.PersonalDetailsCompletedProgress}" -> DateTime.now(),
       "personal-details" -> persistedPersonalDetails
     ))
 
-    collection.update(query, personalDetailsBSON, upsert = false) map {
-      case _ => ()
-    }
+    collection.update(query, personalDetailsBSON, upsert = false) map { _ => () }
   }
 
   def update(applicationId: String, userId: String, personalDetails: PersonalDetails,
-             requiredStatuses: Seq[String], newApplicationStatus: String): Future[Unit] = {
+    requiredApplicationStatuses: Seq[ApplicationStatuses.EnumVal],
+    newApplicationStatus: ApplicationStatuses.EnumVal
+  ): Future[Unit] = {
     val PersonalDetailsCollection = "personal-details"
 
 
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId, "userId" -> userId),
-      BSONDocument("applicationStatus" -> BSONDocument("$in" -> requiredStatuses))
+      BSONDocument("applicationStatus" -> BSONDocument("$in" -> requiredApplicationStatuses))
     ))
 
     val personalDetailsBSON = BSONDocument("$set" ->
       BSONDocument(
-        "progress-status.personal-details" -> true,
-        "progress-status-timestamp.personal-details" -> DateTime.now(),
+        s"progress-status.${ProgressStatuses.PersonalDetailsCompletedProgress}" -> true,
+        s"progress-status-timestamp.${ProgressStatuses.PersonalDetailsCompletedProgress}" -> DateTime.now(),
         PersonalDetailsCollection -> personalDetails,
         "applicationStatus" -> newApplicationStatus
       )
@@ -96,7 +99,7 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
     val projection = BSONDocument("personal-details" -> 1, "_id" -> 0)
 
     collection.find(query, projection).one[BSONDocument] map {
-      case Some(document) if document.getAs[BSONDocument]("personal-details").isDefined => {
+      case Some(document) if document.getAs[BSONDocument]("personal-details").isDefined =>
         val root = document.getAs[BSONDocument]("personal-details").get
         val firstName = root.getAs[String]("firstName").get
         val lastName = root.getAs[String]("lastName").get
@@ -106,8 +109,8 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
         val stemLevel = root.getAs[Boolean]("stemLevel").get
 
         PersonalDetails(firstName, lastName, preferredName, dateOfBirth, aLevel, stemLevel)
-      }
-      case _ => throw new PersonalDetailsNotFound(applicationId)
+
+      case _ => throw PersonalDetailsNotFound(applicationId)
     }
   }
 
@@ -123,7 +126,7 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
         val preferredName = root.getAs[String]("preferredName").get
 
         PersonalDetailsWithUserId(preferredName, userId)
-      case _ => throw new PersonalDetailsNotFound(applicationId)
+      case _ => throw PersonalDetailsNotFound(applicationId)
     }
   }
 

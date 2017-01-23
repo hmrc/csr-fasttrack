@@ -17,21 +17,22 @@
 package services.applicationassessment
 
 import config.AssessmentEvaluationMinimumCompetencyLevel
-import connectors.{CSREmailClient, EmailClient}
+import connectors.{ CSREmailClient, EmailClient }
 import model.ApplicationStatuses
-import model.AssessmentEvaluationCommands.{AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores}
+import model.ApplicationStatuses.BSONEnumHandler
+import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import model.EvaluationResults._
 import model.Exceptions.IncorrectStatusInApplicationException
 import model.PersistedObjects.ApplicationForNotification
 import play.api.Logger
-import repositories.application.{GeneralApplicationRepository, OnlineTestRepository}
+import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
 import repositories._
 import services.AuditService
 import services.evaluation.AssessmentCentrePassmarkRulesEngine
 import services.passmarksettings.AssessmentCentrePassMarkSettingsService
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 object ApplicationAssessmentService extends ApplicationAssessmentService {
 
@@ -68,28 +69,22 @@ trait ApplicationAssessmentService extends ApplicationStatusCalculator {
   val passmarkService: AssessmentCentrePassMarkSettingsService
   val passmarkRulesEngine: AssessmentCentrePassmarkRulesEngine
 
-  def removeFromApplicationAssessmentSlot(applicationId: String) = {
+  def removeFromApplicationAssessmentSlot(applicationId: String): Future[Unit] = {
 
     appAssessRepository.delete(applicationId).flatMap { _ =>
 
-      auditService.logEventNoRequest("ApplicationAssessmentDeleted", Map(
-        "applicationId" -> applicationId
-      ))
+      auditService.logEventNoRequest("ApplicationAssessmentDeleted", Map( "applicationId" -> applicationId ))
 
       otRepository.removeCandidateAllocationStatus(applicationId).map { _ =>
-        auditService.logEventNoRequest("ApplicationDeallocated", Map(
-          "applicationId" -> applicationId
-        ))
+        auditService.logEventNoRequest("ApplicationDeallocated", Map( "applicationId" -> applicationId ))
       }
     }
   }
 
-  def deleteApplicationAssessment(applicationId: String) = {
+  def deleteApplicationAssessment(applicationId: String): Future[Unit] = {
 
     appAssessRepository.delete(applicationId).map { _ =>
-      auditService.logEventNoRequest("ApplicationAssessmentDeleted", Map(
-        "applicationId" -> applicationId
-      ))
+      auditService.logEventNoRequest("ApplicationAssessmentDeleted", Map( "applicationId" -> applicationId ))
     }
   }
 
@@ -146,21 +141,20 @@ trait ApplicationAssessmentService extends ApplicationStatusCalculator {
     }
   }
 
-  private def auditNewStatus(appId: String, newStatus: String): Unit = {
+  private def auditNewStatus(appId: String, newStatus: ApplicationStatuses.EnumVal): Unit = {
     val event = newStatus match {
       case ApplicationStatuses.AssessmentCentrePassedNotified => "ApplicationAssessmentPassedNotified"
       case ApplicationStatuses.AssessmentCentreFailedNotified => "ApplicationAssessmentFailedNotified"
       case ApplicationStatuses.AssessmentCentreFailed | ApplicationStatuses.AssessmentCentrePassed |
-        ApplicationStatuses.AwaitingAssessmentCentreReevaluation => "ApplicationAssessmentEvaluated"
+           ApplicationStatuses.AwaitingAssessmentCentreReevaluation => "ApplicationAssessmentEvaluated"
     }
     Logger.info(s"$event for $appId. The new status: $newStatus")
-    auditService.logEventNoRequest(
-      event,
-      Map("applicationId" -> appId, "applicationStatus" -> newStatus)
+    auditService.logEventNoRequest( event, Map("applicationId" -> appId, "applicationStatus" -> newStatus)
     )
   }
 
   private[applicationassessment] def emailCandidate(application: ApplicationForNotification, emailAddress: String): Future[Unit] = {
+
     application.applicationStatus match {
       case ApplicationStatuses.AssessmentCentrePassed =>
         emailClient.sendAssessmentCentrePassed(emailAddress, application.preferredName).map { _ =>
@@ -173,17 +167,23 @@ trait ApplicationAssessmentService extends ApplicationStatusCalculator {
       case _ =>
         Logger.warn(s"We cannot send email to candidate for application [${application.applicationId}] because its status is " +
           s"[${application.applicationStatus}].")
-        Future.failed(new IncorrectStatusInApplicationException(
+        Future.failed(IncorrectStatusInApplicationException(
           "Application should have been in ASSESSMENT_CENTRE_FAILED or ASSESSMENT_CENTRE_PASSED status"
         ))
     }
   }
 
-  private def commitNotifiedStatus(application: ApplicationForNotification): Future[Unit] =
-    aRepository.updateStatus(application.applicationId, s"${application.applicationStatus}_NOTIFIED").map { _ =>
-      auditNewStatus(application.applicationId, s"${application.applicationStatus}_NOTIFIED")
+  private def commitNotifiedStatus(application: ApplicationForNotification): Future[Unit] = {
+    val notifiedStatus = if (application.applicationStatus == ApplicationStatuses.AssessmentCentreFailed) {
+      ApplicationStatuses.AssessmentCentreFailedNotified
+    } else {
+      ApplicationStatuses.AssessmentCentrePassedNotified
     }
 
+    aRepository.updateStatus(application.applicationId, notifiedStatus).map { _ =>
+      auditNewStatus(application.applicationId, notifiedStatus)
+    }
+  }
   private def candidateEmailAddress(userId: String): Future[String] =
     cdRepository.find(userId).map(_.email)
 
