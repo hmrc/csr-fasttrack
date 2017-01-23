@@ -130,7 +130,7 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
         ProgressStatuses.SchemesCompletedProgress -> DateTime.now.minusDays(9),
         ProgressStatuses.AssistanceDetailsCompletedProgress -> DateTime.now.minusDays(9),
         ProgressStatuses.ReviewCompletedProgress -> DateTime.now.minusDays(8),
-        ProgressStatuses.StartDiversityQuestionnaireProgress -> DateTime.now.minusDays(7),
+        ProgressStatuses.StartQuestionnaireProgress -> DateTime.now.minusDays(7),
         ProgressStatuses.DiversityQuestionsCompletedProgress -> DateTime.now.minusDays(6),
         ProgressStatuses.EducationQuestionsCompletedProgress -> DateTime.now.minusDays(5),
         ProgressStatuses.OccupationQuestionsCompletedProgress -> DateTime.now.minusDays(4),
@@ -156,7 +156,7 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
         ProgressStatuses.SchemesCompletedProgress -> DateTime.now.minusDays(9),
         ProgressStatuses.AssistanceDetailsCompletedProgress -> DateTime.now.minusDays(9),
         ProgressStatuses.ReviewCompletedProgress -> DateTime.now.minusDays(8),
-        ProgressStatuses.StartDiversityQuestionnaireProgress -> DateTime.now.minusDays(7),
+        ProgressStatuses.StartQuestionnaireProgress -> DateTime.now.minusDays(7),
         ProgressStatuses.DiversityQuestionsCompletedProgress -> DateTime.now.minusDays(6),
         ProgressStatuses.EducationQuestionsCompletedProgress -> DateTime.now.minusDays(5),
         ProgressStatuses.OccupationQuestionsCompletedProgress -> DateTime.now.minusDays(4)

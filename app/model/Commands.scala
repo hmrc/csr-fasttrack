@@ -88,13 +88,20 @@ object Commands {
     hasSchemes: Boolean = false,
     assistanceDetails: Boolean = false,
     review: Boolean = false,
-    questionnaire: List[String] = Nil,
+    questionnaire: QuestionnaireProgressResponse = QuestionnaireProgressResponse(),
     submitted: Boolean = false,
     withdrawn: Boolean = false,
     onlineTest: OnlineTestProgressResponse = OnlineTestProgressResponse(),
     failedToAttend: Boolean = false,
     assessmentScores: AssessmentScores = AssessmentScores(),
     assessmentCentre: AssessmentCentre = AssessmentCentre()
+  )
+
+  case class QuestionnaireProgressResponse(
+    diversityStarted: Boolean = false,
+    diversityCompleted: Boolean = false,
+    educationCompleted: Boolean = false,
+    occupationCompleted: Boolean = false
   )
 
   case class Report(applicationId: String, progress: Option[String], firstLocation: Option[String],
@@ -293,6 +300,7 @@ object Commands {
     implicit val addressFormat = Json.format[Address]
     implicit val assessmentScoresFormat = Json.format[AssessmentScores]
     implicit val assessmentCentresFormat = Json.format[AssessmentCentre]
+    implicit val questionnaireResponseFormat = Json.format[QuestionnaireProgressResponse]
     implicit val progressFormat = Json.format[ProgressResponse]
     implicit val applicationAddedFormat = Json.format[ApplicationResponse]
     implicit val passMarkSettingsCreateResponseFormat = Json.format[PassMarkSettingsCreateResponse]
