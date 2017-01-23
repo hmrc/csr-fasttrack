@@ -182,7 +182,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         assistanceDetails = getProgress(ProgressStatuses.AssistanceDetailsCompletedProgress),
         review = getProgress(ProgressStatuses.ReviewCompletedProgress),
         questionnaire = QuestionnaireProgressResponse(
-          diversityStarted = getQuestionnaire(ProgressStatuses.StartDiversityQuestionnaireProgress),
+          diversityStarted = getQuestionnaire(ProgressStatuses.StartQuestionnaireProgress),
           diversityCompleted = getQuestionnaire(ProgressStatuses.DiversityQuestionsCompletedProgress),
           educationCompleted = getQuestionnaire(ProgressStatuses.EducationQuestionsCompletedProgress),
           occupationCompleted = getQuestionnaire(ProgressStatuses.OccupationQuestionsCompletedProgress)
@@ -1074,7 +1074,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
     val query = BSONDocument("applicationId" -> applicationId)
     val schemeLocationsBSON = BSONDocument("$set" -> BSONDocument(
-      "progress-status.scheme-locations" -> true,
+      s"progress-status.${ProgressStatuses.LocationsCompletedProgress}" -> true,
       "scheme-locations" -> locationIds
     ))
     collection.update(query, schemeLocationsBSON, upsert = false) map { _ => () }
@@ -1094,7 +1094,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val schemePreferencesBSON = BSONDocument("$set" -> BSONDocument(
-      "progress-status.scheme-preferences" -> true,
+      s"progress-status.${ProgressStatuses.SchemesCompletedProgress}" -> true,
       "schemes" -> schemeNames
     ))
     collection.update(query, schemePreferencesBSON, upsert = false) map { _ => () }

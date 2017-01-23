@@ -60,7 +60,7 @@ object ApplicationStatusOrder {
     (progress.assistanceDetails, SchemesCompletedProgress.weight, AssistanceDetailsCompletedProgress),
     (progress.review, ReviewCompletedProgress.weight, ReviewCompletedProgress),
 
-    (progress.questionnaire.diversityStarted, StartDiversityQuestionnaireProgress.weight, StartDiversityQuestionnaireProgress),
+    (progress.questionnaire.diversityStarted, StartQuestionnaireProgress.weight, StartQuestionnaireProgress),
     (progress.questionnaire.diversityCompleted, DiversityQuestionsCompletedProgress.weight, DiversityQuestionsCompletedProgress),
     (progress.questionnaire.educationCompleted, EducationQuestionsCompletedProgress.weight, EducationQuestionsCompletedProgress),
     (progress.questionnaire.occupationCompleted, OccupationQuestionsCompletedProgress.weight, OccupationQuestionsCompletedProgress),
