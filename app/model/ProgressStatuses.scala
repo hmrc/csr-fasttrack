@@ -34,7 +34,7 @@ object ProgressStatuses extends Enum {
   val SchemesCompletedProgress = EnumVal("schemes_preferences_completed", 30)
   val AssistanceDetailsCompletedProgress = EnumVal("assistance_details_completed", 40)
   val ReviewCompletedProgress = EnumVal("review_completed", 50)
-  val StartDiversityQuestionnaireProgress = EnumVal("start_diversity_questionnaire", 60)
+  val StartQuestionnaireProgress = EnumVal("start_questionnaire", 60)
   val DiversityQuestionsCompletedProgress = EnumVal("diversity_questions_completed", 70)
   val EducationQuestionsCompletedProgress = EnumVal("education_questions_completed", 80)
   val OccupationQuestionsCompletedProgress = EnumVal("occupation_questions_completed", 90)

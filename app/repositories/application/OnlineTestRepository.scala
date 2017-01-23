@@ -382,9 +382,9 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     val query = BSONDocument("applicationId" -> applicationId)
 
     val progressStatus = applicationStatus match {
-      case ApplicationStatuses.AwaitingOnlineTestReevaluation => "awaiting_online_test_re_evaluation"
-      case ApplicationStatuses.OnlineTestFailed => "online_test_failed"
-      case ApplicationStatuses.AwaitingAllocation => "awaiting_online_test_allocation"
+      case ApplicationStatuses.AwaitingOnlineTestReevaluation => ProgressStatuses.AwaitingOnlineTestReevaluationProgress
+      case ApplicationStatuses.OnlineTestFailed => ProgressStatuses.OnlineTestFailedProgress
+      case ApplicationStatuses.AwaitingAllocation => ProgressStatuses.AwaitingOnlineTestAllocationProgress
     }
 
     val passMarkEvaluation = BSONDocument("$set" ->
