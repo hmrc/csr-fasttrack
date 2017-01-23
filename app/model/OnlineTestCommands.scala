@@ -28,7 +28,7 @@ object OnlineTestCommands {
   case class OnlineTestProfile(cubiksUserId: Int, token: String, onlineTestUrl: String,
     invitationDate: DateTime, expirationDate: DateTime, participantScheduleId: Int)
 
-  case class OnlineTestApplication(applicationId: String, applicationStatus: String, userId: String,
+  case class OnlineTestApplication(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal, userId: String,
     guaranteedInterview: Boolean, needsAdjustments: Boolean, preferredName: String, adjustmentDetail: Option[AdjustmentDetail])
 
   case class OnlineTestApplicationWithCubiksUser(applicationId: String, userId: String, cubiksUserId: Int)
