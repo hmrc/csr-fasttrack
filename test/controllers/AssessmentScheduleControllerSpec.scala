@@ -704,7 +704,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         )
       ))
       when(mockApplicationRepository.findProgress(any())).thenReturn(Future.successful(
-        ProgressResponse("appid-1", true, true, true, true, false, List(), true, false,
+        ProgressResponse("appid-1", true, true, true, true, false, QuestionnaireProgressResponse(), true, false,
           OnlineTestProgressResponse(true, true, true, true, false, false, false, true, true, false), false)
       ))
     }
@@ -735,11 +735,11 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         )
       ))
       when(mockApplicationRepository.findProgress(eqTo("appid-1"))).thenReturn(Future.successful(
-        ProgressResponse("appid-1", true, true, true, true, true, List(), true, false,
+        ProgressResponse("appid-1", true, true, true, true, true, QuestionnaireProgressResponse(), true, false,
           OnlineTestProgressResponse(true, true, false, false, false, false, true, true, false, false))
       ))
       when(mockApplicationRepository.findProgress(eqTo("appid-2"))).thenReturn(Future.successful(
-        ProgressResponse("appid-2", true, true, true, true, true, List(), true, false,
+        ProgressResponse("appid-2", true, true, true, true, true, QuestionnaireProgressResponse(), true, false,
           OnlineTestProgressResponse(true, true, false, false, false, false, true, true, false, false))
       ))
     }
@@ -760,11 +760,11 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         )
       ))
       when(mockApplicationRepository.findProgress(eqTo("appid-1"))).thenReturn(Future.successful(
-        ProgressResponse("appid-1", true, true, true, true, true, List(), true, true,
+        ProgressResponse("appid-1", true, true, true, true, true, QuestionnaireProgressResponse(), true, true,
           OnlineTestProgressResponse(true, true, false, false, false, false, true, true, false, false))
       ))
       when(mockApplicationRepository.findProgress(eqTo("appid-2"))).thenReturn(Future.successful(
-        ProgressResponse("appid-2", true, true, true, true, true, List(), true, false,
+        ProgressResponse("appid-2", true, true, true, true, true, QuestionnaireProgressResponse(), true, false,
           OnlineTestProgressResponse(true, true, false, false, false, false, true, true, false, false))
       ))
     }

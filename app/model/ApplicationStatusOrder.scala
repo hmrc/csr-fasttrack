@@ -60,17 +60,10 @@ object ApplicationStatusOrder {
     (progress.assistanceDetails, SchemesPreferencesCompletedProgress.weight, AssistanceDetailsCompletedProgress),
     (progress.review, ReviewCompletedProgress.weight, ReviewCompletedProgress),
 
-    (progress.questionnaire.contains("start_questionnaire"), StartDiversityQuestionnaireProgress.weight,
-      StartDiversityQuestionnaireProgress),
-
-    (progress.questionnaire.contains("diversity_questionnaire"), DiversityQuestionsCompletedProgress.weight,
-      DiversityQuestionsCompletedProgress),
-
-    (progress.questionnaire.contains("education_questionnaire"), EducationQuestionsCompletedProgress.weight,
-      EducationQuestionsCompletedProgress),
-
-    (progress.questionnaire.contains("occupation_questionnaire"), OccupationQuestionsCompletedProgress.weight,
-      OccupationQuestionsCompletedProgress),
+    (progress.questionnaire.diversityStarted, StartDiversityQuestionnaireProgress.weight, StartDiversityQuestionnaireProgress),
+    (progress.questionnaire.diversityCompleted, DiversityQuestionsCompletedProgress.weight, DiversityQuestionsCompletedProgress),
+    (progress.questionnaire.educationCompleted, EducationQuestionsCompletedProgress.weight, EducationQuestionsCompletedProgress),
+    (progress.questionnaire.occupationCompleted, OccupationQuestionsCompletedProgress.weight, OccupationQuestionsCompletedProgress),
 
     (progress.submitted, SubmittedProgress.weight, SubmittedProgress),
     (progress.onlineTest.invited, OnlineTestInvitedProgress.weight, OnlineTestInvitedProgress),

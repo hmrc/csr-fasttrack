@@ -17,7 +17,7 @@
 package repositories.application
 
 import model.Exceptions.{ AssistanceDetailsNotFound, CannotUpdateAssistanceDetails }
-import model.ProgressStatuses
+import model.{ ApplicationStatuses, ProgressStatuses }
 import model.persisted.AssistanceDetails
 import reactivemongo.api.DB
 import reactivemongo.bson.{ BSONDocument, _ }
@@ -45,7 +45,7 @@ class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
   override def update(applicationId: String, userId: String, ad: AssistanceDetails): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId, "userId" -> userId)
     val updateBSON = BSONDocument("$set" -> BSONDocument(
-      "applicationStatus" -> "IN_PROGRESS",
+      "applicationStatus" -> ApplicationStatuses.InProgress,
       s"progress-status.${ProgressStatuses.AssistanceDetailsCompletedProgress}" -> true,
       AssistanceDetailsCollection -> ad
     ))
@@ -64,7 +64,7 @@ class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
       case Some(document) if document.getAs[BSONDocument](AssistanceDetailsCollection).isDefined => {
         document.getAs[AssistanceDetails](AssistanceDetailsCollection).get
       }
-      case _ => throw new AssistanceDetailsNotFound(applicationId)
+      case _ => throw AssistanceDetailsNotFound(applicationId)
     }
   }
 }
