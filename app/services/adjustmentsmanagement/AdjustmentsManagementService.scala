@@ -38,8 +38,8 @@ trait AdjustmentsManagementService {
   def confirmAdjustment(applicationId: String, adjustments: Adjustments)
                        (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
     adjustments.typeOfAdjustments match {
-      case Some(list) if list.nonEmpty => auditService.logEvent("AjustmentsConfirmed")
-      case _ => auditService.logEvent("AjustmentsRejected")
+      case Some(list) if list.nonEmpty => auditService.logEvent("AdjustmentsConfirmed")
+      case _ => auditService.logEvent("AdjustmentsRejected")
     }
     appRepository.confirmAdjustments(applicationId, adjustments)
   }
@@ -51,7 +51,7 @@ trait AdjustmentsManagementService {
   def updateAdjustmentsComment(applicationId: String, adjustmentsComment: AdjustmentsComment)
                               (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
     appRepository.updateAdjustmentsComment(applicationId, adjustmentsComment).map { _ =>
-      auditService.logEvent("AjustmentsCommentUpdated")
+      auditService.logEvent("AdjustmentsCommentUpdated")
     }
   }
 
@@ -61,7 +61,7 @@ trait AdjustmentsManagementService {
 
   def removeAdjustmentsComment(applicationId: String)(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
     appRepository.removeAdjustmentsComment(applicationId).map { _ =>
-      auditService.logEvent("AjustmentsCommentRemoved")
+      auditService.logEvent("AdjustmentsCommentRemoved")
     }
   }
 }
