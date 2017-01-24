@@ -19,8 +19,8 @@ package repositories.application
 import common.Constants.{ No, Yes }
 import factories.UUIDFactory
 import model.Commands.Report
-import model.Exceptions.{ LocationPreferencesNotFound, SchemePreferencesNotFound }
-import model.{ ApplicationStatuses, ProgressStatuses, Scheme }
+import model.Exceptions.{ AdjustmentsCommentNotFound, LocationPreferencesNotFound, SchemePreferencesNotFound }
+import model._
 import model.ApplicationStatuses._
 import model.commands.ApplicationStatusDetails
 import org.joda.time.{ DateTime, DateTimeZone }
@@ -117,6 +117,48 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
       an[LocationPreferencesNotFound] must be thrownBy {
         Await.result(repository.getSchemeLocations(appId), 5 seconds)
       }
+    }
+
+    "return None for adjustments" in {
+      val userId = generateUUID()
+      val appId = generateUUID()
+      createMinimumApplication(userId, appId, "FastTrack")
+      val result = repository.findAdjustments(appId).futureValue
+      result mustBe None
+    }
+
+    "update adjustments and retrieve" in {
+      val userId = generateUUID()
+      val appId = generateUUID()
+      val adjustments = Adjustments(
+        typeOfAdjustments = Some(List("timeExtension")),
+        onlineTests = Some(AdjustmentDetail(Some(9)))
+      )
+      createMinimumApplication(userId, appId, "FastTrack")
+      repository.confirmAdjustments(appId, adjustments).futureValue
+
+      val result = repository.findAdjustments(appId).futureValue
+      result mustBe Some(adjustments.copy(adjustmentsConfirmed = Some(true)))
+    }
+
+    "return None for adjustments comments" in {
+      val userId = generateUUID()
+      val appId = generateUUID()
+      createMinimumApplication(userId, appId, "FastTrack")
+      an[AdjustmentsCommentNotFound] mustBe thrownBy {
+        Await.result(repository.findAdjustmentsComment(appId), 5 seconds)
+      }
+    }
+
+    "update comments and retrieve" in {
+      val userId = generateUUID()
+      val appId = generateUUID()
+      val adjustmentsComment = AdjustmentsComment("adjustment comment")
+      createMinimumApplication(userId, appId, "FastTrack")
+      repository.updateAdjustmentsComment(appId, adjustmentsComment).futureValue
+
+      val result = repository.findAdjustmentsComment(appId).futureValue
+      result mustBe adjustmentsComment
     }
 
   }

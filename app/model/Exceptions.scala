@@ -70,4 +70,10 @@ object Exceptions {
   case class SchemePreferencesNotFound(applicationId: String) extends Exception(applicationId)
 
   case class LocationPreferencesNotFound(applicationId: String) extends Exception(applicationId)
+
+  case class AdjustmentsCommentNotFound(applicationId: String) extends Exception(applicationId)
+
+  case class CannotUpdateAdjustmentsComment(applicationId: String) extends Exception(applicationId)
+
+  case class CannotRemoveAdjustmentsComment(applicationId: String) extends Exception(applicationId)
 }

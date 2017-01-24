@@ -24,7 +24,7 @@ class AssistanceDetailsRepositorySpec extends MongoRepositorySpec {
         ad <- repository.find(applicationId(1))
       } yield ad).futureValue
 
-      result must be(model.persisted.AssistanceDetails.fromExchange(AssistanceDetailsExamples.DisabilityGisAndAdjustments))
+      result must be(AssistanceDetailsExamples.DisabilityGisAndAdjustments)
     }
 
     "update assistance details when they exist and find them successfully" in {
@@ -34,7 +34,7 @@ class AssistanceDetailsRepositorySpec extends MongoRepositorySpec {
         ad <- repository.find(applicationId(3))
       } yield ad).futureValue
 
-      result must be(model.persisted.AssistanceDetails.fromExchange(AssistanceDetailsExamples.OnlyDisabilityNoGisNoAdjustments))
+      result must be(AssistanceDetailsExamples.OnlyDisabilityNoGisNoAdjustments)
     }
   }
 

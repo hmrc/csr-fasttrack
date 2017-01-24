@@ -19,7 +19,7 @@ package connectors.testdata
 import model.Commands.ApplicationAssessment
 import model.EvaluationResults.SchemePreferences
 import model.PersistedObjects.{ContactDetails, PersonalDetails}
-import model.persisted.AssistanceDetails
+import model.exchange.AssistanceDetails
 import model.Preferences
 import play.api.libs.json.Json
 

@@ -20,18 +20,19 @@ import java.util.UUID
 import java.util.regex.Pattern
 
 import common.Constants.{ No, Yes }
-import model.ApplicationStatuses.BSONEnumHandler
+import model.Adjustments._
 import model.ApplicationStatusOrder._
-import model._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.EvaluationResults._
 import model.Exceptions.{ ApplicationNotFound, CannotUpdateReview, LocationPreferencesNotFound, SchemePreferencesNotFound }
+import common.StringUtils._
+import model.Exceptions._
 import model.PersistedObjects.ApplicationForNotification
-import model.ProgressStatuses.BSONEnumHandler
 import model.Scheme.Scheme
+import model._
 import model.commands.{ ApplicationStatusDetails, OnlineTestProgressResponse }
-import model.persisted.AssistanceDetails
+import model.exchange.AssistanceDetails
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{ DateTime, LocalDate }
 import play.api.libs.json.{ Format, JsNumber, JsObject }
@@ -88,9 +89,15 @@ trait GeneralApplicationRepository {
 
   def applicationsReport(frameworkId: String): Future[List[(String, IsNonSubmitted, PreferencesWithContactDetails)]]
 
-  def confirmAdjustment(applicationId: String, data: AdjustmentManagement): Future[Unit]
+  def confirmAdjustments(applicationId: String, data: Adjustments): Future[Unit]
 
-  def rejectAdjustment(applicationId: String): Future[Unit]
+  def findAdjustments(applicationId: String): Future[Option[Adjustments]]
+
+  def updateAdjustmentsComment(applicationId: String, adjustmentsComment: AdjustmentsComment): Future[Unit]
+
+  def findAdjustmentsComment(applicationId: String): Future[AdjustmentsComment]
+
+  def removeAdjustmentsComment(applicationId: String): Future[Unit]
 
   def allocationExpireDateByApplicationId(applicationId: String): Future[Option[LocalDate]]
 
@@ -125,7 +132,7 @@ trait GeneralApplicationRepository {
 class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implicit mongo: () => DB)
   extends ReactiveRepository[CreateApplicationRequest, BSONObjectID](CollectionNames.APPLICATION, mongo,
     Commands.Implicits.createApplicationRequestFormats,
-    ReactiveMongoFormats.objectIdFormats) with GeneralApplicationRepository with ReactiveRepositoryHelpers with RandomSelection {
+    ReactiveMongoFormats.objectIdFormats) with GeneralApplicationRepository with RandomSelection with ReactiveRepositoryHelpers {
 
   override def create(userId: String, frameworkId: String): Future[ApplicationResponse] = {
     val applicationId = UUID.randomUUID().toString
@@ -799,7 +806,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         val adjustmentsConfirmed = getAdjustmentsConfirmed(ad)
         val typesOfAdjustments = ad.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
         val adjustments = typesOfAdjustments.getOrElse(Nil)
-        val finalTOA = if (adjustments.isEmpty) None else Some(adjustments.mkString("|"))
+        val finalTOA = if (adjustments.isEmpty) None else Some(adjustments.map(splitCamelCase).mkString("|"))
 
         AdjustmentReport(userId, firstName, lastName, preferredName, None, None, finalTOA, guaranteedInterview, adjustmentsConfirmed)
       }
@@ -842,7 +849,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         val typesOfAdjustments = assistance.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
 
         val adjustments = typesOfAdjustments.getOrElse(Nil)
-        val finalTOA = if (adjustments.isEmpty) None else Some(adjustments.mkString("|"))
+        val finalTOA = if (adjustments.isEmpty) None else Some(adjustments.map(splitCamelCase).mkString("|"))
 
         CandidateAwaitingAllocation(userId, firstName, lastName, preferredName, firstLocation, finalTOA, dateOfBirth)
       }
@@ -920,34 +927,94 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     }
   }
 
-  def confirmAdjustment(applicationId: String, data: AdjustmentManagement): Future[Unit] = {
-
-    val query = BSONDocument("applicationId" -> applicationId)
-    val verbalAdjustment = data.timeNeeded.map(i => BSONDocument("assistance-details.verbalTimeAdjustmentPercentage" -> i))
-      .getOrElse(BSONDocument.empty)
-    val numericalAdjustment = data.timeNeededNum.map(i => BSONDocument("assistance-details.numericalTimeAdjustmentPercentage" -> i))
-      .getOrElse(BSONDocument.empty)
-
-    val adjustmentsConfirmationBSON = BSONDocument("$set" -> BSONDocument(
-      "assistance-details.typeOfAdjustments" -> data.adjustments.getOrElse(List.empty[String]),
-      "assistance-details.confirmedAdjustments" -> true
-    ).add(verbalAdjustment).add(numericalAdjustment))
-
-    collection.update(query, adjustmentsConfirmationBSON, upsert = false) map { _ => () }
-  }
-
-  def rejectAdjustment(applicationId: String): Future[Unit] = {
+  def confirmAdjustments(applicationId: String, data: Adjustments): Future[Unit] = {
 
     val query = BSONDocument("applicationId" -> applicationId)
 
-    val adjustmentRejection = BSONDocument("$set" -> BSONDocument(
-      "assistance-details.typeOfAdjustments" -> List.empty[String] //,
-      // TODO: Review this once we deal with this story, this field "needsAdjustment" is obsolete but we have
-      // separate fields for online and atVenue adjustments
-      //"assistance-details.needsAdjustment" -> "No"
+    val resetAdjustmentsBSON = BSONDocument("$unset" -> BSONDocument(
+      "assistance-details.onlineTests" -> "",
+      "assistance-details.assessmentCenter" -> ""
     ))
 
-    collection.update(query, adjustmentRejection, upsert = false) map { _ => () }
+    val adjustmentsConfirmationBSON = BSONDocument("$set" -> BSONDocument(
+      "assistance-details.typeOfAdjustments" -> data.typeOfAdjustments.getOrElse(List.empty[String]),
+      "assistance-details.adjustmentsConfirmed" -> true,
+      "assistance-details.onlineTests" -> data.onlineTests,
+      "assistance-details.assessmentCenter" -> data.assessmentCenter
+    ))
+
+    val resetValidator = singleUpdateValidator(applicationId, actionDesc = "reset")
+    val adjustmentValidator = singleUpdateValidator(applicationId, actionDesc = "updateAdjustments")
+
+    collection.update(query, resetAdjustmentsBSON).map(resetValidator).flatMap { _ =>
+      collection.update(query, adjustmentsConfirmationBSON) map adjustmentValidator
+    }
+  }
+
+  def findAdjustments(applicationId: String): Future[Option[Adjustments]] = {
+
+    val query = BSONDocument("applicationId" -> applicationId)
+    val projection = BSONDocument("assistance-details" -> 1, "_id" -> 0)
+
+    collection.find(query, projection).one[BSONDocument].map {
+      _.flatMap { document =>
+        val rootOpt = document.getAs[BSONDocument]("assistance-details")
+        rootOpt.map { root =>
+          val adjustmentList = root.getAs[List[String]]("typeOfAdjustments")
+          val adjustmentsConfirmed = root.getAs[Boolean]("adjustmentsConfirmed")
+          val onlineTests = root.getAs[AdjustmentDetail]("onlineTests")
+          val assessmentCenter = root.getAs[AdjustmentDetail]("assessmentCenter")
+          Adjustments(adjustmentList, adjustmentsConfirmed, onlineTests, assessmentCenter)
+        }
+      }
+    }
+  }
+
+  def removeAdjustmentsComment(applicationId: String): Future[Unit] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+
+    val removeBSON = BSONDocument("$unset" -> BSONDocument(
+      "assistance-details.adjustmentsComment" -> ""
+    ))
+
+    val validator = singleUpdateValidator(applicationId,
+      actionDesc = "remove adjustments comment",
+      notFound = CannotRemoveAdjustmentsComment(applicationId))
+
+    collection.update(query, removeBSON) map validator
+  }
+
+  def updateAdjustmentsComment(applicationId: String, adjustmentsComment: AdjustmentsComment): Future[Unit] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+
+    val updateBSON = BSONDocument("$set" -> BSONDocument(
+      "assistance-details.adjustmentsComment" -> adjustmentsComment.comment
+    ))
+
+    val validator = singleUpdateValidator(applicationId,
+      actionDesc = "save adjustments comment",
+      notFound = CannotUpdateAdjustmentsComment(applicationId))
+
+    collection.update(query, updateBSON) map validator
+  }
+
+  def findAdjustmentsComment(applicationId: String): Future[AdjustmentsComment] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    val projection = BSONDocument("assistance-details" -> 1, "_id" -> 0)
+
+    collection.find(query, projection).one[BSONDocument].map {
+      case Some(document) =>
+        val root = document.getAs[BSONDocument]("assistance-details")
+        root match {
+          case Some(doc) =>
+            doc.getAs[String]("adjustmentsComment") match {
+              case Some(comment) => AdjustmentsComment(comment)
+              case None => throw AdjustmentsCommentNotFound(applicationId)
+            }
+          case None => throw AdjustmentsCommentNotFound(applicationId)
+        }
+      case None => throw ApplicationNotFound(applicationId)
+    }
   }
 
   def allocationExpireDateByApplicationId(applicationId: String): Future[Option[LocalDate]] = {

@@ -30,10 +30,9 @@ case class AssistanceDetailsData(
                                   assessmentCentreAdjustments: Boolean = true,
                                   assessmentCentreAdjustmentsDescription: Option[String] = Some("I need coloured paper")
                                 ) {
-  def getAssistanceDetails(): model.persisted.AssistanceDetails = {
-    model.persisted.AssistanceDetails(hasDisability, hasDisabilityDescription, setGis, onlineAdjustments,
-      onlineAdjustmentsDescription, assessmentCentreAdjustments, assessmentCentreAdjustmentsDescription,
-      None, None, None, None)
+  def getAssistanceDetails(): model.exchange.AssistanceDetails = {
+    model.exchange.AssistanceDetails(hasDisability, hasDisabilityDescription, setGis, onlineAdjustments,
+      onlineAdjustmentsDescription, assessmentCentreAdjustments, assessmentCentreAdjustmentsDescription)
   }
 }
 

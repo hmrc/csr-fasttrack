@@ -17,6 +17,7 @@
 package mocks.application
 
 import common.Constants.{ No, Yes }
+import model.{ Adjustments, AdjustmentsComment }
 import model.ApplicationStatuses
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
@@ -117,9 +118,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
 
   override def findApplicationIdsByLocation(location: String): Future[List[String]] = Future.successful(List())
 
-  override def confirmAdjustment(applicationId: String, data: AdjustmentManagement): Future[Unit] = Future.successful(Unit)
-
-  override def rejectAdjustment(applicationId: String): Future[Unit] = Future.successful(Unit)
+  override def confirmAdjustments(applicationId: String, data: Adjustments): Future[Unit] = Future.successful(Unit)
 
   override def candidatesAwaitingAllocation(frameworkId: String): Future[List[CandidateAwaitingAllocation]] =
     Future.successful(
@@ -156,6 +155,14 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   def getSchemes(applicationId: String): Future[List[Scheme]] = ???
 
   def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit] = ???
+
+  override def findAdjustments(applicationId: String): Future[Option[Adjustments]] = ???
+
+  override def updateAdjustmentsComment(applicationId: String, adjustmentsComment: AdjustmentsComment): Future[Unit] = ???
+
+  override def findAdjustmentsComment(applicationId: String): Future[AdjustmentsComment] = ???
+
+  override def removeAdjustmentsComment(applicationId: String): Future[Unit] = ???
 
   override def findApplicationStatusDetails(applicationId: String): Future[ApplicationStatusDetails] = ???
 }
