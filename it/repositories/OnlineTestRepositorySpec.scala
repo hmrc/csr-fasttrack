@@ -19,7 +19,8 @@ package repositories
 import java.util.UUID
 
 import factories.DateTimeFactory
-import model.{ ApplicationStatuses, ProgressStatuses }
+import model.{ AdjustmentDetail, ApplicationStatuses, ProgressStatuses }
+import model.Adjustments._
 import model.ApplicationStatuses._
 import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound }
 import model.OnlineTestCommands.{ OnlineTestApplicationWithCubiksUser, OnlineTestProfile }
@@ -72,7 +73,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       result.get.userId mustBe "userId1"
       result.get.applicationStatus mustBe ApplicationStatuses.Submitted
       result.get.needsAdjustments mustBe false
-      result.get.timeAdjustments.isEmpty mustBe true
+      result.get.adjustmentDetail.isEmpty mustBe true
     }
 
 
@@ -86,7 +87,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       result.get.userId mustBe "userId1"
       result.get.applicationStatus mustBe ApplicationStatuses.Submitted
       result.get.needsAdjustments mustBe true
-      result.get.timeAdjustments.isEmpty mustBe true
+      result.get.adjustmentDetail.isEmpty mustBe true
     }
 
     "return one application if there is one submitted application with time adjustment needed and confirmed" in {
@@ -99,9 +100,9 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       result.get.userId mustBe "userId1"
       result.get.applicationStatus mustBe ApplicationStatuses.Submitted
       result.get.needsAdjustments mustBe true
-      result.get.timeAdjustments.isDefined mustBe true
-      result.get.timeAdjustments.get.verbalTimeAdjustmentPercentage mustBe 9
-      result.get.timeAdjustments.get.numericalTimeAdjustmentPercentage mustBe 11
+      result.get.adjustmentDetail.isDefined mustBe true
+      result.get.adjustmentDetail.get.extraTimeNeeded.get mustBe 9
+      result.get.adjustmentDetail.get.extraTimeNeededNumerical.get mustBe 11
     }
 
     "return a random application from a choice of multiple submitted applications without adjustment needed" in {
@@ -611,8 +612,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
             "needsSupportAtVenue" -> true,
             "typeOfAdjustments" -> BSONArray("time extension", "room alone"),
             "confirmedAdjustments" -> true,
-            "verbalTimeAdjustmentPercentage" -> 9,
-            "numericalTimeAdjustmentPercentage" -> 11,
+            "onlineTests" -> AdjustmentDetail(Some(9), Some(11)),
             "guaranteedInterview" -> false,
             "hasDisability" -> "No"
           )

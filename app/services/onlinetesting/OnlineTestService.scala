@@ -230,23 +230,26 @@ trait OnlineTestService {
   }
 
   private[services] def getTimeAdjustments(application: OnlineTestApplication): List[TimeAdjustments] = {
-    application.timeAdjustments.fold(Nil: List[TimeAdjustments]) { ta =>
+    (for {
+      extraTimeNeededForVerbal <- application.adjustmentDetail.flatMap(_.extraTimeNeeded)
+      extraTimeNeededForNumerical <- application.adjustmentDetail.flatMap(_.extraTimeNeededNumerical)
+    } yield {
       val config = gatewayConfig.verbalAndNumericalAssessment
       val verbalTimeAdjustment = TimeAdjustments(config.assessmentId, config.verbalSectionId,
         getAdjustedTime(
           config.verbalTimeInMinutesMinimum,
           config.verbalTimeInMinutesMaximum,
-          ta.verbalTimeAdjustmentPercentage
-      ))
+          extraTimeNeededForVerbal
+        ))
 
       val numericalTimeAdjustment = TimeAdjustments(config.assessmentId, config.numericalSectionId,
         getAdjustedTime(
           config.numericalTimeInMinutesMinimum,
           config.numericalTimeInMinutesMaximum,
-          ta.numericalTimeAdjustmentPercentage
-      ))
+          extraTimeNeededForNumerical
+        ))
       List(verbalTimeAdjustment, numericalTimeAdjustment)
-    }
+    }).getOrElse(Nil)
   }
 
   private[services] def getAdjustedTime(minimum: Int, maximum: Int, percentageToIncrease: Int): Int = {

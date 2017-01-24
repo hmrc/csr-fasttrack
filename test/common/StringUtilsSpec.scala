@@ -14,10 +14,18 @@
  * limitations under the License.
  */
 
-package model.exchange
+package common
 
-object AssistanceDetailsExamples {
-  val OnlyDisabilityNoGisNoAdjustments = AssistanceDetails("Yes", Some(""), Some(false), false, None, false, None)
-  val DisabilityGisAndAdjustments = AssistanceDetails("Yes", Some("disability description"), Some(true), true,
-    Some("online adjustment description"), true, Some("venue adjustment description"))
+import testkit.UnitSpec
+
+
+class StringUtilsSpec extends UnitSpec {
+
+  "Split camel case" should {
+    "convert to lowercase with spaces" in {
+      StringUtils.splitCamelCase("HelloWorld") mustBe "hello world"
+      StringUtils.splitCamelCase("ohMyGod") mustBe "oh my god"
+    }
+  }
+
 }
