@@ -162,19 +162,17 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     collection.find(query).cursor[BSONDocument]().collect[List]().map(_.map(docToCandidate))
   }
 
+  // scalastyle:off method.length
   private def findProgress(document: BSONDocument, applicationId: String): ProgressResponse = {
 
     (document.getAs[BSONDocument]("progress-status") map { root =>
 
-      def getProgress(key: String) = {
+      def getStatus(root: BSONDocument)(key: String) = {
         root.getAs[Boolean](key).getOrElse(false)
       }
 
-      def questionnaire = root.getAs[BSONDocument]("questionnaire").map { doc =>
-        doc.elements.collect {
-          case (name, BSONBoolean(true)) => name
-        }.toList
-      }.getOrElse(Nil)
+      def getProgress = getStatus(root)_
+      def getQuestionnaire = getStatus(root.getAs[BSONDocument]("questionnaire").getOrElse(BSONDocument()))_
 
       ProgressResponse(
         applicationId,
@@ -183,7 +181,12 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         hasSchemes = getProgress(ProgressStatuses.SchemesCompletedProgress),
         assistanceDetails = getProgress(ProgressStatuses.AssistanceDetailsCompletedProgress),
         review = getProgress(ProgressStatuses.ReviewCompletedProgress),
-        questionnaire = questionnaire,
+        questionnaire = QuestionnaireProgressResponse(
+          diversityStarted = getQuestionnaire(ProgressStatuses.StartQuestionnaireProgress),
+          diversityCompleted = getQuestionnaire(ProgressStatuses.DiversityQuestionsCompletedProgress),
+          educationCompleted = getQuestionnaire(ProgressStatuses.EducationQuestionsCompletedProgress),
+          occupationCompleted = getQuestionnaire(ProgressStatuses.OccupationQuestionsCompletedProgress)
+        ),
         submitted = getProgress(ProgressStatuses.SubmittedProgress),
         withdrawn = getProgress(ProgressStatuses.WithdrawnProgress),
         OnlineTestProgressResponse(
@@ -212,6 +215,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       )
     }).getOrElse(ProgressResponse(applicationId))
   }
+  // scalastyle:on method.length
 
   override def findProgress(applicationId: String): Future[ProgressResponse] = {
     val query = BSONDocument("applicationId" -> applicationId)
@@ -1070,7 +1074,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
     val query = BSONDocument("applicationId" -> applicationId)
     val schemeLocationsBSON = BSONDocument("$set" -> BSONDocument(
-      "progress-status.scheme-locations" -> true,
+      s"progress-status.${ProgressStatuses.LocationsCompletedProgress}" -> true,
       "scheme-locations" -> locationIds
     ))
     collection.update(query, schemeLocationsBSON, upsert = false) map { _ => () }
@@ -1090,7 +1094,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val schemePreferencesBSON = BSONDocument("$set" -> BSONDocument(
-      "progress-status.scheme-preferences" -> true,
+      s"progress-status.${ProgressStatuses.SchemesCompletedProgress}" -> true,
       "schemes" -> schemeNames
     ))
     collection.update(query, schemePreferencesBSON, upsert = false) map { _ => () }
