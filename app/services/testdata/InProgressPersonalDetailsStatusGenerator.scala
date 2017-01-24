@@ -18,13 +18,9 @@ package services.testdata
 
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.Commands.Address
-import model.PersistedObjects.{ContactDetails, PersonalDetails}
-import org.joda.time.LocalDate
-import repositories._
-import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository, PersonalDetailsRepository}
 import model.PersistedObjects.{ ContactDetails, PersonalDetails }
-import play.api.mvc.RequestHeader
 import repositories._
+import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.testdata.faker.DataFaker.Random
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -43,7 +39,6 @@ trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
   val pdRepository: PersonalDetailsRepository
   val cdRepository: ContactDetailsRepository
 
-
   //scalastyle:off method.length
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
     def getPersonalDetails(candidateInformation: DataGenerationResponse) = {
@@ -53,7 +48,9 @@ trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
         generatorConfig.personalData.getPreferredName,
         generatorConfig.personalData.dob,
         aLevel = false,
-        stemLevel = false
+        stemLevel = false,
+        civilServant = false,
+        department = None
       )
     }
 

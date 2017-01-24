@@ -52,7 +52,8 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
 
   override def update(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
 
-    val persistedPersonalDetails = PersonalDetails(pd.firstName, pd.lastName, pd.preferredName, pd.dateOfBirth, pd.aLevel, pd.stemLevel)
+    val persistedPersonalDetails = PersonalDetails(pd.firstName, pd.lastName, pd.preferredName, pd.dateOfBirth,
+      pd.aLevel, pd.stemLevel, pd.civilServant, pd.department)
 
     val query = BSONDocument("applicationId" -> applicationId, "userId" -> userId)
 
@@ -107,8 +108,10 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
         val dateOfBirth = root.getAs[LocalDate]("dateOfBirth").get
         val aLevel = root.getAs[Boolean]("aLevel").get
         val stemLevel = root.getAs[Boolean]("stemLevel").get
+        val civilServant = root.getAs[Boolean]("civilServant").get
+        val department = root.getAs[String]("department")
 
-        PersonalDetails(firstName, lastName, preferredName, dateOfBirth, aLevel, stemLevel)
+        PersonalDetails(firstName, lastName, preferredName, dateOfBirth, aLevel, stemLevel, civilServant, department)
 
       case _ => throw PersonalDetailsNotFound(applicationId)
     }
@@ -129,5 +132,4 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
       case _ => throw PersonalDetailsNotFound(applicationId)
     }
   }
-
 }

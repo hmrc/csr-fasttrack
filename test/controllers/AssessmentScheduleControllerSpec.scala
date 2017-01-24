@@ -874,10 +874,12 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
 
     def personalDetailsRepository = {
       when(mockPersonalDetailsRepository.find(eqTo("appid-1"))).thenReturn(
-        Future.successful(PersonalDetails("firstName1", "lastName1", "preferredName1", LocalDate.parse("2016-05-26"), true, true))
+        Future.successful(PersonalDetails("firstName1", "lastName1", "preferredName1", LocalDate.parse("2016-05-26"),
+          aLevel = true, stemLevel = true, civilServant = false, department = None))
       )
       when(mockPersonalDetailsRepository.find(eqTo("appid-2"))).thenReturn(
-        Future.successful(PersonalDetails("firstName2", "lastName2", "preferredName2", LocalDate.parse("2016-05-26"), true, true))
+        Future.successful(PersonalDetails("firstName2", "lastName2", "preferredName2", LocalDate.parse("2016-05-26"),
+          aLevel = true, stemLevel = true, civilServant = false, department = None))
       )
     }
   }

@@ -62,7 +62,9 @@ object Commands {
     postCode: PostCode,
     phone: Option[PhoneNumber],
     aLevel: Boolean,
-    stemLevel: Boolean
+    stemLevel: Boolean,
+    civilServant: Boolean,
+    department: Option[String]
   )
 
   case class AssessmentScores(
@@ -349,5 +351,4 @@ object Commands {
     implicit val applicationPreferencesWithTestResults = Json.format[ApplicationPreferencesWithTestResults]
     implicit val assessmentCentreCandidatesReportFormat = Json.format[ApplicationPreferencesWithTestResultsAndContactDetails]
   }
-
 }

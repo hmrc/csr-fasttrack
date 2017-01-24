@@ -63,8 +63,8 @@ class LocationSchemeServiceSpec extends UnitSpec {
     val ALevelsScheme = SchemeInfo(Commercial, "SchemeALevels", requiresALevel = true, requiresALevelInStem = false)
     val ALevelsStemScheme = SchemeInfo(ProjectDelivery, "SchemeALevelsStem", requiresALevel = true, requiresALevelInStem = true)
     val appId = "application-1"
-    val personalDetailsMock = PersonalDetails("", "", "", LocalDate.now(), aLevel = false, stemLevel = false)
-
+    val personalDetailsMock = PersonalDetails("", "", "", LocalDate.now(), aLevel = false, stemLevel = false,
+      civilServant = false, department = None)
 
     when(locationSchemeRepoMock.getSchemesAndLocations).
       thenReturn(Future.successful(

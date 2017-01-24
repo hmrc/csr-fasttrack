@@ -16,13 +16,12 @@
 
 package services
 
-import common.Constants.{ Yes, No }
 import model.PersistedObjects.PersonalDetails
 import model.exchange.AssistanceDetailsExamples
-import model.{ApplicationValidator, LocationPreference, Preferences}
+import model.{ ApplicationValidator, LocationPreference, Preferences }
 import org.joda.time.LocalDate
 import org.scalatestplus.play.PlaySpec
-import repositories.FrameworkRepository.{CandidateHighestQualification, Framework, Location, Region}
+import repositories.FrameworkRepository.{ CandidateHighestQualification, Framework, Location, Region }
 
 class ApplicationValidatorSpec extends PlaySpec {
 
@@ -81,7 +80,8 @@ class ApplicationValidatorSpec extends PlaySpec {
 }
 
 object ApplicationValidatorSpec {
-  def personalDetails = PersonalDetails("firstName", "lastName", "preferredName", new LocalDate(), true, true)
+  def personalDetails = PersonalDetails("firstName", "lastName", "preferredName", new LocalDate(), aLevel = true,
+    stemLevel = true, civilServant = false, department = None)
 
   def assistanceDetails = AssistanceDetailsExamples.DisabilityGisAndAdjustments
 

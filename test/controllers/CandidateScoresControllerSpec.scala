@@ -24,20 +24,18 @@ import model.PersistedObjects.PersonalDetails
 import org.joda.time.LocalDate
 import org.mockito.Matchers.{ eq => eqTo }
 import org.mockito.Mockito._
-import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
-import play.api.mvc.Results
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import repositories.{ ApplicationAssessmentRepository, ApplicationAssessmentScoresRepository }
-import testkit.{ MockitoSugar, UnitWithAppSpec }
+import testkit.UnitWithAppSpec
 
 import scala.concurrent.Future
 
 class CandidateScoresControllerSpec extends UnitWithAppSpec {
 
-  val CandidateScoresWithFeedback = CandidateScoresAndFeedback("app1", Some(true), false,
+  val CandidateScoresWithFeedback = CandidateScoresAndFeedback("app1", Some(true), assessmentIncomplete = false,
     CandidateScores(Some(4.0), Some(3.0), Some(2.0)), CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
     CandidateScores(Some(4.0), Some(3.0), Some(2.0)), CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
     CandidateScores(Some(4.0), Some(3.0), Some(2.0)), CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
@@ -45,8 +43,9 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
 
   "Get Candidate Scores" should {
     val assessmentDate = LocalDate.now.minusDays(1)
-    val applicationAssessment = ApplicationAssessment("app1", "London (FSAC) 1", assessmentDate, "am", 1, false)
-    val personalDetails = PersonalDetails("John", "Smith", "Jon", LocalDate.now().minusYears(15), true, false)
+    val applicationAssessment = ApplicationAssessment("app1", "London (FSAC) 1", assessmentDate, "am", 1, confirmed = false)
+    val personalDetails = PersonalDetails("John", "Smith", "Jon", LocalDate.now().minusYears(15), aLevel = true,
+      stemLevel = false, civilServant = false, department = None)
 
     "return basic candidate information when there is no score submitted" in new TestFixture {
       when(mockApplicationAssessmentRepository.find("app1")).thenReturn(Future.successful(applicationAssessment))
@@ -105,7 +104,7 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
     }
 
     "return Bad Request when attendancy is not set" in new TestFixture {
-      val candidateScores = CandidateScoresAndFeedback("app1", attendancy = None, false)
+      val candidateScores = CandidateScoresAndFeedback("app1", attendancy = None, assessmentIncomplete = false)
       val result = TestCandidateScoresController.createCandidateScoresAndFeedback("app1")(
         createSaveCandidateScoresAndFeedback("app1", Json.toJson(candidateScores).toString())
       )
@@ -141,5 +140,4 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
         .withHeaders("Content-Type" -> "application/json")
     }
   }
-
 }
