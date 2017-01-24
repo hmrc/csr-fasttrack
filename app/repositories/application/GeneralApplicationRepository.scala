@@ -20,20 +20,16 @@ import java.util.UUID
 import java.util.regex.Pattern
 
 import common.Constants.{ No, Yes }
-import model.ApplicationStatuses.BSONEnumHandler
+import model.Adjustments._
 import model.ApplicationStatusOrder._
-import model._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.EvaluationResults._
+import common.StringUtils._
 import model.Exceptions._
 import model.PersistedObjects.ApplicationForNotification
-import model.ProgressStatuses.BSONEnumHandler
 import model.Scheme.Scheme
 import model._
-import model.Adjustments._
-import model.commands.OnlineTestProgressResponse
-import model.exchange.AssistanceDetails
 import model.commands.{ ApplicationStatusDetails, OnlineTestProgressResponse }
 import model.exchange.AssistanceDetails
 import org.joda.time.format.DateTimeFormat
@@ -101,8 +97,6 @@ trait GeneralApplicationRepository {
   def findAdjustmentsComment(applicationId: String): Future[AdjustmentsComment]
 
   def removeAdjustmentsComment(applicationId: String): Future[Unit]
-
-  def rejectAdjustment(applicationId: String): Future[Unit]
 
   def allocationExpireDateByApplicationId(applicationId: String): Future[Option[LocalDate]]
 
@@ -808,7 +802,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         val adjustmentsConfirmed = getAdjustmentsConfirmed(ad)
         val typesOfAdjustments = ad.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
         val adjustments = typesOfAdjustments.getOrElse(Nil)
-        val finalTOA = if (adjustments.isEmpty) None else Some(adjustments.mkString("|"))
+        val finalTOA = if (adjustments.isEmpty) None else Some(adjustments.map(splitCamelCase).mkString("|"))
 
         AdjustmentReport(userId, firstName, lastName, preferredName, None, None, finalTOA, guaranteedInterview, adjustmentsConfirmed)
       }
@@ -851,7 +845,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         val typesOfAdjustments = assistance.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
 
         val adjustments = typesOfAdjustments.getOrElse(Nil)
-        val finalTOA = if (adjustments.isEmpty) None else Some(adjustments.mkString("|"))
+        val finalTOA = if (adjustments.isEmpty) None else Some(adjustments.map(splitCamelCase).mkString("|"))
 
         CandidateAwaitingAllocation(userId, firstName, lastName, preferredName, firstLocation, finalTOA, dateOfBirth)
       }
@@ -1017,21 +1011,6 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         }
       case None => throw ApplicationNotFound(applicationId)
     }
-  }
-
-  def rejectAdjustment(applicationId: String): Future[Unit] = {
-    val query = BSONDocument("applicationId" -> applicationId)
-
-    val adjustmentRejection = BSONDocument("$set" -> BSONDocument(
-      "assistance-details.typeOfAdjustments" -> List.empty[String],
-      "assistance-details.needsAdjustment" -> "No"
-    ))
-
-    val validator = singleUpdateValidator(applicationId,
-      actionDesc = "remove adjustments comment",
-      notFound = CannotRemoveAdjustmentsComment(applicationId))
-
-    collection.update(query, adjustmentRejection) map validator
   }
 
   def allocationExpireDateByApplicationId(applicationId: String): Future[Option[LocalDate]] = {
