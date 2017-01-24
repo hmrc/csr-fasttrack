@@ -98,7 +98,7 @@ trait ApplicationController extends BaseController {
         auditService.logEvent("ApplicationReviewed")
         Ok
       }.recover {
-        case e: CannotUpdateReview => NotFound(s"cannot find application for user with id: ${e.applicationId}")
+        case e: CannotUpdateReview => NotFound(s"cannot find application with id: ${e.applicationId}")
       }
     }
   }
