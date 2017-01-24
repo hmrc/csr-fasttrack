@@ -58,13 +58,13 @@ object ApplicationStatusOrder {
     (progress.hasSchemeLocations, SchemeLocationsCompletedProgress.weight, SchemeLocationsCompletedProgress),
     (progress.hasSchemes, SchemesPreferencesCompletedProgress.weight, SchemesPreferencesCompletedProgress),
     (progress.assistanceDetails, SchemesPreferencesCompletedProgress.weight, AssistanceDetailsCompletedProgress),
-    (progress.review, ReviewCompletedProgress.weight, ReviewCompletedProgress),
 
     (progress.questionnaire.diversityStarted, StartDiversityQuestionnaireProgress.weight, StartDiversityQuestionnaireProgress),
     (progress.questionnaire.diversityCompleted, DiversityQuestionsCompletedProgress.weight, DiversityQuestionsCompletedProgress),
     (progress.questionnaire.educationCompleted, EducationQuestionsCompletedProgress.weight, EducationQuestionsCompletedProgress),
     (progress.questionnaire.occupationCompleted, OccupationQuestionsCompletedProgress.weight, OccupationQuestionsCompletedProgress),
 
+    (progress.review, ReviewCompletedProgress.weight, ReviewCompletedProgress),
     (progress.submitted, SubmittedProgress.weight, SubmittedProgress),
     (progress.onlineTest.invited, OnlineTestInvitedProgress.weight, OnlineTestInvitedProgress),
     (progress.onlineTest.started, OnlineTestStartedProgress.weight, OnlineTestStartedProgress),
