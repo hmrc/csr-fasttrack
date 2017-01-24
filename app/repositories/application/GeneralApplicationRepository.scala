@@ -1130,7 +1130,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
   def getSchemeLocations(applicationId: String): Future[List[String]] = {
     val query = BSONDocument("applicationId" -> applicationId)
-    val projection = BSONDocument( "scheme-locations" -> 1)
+    val projection = BSONDocument("scheme-locations" -> 1)
 
     collection.find(query, projection).one[BSONDocument] map {
       case Some(document) if document.getAs[List[String]]("scheme-locations").isDefined =>
