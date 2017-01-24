@@ -36,7 +36,7 @@ object PersistedObjects {
     civilServant: Boolean,
     department: Option[String]
   ) {
-    require(civilServant && department.isDefined)
+    require((civilServant && department.isDefined) || (!civilServant && department.isEmpty))
   }
 
   case class PersonalDetailsWithUserId(preferredName: String, userId: String)

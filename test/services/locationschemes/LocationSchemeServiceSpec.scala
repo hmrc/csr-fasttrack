@@ -66,8 +66,8 @@ class LocationSchemeServiceSpec extends UnitSpec {
     val personalDetailsMock = PersonalDetails("", "", "", LocalDate.now(), aLevel = false, stemLevel = false,
       civilServant = false, department = None)
 
-    when(locationSchemeRepoMock.getSchemesAndLocations).
-      thenReturn(Future.successful(
+    when(locationSchemeRepoMock.getSchemesAndLocations)
+      .thenReturn(Future.successful(
         List(
           LocationSchemes("id1", "testLocation1", 2.0, 5.0, schemes = List("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem")),
           LocationSchemes("id2", "testLocation2", 6.0, 2.0, schemes = List("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem")),

@@ -19,9 +19,10 @@ package controllers
 import config.TestFixtureBase
 import mocks.ContactDetailsInMemoryRepository
 import mocks.application.PersonalDetailsInMemoryRepository
+import model.PersistedObjects.PersonalDetails
+import org.joda.time.LocalDate
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
-import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.Helpers._
@@ -29,7 +30,7 @@ import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.ContactDetailsRepository
 import repositories.application.PersonalDetailsRepository
 import services.AuditService
-import testkit.{ UnitSpec, UnitWithAppSpec }
+import testkit.UnitWithAppSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.language.postfixOps
@@ -58,7 +59,8 @@ class PersonalDetailsControllerSpec extends UnitWithAppSpec {
                        |  "postCode":"H0H 0H0",
                        |  "phone":"071234567",
                        |  "aLevel": true,
-                       |  "stemLevel": false
+                       |  "stemLevel": false,
+                       |  "civilServant": false
                        |}
         """.stripMargin
 
@@ -66,7 +68,7 @@ class PersonalDetailsControllerSpec extends UnitWithAppSpec {
         updatePersonalDetailsRequest(userId, applicationId)(request)
       )
 
-      status(result) must be(201)
+      status(result) mustBe CREATED
 
       verify(mockAuditService).logEvent(eqTo("PersonalDetailsSaved"))(any[HeaderCarrier], any[RequestHeader])
 
@@ -74,7 +76,7 @@ class PersonalDetailsControllerSpec extends UnitWithAppSpec {
         FakeRequest(Helpers.GET, "", FakeHeaders(), "")
       ).run
 
-      contentAsJson(savedResult) must be(Json.parse(request))
+      contentAsJson(savedResult) mustBe Json.parse(request)
     }
 
     "return a system error on invalid json" in new TestFixture {
@@ -94,7 +96,21 @@ class PersonalDetailsControllerSpec extends UnitWithAppSpec {
         )
       )
 
-      status(result) must be(400)
+      status(result) mustBe BAD_REQUEST
+    }
+
+    "throw an exception if the department is missing when the candidate is a civil servant" in {
+      intercept[IllegalArgumentException] {
+        PersonalDetails("firstName", "lastName", "preferredName", new LocalDate("1990-11-25"),
+          aLevel = false, stemLevel = false, civilServant = true, department = None)
+      }
+    }
+
+    "throw an exception if the department is supplied when the candidate is not a civil servant" in {
+      intercept[IllegalArgumentException] {
+        PersonalDetails("firstName", "lastName", "preferredName", new LocalDate("1990-11-25"),
+          aLevel = false, stemLevel = false, civilServant = false, department = Some("dept"))
+      }
     }
   }
 
