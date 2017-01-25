@@ -50,10 +50,10 @@ trait AdjustmentsManagementService {
                             prevAdjustments: Option[Adjustments],
                             adjustments: Adjustments): Future[Unit] = {
       val hasNewAdjustments = adjustments.typeOfAdjustments.exists(_.nonEmpty)
-      val hasPreviousAdjustments = prevAdjustments.nonEmpty
+      val hasPreviousAdjustments = prevAdjustments.exists(_.typeOfAdjustments.nonEmpty)
       val sendEmail = hasNewAdjustments || hasPreviousAdjustments
 
-      if(adjustments.typeOfAdjustments.isEmpty) {
+      if(adjustments.typeOfAdjustments.exists(_.isEmpty)) {
         auditService.logEvent(s"Candidate ${candidate.userId} AdjustmentsRejected by $actionTriggeredBy")
       }
 
@@ -116,20 +116,24 @@ trait AdjustmentsManagementService {
       ad.map(e => List(e.extraTimeNeeded.map( tn => s"$tn% extra time (Verbal)"),
         e.extraTimeNeededNumerical.map( tn => s"$tn% extra time (Numerical)"),
         e.otherInfo).flatten.mkString(", "))
-
-    mkString(onlineTestsAdjustments) match {
-      case Some(txt) if !txt.isEmpty => s"$header $txt"
-      case _ => ""
-    }
+    toEmailString(header, onlineTestsAdjustments, mkString)
   }
 
+
   private def assessmentCenterAdjustmentsString(header: String, adjustments: Adjustments): String = {
+
+    def assessmentCenterAdjustments() = adjustments.typeOfAdjustments.map(_.filter(_.contains(" ")).mkString(", "))
+
     def mkString(ad: Option[AdjustmentDetail]): Option[String] =
       ad.map(e => List(e.extraTimeNeeded.map( tn => s"$tn% extra time"),
-        adjustments.typeOfAdjustments.map(_.filter(_.contains(" ")).mkString(", ")),
+        assessmentCenterAdjustments().filter(_.trim.nonEmpty),
         e.otherInfo).flatten.mkString(", "))
+    toEmailString(header, adjustments.assessmentCenter, mkString)
+  }
 
-    mkString(adjustments.assessmentCenter) match {
+  private def toEmailString(header: String, adjustmentDetail: Option[AdjustmentDetail],
+                            mkString: (Option[AdjustmentDetail]) => Option[String]): String = {
+    mkString(adjustmentDetail) match {
       case Some(txt) if !txt.isEmpty => s"$header $txt"
       case _ => ""
     }

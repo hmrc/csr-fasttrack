@@ -15,8 +15,8 @@ PUT         /application/review/:applicationId                           control
 PUT         /application/submit/:userId/:applicationId                   controllers.SubmitApplicationController.submitApplication(userId: String, applicationId: String)
 PUT         /application/withdraw/:applicationId                         controllers.ApplicationController.applicationWithdraw(applicationId: String)
 
-PUT         /adjustments/:applicationId/:actionTriggeredBy               controllers.AdjustmentsManagementController.confirmAdjustments(applicationId:String, actionTriggeredBy:String)
-GET         /adjustments/:applicationId                                  controllers.AdjustmentsManagementController.findAdjustments(applicationId: String)
+PUT         /adjustments/details/:applicationId/:actionTriggeredBy       controllers.AdjustmentsManagementController.confirmAdjustments(applicationId:String, actionTriggeredBy:String)
+GET         /adjustments/details/:applicationId                          controllers.AdjustmentsManagementController.findAdjustments(applicationId: String)
 PUT         /adjustments/comment/:applicationId                          controllers.AdjustmentsManagementController.updateAdjustmentsComment(applicationId: String)
 GET         /adjustments/comment/:applicationId                          controllers.AdjustmentsManagementController.findAdjustmentsComment(applicationId: String)
 DELETE      /adjustments/comment/:applicationId                          controllers.AdjustmentsManagementController.removeAdjustmentsComment(applicationId: String)
