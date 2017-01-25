@@ -21,8 +21,8 @@ import model.Scheme._
 import model.exchange.{ LocationSchemesExamples, SchemeInfoExamples }
 import org.joda.time.LocalDate
 import org.mockito.Mockito._
+import repositories.LocationSchemeRepository
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
-import repositories.{ LocationSchemeRepository, LocationSchemes, SchemeInfo }
 import testkit.UnitSpec
 
 import scala.concurrent.Future
@@ -62,10 +62,11 @@ class LocationSchemeServiceSpec extends UnitSpec {
     val pdRepoMock = mock[PersonalDetailsRepository]
     val appRepoMock = mock[GeneralApplicationRepository]
     val appId = "application-1"
-    val personalDetailsMock = PersonalDetails("", "", "", LocalDate.now(), aLevel = false, stemLevel = false)
+    val personalDetailsMock = PersonalDetails("", "", "", LocalDate.now(), aLevel = false, stemLevel = false,
+      civilServant = false, department = None)
 
-    when(locationSchemeRepoMock.getSchemesAndLocations).
-      thenReturn(Future.successful(
+    when(locationSchemeRepoMock.getSchemesAndLocations)
+      .thenReturn(Future.successful(
         List(
           LocationSchemesExamples.LocationSchemes1, LocationSchemesExamples.LocationSchemes2,
           LocationSchemesExamples.LocationSchemes3, LocationSchemesExamples.LocationSchemes4

@@ -21,14 +21,13 @@ import org.scalatest._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{ Millis, Span }
 import org.scalatestplus.play.PlaySpec
-import play.api.{ Application, Play }
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
+import play.api.{ Application, Play }
 import play.modules.reactivemongo.MongoDbConnection
 import reactivemongo.api.DefaultDB
 import reactivemongo.json.ImplicitBSONHandlers
 import reactivemongo.json.collection.JSONCollection
-import repositories.MongoDbConnection
 import uk.gov.hmrc.mongo.ReactiveRepository
 
 import scala.concurrent.duration._
@@ -45,7 +44,7 @@ trait MongoRepositorySpec extends PlaySpec with Inside with Inspectors with Scal
   override implicit def patienceConfig = PatienceConfig(timeout = scaled(Span(5000, Millis)))
 
   implicit final def app: Application = new GuiceApplicationBuilder()
-      .disable[PlayModule]
+    .disable[PlayModule]
     .build
 
   implicit val context = play.api.libs.concurrent.Execution.Implicits.defaultContext
