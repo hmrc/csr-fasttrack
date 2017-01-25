@@ -16,7 +16,7 @@
 
 package services
 
-import model.PersistedObjects.PersonalDetails
+import model.persisted.PersonalDetails
 import model.exchange.AssistanceDetailsExamples
 import model.{ ApplicationValidator, LocationPreference, Preferences }
 import org.joda.time.LocalDate

@@ -20,7 +20,7 @@ import model.Commands._
 import model.EvaluationResults._
 import model.FlagCandidatePersistedObject.FlagCandidate
 import model.PassmarkPersistedObjects._
-import model.PersistedObjects.{ ContactDetails, PersistedAnswer, PersonalDetails, _ }
+import model.PersistedObjects.{ ContactDetails, PersistedAnswer, _ }
 import org.joda.time.{ DateTime, DateTimeZone, LocalDate }
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.indexes.IndexType.Ascending
@@ -93,34 +93,6 @@ package object repositories {
     def read(time: BSONString) = LocalDate.parse(time.value)
 
     def write(jdtime: LocalDate) = BSONString(jdtime.toString("yyyy-MM-dd"))
-  }
-
-  /** Implicit transformation for the PersistedPersonalDetails **/
-  implicit object BSONPersistedPersonalDetailsHandler extends BSONHandler[BSONDocument, PersonalDetails] {
-    def read(doc: BSONDocument): PersonalDetails = {
-      val root = doc.getAs[BSONDocument]("personal-details").get
-      val firstName = root.getAs[String]("firstName").get
-      val lastName = root.getAs[String]("lastName").get
-      val preferredName = root.getAs[String]("preferredName").get
-      val dateOfBirth = doc.getAs[LocalDate]("dateOfBirth").get
-      val aLevel = doc.getAs[Boolean]("aLevel").get
-      val stemLevel = doc.getAs[Boolean]("stemLevel").get
-      val civilServant = doc.getAs[Boolean]("civilServant").get
-      val department = doc.getAs[String]("department")
-
-      PersonalDetails(firstName, lastName, preferredName, dateOfBirth, aLevel, stemLevel, civilServant, department)
-    }
-
-    def write(psDoc: PersonalDetails) = BSONDocument(
-      "firstName" -> psDoc.firstName,
-      "lastName" -> psDoc.lastName,
-      "preferredName" -> psDoc.preferredName,
-      "dateOfBirth" -> psDoc.dateOfBirth,
-      "aLevel" -> psDoc.aLevel,
-      "stemLevel" -> psDoc.stemLevel,
-      "civilServant" -> psDoc.civilServant,
-      "department" -> psDoc.department
-    )
   }
 
   /** Implicit transformation for the Candidate **/

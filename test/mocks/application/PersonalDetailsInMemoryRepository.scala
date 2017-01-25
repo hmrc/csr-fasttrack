@@ -19,7 +19,8 @@ package mocks.application
 import mocks.InMemoryStorage
 import model.ApplicationStatuses
 import model.Exceptions.PersonalDetailsNotFound
-import model.PersistedObjects.{ PersonalDetails, PersonalDetailsWithUserId }
+import model.PersistedObjects.PersonalDetailsWithUserId
+import model.persisted.PersonalDetails
 import org.joda.time.LocalDate
 import repositories.application.PersonalDetailsRepository
 

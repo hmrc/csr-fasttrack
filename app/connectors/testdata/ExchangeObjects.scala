@@ -18,9 +18,10 @@ package connectors.testdata
 
 import model.Commands.ApplicationAssessment
 import model.EvaluationResults.SchemePreferences
-import model.PersistedObjects.{ContactDetails, PersonalDetails}
+import model.PersistedObjects.ContactDetails
 import model.exchange.AssistanceDetails
 import model.Preferences
+import model.persisted.PersonalDetails
 import play.api.libs.json.Json
 
 object ExchangeObjects {
