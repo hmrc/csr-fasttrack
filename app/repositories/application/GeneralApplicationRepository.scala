@@ -25,6 +25,7 @@ import model.ApplicationStatusOrder._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.EvaluationResults._
+import model.Exceptions.{ ApplicationNotFound, CannotUpdateReview, LocationPreferencesNotFound, SchemePreferencesNotFound }
 import common.StringUtils._
 import model.Exceptions._
 import model.PersistedObjects.ApplicationForNotification
@@ -183,12 +184,12 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       ProgressResponse(
         applicationId,
         personalDetails = getProgress(ProgressStatuses.PersonalDetailsCompletedProgress),
-        hasLocations = getProgress(ProgressStatuses.LocationsCompletedProgress),
-        hasSchemes = getProgress(ProgressStatuses.SchemesCompletedProgress),
+        hasSchemeLocations = getProgress(ProgressStatuses.SchemeLocationsCompletedProgress),
+        hasSchemes = getProgress(ProgressStatuses.SchemesPreferencesCompletedProgress),
         assistanceDetails = getProgress(ProgressStatuses.AssistanceDetailsCompletedProgress),
         review = getProgress(ProgressStatuses.ReviewCompletedProgress),
         questionnaire = QuestionnaireProgressResponse(
-          diversityStarted = getQuestionnaire(ProgressStatuses.StartQuestionnaireProgress),
+          diversityStarted = getQuestionnaire(ProgressStatuses.StartDiversityQuestionnaireProgress),
           diversityCompleted = getQuestionnaire(ProgressStatuses.DiversityQuestionsCompletedProgress),
           educationCompleted = getQuestionnaire(ProgressStatuses.EducationQuestionsCompletedProgress),
           occupationCompleted = getQuestionnaire(ProgressStatuses.OccupationQuestionsCompletedProgress)
@@ -407,12 +408,15 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
   override def review(applicationId: String): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
-    val applicationStatusBSON = BSONDocument("$set" -> BSONDocument(
+    val progressStatusBSON = BSONDocument("$set" -> BSONDocument(
       s"progress-status.${ProgressStatuses.ReviewCompletedProgress}" -> true,
       s"progress-status-timestamp.${ProgressStatuses.ReviewCompletedProgress}" -> DateTime.now
     ))
 
-    collection.update(query, applicationStatusBSON, upsert = false) map { _ => () }
+    val validator = singleUpdateValidator(applicationId, actionDesc = "review",
+      CannotUpdateReview(s"review $applicationId"))
+
+    collection.update(query, progressStatusBSON) map validator
   }
 
   override def overallReportNotWithdrawn(frameworkId: String): Future[List[Report]] =
@@ -1140,7 +1144,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
     val query = BSONDocument("applicationId" -> applicationId)
     val schemeLocationsBSON = BSONDocument("$set" -> BSONDocument(
-      s"progress-status.${ProgressStatuses.LocationsCompletedProgress}" -> true,
+      s"progress-status.${ProgressStatuses.SchemeLocationsCompletedProgress}" -> true,
       "scheme-locations" -> locationIds
     ))
     collection.update(query, schemeLocationsBSON, upsert = false) map { _ => () }
@@ -1160,7 +1164,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val schemePreferencesBSON = BSONDocument("$set" -> BSONDocument(
-      s"progress-status.${ProgressStatuses.SchemesCompletedProgress}" -> true,
+      s"progress-status.${ProgressStatuses.SchemesPreferencesCompletedProgress}" -> true,
       "schemes" -> schemeNames
     ))
     collection.update(query, schemePreferencesBSON, upsert = false) map { _ => () }

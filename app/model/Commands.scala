@@ -84,7 +84,7 @@ object Commands {
   case class ProgressResponse(
     applicationId: String,
     personalDetails: Boolean = false,
-    hasLocations: Boolean = false,
+    hasSchemeLocations: Boolean = false,
     hasSchemes: Boolean = false,
     assistanceDetails: Boolean = false,
     review: Boolean = false,
