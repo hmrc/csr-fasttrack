@@ -17,28 +17,26 @@
 package controllers
 
 import config.TestFixtureBase
-import mocks.ContactDetailsInMemoryRepository
-import mocks.application.PersonalDetailsInMemoryRepository
+import model.Exceptions.CannotUpdateContactDetails
+import model.PersistedObjects.{ ContactDetails, PersonalDetails }
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
-import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories.ContactDetailsRepository
-import repositories.application.PersonalDetailsRepository
-import services.AuditService
-import testkit.{ UnitSpec, UnitWithAppSpec }
+import services.application.PersonalDetailsService
+import testkit.UnitWithAppSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
 
+import scala.concurrent.Future
 import scala.language.postfixOps
 
 class PersonalDetailsControllerSpec extends UnitWithAppSpec {
 
   "Personal Details Controller" should {
 
-    "create contact details and return the same details" in new TestFixture {
+    "create contact details and return 201" in new TestFixture {
       val userId = "1234"
       val applicationId = "111-111"
 
@@ -62,19 +60,18 @@ class PersonalDetailsControllerSpec extends UnitWithAppSpec {
                        |}
         """.stripMargin
 
+      when(mockPersonalDetailsService.update(any[String], any[String], any[PersonalDetails], any[ContactDetails])
+        (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
+
       val result = TestPersonalDetailsController.personalDetails(userId, applicationId)(
         updatePersonalDetailsRequest(userId, applicationId)(request)
       )
 
       status(result) must be(201)
+    }
 
-      verify(mockAuditService).logEvent(eqTo("PersonalDetailsSaved"))(any[HeaderCarrier], any[RequestHeader])
+    "find and return personal details" in new TestFixture {
 
-      val savedResult = TestPersonalDetailsController.find(userId, applicationId)(
-        FakeRequest(Helpers.GET, "", FakeHeaders(), "")
-      ).run
-
-      contentAsJson(savedResult) must be(Json.parse(request))
     }
 
     "return a system error on invalid json" in new TestFixture {
@@ -94,21 +91,28 @@ class PersonalDetailsControllerSpec extends UnitWithAppSpec {
         )
       )
 
+      when(mockPersonalDetailsService.update(any[String], any[String], any[PersonalDetails], any[ContactDetails])
+        (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(CannotUpdateContactDetails("appId")))
+
       status(result) must be(400)
     }
   }
 
   trait TestFixture extends TestFixtureBase {
+    val mockPersonalDetailsService = mock[PersonalDetailsService]
+
     object TestPersonalDetailsController extends PersonalDetailsController {
-      override val psRepository: PersonalDetailsRepository = PersonalDetailsInMemoryRepository
-      override val cdRepository: ContactDetailsRepository = ContactDetailsInMemoryRepository
-      override val auditService: AuditService = mockAuditService
+      val personalDetailsService = mockPersonalDetailsService
     }
 
     def updatePersonalDetailsRequest(userId: String, applicationId: String)(jsonString: String) = {
       val json = Json.parse(jsonString)
       FakeRequest(Helpers.PUT, controllers.routes.PersonalDetailsController.personalDetails(userId, applicationId).url, FakeHeaders(), json)
         .withHeaders("Content-Type" -> "application/json")
+    }
+
+    def findPersonalDetailsRequest(userId: String, applicationId: String) = {
+      FakeRequest(Helpers.GET, controllers.routes.PersonalDetailsController.find(userId, applicationId).url)
     }
   }
 }

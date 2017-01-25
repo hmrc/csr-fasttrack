@@ -57,7 +57,7 @@ class ContactDetailsMongoRepository(implicit mongo: () => DB)
     collection.update(BSONDocument("userId" -> userId), contactDetailsBson, upsert = true) map {
       case lastError if lastError.nModified == 0 && lastError.n == 0 =>
         logger.error(s"""Failed to write contact details for user: $userId -> ${lastError.writeConcernError.map(_.errmsg).mkString(",")}""")
-        throw new CannotUpdateContactDetails(userId)
+        throw CannotUpdateContactDetails(userId)
       case _ => ()
     }
   }
@@ -75,7 +75,7 @@ class ContactDetailsMongoRepository(implicit mongo: () => DB)
         val phone = root.getAs[PhoneNumber]("phone")
         val email = root.getAs[String]("email").getOrElse("")
         ContactDetails(address, postCode, email, phone)
-      case None => throw new ContactDetailsNotFound(userId)
+      case None => throw ContactDetailsNotFound(userId)
     }
   }
 
