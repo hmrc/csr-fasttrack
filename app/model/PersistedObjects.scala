@@ -27,19 +27,6 @@ object PersistedObjects {
 
   case class ApplicationStatus(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal)
 
-  case class PersonalDetails(
-    firstName: String,
-    lastName: String,
-    preferredName: String,
-    dateOfBirth: LocalDate,
-    aLevel: Boolean,
-    stemLevel: Boolean,
-    civilServant: Boolean,
-    department: Option[String]
-  ) {
-    require((civilServant && department.isDefined) || (!civilServant && department.isEmpty))
-  }
-
   case class PersonalDetailsWithUserId(preferredName: String, userId: String)
 
   case class ContactDetails(
@@ -124,10 +111,6 @@ object PersistedObjects {
   case class PreferencesWithQualification(preferences: Preferences, aLevel: Boolean, stemLevel: Boolean)
 
   object Implicits {
-    import repositories.BSONLocalDateHandler
-
-    implicit val persistedPersonalDetailsFormats = Json.format[PersonalDetails]
-    implicit val persistedPersonalDetailsMacro = Macros.handler[PersonalDetails]
     implicit val applicationStatusFormats = Json.format[ApplicationStatus]
     implicit val addressFormats = Json.format[Address]
     implicit val contactDetailsFormats = Json.format[ContactDetails]

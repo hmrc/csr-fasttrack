@@ -19,8 +19,9 @@ package repositories.application
 import model.Exceptions.PersonalDetailsNotFound
 import model.{ ApplicationStatuses, PersistedObjects, ProgressStatuses }
 import model.ApplicationStatuses.BSONEnumHandler
-import model.PersistedObjects.{ PersonalDetails, PersonalDetailsWithUserId }
+import model.PersistedObjects.PersonalDetailsWithUserId
 import model.PersistedObjects.Implicits._
+import model.persisted.PersonalDetails
 import org.joda.time.{ DateTime, LocalDate }
 import reactivemongo.api.DB
 import reactivemongo.bson.{ BSONDocument, _ }
@@ -48,7 +49,7 @@ trait PersonalDetailsRepository {
 
 class PersonalDetailsMongoRepository(implicit mongo: () => DB)
   extends ReactiveRepository[PersonalDetails, BSONObjectID](CollectionNames.APPLICATION, mongo,
-    PersistedObjects.Implicits.persistedPersonalDetailsFormats, ReactiveMongoFormats.objectIdFormats)
+    PersonalDetails.persistedPersonalDetailsFormats, ReactiveMongoFormats.objectIdFormats)
     with PersonalDetailsRepository with ReactiveRepositoryHelpers {
 
   override def update(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {

@@ -18,7 +18,7 @@ package repositories
 
 import java.util
 
-import model.PersistedObjects.PersonalDetails
+import model.persisted.PersonalDetails
 import org.yaml.snakeyaml.Yaml
 import play.api.Play
 import repositories.FrameworkRepository.{ CandidateHighestQualification, Framework, Location, Region }

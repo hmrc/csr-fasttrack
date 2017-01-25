@@ -1,7 +1,7 @@
 package repositories.application
 
 import factories.UUIDFactory
-import model.PersistedObjects.PersonalDetails
+import model.persisted.PersonalDetails
 import org.joda.time.LocalDate
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
