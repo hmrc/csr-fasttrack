@@ -70,7 +70,7 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
     "search by date of birth only" in new TestFixture {
       when(appRepositoryMock.findByCriteria(any[Option[String]], any[Option[String]],
         any[Option[LocalDate]], any[List[String]])
-      ).thenReturn(Future.successful(List(Candidate("123", None, None, Some("Leia"), Some("Amadala"),
+      ).thenReturn(Future.successful(List(Candidate("123", None, None, Some("Leia"), Some("Amadala"), Some("Amadala"),
         Some(new LocalDate("1990-11-25")), None, None))))
 
       val actual = searchForApplicantService.findByCriteria(SearchCandidate(firstOrPreferredName = None,
@@ -93,7 +93,7 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
     }
 
     "return the number of candidates from auth provider even if more candidates are in the application repository" in new TestFixture {
-      val candidate = Candidate("123", None, None, Some("Leia"), Some("Amadala"), Some(new LocalDate("1990-11-25")), None, None)
+      val candidate = Candidate("123", None, None, Some("Leia"), Some("Amadala"), Some("Amadala"), Some(new LocalDate("1990-11-25")), None, None)
       val candidates = List(candidate, candidate, candidate, candidate)
       when(appRepositoryMock.findByCriteria(any[Option[String]], any[Option[String]], any[Option[LocalDate]],
         any[List[String]])).thenReturn(Future.successful(candidates))
@@ -133,6 +133,7 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
       email = Some(testEmail),
       firstName = Some("Leia"),
       lastName = Some("Amadala"),
+      preferredName = Some("Amadala"),
       dateOfBirth = None,
       address = Some(testAddress),
       postCode = Some("QQ1 1QQ")
@@ -154,6 +155,6 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
 
     when(appRepositoryMock.findByCriteria(any[Option[String]], any[Option[String]],
       any[Option[LocalDate]], any[List[String]])
-    ).thenReturn(Future.successful(List(Candidate("123", None, None, Some("Leia"), Some("Amadala"), None, None, None))))
+    ).thenReturn(Future.successful(List(Candidate("123", None, None, Some("Leia"), Some("Amadala"), Some("Amadala"), None, None, None))))
   }
 }

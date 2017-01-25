@@ -51,6 +51,8 @@ trait GeneralApplicationRepository {
 
   def create(userId: String, frameworkId: String): Future[ApplicationResponse]
 
+  def find(applicationId: String): Future[Option[Candidate]]
+
   def find(applicationIds: List[String]): Future[List[Candidate]]
 
   def findProgress(applicationId: String): Future[ProgressResponse]
@@ -156,9 +158,10 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val psRoot = doc.getAs[BSONDocument]("personal-details")
     val firstName = psRoot.flatMap(_.getAs[String]("firstName"))
     val lastName = psRoot.flatMap(_.getAs[String]("lastName"))
+    val preferredName = psRoot.flatMap(_.getAs[String]("preferredName"))
     val dateOfBirth = psRoot.flatMap(_.getAs[LocalDate]("dateOfBirth"))
 
-    Candidate(userId, applicationId, None, firstName, lastName, dateOfBirth, None, None)
+    Candidate(userId, applicationId, None, firstName, lastName, preferredName, dateOfBirth, None, None)
   }
 
   def find(applicationIds: List[String]): Future[List[Candidate]] = {
@@ -279,10 +282,13 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     resp.flatMap(identity)
   }
 
+  def find(applicationId: String): Future[Option[Candidate]] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    collection.find(query).one[BSONDocument].map(_.map(docToCandidate))
+  }
+
   def findCandidateByUserId(userId: String): Future[Option[Candidate]] = {
-
     val query = BSONDocument("userId" -> userId)
-
     collection.find(query).one[BSONDocument].map(_.map(docToCandidate))
   }
 
