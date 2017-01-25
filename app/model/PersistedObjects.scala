@@ -21,6 +21,7 @@ import model.EvaluationResults.Result
 import model.OnlineTestCommands.TestResult
 import org.joda.time.{ DateTime, LocalDate }
 import play.api.libs.json._
+import reactivemongo.bson.Macros
 
 object PersistedObjects {
 
@@ -123,7 +124,10 @@ object PersistedObjects {
   case class PreferencesWithQualification(preferences: Preferences, aLevel: Boolean, stemLevel: Boolean)
 
   object Implicits {
+    import repositories.BSONLocalDateHandler
+
     implicit val persistedPersonalDetailsFormats = Json.format[PersonalDetails]
+    implicit val persistedPersonalDetailsMacro = Macros.handler[PersonalDetails]
     implicit val applicationStatusFormats = Json.format[ApplicationStatus]
     implicit val addressFormats = Json.format[Address]
     implicit val contactDetailsFormats = Json.format[ContactDetails]

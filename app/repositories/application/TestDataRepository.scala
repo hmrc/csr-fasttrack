@@ -176,7 +176,8 @@ class TestDataMongoRepository(implicit mongo: () => DB)
         "preferredName" -> chooseOne(preferredName),
         "dateOfBirth" -> chooseOne(dateOfBirth),
         "aLevel" -> true,
-        "stemLevel" -> true
+        "stemLevel" -> true,
+        "civilServant" -> false
       ))
   }
 
