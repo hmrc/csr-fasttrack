@@ -73,7 +73,6 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
   ): Future[Unit] = {
     val PersonalDetailsCollection = "personal-details"
 
-
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId, "userId" -> userId),
       BSONDocument("applicationStatus" -> BSONDocument("$in" -> requiredApplicationStatuses))
