@@ -16,8 +16,11 @@
 
 package model.exchange
 
-object AssistanceDetailsExamples {
-  val OnlyDisabilityNoGisNoAdjustments = AssistanceDetails("Yes", Some(""), Some(false), false, None, false, None)
-  val DisabilityGisAndAdjustments = AssistanceDetails("Yes", Some("disability description"), Some(true), true,
-    Some("online adjustment description"), true, Some("venue adjustment description"))
+import repositories.SchemeInfo
+import model.Scheme._
+
+object SchemeInfoExamples {
+  val NoALevelsScheme = SchemeInfo(Business, "SchemeNoALevels", requiresALevel = false, requiresALevelInStem = false)
+  val ALevelsScheme = SchemeInfo(Commercial, "SchemeALevels", requiresALevel = true, requiresALevelInStem = false)
+  val ALevelsStemScheme = SchemeInfo(ProjectDelivery, "SchemeALevelsStem", requiresALevel = true, requiresALevelInStem = true)
 }

@@ -43,6 +43,8 @@ object Exceptions {
 
   case class CannotUpdateAssistanceDetails(userId: String) extends Exception(userId)
 
+  case class CannotUpdateReview(applicationId: String) extends Exception(applicationId)
+
   case class TooManyEntries(msg: String) extends Exception(msg)
 
   case class NoResultsReturned(reason: String) extends Exception(reason)
@@ -68,4 +70,10 @@ object Exceptions {
   case class SchemePreferencesNotFound(applicationId: String) extends Exception(applicationId)
 
   case class LocationPreferencesNotFound(applicationId: String) extends Exception(applicationId)
+
+  case class AdjustmentsCommentNotFound(applicationId: String) extends Exception(applicationId)
+
+  case class CannotUpdateAdjustmentsComment(applicationId: String) extends Exception(applicationId)
+
+  case class CannotRemoveAdjustmentsComment(applicationId: String) extends Exception(applicationId)
 }

@@ -55,16 +55,16 @@ object ApplicationStatusOrder {
 
   def statusMaps(progress: ProgressResponse) = Seq(
     (progress.personalDetails, PersonalDetailsCompletedProgress.weight, PersonalDetailsCompletedProgress),
-    (progress.hasLocations, LocationsCompletedProgress.weight, LocationsCompletedProgress),
-    (progress.hasSchemes, SchemesCompletedProgress.weight, SchemesCompletedProgress),
-    (progress.assistanceDetails, SchemesCompletedProgress.weight, AssistanceDetailsCompletedProgress),
-    (progress.review, ReviewCompletedProgress.weight, ReviewCompletedProgress),
+    (progress.hasSchemeLocations, SchemeLocationsCompletedProgress.weight, SchemeLocationsCompletedProgress),
+    (progress.hasSchemes, SchemesPreferencesCompletedProgress.weight, SchemesPreferencesCompletedProgress),
+    (progress.assistanceDetails, SchemesPreferencesCompletedProgress.weight, AssistanceDetailsCompletedProgress),
 
-    (progress.questionnaire.diversityStarted, StartQuestionnaireProgress.weight, StartQuestionnaireProgress),
+    (progress.questionnaire.diversityStarted, StartDiversityQuestionnaireProgress.weight, StartDiversityQuestionnaireProgress),
     (progress.questionnaire.diversityCompleted, DiversityQuestionsCompletedProgress.weight, DiversityQuestionsCompletedProgress),
     (progress.questionnaire.educationCompleted, EducationQuestionsCompletedProgress.weight, EducationQuestionsCompletedProgress),
     (progress.questionnaire.occupationCompleted, OccupationQuestionsCompletedProgress.weight, OccupationQuestionsCompletedProgress),
 
+    (progress.review, ReviewCompletedProgress.weight, ReviewCompletedProgress),
     (progress.submitted, SubmittedProgress.weight, SubmittedProgress),
     (progress.onlineTest.invited, OnlineTestInvitedProgress.weight, OnlineTestInvitedProgress),
     (progress.onlineTest.started, OnlineTestStartedProgress.weight, OnlineTestStartedProgress),

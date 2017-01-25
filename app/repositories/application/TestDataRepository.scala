@@ -16,9 +16,9 @@
 
 package repositories.application
 
-import common.Constants.{ Yes, No }
+import common.Constants.{ No, Yes }
 import model.Commands._
-import model.PersistedObjects
+import model.{ PersistedObjects, ProgressStatuses }
 import model.PersistedObjects.ContactDetails
 import org.joda.time.{ DateTime, LocalDate }
 import reactivemongo.api.DB
@@ -112,11 +112,12 @@ class TestDataMongoRepository(implicit mongo: () => DB)
                             ) = {
     var progress = BSONDocument()
 
-    progress = personalDetails.map(_ => progress ++ ("personal-details" -> true)).getOrElse(progress)
-    progress = frameworks.map(_ => progress ++ ("frameworks-location" -> true)).getOrElse(progress)
-    progress = assistance.map(_ => progress ++ ("assistance-details" -> true)).getOrElse(progress)
-    progress = isSubmitted.map(_ => progress ++ ("submitted" -> true)).getOrElse(progress)
-    progress = isWithdrawn.map(_ => progress ++ ("withdrawn" -> true)).getOrElse(progress)
+    progress = personalDetails.map(_ => progress ++ (ProgressStatuses.PersonalDetailsCompletedProgress.name -> true)).getOrElse(progress)
+    progress = frameworks.map(_ => progress ++ (ProgressStatuses.SchemesPreferencesCompletedProgress.name -> true)).getOrElse(progress)
+    progress = frameworks.map(_ => progress ++ (ProgressStatuses.SchemeLocationsCompletedProgress.name -> true)).getOrElse(progress)
+    progress = assistance.map(_ => progress ++ (ProgressStatuses.AssistanceDetailsCompletedProgress.name -> true)).getOrElse(progress)
+    progress = isSubmitted.map(_ => progress ++ (ProgressStatuses.SubmittedProgress.name -> true)).getOrElse(progress)
+    progress = isWithdrawn.map(_ => progress ++ (ProgressStatuses.WithdrawnProgress.name -> true)).getOrElse(progress)
 
     progress
   }

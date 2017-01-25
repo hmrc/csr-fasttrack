@@ -18,7 +18,7 @@ package controllers
 
 import model.ApplicationStatusOrder
 import model.Commands._
-import model.Exceptions.ApplicationNotFound
+import model.Exceptions.{ ApplicationNotFound, CannotUpdateReview }
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import repositories._
@@ -98,31 +98,8 @@ trait ApplicationController extends BaseController {
         auditService.logEvent("ApplicationReviewed")
         Ok
       }.recover {
-        case e: ApplicationNotFound => NotFound(s"cannot find application for user with id: ${e.id}")
+        case e: CannotUpdateReview => NotFound(s"cannot find application with id: ${e.applicationId}")
       }
     }
   }
-
-  def confirmAdjustment(applicationId: String) = Action.async(parse.json) { implicit request =>
-    withJsonBody[AdjustmentManagement] { data =>
-      data.adjustments match {
-        case Some(list) if list.nonEmpty =>
-          appRepository.confirmAdjustment(applicationId, data).map { _ =>
-            auditService.logEvent("AjustmentsConfirmed")
-            Ok
-          }.recover {
-            case e: ApplicationNotFound => NotFound(s"cannot find application for user with id: ${e.id}")
-          }
-        case _ =>
-          appRepository.rejectAdjustment(applicationId).map { _ =>
-            auditService.logEvent("AjustmentsRejected")
-            Ok
-          }.recover {
-            case e: ApplicationNotFound => NotFound(s"cannot find application for user with id: ${e.id}")
-          }
-      }
-
-    }
-  }
-
 }
