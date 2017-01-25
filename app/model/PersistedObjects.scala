@@ -16,7 +16,6 @@
 
 package model
 
-import model.ApplicationStatuses.enumFormat
 import model.Commands.{ Address, PhoneNumber, PostCode }
 import model.EvaluationResults.Result
 import model.OnlineTestCommands.TestResult
@@ -33,8 +32,12 @@ object PersistedObjects {
     preferredName: String,
     dateOfBirth: LocalDate,
     aLevel: Boolean,
-    stemLevel: Boolean
-  )
+    stemLevel: Boolean,
+    civilServant: Boolean,
+    department: Option[String]
+  ) {
+    require((civilServant && department.isDefined) || (!civilServant && department.isEmpty))
+  }
 
   case class PersonalDetailsWithUserId(preferredName: String, userId: String)
 

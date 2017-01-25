@@ -44,7 +44,8 @@ trait PersonalDetailsController extends BaseController {
 
   def personalDetails(userId: String, applicationId: String) = Action.async(parse.json) { implicit request =>
     withJsonBody[UpdateGeneralDetails] { req =>
-      val personalDetails = PersonalDetails(req.firstName, req.lastName, req.preferredName, req.dateOfBirth, req.aLevel, req.stemLevel)
+      val personalDetails = PersonalDetails(req.firstName, req.lastName, req.preferredName, req.dateOfBirth, req.aLevel,
+        req.stemLevel, req.civilServant, req.department)
       val contactDetails = ContactDetails(req.address, req.postCode, req.email, req.phone)
 
       (for {
@@ -68,7 +69,7 @@ trait PersonalDetailsController extends BaseController {
       Ok(Json.toJson(UpdateGeneralDetails(
         pd.firstName, pd.lastName, pd.preferredName, cd.email, pd.dateOfBirth,
         cd.address, cd.postCode, cd.phone,
-        pd.aLevel, pd.stemLevel
+        pd.aLevel, pd.stemLevel, pd.civilServant, pd.department
       )))
     }) recover {
       case e: ContactDetailsNotFound => NotFound(s"cannot find contact details for userId: ${e.userId}")

@@ -37,7 +37,8 @@ import model.commands.exchange.testdata.AssistanceDetailsData
     def getPreferredName: String = preferredName.getOrElse(s"Pref$firstName")
 
     def personalDetails: PersonalDetails = {
-      PersonalDetails(firstName, lastName, preferredName.getOrElse(firstName), dob, aLevel = false, stemLevel = false)
+      PersonalDetails(firstName, lastName, preferredName.getOrElse(firstName), dob, aLevel = false, stemLevel = false,
+        civilServant = false, department = None)
     }
   }
 
