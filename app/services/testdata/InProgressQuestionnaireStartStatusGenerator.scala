@@ -38,7 +38,7 @@ trait InProgressQuestionnaireStartStatusGenerator extends ConstructiveGenerator 
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get,
-        ProgressStatuses.StartQuestionnaireProgress)
+        ProgressStatuses.StartDiversityQuestionnaireProgress)
     } yield {
       candidateInPreviousStatus
     }

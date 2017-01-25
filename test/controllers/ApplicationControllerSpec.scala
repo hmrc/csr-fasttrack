@@ -19,6 +19,7 @@ package controllers
 import config.TestFixtureBase
 import mocks.application.DocumentRootInMemoryRepository
 import model.Commands.WithdrawApplicationRequest
+import model.Exceptions.CannotUpdateReview
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
@@ -138,8 +139,8 @@ class ApplicationControllerSpec extends UnitWithAppSpec {
   }
 
   "Review application" should {
-    "mark the application as reviewed" in new TestFixture {
-      val result = TestApplicationController.review(ApplicationId)(reviewApplicationRequest(ApplicationId)(
+    "return 200 and mark the application as reviewed" in new TestFixture {
+      val result = TestApplicationFullyMockedController.review(ApplicationId)(reviewApplicationRequest(ApplicationId)(
         s"""
            |{
            |  "flag": true
@@ -149,14 +150,36 @@ class ApplicationControllerSpec extends UnitWithAppSpec {
       status(result) must be(200)
       verify(mockAuditService).logEvent(eqTo("ApplicationReviewed"))(any[HeaderCarrier], any[RequestHeader])
     }
+
+    "return 404 when there is an error when storing review status" in new TestFixture {
+      when(mockApplicationRepository.review(eqTo(ApplicationId))).thenReturn(Future.failed(CannotUpdateReview(s"review $ApplicationId")))
+
+      val result = TestApplicationFullyMockedController.review(ApplicationId)(reviewApplicationRequest(ApplicationId)(
+        s"""
+           |{
+           |  "flag": true
+           |}
+        """.stripMargin
+      ))
+      status(result) must be(404)
+      verify(mockAuditService, times(0)).logEvent(eqTo("ApplicationReviewed"))(any[HeaderCarrier], any[RequestHeader])
+    }
   }
 
   trait TestFixture extends TestFixtureBase {
+    val mockApplicationRepository = mock[GeneralApplicationRepository]
     val mockApplicationService = mock[ApplicationService]
     when(mockApplicationService.withdraw(eqTo(ApplicationId), eqTo(aWithdrawApplicationRequest))).thenReturn(Future.successful(()))
+    when(mockApplicationRepository.review(eqTo(ApplicationId))).thenReturn(Future.successful())
 
     object TestApplicationController extends ApplicationController {
       override val appRepository: GeneralApplicationRepository = DocumentRootInMemoryRepository
+      override val auditService: AuditService = mockAuditService
+      override val applicationService: ApplicationService = mockApplicationService
+    }
+
+    object TestApplicationFullyMockedController extends ApplicationController {
+      override val appRepository: GeneralApplicationRepository = mockApplicationRepository
       override val auditService: AuditService = mockAuditService
       override val applicationService: ApplicationService = mockApplicationService
     }
