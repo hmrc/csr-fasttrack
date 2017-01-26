@@ -44,7 +44,7 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.Random
 
-class ReportControllerSpec extends UnitWithAppSpec {
+class ReportingControllerSpec extends UnitWithAppSpec {
 
   "Reporting controller create adjustment report" should {
     "return the adjustment report when we execute adjustment reports" in new TestFixture {
