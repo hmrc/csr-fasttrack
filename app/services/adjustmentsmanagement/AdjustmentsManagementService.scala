@@ -51,14 +51,16 @@ trait AdjustmentsManagementService {
                             adjustments: Adjustments): Future[Unit] = {
 
       val hasPreviousAdjustments = prevAdjustments.flatMap(_.adjustmentsConfirmed).contains(true)
+      val adjustmentsRejected = adjustments.typeOfAdjustments.forall(_.isEmpty)
 
-      if(adjustments.typeOfAdjustments.exists(_.isEmpty)) {
-        auditService.logEvent(s"Candidate ${candidate.userId} AdjustmentsRejected by $actionTriggeredBy")
+      (adjustmentsRejected, hasPreviousAdjustments) match {
+        case (true, _) => auditService.logEvent(s"Candidate ${candidate.userId} AdjustmentsRejected by $actionTriggeredBy")
+        case (_, true) => auditService.logEvent(s"Candidate ${candidate.userId} AdjustmentsUpdated by $actionTriggeredBy")
+        case (_, false) => auditService.logEvent(s"Candidate ${candidate.userId} AdjustmentsConfirmed by $actionTriggeredBy")
       }
 
       hasPreviousAdjustments match {
         case true =>
-          auditService.logEvent(s"Candidate ${candidate.userId} AdjustmentsUpdated by $actionTriggeredBy")
           emailClient.sendAdjustmentsUpdateConfirmation(
             contactDetails.email,
             candidate.preferredName.getOrElse(candidate.firstName.getOrElse("")),
@@ -66,7 +68,6 @@ trait AdjustmentsManagementService {
             assessmentCenterAdjustmentsString("Assessment center:", adjustments)
           )
         case false =>
-          auditService.logEvent(s"Candidate ${candidate.userId} AdjustmentsConfirmed by $actionTriggeredBy")
           emailClient.sendAdjustmentsConfirmation(
             contactDetails.email,
             candidate.preferredName.getOrElse(candidate.firstName.getOrElse("")),
