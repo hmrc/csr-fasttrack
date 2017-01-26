@@ -53,30 +53,27 @@ trait SubmitApplicationController extends BaseController {
   val assessmentCentreIndicatorRepo: AssessmentCentreIndicatorRepository
 
   def submitApplication(userId: String, applicationId: String) = Action.async { implicit request =>
-    val generalDetailsFuture = pdRepository.find(applicationId)
-    val assistanceDetailsFuture = adService.find(applicationId, userId)
-    val contactDetailsFuture = cdRepository.find(userId)
-    val schemesLocationsFuture = frameworkPrefRepository.tryGetPreferences(applicationId)
 
     val result = for {
-        gd <- generalDetailsFuture
-        ad <- assistanceDetailsFuture
-        cd <- contactDetailsFuture
-        sl <- schemesLocationsFuture
-        availableRegions <- frameworkRegionsRepository.getFrameworksByRegionFilteredByQualification(CandidateHighestQualification.from(gd))
+        personalDetails <- pdRepository.find(applicationId)
+        assistanceDetails <- adService.find(applicationId, userId)
+        contactDetails <- cdRepository.find(userId)
+        schemePreferences <- frameworkPrefRepository.tryGetPreferences(applicationId)
+        availableRegions <- frameworkRegionsRepository.getFrameworksByRegionFilteredByQualification(
+          CandidateHighestQualification.from(personalDetails)
+        )
       } yield {
 
-        if (ApplicationValidator(gd, ad, sl, availableRegions).validate) {
+        if (ApplicationValidator(personalDetails, assistanceDetails, schemePreferences, availableRegions).validate) {
           appRepository.submit(applicationId).flatMap { _ =>
-            val assessmentCentreIndicator = assessmentCentreIndicatorRepo.calculateIndicator(Some(cd.postCode))
+            val assessmentCentreIndicator = assessmentCentreIndicatorRepo.calculateIndicator(Some(contactDetails.postCode))
             auditService.logEvent("ApplicationSubmitted")
             appRepository.updateAssessmentCentreIndicator(applicationId, assessmentCentreIndicator).flatMap { _ =>
               auditService.logEvent("AssessmentCentreIndicatorSet")
-              emailClient.sendApplicationSubmittedConfirmation(cd.email, gd.preferredName).map { _ =>
+              emailClient.sendApplicationSubmittedConfirmation(contactDetails.email, personalDetails.preferredName).map { _ =>
                 Ok
               }
             }
-
           }
         } else {
           Future.successful(BadRequest)

@@ -16,63 +16,108 @@
 
 package controllers
 
+import akka.stream.Materializer
 import config.TestFixtureBase
 import connectors.EmailClient
-import mocks.application.{ DocumentRootInMemoryRepository, PersonalDetailsInMemoryRepository}
-import mocks.{ContactDetailsInMemoryRepository, _}
-import org.mockito.Matchers.{eq => eqTo}
-import org.scalatestplus.play.PlaySpec
+import common.Constants.No
+import model.Commands.{ Address, PostCode }
+import model.PersistedObjects.ContactDetails
+import model.{ AssessmentCentreIndicator, LocationPreference, Preferences }
+import model.exchange.AssistanceDetails
+import model.persisted.PersonalDetails
+import org.joda.time.LocalDate
+import org.mockito.Matchers.{ eq => eqTo, _ }
+import org.mockito.Mockito._
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatestplus.play.{ OneAppPerSuite, PlaySpec }
 import play.api.mvc._
-import play.api.test.{FakeHeaders, FakeRequest, Helpers}
+import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
+import repositories.FrameworkRepository.{ CandidateHighestQualification, Framework, Location, Region }
 import repositories._
-import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository, PersonalDetailsRepository}
+import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
 import services.assistancedetails.AssistanceDetailsService
+import play.api.test.Helpers._
+import uk.gov.hmrc.play.http.HeaderCarrier
 
+import scala.concurrent.Future
 import scala.language.postfixOps
 
-class SubmitApplicationControllerSpec extends PlaySpec with Results {
+class SubmitApplicationControllerSpec extends PlaySpec with Results with OneAppPerSuite {
+
+  implicit val mat: Materializer = app.materializer
 
   "Submit Application" should {
 
-    "audit when correct data is in the storage" in pending
-    //new TestFixture { TODO
-    //  val action = TestSubmitApplicationController.submitApplication("000-000", "111-111")(submitApplicationRequest("000-000", "111-111"))
-    //  status(action.run) must be(200)
-    //  verify(mockAuditService).logEvent(eqTo("ApplicationSubmitted"))(any[HeaderCarrier], any[RequestHeader])
-    //}
+    "return 400 when the application is not valid" in new TestFixture {
+      when(mockPdRepo.find(any[String])).thenReturn(Future.successful(PersonalDetails("", "", "", LocalDate.now)))
 
-    "return 400 when no data in the storage" in pending
-    // Original test didn't actually exercise any controller code - so this test was never in fact implemented.
-    // Reverted to TODO, like the other 'todo' test, since it needs implementing correctly.
+      val result = TestSubmitApplicationController.submitApplication("user1", "app1")(submitApplicationRequest("user1", "app1")).run
 
-    "return 200 when correct data is in the storage" in pending
-    //    { TODO
-    //      TestSubmitApplicationController.frameworkPrefRepository.savePreferences(appId, ApplicationValidatorSpec.preferences.get)
-    //      TestSubmitApplicationController.cdRepository.update(userId, ContactDetails(
-    //        Address("", None, None, None),
-    //        "aaa",
-    //        "aaa",
-    //        None
-    //      ))
-    //      status(action.run) must be(200)
-    //    }
+      status(result) mustBe BAD_REQUEST
+      verify(mockAuditService, never).logEvent(any[String])(any[HeaderCarrier], any[RequestHeader])
+    }
+
+    "return 200 when the application is valid" in new TestFixture {
+
+      when(mockPdRepo.find(any[String])).thenReturn(Future.successful(PersonalDetails("fname", "lname", "prefname", LocalDate.now)))
+
+      when(mockAppRepo.submit(any[String])).thenReturn(Future.successful(unit))
+      when(mockAssessmentCentreIndicatorRepo.calculateIndicator(any[Option[String]])).thenReturn(
+        AssessmentCentreIndicator("London", "London")
+      )
+      when(mockAppRepo.updateAssessmentCentreIndicator(any[String], any[AssessmentCentreIndicator])).thenReturn(Future.successful(unit))
+      when(mockEmailClient.sendApplicationSubmittedConfirmation(any[String], any[String])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(unit))
+
+      val result = TestSubmitApplicationController.submitApplication("user1", "app1")(submitApplicationRequest("user1", "app1")).run
+
+      status(result) mustBe OK
+      verify(mockAuditService, times(2)).logEvent(any[String])(any[HeaderCarrier], any[RequestHeader])
+
+    }
 
   }
 
   trait TestFixture extends TestFixtureBase {
-    val mockAssistanceDetailsService = mock[AssistanceDetailsService]
+    val mockAppRepo = mock[GeneralApplicationRepository]
+    val mockPdRepo = mock[PersonalDetailsRepository]
+    val mockAdService = mock[AssistanceDetailsService]
+    val mockFrameworkPrefRepo = mock[FrameworkPreferenceRepository]
+    val mockFrameworkRegionsRepo = mock[FrameworkRepository]
+    val mockCdRepo = mock[ContactDetailsRepository]
+    val mockEmailClient = mock[EmailClient]
+    val mockAssessmentCentreIndicatorRepo = mock[AssessmentCentreIndicatorRepository]
+
     object TestSubmitApplicationController extends SubmitApplicationController {
-      override val appRepository: GeneralApplicationRepository = DocumentRootInMemoryRepository
-      override val pdRepository: PersonalDetailsRepository = PersonalDetailsInMemoryRepository
-      override val adService: AssistanceDetailsService = mockAssistanceDetailsService
-      override val frameworkPrefRepository: FrameworkPreferenceRepository = FrameworkPreferenceInMemoryRepository
-      override val frameworkRegionsRepository: FrameworkRepository = FrameworkInMemoryRepository
-      override val cdRepository: ContactDetailsRepository = ContactDetailsInMemoryRepository
+      override val appRepository: GeneralApplicationRepository = mockAppRepo
+      override val pdRepository: PersonalDetailsRepository = mockPdRepo
+      override val adService: AssistanceDetailsService = mockAdService
+      override val frameworkPrefRepository: FrameworkPreferenceRepository = mockFrameworkPrefRepo
+      override val frameworkRegionsRepository: FrameworkRepository = mockFrameworkRegionsRepo
+      override val cdRepository: ContactDetailsRepository = mockCdRepo
       override val auditService: AuditService = mockAuditService
-      override val emailClient: EmailClient = EmailClientStub
-      override val assessmentCentreIndicatorRepo: AssessmentCentreIndicatorRepository = AssessmentCentreIndicatorCSVRepository
+      override val emailClient: EmailClient = mockEmailClient
+      override val assessmentCentreIndicatorRepo: AssessmentCentreIndicatorRepository = mockAssessmentCentreIndicatorRepo
     }
+
+    val address = Address("line1", Some("line2"), Some("line3"), Some("line4"))
+
+    when(mockAdService.find(any[String], any[String])).thenReturn(Future.successful(AssistanceDetails(hasDisability = No,
+      hasDisabilityDescription = None, guaranteedInterview = None, needsSupportForOnlineAssessment = false,
+      needsSupportForOnlineAssessmentDescription = None, needsSupportAtVenue = false, needsSupportAtVenueDescription = None
+    )))
+
+    when(mockCdRepo.find(any[String])).thenReturn(Future.successful(ContactDetails(address, "QQ1 1QQ": PostCode, "test@test.com",
+        phone = None
+    )))
+    when(mockFrameworkPrefRepo.tryGetPreferences(any[String])).thenReturn(Future.successful(
+      Some(Preferences(LocationPreference("London", "London", "framework", None)))
+    ))
+    when(mockFrameworkRegionsRepo.getFrameworksByRegionFilteredByQualification(any[CandidateHighestQualification]))
+      .thenReturn(Future.successful(List(
+        Region("London", List(Location("London", List(Framework("framework", CandidateHighestQualification(2))))))
+      )))
 
     def submitApplicationRequest(userId: String, applicationId: String) = {
       FakeRequest(Helpers.PUT, controllers.routes.SubmitApplicationController.submitApplication(userId, applicationId).url, FakeHeaders(), "")
