@@ -34,18 +34,17 @@ class DiagnosticReportRepositorySpec extends MongoRepositorySpec {
 
   "Find application by user id" should {
     "return ApplicationNotFound if there is nobody with this userId" in {
-      val result = diagnosticReportRepo.findByUserId("123").failed.futureValue
+      val result = diagnosticReportRepo.findByApplicationId("123").failed.futureValue
       result mustBe an[ApplicationNotFound]
     }
 
     "return application with the given user id with personal details excluded" in {
       helperRepo.collection.insert(UserWithAllDetails).futureValue
 
-      val result = diagnosticReportRepo.findByUserId("user1").futureValue
-      result.size mustBe 1
+      val result = diagnosticReportRepo.findByApplicationId("app1").futureValue
       val msg = "Expected to find the userId in the result"
-      result.head.value.get("userId").fold(fail(msg)){u => u mustBe JsString("user1")}
-      result.head.value.get("personal-details") mustBe None
+      result.value.get("userId").fold(fail(msg)){u => u mustBe JsString("user1")}
+      result.value.get("personal-details") mustBe None
     }
   }
 
