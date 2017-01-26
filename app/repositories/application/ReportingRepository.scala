@@ -33,7 +33,7 @@ import model.Commands._
 import model.commands.{ ApplicationStatusDetails, OnlineTestProgressResponse }
 import org.joda.time.{ DateTime, LocalDate }
 import reactivemongo.api.DB
-import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID, BSONRegex }
+import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID, BSONRegex, _ }
 import repositories.{ CollectionNames, RandomSelection, ReactiveRepositoryHelpers }
 import services.TimeZoneService
 import uk.gov.hmrc.mongo.ReactiveRepository
@@ -78,7 +78,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     val lastName = psRoot.flatMap(_.getAs[String]("lastName"))
     val dateOfBirth = psRoot.flatMap(_.getAs[LocalDate]("dateOfBirth"))
 
-    Candidate(userId, applicationId, None, firstName, lastName, dateOfBirth, None, None)
+    Candidate(userId, applicationId, None, firstName, lastName, Some(dateOfBirth.toString), None, None, None)
   }
 
   def find(applicationIds: List[String]): Future[List[Candidate]] = {
