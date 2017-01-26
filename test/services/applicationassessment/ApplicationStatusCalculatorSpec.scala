@@ -120,5 +120,4 @@ class ApplicationStatusCalculatorSpec extends PlaySpec with TableDrivenPropertyC
                 location2Scheme2: Option[Result] = None,
                 alternativeScheme: Option[Result] = None) =
     r(None, location1Scheme1, location1Scheme2, location2Scheme1, location2Scheme2, alternativeScheme)
-  
 }

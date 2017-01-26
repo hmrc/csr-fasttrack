@@ -30,15 +30,14 @@ object ProgressStatuses extends Enum {
 
   val RegisteredProgress = EnumVal("registered", 0)
   val PersonalDetailsCompletedProgress = EnumVal("personal_details_completed", 10)
-  val LocationsCompletedProgress = EnumVal("scheme_locations_completed", 20)
-  val SchemesCompletedProgress = EnumVal("schemes_preferences_completed", 30)
+  val SchemeLocationsCompletedProgress = EnumVal("scheme_locations_completed", 20)
+  val SchemesPreferencesCompletedProgress = EnumVal("schemes_preferences_completed", 30)
   val AssistanceDetailsCompletedProgress = EnumVal("assistance_details_completed", 40)
-  val ReviewCompletedProgress = EnumVal("review_completed", 50)
-  val StartQuestionnaireProgress = EnumVal("start_questionnaire", 60)
-  val DiversityQuestionsCompletedProgress = EnumVal("diversity_questions_completed", 70)
-  val EducationQuestionsCompletedProgress = EnumVal("education_questions_completed", 80)
-  val OccupationQuestionsCompletedProgress = EnumVal("occupation_questions_completed", 90)
-
+  val StartDiversityQuestionnaireProgress = EnumVal("start_questionnaire", 50)
+  val DiversityQuestionsCompletedProgress = EnumVal("diversity_questions_completed", 60)
+  val EducationQuestionsCompletedProgress = EnumVal("education_questions_completed", 70)
+  val OccupationQuestionsCompletedProgress = EnumVal("occupation_questions_completed", 80)
+  val ReviewCompletedProgress = EnumVal("review_completed", 90)
   val SubmittedProgress = EnumVal(ApplicationStatuses.Submitted.name.toLowerCase, 100)
 
   val OnlineTestInvitedProgress = EnumVal(ApplicationStatuses.OnlineTestInvited.name.toLowerCase, 110)

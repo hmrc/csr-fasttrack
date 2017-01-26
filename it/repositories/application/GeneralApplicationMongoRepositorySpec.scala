@@ -19,8 +19,8 @@ package repositories.application
 import common.Constants.{ No, Yes }
 import factories.UUIDFactory
 import model.Commands.Report
-import model.Exceptions.{ LocationPreferencesNotFound, SchemePreferencesNotFound }
-import model.{ ApplicationStatuses, ProgressStatuses, Scheme }
+import model.Exceptions.{ AdjustmentsCommentNotFound, LocationPreferencesNotFound, SchemePreferencesNotFound }
+import model._
 import model.ApplicationStatuses._
 import model.commands.ApplicationStatusDetails
 import org.joda.time.{ DateTime, DateTimeZone }
@@ -119,6 +119,48 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
       }
     }
 
+    "return None for adjustments" in {
+      val userId = generateUUID()
+      val appId = generateUUID()
+      createMinimumApplication(userId, appId, "FastTrack")
+      val result = repository.findAdjustments(appId).futureValue
+      result mustBe None
+    }
+
+    "update adjustments and retrieve" in {
+      val userId = generateUUID()
+      val appId = generateUUID()
+      val adjustments = Adjustments(
+        typeOfAdjustments = Some(List("timeExtension")),
+        onlineTests = Some(AdjustmentDetail(Some(9)))
+      )
+      createMinimumApplication(userId, appId, "FastTrack")
+      repository.confirmAdjustments(appId, adjustments).futureValue
+
+      val result = repository.findAdjustments(appId).futureValue
+      result mustBe Some(adjustments.copy(adjustmentsConfirmed = Some(true)))
+    }
+
+    "return None for adjustments comments" in {
+      val userId = generateUUID()
+      val appId = generateUUID()
+      createMinimumApplication(userId, appId, "FastTrack")
+      an[AdjustmentsCommentNotFound] mustBe thrownBy {
+        Await.result(repository.findAdjustmentsComment(appId), 5 seconds)
+      }
+    }
+
+    "update comments and retrieve" in {
+      val userId = generateUUID()
+      val appId = generateUUID()
+      val adjustmentsComment = AdjustmentsComment("adjustment comment")
+      createMinimumApplication(userId, appId, "FastTrack")
+      repository.updateAdjustmentsComment(appId, adjustmentsComment).futureValue
+
+      val result = repository.findAdjustmentsComment(appId).futureValue
+      result mustBe adjustmentsComment
+    }
+
   }
 
   "get progress status dates" must {
@@ -126,11 +168,11 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
       val progressStatuses = Map (
         ProgressStatuses.RegisteredProgress -> DateTime.now.minusDays(12),
         ProgressStatuses.PersonalDetailsCompletedProgress -> DateTime.now.minusDays(11),
-        ProgressStatuses.LocationsCompletedProgress -> DateTime.now.minusDays(10),
-        ProgressStatuses.SchemesCompletedProgress -> DateTime.now.minusDays(9),
+        ProgressStatuses.SchemeLocationsCompletedProgress -> DateTime.now.minusDays(10),
+        ProgressStatuses.SchemesPreferencesCompletedProgress -> DateTime.now.minusDays(9),
         ProgressStatuses.AssistanceDetailsCompletedProgress -> DateTime.now.minusDays(9),
         ProgressStatuses.ReviewCompletedProgress -> DateTime.now.minusDays(8),
-        ProgressStatuses.StartQuestionnaireProgress -> DateTime.now.minusDays(7),
+        ProgressStatuses.StartDiversityQuestionnaireProgress -> DateTime.now.minusDays(7),
         ProgressStatuses.DiversityQuestionsCompletedProgress -> DateTime.now.minusDays(6),
         ProgressStatuses.EducationQuestionsCompletedProgress -> DateTime.now.minusDays(5),
         ProgressStatuses.OccupationQuestionsCompletedProgress -> DateTime.now.minusDays(4),
@@ -152,11 +194,11 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
       val progressStatuses = Map (
         ProgressStatuses.RegisteredProgress -> DateTime.now.minusDays(12),
         ProgressStatuses.PersonalDetailsCompletedProgress -> DateTime.now.minusDays(11),
-        ProgressStatuses.LocationsCompletedProgress -> DateTime.now.minusDays(10),
-        ProgressStatuses.SchemesCompletedProgress -> DateTime.now.minusDays(9),
+        ProgressStatuses.SchemeLocationsCompletedProgress -> DateTime.now.minusDays(10),
+        ProgressStatuses.SchemesPreferencesCompletedProgress -> DateTime.now.minusDays(9),
         ProgressStatuses.AssistanceDetailsCompletedProgress -> DateTime.now.minusDays(9),
         ProgressStatuses.ReviewCompletedProgress -> DateTime.now.minusDays(8),
-        ProgressStatuses.StartQuestionnaireProgress -> DateTime.now.minusDays(7),
+        ProgressStatuses.StartDiversityQuestionnaireProgress -> DateTime.now.minusDays(7),
         ProgressStatuses.DiversityQuestionsCompletedProgress -> DateTime.now.minusDays(6),
         ProgressStatuses.EducationQuestionsCompletedProgress -> DateTime.now.minusDays(5),
         ProgressStatuses.OccupationQuestionsCompletedProgress -> DateTime.now.minusDays(4)

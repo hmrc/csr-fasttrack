@@ -19,7 +19,9 @@ package repositories.application
 import model.Exceptions.PersonalDetailsNotFound
 import model.{ ApplicationStatuses, PersistedObjects, ProgressStatuses }
 import model.ApplicationStatuses.BSONEnumHandler
-import model.PersistedObjects.{ PersonalDetails, PersonalDetailsWithUserId }
+import model.PersistedObjects.PersonalDetailsWithUserId
+import model.PersistedObjects.Implicits._
+import model.persisted.PersonalDetails
 import org.joda.time.{ DateTime, LocalDate }
 import reactivemongo.api.DB
 import reactivemongo.bson.{ BSONDocument, _ }
@@ -47,12 +49,13 @@ trait PersonalDetailsRepository {
 
 class PersonalDetailsMongoRepository(implicit mongo: () => DB)
   extends ReactiveRepository[PersonalDetails, BSONObjectID](CollectionNames.APPLICATION, mongo,
-    PersistedObjects.Implicits.persistedPersonalDetailsFormats, ReactiveMongoFormats.objectIdFormats)
+    PersonalDetails.persistedPersonalDetailsFormats, ReactiveMongoFormats.objectIdFormats)
     with PersonalDetailsRepository with ReactiveRepositoryHelpers {
 
   override def update(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
 
-    val persistedPersonalDetails = PersonalDetails(pd.firstName, pd.lastName, pd.preferredName, pd.dateOfBirth, pd.aLevel, pd.stemLevel)
+    val persistedPersonalDetails = PersonalDetails(pd.firstName, pd.lastName, pd.preferredName, pd.dateOfBirth,
+      pd.aLevel, pd.stemLevel, pd.civilServant, pd.department)
 
     val query = BSONDocument("applicationId" -> applicationId, "userId" -> userId)
 
@@ -71,7 +74,6 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
     newApplicationStatus: ApplicationStatuses.EnumVal
   ): Future[Unit] = {
     val PersonalDetailsCollection = "personal-details"
-
 
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId, "userId" -> userId),
@@ -94,22 +96,12 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
   }
 
   override def find(applicationId: String): Future[PersonalDetails] = {
-
     val query = BSONDocument("applicationId" -> applicationId)
     val projection = BSONDocument("personal-details" -> 1, "_id" -> 0)
 
     collection.find(query, projection).one[BSONDocument] map {
       case Some(document) if document.getAs[BSONDocument]("personal-details").isDefined =>
-        val root = document.getAs[BSONDocument]("personal-details").get
-        val firstName = root.getAs[String]("firstName").get
-        val lastName = root.getAs[String]("lastName").get
-        val preferredName = root.getAs[String]("preferredName").get
-        val dateOfBirth = root.getAs[LocalDate]("dateOfBirth").get
-        val aLevel = root.getAs[Boolean]("aLevel").get
-        val stemLevel = root.getAs[Boolean]("stemLevel").get
-
-        PersonalDetails(firstName, lastName, preferredName, dateOfBirth, aLevel, stemLevel)
-
+        document.getAs[PersonalDetails]("personal-details").get
       case _ => throw PersonalDetailsNotFound(applicationId)
     }
   }
@@ -129,5 +121,4 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
       case _ => throw PersonalDetailsNotFound(applicationId)
     }
   }
-
 }

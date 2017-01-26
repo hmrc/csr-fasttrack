@@ -14,10 +14,15 @@
  * limitations under the License.
  */
 
-package model.exchange
+package common
 
-object AssistanceDetailsExamples {
-  val OnlyDisabilityNoGisNoAdjustments = AssistanceDetails("Yes", Some(""), Some(false), false, None, false, None)
-  val DisabilityGisAndAdjustments = AssistanceDetails("Yes", Some("disability description"), Some(true), true,
-    Some("online adjustment description"), true, Some("venue adjustment description"))
+import scala.language.implicitConversions
+
+object StringUtils {
+
+  def splitCamelCase(text: String)(implicit delim: String = " ") =
+    "[A-Z\\d]".r.replaceAllIn(text, {m =>
+      delim + m.group(0).toLowerCase()
+    }).trim
+
 }

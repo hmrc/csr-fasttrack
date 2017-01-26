@@ -18,7 +18,7 @@ package services.testdata
 
 import model.ApplicationStatuses
 import model.EvaluationResults.Result
-import model.PersistedObjects.PersonalDetails
+import model.persisted.PersonalDetails
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 import services.testdata.faker.DataFaker.Random
@@ -37,7 +37,8 @@ import model.commands.exchange.testdata.AssistanceDetailsData
     def getPreferredName: String = preferredName.getOrElse(s"Pref$firstName")
 
     def personalDetails: PersonalDetails = {
-      PersonalDetails(firstName, lastName, preferredName.getOrElse(firstName), dob, aLevel = false, stemLevel = false)
+      PersonalDetails(firstName, lastName, preferredName.getOrElse(firstName), dob, aLevel = false, stemLevel = false,
+        civilServant = false, department = None)
     }
   }
 

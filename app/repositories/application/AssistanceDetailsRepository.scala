@@ -17,12 +17,11 @@
 package repositories.application
 
 import model.Exceptions.{ AssistanceDetailsNotFound, CannotUpdateAssistanceDetails }
+import model.exchange.AssistanceDetails
 import model.{ ApplicationStatuses, ProgressStatuses }
-import model.persisted.AssistanceDetails
 import reactivemongo.api.DB
 import reactivemongo.bson.{ BSONDocument, _ }
-import repositories.ReactiveRepositoryHelpers
-import repositories._
+import repositories.{ ReactiveRepositoryHelpers, _ }
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -61,9 +60,9 @@ class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
     val projection = BSONDocument(AssistanceDetailsCollection -> 1, "_id" -> 0)
 
     collection.find(query, projection).one[BSONDocument] map {
-      case Some(document) if document.getAs[BSONDocument](AssistanceDetailsCollection).isDefined => {
+      case Some(document) if document.getAs[BSONDocument](AssistanceDetailsCollection).isDefined =>
         document.getAs[AssistanceDetails](AssistanceDetailsCollection).get
-      }
+
       case _ => throw AssistanceDetailsNotFound(applicationId)
     }
   }
