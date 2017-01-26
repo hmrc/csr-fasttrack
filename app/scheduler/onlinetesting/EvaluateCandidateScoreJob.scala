@@ -18,10 +18,11 @@ package scheduler.onlinetesting
 
 import config.ScheduledJobConfig
 import model.ApplicationStatuses
+import play.api.Logger
 import scheduler.clustering.SingleInstanceScheduledJob
 import services.onlinetesting.OnlineTestPassmarkService
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 object EvaluateCandidateScoreJob extends EvaluateCandidateScoreJob {
   val passmarkService: OnlineTestPassmarkService = OnlineTestPassmarkService
@@ -31,13 +32,19 @@ trait EvaluateCandidateScoreJob extends SingleInstanceScheduledJob with Evaluate
   val passmarkService: OnlineTestPassmarkService
 
   def tryExecute()(implicit ec: ExecutionContext): Future[Unit] = {
+    Logger.error("--->tryExecute")
     passmarkService.nextCandidateScoreReadyForEvaluation.flatMap { applicationScoreOpt =>
       applicationScoreOpt.map { applicationScore => applicationScore.applicationStatus match {
+        // TODO LT: remove it
         case ApplicationStatuses.AssessmentScoresAccepted =>
-          passmarkService.evaluateCandidateScoreWithoutChangingApplicationStatus(applicationScore)
+          ???
         case _ =>
+          Logger.error("--->HERE")
           passmarkService.evaluateCandidateScore(applicationScore)
-      }}.getOrElse(Future.successful(()))
+      }}.getOrElse {
+        Logger.error("--->EEEEMPTY")
+        Future.successful(())
+      }
     }
   }
 }

@@ -33,6 +33,7 @@ import org.joda.time.DateTime
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.Logger
+import repositories.application.GeneralApplicationRepository
 import repositories.{ FrameworkPreferenceRepository, FrameworkRepository, PassMarkSettingsRepository, TestReportRepository }
 import services.onlinetesting.OnlineTestPassmarkService
 import services.passmarksettings.PassMarkSettingsService
@@ -56,6 +57,7 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
       override val fwRepository = mock[FrameworkRepository]
       override val pmsRepository = PassMarkSettingsInMemoryRepository
     }
+    val appRepository = mock[GeneralApplicationRepository]
   }
 
   "Online Test Passmark Service" should {
@@ -90,7 +92,7 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
             val alreadyEvaluated = t.previousEvaluation
 
             val candidateScoreWithPassmark = CandidateScoresWithPreferencesAndPassmarkSettings(passmarkSettings,
-              t.preferences, t.scores, alreadyEvaluated.map(_.applicationStatus).getOrElse(ApplicationStatuses.OnlineTestCompleted))
+              List(), t.scores, alreadyEvaluated.map(_.applicationStatus).getOrElse(ApplicationStatuses.OnlineTestCompleted))
 
             val actual = service.oRepository.inMemoryRepo
             val appId = t.scores.applicationId
@@ -131,29 +133,30 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
 
   def evaluate(appId: String, candidateScoreWithPassmark: CandidateScoresWithPreferencesAndPassmarkSettings,
                alreadyEvaluated: Option[ScoreEvaluationTestExpectation] = None) = {
-    candidateScoreWithPassmark.applicationStatus match {
-      case ApplicationStatuses.AssessmentScoresAccepted =>
-        require(alreadyEvaluated.isDefined, "AssessmentScoresAccepted requires already evaluated application")
-
-        alreadyEvaluated.map { currentEvaluation =>
-          val currentResult = RuleCategoryResult(
-            Result(currentEvaluation.location1Scheme1),
-            currentEvaluation.location1Scheme2.map(Result(_)),
-            currentEvaluation.location2Scheme1.map(Result(_)),
-            currentEvaluation.location2Scheme2.map(Result(_)),
-            currentEvaluation.alternativeScheme.map(Result(_))
-          )
-
-          service.oRepository.savePassMarkScore(appId, currentEvaluation.passmarkVersion.get,
-            currentResult, currentEvaluation.applicationStatus)
-        }
-
-        service.evaluateCandidateScoreWithoutChangingApplicationStatus(candidateScoreWithPassmark)
-      case ApplicationStatuses.OnlineTestCompleted =>
-        service.evaluateCandidateScore(candidateScoreWithPassmark)
-      case _ =>
-        throw new IllegalArgumentException("This status is not supported by the test framework")
-    }
+//    candidateScoreWithPassmark.applicationStatus match {
+//      case ApplicationStatuses.AssessmentScoresAccepted =>
+//        require(alreadyEvaluated.isDefined, "AssessmentScoresAccepted requires already evaluated application")
+//
+//        alreadyEvaluated.map { currentEvaluation =>
+//          val currentResult = RuleCategoryResult(
+//            Result(currentEvaluation.location1Scheme1),
+//            currentEvaluation.location1Scheme2.map(Result(_)),
+//            currentEvaluation.location2Scheme1.map(Result(_)),
+//            currentEvaluation.location2Scheme2.map(Result(_)),
+//            currentEvaluation.alternativeScheme.map(Result(_))
+//          )
+//
+//          service.oRepository.savePassMarkScore(appId, currentEvaluation.passmarkVersion.get,
+//            currentResult, currentEvaluation.applicationStatus)
+//        }
+//
+//        service.evaluateCandidateScoreWithoutChangingApplicationStatus(candidateScoreWithPassmark)
+//      case ApplicationStatuses.OnlineTestCompleted =>
+//        service.evaluateCandidateScore(candidateScoreWithPassmark)
+//      case _ =>
+//        throw new IllegalArgumentException("This status is not supported by the test framework")
+//    }
+    ???
   }
 
   def toStr(r: Result): String = r.getClass.getSimpleName.split("\\$").head

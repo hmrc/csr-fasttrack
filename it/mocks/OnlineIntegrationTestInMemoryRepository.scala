@@ -19,9 +19,10 @@ package mocks
 import controllers.OnlineTestDetails
 import model.EvaluationResults._
 import model.ApplicationStatuses
-import model.OnlineTestCommands.{OnlineTestApplication, OnlineTestApplicationWithCubiksUser, OnlineTestProfile}
-import model.PersistedObjects.{ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation}
-import org.joda.time.{DateTime, LocalDate}
+import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser, OnlineTestProfile }
+import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
+import model.Scheme.Scheme
+import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.OnlineTestRepository
 
 import scala.collection.mutable
@@ -75,16 +76,14 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
 
   override def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = ???
 
-  override def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult,
+  // TODO LT: fix it
+  override def savePassMarkScore(applicationId: String, version: String, p: Map[Scheme, Result],
     applicationStatus: ApplicationStatuses.EnumVal
   ): Future[Unit] = {
-    inMemoryRepo += applicationId -> TestableResult(p, version, applicationStatus)
     Future.successful(())
   }
 
-  def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, newVersion: String, p: RuleCategoryResult): Future[Unit] = {
-    val updatedResult = inMemoryRepo(applicationId).copy(result = p, version = newVersion)
-    inMemoryRepo += applicationId -> updatedResult
+  def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, newVersion: String, p: Map[Scheme, Result]): Future[Unit] = {
     Future.successful(())
   }
 

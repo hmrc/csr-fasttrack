@@ -38,22 +38,24 @@ trait AwaitingAllocationStatusGenerator extends ConstructiveGenerator {
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
 
-    def getEvaluationResult(candidate: DataGenerationResponse): RuleCategoryResult = {
-      RuleCategoryResult(
-        generatorConfig.loc1scheme1Passmark.getOrElse(Random.passmark),
-        generatorConfig.loc1scheme2Passmark,
-        None,
-        None,
-        None
-      )
-    }
-
-    for {
-      candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      _ <- otRepository.savePassMarkScore(candidateInPreviousStatus.applicationId.get, UUID.randomUUID().toString,
-        getEvaluationResult(candidateInPreviousStatus), ApplicationStatuses.AwaitingAllocation)
-    } yield {
-      candidateInPreviousStatus
-    }
+    // TODO LT: fix it
+//    def getEvaluationResult(candidate: DataGenerationResponse): RuleCategoryResult = {
+//      RuleCategoryResult(
+//        generatorConfig.loc1scheme1Passmark.getOrElse(Random.passmark),
+//        generatorConfig.loc1scheme2Passmark,
+//        None,
+//        None,
+//        None
+//      )
+//    }
+//
+//    for {
+//      candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
+//      _ <- otRepository.savePassMarkScore(candidateInPreviousStatus.applicationId.get, UUID.randomUUID().toString,
+//        getEvaluationResult(candidateInPreviousStatus), ApplicationStatuses.AwaitingAllocation)
+//    } yield {
+//      candidateInPreviousStatus
+//    }
+    ???
   }
 }

@@ -33,13 +33,15 @@ trait AwaitingOnlineTestReevaluationStatusGenerator extends ConstructiveGenerato
   val otRepository: OnlineTestRepository
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
-    val ruleCategory = RuleCategoryResult(Amber, Some(Amber), Some(Amber), Some(Amber), Some(Amber))
-    for {
-      candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      _ <- otRepository.savePassMarkScore(candidateInPreviousStatus.applicationId.get, "version2", ruleCategory,
-        ApplicationStatuses.AwaitingOnlineTestReevaluation)
-    } yield {
-      candidateInPreviousStatus
-    }
+    // TODO LT: fix it
+//    val ruleCategory = RuleCategoryResult(Amber, Some(Amber), Some(Amber), Some(Amber), Some(Amber))
+//    for {
+//      candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
+//      _ <- otRepository.savePassMarkScore(candidateInPreviousStatus.applicationId.get, "version2", ruleCategory,
+//        ApplicationStatuses.AwaitingOnlineTestReevaluation)
+//    } yield {
+//      candidateInPreviousStatus
+//    }
+    ???
   }
 }

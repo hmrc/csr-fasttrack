@@ -20,34 +20,30 @@ import connectors.PassMarkExchangeObjects.{ SchemeThreshold, SchemeThresholds }
 import model.EvaluationResults._
 import model.OnlineTestCommands.{ CandidateScoresWithPreferencesAndPassmarkSettings, TestResult }
 import model.PersistedObjects.CandidateTestReport
+import model.Scheme.Scheme
 import model.Schemes
 
 trait OnlineTestPassmarkRulesEngine {
 
-  def evaluate(score: CandidateScoresWithPreferencesAndPassmarkSettings): RuleCategoryResult
+  def evaluate(score: CandidateScoresWithPreferencesAndPassmarkSettings): Map[Scheme, Result]
 
 }
 
 object OnlineTestPassmarkRulesEngine extends OnlineTestPassmarkRulesEngine {
 
-  def evaluate(score: CandidateScoresWithPreferencesAndPassmarkSettings): RuleCategoryResult = {
-    val prefs = score.preferences
-
-    val location1Scheme1 = prefs.firstLocation.firstFramework
-    val location1Scheme2 = prefs.firstLocation.secondFramework
-    val location2Scheme1 = prefs.secondLocation.map(s => s.firstFramework)
-    val location2Scheme2 = prefs.secondLocation.flatMap(s => s.secondFramework)
-    val alternativeScheme = prefs.alternatives.map(_.framework)
+  // TODO LT: Next to work on
+  def evaluate(score: CandidateScoresWithPreferencesAndPassmarkSettings): Map[Scheme, Result] = {
+    val schemes = score.schemes
 
     def evaluateAgainstScheme = evaluateScore(score) _
 
-    val location1Scheme1Result = evaluateAgainstScheme(location1Scheme1)
-    val location1Scheme2Result = location1Scheme2 map evaluateAgainstScheme
-    val location2Scheme1Result = location2Scheme1 map evaluateAgainstScheme
-    val location2Scheme2Result = location2Scheme2 map evaluateAgainstScheme
-    val alternativeSchemeResult = alternativeScheme collect { case true => evaluateScoreForAllSchemes(score) }
+//    val location1Scheme1Result = evaluateAgainstScheme(location1Scheme1)
+//    val location1Scheme2Result = location1Scheme2 map evaluateAgainstScheme
+//    val location2Scheme1Result = location2Scheme1 map evaluateAgainstScheme
+//    val location2Scheme2Result = location2Scheme2 map evaluateAgainstScheme
+//    val alternativeSchemeResult = alternativeScheme collect { case true => evaluateScoreForAllSchemes(score) }
 
-    RuleCategoryResult(location1Scheme1Result, location1Scheme2Result, location2Scheme1Result, location2Scheme2Result, alternativeSchemeResult)
+    Map()
   }
 
   private def evaluateScore(candidateScores: CandidateScoresWithPreferencesAndPassmarkSettings)(schemeName: String) = {

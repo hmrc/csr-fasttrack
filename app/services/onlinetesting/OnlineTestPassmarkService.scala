@@ -20,15 +20,17 @@ import model.ApplicationStatuses
 import model.EvaluationResults.{ RuleCategoryResult, _ }
 import model.OnlineTestCommands._
 import model.PersistedObjects.ApplicationIdWithUserIdAndStatus
+import model.Scheme.Scheme
 import play.api.Logger
 import repositories._
-import repositories.application.OnlineTestRepository
+import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
 import services.evaluation._
 import services.passmarksettings.PassMarkSettingsService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+// TODO LT: Next to work on
 object OnlineTestPassmarkService extends OnlineTestPassmarkService {
   val pmsRepository = passMarkSettingsRepository
   val fpRepository = frameworkPreferenceRepository
@@ -36,6 +38,7 @@ object OnlineTestPassmarkService extends OnlineTestPassmarkService {
   val oRepository = onlineTestRepository
   val passmarkRulesEngine = OnlineTestPassmarkRulesEngine
   val passMarkSettingsService = PassMarkSettingsService
+  val appRepository = applicationRepository
 }
 
 trait OnlineTestPassmarkService {
@@ -45,6 +48,7 @@ trait OnlineTestPassmarkService {
   val passmarkRulesEngine: OnlineTestPassmarkRulesEngine
   val pmsRepository: PassMarkSettingsRepository
   val passMarkSettingsService: PassMarkSettingsService
+  val appRepository: GeneralApplicationRepository
 
   def nextCandidateScoreReadyForEvaluation: Future[Option[CandidateScoresWithPreferencesAndPassmarkSettings]] = {
     passMarkSettingsService.tryGetLatestVersion().flatMap {
@@ -52,13 +56,10 @@ trait OnlineTestPassmarkService {
         oRepository.nextApplicationPassMarkProcessing(settings.version).flatMap {
           case Some(ApplicationIdWithUserIdAndStatus(appId, _, appStatus)) =>
             for {
+              schemes <- appRepository.getSchemes(appId)
               reportOpt <- trRepository.getReportByApplicationId(appId)
-              pOpt <- fpRepository.tryGetPreferences(appId)
-            } yield {
-              for {
-                r <- reportOpt
-                p <- pOpt
-              } yield CandidateScoresWithPreferencesAndPassmarkSettings(settings, p, r, appStatus)
+            } yield reportOpt.map {
+              report => CandidateScoresWithPreferencesAndPassmarkSettings(settings, schemes, report, appStatus)
             }
           case _ =>
             Future.successful(None)
@@ -69,48 +70,8 @@ trait OnlineTestPassmarkService {
     }
   }
 
-  private def determineApplicationStatus(setting: String, result: RuleCategoryResult) = {
-    type Rules = Seq[(RuleCategoryResult) => Option[Result]]
-
-    val totalFailure = Seq(
-      Some(result.location1Scheme1),
-      result.location1Scheme2,
-      result.location2Scheme1,
-      result.location2Scheme2,
-      result.alternativeScheme
-    ).filter { case Some(_) => true case _ => false }
-      .map(_.get)
-      .forall(_ == Red)
-
-    // We build a list with the results to be considered depending on the rule
-    // First element of the sequence is rule1 location1scheme1 setting
-    // Second element will contain the first, plus rule2 other scheme setting
-    // Third element will contain all the previous ones, plus rule 3 any setting
-    val rule1: Rules = Seq(r => Some(r.location1Scheme1))
-    val rule2: Rules = setting match {
-      case "otherScheme" | "any" =>
-        Seq(
-          _.location1Scheme2,
-          _.location2Scheme1,
-          _.location2Scheme2
-        )
-      case _ => Nil
-    }
-    val rule3: Rules = setting match {
-      case "any" => Seq(_.alternativeScheme)
-      case _ => Nil
-    }
-
-    if (totalFailure) {
-      ApplicationStatuses.OnlineTestFailed
-    } else {
-      provideResult(
-        Seq(rule1, rule2, rule3)
-          .filter(_.nonEmpty)
-          .flatten
-          .map(f => f(result).getOrElse(Red)), result
-      )
-    }
+  private def determineApplicationStatus(setting: String, result: Map[Scheme, Result]) = {
+    ApplicationStatuses.AwaitingAllocation
   }
 
   def provideResult(rules: Seq[Result], ruleCategoryResult: RuleCategoryResult) = {
@@ -133,16 +94,6 @@ trait OnlineTestPassmarkService {
       score.passmarkSettings.version,
       result,
       applicationStatus
-    )
-  }
-
-  def evaluateCandidateScoreWithoutChangingApplicationStatus(score: CandidateScoresWithPreferencesAndPassmarkSettings): Future[Unit] = {
-    val result = passmarkRulesEngine.evaluate(score)
-
-    oRepository.savePassMarkScoreWithoutApplicationStatusUpdate(
-      score.scores.applicationId,
-      score.passmarkSettings.version,
-      result
     )
   }
 }

@@ -21,6 +21,7 @@ import connectors.PassMarkExchangeObjects.Settings
 import model.ApplicationStatuses.enumFormat
 import model.PersistedObjects.CandidateTestReport
 import model.Adjustments._
+import model.Scheme.Scheme
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 
@@ -38,7 +39,7 @@ object OnlineTestCommands {
 
   case class CandidateScoresWithPreferencesAndPassmarkSettings(
     passmarkSettings: Settings, // pass and fail mark
-    preferences: Preferences, // preferences which scheme candidates like
+    schemes: List[Scheme], // preferences which scheme candidates like
     scores: CandidateTestReport, // applicationId + scores
     applicationStatus: ApplicationStatuses.EnumVal
   )

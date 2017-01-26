@@ -17,10 +17,11 @@
 package mocks.application
 
 import controllers.OnlineTestDetails
-import model.ApplicationStatuses
+import model.{ ApplicationStatuses, Scheme }
 import model.EvaluationResults._
 import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser, OnlineTestProfile }
 import model.PersistedObjects._
+import model.Scheme.Scheme
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.OnlineTestRepository
 
@@ -75,9 +76,9 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
 
   override def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = ???
 
-  override def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult,
+  // TODO LT: fix it
+  override def savePassMarkScore(applicationId: String, version: String, p: Map[Scheme, Result],
     applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
-    inMemoryRepo += applicationId -> p
     Future.successful(())
   }
 
@@ -88,7 +89,7 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
 
   def removeOnlineTestEvaluationAndReports(applicationId: String): Future[Unit] = ???
 
-  def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, version: String, p: RuleCategoryResult): Future[Unit] = ???
+  def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, version: String, p: Map[Scheme, Result]): Future[Unit] = ???
 
   def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = ???
 }
