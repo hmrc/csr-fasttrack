@@ -19,15 +19,16 @@ package controllers
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 
-import common.Constants.{ Yes, No }
+import common.Constants.{ No, Yes }
 import config._
 import connectors.EmailClient
 import model.AssessmentScheduleCommands.Implicits._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.Exceptions.NotFoundException
-import model.PersistedObjects.{ ContactDetails, PersonalDetails }
+import model.PersistedObjects.ContactDetails
 import model.commands.OnlineTestProgressResponse
+import model.persisted.PersonalDetails
 import org.joda.time.{ DateTime, LocalDate }
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._

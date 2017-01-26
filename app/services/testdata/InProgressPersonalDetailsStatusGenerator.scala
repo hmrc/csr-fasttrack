@@ -18,7 +18,8 @@ package services.testdata
 
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.Commands.Address
-import model.PersistedObjects.{ ContactDetails, PersonalDetails }
+import model.PersistedObjects.ContactDetails
+import model.persisted.PersonalDetails
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.testdata.faker.DataFaker.Random

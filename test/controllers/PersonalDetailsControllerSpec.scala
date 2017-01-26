@@ -19,7 +19,7 @@ package controllers
 import config.TestFixtureBase
 import mocks.ContactDetailsInMemoryRepository
 import mocks.application.PersonalDetailsInMemoryRepository
-import model.PersistedObjects.PersonalDetails
+import model.persisted.PersonalDetails
 import org.joda.time.LocalDate
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._

@@ -18,7 +18,8 @@ package controllers
 
 import model.Commands._
 import model.Exceptions.{ CannotUpdateContactDetails, CannotUpdateRecord, ContactDetailsNotFound, PersonalDetailsNotFound }
-import model.PersistedObjects.{ ContactDetails, PersonalDetails }
+import model.PersistedObjects.ContactDetails
+import model.persisted.PersonalDetails
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import repositories._
