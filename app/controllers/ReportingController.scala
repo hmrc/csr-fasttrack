@@ -23,7 +23,7 @@ import model.PersistedObjects.ContactDetailsWithId
 import model.PersistedObjects.Implicits._
 import play.api.libs.json.Json
 import play.api.mvc.{ Action, AnyContent, Request }
-import repositories.application.GeneralApplicationRepository
+import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
 import repositories.{ QuestionnaireRepository, _ }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -32,11 +32,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object ReportingController extends ReportingController {
   val appRepository = applicationRepository
   val cdRepository = contactDetailsRepository
-  val reportingRepository = diversityReportRepository
-  val authProviderClient = AuthProviderClient
+  val diversityReportRepository = repositories.diversityReportRepository
   val questionnaireRepository = repositories.questionnaireRepository
   val testReportRepository = repositories.testReportRepository
   val assessmentScoresRepository = repositories.applicationAssessmentScoresRepository
+  val reportingRepository = repositories.reportingRepository
+  val authProviderClient = AuthProviderClient
 }
 
 trait ReportingController extends BaseController {
@@ -45,18 +46,19 @@ trait ReportingController extends BaseController {
 
   val appRepository: GeneralApplicationRepository
   val cdRepository: ContactDetailsRepository
-  val reportingRepository: ReportingRepository
-  val authProviderClient: AuthProviderClient
+  val diversityReportRepository: DiversityReportRepository
   val questionnaireRepository: QuestionnaireRepository
   val testReportRepository: TestReportRepository
   val assessmentScoresRepository: ApplicationAssessmentScoresRepository
+  val reportingRepository: ReportingRepository
+  val authProviderClient: AuthProviderClient
 
   def createReport(frameworkId: String) = Action.async { implicit request =>
     appRepository.overallReport(frameworkId).map(r => Ok(Json.toJson(r)))
   }
 
   def retrieveDiversityReport = Action.async { implicit request =>
-    reportingRepository.findLatest().map {
+    diversityReportRepository.findLatest().map {
       case Some(report) => Ok(Json.toJson(report))
       case None => NotFound
     }

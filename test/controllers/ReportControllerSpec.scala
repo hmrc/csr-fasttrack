@@ -35,8 +35,8 @@ import play.api.libs.json.{ JsArray, JsValue }
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories.application.GeneralApplicationRepository
-import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, QuestionnaireRepository, ReportingRepository, TestReportRepository }
+import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
+import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, DiversityReportRepository, QuestionnaireRepository, TestReportRepository }
 import testkit.MockitoImplicits.OngoingStubbingExtension
 import testkit.{ MockitoSugar, UnitSpec, UnitWithAppSpec }
 
@@ -50,7 +50,7 @@ class ReportControllerSpec extends UnitWithAppSpec {
     "return the adjustment report when we execute adjustment reports" in new TestFixture {
       val controller = new ReportingController {
         override val appRepository = DocumentRootInMemoryRepository
-        override val reportingRepository = ReportingInMemoryRepository
+        override val diversityReportRepository = DiversityReportInMemoryRepository
         override val cdRepository = new ContactDetailsInMemoryRepository {
           override def findAll: Future[List[ContactDetailsWithId]] =
             Future.successful(List(
@@ -63,6 +63,7 @@ class ReportControllerSpec extends UnitWithAppSpec {
         override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val testReportRepository = TestReportInMemoryRepository
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val reportingRepository: ReportingRepository = reportingRepositoryMock
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
@@ -78,12 +79,13 @@ class ReportControllerSpec extends UnitWithAppSpec {
     "return the adjustment report without contact details data" in new TestFixture {
       val controller = new ReportingController {
         override val appRepository = DocumentRootInMemoryRepository
-        override val reportingRepository = ReportingInMemoryRepository
+        override val diversityReportRepository = DiversityReportInMemoryRepository
         override val cdRepository = new ContactDetailsInMemoryRepository
         override val authProviderClient: AuthProviderClient = authProviderClientMock
         override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val testReportRepository = TestReportInMemoryRepository
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val reportingRepository: ReportingRepository = reportingRepositoryMock
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
@@ -104,12 +106,13 @@ class ReportControllerSpec extends UnitWithAppSpec {
             Future.successful(List.empty[AdjustmentReport])
           }
         }
-        override val reportingRepository = ReportingInMemoryRepository
+        override val diversityReportRepository = DiversityReportInMemoryRepository
         override val cdRepository = ContactDetailsInMemoryRepository
         override val authProviderClient: AuthProviderClient = authProviderClientMock
         override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val testReportRepository = TestReportInMemoryRepository
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val reportingRepository: ReportingRepository = reportingRepositoryMock
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
@@ -124,7 +127,7 @@ class ReportControllerSpec extends UnitWithAppSpec {
     "return a list of non submitted applications with phone number if contact details exist" in new TestFixture {
       val controller = new ReportingController {
         override val appRepository = new DocumentRootInMemoryRepository
-        override val reportingRepository = ReportingInMemoryRepository
+        override val diversityReportRepository = DiversityReportInMemoryRepository
         override val cdRepository = new ContactDetailsInMemoryRepository {
           override def findAll: Future[List[ContactDetailsWithId]] = {
             Future.successful(ContactDetailsWithId(
@@ -137,6 +140,7 @@ class ReportControllerSpec extends UnitWithAppSpec {
         override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val testReportRepository = TestReportInMemoryRepository
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val reportingRepository: ReportingRepository = reportingRepositoryMock
       }
       val result = controller.createNonSubmittedAppsReports(frameworkId)(createNonSubmittedAppsReportRequest(frameworkId)).run
 
@@ -163,12 +167,13 @@ class ReportControllerSpec extends UnitWithAppSpec {
             Future.successful(Nil)
           }
         }
-        override val reportingRepository = ReportingInMemoryRepository
+        override val diversityReportRepository = DiversityReportInMemoryRepository
         override val cdRepository = ContactDetailsInMemoryRepository
         override val authProviderClient = authProviderClientMock
         override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val testReportRepository = TestReportInMemoryRepository
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val reportingRepository: ReportingRepository = reportingRepositoryMock
       }
       val result = controller.createNonSubmittedAppsReports(frameworkId)(createNonSubmittedAppsReportRequest(frameworkId)).run
 
@@ -391,6 +396,8 @@ class ReportControllerSpec extends UnitWithAppSpec {
         Candidate("firstName2", "lastName2", None, "email2@test.com", "user2") ::
         Nil
     ))
+
+    val reportingRepositoryMock = mock[ReportingRepository]
   }
 
   trait SuccessfulCandidatesReportTestFixture extends TestFixture {
@@ -401,12 +408,13 @@ class ReportControllerSpec extends UnitWithAppSpec {
     val cdRepo = mock[ContactDetailsRepository]
     val controller = new ReportingController {
       val appRepository = appRepo
-      val reportingRepository = mock[ReportingRepository]
+      val diversityReportRepository = mock[DiversityReportRepository]
       val cdRepository = cdRepo
       val authProviderClient = mock[AuthProviderClient]
       val questionnaireRepository = questionRepo
       val testReportRepository = testResultRepo
       val assessmentScoresRepository = assessmentScoresRepo
+      val reportingRepository = reportingRepositoryMock
     }
 
     val appId = rnd("appId")
@@ -457,12 +465,13 @@ class ReportControllerSpec extends UnitWithAppSpec {
     val testResultRepo = mock[TestReportRepository]
     val controller = new ReportingController {
       val appRepository = appRepo
-      val reportingRepository = mock[ReportingRepository]
+      val diversityReportRepository = mock[DiversityReportRepository]
       val cdRepository = mock[ContactDetailsRepository]
       val authProviderClient = mock[AuthProviderClient]
       val questionnaireRepository = questionRepo
       val testReportRepository = testResultRepo
       val assessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
+      val reportingRepository = reportingRepositoryMock
     }
 
     lazy val report1 = newReport
@@ -504,12 +513,13 @@ class ReportControllerSpec extends UnitWithAppSpec {
     val cdRepo = mock[ContactDetailsRepository]
     val controller = new ReportingController {
       val appRepository = appRepo
-      val reportingRepository = mock[ReportingRepository]
+      val diversityReportRepository = mock[DiversityReportRepository]
       val cdRepository = cdRepo
       val authProviderClient = mock[AuthProviderClient]
       val questionnaireRepository = mock[QuestionnaireRepository]
       val testReportRepository = mock[TestReportRepository]
       val assessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
+      val reportingRepository = reportingRepositoryMock
     }
 
     lazy val candidate1 = newCandidate
@@ -551,12 +561,13 @@ class ReportControllerSpec extends UnitWithAppSpec {
     val assessmentScoresRepo = mock[ApplicationAssessmentScoresRepository]
     val controller = new ReportingController {
       val appRepository = appRepo
-      val reportingRepository = mock[ReportingRepository]
+      val diversityReportRepository = mock[DiversityReportRepository]
       val cdRepository = mock[ContactDetailsRepository]
       val authProviderClient = mock[AuthProviderClient]
       val questionnaireRepository = questionRepo
       val testReportRepository = testResultRepo
       val assessmentScoresRepository = assessmentScoresRepo
+      val reportingRepository = reportingRepositoryMock
     }
 
     val appId = rnd("appId")

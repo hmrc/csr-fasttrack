@@ -18,11 +18,11 @@ package mocks
 
 import model.PersistedObjects.{ DiversityReport, DiversityReportRow }
 import org.joda.time.DateTime
-import repositories.ReportingRepository
+import repositories.DiversityReportRepository
 
 import scala.concurrent.Future
 
-object ReportingInMemoryRepository extends ReportingRepository {
+object DiversityReportInMemoryRepository extends DiversityReportRepository {
   override def update(location: String, timeStamp: DateTime, data: DiversityReportRow): Future[Unit] = Future.successful(Unit)
 
   override def findLatest(): Future[Option[DiversityReport]] = Future.successful(None)
