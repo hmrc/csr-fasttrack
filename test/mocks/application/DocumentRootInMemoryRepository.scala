@@ -166,6 +166,10 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
 
   override def findApplicationStatusDetails(applicationId: String): Future[ApplicationStatusDetails] = ???
 
+  def findAssessmentCentreIndicator(appId: String): scala.concurrent.Future[Option[model.AssessmentCentreIndicator]] = ???
+
+  def updateAssessmentCentreIndicator(applicationId: String,indicator: model.AssessmentCentreIndicator): scala.concurrent.Future[Unit] = ???
+
   override def find(applicationId: String): Future[Option[Candidate]] = ???
 }
 // scalastyle:on number.of.methods

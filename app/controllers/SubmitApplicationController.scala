@@ -32,12 +32,13 @@ import scala.concurrent.Future
 object SubmitApplicationController extends SubmitApplicationController {
   override val adService: AssistanceDetailsService = AssistanceDetailsService
   override val pdRepository: PersonalDetailsRepository = personalDetailsRepository
-  override val cdRepository = contactDetailsRepository
+  override val cdRepository: ContactDetailsMongoRepository = contactDetailsRepository
   override val frameworkPrefRepository: FrameworkPreferenceMongoRepository = frameworkPreferenceRepository
   override val frameworkRegionsRepository: FrameworkRepository = frameworkRepository
   override val appRepository: GeneralApplicationRepository = applicationRepository
   override val emailClient = CSREmailClient
   override val auditService = AuditService
+  override val assessmentCentreIndicatorRepo = AssessmentCentreIndicatorCSVRepository
 }
 
 trait SubmitApplicationController extends BaseController {
@@ -49,26 +50,29 @@ trait SubmitApplicationController extends BaseController {
   val appRepository: GeneralApplicationRepository
   val emailClient: EmailClient
   val auditService: AuditService
+  val assessmentCentreIndicatorRepo: AssessmentCentreIndicatorRepository
 
   def submitApplication(userId: String, applicationId: String) = Action.async { implicit request =>
-    val generalDetailsFuture = pdRepository.find(applicationId)
-    val assistanceDetailsFuture = adService.find(applicationId, userId)
-    val contactDetailsFuture = cdRepository.find(userId)
-    val schemesLocationsFuture = frameworkPrefRepository.tryGetPreferences(applicationId)
 
     val result = for {
-        gd <- generalDetailsFuture
-        ad <- assistanceDetailsFuture
-        cd <- contactDetailsFuture
-        sl <- schemesLocationsFuture
-        availableRegions <- frameworkRegionsRepository.getFrameworksByRegionFilteredByQualification(CandidateHighestQualification.from(gd))
+        personalDetails <- pdRepository.find(applicationId)
+        assistanceDetails <- adService.find(applicationId, userId)
+        contactDetails <- cdRepository.find(userId)
+        schemePreferences <- frameworkPrefRepository.tryGetPreferences(applicationId)
+        availableRegions <- frameworkRegionsRepository.getFrameworksByRegionFilteredByQualification(
+          CandidateHighestQualification.from(personalDetails)
+        )
       } yield {
 
-        if (ApplicationValidator(gd, ad, sl, availableRegions).validate) {
+        if (ApplicationValidator(personalDetails, assistanceDetails, schemePreferences, availableRegions).validate) {
           appRepository.submit(applicationId).flatMap { _ =>
-            emailClient.sendApplicationSubmittedConfirmation(cd.email, gd.preferredName).flatMap { _ =>
-              auditService.logEvent("ApplicationSubmitted")
-              Future.successful(Ok)
+            val assessmentCentreIndicator = assessmentCentreIndicatorRepo.calculateIndicator(Some(contactDetails.postCode))
+            auditService.logEvent("ApplicationSubmitted")
+            appRepository.updateAssessmentCentreIndicator(applicationId, assessmentCentreIndicator).flatMap { _ =>
+              auditService.logEvent("AssessmentCentreIndicatorSet")
+              emailClient.sendApplicationSubmittedConfirmation(contactDetails.email, personalDetails.preferredName).map { _ =>
+                Ok
+              }
             }
           }
         } else {

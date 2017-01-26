@@ -25,10 +25,10 @@ case class PersonalDetails(
                             lastName: String,
                             preferredName: String,
                             dateOfBirth: LocalDate,
-                            aLevel: Boolean,
-                            stemLevel: Boolean,
-                            civilServant: Boolean,
-                            department: Option[String]
+                            aLevel: Boolean = false,
+                            stemLevel: Boolean = false,
+                            civilServant: Boolean = false,
+                            department: Option[String] = None
                           ) {
   require((civilServant && department.isDefined) || (!civilServant && department.isEmpty))
 }
