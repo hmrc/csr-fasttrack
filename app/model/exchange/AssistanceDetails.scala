@@ -17,6 +17,7 @@
 package model.exchange
 
 import play.api.libs.json.Json
+import reactivemongo.bson.Macros
 
 import scala.language.implicitConversions
 
@@ -26,29 +27,10 @@ case class AssistanceDetails(hasDisability: String,
                              needsSupportForOnlineAssessment: Boolean,
                              needsSupportForOnlineAssessmentDescription: Option[String],
                              needsSupportAtVenue: Boolean,
-                             needsSupportAtVenueDescription: Option[String],
-                             // TODO: Change adjustments
-                             typeOfAdjustments: Option[List[String]],
-                             confirmedAdjustments: Option[Boolean],
-                             numericalTimeAdjustmentPercentage: Option[Int],
-                             verbalTimeAdjustmentPercentage: Option[Int])
+                             needsSupportAtVenueDescription: Option[String]
+                             )
 
 object AssistanceDetails {
   implicit val assistanceDetailsFormat = Json.format[AssistanceDetails]
-
-  implicit def fromPersisted(assistanceDetails: model.persisted.AssistanceDetails): AssistanceDetails = {
-    AssistanceDetails(
-      hasDisability = assistanceDetails.hasDisability,
-      hasDisabilityDescription = assistanceDetails.hasDisabilityDescription,
-      guaranteedInterview = assistanceDetails.guaranteedInterview,
-      needsSupportForOnlineAssessment = assistanceDetails.needsSupportForOnlineAssessment,
-      needsSupportForOnlineAssessmentDescription = assistanceDetails.needsSupportForOnlineAssessmentDescription,
-      needsSupportAtVenue = assistanceDetails.needsSupportAtVenue,
-      needsSupportAtVenueDescription = assistanceDetails.needsSupportAtVenueDescription,
-      typeOfAdjustments = assistanceDetails.typeOfAdjustments,
-      confirmedAdjustments = assistanceDetails.confirmedAdjustments,
-      numericalTimeAdjustmentPercentage = assistanceDetails.numericalTimeAdjustmentPercentage,
-      verbalTimeAdjustmentPercentage = assistanceDetails.verbalTimeAdjustmentPercentage
-    )
-  }
+  implicit val assistanceDetailsMacro = Macros.handler[AssistanceDetails]
 }

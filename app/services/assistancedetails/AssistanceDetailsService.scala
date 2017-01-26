@@ -19,7 +19,6 @@ package services.assistancedetails
 import model.exchange.AssistanceDetails
 import repositories._
 import repositories.application.AssistanceDetailsRepository
-import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
@@ -35,6 +34,6 @@ trait AssistanceDetailsService {
   }
 
   def find(applicationId: String, userId: String): Future[AssistanceDetails] = {
-    adRepository.find(applicationId).map { ad => ad}
+    adRepository.find(applicationId)
   }
 }

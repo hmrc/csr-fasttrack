@@ -34,5 +34,4 @@ class LocationSchemeRepositorySpec extends IntegrationSpec with MockitoSugar wit
       locationSchemes.map(_.schemes.forall(schemeNames.contains(_)))
     }
   }
-
 }

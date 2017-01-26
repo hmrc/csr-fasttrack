@@ -15,14 +15,13 @@
  */
 
 import factories.DateTimeFactory
-import model.CandidateScoresCommands.{CandidateScoreFeedback, CandidateScores, CandidateScoresAndFeedback}
+import model.CandidateScoresCommands.{ CandidateScoreFeedback, CandidateScores, CandidateScoresAndFeedback }
 import model.Commands._
 import model.EvaluationResults._
 import model.FlagCandidatePersistedObject.FlagCandidate
 import model.PassmarkPersistedObjects._
-import model.PersistedObjects.{ContactDetails, PersistedAnswer, PersonalDetails, _}
-import model.persisted.AssistanceDetails
-import org.joda.time.{DateTime, DateTimeZone, LocalDate}
+import model.PersistedObjects.{ ContactDetails, PersistedAnswer, _ }
+import org.joda.time.{ DateTime, DateTimeZone, LocalDate }
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.indexes.IndexType.Ascending
 import reactivemongo.bson._
@@ -32,7 +31,7 @@ import services.reporting.SocioEconomicScoreCalculatorTrait
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
-import scala.concurrent.{Await, Future}
+import scala.concurrent.{ Await, Future }
 import scala.language.postfixOps
 
 package object repositories {
@@ -94,30 +93,6 @@ package object repositories {
     def read(time: BSONString) = LocalDate.parse(time.value)
 
     def write(jdtime: LocalDate) = BSONString(jdtime.toString("yyyy-MM-dd"))
-  }
-
-  /** Implicit transformation for the PersistedPersonalDetails **/
-  implicit object BSONPersistedPersonalDetailsHandler extends BSONHandler[BSONDocument, PersonalDetails] {
-    def read(doc: BSONDocument): PersonalDetails = {
-      val root = doc.getAs[BSONDocument]("personal-details").get
-      val firstName = root.getAs[String]("firstName").get
-      val lastName = root.getAs[String]("lastName").get
-      val preferredName = root.getAs[String]("preferredName").get
-      val dateOfBirth = doc.getAs[LocalDate]("dateOfBirth").get
-      val aLevel = doc.getAs[Boolean]("aLevel").get
-      val stemLevel = doc.getAs[Boolean]("stemLevel").get
-
-      PersonalDetails(firstName, lastName, preferredName, dateOfBirth, aLevel, stemLevel)
-    }
-
-    def write(psDoc: PersonalDetails) = BSONDocument(
-      "firstName" -> psDoc.firstName,
-      "lastName" -> psDoc.lastName,
-      "preferredName" -> psDoc.preferredName,
-      "dateOfBirth" -> psDoc.dateOfBirth,
-      "aLevel" -> psDoc.aLevel,
-      "stemLevel" -> psDoc.stemLevel
-    )
   }
 
   /** Implicit transformation for the Candidate **/

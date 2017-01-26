@@ -56,7 +56,8 @@ class PersonalDetailsControllerSpec extends UnitWithAppSpec {
                        |  "postCode":"H0H 0H0",
                        |  "phone":"071234567",
                        |  "aLevel": true,
-                       |  "stemLevel": false
+                       |  "stemLevel": false,
+                       |  "civilServant": false
                        |}
         """.stripMargin
 
@@ -67,11 +68,11 @@ class PersonalDetailsControllerSpec extends UnitWithAppSpec {
         updatePersonalDetailsRequest(userId, applicationId)(request)
       )
 
-      status(result) must be(201)
-    }
+      status(result) mustBe CREATED
 
     "find and return personal details" in new TestFixture {
 
+      contentAsJson(savedResult) mustBe Json.parse(request)
     }
 
     "return a system error on invalid json" in new TestFixture {
@@ -94,7 +95,21 @@ class PersonalDetailsControllerSpec extends UnitWithAppSpec {
       when(mockPersonalDetailsService.update(any[String], any[String], any[PersonalDetails], any[ContactDetails])
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(CannotUpdateContactDetails("appId")))
 
-      status(result) must be(400)
+      status(result) mustBe BAD_REQUEST
+    }
+
+    "throw an exception if the department is missing when the candidate is a civil servant" in {
+      intercept[IllegalArgumentException] {
+        PersonalDetails("firstName", "lastName", "preferredName", new LocalDate("1990-11-25"),
+          aLevel = false, stemLevel = false, civilServant = true, department = None)
+      }
+    }
+
+    "throw an exception if the department is supplied when the candidate is not a civil servant" in {
+      intercept[IllegalArgumentException] {
+        PersonalDetails("firstName", "lastName", "preferredName", new LocalDate("1990-11-25"),
+          aLevel = false, stemLevel = false, civilServant = false, department = Some("dept"))
+      }
     }
   }
 

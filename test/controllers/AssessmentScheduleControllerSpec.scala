@@ -19,15 +19,16 @@ package controllers
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 
-import common.Constants.{ Yes, No }
+import common.Constants.{ No, Yes }
 import config._
 import connectors.EmailClient
 import model.AssessmentScheduleCommands.Implicits._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.Exceptions.NotFoundException
-import model.PersistedObjects.{ ContactDetails, PersonalDetails }
+import model.PersistedObjects.ContactDetails
 import model.commands.OnlineTestProgressResponse
+import model.persisted.PersonalDetails
 import org.joda.time.{ DateTime, LocalDate }
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
@@ -874,10 +875,12 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
 
     def personalDetailsRepository = {
       when(mockPersonalDetailsRepository.find(eqTo("appid-1"))).thenReturn(
-        Future.successful(PersonalDetails("firstName1", "lastName1", "preferredName1", LocalDate.parse("2016-05-26"), true, true))
+        Future.successful(PersonalDetails("firstName1", "lastName1", "preferredName1", LocalDate.parse("2016-05-26"),
+          aLevel = true, stemLevel = true, civilServant = false, department = None))
       )
       when(mockPersonalDetailsRepository.find(eqTo("appid-2"))).thenReturn(
-        Future.successful(PersonalDetails("firstName2", "lastName2", "preferredName2", LocalDate.parse("2016-05-26"), true, true))
+        Future.successful(PersonalDetails("firstName2", "lastName2", "preferredName2", LocalDate.parse("2016-05-26"),
+          aLevel = true, stemLevel = true, civilServant = false, department = None))
       )
     }
   }
