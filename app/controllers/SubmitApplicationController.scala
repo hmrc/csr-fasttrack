@@ -32,12 +32,13 @@ import scala.concurrent.Future
 object SubmitApplicationController extends SubmitApplicationController {
   override val adService: AssistanceDetailsService = AssistanceDetailsService
   override val pdRepository: PersonalDetailsRepository = personalDetailsRepository
-  override val cdRepository = contactDetailsRepository
+  override val cdRepository: ContactDetailsMongoRepository = contactDetailsRepository
   override val frameworkPrefRepository: FrameworkPreferenceMongoRepository = frameworkPreferenceRepository
   override val frameworkRegionsRepository: FrameworkRepository = frameworkRepository
   override val appRepository: GeneralApplicationRepository = applicationRepository
   override val emailClient = CSREmailClient
   override val auditService = AuditService
+  override val assessmentCentreIndicatorRepo = AssessmentCentreIndicatorCSVRepository
 }
 
 trait SubmitApplicationController extends BaseController {
@@ -49,6 +50,7 @@ trait SubmitApplicationController extends BaseController {
   val appRepository: GeneralApplicationRepository
   val emailClient: EmailClient
   val auditService: AuditService
+  val assessmentCentreIndicatorRepo: AssessmentCentreIndicatorRepository
 
   def submitApplication(userId: String, applicationId: String) = Action.async { implicit request =>
     val generalDetailsFuture = pdRepository.find(applicationId)
@@ -66,10 +68,15 @@ trait SubmitApplicationController extends BaseController {
 
         if (ApplicationValidator(gd, ad, sl, availableRegions).validate) {
           appRepository.submit(applicationId).flatMap { _ =>
-            emailClient.sendApplicationSubmittedConfirmation(cd.email, gd.preferredName).flatMap { _ =>
-              auditService.logEvent("ApplicationSubmitted")
-              Future.successful(Ok)
+            val assessmentCentreIndicator = assessmentCentreIndicatorRepo.calculateIndicator(Some(cd.postCode))
+            auditService.logEvent("ApplicationSubmitted")
+            appRepository.updateAssessmentCentreIndicator(applicationId, assessmentCentreIndicator).flatMap { _ =>
+              auditService.logEvent("AssessmentCentreIndicatorSet")
+              emailClient.sendApplicationSubmittedConfirmation(cd.email, gd.preferredName).map { _ =>
+                Ok
+              }
             }
+
           }
         } else {
           Future.successful(BadRequest)

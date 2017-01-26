@@ -18,7 +18,9 @@ package controllers
 
 import config.TestFixtureBase
 import model.Exceptions.CannotUpdateContactDetails
-import model.PersistedObjects.{ ContactDetails, PersonalDetails }
+import model.PersistedObjects.ContactDetails
+import model.persisted.PersonalDetails
+import org.joda.time.LocalDate
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import play.api.libs.json.Json
@@ -70,9 +72,6 @@ class PersonalDetailsControllerSpec extends UnitWithAppSpec {
 
       status(result) mustBe CREATED
 
-    "find and return personal details" in new TestFixture {
-
-      contentAsJson(savedResult) mustBe Json.parse(request)
     }
 
     "return a system error on invalid json" in new TestFixture {

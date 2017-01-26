@@ -18,13 +18,11 @@ package controllers
 
 import model.Commands._
 import model.Exceptions.{ CannotUpdateContactDetails, CannotUpdateRecord, ContactDetailsNotFound, PersonalDetailsNotFound }
-import model.PersistedObjects.{ ContactDetails, PersonalDetails }
+import model.PersistedObjects.ContactDetails
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent }
 import services.application.PersonalDetailsService
 import model.persisted.PersonalDetails
-import repositories._
-import repositories.application.PersonalDetailsRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global

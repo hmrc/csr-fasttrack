@@ -71,6 +71,7 @@ class SubmitApplicationControllerSpec extends PlaySpec with Results {
       override val cdRepository: ContactDetailsRepository = ContactDetailsInMemoryRepository
       override val auditService: AuditService = mockAuditService
       override val emailClient: EmailClient = EmailClientStub
+      override val assessmentCentreIndicatorRepo: AssessmentCentreIndicatorRepository = AssessmentCentreIndicatorCSVRepository
     }
 
     def submitApplicationRequest(userId: String, applicationId: String) = {

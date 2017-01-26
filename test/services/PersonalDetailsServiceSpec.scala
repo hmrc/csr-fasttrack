@@ -17,7 +17,8 @@
 package services
 
 import model.Commands.{ Address, PhoneNumber, PostCode, UpdateGeneralDetails }
-import model.PersistedObjects.{ ContactDetails, PersonalDetails }
+import model.PersistedObjects.ContactDetails
+import model.persisted.PersonalDetails
 import org.joda.time.LocalDate
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
@@ -35,9 +36,11 @@ class PersonalDetailsServiceSpec extends PlaySpec with MockitoSugar with ScalaFu
   "Personal Details Service Spec" must {
 
     "return personal details" in new TestFixture {
-      val personalDetails = PersonalDetails("fname", "lname", "prefname", LocalDate.now, aLevel = true, stemLevel = true)
-      val contactDetails = ContactDetails(address, "QQ1 1QQ": PostCode, "test@test.com", Some("0123456789": PhoneNumber))
+      val personalDetails = PersonalDetails("fname", "lname", "prefname", LocalDate.now, aLevel = true, stemLevel = true, civilServant = false,
+        department = None
+      )
       val address = Address("line1", Some("line2"), Some("line3"), Some("line4"))
+      val contactDetails = ContactDetails(address, "QQ1 1QQ": PostCode, "test@test.com", Some("0123456789": PhoneNumber))
 
       when(mockPersonalDetailsRepo.find("appId")).thenReturn(Future.successful(personalDetails))
 
@@ -45,8 +48,8 @@ class PersonalDetailsServiceSpec extends PlaySpec with MockitoSugar with ScalaFu
 
       val result = personalDetailService.find("userId", "appId").futureValue
 
-      inside (result) match {
-        case UpdateGeneralDetails(fname, lname, prefname, email, dob, addr, postcode, phone, alevel, stemlevel) =>
+      inside (result) {
+        case UpdateGeneralDetails(fname, lname, prefname, email, dob, addr, postcode, phone, alevel, stemlevel, isCivilServant, dept) =>
           fname mustBe personalDetails.firstName
           lname mustBe personalDetails.lastName
           prefname mustBe personalDetails.preferredName
@@ -57,6 +60,8 @@ class PersonalDetailsServiceSpec extends PlaySpec with MockitoSugar with ScalaFu
           phone mustBe contactDetails.phone
           alevel mustBe personalDetails.aLevel
           stemlevel mustBe personalDetails.stemLevel
+          isCivilServant mustBe personalDetails.civilServant
+          dept mustBe personalDetails.department
       }
 
     }
@@ -74,7 +79,6 @@ class PersonalDetailsServiceSpec extends PlaySpec with MockitoSugar with ScalaFu
       override def appRepo: GeneralApplicationRepository = mockAppRepo
       override def personalDetailsRepo: PersonalDetailsRepository = mockPersonalDetailsRepo
       override def contactDetailsRepo: ContactDetailsRepository = mockContactDetailsRepo
-      override def assessmentCentreIndicatorRepo: AssessmentCentreIndicatorRepository = mockAssessmentCentreIndicatorRepo
       override def auditService: AuditService = mockAuditService
     }
   }

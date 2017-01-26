@@ -18,7 +18,7 @@ package services.application
 
 import model.Commands.UpdateGeneralDetails
 import model.PersistedObjects.ContactDetails
-import model.PersistedObjects.PersonalDetails
+import model.persisted.PersonalDetails
 import play.api.mvc.RequestHeader
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
@@ -32,14 +32,12 @@ trait PersonalDetailsService {
   def appRepo: GeneralApplicationRepository
   def personalDetailsRepo: PersonalDetailsRepository
   def contactDetailsRepo: ContactDetailsRepository
-  def assessmentCentreIndicatorRepo: AssessmentCentreIndicatorRepository
   def auditService: AuditService
 
   def update(userId: String, applicationId: String, personalDetails: PersonalDetails, contactDetails: ContactDetails)
     (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = for {
      _ <- personalDetailsRepo.update(applicationId, userId, personalDetails)
      _ <- contactDetailsRepo.update(userId, contactDetails)
-     _ <- appRepo.updateAssessmentCentreIndicator(applicationId, assessmentCentreIndicatorRepo.calculateIndicator(Some(contactDetails.postCode)))
   } yield {
     auditService.logEvent("PersonalDetailsSaved")
   }
@@ -51,7 +49,7 @@ trait PersonalDetailsService {
     UpdateGeneralDetails(
       pd.firstName, pd.lastName, pd.preferredName, cd.email, pd.dateOfBirth,
       cd.address, cd.postCode, cd.phone,
-      pd.aLevel, pd.stemLevel
+      pd.aLevel, pd.stemLevel, civilServant = pd.civilServant, pd.department
     )
   }
 }
@@ -60,6 +58,5 @@ object PersonalDetailsService extends PersonalDetailsService {
   val appRepo = applicationRepository
   val personalDetailsRepo = personalDetailsRepository
   val contactDetailsRepo = contactDetailsRepository
-  val assessmentCentreIndicatorRepo = AssessmentCentreIndicatorCSVRepository
   val auditService = AuditService
 }
