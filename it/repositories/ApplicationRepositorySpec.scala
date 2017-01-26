@@ -366,14 +366,14 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
   "manual assessment centre allocation report" should {
     "return all candidates that are in awaiting allocation state" in {
       val testData = new TestDataMongoRepository()
-      testData.createApplications(10,true).futureValue
+      testData.createApplications(10, onlyAwaitingAllocation = true).futureValue
 
       val result = applicationRepo.candidatesAwaitingAllocation(frameworkId).futureValue
       result must have size 10
     }
     "not return candidates that are initially awaiting allocation but subsequently withdrawn" in {
       val testData = new TestDataMongoRepository()
-      testData.createApplications(10,true).futureValue
+      testData.createApplications(10, onlyAwaitingAllocation = true).futureValue
 
       val result = applicationRepo.candidatesAwaitingAllocation(frameworkId).futureValue
       result.foreach{ c =>

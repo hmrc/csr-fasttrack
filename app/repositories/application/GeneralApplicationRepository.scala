@@ -830,7 +830,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       "personal-details.lastName" -> "1",
       "personal-details.preferredName" -> "1",
       "personal-details.dateOfBirth" -> "1",
-      "framework-preferences.firstLocation.location" -> "1",
+      "assessment-centre-indicator" -> "1",
       "assistance-details.typeOfAdjustments" -> "1",
       "assistance-details.needsSupportForOnlineAssessment" -> "1",
       "assistance-details.needsSupportAtVenue" -> "1"
@@ -845,9 +845,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         val lastName = personalDetails.getAs[String]("lastName").get
         val preferredName = personalDetails.getAs[String]("preferredName").get
         val dateOfBirth = personalDetails.getAs[LocalDate]("dateOfBirth").get
-        val frameworkPreferences = document.getAs[BSONDocument]("framework-preferences").get
-        val firstLocationDoc = frameworkPreferences.getAs[BSONDocument]("firstLocation").get
-        val firstLocation = firstLocationDoc.getAs[String]("location").get
+        val centreIndicator = document.getAs[AssessmentCentreIndicator]("assessment-centre-indicator").get
 
         val assistance = document.getAs[BSONDocument]("assistance-details")
         val typesOfAdjustments = assistance.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
@@ -855,7 +853,9 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         val adjustments = typesOfAdjustments.getOrElse(Nil)
         val finalTOA = if (adjustments.isEmpty) None else Some(adjustments.map(splitCamelCase).mkString("|"))
 
-        CandidateAwaitingAllocation(userId, firstName, lastName, preferredName, firstLocation, finalTOA, dateOfBirth)
+        CandidateAwaitingAllocation(userId, firstName, lastName, preferredName, centreIndicator.assessmentCentre,
+          finalTOA, dateOfBirth
+        )
       }
     }
   }
