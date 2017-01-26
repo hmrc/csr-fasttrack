@@ -49,16 +49,15 @@ trait AdjustmentsManagementService {
                             contactDetails: ContactDetails,
                             prevAdjustments: Option[Adjustments],
                             adjustments: Adjustments): Future[Unit] = {
-      val hasNewAdjustments = adjustments.typeOfAdjustments.exists(_.nonEmpty)
-      val hasPreviousAdjustments = prevAdjustments.exists(_.typeOfAdjustments.nonEmpty)
-      val sendEmail = hasNewAdjustments || hasPreviousAdjustments
+
+      val hasPreviousAdjustments = prevAdjustments.flatMap(_.adjustmentsConfirmed).contains(true)
 
       if(adjustments.typeOfAdjustments.exists(_.isEmpty)) {
         auditService.logEvent(s"Candidate ${candidate.userId} AdjustmentsRejected by $actionTriggeredBy")
       }
 
-      sendEmail match {
-        case true if hasPreviousAdjustments =>
+      hasPreviousAdjustments match {
+        case true =>
           auditService.logEvent(s"Candidate ${candidate.userId} AdjustmentsUpdated by $actionTriggeredBy")
           emailClient.sendAdjustmentsUpdateConfirmation(
             contactDetails.email,
@@ -66,7 +65,7 @@ trait AdjustmentsManagementService {
             onlineTestsAdjustmentsString("Online tests:", adjustments.onlineTests),
             assessmentCenterAdjustmentsString("Assessment center:", adjustments)
           )
-        case true =>
+        case false =>
           auditService.logEvent(s"Candidate ${candidate.userId} AdjustmentsConfirmed by $actionTriggeredBy")
           emailClient.sendAdjustmentsConfirmation(
             contactDetails.email,
@@ -74,7 +73,6 @@ trait AdjustmentsManagementService {
             onlineTestsAdjustmentsString("Online tests:", adjustments.onlineTests),
             assessmentCenterAdjustmentsString("Assessment center:", adjustments)
           )
-        case _ => Future.successful(())
       }
     }
 
