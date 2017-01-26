@@ -243,7 +243,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
         BSONDocument("assistance-details.needsSupportForOnlineAssessment" -> false),
         BSONDocument("$and" -> BSONArray(
           BSONDocument("assistance-details.needsSupportForOnlineAssessment" -> true),
-          BSONDocument("assistance-details.confirmedAdjustments" -> true)
+          BSONDocument("assistance-details.adjustmentsConfirmed" -> true)
         ))
       ))
     ))

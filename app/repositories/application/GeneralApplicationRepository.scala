@@ -789,7 +789,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       "assistance-details.typeOfAdjustments" -> "1",
       "assistance-details.needsSupportForOnlineAssessment" -> "1",
       "assistance-details.needsSupportAtVenue" -> "1",
-      "assistance-details.confirmedAdjustments" -> "1"
+      "assistance-details.adjustmentsConfirmed" -> "1"
     )
 
     reportQueryWithProjections[BSONDocument](query, projection).map { list =>
@@ -921,7 +921,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   def extract(key: String)(root: Option[BSONDocument]) = root.flatMap(_.getAs[String](key))
 
   private def getAdjustmentsConfirmed(assistance: Option[BSONDocument]): Option[String] = {
-    assistance.flatMap(_.getAs[Boolean]("confirmedAdjustments")).getOrElse(false) match {
+    assistance.flatMap(_.getAs[Boolean]("adjustmentsConfirmed")).getOrElse(false) match {
       case false => Some("Unconfirmed")
       case true => Some("Confirmed")
     }
