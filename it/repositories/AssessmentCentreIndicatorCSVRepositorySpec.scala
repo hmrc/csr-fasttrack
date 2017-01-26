@@ -12,36 +12,32 @@ class AssessmentCentreIndicatorCSVRepositorySpec extends UnitWithAppSpec with Sh
   }
 
   "calculateFsacIndicator" should {
-    "return no indicator when in UK but no postcode" in {
-      val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(None, outsideUk = false)
-      result mustBe None
-    }
-    "return default indicator when outside UK and no postcode" in {
-      val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(None, outsideUk = true)
+    "return default indicator when no postcode" in {
+      val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(None)
       result mustBe Some(AssessmentCentreIndicatorCSVRepository.DefaultIndicator)
     }
-    "return default indicator when in UK and no postcode match is found" in {
-      val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some("BOGUS3"), outsideUk = false)
+    "return default indicator when no postcode match is found" in {
+      val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some("BOGUS3"))
       result mustBe Some(AssessmentCentreIndicatorCSVRepository.DefaultIndicator)
     }
-    "return default indicator when in UK for an empty postcode " in {
-      val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some(""), outsideUk = false)
+    "return default indicator for an empty postcode " in {
+      val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some(""))
       result mustBe Some(AssessmentCentreIndicatorCSVRepository.DefaultIndicator)
     }
     "ignore postcode if outside UK and return the default indicator" in {
-      val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some("OX1 4DB"), outsideUk = true)
+      val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some("OX1 4DB"))
       result mustBe Some(AssessmentCentreIndicatorCSVRepository.DefaultIndicator)
     }
     "return London for Oxford postcode" in {
-      val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some("OX1 4DB"), outsideUk = false)
+      val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some("OX1 4DB"))
       result mustBe Some("London")
     }
     "return Newcastle for Edinburgh postcode" in {
-      val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some("EH1 3EG"), outsideUk = false)
+      val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some("EH1 3EG"))
       result mustBe Some("Newcastle")
     }
     "return London even when postcode is lowercase" in {
-      val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some("ec1v 3eg"), outsideUk = false)
+      val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some("ec1v 3eg"))
       result mustBe Some("London")
     }
   }
