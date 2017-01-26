@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package services
+package model
 
-import org.joda.time.{ DateTime, DateTimeZone }
-import play.api.mvc.RequestHeader
-import testkit.{ FutureHelper, UnitSpec }
-import uk.gov.hmrc.play.http.HeaderCarrier
+import play.api.libs.json.Json
+import reactivemongo.bson.{ BSONDocument, BSONHandler, Macros }
 
-/**
-  * Common base class for all service tests
-  */
-class BaseServiceSpec extends UnitSpec with FutureHelper {
-  implicit val now: DateTime = DateTime.now().withZone(DateTimeZone.UTC)
-  implicit val hc = new HeaderCarrier()
-  implicit val rh = mock[RequestHeader]
+final case class AssessmentCentreIndicator(area: String, assessmentCentre: String)
+
+object AssessmentCentreIndicator {
+  implicit val formats = Json.format[AssessmentCentreIndicator]
+  implicit val bsonHandler: BSONHandler[BSONDocument, AssessmentCentreIndicator] = Macros.handler[AssessmentCentreIndicator]
+
 }

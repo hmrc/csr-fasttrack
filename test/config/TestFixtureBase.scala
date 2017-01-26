@@ -16,18 +16,20 @@
 
 package config
 
-import common.Constants.{ Yes, No }
+import common.Constants.{ No, Yes }
 import org.scalatest.mock.MockitoSugar
+import play.api.Play
 import services.AuditService
 
 import scala.util.Random
 
 abstract class TestFixtureBase extends MockitoSugar {
-  val mockAuditService = mock[AuditService]
+  val mockAuditService: AuditService = mock[AuditService]
+  val unit: Unit = ()
 
   def rnd(prefix: String) = s"$prefix-${Random.nextInt(100)}"
-  def maybe[A](value: => A) = if (Random.nextBoolean()) Some(value) else None
-  def maybeRnd(prefix: String) = maybe(rnd(prefix))
+  def maybe[A](value: => A): Option[A] = if (Random.nextBoolean()) Some(value) else None
+  def maybeRnd(prefix: String): Option[String] = maybe(rnd(prefix))
   def someRnd(prefix: String) = Some(rnd(prefix))
-  def yesNoRnd = if (Random.nextBoolean()) Some(Yes) else Some(No)
+  def yesNoRnd: Some[String] = if (Random.nextBoolean()) Some(Yes) else Some(No)
 }

@@ -130,7 +130,7 @@ trait AssessmentScheduleController extends BaseController {
     } yield {
       assessments.flatMap { assessment =>
         candidates.collect {
-          case candidate if candidate.applicationId == Some(assessment.applicationId) => (assessment, candidate)
+          case candidate if candidate.applicationId.contains(assessment.applicationId) => (assessment, candidate)
         }
       }
     }
@@ -156,10 +156,10 @@ trait AssessmentScheduleController extends BaseController {
   }
 
   private def findPreferredLocations(
-    preferredLocationsToAsssessmentCenterLocation: Map[String, String],
+    preferredLocationsToAssessmentCenterLocation: Map[String, String],
     assessmentCenterLocation: String
   ): List[String] = {
-    preferredLocationsToAsssessmentCenterLocation.filter {
+    preferredLocationsToAssessmentCenterLocation.filter {
       case (_, location) =>
         location == assessmentCenterLocation
     }.keys.toList

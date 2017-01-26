@@ -32,8 +32,9 @@ import scala.concurrent.Future
 
 trait DiagnosticReportingRepository {
 
-  def findByUserId(userId: String): Future[List[JsObject]]
+  def findByApplicationId(applicationId: String): Future[JsObject]
   def findAll(): Enumerator[JsValue]
+
 }
 
 class DiagnosticReportingMongoRepository(implicit mongo: () => DB)
@@ -45,21 +46,19 @@ class DiagnosticReportingMongoRepository(implicit mongo: () => DB)
     "personal-details" -> 0)  // these reports should not export personally identifiable data
 
   private val largeFields = Json.obj(
-    "progress-status-timestamp" -> 0, // this is quite a bit of data, that is not really used for queries as progress-status is easier
-    "testGroups.PHASE1.tests.reportLinkURL" -> 0,
-    "testGroups.PHASE1.tests.testUrl" -> 0
+    "progress-status-timestamp" -> 0 // this is quite a bit of data, that is not really used for queries as progress-status is easier
   )
 
-  override def findByUserId(userId: String): Future[List[JsObject]] = {
+  override def findByApplicationId(applicationId: String): Future[JsObject] = {
     val projection = defaultExclusions
 
-    val results = collection.find(Json.obj("userId" -> userId), projection)
+    val results = collection.find(Json.obj("applicationId" -> applicationId), projection)
       .cursor[JsObject](ReadPreference.primaryPreferred)
       .collect[List]()
 
     results.map { r =>
-      if (r.isEmpty) { throw ApplicationNotFound(userId) }
-      else { r }
+      if (r.isEmpty) { throw ApplicationNotFound(applicationId) }
+      else { r.head }
     }
   }
 
