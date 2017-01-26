@@ -54,7 +54,7 @@ class SearchForApplicantsControllerSpec extends UnitWithAppSpec {
     "return 413 REQUEST_ENTITY_TOO_LARGE if the max result set is exceeded" in new TestFixture {
       val candidates = List.fill(TestSearchForApplicantsController.MAX_RESULTS + 1)(
         Candidate(userId = "userId", applicationId = None, email = None, firstName = None, lastName = None,
-          dateOfBirth = None, address = None, postCode = None)
+          preferredName = None, dateOfBirth = None, address = None, postCode = None)
       )
 
       when(mockSearchForApplicantService.findByCriteria(any[SearchCandidate], any[Int])(any[HeaderCarrier]))
@@ -67,7 +67,8 @@ class SearchForApplicantsControllerSpec extends UnitWithAppSpec {
 
     "return 200 OK if the search is successful" in new TestFixture {
       val candidates = List(Candidate(userId = "userId", applicationId = Some("appId"), email = Some("super@man.com"),
-        firstName = Some("Clark"), lastName = Some("Kent"), dateOfBirth = None, address = None, postCode = Some("H0H 0H0")))
+        firstName = Some("Clark"), lastName = Some("Kent"), preferredName = Some("Kent"), dateOfBirth = None,
+        address = None, postCode = Some("H0H 0H0")))
 
       when(mockSearchForApplicantService.findByCriteria(any[SearchCandidate], any[Int])(any[HeaderCarrier]))
         .thenReturn(Future.successful(candidates))

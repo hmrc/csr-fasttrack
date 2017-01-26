@@ -44,7 +44,7 @@ class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(impl
   def tryFind(applicationId: String): Future[Option[CandidateScoresAndFeedback]] = {
     val query = BSONDocument("applicationId" -> applicationId)
 
-    collection.find(query).one[BSONDocument].map { _.map(candidateScoresAndFeedback.read) }
+    collection.find(query).one[CandidateScoresAndFeedback]
   }
 
   def allScores: Future[Map[String, CandidateScoresAndFeedback]] = {
