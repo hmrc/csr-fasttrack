@@ -66,7 +66,10 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
       "personal-details" -> persistedPersonalDetails
     ))
 
-    collection.update(query, personalDetailsBSON, upsert = false) map { _ => () }
+    val validator = singleUpdateValidator(applicationId, actionDesc = "updating personal details",
+      PersonalDetailsNotFound(applicationId))
+
+    collection.update(query, personalDetailsBSON, upsert = false) map validator
   }
 
   def update(applicationId: String, userId: String, personalDetails: PersonalDetails,

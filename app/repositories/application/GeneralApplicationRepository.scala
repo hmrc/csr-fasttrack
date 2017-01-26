@@ -120,6 +120,10 @@ trait GeneralApplicationRepository {
 
   def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit]
 
+  def updateAssessmentCentreIndicator(applicationId: String, indicator: AssessmentCentreIndicator): Future[Unit]
+
+  def findAssessmentCentreIndicator(appId: String): Future[Option[AssessmentCentreIndicator]]
+
   def getSchemes(applicationId: String): Future[List[Scheme]]
 
   def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit]
@@ -1137,6 +1141,22 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         document.getAs[List[String]]("scheme-locations").get
       case _ => throw LocationPreferencesNotFound(applicationId)
     }
+  }
+
+  override def findAssessmentCentreIndicator(appId: String): Future[Option[AssessmentCentreIndicator]] ={
+    val query = BSONDocument("applicationId" -> appId)
+    val projection = BSONDocument("assessment-centre-indicator" -> true)
+
+    collection.find(query, projection).one[AssessmentCentreIndicator]
+  }
+
+  override def updateAssessmentCentreIndicator(appId: String, indicator: AssessmentCentreIndicator): Future[Unit] ={
+    val query = BSONDocument("applicationId" -> appId)
+    val update = BSONDocument("$set" -> BSONDocument(
+      "assessment-centre-indicator" -> indicator)
+    )
+
+    collection.update(query, update, upsert = false) map { _ => () }
   }
 
   def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit] = {
