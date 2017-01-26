@@ -165,5 +165,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   override def removeAdjustmentsComment(applicationId: String): Future[Unit] = ???
 
   override def findApplicationStatusDetails(applicationId: String): Future[ApplicationStatusDetails] = ???
+
+  override def find(applicationId: String): Future[Option[Candidate]] = ???
 }
 // scalastyle:on number.of.methods
