@@ -611,7 +611,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
             "needsSupportForOnlineAssessment" -> true,
             "needsSupportAtVenue" -> true,
             "typeOfAdjustments" -> BSONArray("time extension", "room alone"),
-            "confirmedAdjustments" -> true,
+            "adjustmentsConfirmed" -> true,
             "onlineTests" -> AdjustmentDetail(Some(9), Some(11)),
             "guaranteedInterview" -> false,
             "hasDisability" -> "No"
@@ -621,7 +621,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
             "needsSupportForOnlineAssessment" -> true,
             "needsSupportAtVenue" -> true,
             "typeOfAdjustments" -> BSONArray("room alone"),
-            "confirmedAdjustments" -> true,
+            "adjustmentsConfirmed" -> true,
             "guaranteedInterview" -> false,
             "hasDisability" -> "No"
           )
@@ -631,7 +631,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
           "needsSupportForOnlineAssessment" -> true,
           "needsSupportAtVenue" -> true,
           "typeOfAdjustments" -> BSONArray("time extension", "room alone"),
-          "confirmedAdjustments" -> false,
+          "adjustmentsConfirmed" -> false,
           "guaranteedInterview" -> false,
           "hasDisability" -> "No"
         )
