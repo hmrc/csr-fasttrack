@@ -43,6 +43,8 @@ object ProgressStatuses extends Enum {
 
   val OnlineTestInvitedProgress = EnumVal(ApplicationStatuses.OnlineTestInvited.name.toLowerCase, 110)
   val OnlineTestStartedProgress = EnumVal(ApplicationStatuses.OnlineTestStarted.name.toLowerCase, 120)
+  val OnlineTestFirstExpiryNotification = EnumVal("test_expiry_first_reminder", 121)
+  val OnlineTestSecondExpiryNotification = EnumVal("test_expiry_second_reminder", 122)
   val OnlineTestCompletedProgress = EnumVal(ApplicationStatuses.OnlineTestCompleted.name.toLowerCase, 130)
   val OnlineTestExpiredProgress = EnumVal(ApplicationStatuses.OnlineTestExpired.name.toLowerCase, 140)
 

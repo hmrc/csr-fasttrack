@@ -98,6 +98,18 @@ trait CSREmailClient extends EmailClient {
       Map("name" -> name)
     )
   }
+
+  override def sendExpiringReminder(template: String, to: String, name: String, expiryDate: DateTime)
+                                   (implicit hc: HeaderCarrier): Future[Unit] = {
+    sendEmail(
+      to,
+      template,
+      Map(
+        "name" -> name,
+        "expireDateTime" -> EmailDateFormatter.toExpiryTime(expiryDate)
+      )
+    )
+  }
 }
 
 trait EmailClient extends WSHttp {
@@ -111,6 +123,7 @@ trait EmailClient extends WSHttp {
     confirmByDate: LocalDate)(implicit hc: HeaderCarrier): Future[Unit]
   def sendAssessmentCentrePassed(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit]
   def sendAssessmentCentreFailed(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit]
+  def sendExpiringReminder(template: String, to: String, name: String, expiryDate: DateTime)(implicit hc: HeaderCarrier): Future[Unit]
 }
 
 object EmailDateFormatter {
