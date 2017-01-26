@@ -1152,7 +1152,9 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
   override def updateAssessmentCentreIndicator(appId: String, indicator: AssessmentCentreIndicator): Future[Unit] ={
     val query = BSONDocument("applicationId" -> appId)
-    val update = BSONDocument("assessment-centre-indicator" -> indicator)
+    val update = BSONDocument("$set" -> BSONDocument(
+      "assessment-centre-indicator" -> indicator)
+    )
 
     collection.update(query, update, upsert = false) map { _ => () }
   }

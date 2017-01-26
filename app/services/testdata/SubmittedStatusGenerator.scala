@@ -25,17 +25,21 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object SubmittedStatusGenerator extends SubmittedStatusGenerator {
   override val previousStatusGenerator = InProgressReviewStatusGenerator
   override val appRepository = applicationRepository
+  override val assessmentCentreIndicatorRepo = AssessmentCentreIndicatorCSVRepository
 }
 
 trait SubmittedStatusGenerator extends ConstructiveGenerator {
   val appRepository: GeneralApplicationRepository
+  val assessmentCentreIndicatorRepo: AssessmentCentreIndicatorRepository
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      submit <- appRepository.submit(candidateInPreviousStatus.applicationId.get)
+      assessmentCentreIndicator = assessmentCentreIndicatorRepo.calculateIndicator(candidateInPreviousStatus.contactDetails.map(_.postCode))
+      _ <- appRepository.updateAssessmentCentreIndicator(candidateInPreviousStatus.applicationId.get, assessmentCentreIndicator)
+      _ <- appRepository.submit(candidateInPreviousStatus.applicationId.get)
     } yield {
-      candidateInPreviousStatus
+      candidateInPreviousStatus.copy(assessmentCentreIndicator = Some(assessmentCentreIndicator))
     }
   }
 }
