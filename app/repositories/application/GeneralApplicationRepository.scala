@@ -347,7 +347,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
                                                        end: Int): Future[ApplicationForAssessmentAllocationResult] = {
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingAllocation),
-      BSONDocument("framework-preferences.firstLocation.location" -> BSONDocument("$in" -> locations))
+      BSONDocument("assessment-centre-indicator.assessmentCentre" -> BSONDocument("$in" -> locations))
     ))
 
     collection.runCommand(JSONCountCommand.Count(query)).flatMap { c =>
