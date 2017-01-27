@@ -26,16 +26,17 @@ import model.Schemes
 trait OnlineTestPassmarkRulesEngine {
 
   def evaluate(score: CandidateScoresWithPreferencesAndPassmarkSettings): Map[Scheme, Result]
-
 }
 
 object OnlineTestPassmarkRulesEngine extends OnlineTestPassmarkRulesEngine {
 
-  // TODO LT: Next to work on
-  def evaluate(score: CandidateScoresWithPreferencesAndPassmarkSettings): Map[Scheme, Result] = {
-    val schemes = score.schemes
+  // TODO LT: Next to work on START HERE
+  def evaluate(candidateData: CandidateScoresWithPreferencesAndPassmarkSettings): Map[Scheme, Result] = {
+    val schemes = candidateData.schemes
 
-    def evaluateAgainstScheme = evaluateScore(score) _
+//    def evaluateAgainstScheme = evaluateScore(score) _
+//    def evaluateAgainstScheme(scheme: Scheme) =
+//      evaluateScore(score) _
 
 //    val location1Scheme1Result = evaluateAgainstScheme(location1Scheme1)
 //    val location1Scheme2Result = location1Scheme2 map evaluateAgainstScheme
@@ -43,20 +44,26 @@ object OnlineTestPassmarkRulesEngine extends OnlineTestPassmarkRulesEngine {
 //    val location2Scheme2Result = location2Scheme2 map evaluateAgainstScheme
 //    val alternativeSchemeResult = alternativeScheme collect { case true => evaluateScoreForAllSchemes(score) }
 
-    Map()
+    val res = schemes.map{ scheme =>
+      val result = evaluateScore(candidateData, scheme.toString)
+      scheme -> result
+    }.toMap
+    res
   }
 
-  private def evaluateScore(candidateScores: CandidateScoresWithPreferencesAndPassmarkSettings)(schemeName: String) = {
+  private def evaluateScore(candidateScores: CandidateScoresWithPreferencesAndPassmarkSettings, schemeName: String) = {
+//  private def evaluateScore(candidateScores: CandidateScoresWithPreferencesAndPassmarkSettings)(schemeName: String) = {
     val passmark = candidateScores.passmarkSettings.schemes.find(_.schemeName == schemeName)
       .getOrElse(throw new IllegalStateException(s"schemeName=$schemeName is not set in Passmark settings"))
 
-    passmark.schemeThresholds match {
-      case threshold @ SchemeThresholds(_, _, _, _, Some(_)) =>
-        CombinationScoreProcessor.determineResult(candidateScores.scores, threshold)
-      case threshold @ SchemeThresholds(_, _, _, _, None) => IndividualScoreProcessor.determineResult(candidateScores.scores, threshold)
-    }
+//    passmark.schemeThresholds match {
+//      case threshold @ SchemeThresholds(_, _, _, _, Some(_)) =>
+//        CombinationScoreProcessor.determineResult(candidateScores.scores, threshold)
+//      case threshold @ SchemeThresholds(_, _, _, _, None) => IndividualScoreProcessor.determineResult(candidateScores.scores, threshold)
+//    }
+    IndividualScoreProcessor.determineResult(candidateScores.scores, passmark.schemeThresholds)
   }
-
+/*
   private def evaluateScoreForAllSchemes(score: CandidateScoresWithPreferencesAndPassmarkSettings) = {
     val evaluation = Schemes.AllSchemes.map { scheme =>
       evaluateScore(score)(scheme)
@@ -70,6 +77,7 @@ object OnlineTestPassmarkRulesEngine extends OnlineTestPassmarkRulesEngine {
       Red
     }
   }
+*/
 }
 
 trait ScoreProcessor {

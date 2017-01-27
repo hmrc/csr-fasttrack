@@ -37,9 +37,10 @@ object OnlineTestCommands {
   case class OnlineTestReportAvailability(reportId: Int, available: Boolean)
   case class OnlineTestReport(xml: Option[String])
 
+  // TODO IS: shall we rename this class - remove preferences
   case class CandidateScoresWithPreferencesAndPassmarkSettings(
     passmarkSettings: Settings, // pass and fail mark
-    schemes: List[Scheme], // preferences which scheme candidates like
+    schemes: List[Scheme], // preferences which scheme candidates like - THIS USED TO BE PREFERENCES
     scores: CandidateTestReport, // applicationId + scores
     applicationStatus: ApplicationStatuses.EnumVal
   )

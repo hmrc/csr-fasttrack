@@ -53,7 +53,7 @@ class EvaluateCandidateScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
       verify(serviceMock).evaluateCandidateScore(OnlineTestCompletedCandidateScore)
     }
 
-    "evaluate the score without changing the application status for ASSESSMENT_SCORES_ACCEPTED" in {
+    "evaluate the score without changing the application status for ASSESSMENT_SCORES_ACCEPTED" ignore {
       when(serviceMock.nextCandidateScoreReadyForEvaluation).thenReturn(
         Future.successful(Some(AssessmentScoresAcceptedCandidateScore))
       )
