@@ -23,7 +23,7 @@ import common.Constants.{ Yes, No }
 import org.joda.time.DateTime
 import play.api.Logger
 import repositories.application.AssistanceDetailsRepository
-import repositories.{ QuestionnaireRepository, ReportingRepository }
+import repositories.{ QuestionnaireRepository, DiversityReportRepository }
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -36,7 +36,7 @@ case class Totals(totalApplications: Int, haveDisability: Int)
 case object TimeoutMessage
 
 class LocationProcessor(val locationAndRegion: (String, String), val timeStamp: DateTime, val questionnaireRepository: QuestionnaireRepository,
-                        val assistanceDetailsRepository: AssistanceDetailsRepository, val reportingRepository: ReportingRepository,
+                        val assistanceDetailsRepository: AssistanceDetailsRepository, val reportingRepository: DiversityReportRepository,
                         reportSupervisor: ActorRef) extends Actor with LocationProcessorTrait {
 
   import config.MicroserviceAppConfig.diversityMonitoringJobConfig
@@ -92,7 +92,7 @@ trait LocationProcessorTrait {
   val timeStamp: DateTime
   val questionnaireRepository: QuestionnaireRepository
   val assistanceDetailsRepository: AssistanceDetailsRepository
-  val reportingRepository: ReportingRepository
+  val reportingRepository: DiversityReportRepository
 
   def findQuestionnaire(applicationId: String): Future[Map[String, String]] =
     questionnaireRepository.findQuestions(applicationId)
@@ -131,6 +131,6 @@ trait LocationProcessorTrait {
 
 object LocationProcessor {
   def props(locationAndRegion: (String, String), timeStamp: DateTime, questionnaireRepository: QuestionnaireRepository,
-    asRepository: AssistanceDetailsRepository, reportingRepository: ReportingRepository, reportSupervisor: ActorRef) =
+            asRepository: AssistanceDetailsRepository, reportingRepository: DiversityReportRepository, reportSupervisor: ActorRef) =
     Props(new LocationProcessor(locationAndRegion, timeStamp, questionnaireRepository, asRepository, reportingRepository, reportSupervisor))
 }

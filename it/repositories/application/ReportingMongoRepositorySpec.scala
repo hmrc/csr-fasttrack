@@ -18,24 +18,23 @@ package repositories.application
 
 import common.Constants.{ No, Yes }
 import factories.UUIDFactory
+import model.ApplicationStatuses._
 import model.Commands.Report
 import model.Exceptions.{ AdjustmentsCommentNotFound, LocationPreferencesNotFound, SchemePreferencesNotFound }
 import model._
-import model.ApplicationStatuses._
 import model.commands.ApplicationStatusDetails
 import org.joda.time.{ DateTime, DateTimeZone }
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
-import repositories.CollectionNames
-import repositories.BSONDateTimeHandler
+import repositories.{ BSONDateTimeHandler, CollectionNames }
 import services.GBTimeZoneService
 import testkit.MongoRepositorySpec
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import language.postfixOps
+import scala.language.postfixOps
 
-class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory {
+class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory {
 
   import ImplicitBSONHandlers._
 
