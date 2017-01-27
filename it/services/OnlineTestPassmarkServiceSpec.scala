@@ -21,11 +21,10 @@ import java.io.File
 import com.typesafe.config.{ Config, ConfigFactory }
 import connectors.PassMarkExchangeObjects.Settings
 import mocks.{ OnlineIntegrationTestInMemoryRepository, PassMarkSettingsInMemoryRepository }
-import model.ApplicationStatuses._
 import model.EvaluationResults._
-import model.OnlineTestCommands.CandidateScoresWithPreferencesAndPassmarkSettings
+import model.OnlineTestCommands.CandidateEvaluationData
 import model.PersistedObjects.CandidateTestReport
-import model.{ ApplicationStatuses, Preferences }
+import model.Preferences
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.ceedubs.ficus.readers.ValueReader
@@ -35,7 +34,7 @@ import org.scalatestplus.play.OneAppPerSuite
 import play.Logger
 import repositories.application.GeneralApplicationRepository
 import repositories.{ FrameworkPreferenceRepository, FrameworkRepository, PassMarkSettingsRepository, TestReportRepository }
-import services.onlinetesting.OnlineTestPassmarkService
+import services.onlinetesting.EvaluateOnlineTestService
 import services.passmarksettings.PassMarkSettingsService
 import testkit.IntegrationSpec
 
@@ -46,12 +45,12 @@ case class OnlineTestPassmarkServiceTest(preferences: Preferences,
 
 class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar with OneAppPerSuite {
 
-  lazy val service = new OnlineTestPassmarkService {
+  lazy val service = new EvaluateOnlineTestService {
 
     val fpRepository = mock[FrameworkPreferenceRepository]
     val testReportRepository = mock[TestReportRepository]
     val onlineTestRepository = OnlineIntegrationTestInMemoryRepository
-    val passMarkRulesEngine = OnlineTestPassmarkService.passMarkRulesEngine
+    val passMarkRulesEngine = EvaluateOnlineTestService.passMarkRulesEngine
     val pmsRepository: PassMarkSettingsRepository = PassMarkSettingsInMemoryRepository
     val passMarkSettingsService = new PassMarkSettingsService {
       override val fwRepository = mock[FrameworkRepository]
@@ -91,7 +90,7 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
             val expected = t.expected
             val alreadyEvaluated = t.previousEvaluation
 
-            val candidateScoreWithPassmark = CandidateScoresWithPreferencesAndPassmarkSettings(passmarkSettings,
+            val candidateScoreWithPassmark = CandidateEvaluationData(passmarkSettings,
               List(), t.scores)
 
             val actual = service.onlineTestRepository.inMemoryRepo
@@ -131,7 +130,7 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
     }
   }
 
-  def evaluate(appId: String, candidateScoreWithPassmark: CandidateScoresWithPreferencesAndPassmarkSettings,
+  def evaluate(appId: String, candidateScoreWithPassmark: CandidateEvaluationData,
                alreadyEvaluated: Option[ScoreEvaluationTestExpectation] = None) = {
 //    candidateScoreWithPassmark.applicationStatus match {
 //      case ApplicationStatuses.AssessmentScoresAccepted =>

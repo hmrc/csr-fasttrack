@@ -17,12 +17,12 @@
 package scheduler.onlinetesting
 
 import connectors.PassMarkExchangeObjects.Settings
-import model.OnlineTestCommands.CandidateScoresWithPreferencesAndPassmarkSettings
+import model.OnlineTestCommands.CandidateEvaluationData
 import model.PersistedObjects.CandidateTestReport
 import org.joda.time.DateTime
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
-import services.onlinetesting.OnlineTestPassmarkService
+import services.onlinetesting.EvaluateOnlineTestService
 import testkit.{ ShortTimeout, UnitWithAppSpec }
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -34,11 +34,11 @@ class EvaluateCandidateScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
     "skip evaluation when no candidate ready for evaluation found" in new TestFixture {
       when(passmarkServiceMock.nextCandidateReadyForEvaluation).thenReturn(Future.successful(None))
       evaluateCandidateScoreJob.tryExecute().futureValue
-      verify(passmarkServiceMock, never).evaluate(any[CandidateScoresWithPreferencesAndPassmarkSettings])
+      verify(passmarkServiceMock, never).evaluate(any[CandidateEvaluationData])
     }
 
     "evaluate the score successfully for ONLINE_TEST_COMPLETED" in new TestFixture {
-      val onlineTestCompletedCandidateScore = CandidateScoresWithPreferencesAndPassmarkSettings(
+      val onlineTestCompletedCandidateScore = CandidateEvaluationData(
         Settings(List(), "version", DateTime.now(), "user", "version1"), Nil, CandidateTestReport("appId", "type"))
       when(passmarkServiceMock.nextCandidateReadyForEvaluation).thenReturn(Future.successful(Some(onlineTestCompletedCandidateScore)))
       when(passmarkServiceMock.evaluate(onlineTestCompletedCandidateScore)).thenReturn(Future.successful(()))
@@ -48,7 +48,7 @@ class EvaluateCandidateScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
   }
 
   trait TestFixture {
-    val passmarkServiceMock = mock[OnlineTestPassmarkService]
+    val passmarkServiceMock = mock[EvaluateOnlineTestService]
     val evaluateCandidateScoreJob = new EvaluateCandidateScoreJob {
       val passmarkService = passmarkServiceMock
     }

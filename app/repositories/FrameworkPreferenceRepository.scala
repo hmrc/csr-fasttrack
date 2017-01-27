@@ -53,8 +53,7 @@ class FrameworkPreferenceMongoRepository(implicit mongo: () => DB)
     }
   }
 
-  // TODO LT: remove it or add more info why it's depr.
-  @deprecated
+  @deprecated("It needs to be removed. Framework-preference does not exist anymore", "27/01/2017")
   def tryGetPreferences(applicationId: String): Future[Option[Preferences]] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val projection = BSONDocument("schemes" -> 1, "_id" -> 0)

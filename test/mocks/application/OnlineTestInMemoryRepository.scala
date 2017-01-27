@@ -22,6 +22,7 @@ import model.EvaluationResults._
 import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser, OnlineTestProfile }
 import model.PersistedObjects._
 import model.Scheme.Scheme
+import model.persisted.SchemeEvaluationResult
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.OnlineTestRepository
 
@@ -76,8 +77,7 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
 
   override def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = ???
 
-  // TODO LT: fix it
-  override def savePassMarkScore(applicationId: String, version: String, p: Map[Scheme, Result],
+  override def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
     applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
     Future.successful(())
   }
@@ -89,7 +89,8 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
 
   def removeOnlineTestEvaluationAndReports(applicationId: String): Future[Unit] = ???
 
-  def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, version: String, p: Map[Scheme, Result]): Future[Unit] = ???
+  def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, version: String,
+                                                      evaluationResult: List[SchemeEvaluationResult]): Future[Unit] = ???
 
   def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = ???
 }

@@ -14,20 +14,14 @@
  * limitations under the License.
  */
 
-package controllers.testdata
+package model.persisted
 
-import play.api.mvc.Action
-import scheduler.onlinetesting.EvaluateCandidateScoreJob
-import uk.gov.hmrc.play.microservice.controller.BaseController
-import scala.concurrent.ExecutionContext.Implicits.global
+import model.EvaluationResults.Result
+import model.Scheme.Scheme
+import reactivemongo.bson.Macros
 
-object TestEvaluateCandidateScoreJobController extends TestEvaluateCandidateScoreJobController
+case class SchemeEvaluationResult(scheme: Scheme, result: Result)
 
-class TestEvaluateCandidateScoreJobController extends BaseController {
-
-  def execute = Action.async { implicit request =>
-    EvaluateCandidateScoreJob.tryExecute().map { _ =>
-      Ok("Evaluate Candidate Score Job started")
-    }
-  }
+object SchemeEvaluationResult {
+  implicit val schemeEvaluationResultHandler = Macros.handler[SchemeEvaluationResult]
 }

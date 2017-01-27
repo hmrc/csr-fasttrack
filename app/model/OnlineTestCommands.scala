@@ -18,9 +18,7 @@ package model
 
 import connectors.ExchangeObjects.ReportNorm
 import connectors.PassMarkExchangeObjects.Settings
-import model.ApplicationStatuses.enumFormat
 import model.PersistedObjects.CandidateTestReport
-import model.Adjustments._
 import model.Scheme.Scheme
 import org.joda.time.DateTime
 import play.api.libs.json.Json
@@ -37,12 +35,7 @@ object OnlineTestCommands {
   case class OnlineTestReportAvailability(reportId: Int, available: Boolean)
   case class OnlineTestReport(xml: Option[String])
 
-  // TODO IS: shall we rename this class - remove preferences
-  case class CandidateScoresWithPreferencesAndPassmarkSettings(
-    passmarkSettings: Settings, // pass and fail mark
-    schemes: List[Scheme], // preferences which scheme candidates like - THIS USED TO BE PREFERENCES
-    scores: CandidateTestReport // applicationId + scores
-  )
+  case class CandidateEvaluationData(passmarkSettings: Settings, schemes: List[Scheme], scores: CandidateTestReport)
 
   case class TimeAdjustmentsOnlineTestApplication(verbalTimeAdjustmentPercentage: Int, numericalTimeAdjustmentPercentage: Int)
   case class TestResult(status: String, norm: String,

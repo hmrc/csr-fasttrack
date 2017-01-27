@@ -22,6 +22,7 @@ import model.ApplicationStatuses
 import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser, OnlineTestProfile }
 import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
 import model.Scheme.Scheme
+import model.persisted.SchemeEvaluationResult
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.OnlineTestRepository
 
@@ -76,8 +77,7 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
 
   override def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = ???
 
-  // TODO LT: fix it
-  override def savePassMarkScore(applicationId: String, version: String, p: Map[Scheme, Result],
+  override def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
     applicationStatus: ApplicationStatuses.EnumVal
   ): Future[Unit] = {
     Future.successful(())

@@ -19,16 +19,16 @@ package scheduler.onlinetesting
 import config.ScheduledJobConfig
 import play.api.Logger
 import scheduler.clustering.SingleInstanceScheduledJob
-import services.onlinetesting.OnlineTestPassmarkService
+import services.onlinetesting.EvaluateOnlineTestService
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 object EvaluateCandidateScoreJob extends EvaluateCandidateScoreJob {
-  val passmarkService: OnlineTestPassmarkService = OnlineTestPassmarkService
+  val passmarkService: EvaluateOnlineTestService = EvaluateOnlineTestService
 }
 
 trait EvaluateCandidateScoreJob extends SingleInstanceScheduledJob with EvaluateCandidateScoreJobConfig {
-  val passmarkService: OnlineTestPassmarkService
+  val passmarkService: EvaluateOnlineTestService
 
   def tryExecute()(implicit ec: ExecutionContext): Future[Unit] = {
     passmarkService.nextCandidateReadyForEvaluation.flatMap {

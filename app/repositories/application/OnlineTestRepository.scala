@@ -29,6 +29,7 @@ import org.joda.time.{ DateTime, LocalDate }
 import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
 import model.Adjustments._
 import model.Scheme.Scheme
+import model.persisted.SchemeEvaluationResult
 import model.{ AdjustmentDetail, ApplicationStatuses, Commands }
 import org.joda.time.{ DateTime, LocalDate }
 import reactivemongo.api.DB
@@ -71,7 +72,7 @@ trait OnlineTestRepository {
 
   def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]]
 
-  def savePassMarkScore(applicationId: String, version: String, p: Map[Scheme, Result],
+  def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
     applicationStatus: ApplicationStatuses.EnumVal): Future[Unit]
 
   def removeCandidateAllocationStatus(applicationId: String): Future[Unit]
@@ -359,8 +360,8 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     })
   }
 
-  def savePassMarkScore(applicationId: String, version: String, p: Map[Scheme, Result],
-    applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
+  def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
+                        applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
 
     val progressStatus = applicationStatus match {
@@ -371,7 +372,10 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
 
     val passMarkEvaluation = BSONDocument("$set" ->
       BSONDocument(
-        "passmarkEvaluation" -> BSONDocument("passmarkVersion" -> version),
+        "passmarkEvaluation" -> BSONDocument(
+          "passmarkVersion" -> version,
+          "result" -> evaluationResult
+        ),
         "applicationStatus" -> applicationStatus,
         s"progress-status.$progressStatus" -> true
       ))

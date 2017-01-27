@@ -26,7 +26,7 @@ import services.passmarksettings.PassMarkSettingsService
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object OnlineTestPassmarkService extends OnlineTestPassmarkService {
+object EvaluateOnlineTestService extends EvaluateOnlineTestService {
   val testReportRepository = repositories.testReportRepository
   val onlineTestRepository = repositories.onlineTestRepository
   val applicationRepository = repositories.applicationRepository
@@ -34,14 +34,14 @@ object OnlineTestPassmarkService extends OnlineTestPassmarkService {
   val passMarkSettingsService = PassMarkSettingsService
 }
 
-trait OnlineTestPassmarkService extends ApplicationStatusCalculator {
+trait EvaluateOnlineTestService extends ApplicationStatusCalculator {
   val testReportRepository: TestReportRepository
   val onlineTestRepository: OnlineTestRepository
   val applicationRepository: GeneralApplicationRepository
   val passMarkRulesEngine: OnlineTestPassmarkRulesEngine
   val passMarkSettingsService: PassMarkSettingsService
 
-  def nextCandidateReadyForEvaluation: Future[Option[CandidateScoresWithPreferencesAndPassmarkSettings]] = {
+  def nextCandidateReadyForEvaluation: Future[Option[CandidateEvaluationData]] = {
     passMarkSettingsService.tryGetLatestVersion().flatMap {
       case None => Future.successful(None)
       case Some(passmark) =>
@@ -54,15 +54,15 @@ trait OnlineTestPassmarkService extends ApplicationStatusCalculator {
               schemes <- schemesFut
               reportOpt <- reportFut
             } yield {
-              reportOpt.map(report => CandidateScoresWithPreferencesAndPassmarkSettings(passmark, schemes, report))
+              reportOpt.map(report => CandidateEvaluationData(passmark, schemes, report))
             }
         }
     }
   }
 
-  def evaluate(score: CandidateScoresWithPreferencesAndPassmarkSettings): Future[Unit] = {
+  def evaluate(score: CandidateEvaluationData): Future[Unit] = {
     val evaluatedSchemes = passMarkRulesEngine.evaluate(score)
-    val applicationStatus = determineStatus(evaluatedSchemes.values.toList)
+    val applicationStatus = determineStatus(evaluatedSchemes.map(_.result))
 
     onlineTestRepository.savePassMarkScore(
       score.scores.applicationId,
