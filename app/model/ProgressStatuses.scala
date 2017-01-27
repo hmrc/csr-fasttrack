@@ -27,23 +27,35 @@ object ProgressStatuses extends Enum {
     def isAfter(that: EnumVal): Boolean = this.weight > that.weight
   }
 
+  val Registered = "registered"
+  val PersonalDetailsCompleted = "personal_details_completed"
+  val SchemeLocationCompleted = "scheme_locations_completed"
+  val SchemePreferencesCompleted = "schemes_preferences_completed"
+  val AssistanceDetailsCompleted = "assistance_details_completed"
+  val StartQuestionnaire = "start_questionnaire"
+  val DiversityQuestionCompleted = "diversity_questions_completed"
+  val EducationQuestionCompleted = "education_questions_completed"
+  val OccupationQuestionsCompleted = "occupation_questions_completed"
+  val ReviewCompleted = "review_completed"
+  val TestExpiryFirstReminder = "test_expiry_first_reminder"
+  val TestExpirySecondReminder = "test_expiry_second_reminder"
 
-  val RegisteredProgress = EnumVal("registered", 0)
-  val PersonalDetailsCompletedProgress = EnumVal("personal_details_completed", 10)
-  val SchemeLocationsCompletedProgress = EnumVal("scheme_locations_completed", 20)
-  val SchemesPreferencesCompletedProgress = EnumVal("schemes_preferences_completed", 30)
-  val AssistanceDetailsCompletedProgress = EnumVal("assistance_details_completed", 40)
-  val StartDiversityQuestionnaireProgress = EnumVal("start_questionnaire", 50)
-  val DiversityQuestionsCompletedProgress = EnumVal("diversity_questions_completed", 60)
-  val EducationQuestionsCompletedProgress = EnumVal("education_questions_completed", 70)
-  val OccupationQuestionsCompletedProgress = EnumVal("occupation_questions_completed", 80)
-  val ReviewCompletedProgress = EnumVal("review_completed", 90)
+  val RegisteredProgress = EnumVal(Registered, 0)
+  val PersonalDetailsCompletedProgress = EnumVal(PersonalDetailsCompleted, 10)
+  val SchemeLocationsCompletedProgress = EnumVal(SchemeLocationCompleted, 20)
+  val SchemesPreferencesCompletedProgress = EnumVal(SchemePreferencesCompleted, 30)
+  val AssistanceDetailsCompletedProgress = EnumVal(AssistanceDetailsCompleted, 40)
+  val StartDiversityQuestionnaireProgress = EnumVal(StartQuestionnaire, 50)
+  val DiversityQuestionsCompletedProgress = EnumVal(DiversityQuestionCompleted, 60)
+  val EducationQuestionsCompletedProgress = EnumVal(EducationQuestionCompleted, 70)
+  val OccupationQuestionsCompletedProgress = EnumVal(OccupationQuestionsCompleted, 80)
+  val ReviewCompletedProgress = EnumVal(ReviewCompleted, 90)
   val SubmittedProgress = EnumVal(ApplicationStatuses.Submitted.name.toLowerCase, 100)
 
   val OnlineTestInvitedProgress = EnumVal(ApplicationStatuses.OnlineTestInvited.name.toLowerCase, 110)
   val OnlineTestStartedProgress = EnumVal(ApplicationStatuses.OnlineTestStarted.name.toLowerCase, 120)
-  val OnlineTestFirstExpiryNotification = EnumVal("test_expiry_first_reminder", 121)
-  val OnlineTestSecondExpiryNotification = EnumVal("test_expiry_second_reminder", 122)
+  val OnlineTestFirstExpiryNotification = EnumVal(TestExpiryFirstReminder, 121)
+  val OnlineTestSecondExpiryNotification = EnumVal(TestExpirySecondReminder, 122)
   val OnlineTestCompletedProgress = EnumVal(ApplicationStatuses.OnlineTestCompleted.name.toLowerCase, 130)
   val OnlineTestExpiredProgress = EnumVal(ApplicationStatuses.OnlineTestExpired.name.toLowerCase, 140)
 
