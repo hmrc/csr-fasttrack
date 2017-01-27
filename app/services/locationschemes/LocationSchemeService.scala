@@ -51,7 +51,7 @@ trait LocationSchemeService {
             latitude <- latitudeOpt
             longitude <- longitudeOpt
           } yield {
-            geocodes.map{ gc => DistanceCalculator.calcKilometersBetween(latitude, longitude, gc.lat, gc.lng) }.min
+            geocodes.map{ gc => DistanceCalculator.calcMilesBetween(latitude, longitude, gc.lat, gc.lng) }.min
           }
 
           GeoLocationSchemeResult(locationId, locationName, distance, schemeChoices.filter(scheme => availableSchemes.contains(scheme.name)))
@@ -99,7 +99,7 @@ trait LocationSchemeService {
 
   private def sortLocations(locations: List[GeoLocationSchemeResult], sortByDistance: Boolean) = {
     sortByDistance match {
-      case true => locations.sortBy(r => r.distanceKm.getOrElse(0d))
+      case true => locations.sortBy(r => r.distanceMiles.getOrElse(0d))
       case false => locations.sortBy(_.locationName)
     }
   }
