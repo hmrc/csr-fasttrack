@@ -88,7 +88,6 @@ class OnlineTestExpiryServiceImpl(
     cdRepository.find(userId).map(_.email)
 
   private def audit(event: String, expiringTest: ExpiringOnlineTest, emailAddress: Option[String] = None): Unit = {
-    // Only log user ID (not email).
     Logger.info(s"$event for user ${expiringTest.userId}")
     auditService.logEventNoRequest(
       event,
@@ -97,7 +96,6 @@ class OnlineTestExpiryServiceImpl(
   }
 
   private def auditF(event: String, userId: String, emailAddress: Option[String] = None): Future[Unit] = {
-    // Only log user ID (not email).
     Logger.info(s"$event for user $userId")
     Future.successful(auditService.logEventNoRequest(
       event,

@@ -71,7 +71,6 @@ class OnlineTestFailureServiceImpl(
     cdRepository.find(userId).map(_.email)
 
   private def audit(event: String, failedTest: ApplicationForNotification, emailAddress: Option[String] = None): Unit = {
-    // Only log user ID (not email).
     Logger.info(s"$event for user ${failedTest.userId}")
     auditService.logEventNoRequest(
       event,
