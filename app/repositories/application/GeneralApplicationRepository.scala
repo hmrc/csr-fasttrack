@@ -1145,9 +1145,15 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
   override def findAssessmentCentreIndicator(appId: String): Future[Option[AssessmentCentreIndicator]] ={
     val query = BSONDocument("applicationId" -> appId)
-    val projection = BSONDocument("assessment-centre-indicator" -> true)
+    val projection = BSONDocument(
+      "_id" -> false,
+      "assessment-centre-indicator" -> true
+    )
 
-    collection.find(query, projection).one[AssessmentCentreIndicator]
+    collection.find(query, projection).one[BSONDocument] map {
+      case Some(doc) => doc.getAs[AssessmentCentreIndicator]("assessment-centre-indicator")
+      case _ => None
+    }
   }
 
   override def updateAssessmentCentreIndicator(appId: String, indicator: AssessmentCentreIndicator): Future[Unit] ={
