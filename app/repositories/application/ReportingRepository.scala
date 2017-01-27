@@ -19,26 +19,22 @@ package repositories.application
 import java.util.regex.Pattern
 
 import common.Constants.{ No, Yes }
-import model.ApplicationStatusOrder._
-import model.EvaluationResults._
 import common.StringUtils._
-import play.api.libs.json.{ Format, JsNumber, JsObject }
-import reactivemongo.api.{ DB, QueryOpts, ReadPreference }
-import repositories._
-
-import scala.concurrent.ExecutionContext.Implicits.global
-
-import model._
+import model.ApplicationStatusOrder._
 import model.Commands._
-import model.commands.{ ApplicationStatusDetails, OnlineTestProgressResponse }
-import org.joda.time.{ DateTime, LocalDate }
-import reactivemongo.api.DB
+import model.EvaluationResults._
+import model._
+import model.commands.OnlineTestProgressResponse
+import org.joda.time.LocalDate
+import play.api.libs.json.Format
+import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID, BSONRegex, _ }
-import repositories.{ CollectionNames, RandomSelection, ReactiveRepositoryHelpers }
+import repositories.{ CollectionNames, RandomSelection, ReactiveRepositoryHelpers, _ }
 import services.TimeZoneService
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 /** This class should contain those repo methods involving application collection that are related
