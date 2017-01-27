@@ -44,8 +44,7 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
   "Pass mark rules engine for candidate with only one scheme" should {
     val schemes = List(Business)
 
-    val scoresWithPassmark = CandidateScoresWithPreferencesAndPassmarkSettings(PassmarkSettings, schemes, FullTestReport,
-      ApplicationStatuses.OnlineTestCompleted)
+    val scoresWithPassmark = CandidateScoresWithPreferencesAndPassmarkSettings(PassmarkSettings, schemes, FullTestReport)
 
     "evaluate the scheme to GREEN when candidate achieves the pass mark for all tests" in {
       // These scores pass all 4 scheme thresholds for the business scheme
@@ -123,8 +122,7 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
 
   "Pass mark rules engine for candidates with all schemes" should {
     val schemes = List(Business, Commercial, DigitalAndTechnology, Finance, ProjectDelivery)
-    val scoresWithPassmark = CandidateScoresWithPreferencesAndPassmarkSettings(PassmarkSettings, schemes, FullTestReport,
-      ApplicationStatuses.OnlineTestCompleted)
+    val scoresWithPassmark = CandidateScoresWithPreferencesAndPassmarkSettings(PassmarkSettings, schemes, FullTestReport)
 
     "evaluate all the scheme to GREEN when a candidate achieves the pass mark for all tests" in {
       val candidateScores = FullTestReport.copy(
@@ -194,7 +192,7 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
       val passmarkWithoutBusinessScheme = CandidateScoresWithPreferencesAndPassmarkSettings(
         PassmarkSettings.copy(
           schemes = PassmarkSettings.schemes.filterNot(_.schemeName == Schemes.Business)
-        ), schemes, FullTestReport, ApplicationStatuses.OnlineTestCompleted
+        ), schemes, FullTestReport
       )
 
       intercept[IllegalStateException] {
@@ -205,8 +203,7 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
     "throw an exception when the candidate's report does not have tScore" in {
       val candidateScores = CandidateScoresWithPreferencesAndPassmarkSettings(
         PassmarkSettings,
-        schemes, FullTestReport.copy(competency = noTScore),
-        ApplicationStatuses.OnlineTestCompleted
+        schemes, FullTestReport.copy(competency = noTScore)
       )
 
       intercept[IllegalArgumentException] {
