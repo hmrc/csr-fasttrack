@@ -45,13 +45,13 @@ trait LocationSchemeService {
     } yield {
 
       val selectedLocations = locationsWithSchemes.collect {
-        case LocationSchemes(locationId, locationName, schemeLatitude, schemeLongitude, availableSchemes)
+        case LocationSchemes(locationId, locationName, geocodes, availableSchemes)
           if schemeChoices.map(_.name).intersect(availableSchemes).nonEmpty =>
           val distance = for {
             latitude <- latitudeOpt
             longitude <- longitudeOpt
           } yield {
-              DistanceCalculator.calcKilometersBetween(latitude, longitude, schemeLatitude, schemeLongitude)
+            geocodes.map{ gc => DistanceCalculator.calcKilometersBetween(latitude, longitude, gc.lat, gc.lng) }.min
           }
 
           GeoLocationSchemeResult(locationId, locationName, distance, schemeChoices.filter(scheme => availableSchemes.contains(scheme.name)))
