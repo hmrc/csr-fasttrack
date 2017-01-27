@@ -29,12 +29,12 @@ object ProgressStatuses extends Enum {
 
   val Registered = "registered"
   val PersonalDetailsCompleted = "personal_details_completed"
-  val SchemeLocationCompleted = "scheme_locations_completed"
-  val SchemePreferencesCompleted = "schemes_preferences_completed"
+  val SchemeLocationsCompleted = "scheme_locations_completed"
+  val SchemesPreferencesCompleted = "schemes_preferences_completed"
   val AssistanceDetailsCompleted = "assistance_details_completed"
   val StartQuestionnaire = "start_questionnaire"
-  val DiversityQuestionCompleted = "diversity_questions_completed"
-  val EducationQuestionCompleted = "education_questions_completed"
+  val DiversityQuestionsCompleted = "diversity_questions_completed"
+  val EducationQuestionsCompleted = "education_questions_completed"
   val OccupationQuestionsCompleted = "occupation_questions_completed"
   val ReviewCompleted = "review_completed"
   val TestExpiryFirstReminder = "test_expiry_first_reminder"
@@ -42,12 +42,12 @@ object ProgressStatuses extends Enum {
 
   val RegisteredProgress = EnumVal(Registered, 0)
   val PersonalDetailsCompletedProgress = EnumVal(PersonalDetailsCompleted, 10)
-  val SchemeLocationsCompletedProgress = EnumVal(SchemeLocationCompleted, 20)
-  val SchemesPreferencesCompletedProgress = EnumVal(SchemePreferencesCompleted, 30)
+  val SchemeLocationsCompletedProgress = EnumVal(SchemeLocationsCompleted, 20)
+  val SchemesPreferencesCompletedProgress = EnumVal(SchemesPreferencesCompleted, 30)
   val AssistanceDetailsCompletedProgress = EnumVal(AssistanceDetailsCompleted, 40)
   val StartDiversityQuestionnaireProgress = EnumVal(StartQuestionnaire, 50)
-  val DiversityQuestionsCompletedProgress = EnumVal(DiversityQuestionCompleted, 60)
-  val EducationQuestionsCompletedProgress = EnumVal(EducationQuestionCompleted, 70)
+  val DiversityQuestionsCompletedProgress = EnumVal(DiversityQuestionsCompleted, 60)
+  val EducationQuestionsCompletedProgress = EnumVal(EducationQuestionsCompleted, 70)
   val OccupationQuestionsCompletedProgress = EnumVal(OccupationQuestionsCompleted, 80)
   val ReviewCompletedProgress = EnumVal(ReviewCompleted, 90)
   val SubmittedProgress = EnumVal(ApplicationStatuses.Submitted.name.toLowerCase, 100)
