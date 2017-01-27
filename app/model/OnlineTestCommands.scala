@@ -38,10 +38,9 @@ object OnlineTestCommands {
   case class OnlineTestReport(xml: Option[String])
 
   case class CandidateScoresWithPreferencesAndPassmarkSettings(
-    passmarkSettings: Settings, // pass and fail mark
-    schemes: List[Scheme], // preferences which scheme candidates like
-    scores: CandidateTestReport, // applicationId + scores
-    applicationStatus: ApplicationStatuses.EnumVal
+    passmarkSettings: Settings,
+    schemes: List[Scheme],
+    scores: CandidateTestReport
   )
 
   case class TimeAdjustmentsOnlineTestApplication(verbalTimeAdjustmentPercentage: Int, numericalTimeAdjustmentPercentage: Int)

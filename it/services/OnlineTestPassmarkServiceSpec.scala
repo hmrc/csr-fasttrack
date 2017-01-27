@@ -49,15 +49,15 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
   lazy val service = new OnlineTestPassmarkService {
 
     val fpRepository = mock[FrameworkPreferenceRepository]
-    val trRepository = mock[TestReportRepository]
-    val oRepository = OnlineIntegrationTestInMemoryRepository
-    val passmarkRulesEngine = OnlineTestPassmarkService.passmarkRulesEngine
+    val testReportRepository = mock[TestReportRepository]
+    val onlineTestRepository = OnlineIntegrationTestInMemoryRepository
+    val passMarkRulesEngine = OnlineTestPassmarkService.passMarkRulesEngine
     val pmsRepository: PassMarkSettingsRepository = PassMarkSettingsInMemoryRepository
     val passMarkSettingsService = new PassMarkSettingsService {
       override val fwRepository = mock[FrameworkRepository]
       override val pmsRepository = PassMarkSettingsInMemoryRepository
     }
-    val appRepository = mock[GeneralApplicationRepository]
+    val applicationRepository = mock[GeneralApplicationRepository]
   }
 
   "Online Test Passmark Service" should {
@@ -92,9 +92,9 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
             val alreadyEvaluated = t.previousEvaluation
 
             val candidateScoreWithPassmark = CandidateScoresWithPreferencesAndPassmarkSettings(passmarkSettings,
-              List(), t.scores, alreadyEvaluated.map(_.applicationStatus).getOrElse(ApplicationStatuses.OnlineTestCompleted))
+              List(), t.scores)
 
-            val actual = service.oRepository.inMemoryRepo
+            val actual = service.onlineTestRepository.inMemoryRepo
             val appId = t.scores.applicationId
 
             evaluate(appId, candidateScoreWithPassmark, alreadyEvaluated)

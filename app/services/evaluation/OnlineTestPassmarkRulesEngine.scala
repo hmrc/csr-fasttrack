@@ -21,7 +21,7 @@ import model.EvaluationResults._
 import model.OnlineTestCommands.{ CandidateScoresWithPreferencesAndPassmarkSettings, TestResult }
 import model.PersistedObjects.CandidateTestReport
 import model.Scheme.Scheme
-import model.Schemes
+import model.{ Scheme, Schemes }
 
 trait OnlineTestPassmarkRulesEngine {
 
@@ -43,7 +43,7 @@ object OnlineTestPassmarkRulesEngine extends OnlineTestPassmarkRulesEngine {
 //    val location2Scheme2Result = location2Scheme2 map evaluateAgainstScheme
 //    val alternativeSchemeResult = alternativeScheme collect { case true => evaluateScoreForAllSchemes(score) }
 
-    Map()
+    Map(Scheme.Business -> Red)
   }
 
   private def evaluateScore(candidateScores: CandidateScoresWithPreferencesAndPassmarkSettings)(schemeName: String) = {

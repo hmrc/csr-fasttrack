@@ -339,32 +339,19 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = {
-    val query =
-      BSONDocument("$or" ->
-        BSONArray(
-          BSONDocument(
-            "$and" -> BSONArray(
-              BSONDocument("online-tests.xmlReportSaved" -> true),
-              BSONDocument("passmarkEvaluation.passmarkVersion" -> BSONDocument("$exists" -> false))
-            )
-          ),
-          BSONDocument(
-            "$and" -> BSONArray(
-              BSONDocument("passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)),
-              BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingOnlineTestReevaluation)
-            )
-          ),
-          BSONDocument(
-            "$and" -> BSONArray(
-              BSONDocument("passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)),
-              BSONDocument("applicationStatus" -> ApplicationStatuses.AssessmentScoresAccepted)
-            )
-          )
-        ))
+    val query = BSONDocument("$or" -> BSONArray(
+      BSONDocument(
+        "applicationStatus" -> ApplicationStatuses.OnlineTestCompleted,
+        "online-tests.xmlReportSaved" -> true,
+        "passmarkEvaluation.passmarkVersion" -> BSONDocument("$exists" -> false)),
+      BSONDocument(
+        "applicationStatus" -> ApplicationStatuses.AwaitingOnlineTestReevaluation,
+        "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion))
+    ))
 
     selectRandom(query).map(_.map { doc =>
-      val applicationId = doc.getAs[String]("applicationId").getOrElse("")
-      val userId = doc.getAs[String]("userId").getOrElse("")
+      val applicationId = doc.getAs[String]("applicationId").get
+      val userId = doc.getAs[String]("userId").get
       val applicationStatus = doc.getAs[ApplicationStatuses.EnumVal]("applicationStatus")
         .getOrElse(throw new IllegalStateException("applicationStatus must be defined"))
 
@@ -384,7 +371,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
 
     val passMarkEvaluation = BSONDocument("$set" ->
       BSONDocument(
-        "evaluation" -> BSONDocument("passmarkVersion" -> version),
+        "passmarkEvaluation" -> BSONDocument("passmarkVersion" -> version),
         "applicationStatus" -> applicationStatus,
         s"progress-status.$progressStatus" -> true
       ))

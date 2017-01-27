@@ -17,7 +17,6 @@
 package scheduler.onlinetesting
 
 import config.ScheduledJobConfig
-import model.ApplicationStatuses
 import play.api.Logger
 import scheduler.clustering.SingleInstanceScheduledJob
 import services.onlinetesting.OnlineTestPassmarkService
@@ -32,19 +31,13 @@ trait EvaluateCandidateScoreJob extends SingleInstanceScheduledJob with Evaluate
   val passmarkService: OnlineTestPassmarkService
 
   def tryExecute()(implicit ec: ExecutionContext): Future[Unit] = {
-    Logger.error("--->tryExecute")
-    passmarkService.nextCandidateScoreReadyForEvaluation.flatMap { applicationScoreOpt =>
-      applicationScoreOpt.map { applicationScore => applicationScore.applicationStatus match {
-        // TODO LT: remove it
-        case ApplicationStatuses.AssessmentScoresAccepted =>
-          ???
-        case _ =>
-          Logger.error("--->HERE")
-          passmarkService.evaluateCandidateScore(applicationScore)
-      }}.getOrElse {
-        Logger.error("--->EEEEMPTY")
-        Future.successful(())
-      }
+    passmarkService.nextCandidateReadyForEvaluation.flatMap {
+      case None =>
+        Logger.debug("All candidates are already evaluated")
+        Future.successful()
+      case Some(applicationScore) =>
+        Logger.debug(s"Online Test Evaluation started for appId=${applicationScore.scores.applicationId}")
+        passmarkService.evaluate(applicationScore)
     }
   }
 }
