@@ -38,6 +38,7 @@ object EvaluationResults {
     }
   }
 
+  // TODO IS: so this is no longer needed
   case class RuleCategoryResult(location1Scheme1: Result, location1Scheme2: Option[Result],
     location2Scheme1: Option[Result], location2Scheme2: Option[Result], alternativeScheme: Option[Result])
 

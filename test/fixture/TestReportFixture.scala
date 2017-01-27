@@ -19,5 +19,6 @@ package fixture
 import model.PersistedObjects.CandidateTestReport
 
 object TestReportFixture {
-  val FullTestReport = CandidateTestReport("appId", "MRA", None, None, None, None)
+  val FullTestReport = CandidateTestReport(applicationId = "appId", reportType = "MRA",
+    competency = None, numerical = None, verbal = None, situational = None)
 }

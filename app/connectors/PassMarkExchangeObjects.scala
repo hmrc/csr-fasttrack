@@ -45,6 +45,7 @@ object PassMarkExchangeObjects {
     setting: String
   )
 
+  // This is the scheme name and pass/fail thresholds for each of the test types
   case class Scheme(schemeName: String, schemeThresholds: SchemeThresholds)
 
   case class SchemeThresholds(
@@ -52,7 +53,7 @@ object PassMarkExchangeObjects {
     verbal: SchemeThreshold,
     numerical: SchemeThreshold,
     situational: SchemeThreshold,
-    combination: Option[SchemeThreshold]
+    combination: Option[SchemeThreshold] // TODO IS: this should be removed
   )
 
   case class SchemeThreshold(failThreshold: Double, passThreshold: Double)

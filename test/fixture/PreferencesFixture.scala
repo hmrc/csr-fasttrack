@@ -18,6 +18,7 @@ package fixture
 
 import model.{ Alternatives, LocationPreference, Preferences }
 
+// TODO IS: remove this class
 object PreferencesFixture {
   def preferences(location1Scheme1: String, location1Scheme2: Option[String] = None, location2Scheme1: Option[String] = None,
     location2Scheme2: Option[String] = None, alternativeScheme: Option[Boolean] = None) =

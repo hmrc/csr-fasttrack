@@ -22,7 +22,7 @@ import reactivemongo.bson.{ BSON, BSONHandler, BSONString }
 object Scheme extends Enumeration {
   type Scheme = Value
 
-  val Business, Commercial, DigitalAndTechnology, Finance, ProjectDelivery= Value
+  val Business, Commercial, DigitalAndTechnology, Finance, ProjectDelivery = Value
 
   implicit val schemeFormat = new Format[Scheme] {
     def reads(json: JsValue) = JsSuccess(Scheme.withName(json.as[String]))
