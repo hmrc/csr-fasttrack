@@ -18,10 +18,11 @@ package mocks
 
 import controllers.OnlineTestDetails
 import model.EvaluationResults._
-import model.ApplicationStatuses
-import model.OnlineTestCommands.{OnlineTestApplication, OnlineTestApplicationWithCubiksUser, OnlineTestProfile}
-import model.PersistedObjects.{ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation}
-import org.joda.time.{DateTime, LocalDate}
+import model.{ ApplicationStatuses, ReminderNotice }
+import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser, OnlineTestProfile }
+import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
+import model.persisted.NotificationExpiringOnlineTest
+import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.OnlineTestRepository
 
 import scala.collection.mutable
@@ -98,4 +99,8 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
   def removeOnlineTestEvaluationAndReports(applicationId: String): Future[Unit] = ???
 
   def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = ???
+
+  def nextTestForReminder(reminder: ReminderNotice): Future[Option[NotificationExpiringOnlineTest]] = ???
+
+  def addReminderNotificationStatus(userId: String, notificationStatus: String): Future[Unit] = ???
 }

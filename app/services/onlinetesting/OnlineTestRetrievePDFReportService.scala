@@ -89,7 +89,6 @@ trait OnlineTestRetrievePDFReportService {
   }
 
   private def audit(event: String, userId: String, emailAddress: Option[String] = None): Unit = {
-    // Only log user ID (not email).
     Logger.info(s"$event for user $userId")
 
     auditService.logEventNoRequest(
