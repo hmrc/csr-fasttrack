@@ -21,7 +21,7 @@ import akka.actor._
 import org.joda.time.DateTime
 import play.api.Logger
 import repositories.application.AssistanceDetailsRepository
-import repositories.{ QuestionnaireRepository, ReportingRepository }
+import repositories.{ QuestionnaireRepository, DiversityReportRepository }
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -30,7 +30,7 @@ case class LocationFinished(location: String)
 
 class DiversityReportSupervisor(val timestamp: DateTime, val locationAndRegions: List[(String, String)],
                                 val questionnaireRepository: QuestionnaireRepository, val adRepository: AssistanceDetailsRepository,
-                                val reportingRepository: ReportingRepository) extends Actor with DiversityReportSupervisorTrait {
+                                val reportingRepository: DiversityReportRepository) extends Actor with DiversityReportSupervisorTrait {
 
   var startTime: Long = 0
 
@@ -83,7 +83,7 @@ trait DiversityReportSupervisorTrait {
   val locationAndRegions: List[(String, String)]
   val questionnaireRepository: QuestionnaireRepository
   val adRepository: AssistanceDetailsRepository
-  val reportingRepository: ReportingRepository
+  val reportingRepository: DiversityReportRepository
 
   val locationWatcher = collection.mutable.Map.empty[String, Boolean]
 
@@ -101,6 +101,6 @@ trait DiversityReportSupervisorTrait {
 
 object DiversityReportSupervisor {
   def props(timestamp: DateTime, locations: List[(String, String)], questionnaireRepository: QuestionnaireRepository,
-            adRepository: AssistanceDetailsRepository, reportingRepository: ReportingRepository) =
+            adRepository: AssistanceDetailsRepository, reportingRepository: DiversityReportRepository) =
     Props(new DiversityReportSupervisor(timestamp, locations, questionnaireRepository, adRepository, reportingRepository))
 }

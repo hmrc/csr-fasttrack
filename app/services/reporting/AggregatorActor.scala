@@ -20,13 +20,13 @@ import akka.actor.{ Actor, ActorRef, Props }
 import model.PersistedObjects._
 import org.joda.time.DateTime
 import play.api.Logger
-import repositories.ReportingRepository
+import repositories.DiversityReportRepository
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class AggregatorActor(locationAndRegion: (String, String), timeStamp: DateTime,
-  reportRepository: ReportingRepository, locationProcessor: ActorRef) extends Actor {
+                      reportRepository: DiversityReportRepository, locationProcessor: ActorRef) extends Actor {
 
   var genderCalculation: Option[DiversityGender] = None
   var sexualityCalculation: Option[DiversitySexuality] = None
@@ -86,6 +86,6 @@ class AggregatorActor(locationAndRegion: (String, String), timeStamp: DateTime,
 }
 
 object AggregatorActor {
-  def props(locationAndRegion: (String, String), timeStamp: DateTime, reportRepository: ReportingRepository, locationProcessor: ActorRef) =
+  def props(locationAndRegion: (String, String), timeStamp: DateTime, reportRepository: DiversityReportRepository, locationProcessor: ActorRef) =
     Props(new AggregatorActor(locationAndRegion, timeStamp, reportRepository, locationProcessor))
 }

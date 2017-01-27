@@ -29,7 +29,7 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait ReportingRepository {
+trait DiversityReportRepository {
 
   def finalizeReportStatus(timeStamp: DateTime): Future[Unit]
 
@@ -39,9 +39,9 @@ trait ReportingRepository {
 
 }
 
-class ReportingMongoRepository(implicit mongo: () => DB)
+class DiversityReportMongoRepository(implicit mongo: () => DB)
   extends ReactiveRepository[DiversityReport, BSONObjectID](CollectionNames.DIVERSITY_REPORTING, mongo,
-    PersistedObjects.Implicits.diversityReportFormats, ReactiveMongoFormats.objectIdFormats) with ReportingRepository {
+    PersistedObjects.Implicits.diversityReportFormats, ReactiveMongoFormats.objectIdFormats) with DiversityReportRepository {
 
   override def update(location: String, timeStamp: DateTime, data: DiversityReportRow): Future[Unit] = {
 
