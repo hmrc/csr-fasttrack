@@ -17,9 +17,11 @@
 package services.onlinetesting
 
 import connectors.EmailClient
-import model.ApplicationStatuses
+import model.{ ApplicationStatuses, FirstReminder, ReminderNotice }
 import model.Commands.Address
 import model.PersistedObjects.{ ContactDetails, ExpiringOnlineTest }
+import model.persisted.NotificationExpiringOnlineTest
+import org.joda.time.DateTime
 import org.mockito.Matchers.{ any, eq => eqTo }
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -71,6 +73,41 @@ class OnlineTestExpiryServiceSpec extends PlaySpec with ScalaFutures with Mockit
       result mustBe an[Exception]
       verify(service).emailCandidate(expiringTest, emailAddress)
       verify(service, never).commitExpiredStatus(expiringTest)
+    }
+  }
+
+  "when notify a candidate with a reminder for an expiring test" should {
+    "do nothing when there are no notification to be sent" in new ProcessNextExpiredFixture {
+      when(otRepository.nextTestForReminder(any[ReminderNotice])).thenReturnAsync(None)
+
+      service.processNextTestForReminder(FirstReminder).futureValue mustBe (())
+
+      verify(otRepository).nextTestForReminder(FirstReminder)
+      verifyNoMoreInteractions(otRepository)
+      verifyZeroInteractions(emailClient, cdRepository, audit)
+    }
+
+    "process the next test for reminder" in new ProcessNextExpiredFixture {
+      when(otRepository.nextTestForReminder(any[ReminderNotice])).thenReturnAsync(Some(testForNotification))
+      when(cdRepository.find(any())).thenReturnAsync(contactDetails)
+      when(emailClient.sendExpiringReminder(any(), any(), any(), any())(any())).thenReturnAsync()
+      when(otRepository.addReminderNotificationStatus(any(), any())).thenReturnAsync()
+
+      service.processNextTestForReminder(FirstReminder).futureValue mustBe (())
+
+      verify(otRepository).nextTestForReminder(FirstReminder)
+      verify(cdRepository).find(userId)
+      verify(otRepository).addReminderNotificationStatus(userId, FirstReminder.notificationStatus)
+      verify(emailClient).sendExpiringReminder(
+        eqTo(FirstReminder.template),
+        eqTo(emailAddress),
+        eqTo(testForNotification.preferredName),
+        eqTo(testForNotification.expiryDate))(any())
+      verify(audit).logEventNoRequest(FirstReminder.event,
+        Map("userId" -> userId,
+          "email" -> emailAddress))
+
+      verifyNoMoreInteractions(otRepository, cdRepository, emailClient, audit)
     }
   }
 
@@ -138,8 +175,10 @@ class OnlineTestExpiryServiceSpec extends PlaySpec with ScalaFutures with Mockit
     val userId = "xyz"
     val preferredName = "Jon"
     val emailAddress = "jon@test.com"
+    val expirationDate = DateTime.now().plusHours((24 * 3) - 1)
     val contactDetails = ContactDetails(Address("line 1"), "HP27 9JU", emailAddress, None)
     val expiringTest = ExpiringOnlineTest(applicationId, userId, preferredName)
+    val testForNotification = NotificationExpiringOnlineTest(applicationId, userId, preferredName, expirationDate)
     def hc = HeaderCarrier()
 
     val ec = scala.concurrent.ExecutionContext.Implicits.global

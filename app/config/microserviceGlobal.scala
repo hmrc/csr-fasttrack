@@ -65,6 +65,18 @@ trait Scheduler extends RunningOfScheduledJobs {
       None
     }
 
+  private lazy val firstReminderOnlineTestJob: Option[ScheduledJob] =
+    if (firstReminderOnlineTestJobConfigValues.enabled) Some(FirstReminderExpiryTestsJob) else {
+      Logger.warn("first reminder online test job is disabled")
+      None
+    }
+
+  private lazy val secondReminderOnlineTestJob: Option[ScheduledJob] =
+    if (secondReminderOnlineTestJobConfigValues.enabled) Some(SecondReminderExpiryTestsJob) else {
+      Logger.warn("second reminder online test job is disabled")
+      None
+    }
+
   private lazy val retrieveResultsJob: Option[ScheduledJob] =
     if (retrieveResultsJobConfigValues.enabled) Some(RetrieveResultsJob) else {
       Logger.warn("Retrieve results job is disabled")
@@ -110,6 +122,8 @@ trait Scheduler extends RunningOfScheduledJobs {
   private[config] def sendInvitationJobConfigValues = sendInvitationJobConfig
   private[config] def expireOnlineTestJobConfigValues = expireOnlineTestJobConfig
   private[config] def failedOnlineTestJobConfigValues = failedOnlineTestJobConfig
+  private[config] def firstReminderOnlineTestJobConfigValues = firstReminderOnlineTestJobConfig
+  private[config] def secondReminderOnlineTestJobConfigValues = secondReminderOnlineTestJobConfig
   private[config] def retrieveResultsJobConfigValues = retrieveResultsJobConfig
   private[config] def retrieveOnlineTestPDFReportJobConfigValues = retrieveOnlineTestPDFReportJobConfig
   private[config] def evaluateCandidateScoreJobConfigValues = evaluateCandidateScoreJobConfig
@@ -120,7 +134,7 @@ trait Scheduler extends RunningOfScheduledJobs {
 
   lazy val scheduledJobs = List(sendInvitationJob, expireOnlineTestJob, failedOnlineTestJob, retrieveResultsJob, retrieveOnlineTestPDFReportJob,
     evaluateCandidateScoreJob, diversityMonitoringJob, confirmAttendanceReminderJob, evaluateAssessmentScoreJob,
-    notifyAssessmentCentrePassedOrFailedJob).flatten
+    notifyAssessmentCentrePassedOrFailedJob, firstReminderOnlineTestJob, secondReminderOnlineTestJob).flatten
 }
 
 object MicroserviceGlobal extends DefaultMicroserviceGlobal with Scheduler {

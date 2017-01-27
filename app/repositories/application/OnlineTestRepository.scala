@@ -24,7 +24,8 @@ import model.EvaluationResults._
 import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound, UnexpectedException }
 import model.OnlineTestCommands._
 import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
-import model.{ ApplicationStatuses, Commands, ProgressStatuses }
+import model.persisted.NotificationExpiringOnlineTest
+import model.{ ApplicationStatuses, Commands, ProgressStatuses, ReminderNotice }
 import org.joda.time.{ DateTime, LocalDate }
 import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
 import model.Adjustments._
@@ -81,11 +82,17 @@ trait OnlineTestRepository {
     expireDate: Option[LocalDate]): Future[Unit]
 
   def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation]
+
+  def nextTestForReminder(reminder: ReminderNotice): Future[Option[NotificationExpiringOnlineTest]]
+
+  def addReminderNotificationStatus(userId: String, notificationStatus: String): Future[Unit]
 }
 
 class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
   extends ReactiveRepository[OnlineTestDetails, BSONObjectID](CollectionNames.APPLICATION, mongo,
     Commands.Implicits.onlineTestDetailsFormat, ReactiveMongoFormats.objectIdFormats) with OnlineTestRepository with RandomSelection {
+
+  val dateTimeFactory: DateTimeFactory = DateTimeFactory
 
   private def applicationStatus(status: ApplicationStatuses.EnumVal): BSONDocument = {
     import model.ApplicationStatuses._
@@ -143,6 +150,15 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       case r if r.n > 1 => throw UnexpectedException(s"updateStatus somehow updated more than one record for userId:$userId")
       case _ =>
     }
+  }
+
+  override def addReminderNotificationStatus(userId: String, notificationStatus: String): Future[Unit] = {
+    val query = BSONDocument("userId" -> userId)
+    val updateStatus = BSONDocument("$set" -> BSONDocument(
+      s"progress-status.$notificationStatus" -> true
+    ))
+
+    collection.update(query, updateStatus, upsert = false).map(_ => ())
   }
 
   override def updateExpiryTime(userId: String, expirationDate: DateTime): Future[Unit] = {
@@ -266,6 +282,20 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       BSONDocument("online-tests.xmlReportSaved" -> BSONDocument("$eq" -> true))
     ))
     selectRandom(query).map(_.map(bsonDocToOnlineTestApplicationForReportRetrieving))
+  }
+
+  override def nextTestForReminder(reminder: ReminderNotice): Future[Option[NotificationExpiringOnlineTest]] = {
+    val progressStatusQuery = BSONDocument("$and" -> BSONArray(
+      BSONDocument("$or" -> BSONArray(
+        BSONDocument("applicationStatus" -> ApplicationStatuses.OnlineTestInvited),
+        BSONDocument("applicationStatus" -> ApplicationStatuses.OnlineTestStarted)
+      )),
+      BSONDocument("online-tests.expirationDate" ->
+        BSONDocument( "$lte" -> dateTimeFactory.nowLocalTimeZone.plusHours(reminder.hoursBeforeReminder)) // Serialises to UTC.
+      ),
+      BSONDocument(s"progress-status.${reminder.notificationStatus}" -> BSONDocument("$ne" -> true))
+    ))
+    selectRandom(progressStatusQuery).map(_.map(NotificationExpiringOnlineTest.fromBson))
   }
 
   private def bsonDocToExpiringOnlineTest(doc: BSONDocument) = {
