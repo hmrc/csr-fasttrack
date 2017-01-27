@@ -57,17 +57,18 @@ PUT         /questionnaire/:applicationId/:sectionKey                    control
 
 GET         /search/find-by-id/user/:userId/framework/:frameworkId       controllers.SearchForApplicantsController.findById(userId: String, frameworkId: String)
 POST        /search/find-by-criteria                                     controllers.SearchForApplicantsController.findByCriteria
+
 GET         /report/diversity-monitoring                                 controllers.ReportingController.retrieveDiversityReport
+GET         /report/application-user-ids/:frameworkId                    controllers.ReportingController.applicationAndUserIdsReport(frameworkId: String)
 GET         /report/adjustments/:frameworkId                             controllers.ReportingController.createAdjustmentReports(frameworkId: String)
 GET         /report/assessment-centre-allocation/:frameworkId            controllers.ReportingController.createAssessmentCentreAllocationReport(frameworkId: String)
-GET         /report/pass-mark-modelling/:frameworkId                     controllers.ReportingController.createPassMarkModellingReport(frameworkId: String)
-GET         /report/pass-mark-personal-data/:frameworkId                 controllers.ReportingController.createPassMarkWithPersonalDataReport(frameworkId: String)
-GET         /report/non-submitted-applications/:frameworkId              controllers.ReportingController.createNonSubmittedAppsReports(frameworkId: String)
-GET         /report/preferences-and-contact/:frameworkId                 controllers.ReportingController.createPreferencesAndContactReports(frameworkId: String)
-GET         /report/application-user-ids/:frameworkId                    controllers.ReportingController.applicationAndUserIdsReport(frameworkId: String)
 GET         /report/assessment-results/:frameworkId                      controllers.ReportingController.createAssessmentResultsReport(frameworkId: String)
+GET         /report//candidate-progress/:frameworkId                     controllers.ReportingController.createCandidateProgressReport(frameworkId: String)
+GET         /report/pass-mark-modelling/:frameworkId                     controllers.ReportingController.createOnlineTestPassMarkModellingReport(frameworkId: String)
+GET         /report/pass-mark-personal-data/:frameworkId                 controllers.ReportingController.createOnlineTestPassMarkWithPersonalDataReport(frameworkId: String)
+GET         /report/non-submitted-applications/:frameworkId              controllers.ReportingController.createNonSubmittedApplicationsReports(frameworkId: String)
+GET         /report/preferences-and-contact/:frameworkId                 controllers.ReportingController.createPreferencesAndContactReports(frameworkId: String)
 GET         /report/successful-candidates/:frameworkId                   controllers.ReportingController.createSuccessfulCandidatesReport(frameworkId: String)
-GET         /report/:frameworkId                                         controllers.ReportingController.createReport(frameworkId: String)
 
 GET         /diagnostic/user/:applicationId                              controllers.DiagnosticReportController.getApplicationByApplicationId(applicationId: String)
 GET         /diagnostic/all-users                                        controllers.DiagnosticReportController.getAllApplications

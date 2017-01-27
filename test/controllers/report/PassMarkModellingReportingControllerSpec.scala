@@ -39,7 +39,7 @@ class PassMarkModellingReportingControllerSpec extends BaseReportingControllerSp
       when(questionnaireRepoMock.passMarkReport).thenReturnAsync(Map.empty)
       when(testReportRepoMock.getOnlineTestReports).thenReturnAsync(Map.empty)
 
-      val response = controller.createPassMarkModellingReport(frameworkId)(request).run
+      val response = controller.createOnlineTestPassMarkModellingReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[PassMarkReport]]
 
       status(response) mustBe OK
@@ -51,7 +51,7 @@ class PassMarkModellingReportingControllerSpec extends BaseReportingControllerSp
       when(questionnaireRepoMock.passMarkReport).thenReturnAsync(Map.empty)
       when(testReportRepoMock.getOnlineTestReports).thenReturnAsync(Map.empty)
 
-      val response = controller.createPassMarkModellingReport(frameworkId)(request).run
+      val response = controller.createOnlineTestPassMarkModellingReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[PassMarkReport]]
 
       status(response) mustBe OK
@@ -63,7 +63,7 @@ class PassMarkModellingReportingControllerSpec extends BaseReportingControllerSp
       when(questionnaireRepoMock.passMarkReport).thenReturnAsync(questionnaires)
       when(testReportRepoMock.getOnlineTestReports).thenReturnAsync(Map.empty)
 
-      val response = controller.createPassMarkModellingReport(frameworkId)(request).run
+      val response = controller.createOnlineTestPassMarkModellingReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[PassMarkReport]]
 
       status(response) mustBe OK
@@ -75,7 +75,7 @@ class PassMarkModellingReportingControllerSpec extends BaseReportingControllerSp
       when(questionnaireRepoMock.passMarkReport).thenReturnAsync(questionnaires)
       when(testReportRepoMock.getOnlineTestReports).thenReturnAsync(testResults)
 
-      val response = controller.createPassMarkModellingReport(frameworkId)(request).run
+      val response = controller.createOnlineTestPassMarkModellingReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[PassMarkReport]]
 
       status(response) mustBe OK
@@ -116,7 +116,7 @@ class PassMarkModellingReportingControllerSpec extends BaseReportingControllerSp
     def newTestResult = TestResult("Completed", "Example Norm", someDouble, someDouble, someDouble, someDouble)
 
     def request = {
-      FakeRequest(Helpers.GET, controllers.routes.ReportingController.createPassMarkModellingReport(frameworkId).url, FakeHeaders(), "")
+      FakeRequest(Helpers.GET, controllers.routes.ReportingController.createOnlineTestPassMarkModellingReport(frameworkId).url, FakeHeaders(), "")
         .withHeaders("Content-Type" -> "application/json")
     }
   }

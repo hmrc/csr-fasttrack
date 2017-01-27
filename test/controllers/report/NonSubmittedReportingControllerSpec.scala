@@ -51,7 +51,7 @@ class NonSubmittedReportingControllerSpec extends BaseReportingControllerSpec {
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
       }
-      val result = controller.createNonSubmittedAppsReports(frameworkId)(createNonSubmittedAppsReportRequest(frameworkId)).run
+      val result = controller.createNonSubmittedApplicationsReports(frameworkId)(createNonSubmittedAppsReportRequest(frameworkId)).run
 
       val finalResult = contentAsJson(result).as[List[PreferencesWithContactDetails]]
 
@@ -83,7 +83,7 @@ class NonSubmittedReportingControllerSpec extends BaseReportingControllerSpec {
         override val testReportRepository = TestReportInMemoryRepository
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
       }
-      val result = controller.createNonSubmittedAppsReports(frameworkId)(createNonSubmittedAppsReportRequest(frameworkId)).run
+      val result = controller.createNonSubmittedApplicationsReports(frameworkId)(createNonSubmittedAppsReportRequest(frameworkId)).run
 
       val finalResult = contentAsJson(result).as[List[JsValue]]
 
@@ -96,7 +96,7 @@ class NonSubmittedReportingControllerSpec extends BaseReportingControllerSpec {
 
   trait NonSubmittedTestFixture extends TestFixture {
     def createNonSubmittedAppsReportRequest(frameworkId: String) = {
-      FakeRequest(Helpers.GET, controllers.routes.ReportingController.createNonSubmittedAppsReports(frameworkId).url, FakeHeaders(), "")
+      FakeRequest(Helpers.GET, controllers.routes.ReportingController.createNonSubmittedApplicationsReports(frameworkId).url, FakeHeaders(), "")
         .withHeaders("Content-Type" -> "application/json")
     }
   }
