@@ -51,10 +51,6 @@ trait ReportingController extends BaseController {
   val reportingRepository: ReportingRepository
   val authProviderClient: AuthProviderClient
 
-  def createReport(frameworkId: String) = Action.async { implicit request =>
-    reportingRepository.overallReport(frameworkId).map(r => Ok(Json.toJson(r)))
-  }
-
   def retrieveDiversityReport = Action.async { implicit request =>
     diversityReportRepository.findLatest().map {
       case Some(report) => Ok(Json.toJson(report))
@@ -196,6 +192,10 @@ trait ReportingController extends BaseController {
     reports.map { list =>
       Ok(Json.toJson(list))
     }
+  }
+
+  def createReport(frameworkId: String) = Action.async { implicit request =>
+    reportingRepository.overallReport(frameworkId).map(r => Ok(Json.toJson(r)))
   }
 
   def createNonSubmittedAppsReports(frameworkId: String) =
