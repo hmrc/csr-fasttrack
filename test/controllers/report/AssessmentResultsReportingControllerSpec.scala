@@ -16,17 +16,16 @@
 
 package controllers.report
 
-import connectors.AuthProviderClient
 import controllers.ReportingController
 import model.CandidateScoresCommands.{ CandidateScoreFeedback, CandidateScores, CandidateScoresAndFeedback }
 import model.Commands.Implicits._
-import model.Commands._
+import model.ReportExchangeObjects.Implicits._
+import model.ReportExchangeObjects.{ ApplicationPreferences, AssessmentResultsReport, OnlineTestPassmarkEvaluationSchemes, PassMarkReportQuestionnaireData }
+import model.UniqueIdentifier
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import play.api.test.Helpers._
-import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, DiversityReportRepository, QuestionnaireRepository, TestReportRepository }
-import repositories.application.GeneralApplicationRepository
 import testkit.MockitoImplicits.OngoingStubbingExtension
 
 import scala.language.postfixOps
@@ -88,20 +87,21 @@ class AssessmentResultsReportingControllerSpec extends BaseReportingControllerSp
   }
 
   trait AssessmentResultsReportTestFixture extends TestFixture {
-    val appId = rnd("appId")
+    val appId =  UniqueIdentifier.randomUniqueIdentifier
+    val userID = UniqueIdentifier.randomUniqueIdentifier
 
     lazy val applicationPreference1 = newAppPreferences
     lazy val passMarks1 = newQuestionnaire
     lazy val scores1 = newScores
 
     lazy val appPreferences = List(applicationPreference1)
-    lazy val passMarks = Map(appId -> passMarks1)
-    lazy val scores = Map(appId -> scores1)
+    lazy val passMarks = Map(appId.toString() -> passMarks1)
+    lazy val scores = Map(appId.toString -> scores1)
 
     private def someDouble = Some(Random.nextDouble())
 
     def newAppPreferences =
-      ApplicationPreferences(rnd("userId"), appId, someRnd("location"), someRnd("location1scheme1-"),
+      ApplicationPreferences(userID, appId, someRnd("location"), someRnd("location1scheme1-"),
         someRnd("location1scheme2-"), someRnd("location"), someRnd("location2scheme1-"), someRnd("location2scheme2-"),
         yesNoRnd, yesNoRnd, yesNoRnd, yesNoRnd, yesNoRnd, yesNoRnd, yesNoRnd,
         OnlineTestPassmarkEvaluationSchemes(Some("Pass"), Some("Fail"), Some("Pass"), Some("Fail"), Some("Amber")))
@@ -110,7 +110,7 @@ class AssessmentResultsReportingControllerSpec extends BaseReportingControllerSp
       PassMarkReportQuestionnaireData(someRnd("Gender"), someRnd("Orientation"), someRnd("Ethnicity"),
         someRnd("EmploymentStatus"), someRnd("Occupation"), someRnd("(Self)Employed"), someRnd("CompanySize"), rnd("SES"))
 
-    def newScores = CandidateScoresAndFeedback(applicationId = appId, attendancy = maybe(true),
+    def newScores = CandidateScoresAndFeedback(applicationId = appId.toString(), attendancy = maybe(true),
       assessmentIncomplete = false,
       leadingAndCommunicating = CandidateScores(someDouble, someDouble, someDouble),
       collaboratingAndPartnering = CandidateScores(someDouble, someDouble, someDouble),

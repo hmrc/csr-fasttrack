@@ -16,18 +16,18 @@
 
 package controllers.report
 
-import connectors.AuthProviderClient
 import controllers.ReportingController
 import model.Commands.Implicits._
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
+import model.ReportExchangeObjects._
+import model.ReportExchangeObjects.Implicits._
+import model.UniqueIdentifier
 import org.joda.time.LocalDate
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import play.api.test.Helpers._
-import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, DiversityReportRepository, QuestionnaireRepository, TestReportRepository }
-import repositories.application.GeneralApplicationRepository
 import testkit.MockitoImplicits.OngoingStubbingExtension
 
 import scala.language.postfixOps
@@ -74,8 +74,8 @@ class SuccessfulCandidatesReportingControllerSpec extends BaseReportingControlle
 
 
   trait SuccessfulCandidatesReportTestFixture extends TestFixture {
-    val appId = rnd("appId")
-    val userId = rnd("userId")
+    val appId = UniqueIdentifier.randomUniqueIdentifier
+    val userId = UniqueIdentifier.randomUniqueIdentifier
 
     lazy val applicationPreference1 = newAppPreferences
     lazy val contactDetails1 = newContactDetails
@@ -99,7 +99,7 @@ class SuccessfulCandidatesReportingControllerSpec extends BaseReportingControlle
         summaryScores, schemeEvaluations)
 
     def newContactDetails = ContactDetailsWithId(
-      userId,
+      userId.toString(),
       Address(rnd("Line 1"), None, None, None),
       rnd("PostCode"),
       rnd("Email"),

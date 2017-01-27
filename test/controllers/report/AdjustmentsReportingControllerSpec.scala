@@ -19,14 +19,16 @@ package controllers.report
 import connectors.AuthProviderClient
 import controllers.ReportingController
 import mocks._
-import mocks.application.{ ReportingDocumentRootInMemoryRepository }
+import mocks.application.ReportingDocumentRootInMemoryRepository
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
+import model.ReportExchangeObjects.AdjustmentReport
 import play.api.libs.json.{ JsArray, JsValue }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
 import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, DiversityReportRepository, QuestionnaireRepository, TestReportRepository }
+
 import scala.concurrent.Future
 import scala.language.postfixOps
 

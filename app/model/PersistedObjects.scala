@@ -110,6 +110,7 @@ object PersistedObjects {
 
   case class PreferencesWithQualification(preferences: Preferences, aLevel: Boolean, stemLevel: Boolean)
 
+
   object Implicits {
     implicit val applicationStatusFormats = Json.format[ApplicationStatus]
     implicit val addressFormats = Json.format[Address]
@@ -135,5 +136,6 @@ object PersistedObjects {
 
     implicit val onlineTestPdfReportFormats = Json.format[OnlineTestPDFReport]
     implicit val preferencesWithQualificationFormats = Json.format[PreferencesWithQualification]
+
   }
 }
