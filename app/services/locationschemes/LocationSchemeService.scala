@@ -16,7 +16,7 @@
 
 package services.locationschemes
 
-import model.Exceptions.NotFoundException
+import model.Exceptions.{ InvalidLocationFound, NotFoundException }
 import model.Scheme.Scheme
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import repositories.{ FileLocationSchemeRepository, LocationSchemeRepository, LocationSchemes, _ }
@@ -80,7 +80,13 @@ trait LocationSchemeService {
   }
 
   def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit] = {
-    appRepository.updateSchemeLocations(applicationId, locationIds)
+    for {
+      locationSchemes <- locationSchemeRepository.getSchemesAndLocations
+      _ <- locationIds.isEmpty || locationIds.diff(locationSchemes.map(_.id)).nonEmpty match {
+        case true => Future.failed(throw InvalidLocationFound())
+        case false => appRepository.updateSchemeLocations(applicationId, locationIds)
+      }
+    } yield {}
   }
 
   def getSchemes(applicationId: String): Future[List[SchemeInfo]] = {

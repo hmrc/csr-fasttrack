@@ -63,9 +63,7 @@ trait LocationSchemeRepository {
   private lazy val cachedLocationSchemes =  {
     // TODO: File needs updating with correct scheme and location data
     val input = managed(Play.application.resourceAsStream("locations-schemes.json"))
-    val loaded = input.acquireAndGet(r => {
-      Json.parse(r).as[Locations]
-    })
+    val loaded = input.acquireAndGet(r => {Json.parse(r).as[Locations]})
     Future.successful(loaded.locations)
   }
 
