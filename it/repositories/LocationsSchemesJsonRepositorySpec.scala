@@ -69,7 +69,7 @@ class LocationsSchemesJsonRepositorySpec extends IntegrationSpec with MockitoSug
       val capacityDate = venue.capacityDates.head
       capacityDate.amCapacity must be(6)
       capacityDate.pmCapacity must be(6)
-      capacityDate.date.toString(DateFormat) must be("24/5/17")
+      capacityDate.date.toString(DateFormat) must be("24/5/18")
     }
 
     "reject invalid configuration" in {
@@ -120,7 +120,7 @@ class LocationsSchemesJsonRepositorySpec extends IntegrationSpec with MockitoSug
       val venue = assessmentCapacity.venues(1)
       venue.venueName must be("London (FSAC) 1")
       venue.venueDescription must be ("FSAC")
-      val capacityDate = venue.capacityDates.find(_.date == new LocalDate("2016-07-04")).get
+      val capacityDate = venue.capacityDates.find(_.date == new LocalDate("2017-07-04")).get
       capacityDate.amCapacity must be(6)
       capacityDate.pmCapacity must be(6)
     }
