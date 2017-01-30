@@ -333,7 +333,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
                                                        end: Int): Future[ApplicationForAssessmentAllocationResult] = {
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingAllocation),
-      BSONDocument("framework-preferences.firstLocation.location" -> BSONDocument("$in" -> locations))
+      BSONDocument("assessment-centre-indicator.assessmentCentre" -> BSONDocument("$in" -> locations))
     ))
 
     collection.runCommand(JSONCountCommand.Count(query)).flatMap { c =>
@@ -609,9 +609,15 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
   override def findAssessmentCentreIndicator(appId: String): Future[Option[AssessmentCentreIndicator]] ={
     val query = BSONDocument("applicationId" -> appId)
-    val projection = BSONDocument("assessment-centre-indicator" -> true)
+    val projection = BSONDocument(
+      "_id" -> false,
+      "assessment-centre-indicator" -> true
+    )
 
-    collection.find(query, projection).one[AssessmentCentreIndicator]
+    collection.find(query, projection).one[BSONDocument] map {
+      case Some(doc) => doc.getAs[AssessmentCentreIndicator]("assessment-centre-indicator")
+      case _ => None
+    }
   }
 
   override def updateAssessmentCentreIndicator(appId: String, indicator: AssessmentCentreIndicator): Future[Unit] ={
