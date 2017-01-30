@@ -18,8 +18,10 @@ package mocks.application
 
 import common.Constants.{ No, Yes }
 import model.Commands._
-import org.joda.time.{ LocalDate }
-import repositories.application.{ ReportingRepository }
+import model.ReportExchangeObjects._
+import model.UniqueIdentifier
+import org.joda.time.LocalDate
+import repositories.application.ReportingRepository
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -41,14 +43,15 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
     Future.successful(app1 :: app2 :: Nil)
   }
 
-  override def overallReportNotWithdrawn(frameworkId: String): Future[List[Report]] = overallReport(frameworkId)
+  override def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[CandidateProgressReportItem]] =
+    candidateProgressReport(frameworkId)
 
-  override def overallReport(frameworkId: String): Future[List[Report]] = Future.successful(List(
-    Report("123", Some("SUBMITTED"), Some("London"), Some("Business"), None, None, None, None,
+  override def candidateProgressReport(frameworkId: String): Future[List[CandidateProgressReportItem]] = Future.successful(List(
+    CandidateProgressReportItem(UniqueIdentifier("123"), Some("SUBMITTED"), Some("London"), Some("Business"), None, None, None, None,
       Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None),
-    Report("456", Some("IN_PROGRESS"), Some("London"), Some("Business"), None, None, None, None,
+    CandidateProgressReportItem(UniqueIdentifier("456"), Some("IN_PROGRESS"), Some("London"), Some("Business"), None, None, None, None,
       Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None),
-    Report("789", Some("SUBMITTED"), Some("London"), Some("Business"), None, None, None, None,
+    CandidateProgressReportItem(UniqueIdentifier("789"), Some("SUBMITTED"), Some("London"), Some("Business"), None, None, None, None,
       Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None)
   ))
 
@@ -70,11 +73,11 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
       )
     )
 
-  override def overallReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]] = ???
+  override def candidateProgressReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]] = ???
 
   override def applicationsWithAssessmentScoresAccepted(frameworkId: String): Future[List[ApplicationPreferences]] = ???
 
-  override def allApplicationAndUserIds(frameworkId: String): Future[List[PersonalDetailsAdded]] = ???
+  override def allApplicationAndUserIds(frameworkId: String): Future[List[ApplicationUserIdReport]] = ???
 
   override def applicationsPassedInAssessmentCentre(frameworkId: String): Future[List[ApplicationPreferencesWithTestResults]] = ???
 }

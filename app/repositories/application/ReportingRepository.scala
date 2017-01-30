@@ -23,6 +23,7 @@ import common.StringUtils._
 import model.ApplicationStatusOrder._
 import model.Commands._
 import model.EvaluationResults._
+import model.ReportExchangeObjects._
 import model._
 import model.commands.OnlineTestProgressResponse
 import org.joda.time.LocalDate
@@ -41,11 +42,11 @@ import scala.concurrent.Future
    exclusively to reporting functionality
  */
 trait ReportingRepository {
-  def overallReport(frameworkId: String): Future[List[Report]]
+  def candidateProgressReport(frameworkId: String): Future[List[CandidateProgressReportItem]]
 
-  def overallReportNotWithdrawn(frameworkId: String): Future[List[Report]]
+  def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[CandidateProgressReportItem]]
 
-  def overallReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]]
+  def candidateProgressReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]]
 
   def adjustmentReport(frameworkId: String): Future[List[AdjustmentReport]]
 
@@ -53,7 +54,7 @@ trait ReportingRepository {
 
   def applicationsReport(frameworkId: String): Future[List[(String, IsNonSubmitted, PreferencesWithContactDetails)]]
 
-  def allApplicationAndUserIds(frameworkId: String): Future[List[PersonalDetailsAdded]]
+  def allApplicationAndUserIds(frameworkId: String): Future[List[ApplicationUserIdReport]]
 
   def applicationsWithAssessmentScoresAccepted(frameworkId: String): Future[List[ApplicationPreferences]]
 
@@ -172,22 +173,22 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     collection.find(query, projection).cursor[BSONDocument]().collect[List]().map(_.map(docToCandidate))
   }
 
-  override def overallReportNotWithdrawn(frameworkId: String): Future[List[Report]] =
-    overallReport(BSONDocument("$and" -> BSONArray(
+  override def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[CandidateProgressReportItem]] =
+    candidateProgressReport(BSONDocument("$and" -> BSONArray(
       BSONDocument("frameworkId" -> frameworkId),
       BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn))
     )))
 
-  override def overallReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]] =
+  override def candidateProgressReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]] =
     overallReportWithPersonalDetails(BSONDocument("$and" -> BSONArray(
       BSONDocument("frameworkId" -> frameworkId),
       BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn))
     )))
 
-  override def overallReport(frameworkId: String): Future[List[Report]] =
-    overallReport(BSONDocument("frameworkId" -> frameworkId))
+  override def candidateProgressReport(frameworkId: String): Future[List[CandidateProgressReportItem]] =
+    candidateProgressReport(BSONDocument("frameworkId" -> frameworkId))
 
-  private def overallReport(query: BSONDocument): Future[List[Report]] = {
+  private def candidateProgressReport(query: BSONDocument): Future[List[CandidateProgressReportItem]] = {
     val projection = BSONDocument(
       "userId" -> "1",
       "framework-preferences.alternatives.location" -> "1",
@@ -290,7 +291,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
         val otLocation2Scheme2PassmarkEvaluation = pe.flatMap(_.getAs[String]("location2Scheme2").map(Result(_).toPassmark))
         val otAlternativeSchemePassmarkEvaluation = pe.flatMap(_.getAs[String]("alternativeScheme").map(Result(_).toPassmark))
 
-        ApplicationPreferences(userId, applicationId, fr1FirstLocation, fr1FirstFramework, fr1SecondFramework,
+        ApplicationPreferences(UniqueIdentifier(userId), UniqueIdentifier(applicationId), fr1FirstLocation, fr1FirstFramework, fr1SecondFramework,
           fr2FirstLocation, fr2FirstFramework, fr2SecondFramework, location, framework, hasDisability,
           guaranteedInterview, needsAdjustment, aLevel, stemLevel,
           OnlineTestPassmarkEvaluationSchemes(otLocation1Scheme1PassmarkEvaluation, otLocation1Scheme2PassmarkEvaluation,
@@ -379,7 +380,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
         val stemLevel = pd.flatMap(_.getAs[Boolean]("stemLevel").map(booleanTranslator))
         val dateOfBirth = pd.flatMap(_.getAs[LocalDate]("dateOfBirth"))
 
-        ApplicationPreferencesWithTestResults(userId, applicationId, fr1FirstLocation, fr1FirstFramework,
+        ApplicationPreferencesWithTestResults(UniqueIdentifier(userId), UniqueIdentifier(applicationId), fr1FirstLocation, fr1FirstFramework,
           fr1SecondFramework, fr2FirstLocation, fr2FirstFramework, fr2SecondFramework, location, framework,
           PersonalInfo(firstName, lastName, preferredName, aLevel, stemLevel, dateOfBirth),
           CandidateScoresSummary(leadingAndCommunicatingAverage, collaboratingAndPartneringAverage,
@@ -460,8 +461,8 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     }
     val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).map { gis => if (gis) Yes else No }
 
-    Report(
-      applicationId, Some(getStatus(progress)), frLocation(fr1), frScheme1(fr1), frScheme2(fr1),
+    CandidateProgressReportItem(
+      UniqueIdentifier(applicationId), Some(getStatus(progress)), frLocation(fr1), frScheme1(fr1), frScheme2(fr1),
       frLocation(fr2), frScheme1(fr2), frScheme2(fr2), aLevel,
       stemLevel, location, framework, hasDisability, needsAdjustments, guaranteedInterview, issue
     )
@@ -511,7 +512,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     val cubiksUserId = onlineTests.flatMap(_.getAs[Int]("cubiksUserId"))
 
     ReportWithPersonalDetails(
-      applicationId, userId, Some(getStatus(progress)), frLocation(fr1), frScheme1(fr1), frScheme2(fr1),
+      UniqueIdentifier(applicationId), UniqueIdentifier(userId), Some(getStatus(progress)), frLocation(fr1), frScheme1(fr1), frScheme2(fr1),
       frLocation(fr2), frScheme1(fr2), frScheme2(fr2), aLevel,
       stemLevel, location, framework, hasDisability, needsAdjustment, guaranteedInterview, firstName, lastName,
       preferredName, dateOfBirth, cubiksUserId
@@ -680,7 +681,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     }
   }
 
-  def allApplicationAndUserIds(frameworkId: String): Future[List[PersonalDetailsAdded]] = {
+  def allApplicationAndUserIds(frameworkId: String): Future[List[ApplicationUserIdReport]] = {
     val query = BSONDocument("frameworkId" -> frameworkId)
     val projection = BSONDocument(
       "applicationId" -> "1",
@@ -691,7 +692,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       _.map { doc =>
         val userId = doc.getAs[String]("userId").getOrElse("")
         val applicationId = doc.getAs[String]("applicationId").getOrElse("")
-        PersonalDetailsAdded(applicationId, userId)
+        ApplicationUserIdReport(UniqueIdentifier(applicationId), UniqueIdentifier(userId))
       }
     }
   }

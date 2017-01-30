@@ -21,9 +21,11 @@ import model.ApplicationStatusOrder
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
 import model.PersistedObjects.Implicits._
+import model.ReportExchangeObjects.Implicits._
+import model.ReportExchangeObjects.{ Implicits => _, _ }
 import play.api.libs.json.Json
 import play.api.mvc.{ Action, AnyContent, Request }
-import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
+import repositories.application.ReportingRepository
 import repositories.{ QuestionnaireRepository, _ }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -58,7 +60,7 @@ trait ReportingController extends BaseController {
     }
   }
 
-  def applicationAndUserIdsReport(frameworkId: String) = Action.async { implicit request =>
+  def createApplicationAndUserIdsReport(frameworkId: String) = Action.async { implicit request =>
     reportingRepository.allApplicationAndUserIds(frameworkId).map { list =>
       Ok(Json.toJson(list))
     }
@@ -124,8 +126,8 @@ trait ReportingController extends BaseController {
     } yield {
       for {
         app <- apps
-        quest <- quests.get(app.applicationId)
-        appscore <- scores.get(app.applicationId)
+        quest <- quests.get(app.applicationId.toString())
+        appscore <- scores.get(app.applicationId.toString())
       } yield {
         AssessmentResultsReport(app, quest, appscore)
       }
@@ -137,24 +139,23 @@ trait ReportingController extends BaseController {
   }
 
   def createCandidateProgressReport(frameworkId: String) = Action.async { implicit request =>
-    reportingRepository.overallReport(frameworkId).map(r => Ok(Json.toJson(r)))
+    reportingRepository.candidateProgressReport(frameworkId).map(r => Ok(Json.toJson(r)))
   }
 
   def createNonSubmittedApplicationsReports(frameworkId: String) =
     preferencesAndContactReports(nonSubmittedOnly = true)(frameworkId)
 
-
   def createOnlineTestPassMarkModellingReport(frameworkId: String) = Action.async { implicit request =>
     val reports =
       for {
-        applications <- reportingRepository.overallReportNotWithdrawn(frameworkId)
+        applications <- reportingRepository.candidateProgressReportNotWithdrawn(frameworkId)
         questionnaires <- questionnaireRepository.passMarkReport
         testResults <- testReportRepository.getOnlineTestReports
       } yield {
         for {
           a <- applications
-          q <- questionnaires.get(a.applicationId)
-          t <- testResults.get(a.applicationId)
+          q <- questionnaires.get(a.applicationId.toString)
+          t <- testResults.get(a.applicationId.toString)
         } yield PassMarkReport(a, q, t)
       }
 
@@ -166,15 +167,15 @@ trait ReportingController extends BaseController {
   def createOnlineTestPassMarkWithPersonalDataReport(frameworkId: String) = Action.async { implicit request =>
     val reports =
       for {
-        applications <- reportingRepository.overallReportNotWithdrawnWithPersonalDetails(frameworkId)
+        applications <- reportingRepository.candidateProgressReportNotWithdrawnWithPersonalDetails(frameworkId)
         testResults <- testReportRepository.getOnlineTestReports
         contactDetails <- cdRepository.findAll
         cDetails = contactDetails.map(c => c.userId -> c).toMap
       } yield {
         for {
           a <- applications
-          t <- testResults.get(a.applicationId)
-          c <- cDetails.get(a.userId)
+          t <- testResults.get(a.applicationId.toString)
+          c <- cDetails.get(a.userId.toString)
         } yield PassMarkReportWithPersonalData(a, t, ContactDetails(c.phone, c.email, c.address, c.postCode))
       }
     reports.map { list =>
@@ -198,7 +199,7 @@ trait ReportingController extends BaseController {
     } yield {
       for {
         a <- apps
-        c <- candidates.get(a.userId)
+        c <- candidates.get(a.userId.toString)
       } yield {
         ApplicationPreferencesWithTestResultsAndContactDetails(
           a,

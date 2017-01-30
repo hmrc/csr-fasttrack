@@ -32,7 +32,7 @@ import repositories.application.{ GeneralApplicationRepository, ReportingReposit
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-class NonSubmittedReportingControllerSpec extends BaseReportingControllerSpec {
+class NonSubmittedApplicationsReportingControllerSpec extends BaseReportingControllerSpec {
   "Reporting controller create non-submitted applications report" should {
     "return a list of non submitted applications with phone number if contact details exist" in new NonSubmittedTestFixture {
       override val controller = new ReportingController {
