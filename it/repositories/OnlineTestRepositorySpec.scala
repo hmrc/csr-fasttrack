@@ -19,7 +19,7 @@ package repositories
 import java.util.UUID
 
 import factories.DateTimeFactory
-import model.{ AdjustmentDetail, ApplicationStatuses, ProgressStatuses }
+import model.{ AdjustmentDetail, ApplicationStatuses, FirstReminder, ProgressStatuses, SecondReminder }
 import model.Adjustments._
 import model.ApplicationStatuses._
 import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound }
@@ -121,6 +121,80 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       userIds must contain("userId1")
       userIds must contain("userId2")
       userIds must contain("userId3")
+    }
+  }
+
+  "nextTestForReminder" should {
+    "return one record for a test about to expire in less than 3 days" in {
+      val expiryDate = DateTime.now().plusHours((24 * 3) - 1)
+      val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestInvited, expirationDate = expiryDate)
+      val result = onlineTestRepo.nextTestForReminder(FirstReminder).futureValue
+
+      result.get.applicationId mustBe appIdWithUserId.applicationId
+      result.get.userId mustBe appIdWithUserId.userId
+      result.get.preferredName mustBe "Test Preferred Name"
+      result.get.expiryDate.getMillis mustBe expiryDate.getMillis
+    }
+    "return no record for a test about to expire in more than 3 days" in {
+      val expiryDate = DateTime.now().plusHours((24 * 3) + 1)
+      val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestInvited, expirationDate = expiryDate)
+      val result = onlineTestRepo.nextTestForReminder(FirstReminder).futureValue
+
+      result mustBe None
+    }
+    "return no record for a test about to expire in less than 3 days but completed" in {
+      val expiryDate = DateTime.now().plusHours((24 * 3) - 1)
+      val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestCompleted, expirationDate = expiryDate)
+      val result = onlineTestRepo.nextTestForReminder(FirstReminder).futureValue
+
+      result mustBe None
+    }
+    "return no record for a test about to expire in less than 3 days but failed" in {
+      val expiryDate = DateTime.now().plusHours((24 * 3) - 1)
+      val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestFailed, expirationDate = expiryDate)
+      val result = onlineTestRepo.nextTestForReminder(FirstReminder).futureValue
+
+      result mustBe None
+    }
+    "return no record for first reminder when a notification has already been sent" in {
+      val expirationDate = DateTime.now().plusHours((24 * 3) - 1)
+      helperRepo.collection.insert(BSONDocument(
+        "applicationId" -> "appId123",
+        "applicationStatus" -> ApplicationStatuses.OnlineTestStarted,
+        "progress-status" -> BSONDocument(
+          s"${ProgressStatuses.OnlineTestFirstExpiryNotification}" -> true
+        ),
+        "personal-details" -> BSONDocument(
+          "firstName" -> "Wilfredo",
+          "lastName" -> "Gomez",
+          "preferredName" -> "Wilfredo",
+          "dateOfBirth" -> "1952-12-12"
+        ),
+        "online-tests" -> BSONDocument(
+          "cubiksUserId" -> 1111,
+          "token" -> "previousToken",
+          "onlineTestUrl" -> "previousOnlineTestUrl",
+          "invitationDate" -> DateTime.now().minusDays(10),
+          "expiratinDate" -> expirationDate,
+          "participantScheduleId" -> "previousScheduleId",
+          "xmlReportSaved" -> true,
+          "pdfReportSaved" -> true
+        ),
+        "passmarkEvaluation" -> "notEmpty"
+      )).futureValue
+
+      val resultFirstReminder = onlineTestRepo.nextTestForReminder(FirstReminder).futureValue
+      resultFirstReminder mustBe None
+    }
+    "return one record for a test about to expire in less than 1 days" in {
+      val expiryDate = DateTime.now().plusHours(23)
+      val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestStarted, expirationDate = expiryDate)
+      val result = onlineTestRepo.nextTestForReminder(SecondReminder).futureValue
+
+      result.get.applicationId mustBe appIdWithUserId.applicationId
+      result.get.userId mustBe appIdWithUserId.userId
+      result.get.preferredName mustBe "Test Preferred Name"
+      result.get.expiryDate.getMillis mustBe expiryDate.getMillis
     }
   }
 

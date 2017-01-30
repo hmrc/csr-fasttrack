@@ -146,6 +146,7 @@ trait SearchForApplicantService {
       email = Some(exchangeCandidate.email),
       firstName = Some(exchangeCandidate.firstName),
       lastName = Some(exchangeCandidate.lastName),
+      preferredName = exchangeCandidate.preferredName,
       dateOfBirth = None,
       address = None,
       postCode = None

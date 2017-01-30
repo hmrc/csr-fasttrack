@@ -33,9 +33,9 @@ object AdjustmentsManagementController extends AdjustmentsManagementController {
 trait AdjustmentsManagementController extends BaseController {
   val adjustmentsManagementService : AdjustmentsManagementService
 
-  def confirmAdjustments(applicationId: String) = Action.async(parse.json) { implicit request =>
+  def confirmAdjustments(applicationId: String, actionTriggeredBy: String) = Action.async(parse.json) { implicit request =>
     withJsonBody[Adjustments] { data =>
-      adjustmentsManagementService.confirmAdjustment(applicationId, data).map { _ =>
+      adjustmentsManagementService.confirmAdjustment(applicationId, data, actionTriggeredBy).map { _ =>
         Ok
       }.recover {
         case e: NotFoundException => NotFound(s"cannot find application for application with id: $applicationId")

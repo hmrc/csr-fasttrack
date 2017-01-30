@@ -51,13 +51,14 @@ package object repositories {
   lazy val onlineTestRepository = new OnlineTestMongoRepository(DateTimeFactory)
   lazy val onlineTestPDFReportRepository = new OnlineTestPDFReportMongoRepository()
   lazy val testReportRepository = new TestReportMongoRepository()
-  lazy val diversityReportRepository = new ReportingMongoRepository()
+  lazy val diversityReportRepository = new DiversityReportMongoRepository()
   lazy val passMarkSettingsRepository = new PassMarkSettingsMongoRepository()
   lazy val assessmentCentrePassMarkSettingsRepository = new AssessmentCentrePassMarkSettingsMongoRepository()
   lazy val applicationAssessmentRepository = new ApplicationAssessmentMongoRepository()
   lazy val candidateAllocationMongoRepository = new CandidateAllocationMongoRepository(DateTimeFactory)
   lazy val diagnosticReportRepository = new DiagnosticReportingMongoRepository
   lazy val applicationAssessmentScoresRepository = new ApplicationAssessmentScoresMongoRepository(DateTimeFactory)
+  lazy val reportingRepository = new ReportingMongoRepository(timeZoneService)
   lazy val flagCandidateRepository = new FlagCandidateMongoRepository
   lazy val schoolsRepository = SchoolsCSVRepository
 
@@ -104,9 +105,10 @@ package object repositories {
       val psRoot = doc.getAs[BSONDocument]("personal-details")
       val firstName = psRoot.flatMap(_.getAs[String]("firstName"))
       val lastName = psRoot.flatMap(_.getAs[String]("lastName"))
+      val preferredName = psRoot.flatMap(_.getAs[String]("preferredName"))
       val dateOfBirth = psRoot.flatMap(_.getAs[LocalDate]("dateOfBirth"))
 
-      Candidate(userId, applicationId, None, firstName, lastName, dateOfBirth, None, None)
+      Candidate(userId, applicationId, None, firstName, lastName, preferredName, dateOfBirth, None, None)
     }
 
     def write(psDoc: Candidate) = BSONDocument() // this should not be used ever

@@ -717,13 +717,14 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     }
 
     def applicationRepositoryWithOneVenueDateCandidate = {
-      when(mockApplicationRepository.find(any())).thenReturn(Future.successful(
+      when(mockApplicationRepository.find(any[List[String]])).thenReturn(Future.successful(
         List(
           Candidate(
             "userid-1",
             Some("appid-1"),
             None,
             Some("Bob"),
+            Some("Marley"),
             Some("Marley"),
             None,
             None,
@@ -738,13 +739,14 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     }
 
     def applicationRepositoryWithOneVenueOneDateOneCandidateInPMOneInAMSession = {
-      when(mockApplicationRepository.find(any())).thenReturn(Future.successful(
+      when(mockApplicationRepository.find(any[List[String]])).thenReturn(Future.successful(
         List(
           Candidate(
             "userid-1",
             Some("appid-1"),
             None,
             Some("Bob"),
+            Some("Marley"),
             Some("Marley"),
             None,
             None,
@@ -755,6 +757,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
             Some("appid-2"),
             None,
             Some("Michael"),
+            Some("Jackson"),
             Some("Jackson"),
             None,
             None,
@@ -773,13 +776,14 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     }
 
     def applicationRepositoryWithOneVenueOneDateOneNormalCandidateAndWithdrawnCandidate = {
-      when(mockApplicationRepository.find(any())).thenReturn(Future.successful(
+      when(mockApplicationRepository.find(any[List[String]])).thenReturn(Future.successful(
         List(
           Candidate(
             "userid-2",
             Some("appid-2"),
             None,
             Some("Michael"),
+            Some("Jackson"),
             Some("Jackson"),
             None,
             None,
@@ -861,7 +865,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     }
 
     def applicationRepositoryWithNoVenueDateCandidates = {
-      when(mockApplicationRepository.find(any())).thenReturn(Future.successful(
+      when(mockApplicationRepository.find(any[List[String]])).thenReturn(Future.successful(
         List()
       ))
     }

@@ -41,7 +41,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
 
   def applicationRepo = new GeneralApplicationMongoRepository(GBTimeZoneService)
 
-  "Application repository" should {
+  "Application repository" must {
     "create indexes for the repository" in {
       val repo = repositories.applicationRepository
 
@@ -56,7 +56,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "Finding an application by User Id" should {
+  "Finding an application by User Id" must {
 
     "throw a NotFound exception when application doesn't exists" in {
       applicationRepo.findByUserId("invalidUser", "invalidFramework")
@@ -75,7 +75,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "Finding applications by user id" should {
+  "Finding applications by user id" must {
     "return an empty list when no records for an applicationid exist" in {
       applicationRepo.find(List("appid-1")).futureValue.size must be(0)
     }
@@ -91,110 +91,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "Applications report" should {
-
-    "return an empty list when there are no applications" in {
-      applicationRepo.applicationsReport(frameworkId).futureValue mustBe empty
-    }
-
-    "return a list of non submitted applications when there are only non submitted applications" in {
-      Await.ready({
-        for {
-          _ <- applicationRepo.create("userId1", frameworkId)
-          _ <- applicationRepo.create("userId2", frameworkId)
-        } yield {
-          Unit
-        }
-      }, timeout)
-
-      val results = applicationRepo.applicationsReport(frameworkId).futureValue
-      results must have size 2
-      results.foreach { case (userId, isNonSubmitted, _) =>
-        isNonSubmitted mustBe true
-        userId must startWith("userId")
-      }
-    }
-
-    "return only submitted applications" in {
-      Await.ready({
-        for {
-          app <- applicationRepo.create("userId1", frameworkId)
-          _ <- applicationRepo.submit(app.applicationId)
-          app2 <- applicationRepo.create("userId2", frameworkId)
-          _ <- applicationRepo.submit(app2.applicationId)
-        } yield {
-          Unit
-        }
-      }, timeout)
-
-
-      val results = applicationRepo.applicationsReport(frameworkId).futureValue
-      results must have size 2
-      results.foreach { case (_, isNonSubmitted, _) =>
-        isNonSubmitted mustBe false
-      }
-    }
-
-    "return only the applications in a specific framework id" in {
-      Await.ready({
-        for {
-          app <- applicationRepo.create("userId1", frameworkId)
-          app2 <- applicationRepo.create("userId2", "otherFramework")
-        } yield {
-          Unit
-        }
-      }, timeout)
-
-      val results = applicationRepo.applicationsReport(frameworkId).futureValue
-      results must have size 1
-    }
-
-    "return a list of non submitted applications with submitted applications" in {
-      Await.ready({
-        for {
-          app1 <- applicationRepo.create("userId1", frameworkId)
-          _ <- applicationRepo.submit(app1.applicationId)
-          _ <- applicationRepo.create("userId2", frameworkId)
-          app3 <- applicationRepo.create("userId3", frameworkId)
-          _ <- applicationRepo.submit(app3.applicationId)
-          app4 <- applicationRepo.create("userId4", frameworkId)
-          _ <- applicationRepo.submit(app4.applicationId)
-          _ <- applicationRepo.create("userId5", frameworkId)
-        } yield {
-          Unit
-        }
-      }, timeout)
-
-      val results = applicationRepo.applicationsReport(frameworkId).futureValue
-      results must have size 5
-      results.filter { case (_, isNonSubmitted, _) => isNonSubmitted } must have size 2
-      results.filter { case (_, isNonSubmitted, _) => !isNonSubmitted } must have size 3
-    }
-  }
-
-  "return the adjustments report" should {
-    "return a list of AdjustmentReports" in {
-      val frameworkId = "FastTrack-2015"
-
-      lazy val testData = new TestDataMongoRepository()
-      testData.createApplications(1000).futureValue
-
-      val listFut = applicationRepo.adjustmentReport(frameworkId)
-
-      val result = Await.result(listFut, timeout)
-
-      result mustBe a[List[_]]
-      result must not be empty
-      result.head mustBe a[AdjustmentReport]
-      result.head.userId must not be empty
-
-      val adjustmentReport = result.head
-      adjustmentReport.adjustments must not be empty
-      //Making sure the separator of adjustments is a pipe instead of a new line
-      adjustmentReport.adjustments.get.contains("|") mustBe true
-    }
-  }
-  "find applications for assessment allocation" should {
+  "find applications for assessment allocation" must {
     "return an empty list when there are no applications" in {
       lazy val testData = new TestDataMongoRepository()
       testData.createApplications(0, false).futureValue
@@ -245,7 +142,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "next application ready for assessment score evaluation" should {
+  "next application ready for assessment score evaluation" must {
     "return the only application ready for evaluation" in {
       createApplication("app1", ApplicationStatuses.AssessmentScoresAccepted)
 
@@ -280,7 +177,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "save assessment score evaluation" should {
+  "save assessment score evaluation" must {
     "save a score evaluation and update the application status when the application is in ASSESSMENT_SCORES_ACCEPTED status" in {
       createApplication("app1", ApplicationStatuses.AssessmentScoresAccepted)
 
@@ -320,73 +217,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "applications passed in assessment centre" should {
-    "be returned" in {
-      val scores = CandidateScoresSummary(Some(2d), Some(2d), Some(2d), Some(2d),Some(2d),Some(2d),Some(2d), Some(14d))
-      createApplicationWithSummaryScoresAndSchemeEvaluations("app1",frameworkId,
-        ApplicationStatuses.AssessmentCentrePassed,
-        "1",
-        scores,
-        SchemeEvaluation(Some("Red"), Some("Green"), Some("Amber"), Some("Red"), Some("Green"))
-      )
-
-      val result = applicationRepo.applicationsPassedInAssessmentCentre(frameworkId).futureValue
-      result.size must be (1)
-      result.head.applicationId must be ("app1")
-      result.head.scores must be (scores)
-      result.head.passmarks must be (SchemeEvaluation(
-        Some("Fail"),
-        Some("Pass"),
-        Some("Amber"),
-        Some("Fail"),
-        Some("Pass")))
-    }
-  }
-
-  "online test results" should {
-    "be returned" in {
-      createApplicationWithFrameworkEvaluations("app1", frameworkId,
-        ApplicationStatuses.AssessmentScoresAccepted,
-        "1",
-        OnlineTestPassmarkEvaluationSchemes(Some("Red"), Some("Green"), Some("Amber"), Some("Red"), Some("Green"))
-      )
-
-      val result = applicationRepo.applicationsWithAssessmentScoresAccepted(frameworkId).futureValue
-      result.size must be (1)
-      result.head.applicationId must be ("app1")
-      result.head.onlineTestPassmarkEvaluations must be (OnlineTestPassmarkEvaluationSchemes(
-        Some("Fail"),
-        Some("Pass"),
-        Some("Amber"),
-        Some("Fail"),
-        Some("Pass")))
-    }
-  }
-
-  "manual assessment centre allocation report" should {
-    "return all candidates that are in awaiting allocation state" in {
-      val testData = new TestDataMongoRepository()
-      testData.createApplications(10, onlyAwaitingAllocation = true).futureValue
-
-      val result = applicationRepo.candidatesAwaitingAllocation(frameworkId).futureValue
-      result must have size 10
-    }
-    "not return candidates that are initially awaiting allocation but subsequently withdrawn" in {
-      val testData = new TestDataMongoRepository()
-      testData.createApplications(10, onlyAwaitingAllocation = true).futureValue
-
-      val result = applicationRepo.candidatesAwaitingAllocation(frameworkId).futureValue
-      result.foreach{ c =>
-        val appId = applicationRepo.findByUserId(c.userId, frameworkId).futureValue.applicationId
-        applicationRepo.withdraw(appId,WithdrawApplicationRequest("testing", None,"Candidate")).futureValue
-      }
-
-      val updatedResult = applicationRepo.candidatesAwaitingAllocation(frameworkId).futureValue
-      updatedResult must be (empty)
-    }
-  }
-
-  "review" should {
+  "review" must {
     "change progress status to review" in {
       createApplication("app1", ApplicationStatuses.InProgress)
 
