@@ -27,17 +27,20 @@ import play.api.libs.json.Json
 import play.api.mvc.{ Action, AnyContent, Request }
 import repositories.application.ReportingRepository
 import repositories.{ QuestionnaireRepository, _ }
+import services.locationschemes.LocationSchemeService
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object ReportingController extends ReportingController {
-  val cdRepository = contactDetailsRepository
+  val locationSchemeService = LocationSchemeService
+  val assessmentScoresRepository = repositories.applicationAssessmentScoresRepository
+  val contactDetailsRepository = repositories.contactDetailsRepository
   val diversityReportRepository = repositories.diversityReportRepository
   val questionnaireRepository = repositories.questionnaireRepository
-  val testReportRepository = repositories.testReportRepository
-  val assessmentScoresRepository = repositories.applicationAssessmentScoresRepository
   val reportingRepository = repositories.reportingRepository
+  val testReportRepository = repositories.testReportRepository
   val authProviderClient = AuthProviderClient
 }
 
@@ -45,12 +48,13 @@ trait ReportingController extends BaseController {
 
   import Implicits._
 
-  val cdRepository: ContactDetailsRepository
+  val locationSchemeService: LocationSchemeService
+  val assessmentScoresRepository: ApplicationAssessmentScoresRepository
+  val contactDetailsRepository: ContactDetailsRepository
   val diversityReportRepository: DiversityReportRepository
   val questionnaireRepository: QuestionnaireRepository
-  val testReportRepository: TestReportRepository
-  val assessmentScoresRepository: ApplicationAssessmentScoresRepository
   val reportingRepository: ReportingRepository
+  val testReportRepository: TestReportRepository
   val authProviderClient: AuthProviderClient
 
   def retrieveDiversityReport = Action.async { implicit request =>
@@ -70,7 +74,7 @@ trait ReportingController extends BaseController {
     val reports =
       for {
         applications <- reportingRepository.adjustmentReport(frameworkId)
-        allCandidates <- cdRepository.findAll
+        allCandidates <- contactDetailsRepository.findAll
         candidates = allCandidates.groupBy(_.userId).mapValues(_.head)
       } yield {
         applications.map { application =>
@@ -90,7 +94,7 @@ trait ReportingController extends BaseController {
     val reports =
       for {
         applications <- reportingRepository.candidatesAwaitingAllocation(frameworkId)
-        allCandidates <- cdRepository.findAll
+        allCandidates <- contactDetailsRepository.findAll
         candidates = allCandidates.groupBy(_.userId).mapValues(_.head)
       } yield {
         for {
@@ -139,7 +143,18 @@ trait ReportingController extends BaseController {
   }
 
   def createCandidateProgressReport(frameworkId: String) = Action.async { implicit request =>
-    reportingRepository.candidateProgressReport(frameworkId).map(r => Ok(Json.toJson(r)))
+    reportingRepository.candidateProgressReport(frameworkId).flatMap { report =>
+      val listOfFutures = report.map { reportItem => {
+        val locNamesFut = locationSchemeService.getSchemeLocations(reportItem.locations).map { locations =>
+          locations.map(_.locationName)
+        }
+        val futt = locNamesFut.map { locNames => reportItem.copy(locations = locNames) }
+        futt
+      }}
+      Future.sequence(listOfFutures)
+    }.map { list =>
+      Ok(Json.toJson(list))
+    }
   }
 
   def createNonSubmittedApplicationsReports(frameworkId: String) =
@@ -169,7 +184,7 @@ trait ReportingController extends BaseController {
       for {
         applications <- reportingRepository.candidateProgressReportNotWithdrawnWithPersonalDetails(frameworkId)
         testResults <- testReportRepository.getOnlineTestReports
-        contactDetails <- cdRepository.findAll
+        contactDetails <- contactDetailsRepository.findAll
         cDetails = contactDetails.map(c => c.userId -> c).toMap
       } yield {
         for {
@@ -190,7 +205,7 @@ trait ReportingController extends BaseController {
   def createSuccessfulCandidatesReport(frameworkId: String) = Action.async { implicit request =>
 
     val applications = reportingRepository.applicationsPassedInAssessmentCentre(frameworkId)
-    val allCandidates = cdRepository.findAll
+    val allCandidates = contactDetailsRepository.findAll
 
     val reports = for {
       apps <- applications
@@ -218,7 +233,7 @@ trait ReportingController extends BaseController {
       applications <- reportingRepository.applicationsReport(frameworkId)
       applicationsToExclude = getApplicationsNotToIncludeInReport(applications, nonSubmittedOnly)
       users <- getAppsFromAuthProvider(applicationsToExclude)
-      contactDetails <- cdRepository.findAll
+      contactDetails <- contactDetailsRepository.findAll
       reports = mergeApplications(users, contactDetails, applications)
     } yield {
       Ok(Json.toJson(reports.values))
@@ -226,10 +241,10 @@ trait ReportingController extends BaseController {
   }
 
   private def mergeApplications(
-    users: Map[String, PreferencesWithContactDetails],
-    contactDetails: List[ContactDetailsWithId],
-    applications: List[(String, IsNonSubmitted, PreferencesWithContactDetails)]
-  ) = {
+                                 users: Map[String, PreferencesWithContactDetails],
+                                 contactDetails: List[ContactDetailsWithId],
+                                 applications: List[(String, IsNonSubmitted, PreferencesWithContactDetails)]
+                               ) = {
 
     val contactDetailsMap = contactDetails.groupBy(_.userId).mapValues(_.headOption)
     val applicationsMap = applications
@@ -261,9 +276,11 @@ trait ReportingController extends BaseController {
   }
 
   private def getApplicationsNotToIncludeInReport(
-    createdApplications: List[(String, IsNonSubmitted, PreferencesWithContactDetails)],
-    nonSubmittedOnly: Boolean
-  ) = {
+                                                   createdApplications: List[(String, IsNonSubmitted, PreferencesWithContactDetails)],
+                                                   nonSubmittedOnly: Boolean
+                                                 )
+
+  = {
     if (nonSubmittedOnly) {
       createdApplications.collect { case (userId, false, _) => userId }.toSet
     } else {
@@ -271,7 +288,9 @@ trait ReportingController extends BaseController {
     }
   }
 
-  private def getAppsFromAuthProvider(candidateExclusionSet: Set[String])(implicit request: Request[AnyContent]) = {
+  private def getAppsFromAuthProvider(candidateExclusionSet: Set[String])(implicit request: Request[AnyContent])
+
+  = {
     for {
       allCandidates <- authProviderClient.candidatesReport
     } yield {

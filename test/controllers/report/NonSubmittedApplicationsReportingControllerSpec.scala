@@ -36,8 +36,9 @@ class NonSubmittedApplicationsReportingControllerSpec extends BaseReportingContr
   "Reporting controller create non-submitted applications report" should {
     "return a list of non submitted applications with phone number if contact details exist" in new NonSubmittedTestFixture {
       override val controller = new ReportingController {
-        override val diversityReportRepository = DiversityReportInMemoryRepository
-        override val cdRepository = new ContactDetailsInMemoryRepository {
+        override val locationSchemeService = locationSchemeServiceMock
+        override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val contactDetailsRepository = new ContactDetailsInMemoryRepository {
           override def findAll: Future[List[ContactDetailsWithId]] = {
             Future.successful(ContactDetailsWithId(
               "user1",
@@ -45,11 +46,11 @@ class NonSubmittedApplicationsReportingControllerSpec extends BaseReportingContr
             ) :: Nil)
           }
         }
-        override val authProviderClient: AuthProviderClient = authProviderClientMock
+        override val diversityReportRepository = DiversityReportInMemoryRepository
         override val questionnaireRepository = QuestionnaireInMemoryRepository
-        override val testReportRepository = TestReportInMemoryRepository
-        override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
+        override val testReportRepository = TestReportInMemoryRepository
+        override val authProviderClient: AuthProviderClient = authProviderClientMock
       }
       val result = controller.createNonSubmittedApplicationsReports(frameworkId)(createNonSubmittedAppsReportRequest(frameworkId)).run
 
@@ -71,17 +72,18 @@ class NonSubmittedApplicationsReportingControllerSpec extends BaseReportingContr
 
     "return only applications based on auth provider in registered state if there is no applications created" in new NonSubmittedTestFixture {
       override val controller = new ReportingController {
+        override val locationSchemeService = locationSchemeServiceMock
+        override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val contactDetailsRepository = ContactDetailsInMemoryRepository
+        override val diversityReportRepository = DiversityReportInMemoryRepository
+        override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val reportingRepository = new ReportingDocumentRootInMemoryRepository {
           override def applicationsReport(frameworkId: String): Future[List[(String, IsNonSubmitted, PreferencesWithContactDetails)]] = {
             Future.successful(Nil)
           }
         }
-        override val diversityReportRepository = DiversityReportInMemoryRepository
-        override val cdRepository = ContactDetailsInMemoryRepository
-        override val authProviderClient = authProviderClientMock
-        override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val testReportRepository = TestReportInMemoryRepository
-        override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val authProviderClient = authProviderClientMock
       }
       val result = controller.createNonSubmittedApplicationsReports(frameworkId)(createNonSubmittedAppsReportRequest(frameworkId)).run
 

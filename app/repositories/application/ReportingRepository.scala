@@ -42,7 +42,7 @@ import scala.concurrent.Future
    exclusively to reporting functionality
  */
 trait ReportingRepository {
-  def candidateProgressReport(frameworkId: String): Future[List[CandidateProgressReportItem]]
+  def candidateProgressReport(frameworkId: String): Future[List[CandidateProgressReportItem2]]
 
   def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[CandidateProgressReportItem]]
 
@@ -63,8 +63,9 @@ trait ReportingRepository {
 
 class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo: () => DB)
    extends ReactiveRepository[CreateApplicationRequest, BSONObjectID](CollectionNames.APPLICATION, mongo,
-        Commands.Implicits.createApplicationRequestFormats,
-        ReactiveMongoFormats.objectIdFormats) with ReportingRepository with RandomSelection with ReactiveRepositoryHelpers {
+        Commands.Implicits.createApplicationRequestFormats, ReactiveMongoFormats.objectIdFormats)
+     with ReportingRepository with RandomSelection with CommonBSONDocuments with ReportingRepoBSONReader
+     with ReactiveRepositoryHelpers {
 
   def docToCandidate(doc: BSONDocument): Candidate = {
     val userId = doc.getAs[String]("userId").getOrElse("")
@@ -139,7 +140,6 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       )
     }).getOrElse(ProgressResponse(applicationId))
   }
-
   // scalastyle:on method.length
 
 
@@ -185,8 +185,8 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn))
     )))
 
-  override def candidateProgressReport(frameworkId: String): Future[List[CandidateProgressReportItem]] =
-    candidateProgressReport(BSONDocument("frameworkId" -> frameworkId))
+  override def candidateProgressReport(frameworkId: String): Future[List[CandidateProgressReportItem2]] =
+    candidateProgressReport2(BSONDocument("frameworkId" -> frameworkId))
 
   private def candidateProgressReport(query: BSONDocument): Future[List[CandidateProgressReportItem]] = {
     val projection = BSONDocument(
@@ -213,6 +213,22 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     reportQueryWithProjections[BSONDocument](query, projection) map { lst =>
       lst.map(docToReport)
     }
+  }
+
+  private def candidateProgressReport2(query: BSONDocument): Future[List[CandidateProgressReportItem2]] = {
+    val projection = BSONDocument(
+      "applicationId" -> "1",
+      "progress-status" -> "1",
+      "personal-details.civilServant" -> "1",
+      "schemes" -> "1",
+      "scheme-locations" -> "1",
+      "assistance-details.hasDisability" -> "1",
+      "assistance-details.guaranteedInterview" -> "1",
+      "assistance-details.needsSupportForOnlineAssessment" -> "1",
+      "assistance-details.needsSupportAtVenue" -> "1"
+    )
+
+    reportQueryWithProjectionsBSON[CandidateProgressReportItem2](query, projection)
   }
 
   override def applicationsWithAssessmentScoresAccepted(frameworkId: String): Future[List[ApplicationPreferences]] =
@@ -291,9 +307,9 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
         val otLocation2Scheme2PassmarkEvaluation = pe.flatMap(_.getAs[String]("location2Scheme2").map(Result(_).toPassmark))
         val otAlternativeSchemePassmarkEvaluation = pe.flatMap(_.getAs[String]("alternativeScheme").map(Result(_).toPassmark))
 
-        ApplicationPreferences(UniqueIdentifier(userId), UniqueIdentifier(applicationId), fr1FirstLocation, fr1FirstFramework, fr1SecondFramework,
-          fr2FirstLocation, fr2FirstFramework, fr2SecondFramework, location, framework, hasDisability,
-          guaranteedInterview, needsAdjustment, aLevel, stemLevel,
+        ApplicationPreferences(UniqueIdentifier(userId), UniqueIdentifier(applicationId), fr1FirstLocation,
+          fr1FirstFramework, fr1SecondFramework, fr2FirstLocation, fr2FirstFramework, fr2SecondFramework, location,
+          framework, hasDisability, guaranteedInterview, needsAdjustment, aLevel, stemLevel,
           OnlineTestPassmarkEvaluationSchemes(otLocation1Scheme1PassmarkEvaluation, otLocation1Scheme2PassmarkEvaluation,
             otLocation2Scheme1PassmarkEvaluation, otLocation2Scheme2PassmarkEvaluation, otAlternativeSchemePassmarkEvaluation))
       }
@@ -444,7 +460,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     val framework = fpAlternatives.flatMap(_.getAs[Boolean]("framework").map(booleanTranslator))
 
     val applicationId = document.getAs[String]("applicationId").getOrElse("")
-    val progress: ProgressResponse = findProgress(document, applicationId)
+    val progress: ProgressResponse = toProgressResponse(applicationId).read(document)
 
     val issue = document.getAs[String]("issue")
 
@@ -662,8 +678,6 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
   private def isoTimeToPrettyDateTime(utcMillis: Long): String =
     timeZoneService.localize(utcMillis).toString("yyyy-MM-dd HH:mm:ss")
 
-  private def booleanTranslator(bool: Boolean) = if (bool) Yes else No
-
   private def reportQueryWithProjections[A](
                                              query: BSONDocument,
                                              prj: BSONDocument,
@@ -671,6 +685,16 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
                                              stopOnError: Boolean = true
                                            )(implicit reader: Format[A]): Future[List[A]] =
     collection.find(query).projection(prj).cursor[A](ReadPreference.nearest).collect[List](upTo, stopOnError)
+
+  private def reportQueryWithProjectionsBSON[A](
+                                                 query: BSONDocument,
+                                                 prj: BSONDocument,
+                                                 upTo: Int = Int.MaxValue,
+                                                 stopOnError: Boolean = true
+                                               )(implicit reader: BSONDocumentReader[A]): Future[List[A]] =
+    bsonCollection.find(query).projection(prj)
+      .cursor[A](ReadPreference.nearest)
+      .collect[List](Int.MaxValue, stopOnError = true)
 
   def extract(key: String)(root: Option[BSONDocument]) = root.flatMap(_.getAs[String](key))
 

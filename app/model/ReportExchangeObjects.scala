@@ -20,6 +20,7 @@ import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.Commands.ContactDetails
 import model.Commands.Implicits._
 import model.CandidateScoresCommands.Implicits._
+import model.Scheme.Scheme
 import org.joda.time.{ DateTime, LocalDate }
 import play.api.libs.json.Json
 
@@ -65,6 +66,19 @@ object ReportExchangeObjects {
     guaranteedInterview: Option[String],
     issue: Option[String]
   )
+
+  case class CandidateProgressReportItem2(
+                                           applicationId: UniqueIdentifier,
+                                           progress: Option[String],
+                                           schemes: List[Scheme],
+                                           locations: List[String],
+                                           disability: Option[String],
+                                           gis: Option[Boolean],
+                                           onlineAdjustments: Option[Boolean],
+                                           assessmentCentreAdjustments: Option[Boolean],
+                                           civilServant: Option[Boolean],
+                                           fsacIndicator: Option[String]
+                                         )
 
   case class ReportWithPersonalDetails(
     applicationId: UniqueIdentifier,
@@ -208,6 +222,7 @@ object ReportExchangeObjects {
 
   object Implicits {
     implicit val candidateProgressReportItemFormats = Json.format[CandidateProgressReportItem]
+    implicit val candidateProgressReportItemFormats2 = Json.format[CandidateProgressReportItem2]
     implicit val candidateProgressReportItemWithPersonalDetailsFormats = Json.format[ReportWithPersonalDetails]
     implicit val passMarkReportTestResultFormats = Json.format[TestResult]
     implicit val adjustmentReportFormats = Json.format[AdjustmentReport]

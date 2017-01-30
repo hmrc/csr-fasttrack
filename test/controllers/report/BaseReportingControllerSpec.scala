@@ -35,6 +35,7 @@ import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
 import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, DiversityReportRepository, QuestionnaireRepository, TestReportRepository }
+import services.locationschemes.LocationSchemeService
 import testkit.MockitoImplicits.OngoingStubbingExtension
 import testkit.UnitWithAppSpec
 
@@ -46,6 +47,8 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
 
   trait TestFixture extends TestFixtureBase {
     val frameworkId = "FastTrack-2015"
+
+    val locationSchemeServiceMock = mock[LocationSchemeService]
 
     val authProviderClientMock = mock[AuthProviderClient]
     when(authProviderClientMock.candidatesReport(any())).thenReturn(Future.successful(
@@ -62,8 +65,9 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
     val testReportRepoMock = mock[TestReportRepository]
 
     val controller = new ReportingController {
+      val locationSchemeService = locationSchemeServiceMock
       val diversityReportRepository = diversityReportRepoMock
-      val cdRepository = contactDetailsRepoMock
+      val contactDetailsRepository = contactDetailsRepoMock
       val authProviderClient = authProviderClientMock
       val questionnaireRepository = questionnaireRepoMock
       val testReportRepository = testReportRepoMock

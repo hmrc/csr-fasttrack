@@ -79,6 +79,15 @@ trait LocationSchemeService {
     }
   }
 
+  def getSchemeLocations(locationIds: List[String]): Future[List[LocationSchemes]] = {
+    for {
+      locationSchemes <- locationSchemeRepository.getSchemesAndLocations
+    } yield {
+      locationIds.map(locId =>
+        locationSchemes.find(_.id == locId).getOrElse(throw NotFoundException(Some(s"Location $locId not found"))))
+    }
+  }
+
   def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit] = {
     appRepository.updateSchemeLocations(applicationId, locationIds)
   }
