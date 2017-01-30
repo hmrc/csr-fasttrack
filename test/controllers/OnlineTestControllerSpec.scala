@@ -26,6 +26,8 @@ import model.ApplicationStatuses
 import model.Commands.Address
 import model.OnlineTestCommands.OnlineTestApplication
 import model.PersistedObjects.ContactDetails
+import model.exchange.OnlineTest
+import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
 import org.mockito.Matchers.any
 import org.mockito.Mockito._
@@ -192,7 +194,13 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
 
       override def getOnlineTest(userId: String): Future[OnlineTest] = Future.successful {
         val date = DateTime.now
-        OnlineTest(date, date.plusDays(4), "http://www.google.co.uk", "123@test.com", isOnlineTestEnabled = true, pdfReportAvailable = false)
+        OnlineTest(
+          inviteDate = date,
+          expireDate = date.plusDays(7),
+          onlineTestLink = "http://www.google.co.uk",
+          token = tokenFactory.generateUUID(),
+          isOnlineTestEnabled = true
+        )
       }
     }
 
@@ -214,6 +222,8 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
             )
           )
         }
+
+        override def startOnlineTest(appId: String): Future[Unit] = Future.successful(())
       }
       override val onlineTestingService = new OnlineTestServiceMock {
         override val cdRepository = new ContactDetailsInMemoryRepository {
@@ -224,6 +234,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
       }
       override val onlineTestExtensionService = onlineTestExtensionServiceMock
       override val onlineTestPDFReportRepo = onlineTestPDFReportRepoMock
+
     }
 
     def createOnlineTestRequest(userId: String) = {

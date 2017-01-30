@@ -42,10 +42,10 @@ trait OnlineTestExpiredStatusGenerator extends ConstructiveGenerator {
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
 
     val onlineTestProfile = CubiksTestProfile(
-      cubiksId = 117344,
+      cubiksUserId = 117344,
       participantScheduleId = 149245,
-      inviteDate = DateTime.now().minusDays(7),
-      expireDate = DateTime.now(),
+      invitationDate = DateTime.now().minusDays(7),
+      expirationDate = DateTime.now(),
       onlineTestUrl = generatorConfig.cubiksUrl,
       token = UUID.randomUUID().toString
     )
@@ -56,7 +56,7 @@ trait OnlineTestExpiredStatusGenerator extends ConstructiveGenerator {
       - <- otRepository.updateStatus(candidateInPreviousStatus.userId, ApplicationStatuses.OnlineTestExpired)
     } yield {
       candidateInPreviousStatus.copy(onlineTestProfile = Some(
-        OnlineTestProfileResponse(onlineTestProfile.cubiksId, onlineTestProfile.token, onlineTestProfile.onlineTestUrl)
+        OnlineTestProfileResponse(onlineTestProfile.cubiksUserId, onlineTestProfile.token, onlineTestProfile.onlineTestUrl)
       ))
     }
   }

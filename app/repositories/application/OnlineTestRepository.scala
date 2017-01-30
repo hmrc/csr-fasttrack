@@ -52,7 +52,7 @@ trait OnlineTestRepository {
 
   def nextApplicationReadyForPDFReportRetrieving(): Future[Option[OnlineTestApplicationWithCubiksUser]]
 
-  def getOnlineTestDetails(userId: String): Future[CubiksTestProfile]
+  def getCubiksTestProfile(userId: String): Future[CubiksTestProfile]
 
   def updateStatus(userId: String, status: ApplicationStatuses.EnumVal): Future[Unit]
 
@@ -122,7 +122,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     }
   }
 
-  override def getOnlineTestDetails(userId: String): Future[CubiksTestProfile] = {
+  override def getCubiksTestProfile(userId: String): Future[CubiksTestProfile] = {
 
     val query = BSONDocument("userId" -> userId)
     val projection = BSONDocument("online-tests" -> 1, "_id" -> 0)
@@ -211,9 +211,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       s"progress-status.$OnlineTestFailedProgress" -> "",
       s"progress-status.$OnlineTestFailedNotifiedProgress" -> "",
       s"progress-status.$AwaitingOnlineTestAllocationProgress" -> "",
-      s"online-tests.xmlReportSaved" -> "",
-      s"online-tests.pdfReportSaved" -> "",
-      s"passmarkEvaluation" -> ""
+      "passmarkEvaluation" -> ""
     )) ++ BSONDocument("$set" -> BSONDocument(
       s"progress-status.$OnlineTestInvitedProgress" -> true,
       "applicationStatus" -> ApplicationStatuses.OnlineTestInvited,
@@ -287,6 +285,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   override def nextTestForReminder(reminder: ReminderNotice): Future[Option[NotificationExpiringOnlineTest]] = {
+
     val progressStatusQuery = BSONDocument("$and" -> BSONArray(
       BSONDocument("$or" -> BSONArray(
         BSONDocument("applicationStatus" -> ApplicationStatuses.OnlineTestInvited),

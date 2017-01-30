@@ -81,15 +81,15 @@ trait OnlineTestService {
 
   def getOnlineTest(userId: String): Future[OnlineTest] = {
     for {
-      onlineTestDetails <- otRepository.getOnlineTestDetails(userId)
+      onlineTestDetails <- otRepository.getCubiksTestProfile(userId)
       candidate <- appRepository.findCandidateByUserId(userId)
       hasReport <- otprRepository.hasReport(candidate.get.applicationId.get)
     } yield {
       OnlineTest(
-        onlineTestDetails.inviteDate,
-        onlineTestDetails.expireDate,
+        onlineTestDetails.invitationDate,
+        onlineTestDetails.expirationDate,
         onlineTestDetails.onlineTestUrl,
-        onlineTestDetails.token,
+        s"${onlineTestDetails.token}@${gatewayConfig.emailDomain}}",
         onlineTestDetails.isOnlineTestEnabled,
         hasReport,
         onlineTestDetails.startedDateTime,
@@ -116,8 +116,7 @@ trait OnlineTestService {
       expirationDate,
       invitation.authenticateUrl,
       token,
-      isOnlineTestEnabled = true,
-      startedDateTime = Some(DateTime.now)
+      isOnlineTestEnabled = true
     )
 
     invitationProcess.flatMap(

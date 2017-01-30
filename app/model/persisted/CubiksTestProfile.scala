@@ -22,15 +22,17 @@ import reactivemongo.bson.{ BSONDocument, BSONHandler, Macros }
 import repositories.BSONDateTimeHandler
 
 case class CubiksTestProfile(
-  cubiksId: Int,
+  cubiksUserId: Int,
   participantScheduleId: Int,
-  inviteDate: DateTime,
-  expireDate: DateTime,
+  invitationDate: DateTime,
+  expirationDate: DateTime,
   onlineTestUrl: String,
   token: String,
-  isOnlineTestEnabled: Boolean = false,
+  isOnlineTestEnabled: Boolean = true,
   startedDateTime: Option[DateTime] = None,
-  completedDateTime: Option[DateTime] = None
+  completedDateTime: Option[DateTime] = None,
+  xmlReportSaved: Boolean = false,
+  pdfReportSaved: Boolean = false
 )
 
 object CubiksTestProfile {

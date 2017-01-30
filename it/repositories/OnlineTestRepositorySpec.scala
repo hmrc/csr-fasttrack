@@ -23,7 +23,7 @@ import model.{ AdjustmentDetail, ApplicationStatuses, FirstReminder, ProgressSta
 import model.Adjustments._
 import model.ApplicationStatuses._
 import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound }
-import model.OnlineTestCommands.{ OnlineTestApplicationWithCubiksUser, OnlineTestProfile }
+import model.OnlineTestCommands.OnlineTestApplicationWithCubiksUser
 import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
 import org.joda.time.{ DateTime, DateTimeZone }
 import reactivemongo.bson.{ BSONArray, BSONDocument }
@@ -32,6 +32,7 @@ import repositories.application.{ GeneralApplicationMongoRepository, OnlineTestM
 import services.GBTimeZoneService
 import testkit.MongoRepositorySpec
 import model.EvaluationResults._
+import model.persisted.CubiksTestProfile
 import reactivemongo.api.commands.WriteResult
 
 class OnlineTestRepositorySpec extends MongoRepositorySpec {
@@ -170,15 +171,16 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
           "preferredName" -> "Wilfredo",
           "dateOfBirth" -> "1952-12-12"
         ),
-        "online-tests" -> BSONDocument(
-          "cubiksUserId" -> 1111,
-          "token" -> "previousToken",
-          "onlineTestUrl" -> "previousOnlineTestUrl",
-          "invitationDate" -> DateTime.now().minusDays(10),
-          "expiratinDate" -> expirationDate,
-          "participantScheduleId" -> "previousScheduleId",
-          "xmlReportSaved" -> true,
-          "pdfReportSaved" -> true
+        "online-tests" -> CubiksTestProfile(
+          cubiksUserId = 1111,
+          participantScheduleId = 123,
+          invitationDate = DateTime.now.minusDays(10),
+          expirationDate = expirationDate,
+          onlineTestUrl = "http://www.google.co.uk",
+          token = "previousToken",
+          isOnlineTestEnabled = true,
+          xmlReportSaved = true,
+          pdfReportSaved = true
         ),
         "passmarkEvaluation" -> "notEmpty"
       )).futureValue
@@ -268,7 +270,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
       onlineTestRepo.updateExpiryTime(appIdWithUserId.userId, newExpiration).futureValue
 
-      val expireDate = onlineTestRepo.getOnlineTestDetails(appIdWithUserId.userId).map(_.expireDate).futureValue
+      val expireDate = onlineTestRepo.getCubiksTestProfile(appIdWithUserId.userId).map(_.expirationDate).futureValue
       expireDate.toDate mustBe newExpiration.toDate
 
       val appStatus = onlineTestRepo.getOnlineTestApplication(appIdWithUserId.applicationId).map(_.get.applicationStatus).futureValue
@@ -322,7 +324,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
   "Get online test" should {
     "throw an exception if there is no test for the specific user id" in {
-      val result = onlineTestRepo.getOnlineTestDetails("userId").failed.futureValue
+      val result = onlineTestRepo.getCubiksTestProfile("userId").failed.futureValue
 
       result mustBe an[NotFoundException]
     }
@@ -332,10 +334,10 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       createOnlineTest("userId", ApplicationStatuses.OnlineTestInvited, "token", Some("http://www.someurl.com"),
         invitationDate = Some(date), expirationDate = Some(date.plusDays(7)))
 
-      val result = onlineTestRepo.getOnlineTestDetails("userId").futureValue
+      val result = onlineTestRepo.getCubiksTestProfile("userId").futureValue
 
-      result.expireDate.toDate mustBe new DateTime("2016-03-15T13:04:29.643Z").toDate
-      result.onlineTestLink mustBe "http://www.someurl.com"
+      result.expirationDate.toDate mustBe new DateTime("2016-03-15T13:04:29.643Z").toDate
+      result.onlineTestUrl mustBe "http://www.someurl.com"
       result.isOnlineTestEnabled mustBe true
     }
   }
@@ -378,22 +380,23 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       val appIdWithUserId = createOnlineTest("userId", ApplicationStatuses.Submitted, "token", Some("http://www.someurl.com"),
         invitationDate = Some(date), expirationDate = Some(date.plusDays(7)), xmlReportSaved = Some(true), pdfReportSaved = Some(true))
 
-      val TestProfile = OnlineTestProfile(
+      val TestProfile = CubiksTestProfile(
         1234,
-        "tokenId",
-        "http://someurl.com",
+        111,
         invitationDate = date,
         expirationDate = date.plusDays(7),
-        123456
+        "http://someurl.com",
+        "tokenId",
+        isOnlineTestEnabled = true
       )
       onlineTestRepo.storeOnlineTestProfileAndUpdateStatusToInvite(appIdWithUserId.applicationId, TestProfile).futureValue
 
-      val result = onlineTestRepo.getOnlineTestDetails(appIdWithUserId.userId).futureValue
+      val result = onlineTestRepo.getCubiksTestProfile(appIdWithUserId.userId).futureValue
       // The expireDate has +7 days, as the method get from the repo adds 7 days
-      result.expireDate.toDate mustBe(new DateTime("2016-03-15T13:04:29.643Z").toDate)
-      result.inviteDate.toDate mustBe(date.toDate)
-      result.isOnlineTestEnabled mustBe(true)
-      result.onlineTestLink mustBe("http://someurl.com")
+      result.expirationDate.toDate mustBe new DateTime("2016-03-15T13:04:29.643Z").toDate
+      result.invitationDate.toDate mustBe date.toDate
+      result.isOnlineTestEnabled mustBe true
+      result.onlineTestUrl mustBe "http://someurl.com"
 
       val query = BSONDocument("applicationId" -> appIdWithUserId.applicationId)
       val (xml, pdf) = helperRepo.collection.find(query).one[BSONDocument].map { docOpt =>
@@ -402,14 +405,21 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
           root.getAs[Boolean]("pdfReportSaved"))
       }.futureValue
 
-      xml mustBe empty
-      pdf mustBe empty
+      xml mustBe Some(false)
+      pdf mustBe Some(false)
     }
 
     "unset the online test flags for already completed online test when storeOnlineTestProfileAndUpdateStatus is called again" in {
-      val InvitationDate = DateTime.now()
+      val InvitationDate = DateTime.now(DateTimeZone.UTC)
       val ExpirationDate = InvitationDate.plusDays(7)
-      val TestProfile = OnlineTestProfile(1234, "tokenId", "http://someurl.com", InvitationDate, ExpirationDate, 123456)
+      val NewTestProfile = CubiksTestProfile(
+        1111,
+        111,
+        InvitationDate,
+        ExpirationDate,
+        "http://someurl.com",
+        "tokenId"
+      )
       helperRepo.collection.insert(BSONDocument(
         "applicationId" -> "appId",
         "applicationStatus" -> ApplicationStatuses.OnlineTestFailedNotified,
@@ -422,20 +432,23 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
           s"${ProgressStatuses.OnlineTestFailedNotifiedProgress}" -> true,
           s"${ProgressStatuses.AwaitingOnlineTestAllocationProgress}" -> true
         ),
-        "online-tests" -> BSONDocument(
-          "cubiksUserId" -> 1111,
-          "token" -> "previousToken",
-          "onlineTestUrl" -> "previousOnlineTestUrl",
-          "invitationDate" -> DateTime.now().minusDays(10),
-          "expiratinDate" -> DateTime.now().minusDays(3),
-          "participantScheduleId" -> "previousScheduleId",
-          "xmlReportSaved" -> true,
-          "pdfReportSaved" -> true
+        "online-tests" -> CubiksTestProfile(
+          cubiksUserId =  1111,
+          participantScheduleId =  2222,
+          invitationDate = DateTime.now.minusDays(10),
+          expirationDate = DateTime.now.minusDays(3),
+          onlineTestUrl = "http://www.google.co.uk",
+          token = "previousToken",
+          isOnlineTestEnabled = true,
+          startedDateTime = Some(DateTime.now),
+          completedDateTime = Some(DateTime.now),
+          xmlReportSaved = true,
+          pdfReportSaved = true
         ),
         "passmarkEvaluation" -> "notEmpty"
       )).futureValue
 
-      onlineTestRepo.storeOnlineTestProfileAndUpdateStatusToInvite("appId", TestProfile).futureValue
+      onlineTestRepo.storeOnlineTestProfileAndUpdateStatusToInvite("appId", NewTestProfile).futureValue
 
       val query = BSONDocument("applicationId" -> "appId")
       helperRepo.collection.find(query).one[BSONDocument].map {
@@ -446,17 +459,20 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
           val allProgressStatuses = progressStatus.elements.map(_._1).toList
           allProgressStatuses mustBe List(ProgressStatuses.OnlineTestInvitedProgress.name)
 
-          val onlineTests = doc.getAs[BSONDocument]("online-tests").get
-          onlineTests.getAs[Int]("cubiksUserId") mustBe Some(1234)
-          onlineTests.getAs[String]("token") mustBe Some("tokenId")
-          onlineTests.getAs[String]("onlineTestUrl") mustBe Some("http://someurl.com")
-          onlineTests.getAs[DateTime]("invitationDate").get mustBe InvitationDate.withZone(DateTimeZone.UTC)
-          onlineTests.getAs[DateTime]("expirationDate").get mustBe ExpirationDate.withZone(DateTimeZone.UTC)
-          onlineTests.getAs[Int]("participantScheduleId") mustBe Some(123456)
-          onlineTests.getAs[Boolean]("xmlReportSaved") mustBe empty
-          onlineTests.getAs[Boolean]("pdfReportSaved") mustBe empty
+          val onlineTests = doc.getAs[CubiksTestProfile]("online-tests").get
 
-          doc.getAs[BSONDocument]("passmarkEvaluation") mustBe (empty)
+          onlineTests.cubiksUserId mustBe NewTestProfile.cubiksUserId
+          onlineTests.participantScheduleId mustBe NewTestProfile.participantScheduleId
+          onlineTests.invitationDate mustBe NewTestProfile.invitationDate
+          onlineTests.expirationDate mustBe NewTestProfile.expirationDate
+          onlineTests.onlineTestUrl mustBe NewTestProfile.onlineTestUrl
+          onlineTests.token mustBe NewTestProfile.token
+          onlineTests.startedDateTime mustBe NewTestProfile.startedDateTime
+          onlineTests.completedDateTime mustBe NewTestProfile.completedDateTime
+          onlineTests.xmlReportSaved mustBe NewTestProfile.xmlReportSaved
+          onlineTests.pdfReportSaved mustBe NewTestProfile.pdfReportSaved
+
+          doc.getAs[BSONDocument]("passmarkEvaluation") mustBe empty
 
         case None => fail("Application should have been already created and cannot be empty")
       }.futureValue
@@ -753,36 +769,16 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
   def createOnlineTest(userId: String, appStatus: ApplicationStatuses.EnumVal, token: String, onlineTestUrl: Option[String],
                        invitationDate: Option[DateTime], expirationDate: Option[DateTime], cubiksUserId: Option[Int] = None,
                        xmlReportSaved: Option[Boolean] = None, pdfReportSaved: Option[Boolean] = None): ApplicationIdWithUserIdAndStatus = {
-    val onlineTests = if (pdfReportSaved.isDefined && xmlReportSaved.isDefined) {
-      BSONDocument(
-        "cubiksUserId" -> cubiksUserId.getOrElse(0),
-        "onlineTestUrl" -> onlineTestUrl.get,
-        "invitationDate" -> invitationDate.get,
-        "expirationDate" -> expirationDate.get,
-        "token" -> token,
-        "xmlReportSaved" -> xmlReportSaved.get,
-        "pdfReportSaved" -> pdfReportSaved.get
+    val onlineTests = CubiksTestProfile(
+        cubiksUserId = cubiksUserId.getOrElse(0),
+        participantScheduleId = 123,
+        invitationDate = invitationDate.get,
+        expirationDate = expirationDate.get,
+        onlineTestUrl = onlineTestUrl.get,
+        token = token,
+        xmlReportSaved = xmlReportSaved.getOrElse(false),
+        pdfReportSaved = pdfReportSaved.getOrElse(false)
       )
-    } else {
-      if (xmlReportSaved.isDefined) {
-        BSONDocument(
-          "cubiksUserId" -> cubiksUserId.getOrElse(0),
-          "onlineTestUrl" -> onlineTestUrl.get,
-          "invitationDate" -> invitationDate.get,
-          "expirationDate" -> expirationDate.get,
-          "token" -> token,
-          "xmlReportSaved" -> xmlReportSaved.get
-        )
-      } else {
-        BSONDocument(
-          "cubiksUserId" -> cubiksUserId.getOrElse(0),
-          "onlineTestUrl" -> onlineTestUrl.get,
-          "invitationDate" -> invitationDate.get,
-          "expirationDate" -> expirationDate.get,
-          "token" -> token
-        )
-      }
-    }
 
     val appId = UUID.randomUUID().toString
 

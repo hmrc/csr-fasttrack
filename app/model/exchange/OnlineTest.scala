@@ -23,7 +23,7 @@ case class OnlineTest(
   inviteDate: DateTime,
   expireDate: DateTime,
   onlineTestLink: String,
-  cubiksEmailAddress: String,
+  token: String,
   isOnlineTestEnabled: Boolean = false,
   pdfReportAvailable: Boolean = false,
   startedDateTime: Option[DateTime] = None,

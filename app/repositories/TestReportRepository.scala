@@ -151,7 +151,7 @@ class TestReportMongoRepository(implicit mongo: () => DB)
   def remove(applicationId: String) = {
     val query = BSONDocument("applicationId" -> applicationId)
 
-    collection.remove(query, firstMatchOnly = false).map { writeResult => () }
+    collection.remove(query, firstMatchOnly = false).map { _ => () }
   }
 
 }

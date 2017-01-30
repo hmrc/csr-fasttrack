@@ -16,10 +16,10 @@
 
 package services.onlinetesting
 
-import controllers.OnlineTestDetails
-import factories.DateTimeFactory
+import factories.{ DateTimeFactory, UUIDFactory }
 import model.ApplicationStatuses
 import model.OnlineTestCommands.OnlineTestApplication
+import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
@@ -34,7 +34,7 @@ class OnlineTestExtensionServiceSpec extends PlaySpec with ScalaFutures with Moc
 
     "add extra days onto expiry, from the expiry time, if not expired" in new TestFixture {
       when(dateTime.nowLocalTimeZone).thenReturn(now)
-      when(repository.getOnlineTestDetails(any())).thenReturnAsync(onlineTest)
+      when(repository.getCubiksTestProfile(any())).thenReturnAsync(onlineTest)
       when(repository.updateExpiryTime(any(), any())).thenReturnAsync()
 
       service.extendExpiryTime(onlineTestApp, extraDays).futureValue mustBe (())
@@ -45,7 +45,7 @@ class OnlineTestExtensionServiceSpec extends PlaySpec with ScalaFutures with Moc
     "add extra days onto expiry, from today, if already expired" in new TestFixture {
       val nowBeyondExpiry = expirationDate.plusDays(10)
       when(dateTime.nowLocalTimeZone).thenReturn(nowBeyondExpiry)
-      when(repository.getOnlineTestDetails(any())).thenReturnAsync(onlineTest)
+      when(repository.getCubiksTestProfile(any())).thenReturnAsync(onlineTest)
       when(repository.updateExpiryTime(any(), any())).thenReturnAsync()
 
       service.extendExpiryTime(onlineTestApp, extraDays).futureValue mustBe (())
@@ -65,7 +65,15 @@ class OnlineTestExtensionServiceSpec extends PlaySpec with ScalaFutures with Moc
     val now = DateTime.now()
     val invitationDate = now.minusDays(4)
     val expirationDate = now.plusDays(3)
-    val onlineTest = OnlineTestDetails(invitationDate, expirationDate, "http://example.com/", cubiksEmail, isOnlineTestEnabled = true)
+    val onlineTest = CubiksTestProfile(
+      cubiksUserId = 123,
+      participantScheduleId = 111,
+      invitationDate = invitationDate,
+      expirationDate = expirationDate,
+      onlineTestUrl = "http://www.google.co.uk",
+      token = UUIDFactory.generateUUID(),
+      isOnlineTestEnabled = true
+    )
     val numericalTimeAdjustmentPercentage = 0
     val verbalTimeAdjustmentPercentage = 0
     val onlineTestApp = OnlineTestApplication(
