@@ -17,7 +17,7 @@
 package services.locationschemes
 
 object DistanceCalculator {
-  def calcKilometersBetween(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Double = {
+  def calcMilesBetween(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Double = {
     // Using haversine distance
     val deltaLat = math.toRadians(lat2 - lat1)
     val deltaLong = math.toRadians(lng2 - lng1)
@@ -29,6 +29,6 @@ object DistanceCalculator {
     // WGS 84 specifies this diameter at the equator, but this calculation takes the earth to be a perfect sphere,
     // which is a simplification as it is an oblate spheroid
     val diameterOfTheEarthAtEquator = 6378.137
-    diameterOfTheEarthAtEquator * greatCircleDistance
+    diameterOfTheEarthAtEquator * greatCircleDistance / 1.609344
   }
 }
