@@ -740,23 +740,27 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       case (None, None ) =>
         helperRepo.collection.insert(BSONDocument(
           "applicationId" -> appId,
+          "userId" -> appId,
           "applicationStatus" -> applicationStatus
         ))
       case (Some(xmlReportSaved), None) =>
         helperRepo.collection.insert(BSONDocument(
           "applicationId" -> appId,
+          "userId" -> appId,
           "applicationStatus" -> applicationStatus,
           "online-tests" -> BSONDocument("xmlReportSaved" -> xmlReportSaved)
         ))
       case (None, Some(alreadyEvaluatedAgainstPassmarkVersion)) =>
         helperRepo.collection.insert(BSONDocument(
           "applicationId" -> appId,
+          "userId" -> appId,
           "applicationStatus" -> applicationStatus,
           "passmarkEvaluation" -> BSONDocument("passmarkVersion" -> alreadyEvaluatedAgainstPassmarkVersion)
         ))
       case (Some(xmlReportSaved), Some(alreadyEvaluatedAgainstPassmarkVersion)) =>
         helperRepo.collection.insert(BSONDocument(
           "applicationId" -> appId,
+          "userId" -> appId,
           "applicationStatus" -> applicationStatus,
           "online-tests" -> BSONDocument("xmlReportSaved" -> xmlReportSaved),
           "passmarkEvaluation" -> BSONDocument("passmarkVersion" -> alreadyEvaluatedAgainstPassmarkVersion)

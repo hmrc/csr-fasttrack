@@ -23,10 +23,8 @@ import connectors.PassMarkExchangeObjects.Settings
 import mocks.{ OnlineIntegrationTestInMemoryRepository, PassMarkSettingsInMemoryRepository }
 import model.EvaluationResults._
 import model.OnlineTestCommands.CandidateEvaluationData
-import model.PersistedObjects.CandidateTestReport
-import model.{ ApplicationStatuses, Preferences, Scheme }
-import model.Scheme.Scheme
 import model.persisted.SchemeEvaluationResult
+import model.{ ApplicationStatuses, Scheme }
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.ceedubs.ficus.readers.ValueReader
@@ -34,12 +32,11 @@ import org.joda.time.DateTime
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.Logger
-import play.api.libs.json.Json
 import repositories.application.GeneralApplicationRepository
 import repositories.{ FrameworkPreferenceRepository, FrameworkRepository, PassMarkSettingsRepository, TestReportRepository }
 import services.onlinetesting.EvaluateOnlineTestService
 import services.passmarksettings.PassMarkSettingsService
-import services.testmodel.{ OnlineTestPassmarkServiceTest, SchemeEvaluationTestResult, ScoreEvaluationTestExpectation }
+import services.testmodel.{ OnlineTestPassmarkServiceTest, SchemeEvaluationTestResult }
 import testkit.IntegrationSpec
 
 class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar with OneAppPerSuite {
@@ -107,7 +104,7 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
               actualResult.applicationStatus mustBe ApplicationStatuses.stringToEnum(expected.applicationStatus)
             }
             withClue(testMessage + " version") {
-              actualResult.version must be(passmarkSettings.version)
+              actualResult.version mustBe passmarkSettings.version
             }
           }
         }
