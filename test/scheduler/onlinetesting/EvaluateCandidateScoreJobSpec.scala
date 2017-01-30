@@ -17,6 +17,7 @@
 package scheduler.onlinetesting
 
 import connectors.PassMarkExchangeObjects.Settings
+import model.ApplicationStatuses
 import model.OnlineTestCommands.CandidateEvaluationData
 import model.PersistedObjects.CandidateTestReport
 import org.joda.time.DateTime
@@ -39,7 +40,8 @@ class EvaluateCandidateScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
 
     "evaluate the score successfully for ONLINE_TEST_COMPLETED" in new TestFixture {
       val onlineTestCompletedCandidateScore = CandidateEvaluationData(
-        Settings(List(), "version", DateTime.now(), "user", "version1"), Nil, CandidateTestReport("appId", "type"))
+        Settings(List(), "version", DateTime.now(), "user", "version1"), Nil, CandidateTestReport("appId", "type"),
+        ApplicationStatuses.OnlineTestCompleted)
       when(passmarkServiceMock.nextCandidateReadyForEvaluation).thenReturn(Future.successful(Some(onlineTestCompletedCandidateScore)))
       when(passmarkServiceMock.evaluate(onlineTestCompletedCandidateScore)).thenReturn(Future.successful(()))
       evaluateCandidateScoreJob.tryExecute().futureValue

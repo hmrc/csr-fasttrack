@@ -49,7 +49,6 @@ object OnlineTestPassmarkRulesEngine extends OnlineTestPassmarkRulesEngine {
       (scores.situational, thresholds.situational)
     )
 
-    // TODO: Should we add explicit flag isGISCandidate to make sure only 2 tests are empty?
     val testResults: Seq[Result] = resultsToPassmark.map {
       case (None, _) => Green
       case (Some(TestResult(_, _, Some(tScore), _, _, _)), passMark) => schemeResult(tScore, passMark)

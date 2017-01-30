@@ -5,6 +5,7 @@ import play.api.libs.json.Json
 
 case class OnlineTestPassmarkServiceTest(schemes: List[String],
                                          scores: CandidateTestReport,
+                                         applicationStatus: String,
                                          expected: ScoreEvaluationTestExpectation)
 
 object OnlineTestPassmarkServiceTest {

@@ -16,8 +16,9 @@
 
 package services.testdata
 
-import model.ApplicationStatuses
-import model.EvaluationResults.{ Amber, RuleCategoryResult }
+import model.EvaluationResults.Amber
+import model.persisted.SchemeEvaluationResult
+import model.{ ApplicationStatuses, Scheme }
 import repositories._
 import repositories.application.OnlineTestRepository
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -33,15 +34,13 @@ trait AwaitingOnlineTestReevaluationStatusGenerator extends ConstructiveGenerato
   val otRepository: OnlineTestRepository
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
-    // TODO LT: fix it
-//    val ruleCategory = RuleCategoryResult(Amber, Some(Amber), Some(Amber), Some(Amber), Some(Amber))
-//    for {
-//      candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-//      _ <- otRepository.savePassMarkScore(candidateInPreviousStatus.applicationId.get, "version2", ruleCategory,
-//        ApplicationStatuses.AwaitingOnlineTestReevaluation)
-//    } yield {
-//      candidateInPreviousStatus
-//    }
-    ???
+    val evaluationResult = List(SchemeEvaluationResult(Scheme.Business, Amber))
+    for {
+      candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
+      _ <- otRepository.savePassMarkScore(candidateInPreviousStatus.applicationId.get, "version2", evaluationResult,
+        ApplicationStatuses.AwaitingOnlineTestReevaluation)
+    } yield {
+      candidateInPreviousStatus
+    }
   }
 }

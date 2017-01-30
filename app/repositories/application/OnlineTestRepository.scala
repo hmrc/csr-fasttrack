@@ -347,7 +347,11 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
         "passmarkEvaluation.passmarkVersion" -> BSONDocument("$exists" -> false)),
       BSONDocument(
         "applicationStatus" -> ApplicationStatuses.AwaitingOnlineTestReevaluation,
+        "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)),
+      BSONDocument(
+        "applicationStatus" -> ApplicationStatuses.AssessmentScoresAccepted,
         "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion))
+
     ))
 
     selectRandom(query).map(_.map { doc =>

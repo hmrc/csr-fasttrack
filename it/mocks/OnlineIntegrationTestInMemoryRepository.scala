@@ -29,13 +29,8 @@ import repositories.application.OnlineTestRepository
 import scala.collection.mutable
 import scala.concurrent.Future
 
-/**
-  * @deprecated Please use Mockito
-  */
-case class TestableResult(result: RuleCategoryResult, version: String, applicationStatus: ApplicationStatuses.EnumVal)
-
-case class TestableResult2(version: String, evaluatedSchemes: List[SchemeEvaluationResult],
-                           applicationStatus: ApplicationStatuses.EnumVal)
+case class TestableResult(version: String, evaluatedSchemes: List[SchemeEvaluationResult],
+                          applicationStatus: ApplicationStatuses.EnumVal)
 
 /**
   * @deprecated Please use Mockito
@@ -44,7 +39,6 @@ object OnlineIntegrationTestInMemoryRepository extends OnlineIntegrationTestInMe
 
 class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
   val inMemoryRepo = new mutable.HashMap[String, TestableResult]
-  val inMemoryRepo2 = new mutable.HashMap[String, TestableResult2]
 
   def nextApplicationReadyForOnlineTesting: Future[Option[OnlineTestApplication]] =
     Future.successful(Some(OnlineTestApplication("appId", ApplicationStatuses.Submitted, "userId", guaranteedInterview = false,
@@ -83,7 +77,7 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
 
   override def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
     applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
-    inMemoryRepo2 += applicationId -> TestableResult2(version, evaluationResult, applicationStatus)
+    inMemoryRepo += applicationId -> TestableResult(version, evaluationResult, applicationStatus)
     Future.successful(())
   }
 

@@ -18,12 +18,11 @@ package services.testdata
 
 import java.util.UUID
 
-import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import model.ApplicationStatuses
-import model.EvaluationResults.RuleCategoryResult
+import model.EvaluationResults.Amber
+import model.persisted.SchemeEvaluationResult
+import model.{ ApplicationStatuses, Scheme }
 import repositories._
 import repositories.application.OnlineTestRepository
-import services.testdata.faker.DataFaker.Random
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,25 +36,14 @@ trait AwaitingAllocationStatusGenerator extends ConstructiveGenerator {
   val otRepository: OnlineTestRepository
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
+    val evaluationResult = List(SchemeEvaluationResult(Scheme.Business, Amber))
 
-    // TODO LT: fix it
-//    def getEvaluationResult(candidate: DataGenerationResponse): RuleCategoryResult = {
-//      RuleCategoryResult(
-//        generatorConfig.loc1scheme1Passmark.getOrElse(Random.passmark),
-//        generatorConfig.loc1scheme2Passmark,
-//        None,
-//        None,
-//        None
-//      )
-//    }
-//
-//    for {
-//      candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-//      _ <- otRepository.savePassMarkScore(candidateInPreviousStatus.applicationId.get, UUID.randomUUID().toString,
-//        getEvaluationResult(candidateInPreviousStatus), ApplicationStatuses.AwaitingAllocation)
-//    } yield {
-//      candidateInPreviousStatus
-//    }
-    ???
+    for {
+      candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
+      _ <- otRepository.savePassMarkScore(candidateInPreviousStatus.applicationId.get, UUID.randomUUID().toString,
+        evaluationResult, ApplicationStatuses.AwaitingAllocation)
+    } yield {
+      candidateInPreviousStatus
+    }
   }
 }

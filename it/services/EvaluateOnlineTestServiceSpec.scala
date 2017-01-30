@@ -39,7 +39,7 @@ import services.passmarksettings.PassMarkSettingsService
 import services.testmodel.{ OnlineTestPassmarkServiceTest, SchemeEvaluationTestResult }
 import testkit.IntegrationSpec
 
-class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar with OneAppPerSuite {
+class EvaluateOnlineTestServiceSpec extends IntegrationSpec with MockitoSugar with OneAppPerSuite {
 
   lazy val service = new EvaluateOnlineTestService {
 
@@ -55,7 +55,7 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
     val applicationRepository = mock[GeneralApplicationRepository]
   }
 
-  "Online Test Passmark Service" should {
+  "Evaluate Online Test Service" should {
     "for each test in the path evaluate scores" in {
       implicit object DateTimeValueReader extends ValueReader[DateTime] {
         override def read(config: Config, path: String): DateTime = {
@@ -85,9 +85,9 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
           tests.foreach { t =>
             val expected = t.expected
             val candidateScoreWithPassmark = CandidateEvaluationData(passmarkSettings,
-              t.schemes.map(Scheme.withName), t.scores)
+              t.schemes.map(Scheme.withName), t.scores, ApplicationStatuses.stringToEnum(t.applicationStatus))
 
-            val actual = service.onlineTestRepository.inMemoryRepo2
+            val actual = service.onlineTestRepository.inMemoryRepo
             val appId = t.scores.applicationId
 
             service.evaluate(candidateScoreWithPassmark)

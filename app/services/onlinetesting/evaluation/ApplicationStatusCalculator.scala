@@ -16,21 +16,24 @@
 
 package services.onlinetesting.evaluation
 
-import model.ApplicationStatuses
+import model.ApplicationStatuses._
 import model.EvaluationResults.{ Result, _ }
 
 trait ApplicationStatusCalculator {
-  private val Failed = ApplicationStatuses.OnlineTestFailed
-  private val Held = ApplicationStatuses.AwaitingOnlineTestReevaluation
-  private val Passed = ApplicationStatuses.AwaitingAllocation
+  private val Failed = OnlineTestFailed
+  private val Held = AwaitingOnlineTestReevaluation
+  private val Passed = AwaitingAllocation
+  private val CanTransition = List(OnlineTestCompleted, AwaitingOnlineTestReevaluation)
 
-  def determineStatus(result: List[Result]): ApplicationStatuses.EnumVal = {
+  def determineStatus(result: List[Result], currentApplicationStatus: EnumVal): EnumVal = {
     require(result.nonEmpty, "Cannot determine status from an empty list")
 
-    if (result.contains(Amber)) {
-      Held
+    if (!CanTransition.contains(currentApplicationStatus)) {
+      currentApplicationStatus
     } else if (result.contains(Green)) {
       Passed
+    } else if (result.contains(Amber)) {
+      Held
     } else {
       Failed
     }

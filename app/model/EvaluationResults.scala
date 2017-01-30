@@ -55,10 +55,6 @@ object EvaluationResults {
 
   }
 
-  // TODO IS: so this is no longer needed. Once we fix test generator it should be removed
-  case class RuleCategoryResult(location1Scheme1: Result, location1Scheme2: Option[Result],
-    location2Scheme1: Option[Result], location2Scheme2: Option[Result], alternativeScheme: Option[Result])
-
   case class CompetencyAverageResult(leadingAndCommunicatingAverage: Double, collaboratingAndPartneringAverage: Double,
     deliveringAtPaceAverage: Double, makingEffectiveDecisionsAverage: Double,
     changingAndImprovingAverage: Double, buildingCapabilityForAllAverage: Double,

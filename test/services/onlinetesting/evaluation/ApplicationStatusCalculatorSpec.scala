@@ -16,6 +16,7 @@
 
 package services.onlinetesting.evaluation
 
+import model.ApplicationStatuses
 import model.ApplicationStatuses._
 import model.EvaluationResults._
 import org.scalatestplus.play.PlaySpec
@@ -26,27 +27,40 @@ class ApplicationStatusCalculatorSpec extends PlaySpec {
   "Application status salculator" should {
     "return online test failed when all results are RED" in {
       val evaluated = List(Red, Red, Red)
-      calc.determineStatus(evaluated) mustBe OnlineTestFailed
+      calc.determineStatus(evaluated, OnlineTestCompleted) mustBe OnlineTestFailed
+    }
+
+    "do not change application status for application status different to: OnlineTestCompleted and AwaitingOnlineTestReevaluation" in {
+      val evaluated = List(Red, Green, Red)
+      val CanTransition = List(OnlineTestCompleted, AwaitingOnlineTestReevaluation)
+      ApplicationStatuses.values.filterNot(s => CanTransition.contains(s)).foreach { status =>
+        calc.determineStatus(evaluated, status) mustBe status
+      }
     }
 
     "return awaiting allocation when all results are GREEN" in {
       val evaluated = List(Green, Green, Green)
-      calc.determineStatus(evaluated) mustBe AwaitingAllocation
+      calc.determineStatus(evaluated, OnlineTestCompleted) mustBe AwaitingAllocation
     }
 
-    "return awaiting online test reevaluation when there is at least one AMBER result" in {
+    "return awaiting online test reevaluation when all results are AMBER" in {
+      val evaluated = List(Amber, Amber, Amber)
+      calc.determineStatus(evaluated, OnlineTestCompleted) mustBe AwaitingOnlineTestReevaluation
+    }
+
+    "return awaiting allocation  when there is at least one GREEN result" in {
       val evaluated = List(Green, Red, Amber)
-      calc.determineStatus(evaluated) mustBe AwaitingOnlineTestReevaluation
+      calc.determineStatus(evaluated, OnlineTestCompleted) mustBe AwaitingAllocation
     }
 
-    "return online test completed when there is no AMBER and at least one GREEN" in {
-      val evaluated = List(Red, Green, Red, Red)
-      calc.determineStatus(evaluated) mustBe AwaitingAllocation
+    "return awaiting online test reevaluation when there is an AMBER with REDs" in {
+      val evaluated = List(Red, Amber, Red, Red)
+      calc.determineStatus(evaluated, OnlineTestCompleted) mustBe AwaitingOnlineTestReevaluation
     }
 
     "throw an exception if there is nothing evaluated" in {
       an[IllegalArgumentException] must be thrownBy {
-        calc.determineStatus(Nil)
+        calc.determineStatus(Nil, OnlineTestCompleted)
       }
     }
   }

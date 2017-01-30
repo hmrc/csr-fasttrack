@@ -53,7 +53,7 @@ object PassMarkExchangeObjects {
     verbal: SchemeThreshold,
     numerical: SchemeThreshold,
     situational: SchemeThreshold,
-    combination: Option[SchemeThreshold] // TODO IS: this should be removed
+    combination: Option[SchemeThreshold]
   )
 
   case class SchemeThreshold(failThreshold: Double, passThreshold: Double)

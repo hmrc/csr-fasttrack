@@ -36,7 +36,10 @@ object OnlineTestCommands {
   case class OnlineTestReportAvailability(reportId: Int, available: Boolean)
   case class OnlineTestReport(xml: Option[String])
 
-  case class CandidateEvaluationData(passmarkSettings: Settings, schemes: List[Scheme], scores: CandidateTestReport)
+  case class CandidateEvaluationData(passmarkSettings: Settings,
+                                     schemes: List[Scheme],
+                                     scores: CandidateTestReport,
+                                     applicationStatus: ApplicationStatuses.EnumVal)
 
   case class TimeAdjustmentsOnlineTestApplication(verbalTimeAdjustmentPercentage: Int, numericalTimeAdjustmentPercentage: Int)
   case class TestResult(status: String, norm: String,
