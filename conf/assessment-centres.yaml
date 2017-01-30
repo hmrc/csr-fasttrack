@@ -1,6 +1,6 @@
 London:
-  - London (FSAC) 1:
-      description: FSAC
+  - London FTAC:
+      description: FTAC
       capacities:
          - date: 03/05/18
            amCapacity: 18
