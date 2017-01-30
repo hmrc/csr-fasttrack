@@ -24,7 +24,9 @@ import mocks.{ OnlineIntegrationTestInMemoryRepository, PassMarkSettingsInMemory
 import model.EvaluationResults._
 import model.OnlineTestCommands.CandidateEvaluationData
 import model.PersistedObjects.CandidateTestReport
-import model.Preferences
+import model.{ ApplicationStatuses, Preferences, Scheme }
+import model.Scheme.Scheme
+import model.persisted.SchemeEvaluationResult
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.ceedubs.ficus.readers.ValueReader
@@ -32,16 +34,13 @@ import org.joda.time.DateTime
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.Logger
+import play.api.libs.json.Json
 import repositories.application.GeneralApplicationRepository
 import repositories.{ FrameworkPreferenceRepository, FrameworkRepository, PassMarkSettingsRepository, TestReportRepository }
 import services.onlinetesting.EvaluateOnlineTestService
 import services.passmarksettings.PassMarkSettingsService
+import services.testmodel.{ OnlineTestPassmarkServiceTest, SchemeEvaluationTestResult, ScoreEvaluationTestExpectation }
 import testkit.IntegrationSpec
-
-case class OnlineTestPassmarkServiceTest(preferences: Preferences,
-                                         scores: CandidateTestReport,
-                                         expected: ScoreEvaluationTestExpectation,
-                                         previousEvaluation: Option[ScoreEvaluationTestExpectation] = None)
 
 class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar with OneAppPerSuite {
 
@@ -68,35 +67,33 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
       }
       val suites = new File("it/resources/onlineTestPassmarkServiceSpec").listFiles.filterNot(_.getName.startsWith("."))
       // Test should fail in case the path is incorrect for the env and return 0 suites
-      suites.nonEmpty must be(true)
+      suites.nonEmpty mustBe true
 
       suites.foreach { suiteName =>
         val suiteFileName = suiteName.getName
-
         val passmarkSettingsFile = new File(suiteName.getAbsolutePath + "/passmarkSettings.conf")
         require(passmarkSettingsFile.exists(), s"File does not exist: ${passmarkSettingsFile.getAbsolutePath}")
-        val passmarkSettings = ConfigFactory.parseFile(passmarkSettingsFile)
-          .as[Settings]("passmarkSettings")
+
+        val passmarkSettings = ConfigFactory.parseFile(passmarkSettingsFile).as[Settings]("passmarkSettings")
         val testCases = new File(s"it/resources/onlineTestPassmarkServiceSpec/$suiteFileName/").listFiles
 
         // Test should fail in case the path is incorrect for the env and return 0 tests
-        testCases.nonEmpty must be(true)
+        testCases.nonEmpty mustBe true
 
         testCases.filterNot(t => t.getName == "passmarkSettings.conf").foreach { testCase =>
           val testCaseFileName = testCase.getName
-          val tests: List[OnlineTestPassmarkServiceTest] = ConfigFactory.parseFile(
-            new File(testCase.getAbsolutePath)).as[List[OnlineTestPassmarkServiceTest]]("tests")
+          val tests = ConfigFactory.parseFile(new File(testCase.getAbsolutePath))
+            .as[List[OnlineTestPassmarkServiceTest]]("tests")
+
           tests.foreach { t =>
             val expected = t.expected
-            val alreadyEvaluated = t.previousEvaluation
-
             val candidateScoreWithPassmark = CandidateEvaluationData(passmarkSettings,
-              List(), t.scores)
+              t.schemes.map(Scheme.withName), t.scores)
 
-            val actual = service.onlineTestRepository.inMemoryRepo
+            val actual = service.onlineTestRepository.inMemoryRepo2
             val appId = t.scores.applicationId
 
-            evaluate(appId, candidateScoreWithPassmark, alreadyEvaluated)
+            service.evaluate(candidateScoreWithPassmark)
 
             val actualResult = actual(appId)
 
@@ -104,22 +101,10 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
             Logger.info(s"Processing $testMessage")
 
             withClue(testMessage + " location1Scheme1") {
-              toStr(actualResult.result.location1Scheme1) must be(expected.location1Scheme1)
-            }
-            withClue(testMessage + " location1Scheme2") {
-              toStr(actualResult.result.location1Scheme2) must be(expected.location1Scheme2)
-            }
-            withClue(testMessage + " location2Scheme1") {
-              toStr(actualResult.result.location2Scheme1) must be(expected.location2Scheme1)
-            }
-            withClue(testMessage + " location2Scheme2") {
-              toStr(actualResult.result.location2Scheme2) must be(expected.location2Scheme2)
-            }
-            withClue(testMessage + " alternativeScheme") {
-              toStr(actualResult.result.alternativeScheme) must be(expected.alternativeScheme)
+              actualResult.evaluatedSchemes mustBe toSchemeEvaluationResult(expected.result)
             }
             withClue(testMessage + " applicationStatus") {
-              actualResult.applicationStatus must be(expected.applicationStatus)
+              actualResult.applicationStatus mustBe ApplicationStatuses.stringToEnum(expected.applicationStatus)
             }
             withClue(testMessage + " version") {
               actualResult.version must be(passmarkSettings.version)
@@ -130,35 +115,12 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
     }
   }
 
-  def evaluate(appId: String, candidateScoreWithPassmark: CandidateEvaluationData,
-               alreadyEvaluated: Option[ScoreEvaluationTestExpectation] = None) = {
-//    candidateScoreWithPassmark.applicationStatus match {
-//      case ApplicationStatuses.AssessmentScoresAccepted =>
-//        require(alreadyEvaluated.isDefined, "AssessmentScoresAccepted requires already evaluated application")
-//
-//        alreadyEvaluated.map { currentEvaluation =>
-//          val currentResult = RuleCategoryResult(
-//            Result(currentEvaluation.location1Scheme1),
-//            currentEvaluation.location1Scheme2.map(Result(_)),
-//            currentEvaluation.location2Scheme1.map(Result(_)),
-//            currentEvaluation.location2Scheme2.map(Result(_)),
-//            currentEvaluation.alternativeScheme.map(Result(_))
-//          )
-//
-//          service.oRepository.savePassMarkScore(appId, currentEvaluation.passmarkVersion.get,
-//            currentResult, currentEvaluation.applicationStatus)
-//        }
-//
-//        service.evaluateCandidateScoreWithoutChangingApplicationStatus(candidateScoreWithPassmark)
-//      case ApplicationStatuses.OnlineTestCompleted =>
-//        service.evaluateCandidateScore(candidateScoreWithPassmark)
-//      case _ =>
-//        throw new IllegalArgumentException("This status is not supported by the test framework")
-//    }
-    ???
-  }
-
   def toStr(r: Result): String = r.getClass.getSimpleName.split("\\$").head
+
   def toStr(r: Option[Result]): Option[String] = r.map(toStr)
+
+  def toSchemeEvaluationResult(testResult: List[SchemeEvaluationTestResult]): List[SchemeEvaluationResult] = {
+    testResult.map(t => SchemeEvaluationResult(Scheme.withName(t.scheme), Result(t.result)))
+  }
 
 }

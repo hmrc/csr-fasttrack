@@ -23,6 +23,11 @@ class ApplicationStatusCalculatorSpec extends PlaySpec {
       calc.determineStatus(evaluated) mustBe AwaitingOnlineTestReevaluation
     }
 
+    "return online test completed when there is no AMBER and at least one GREEN" in {
+      val evaluated = List(Red, Green, Red, Red)
+      calc.determineStatus(evaluated) mustBe AwaitingAllocation
+    }
+
     "throw an exception if there is nothing evaluated" in {
       an[IllegalArgumentException] must be thrownBy {
         calc.determineStatus(Nil)

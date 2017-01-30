@@ -16,6 +16,7 @@
 
 package model
 
+import play.api.libs.json.{ Format, JsString, JsSuccess, JsValue }
 import reactivemongo.bson.{ BSON, BSONHandler, BSONString }
 
 object EvaluationResults {
@@ -44,6 +45,13 @@ object EvaluationResults {
 
       def write(result: Result) = BSON.write(result.toString)
     }
+
+    implicit val resultFormat = new Format[Result] {
+      def reads(json: JsValue) = JsSuccess(Result(json.as[String]))
+
+      def writes(result: Result) = JsString(result.toString)
+    }
+
 
   }
 

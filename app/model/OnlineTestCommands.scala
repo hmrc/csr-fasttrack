@@ -18,7 +18,9 @@ package model
 
 import connectors.ExchangeObjects.ReportNorm
 import connectors.PassMarkExchangeObjects.Settings
+import model.ApplicationStatuses.enumFormat
 import model.PersistedObjects.CandidateTestReport
+import model.Adjustments._
 import model.Scheme.Scheme
 import org.joda.time.DateTime
 import play.api.libs.json.Json

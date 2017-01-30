@@ -34,6 +34,9 @@ import scala.concurrent.Future
   */
 case class TestableResult(result: RuleCategoryResult, version: String, applicationStatus: ApplicationStatuses.EnumVal)
 
+case class TestableResult2(version: String, evaluatedSchemes: List[SchemeEvaluationResult],
+                           applicationStatus: ApplicationStatuses.EnumVal)
+
 /**
   * @deprecated Please use Mockito
   */
@@ -41,6 +44,7 @@ object OnlineIntegrationTestInMemoryRepository extends OnlineIntegrationTestInMe
 
 class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
   val inMemoryRepo = new mutable.HashMap[String, TestableResult]
+  val inMemoryRepo2 = new mutable.HashMap[String, TestableResult2]
 
   def nextApplicationReadyForOnlineTesting: Future[Option[OnlineTestApplication]] =
     Future.successful(Some(OnlineTestApplication("appId", ApplicationStatuses.Submitted, "userId", guaranteedInterview = false,
@@ -78,12 +82,8 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
   override def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = ???
 
   override def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
-    applicationStatus: ApplicationStatuses.EnumVal
-  ): Future[Unit] = {
-    Future.successful(())
-  }
-
-  def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, newVersion: String, p: Map[Scheme, Result]): Future[Unit] = {
+    applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
+    inMemoryRepo2 += applicationId -> TestableResult2(version, evaluationResult, applicationStatus)
     Future.successful(())
   }
 

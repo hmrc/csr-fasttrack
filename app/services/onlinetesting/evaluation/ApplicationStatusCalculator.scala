@@ -29,11 +29,10 @@ trait ApplicationStatusCalculator {
 
     if (result.contains(Amber)) {
       Held
-    } else if (result.forall(_ == Green)) {
+    } else if (result.contains(Green)) {
       Passed
     } else {
       Failed
     }
   }
-
 }

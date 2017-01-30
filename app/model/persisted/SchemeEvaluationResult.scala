@@ -18,10 +18,12 @@ package model.persisted
 
 import model.EvaluationResults.Result
 import model.Scheme.Scheme
+import play.api.libs.json.Json
 import reactivemongo.bson.Macros
 
 case class SchemeEvaluationResult(scheme: Scheme, result: Result)
 
 object SchemeEvaluationResult {
   implicit val schemeEvaluationResultHandler = Macros.handler[SchemeEvaluationResult]
+  implicit val schemeEvaluationResultFormat = Json.format[SchemeEvaluationResult]
 }
