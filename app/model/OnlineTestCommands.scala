@@ -25,9 +25,6 @@ import org.joda.time.DateTime
 import play.api.libs.json.Json
 
 object OnlineTestCommands {
-  case class OnlineTestProfile(cubiksUserId: Int, token: String, onlineTestUrl: String,
-    invitationDate: DateTime, expirationDate: DateTime, participantScheduleId: Int)
-
   case class OnlineTestApplication(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal, userId: String,
     guaranteedInterview: Boolean, needsAdjustments: Boolean, preferredName: String, adjustmentDetail: Option[AdjustmentDetail])
 
@@ -54,7 +51,6 @@ object OnlineTestCommands {
     implicit val OnlineTestReportNormFormats = Json.format[ReportNorm]
     implicit val OnlineTestApplicationForReportRetrievingFormats = Json.format[OnlineTestApplicationForReportRetrieving]
     implicit val OnlineTestApplicationUserFormats = Json.format[OnlineTestApplicationWithCubiksUser]
-    implicit val OnlineTestProfileFormats = Json.format[OnlineTestProfile]
     implicit val OnlineTestReportIdMRAFormats = Json.format[OnlineTestReportAvailability]
     implicit val testFormat = Json.format[TestResult]
   }

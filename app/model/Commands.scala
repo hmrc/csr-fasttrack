@@ -329,8 +329,6 @@ object Commands {
     implicit def fromCommandToPersistedQuestion(q: Question): PersistedQuestion =
       PersistedQuestion(q.question, PersistedAnswer(q.answer.answer, q.answer.otherDetails, q.answer.unknown))
 
-    implicit val onlineTestDetailsFormat = Json.format[OnlineTestDetails]
-    implicit val onlineTestFormat = Json.format[OnlineTest]
     implicit val onlineTestStatusFormats = Json.format[OnlineTestStatus]
     implicit val onlineTestExtensionFormats = Json.format[OnlineTestExtension]
     implicit val userIdWrapperFormats = Json.format[UserIdWrapper]

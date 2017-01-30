@@ -199,14 +199,14 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     object OnlineTestServiceMock extends OnlineTestServiceMock
 
     object TestOnlineTestController extends OnlineTestController {
-      override val onlineRepository = OnlineTestInMemoryRepository
+      override val onlineTestingRepo = OnlineTestInMemoryRepository
       override val onlineTestingService = OnlineTestServiceMock
       override val onlineTestExtensionService = onlineTestExtensionServiceMock
       override val onlineTestPDFReportRepo = onlineTestPDFReportRepoMock
     }
 
     object TestOnlineTestController2 extends OnlineTestController {
-      override val onlineRepository = new OnlineTestInMemoryRepository {
+      override val onlineTestingRepo = new OnlineTestInMemoryRepository {
         override def getOnlineTestApplication(appId: String): Future[Option[OnlineTestApplication]] = {
           Future.successful(
             Some(

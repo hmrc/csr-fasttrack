@@ -23,6 +23,8 @@ object Exceptions {
     def this(m: String) = this(Some(m))
   }
 
+  case class CannotUpdateCubiksTest(appId: String) extends Exception(s"Cannot update cubiks test for application $appId")
+
   case class UnexpectedException(m: String) extends Exception(m)
 
   case class CannotUpdateRecord(applicationId: String) extends Exception(applicationId)

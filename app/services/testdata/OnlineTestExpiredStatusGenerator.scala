@@ -20,7 +20,7 @@ import java.util.UUID
 
 import connectors.testdata.ExchangeObjects.OnlineTestProfileResponse
 import model.ApplicationStatuses
-import model.OnlineTestCommands.OnlineTestProfile
+import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
 import repositories._
 import repositories.application.OnlineTestRepository
@@ -41,13 +41,13 @@ trait OnlineTestExpiredStatusGenerator extends ConstructiveGenerator {
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
 
-    val onlineTestProfile = OnlineTestProfile(
-      cubiksUserId = 117344,
-      token = UUID.randomUUID().toString,
+    val onlineTestProfile = CubiksTestProfile(
+      cubiksId = 117344,
+      participantScheduleId = 149245,
+      inviteDate = DateTime.now().minusDays(7),
+      expireDate = DateTime.now(),
       onlineTestUrl = generatorConfig.cubiksUrl,
-      invitationDate = DateTime.now().minusDays(7),
-      expirationDate = DateTime.now(),
-      participantScheduleId = 149245
+      token = UUID.randomUUID().toString
     )
 
     for {
@@ -56,7 +56,7 @@ trait OnlineTestExpiredStatusGenerator extends ConstructiveGenerator {
       - <- otRepository.updateStatus(candidateInPreviousStatus.userId, ApplicationStatuses.OnlineTestExpired)
     } yield {
       candidateInPreviousStatus.copy(onlineTestProfile = Some(
-        OnlineTestProfileResponse(onlineTestProfile.cubiksUserId, onlineTestProfile.token, onlineTestProfile.onlineTestUrl)
+        OnlineTestProfileResponse(onlineTestProfile.cubiksId, onlineTestProfile.token, onlineTestProfile.onlineTestUrl)
       ))
     }
   }

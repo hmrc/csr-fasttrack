@@ -19,23 +19,22 @@ package services.onlinetesting
 import _root_.services.AuditService
 import config.CubiksGatewayConfig
 import connectors.ExchangeObjects._
-import connectors.{CSREmailClient, CubiksGatewayClient, EmailClient}
-import controllers.OnlineTest
-import factories.{DateTimeFactory, UUIDFactory}
-import model.Exceptions.AssistanceDetailsNotFound
+import connectors.{ CSREmailClient, CubiksGatewayClient, EmailClient }
+import factories.{ DateTimeFactory, UUIDFactory }
 import model.OnlineTestCommands._
 import model.PersistedObjects.CandidateTestReport
+import model.exchange.OnlineTest
+import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
 import play.api.Logger
 import play.libs.Akka
 import repositories._
-import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository, OnlineTestRepository}
+import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository, OnlineTestRepository }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.duration._
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 import scala.language.postfixOps
-import scala.util.{Failure, Success, Try}
 
 object OnlineTestService extends OnlineTestService {
   import config.MicroserviceAppConfig._
@@ -70,13 +69,13 @@ trait OnlineTestService {
   val onlineTestInvitationDateFactory: DateTimeFactory
   val gatewayConfig: CubiksGatewayConfig
 
-  def norms = Seq(
+  def norms: List[ReportNorm] = Seq(
     gatewayConfig.competenceAssessment,
     gatewayConfig.situationalAssessment,
     gatewayConfig.verbalAndNumericalAssessment
   ).map(a => ReportNorm(a.assessmentId, a.normId)).toList
 
-  def nextApplicationReadyForOnlineTesting() = {
+  def nextApplicationReadyForOnlineTesting(): Future[Option[OnlineTestApplication]] = {
     otRepository.nextApplicationReadyForOnlineTesting
   }
 
@@ -89,10 +88,12 @@ trait OnlineTestService {
       OnlineTest(
         onlineTestDetails.inviteDate,
         onlineTestDetails.expireDate,
-        onlineTestDetails.onlineTestLink,
-        onlineTestDetails.cubiksEmailAddress,
+        onlineTestDetails.onlineTestUrl,
+        onlineTestDetails.token,
         onlineTestDetails.isOnlineTestEnabled,
-        hasReport
+        hasReport,
+        onlineTestDetails.startedDateTime,
+        onlineTestDetails.completedDateTime
       )
     }
   }
@@ -108,13 +109,15 @@ trait OnlineTestService {
       _ <- otprRepository.remove(application.applicationId)
       emailAddress <- candidateEmailAddress(application)
       _ <- emailInviteToApplicant(application, emailAddress, invitationDate)
-    } yield OnlineTestProfile(
+    } yield CubiksTestProfile(
       invitation.userId,
-      token,
-      invitation.authenticateUrl,
+      invitation.participantScheduleId,
       invitationDate,
       expirationDate,
-      invitation.participantScheduleId
+      invitation.authenticateUrl,
+      token,
+      isOnlineTestEnabled = true,
+      startedDateTime = Some(DateTime.now)
     )
 
     invitationProcess.flatMap(
@@ -195,7 +198,7 @@ trait OnlineTestService {
     }
   }
 
-  private def markAsCompleted(application: OnlineTestApplication)(onlineTestProfile: OnlineTestProfile): Future[Unit] =
+  private def markAsCompleted(application: OnlineTestApplication)(onlineTestProfile: CubiksTestProfile): Future[Unit] =
     otRepository.storeOnlineTestProfileAndUpdateStatusToInvite(application.applicationId, onlineTestProfile).map { _ =>
       audit("OnlineTestInvitationProcessComplete", application.userId)
     }
