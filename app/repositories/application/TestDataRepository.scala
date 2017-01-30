@@ -18,7 +18,7 @@ package repositories.application
 
 import common.Constants.{ No, Yes }
 import model.Commands._
-import model.{ PersistedObjects, ProgressStatuses }
+import model.{ ApplicationStatuses, PersistedObjects, ProgressStatuses }
 import model.PersistedObjects.ContactDetails
 import org.joda.time.{ DateTime, LocalDate }
 import reactivemongo.api.DB
@@ -73,20 +73,21 @@ class TestDataMongoRepository(implicit mongo: () => DB)
     PersistedObjects.Implicits.contactDetailsFormats, ReactiveMongoFormats.objectIdFormats) with TestDataRepository {
   import Utils.chooseOne
 
-  val applicationStatuses = Seq("CREATED", "IN_PROGRESS", "SUBMITTED", "WITHDRAWN")
+  val applicationStatuses = Seq(ApplicationStatuses.Created, ApplicationStatuses.InProgress, ApplicationStatuses.Submitted,
+    ApplicationStatuses.Withdrawn
+  )
+
   val firstNames = Seq("John", "Chris", "James", "Paul")
   val lastNames = Seq("Clerk", "Smith", "Gulliver", "Swift")
   val preferredName = Seq("Superman", "Batman", "Spiderman", "Wolverine", "Hulk")
   val frameworks = Seq("Digital and technology", "Finance", "Project delivery", "Commercial", "Business")
 
-  val locationsAndRegions = Seq("Southend" -> "East", "Nottingham" -> "East-midlands", "London" -> "London", "Darlington" -> "North-east",
-    "newcastle" -> "North-east", "Blackpool" -> "North-west", "Stockport" -> "North-west", "Warrington" -> "North-west",
-    "Manchester / Salford" -> "North-west", "Liverpool / Bootle / Netherton" -> "North-west", "Bathgate" -> "Scotland",
-    "East Kilbride" -> "Scotland", "Edinburgh" -> "Scotland", "Glasgow" -> "Scotland", "Airdrie / Motherwell / Hamilton" -> "Scotland",
-    "Springburn / Newlands / Govan" -> "Scotland", "Hastings" -> "South-east", "Reading" -> "South-east", "Worthing" -> "South-east",
-    "Bristol" -> "South-west", "St Austell" -> "South-west", "Torquay" -> "South-west", "Cardiff" -> "Wales", "Birmingham" -> "West-midlands",
-    "Coventry" -> "West-midlands", "Telford" -> "West-midlands", "Bradford" -> "Yorkshire-humberside",
-    "Shipley" -> "Yorkshire-humberside", "Leeds / Sheffield" -> "Yorkshire-humberside")
+  val locationsAndRegions = Seq("Bath" -> "London", "Blackburn" -> "London", "Bournemouth" -> "London", "Brighton" -> "London",
+    "Bromley" -> "London", "Bristol" -> "London", "Northern Ireland" -> "London", "Cambridge" -> "London", "Motherwell" -> "Newcastle",
+    "Newcastle upon Tyne" -> "Newcastle", "Nottingham" -> "Newcastle", "Outer Hebrides" -> "Newcastle", "Paisley" -> "Newcastle",
+    "Perth" -> "Newcastle", "Peterborough" -> "Newcastle", "Sheffield" -> "Newcastle", "St Albans" -> "Newcastle"
+  )
+
   val dateOfBirth = Seq(LocalDate.parse("1980-12-12"), LocalDate.parse("1981-12-12"),
     LocalDate.parse("1982-12-12"), LocalDate.parse("1983-12-12"), LocalDate.parse("1984-12-12"), LocalDate.parse("1985-12-12"),
     LocalDate.parse("1987-12-12"), LocalDate.parse("1987-12-12"))
@@ -132,7 +133,7 @@ class TestDataMongoRepository(implicit mongo: () => DB)
 
     val progress = createProgress(personalDetails, frameworks, assistanceDetails, submitted, withdrawn)
 
-    val applicationStatus = if (onlyAwaitingAllocation) "AWAITING_ALLOCATION" else chooseOne(applicationStatuses)
+    val applicationStatus = if (onlyAwaitingAllocation) ApplicationStatuses.AwaitingAllocation else chooseOne(applicationStatuses)
     var document = BSONDocument(
       "applicationId" -> id.toString,
       "userId" -> id.toString,
@@ -140,7 +141,7 @@ class TestDataMongoRepository(implicit mongo: () => DB)
       "applicationStatus" -> applicationStatus
     )
     document = buildDocument(document)(personalDetails.map(d => "personal-details" -> d))
-    document = buildDocument(document)(frameworks.map(d => "framework-preferences" -> d))
+    document = buildDocument(document)(frameworks.map(d => "assessment-centre-indicator" -> d))
     document = buildDocument(document)(assistanceDetails.map(d => "assistance-details" -> d))
     document = buildDocument(document)(onlineTests.map(d => "online-tests" -> d))
     document = document ++ ("progress-status" -> progress)
@@ -184,19 +185,10 @@ class TestDataMongoRepository(implicit mongo: () => DB)
   private def createLocations(id: Int, buildAlways: Boolean = false) = id match {
     case x if x % 11 == 0 && !buildAlways => None
     case _ =>
-      val firstLocationRegion = chooseOne(locationsAndRegions)
-      val secondLocationRegion = chooseOne(locationsAndRegions)
+      val regionAndCentre = chooseOne(locationsAndRegions)
       Some(BSONDocument(
-        "firstLocation" -> BSONDocument(
-          "region" -> firstLocationRegion._2, "location" -> firstLocationRegion._1,
-          "firstFramework" -> chooseOne(frameworks), "secondFramework" -> chooseOne(frameworks)
-        ), // Could be identical.
-        "secondLocation" -> BSONDocument(
-          "region" -> secondLocationRegion._2, "location" -> secondLocationRegion._1,
-          "firstFramework" -> chooseOne(frameworks), "secondFramework" -> chooseOne(frameworks)
-        ), // Could be identical.
-        "secondLocationIntended" -> true,
-        "alternatives" -> BSONDocument("location" -> true, "framework" -> true)
+        "area" -> regionAndCentre._1,
+        "assessmentCentre" -> regionAndCentre._2
       ))
   }
 

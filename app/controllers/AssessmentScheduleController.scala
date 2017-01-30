@@ -34,7 +34,7 @@ import model.Exceptions.NotFoundException
 import model.{ ApplicationStatusOrder, Commands, ProgressStatuses }
 import org.joda.time.LocalDate
 import play.api.libs.json.Json
-import play.api.mvc.{ Action, Result }
+import play.api.mvc.{ Action, AnyContent, Result }
 import repositories.AssessmentCentreLocation.assessmentCentreVenueFormat
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
@@ -136,36 +136,14 @@ trait AssessmentScheduleController extends BaseController {
     }
   }
 
-  def getApplicationForAssessmentAllocation(assessmentCenterLocation: String, start: Int, end: Int) = Action.async { implicit request =>
-    val assessmentCenterLocationDecoded = URLDecoder.decode(assessmentCenterLocation, "UTF-8")
-    val locationsFuture = acRepository.locationsAndAssessmentCentreMapping.map { prefferedLocationToAsssessmentCenterLocation =>
-      findPreferredLocations(prefferedLocationToAsssessmentCenterLocation, assessmentCenterLocationDecoded)
-    }
-
-    val allCandidatesForAssessmentCenterLocation = locationsFuture.flatMap { locations =>
-      if (locations.isEmpty) {
-        Future.successful(ApplicationForAssessmentAllocationResult(List(), 0))
-      } else {
-        aRepository.findApplicationsForAssessmentAllocation(locations, start, end)
-      }
-    }
-
-    allCandidatesForAssessmentCenterLocation.map { apps =>
+  def getApplicationForAssessmentAllocation(assessmentCenterLocation: String, start: Int, end: Int): Action[AnyContent] = Action.async {
+  implicit request =>
+    aRepository.findApplicationsForAssessmentAllocation(List(assessmentCenterLocation), start, end) map { apps =>
       Ok(Json.toJson(apps))
     }
   }
 
-  private def findPreferredLocations(
-    preferredLocationsToAssessmentCenterLocation: Map[String, String],
-    assessmentCenterLocation: String
-  ): List[String] = {
-    preferredLocationsToAssessmentCenterLocation.filter {
-      case (_, location) =>
-        location == assessmentCenterLocation
-    }.keys.toList
-  }
-
-  def getAllocationsForVenue(venue: String) = Action.async { implicit request =>
+  def getAllocationsForVenue(venue: String): Action[AnyContent] = Action.async { implicit request =>
     val venueDecoded = URLDecoder.decode(venue, "UTF-8")
     val assessments = aaRepository.applicationAssessmentsForVenue(venueDecoded).map(_.groupBy(x => x.session))
 
@@ -228,7 +206,7 @@ trait AssessmentScheduleController extends BaseController {
   def allocationStatus(applicationId: String) = Action.async { implicit request =>
     import connectors.ExchangeObjects.Implicits._
 
-    acRepository.assessmentCentreCapacities.flatMap { assessmentCentreCapacities =>
+    acRepository.assessmentCentreCapacities.flatMap { assessmentCentres =>
 
       for {
         assessmentF <- aaRepository.applicationAssessment(applicationId)
@@ -236,7 +214,7 @@ trait AssessmentScheduleController extends BaseController {
       } yield {
         assessmentF match {
           case Some(assessment) => {
-            val (locationName, venue) = assessmentCentreCapacities.flatMap(capacity =>
+            val (locationName, venue) = assessmentCentres.flatMap(capacity =>
               capacity.venues.find(_.venueName == assessment.venue).map(capacity.locationName -> _)).head
 
             Ok(Json.toJson(AllocationDetails(locationName, venue.venueDescription, assessment.assessmentDateTime, expiryDate)))
@@ -338,7 +316,7 @@ trait AssessmentScheduleController extends BaseController {
     }
   }
 
-  def getVenueDayCandidateScheduleWithDetails(venueEncoded: String, dateEncoded: String) = Action.async { implicit request =>
+  def getVenueDayCandidateScheduleWithDetails(venueEncoded: String, dateEncoded: String): Action[AnyContent] = Action.async { implicit request =>
 
     getVenueDayDetails(venueEncoded, dateEncoded) { (venue, date, detailsF) =>
       detailsF.flatMap { venueDateDetails =>
@@ -374,20 +352,20 @@ trait AssessmentScheduleController extends BaseController {
 
   }
 
-  def getVenueDayCandidateSchedule(venueEncoded: String, dateEncoded: String) = Action.async { implicit request =>
+  def getVenueDayCandidateSchedule(venueEncoded: String, dateEncoded: String): Action[AnyContent] = Action.async { implicit request =>
     getVenueDayDetails(venueEncoded, dateEncoded)((_, _, detailsFuture) => detailsFuture.map { venueDateDetails =>
       Ok(Json.toJson(venueDateDetails))
     })
   }
 
-  def getApplicationAssessment(applicationId: String) = Action.async { implicit request =>
+  def getApplicationAssessment(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
     aaRepository.applicationAssessment(applicationId).map {
       case Some(assessment) => Ok(Json.toJson(assessment))
       case _ => NotFound("No application assessment could be found")
     }
   }
 
-  def deleteApplicationAssessment(applicationId: String) = Action.async { implicit request =>
+  def deleteApplicationAssessment(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
     aRepository.findProgress(applicationId).flatMap { result =>
       ApplicationStatusOrder.getStatus(result) match {
         case ProgressStatuses.AssessmentScoresAcceptedProgress =>
@@ -404,9 +382,11 @@ trait AssessmentScheduleController extends BaseController {
   }
 
   def locationToAssessmentCentreLocation(locationName: String) = Action.async { implicit request =>
-    acRepository.locationsAndAssessmentCentreMapping.map(
-      _.get(locationName).map(location => Ok(Json.toJson(LocationName(location)))).getOrElse(NotFound("No such location"))
-    )
+    acRepository.assessmentCentreCapacities.map { assessmentCentres =>
+      assessmentCentres.find(_.locationName == locationName).map { location =>
+        Ok(Json.toJson(LocationName(location.locationName)))
+      }.getOrElse(NotFound("No such location"))
+    }
   }
 
   def assessmentCentres = Action.async { implicit request =>

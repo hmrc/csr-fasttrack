@@ -41,7 +41,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
 
   def applicationRepo = new GeneralApplicationMongoRepository(GBTimeZoneService)
 
-  "Application repository" should {
+  "Application repository" must {
     "create indexes for the repository" in {
       val repo = repositories.applicationRepository
 
@@ -56,7 +56,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "Finding an application by User Id" should {
+  "Finding an application by User Id" must {
 
     "throw a NotFound exception when application doesn't exists" in {
       applicationRepo.findByUserId("invalidUser", "invalidFramework")
@@ -75,7 +75,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "Finding applications by user id" should {
+  "Finding applications by user id" must {
     "return an empty list when no records for an applicationid exist" in {
       applicationRepo.find(List("appid-1")).futureValue.size must be(0)
     }
@@ -91,7 +91,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "find applications for assessment allocation" should {
+  "find applications for assessment allocation" must {
     "return an empty list when there are no applications" in {
       lazy val testData = new TestDataMongoRepository()
       testData.createApplications(0, false).futureValue
@@ -142,7 +142,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "next application ready for assessment score evaluation" should {
+  "next application ready for assessment score evaluation" must {
     "return the only application ready for evaluation" in {
       createApplication("app1", ApplicationStatuses.AssessmentScoresAccepted)
 
@@ -177,7 +177,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "save assessment score evaluation" should {
+  "save assessment score evaluation" must {
     "save a score evaluation and update the application status when the application is in ASSESSMENT_SCORES_ACCEPTED status" in {
       createApplication("app1", ApplicationStatuses.AssessmentScoresAccepted)
 
@@ -217,7 +217,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "review" should {
+  "review" must {
     "change progress status to review" in {
       createApplication("app1", ApplicationStatuses.InProgress)
 
