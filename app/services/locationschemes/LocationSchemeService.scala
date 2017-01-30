@@ -16,7 +16,7 @@
 
 package services.locationschemes
 
-import model.Exceptions.NotFoundException
+import model.Exceptions.{ InvalidLocationFound, NotFoundException }
 import model.Scheme.Scheme
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import repositories.{ FileLocationSchemeRepository, LocationSchemeRepository, LocationSchemes, _ }
@@ -45,13 +45,13 @@ trait LocationSchemeService {
     } yield {
 
       val selectedLocations = locationsWithSchemes.collect {
-        case LocationSchemes(locationId, locationName, schemeLatitude, schemeLongitude, availableSchemes)
+        case LocationSchemes(locationId, locationName, geocodes, availableSchemes)
           if schemeChoices.map(_.name).intersect(availableSchemes).nonEmpty =>
           val distance = for {
             latitude <- latitudeOpt
             longitude <- longitudeOpt
           } yield {
-              DistanceCalculator.calcKilometersBetween(latitude, longitude, schemeLatitude, schemeLongitude)
+            geocodes.map{ gc => DistanceCalculator.calcMilesBetween(latitude, longitude, gc.lat, gc.lng) }.min
           }
 
           GeoLocationSchemeResult(locationId, locationName, distance, schemeChoices.filter(scheme => availableSchemes.contains(scheme.name)))
@@ -89,7 +89,13 @@ trait LocationSchemeService {
   }
 
   def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit] = {
-    appRepository.updateSchemeLocations(applicationId, locationIds)
+    for {
+      locationSchemes <- locationSchemeRepository.getSchemesAndLocations
+      _ <- locationIds.isEmpty || locationIds.diff(locationSchemes.map(_.id)).nonEmpty match {
+        case true => Future.failed(throw InvalidLocationFound())
+        case false => appRepository.updateSchemeLocations(applicationId, locationIds)
+      }
+    } yield {}
   }
 
   def getSchemes(applicationId: String): Future[List[SchemeInfo]] = {
@@ -108,7 +114,7 @@ trait LocationSchemeService {
 
   private def sortLocations(locations: List[GeoLocationSchemeResult], sortByDistance: Boolean) = {
     sortByDistance match {
-      case true => locations.sortBy(r => r.distanceKm.getOrElse(0d))
+      case true => locations.sortBy(r => r.distanceMiles.getOrElse(0d))
       case false => locations.sortBy(_.locationName)
     }
   }

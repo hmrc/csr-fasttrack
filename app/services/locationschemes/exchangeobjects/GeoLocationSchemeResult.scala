@@ -19,7 +19,7 @@ package services.locationschemes.exchangeobjects
 import play.api.libs.json.Json
 import repositories.SchemeInfo
 
-case class GeoLocationSchemeResult(locationId: String, locationName: String, distanceKm: Option[Double], schemes: List[SchemeInfo])
+case class GeoLocationSchemeResult(locationId: String, locationName: String, distanceMiles: Option[Double], schemes: List[SchemeInfo])
 
 object GeoLocationSchemeResult {
   implicit val jsonWriter = Json.writes[GeoLocationSchemeResult]
