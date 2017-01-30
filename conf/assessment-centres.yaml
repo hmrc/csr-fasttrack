@@ -2,337 +2,337 @@ London:
   - London FTAC:
       description: FTAC
       capacities:
-         - date: 03/05/18
+         - date: 03/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 04/05/18
+         - date: 04/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 05/05/18
+         - date: 05/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 06/05/18
+         - date: 06/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 09/05/18
+         - date: 09/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 10/05/18
+         - date: 10/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 11/05/18
+         - date: 11/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 12/05/18
+         - date: 12/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 13/05/18
+         - date: 13/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 16/05/18
+         - date: 16/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 17/05/18
+         - date: 17/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 18/05/18
+         - date: 18/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 19/05/18
+         - date: 19/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 20/05/18
+         - date: 20/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 13/06/18
+         - date: 13/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 14/06/18
+         - date: 14/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 15/06/18
+         - date: 15/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 17/06/18
+         - date: 17/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 22/06/18
+         - date: 22/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 23/06/18
+         - date: 23/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 24/06/18
+         - date: 24/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 30/06/18
+         - date: 30/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 01/07/18
+         - date: 01/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 04/07/18
+         - date: 04/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 06/07/18
+         - date: 06/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 07/07/18
+         - date: 07/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 08/07/18
+         - date: 08/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 27/07/18
+         - date: 27/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 28/07/18
+         - date: 28/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 29/07/18
+         - date: 29/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 01/08/18
+         - date: 01/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 02/08/18
+         - date: 02/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 03/08/18
+         - date: 03/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 04/08/18
+         - date: 04/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 05/08/18
+         - date: 05/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 09/08/18
+         - date: 09/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 10/08/18
+         - date: 10/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 11/08/18
+         - date: 11/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 12/08/18
+         - date: 12/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 15/08/18
+         - date: 15/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 16/08/18
+         - date: 16/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 17/08/18
+         - date: 17/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 18/08/18
+         - date: 18/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 19/08/18
+         - date: 19/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 22/08/18
+         - date: 22/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 23/08/18
+         - date: 23/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 24/08/18
+         - date: 24/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 25/08/18
+         - date: 25/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 26/08/18
+         - date: 26/08/17
            amCapacity: 18
            pmCapacity: 18
-     
+
 Manchester:
   - Manchester FTAC:
       description: The Cresent Centre
       capacities:
-         - date: 09/06/18
+         - date: 09/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 10/06/18
+         - date: 10/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 15/07/18
+         - date: 15/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 22/07/18
+         - date: 22/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 29/07/18
+         - date: 29/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 05/08/18
+         - date: 05/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 12/08/18
+         - date: 12/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 19/08/18
+         - date: 19/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 24/08/18
+         - date: 24/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 25/08/18
+         - date: 25/08/17
            amCapacity: 18
            pmCapacity: 18
-     
+
 Newcastle:
   - Newcastle Longbenton:
       description: Longbenton
       capacities:
-         - date: 03/05/18
+         - date: 03/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 04/05/18
+         - date: 04/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 05/05/18
+         - date: 05/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 06/05/18
+         - date: 06/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 09/05/18
+         - date: 09/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 10/05/18
+         - date: 10/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 11/05/18
+         - date: 11/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 12/05/18
+         - date: 12/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 13/05/18
+         - date: 13/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 16/05/18
+         - date: 16/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 17/05/18
+         - date: 17/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 18/05/18
+         - date: 18/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 19/05/18
+         - date: 19/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 20/05/18
+         - date: 20/05/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 13/06/18
+         - date: 13/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 14/06/18
+         - date: 14/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 15/06/18
+         - date: 15/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 17/06/18
+         - date: 17/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 22/06/18
+         - date: 22/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 23/06/18
+         - date: 23/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 24/06/18
+         - date: 24/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 30/06/18
+         - date: 30/06/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 01/07/18
+         - date: 01/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 04/07/18
+         - date: 04/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 06/07/18
+         - date: 06/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 07/07/18
+         - date: 07/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 08/07/18
+         - date: 08/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 27/07/18
+         - date: 27/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 28/07/18
+         - date: 28/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 29/07/18
+         - date: 29/07/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 01/08/18
+         - date: 01/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 02/08/18
+         - date: 02/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 03/08/18
+         - date: 03/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 04/08/18
+         - date: 04/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 05/08/18
+         - date: 05/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 09/08/18
+         - date: 09/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 10/08/18
+         - date: 10/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 11/08/18
+         - date: 11/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 12/08/18
+         - date: 12/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 15/08/18
+         - date: 15/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 16/08/18
+         - date: 16/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 17/08/18
+         - date: 17/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 18/08/18
+         - date: 18/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 19/08/18
+         - date: 19/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 22/08/18
+         - date: 22/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 23/08/18
+         - date: 23/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 24/08/18
+         - date: 24/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 25/08/18
+         - date: 25/08/17
            amCapacity: 18
            pmCapacity: 18
-         - date: 26/08/18
+         - date: 26/08/17
            amCapacity: 18
            pmCapacity: 18
