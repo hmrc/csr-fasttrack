@@ -73,15 +73,13 @@ class PassMarkSettingsServiceSpec extends PlaySpec with BeforeAndAfterEach with 
                 competency = SchemeThreshold(20d, 80d),
                 verbal = SchemeThreshold(20d, 80d),
                 numerical = SchemeThreshold(20d, 80d),
-                situational = SchemeThreshold(20d, 80d),
-                None
+                situational = SchemeThreshold(20d, 80d)
               )
             )
           ),
           version = "aVersion",
           createDate = DateTime.parse("2016-04-13T10:00:00Z"),
-          createdByUser = "TestUser",
-          setting = "location1Scheme1"
+          createdByUser = "TestUser"
         )
       )
     ))
