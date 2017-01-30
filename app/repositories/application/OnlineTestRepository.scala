@@ -23,12 +23,9 @@ import model.ApplicationStatuses.BSONEnumHandler
 import model.EvaluationResults._
 import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound, UnexpectedException }
 import model.OnlineTestCommands._
-import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
-import model.{ ApplicationStatuses, Commands, ProgressStatuses }
-import org.joda.time.{ DateTime, LocalDate }
+import model.ProgressStatuses
 import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
 import model.Adjustments._
-import model.Scheme.Scheme
 import model.persisted.SchemeEvaluationResult
 import model.{ AdjustmentDetail, ApplicationStatuses, Commands }
 import org.joda.time.{ DateTime, LocalDate }
