@@ -51,8 +51,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
           SchemeResponse(mockSchemes(2).schemeName, None)
         ),
         None,
-        None,
-        "location1Scheme1"
+        None
       )
 
       val result = passMarkSettingsControllerWithNoSettings.getLatestVersion()(FakeRequest())
@@ -81,8 +80,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
           SchemeResponse(mockSchemes(2).schemeName, Some(mockSchemes(2).schemeThresholds))
         ),
         Some(mockCreateDate),
-        Some(mockCreatedByUser),
-        "location1Scheme1"
+        Some(mockCreatedByUser)
       )
 
       val result = passMarkSettingsControllerWithSettings.getLatestVersion()(FakeRequest())
@@ -133,7 +131,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
     val defaultSchemeThreshold = SchemeThreshold(20d, 80d)
 
     val defaultSchemeThresholds = SchemeThresholds(
-      defaultSchemeThreshold, defaultSchemeThreshold, defaultSchemeThreshold, defaultSchemeThreshold, None
+      defaultSchemeThreshold, defaultSchemeThreshold, defaultSchemeThreshold, defaultSchemeThreshold
     )
 
     val mockSchemes = List(
@@ -149,8 +147,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
       schemes = mockSchemes,
       version = mockVersion,
       createDate = mockCreateDate,
-      createdByUser = mockCreatedByUser,
-      setting = "location1Scheme1"
+      createdByUser = mockCreatedByUser
     )
 
     val mockUUIDFactory = mock[UUIDFactory]
