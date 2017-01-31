@@ -69,7 +69,7 @@ trait OnlineTestPassmarkService {
     }
   }
 
-  private def determineApplicationStatus(setting: String, result: RuleCategoryResult) = {
+  private def determineApplicationStatus(result: RuleCategoryResult) = {
     type Rules = Seq[(RuleCategoryResult) => Option[Result]]
 
     val totalFailure = Seq(
@@ -87,25 +87,12 @@ trait OnlineTestPassmarkService {
     // Second element will contain the first, plus rule2 other scheme setting
     // Third element will contain all the previous ones, plus rule 3 any setting
     val rule1: Rules = Seq(r => Some(r.location1Scheme1))
-    val rule2: Rules = setting match {
-      case "otherScheme" | "any" =>
-        Seq(
-          _.location1Scheme2,
-          _.location2Scheme1,
-          _.location2Scheme2
-        )
-      case _ => Nil
-    }
-    val rule3: Rules = setting match {
-      case "any" => Seq(_.alternativeScheme)
-      case _ => Nil
-    }
 
     if (totalFailure) {
       ApplicationStatuses.OnlineTestFailed
     } else {
       provideResult(
-        Seq(rule1, rule2, rule3)
+        Seq(rule1)
           .filter(_.nonEmpty)
           .flatten
           .map(f => f(result).getOrElse(Red)), result
@@ -126,7 +113,7 @@ trait OnlineTestPassmarkService {
 
   def evaluateCandidateScore(score: CandidateScoresWithPreferencesAndPassmarkSettings): Future[Unit] = {
     val result = passmarkRulesEngine.evaluate(score)
-    val applicationStatus = determineApplicationStatus(score.passmarkSettings.setting, result)
+    val applicationStatus = determineApplicationStatus(result)
 
     oRepository.savePassMarkScore(
       score.scores.applicationId,

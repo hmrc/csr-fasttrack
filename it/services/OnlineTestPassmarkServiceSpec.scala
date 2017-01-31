@@ -20,7 +20,7 @@ import java.io.File
 
 import com.typesafe.config.{ Config, ConfigFactory }
 import connectors.PassMarkExchangeObjects.Settings
-import mocks.{ OnlineIntegrationTestInMemoryRepository, PassMarkSettingsInMemoryRepository }
+import mocks.OnlineIntegrationTestInMemoryRepository
 import model.ApplicationStatuses._
 import model.EvaluationResults._
 import model.OnlineTestCommands.CandidateScoresWithPreferencesAndPassmarkSettings
@@ -51,10 +51,10 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
     val trRepository = mock[TestReportRepository]
     val oRepository = OnlineIntegrationTestInMemoryRepository
     val passmarkRulesEngine = OnlineTestPassmarkService.passmarkRulesEngine
-    val pmsRepository: PassMarkSettingsRepository = PassMarkSettingsInMemoryRepository
+    val pmsRepository: PassMarkSettingsRepository = mock[PassMarkSettingsRepository]
     val passMarkSettingsService = new PassMarkSettingsService {
       override val fwRepository = mock[FrameworkRepository]
-      override val pmsRepository = PassMarkSettingsInMemoryRepository
+      override val pmsRepository = mock[PassMarkSettingsRepository]
     }
   }
 
@@ -104,18 +104,6 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
 
             withClue(testMessage + " location1Scheme1") {
               toStr(actualResult.result.location1Scheme1) must be(expected.location1Scheme1)
-            }
-            withClue(testMessage + " location1Scheme2") {
-              toStr(actualResult.result.location1Scheme2) must be(expected.location1Scheme2)
-            }
-            withClue(testMessage + " location2Scheme1") {
-              toStr(actualResult.result.location2Scheme1) must be(expected.location2Scheme1)
-            }
-            withClue(testMessage + " location2Scheme2") {
-              toStr(actualResult.result.location2Scheme2) must be(expected.location2Scheme2)
-            }
-            withClue(testMessage + " alternativeScheme") {
-              toStr(actualResult.result.alternativeScheme) must be(expected.alternativeScheme)
             }
             withClue(testMessage + " applicationStatus") {
               actualResult.applicationStatus must be(expected.applicationStatus)

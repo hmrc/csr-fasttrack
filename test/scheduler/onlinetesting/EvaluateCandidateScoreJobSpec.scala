@@ -70,7 +70,7 @@ class EvaluateCandidateScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
 object EvaluateCandidateScoreJobSpec {
 
   val OnlineTestCompletedCandidateScore = CandidateScoresWithPreferencesAndPassmarkSettings(
-    Settings(List(), "verison", DateTime.now(), "user", "version1"),
+    Settings(List(), "verison", DateTime.now(), "user"),
     Preferences(LocationPreference("region", "location", "framework", None)),
     CandidateTestReport("appId", "type"),
     ApplicationStatuses.OnlineTestCompleted
