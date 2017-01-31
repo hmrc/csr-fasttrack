@@ -198,10 +198,11 @@ trait OnlineTestService {
     }
   }
 
-  private def markAsCompleted(application: OnlineTestApplication)(onlineTestProfile: CubiksTestProfile): Future[Unit] =
+  private def markAsCompleted(application: OnlineTestApplication)(onlineTestProfile: CubiksTestProfile): Future[Unit] = {
     otRepository.storeOnlineTestProfileAndUpdateStatusToInvite(application.applicationId, onlineTestProfile).map { _ =>
       audit("OnlineTestInvitationProcessComplete", application.userId)
     }
+  }
 
   private def candidateEmailAddress(application: OnlineTestApplication): Future[String] =
     cdRepository.find(application.userId).map(_.email)

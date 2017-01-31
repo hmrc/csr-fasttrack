@@ -34,7 +34,7 @@ class OnlineTestExtensionServiceSpec extends PlaySpec with ScalaFutures with Moc
 
     "add extra days onto expiry, from the expiry time, if not expired" in new TestFixture {
       when(dateTime.nowLocalTimeZone).thenReturn(now)
-      when(repository.getCubiksTestProfile(any())).thenReturnAsync(onlineTest)
+      when(repository.getCubiksTestProfile(any[String])).thenReturnAsync(onlineTest)
       when(repository.updateExpiryTime(any(), any())).thenReturnAsync()
 
       service.extendExpiryTime(onlineTestApp, extraDays).futureValue mustBe (())
@@ -45,7 +45,7 @@ class OnlineTestExtensionServiceSpec extends PlaySpec with ScalaFutures with Moc
     "add extra days onto expiry, from today, if already expired" in new TestFixture {
       val nowBeyondExpiry = expirationDate.plusDays(10)
       when(dateTime.nowLocalTimeZone).thenReturn(nowBeyondExpiry)
-      when(repository.getCubiksTestProfile(any())).thenReturnAsync(onlineTest)
+      when(repository.getCubiksTestProfile(any[String])).thenReturnAsync(onlineTest)
       when(repository.updateExpiryTime(any(), any())).thenReturnAsync()
 
       service.extendExpiryTime(onlineTestApp, extraDays).futureValue mustBe (())

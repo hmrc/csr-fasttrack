@@ -105,5 +105,7 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
 
   def nextTestForReminder(reminder: model.ReminderNotice): scala.concurrent.Future[Option[model.persisted.NotificationExpiringOnlineTest]] = ???
 
-  override def startOnlineTest(appId: String): Future[Unit] = Future.successful(())
+  override def startOnlineTest(cubiksId: Int): Future[Unit] = Future.successful(())
+
+  override def getCubiksTestProfile(cubiksUserId: Int): Future[CubiksTestProfile] = ???
 }

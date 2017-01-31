@@ -224,7 +224,6 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
           )
         }
 
-        override def startOnlineTest(appId: String): Future[Unit] = Future.successful(())
       }
       override val onlineTestingService = new OnlineTestServiceMock {
         override val cdRepository = new ContactDetailsInMemoryRepository {
