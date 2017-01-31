@@ -145,7 +145,6 @@ trait ReportingController extends BaseController {
   }
 
   def createCandidateProgressReport(frameworkId: String) = Action.async { implicit request =>
-
     val reportFut = for {
       applications <- reportingRepository.applicationsForCandidateProgressReport(frameworkId)
       allContactDetails <- contactDetailsRepository.findAll.map(x => x.groupBy(_.userId).mapValues(_.head))

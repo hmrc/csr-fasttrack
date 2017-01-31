@@ -74,8 +74,8 @@ object ReportExchangeObjects {
                                            locations: List[String],
                                            disability: Option[String],
                                            gis: Option[Boolean],
-                                           onlineAdjustments: Option[Boolean],
-                                           assessmentCentreAdjustments: Option[Boolean],
+                                           onlineAdjustments: Option[String],
+                                           assessmentCentreAdjustments: Option[String],
                                            civilServant: Option[Boolean],
                                            fsacIndicator: Option[String]
                                          )
@@ -88,8 +88,8 @@ object ReportExchangeObjects {
         locations = application.locations,
         disability = application.disability,
         gis = application.gis,
-        onlineAdjustments = application.onlineAdjustments,
-        assessmentCentreAdjustments = application.assessmentCentreAdjustments,
+        onlineAdjustments = application.onlineAdjustments.map( value => if (value) {"Yes"} else {"No"}),
+        assessmentCentreAdjustments = application.assessmentCentreAdjustments.map( value => if (value) {"Yes"} else {"No"}),
         civilServant = application.civilServant,
         None)
     }

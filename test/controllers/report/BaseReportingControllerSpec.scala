@@ -20,20 +20,9 @@ import config.TestFixtureBase
 import connectors.AuthProviderClient
 import connectors.ExchangeObjects.Candidate
 import controllers.ReportingController
-import mocks._
-import mocks.application.DocumentRootInMemoryRepository
-import model.CandidateScoresCommands.{ CandidateScoreFeedback, CandidateScores, CandidateScoresAndFeedback }
-import model.Commands.Implicits._
-import model.Commands._
-import model.OnlineTestCommands.TestResult
-import model.PersistedObjects.ContactDetailsWithId
-import org.joda.time.LocalDate
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
-import play.api.libs.json.{ JsArray, JsValue }
-import play.api.test.Helpers._
-import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
+import repositories.application.{ ReportingRepository }
 import repositories.{ ApplicationAssessmentScoresRepository, AssessmentCentreIndicatorRepository, ContactDetailsRepository, DiversityReportRepository, QuestionnaireRepository, TestReportRepository }
 import services.locationschemes.LocationSchemeService
 import testkit.MockitoImplicits.OngoingStubbingExtension
