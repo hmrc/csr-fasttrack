@@ -19,14 +19,15 @@ package controllers.report
 import connectors.AuthProviderClient
 import controllers.ReportingController
 import mocks._
-import mocks.application.{ ReportingDocumentRootInMemoryRepository }
+import mocks.application.ReportingDocumentRootInMemoryRepository
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
-import play.api.libs.json.{ JsArray, JsValue }
+import play.api.libs.json.JsArray
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
-import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, DiversityReportRepository, QuestionnaireRepository, TestReportRepository }
+import repositories.ApplicationAssessmentScoresRepository
+import repositories.application.{ PreviousYearCandidatesDetailsRepository, ReportingRepository }
+
 import scala.concurrent.Future
 import scala.language.postfixOps
 
@@ -49,6 +50,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val testReportRepository = TestReportInMemoryRepository
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
+        override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
@@ -70,6 +72,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val testReportRepository = TestReportInMemoryRepository
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
+        override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
@@ -96,6 +99,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val testReportRepository = TestReportInMemoryRepository
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 

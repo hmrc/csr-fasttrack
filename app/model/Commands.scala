@@ -106,6 +106,8 @@ object Commands {
     occupationCompleted: Boolean = false
   )
 
+  case class CandidateDetailsReportItem(appId: String, userId: String, csvRecord: String)
+
   case class Report(applicationId: String, progress: Option[String], firstLocation: Option[String],
                     firstLocationFirstScheme: Option[String], firstLocationSecondScheme: Option[String], secondLocation: Option[String],
                     secondLocationFirstScheme: Option[String], secondLocationSecondScheme: Option[String], alevels: Option[String],

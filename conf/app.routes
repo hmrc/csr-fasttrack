@@ -69,6 +69,7 @@ GET         /report/application-user-ids/:frameworkId                    control
 GET         /report/assessment-results/:frameworkId                      controllers.ReportingController.createAssessmentResultsReport(frameworkId: String)
 GET         /report/successful-candidates/:frameworkId                   controllers.ReportingController.createSuccessfulCandidatesReport(frameworkId: String)
 GET         /report/:frameworkId                                         controllers.ReportingController.createReport(frameworkId: String)
+GET         /report/candidates-details/previous-year                     controllers.ReportingController.prevYearCandidatesDetailsReport
 
 GET         /diagnostic/user/:applicationId                              controllers.DiagnosticReportController.getApplicationByApplicationId(applicationId: String)
 GET         /diagnostic/all-users                                        controllers.DiagnosticReportController.getAllApplications

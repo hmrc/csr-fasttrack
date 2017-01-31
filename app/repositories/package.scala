@@ -61,6 +61,7 @@ package object repositories {
   lazy val reportingRepository = new ReportingMongoRepository(timeZoneService)
   lazy val flagCandidateRepository = new FlagCandidateMongoRepository
   lazy val schoolsRepository = SchoolsCSVRepository
+  lazy val prevYearCandidatesDetailsRepository = new PreviousYearCandidatesDetailsMongoRepository()
 
   /** Create indexes */
   Await.result(Future.sequence(List(

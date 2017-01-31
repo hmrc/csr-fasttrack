@@ -24,10 +24,10 @@ import model.Commands.Implicits._
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
 import play.api.libs.json.JsValue
-import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import play.api.test.Helpers._
+import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.ApplicationAssessmentScoresRepository
-import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
+import repositories.application.ReportingRepository
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -50,6 +50,7 @@ class NonSubmittedReportingControllerSpec extends BaseReportingControllerSpec {
         override val testReportRepository = TestReportInMemoryRepository
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
+        override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
       }
       val result = controller.createNonSubmittedAppsReports(frameworkId)(createNonSubmittedAppsReportRequest(frameworkId)).run
 
@@ -82,6 +83,7 @@ class NonSubmittedReportingControllerSpec extends BaseReportingControllerSpec {
         override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val testReportRepository = TestReportInMemoryRepository
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
       }
       val result = controller.createNonSubmittedAppsReports(frameworkId)(createNonSubmittedAppsReportRequest(frameworkId)).run
 

@@ -23,7 +23,7 @@ import model.PersistedObjects.ContactDetailsWithId
 import model.PersistedObjects.Implicits._
 import play.api.libs.json.Json
 import play.api.mvc.{ Action, AnyContent, Request }
-import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
+import repositories.application.{ PreviousYearCandidatesDetailsRepository, ReportingRepository }
 import repositories.{ QuestionnaireRepository, _ }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -36,6 +36,7 @@ object ReportingController extends ReportingController {
   val testReportRepository = repositories.testReportRepository
   val assessmentScoresRepository = repositories.applicationAssessmentScoresRepository
   val reportingRepository = repositories.reportingRepository
+  val prevYearCandidatesDetailsRepository = repositories.prevYearCandidatesDetailsRepository
   val authProviderClient = AuthProviderClient
 }
 
@@ -49,6 +50,7 @@ trait ReportingController extends BaseController {
   val testReportRepository: TestReportRepository
   val assessmentScoresRepository: ApplicationAssessmentScoresRepository
   val reportingRepository: ReportingRepository
+  val prevYearCandidatesDetailsRepository: PreviousYearCandidatesDetailsRepository
   val authProviderClient: AuthProviderClient
 
   def retrieveDiversityReport = Action.async { implicit request =>
@@ -207,6 +209,17 @@ trait ReportingController extends BaseController {
   def applicationAndUserIdsReport(frameworkId: String) = Action.async { implicit request =>
     reportingRepository.allApplicationAndUserIds(frameworkId).map { list =>
       Ok(Json.toJson(list))
+    }
+  }
+
+  def prevYearCandidatesDetailsReport = Action.async { implicit request =>
+    for {
+      applications <- prevYearCandidatesDetailsRepository.findApplicationDetails()
+      contactDetails <- prevYearCandidatesDetailsRepository.findContactDetails()
+    } yield {
+      Ok(applications.map {
+        app => app.csvRecord + contactDetails.getOrElse(app.userId, "")
+      }.mkString("\n"))
     }
   }
 
