@@ -35,6 +35,7 @@ import scala.concurrent.Future
 
 object ReportingController extends ReportingController {
   val locationSchemeService = LocationSchemeService
+  val assessmentCentreIndicatorRepository = AssessmentCentreIndicatorCSVRepository
   val assessmentScoresRepository = repositories.applicationAssessmentScoresRepository
   val contactDetailsRepository = repositories.contactDetailsRepository
   val diversityReportRepository = repositories.diversityReportRepository
@@ -49,6 +50,7 @@ trait ReportingController extends BaseController {
   import Implicits._
 
   val locationSchemeService: LocationSchemeService
+  val assessmentCentreIndicatorRepository: AssessmentCentreIndicatorRepository
   val assessmentScoresRepository: ApplicationAssessmentScoresRepository
   val contactDetailsRepository: ContactDetailsRepository
   val diversityReportRepository: DiversityReportRepository
@@ -145,34 +147,39 @@ trait ReportingController extends BaseController {
   def createCandidateProgressReport(frameworkId: String) = Action.async { implicit request =>
     reportingRepository.candidateProgressReport(frameworkId).flatMap { report =>
       val listOfFutures = report.map { reportItem => {
+        val fsacIndicatorFut = contactDetailsRepository.find(reportItem.userId.toString).map { contactDetails =>
+          assessmentCentreIndicatorRepository.calculateIndicator(Some(contactDetails.postCode.toString))
+        }
         val locNamesFut = locationSchemeService.getSchemeLocations(reportItem.locations).map { locations =>
           locations.map(_.locationName)
         }
-        val futt = locNamesFut.map { locNames => reportItem.copy(locations = locNames) }
-        futt
+        for {
+          fsacIndicator <- fsacIndicatorFut
+          locNames <- locNamesFut
+        } yield {
+          CandidateProgressReportItem2(reportItem).copy(fsacIndicator = Some(fsacIndicator.assessmentCentre), locations = locNames)
+        }
       }}
       Future.sequence(listOfFutures)
-    }.map { list =>
-      Ok(Json.toJson(list))
-    }
+    }.map { list => Ok(Json.toJson(list)) }
   }
 
   def createNonSubmittedApplicationsReports(frameworkId: String) =
     preferencesAndContactReports(nonSubmittedOnly = true)(frameworkId)
 
   def createOnlineTestPassMarkModellingReport(frameworkId: String) = Action.async { implicit request =>
-    val reports =
-      for {
-        applications <- reportingRepository.candidateProgressReportNotWithdrawn(frameworkId)
-        questionnaires <- questionnaireRepository.passMarkReport
-        testResults <- testReportRepository.getOnlineTestReports
-      } yield {
+      val reports =
         for {
-          a <- applications
-          q <- questionnaires.get(a.applicationId.toString)
-          t <- testResults.get(a.applicationId.toString)
-        } yield PassMarkReport(a, q, t)
-      }
+          applications <- reportingRepository.candidateProgressReportNotWithdrawn(frameworkId)
+          questionnaires <- questionnaireRepository.passMarkReport
+          testResults <- testReportRepository.getOnlineTestReports
+        } yield {
+          for {
+            a <- applications
+            q <- questionnaires.get(a.applicationId.toString)
+            t <- testResults.get(a.applicationId.toString)
+          } yield PassMarkReport(a, q, t)
+        }
 
     reports.map { list =>
       Ok(Json.toJson(list))
@@ -180,22 +187,22 @@ trait ReportingController extends BaseController {
   }
 
   def createOnlineTestPassMarkWithPersonalDataReport(frameworkId: String) = Action.async { implicit request =>
-    val reports =
-      for {
-        applications <- reportingRepository.candidateProgressReportNotWithdrawnWithPersonalDetails(frameworkId)
-        testResults <- testReportRepository.getOnlineTestReports
-        contactDetails <- contactDetailsRepository.findAll
-        cDetails = contactDetails.map(c => c.userId -> c).toMap
-      } yield {
+      val reports =
         for {
-          a <- applications
-          t <- testResults.get(a.applicationId.toString)
-          c <- cDetails.get(a.userId.toString)
-        } yield PassMarkReportWithPersonalData(a, t, ContactDetails(c.phone, c.email, c.address, c.postCode))
+          applications <- reportingRepository.candidateProgressReportNotWithdrawnWithPersonalDetails(frameworkId)
+          testResults <- testReportRepository.getOnlineTestReports
+          contactDetails <- contactDetailsRepository.findAll
+          cDetails = contactDetails.map(c => c.userId -> c).toMap
+        } yield {
+          for {
+            a <- applications
+            t <- testResults.get(a.applicationId.toString)
+            c <- cDetails.get(a.userId.toString)
+          } yield PassMarkReportWithPersonalData(a, t, ContactDetails(c.phone, c.email, c.address, c.postCode))
+        }
+      reports.map { list =>
+        Ok(Json.toJson(list))
       }
-    reports.map { list =>
-      Ok(Json.toJson(list))
-    }
   }
 
   def createPreferencesAndContactReports(frameworkId: String) =
@@ -204,24 +211,24 @@ trait ReportingController extends BaseController {
 
   def createSuccessfulCandidatesReport(frameworkId: String) = Action.async { implicit request =>
 
-    val applications = reportingRepository.applicationsPassedInAssessmentCentre(frameworkId)
-    val allCandidates = contactDetailsRepository.findAll
+      val applications = reportingRepository.applicationsPassedInAssessmentCentre(frameworkId)
+      val allCandidates = contactDetailsRepository.findAll
 
-    val reports = for {
-      apps <- applications
-      acs <- allCandidates
-      candidates = acs.map(c => c.userId -> c).toMap
-    } yield {
-      for {
-        a <- apps
-        c <- candidates.get(a.userId.toString)
+      val reports = for {
+        apps <- applications
+        acs <- allCandidates
+        candidates = acs.map(c => c.userId -> c).toMap
       } yield {
-        ApplicationPreferencesWithTestResultsAndContactDetails(
-          a,
-          ContactDetails(c.phone, c.email, c.address, c.postCode)
-        )
+        for {
+          a <- apps
+          c <- candidates.get(a.userId.toString)
+        } yield {
+          ApplicationPreferencesWithTestResultsAndContactDetails(
+            a,
+            ContactDetails(c.phone, c.email, c.address, c.postCode)
+          )
+        }
       }
-    }
 
     reports.map { list =>
       Ok(Json.toJson(list))
@@ -229,15 +236,15 @@ trait ReportingController extends BaseController {
   }
 
   private def preferencesAndContactReports(nonSubmittedOnly: Boolean)(frameworkId: String) = Action.async { implicit request =>
-    for {
-      applications <- reportingRepository.applicationsReport(frameworkId)
-      applicationsToExclude = getApplicationsNotToIncludeInReport(applications, nonSubmittedOnly)
-      users <- getAppsFromAuthProvider(applicationsToExclude)
-      contactDetails <- contactDetailsRepository.findAll
-      reports = mergeApplications(users, contactDetails, applications)
-    } yield {
-      Ok(Json.toJson(reports.values))
-    }
+      for {
+        applications <- reportingRepository.applicationsReport(frameworkId)
+        applicationsToExclude = getApplicationsNotToIncludeInReport(applications, nonSubmittedOnly)
+        users <- getAppsFromAuthProvider(applicationsToExclude)
+        contactDetails <- contactDetailsRepository.findAll
+        reports = mergeApplications(users, contactDetails, applications)
+      } yield {
+        Ok(Json.toJson(reports.values))
+      }
   }
 
   private def mergeApplications(

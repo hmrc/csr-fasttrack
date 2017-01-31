@@ -42,7 +42,7 @@ import scala.concurrent.Future
    exclusively to reporting functionality
  */
 trait ReportingRepository {
-  def candidateProgressReport(frameworkId: String): Future[List[CandidateProgressReportItem2]]
+  def candidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
 
   def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[CandidateProgressReportItem]]
 
@@ -185,7 +185,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn))
     )))
 
-  override def candidateProgressReport(frameworkId: String): Future[List[CandidateProgressReportItem2]] =
+  override def candidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] =
     candidateProgressReport2(BSONDocument("frameworkId" -> frameworkId))
 
   private def candidateProgressReport(query: BSONDocument): Future[List[CandidateProgressReportItem]] = {
@@ -215,9 +215,10 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     }
   }
 
-  private def candidateProgressReport2(query: BSONDocument): Future[List[CandidateProgressReportItem2]] = {
+  private def candidateProgressReport2(query: BSONDocument): Future[List[ApplicationForCandidateProgressReport]] = {
     val projection = BSONDocument(
       "applicationId" -> "1",
+      "userId" -> "1",
       "progress-status" -> "1",
       "personal-details.civilServant" -> "1",
       "schemes" -> "1",
@@ -228,7 +229,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       "assistance-details.needsSupportAtVenue" -> "1"
     )
 
-    reportQueryWithProjectionsBSON[CandidateProgressReportItem2](query, projection)
+    reportQueryWithProjectionsBSON[ApplicationForCandidateProgressReport](query, projection)
   }
 
   override def applicationsWithAssessmentScoresAccepted(frameworkId: String): Future[List[ApplicationPreferences]] =
@@ -440,6 +441,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     }
   }
 
+  // TODO: Not sure if we will need it once Candidate Progress Report is finished
   private def docToReport(document: BSONDocument) = {
     val fr = document.getAs[BSONDocument]("framework-preferences")
     val fr1 = fr.flatMap(_.getAs[BSONDocument]("firstLocation"))

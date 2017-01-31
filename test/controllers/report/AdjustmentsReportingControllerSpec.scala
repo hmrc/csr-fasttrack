@@ -37,6 +37,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
   "Reporting controller create adjustment report" should {
     "return the adjustment report when we execute adjustment reports" in new AdjustmentsTestFixture {
       override val controller = new ReportingController {
+        override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
         override val locationSchemeService = locationSchemeServiceMock
         override val authProviderClient: AuthProviderClient = authProviderClientMock
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
@@ -67,6 +68,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
     "return the adjustment report without contact details data" in new AdjustmentsTestFixture {
       override val controller = new ReportingController {
         override val locationSchemeService = locationSchemeServiceMock
+        override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
         override val contactDetailsRepository = new ContactDetailsInMemoryRepository
         override val diversityReportRepository = DiversityReportInMemoryRepository
@@ -90,6 +92,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
     "return no adjustments if there's no data on the server" in new AdjustmentsTestFixture {
       override val controller = new ReportingController {
         override val locationSchemeService = locationSchemeServiceMock
+        override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
         override val contactDetailsRepository = ContactDetailsInMemoryRepository
         override val diversityReportRepository = DiversityReportInMemoryRepository

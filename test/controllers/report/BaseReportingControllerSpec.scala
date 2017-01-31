@@ -34,7 +34,7 @@ import play.api.libs.json.{ JsArray, JsValue }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
-import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, DiversityReportRepository, QuestionnaireRepository, TestReportRepository }
+import repositories.{ ApplicationAssessmentScoresRepository, AssessmentCentreIndicatorRepository, ContactDetailsRepository, DiversityReportRepository, QuestionnaireRepository, TestReportRepository }
 import services.locationschemes.LocationSchemeService
 import testkit.MockitoImplicits.OngoingStubbingExtension
 import testkit.UnitWithAppSpec
@@ -49,7 +49,13 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
     val frameworkId = "FastTrack-2015"
 
     val locationSchemeServiceMock = mock[LocationSchemeService]
-
+    val assessmentCentreIndicatorRepoMock = mock[AssessmentCentreIndicatorRepository]
+    val assessmentScoresRepoMock = mock[ApplicationAssessmentScoresRepository]
+    val contactDetailsRepoMock = mock[ContactDetailsRepository]
+    val diversityReportRepoMock = mock[DiversityReportRepository]
+    val questionnaireRepoMock = mock[QuestionnaireRepository]
+    val reportingRepoMock = mock[ReportingRepository]
+    val testReportRepoMock = mock[TestReportRepository]
     val authProviderClientMock = mock[AuthProviderClient]
     when(authProviderClientMock.candidatesReport(any())).thenReturn(Future.successful(
       Candidate("firstName1", "lastName1", Some("preferredName1"), "email1@test.com", "user1") ::
@@ -57,22 +63,17 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
         Nil
     ))
 
-    val assessmentScoresRepoMock = mock[ApplicationAssessmentScoresRepository]
-    val contactDetailsRepoMock = mock[ContactDetailsRepository]
-    val diversityReportRepoMock = mock[DiversityReportRepository]
-    val questionnaireRepoMock = mock[QuestionnaireRepository]
-    val reportingRepoMock = mock[ReportingRepository]
-    val testReportRepoMock = mock[TestReportRepository]
 
     val controller = new ReportingController {
       val locationSchemeService = locationSchemeServiceMock
-      val diversityReportRepository = diversityReportRepoMock
-      val contactDetailsRepository = contactDetailsRepoMock
-      val authProviderClient = authProviderClientMock
-      val questionnaireRepository = questionnaireRepoMock
-      val testReportRepository = testReportRepoMock
+      val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
       val assessmentScoresRepository = assessmentScoresRepoMock
+      val contactDetailsRepository = contactDetailsRepoMock
+      val diversityReportRepository = diversityReportRepoMock
+      val questionnaireRepository = questionnaireRepoMock
       val reportingRepository = reportingRepoMock
+      val testReportRepository = testReportRepoMock
+      val authProviderClient = authProviderClientMock
     }
   }
 }

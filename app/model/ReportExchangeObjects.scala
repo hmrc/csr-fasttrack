@@ -80,6 +80,34 @@ object ReportExchangeObjects {
                                            fsacIndicator: Option[String]
                                          )
 
+  case object CandidateProgressReportItem2 {
+    def apply(application: ApplicationForCandidateProgressReport): CandidateProgressReportItem2 = {
+      CandidateProgressReportItem2(applicationId = application.applicationId,
+        progress = application.progress,
+        schemes = application.schemes,
+        locations = application.locations,
+        disability = application.disability,
+        gis = application.gis,
+        onlineAdjustments = application.onlineAdjustments,
+        assessmentCentreAdjustments = application.assessmentCentreAdjustments,
+        civilServant = application.civilServant,
+        None)
+    }
+  }
+
+  case class ApplicationForCandidateProgressReport(
+                                                    applicationId: UniqueIdentifier,
+                                                    userId: UniqueIdentifier,
+                                                    progress: Option[String],
+                                                    schemes: List[Scheme],
+                                                    locations: List[String],
+                                                    disability: Option[String],
+                                                    gis: Option[Boolean],
+                                                    onlineAdjustments: Option[Boolean],
+                                                    assessmentCentreAdjustments: Option[Boolean],
+                                                    civilServant: Option[Boolean]
+                                                  )
+
   case class ReportWithPersonalDetails(
     applicationId: UniqueIdentifier,
     userId: UniqueIdentifier,
@@ -223,6 +251,7 @@ object ReportExchangeObjects {
   object Implicits {
     implicit val candidateProgressReportItemFormats = Json.format[CandidateProgressReportItem]
     implicit val candidateProgressReportItemFormats2 = Json.format[CandidateProgressReportItem2]
+    implicit val applicationForCandidateProgressReportFormats = Json.format[ApplicationForCandidateProgressReport]
     implicit val candidateProgressReportItemWithPersonalDetailsFormats = Json.format[ReportWithPersonalDetails]
     implicit val passMarkReportTestResultFormats = Json.format[TestResult]
     implicit val adjustmentReportFormats = Json.format[AdjustmentReport]
@@ -241,6 +270,5 @@ object ReportExchangeObjects {
     implicit val applicationPreferencesWithTestResultsFormats = Json.format[ApplicationPreferencesWithTestResults]
     implicit val successfulCandidatesReportFormats = Json.format[ApplicationPreferencesWithTestResultsAndContactDetails]
     implicit val candidateAwaitingAllocationFormats = Json.format[CandidateAwaitingAllocation]
-
   }
 }

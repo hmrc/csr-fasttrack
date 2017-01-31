@@ -44,18 +44,21 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
   }
 
   override def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[CandidateProgressReportItem]] = Future.successful(List(
-    CandidateProgressReportItem(UniqueIdentifier("123"), Some("SUBMITTED"), Some("London"), Some("Business"), None, None, None, None,
-      Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None),
-    CandidateProgressReportItem(UniqueIdentifier("456"), Some("IN_PROGRESS"), Some("London"), Some("Business"), None, None, None, None,
-      Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None),
-    CandidateProgressReportItem(UniqueIdentifier("789"), Some("SUBMITTED"), Some("London"), Some("Business"), None, None, None, None,
-      Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None)
+    CandidateProgressReportItem(UniqueIdentifier.randomUniqueIdentifier, Some("SUBMITTED"), Some("London"), Some("Business"),
+      None, None, None, None, Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None),
+    CandidateProgressReportItem(UniqueIdentifier.randomUniqueIdentifier, Some("IN_PROGRESS"), Some("London"), Some("Business"),
+      None, None, None, None, Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None),
+    CandidateProgressReportItem(UniqueIdentifier.randomUniqueIdentifier, Some("SUBMITTED"), Some("London"), Some("Business"),
+      None, None, None, None, Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None)
   ))
 
-  override def candidateProgressReport(frameworkId: String): Future[List[CandidateProgressReportItem2]] = Future.successful(List(
-    CandidateProgressReportItem2(UniqueIdentifier("123"), Some("SUBMITTED"), List.empty, List.empty, None, None, None, None, None, None),
-    CandidateProgressReportItem2(UniqueIdentifier("456"), Some("IN_PROGRESS"), List.empty, List.empty, None, None, None, None, None, None),
-    CandidateProgressReportItem2(UniqueIdentifier("789"), Some("SUBMITTED"), List.empty, List.empty, None, None, None, None, None, None)
+  override def candidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] = Future.successful(List(
+    ApplicationForCandidateProgressReport(UniqueIdentifier.randomUniqueIdentifier, UniqueIdentifier.randomUniqueIdentifier, Some("SUBMITTED"),
+      List.empty, List.empty, None, None, None, None, None),
+    ApplicationForCandidateProgressReport(UniqueIdentifier.randomUniqueIdentifier, UniqueIdentifier.randomUniqueIdentifier, Some("IN_PROGRESS"),
+      List.empty, List.empty, None, None, None, None, None),
+    ApplicationForCandidateProgressReport(UniqueIdentifier.randomUniqueIdentifier, UniqueIdentifier.randomUniqueIdentifier, Some("SUBMITTED"),
+      List.empty, List.empty, None, None, None, None, None)
   ))
 
   override def adjustmentReport(frameworkId: String): Future[List[AdjustmentReport]] =

@@ -37,6 +37,7 @@ class NonSubmittedApplicationsReportingControllerSpec extends BaseReportingContr
     "return a list of non submitted applications with phone number if contact details exist" in new NonSubmittedTestFixture {
       override val controller = new ReportingController {
         override val locationSchemeService = locationSchemeServiceMock
+        override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
         override val contactDetailsRepository = new ContactDetailsInMemoryRepository {
           override def findAll: Future[List[ContactDetailsWithId]] = {
@@ -73,6 +74,7 @@ class NonSubmittedApplicationsReportingControllerSpec extends BaseReportingContr
     "return only applications based on auth provider in registered state if there is no applications created" in new NonSubmittedTestFixture {
       override val controller = new ReportingController {
         override val locationSchemeService = locationSchemeServiceMock
+        override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
         override val contactDetailsRepository = ContactDetailsInMemoryRepository
         override val diversityReportRepository = DiversityReportInMemoryRepository
