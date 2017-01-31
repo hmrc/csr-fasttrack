@@ -53,10 +53,9 @@ class FrameworkPreferenceMongoRepository(implicit mongo: () => DB)
     }
   }
 
-  @deprecated("It needs to be removed. Framework-preference does not exist anymore", "27/01/2017")
   def tryGetPreferences(applicationId: String): Future[Option[Preferences]] = {
     val query = BSONDocument("applicationId" -> applicationId)
-    val projection = BSONDocument("schemes" -> 1, "_id" -> 0)
+    val projection = BSONDocument("framework-preferences" -> 1, "_id" -> 0)
     collection.find(query, projection).one[BSONDocument].map { rootDocument =>
       rootDocument.flatMap(_.getAs[Preferences]("framework-preferences"))
     }
