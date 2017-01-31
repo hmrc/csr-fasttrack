@@ -52,7 +52,7 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
       None, None, None, None, Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None)
   ))
 
-  override def candidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] = Future.successful(List(
+  override def applicationsForCandidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] = Future.successful(List(
     ApplicationForCandidateProgressReport(UniqueIdentifier.randomUniqueIdentifier, UniqueIdentifier.randomUniqueIdentifier, Some("SUBMITTED"),
       List.empty, List.empty, None, None, None, None, None),
     ApplicationForCandidateProgressReport(UniqueIdentifier.randomUniqueIdentifier, UniqueIdentifier.randomUniqueIdentifier, Some("IN_PROGRESS"),

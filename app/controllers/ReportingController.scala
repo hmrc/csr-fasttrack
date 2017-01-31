@@ -145,23 +145,21 @@ trait ReportingController extends BaseController {
   }
 
   def createCandidateProgressReport(frameworkId: String) = Action.async { implicit request =>
-    reportingRepository.candidateProgressReport(frameworkId).flatMap { report =>
-      val listOfFutures = report.map { reportItem => {
-        val fsacIndicatorFut = contactDetailsRepository.find(reportItem.userId.toString).map { contactDetails =>
-          assessmentCentreIndicatorRepository.calculateIndicator(Some(contactDetails.postCode.toString))
-        }
-        val locNamesFut = locationSchemeService.getSchemeLocations(reportItem.locations).map { locations =>
-          locations.map(_.locationName)
-        }
-        for {
-          fsacIndicator <- fsacIndicatorFut
-          locNames <- locNamesFut
-        } yield {
-          CandidateProgressReportItem2(reportItem).copy(fsacIndicator = Some(fsacIndicator.assessmentCentre), locations = locNames)
-        }
-      }}
-      Future.sequence(listOfFutures)
-    }.map { list => Ok(Json.toJson(list)) }
+
+    val reportFut = for {
+      applications <- reportingRepository.applicationsForCandidateProgressReport(frameworkId)
+      allContactDetails <- contactDetailsRepository.findAll.map(x => x.groupBy(_.userId).mapValues(_.head))
+      allLocations <- locationSchemeService.getAllSchemeLocations
+    } yield {
+      applications.map { application =>
+        val contactDetails = allContactDetails(application.userId.toString())
+        val fsacIndicator = assessmentCentreIndicatorRepository.calculateIndicator(Some(contactDetails.postCode.toString))
+        val locationIds = application.locations
+        val locationNames = allLocations.filter(location => locationIds.contains(location.id)).map(_.locationName)
+        CandidateProgressReportItem2(application).copy(fsacIndicator = Some(fsacIndicator.assessmentCentre), locations = locationNames)
+      }
+    }
+    reportFut.map { report => Ok(Json.toJson(report)) }
   }
 
   def createNonSubmittedApplicationsReports(frameworkId: String) =

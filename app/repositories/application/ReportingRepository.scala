@@ -42,7 +42,7 @@ import scala.concurrent.Future
    exclusively to reporting functionality
  */
 trait ReportingRepository {
-  def candidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
+  def applicationsForCandidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
 
   def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[CandidateProgressReportItem]]
 
@@ -185,7 +185,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn))
     )))
 
-  override def candidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] =
+  override def applicationsForCandidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] =
     candidateProgressReport2(BSONDocument("frameworkId" -> frameworkId))
 
   private def candidateProgressReport(query: BSONDocument): Future[List[CandidateProgressReportItem]] = {
