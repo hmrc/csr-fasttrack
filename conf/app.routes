@@ -75,6 +75,7 @@ GET         /diagnostic/all-users                                        control
 
 GET         /online-test/candidate/:userId                               controllers.OnlineTestController.getOnlineTest(userId: String)
 POST        /online-test/candidate/:userId/status                        controllers.OnlineTestController.onlineTestStatusUpdate(userId: String)
+POST        /online-test/start/:cubiksUserId                             controllers.OnlineTestController.startOnlineTest(cubiksUserId: Int)
 POST        /online-test/complete/:token                                 controllers.OnlineTestController.completeTests(token: String)
 POST        /online-test/reset/:appId                                    controllers.OnlineTestController.resetOnlineTests(appId: String)
 POST        /online-test/extend/:appId                                   controllers.OnlineTestController.extendOnlineTests(appId: String)

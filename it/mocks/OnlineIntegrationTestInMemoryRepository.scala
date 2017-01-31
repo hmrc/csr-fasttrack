@@ -111,5 +111,7 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
 
   def addReminderNotificationStatus(userId: String, notificationStatus: String): Future[Unit] = ???
 
-  override def startOnlineTest(appId: String): Future[Unit] = Future.successful(())
+  override def startOnlineTest(cubiksUserId: Int): Future[Unit] = Future.successful(())
+
+  override def getCubiksTestProfile(cubiksUserId: Int): Future[CubiksTestProfile] = ???
 }

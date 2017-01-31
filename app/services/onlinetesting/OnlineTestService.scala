@@ -86,6 +86,7 @@ trait OnlineTestService {
       hasReport <- otprRepository.hasReport(candidate.get.applicationId.get)
     } yield {
       OnlineTest(
+        onlineTestDetails.cubiksUserId,
         onlineTestDetails.invitationDate,
         onlineTestDetails.expirationDate,
         onlineTestDetails.onlineTestUrl,

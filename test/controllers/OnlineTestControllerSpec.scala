@@ -195,6 +195,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
       override def getOnlineTest(userId: String): Future[OnlineTest] = Future.successful {
         val date = DateTime.now
         OnlineTest(
+          cubiksUserId = 123,
           inviteDate = date,
           expireDate = date.plusDays(7),
           onlineTestLink = "http://www.google.co.uk",

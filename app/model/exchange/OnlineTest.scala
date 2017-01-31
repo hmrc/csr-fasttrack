@@ -20,6 +20,7 @@ import org.joda.time.DateTime
 import play.api.libs.json.Json
 
 case class OnlineTest(
+  cubiksUserId: Int,
   inviteDate: DateTime,
   expireDate: DateTime,
   onlineTestLink: String,

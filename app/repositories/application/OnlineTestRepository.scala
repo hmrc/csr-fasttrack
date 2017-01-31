@@ -54,6 +54,8 @@ trait OnlineTestRepository {
 
   def getCubiksTestProfile(userId: String): Future[CubiksTestProfile]
 
+  def getCubiksTestProfile(cubiksUserId: Int): Future[CubiksTestProfile]
+
   def updateStatus(userId: String, status: ApplicationStatuses.EnumVal): Future[Unit]
 
   def updateExpiryTime(userId: String, expirationDate: DateTime): Future[Unit]
@@ -86,7 +88,7 @@ trait OnlineTestRepository {
 
   def addReminderNotificationStatus(userId: String, notificationStatus: String): Future[Unit]
 
-  def startOnlineTest(appId: String): Future[Unit]
+  def startOnlineTest(cubiksUserId: Int): Future[Unit]
 }
 
 class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
@@ -117,6 +119,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     } else {
       BSONDocument("$set" -> BSONDocument(
         s"progress-status.$flag" -> true,
+
         "applicationStatus" -> status
       ))
     }
@@ -135,6 +138,21 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     }
   }
 
+  override def getCubiksTestProfile(cubiksUserId: Int): Future[CubiksTestProfile] = {
+
+    val query = BSONDocument("online-tests.cubiksUserId" -> cubiksUserId)
+    val projection = BSONDocument("online-tests" -> 1, "_id" -> 0)
+
+    collection.find(query, projection).one[BSONDocument] map {
+      case Some(document) if document.getAs[BSONDocument]("online-tests").isDefined =>
+        document.getAs[CubiksTestProfile]("online-tests").getOrElse(throw NotFoundException(
+          Some(s"No online test found for cubiksId $cubiksUserId"))
+        )
+
+      case _ => throw NotFoundException()
+    }
+  }
+
   override def updateStatus(userId: String, status: ApplicationStatuses.EnumVal): Future[Unit] = {
     val query = BSONDocument("userId" -> userId)
     val applicationStatusBSON = applicationStatus(status)
@@ -146,15 +164,16 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     }
   }
 
-  override def startOnlineTest(appId: String): Future[Unit] = {
-    val query = BSONDocument("applicationId" -> appId)
+  override def startOnlineTest(cubiksUserId: Int): Future[Unit] = {
+    val query = BSONDocument("online-tests.cubiksUserId" -> cubiksUserId)
     val update = BSONDocument("$set" -> BSONDocument(
       s"applicationStatus" -> ApplicationStatuses.OnlineTestStarted,
       s"progress-status.${ProgressStatuses.OnlineTestStartedProgress}" -> true,
       "online-tests.startedDateTime" -> DateTime.now
     ))
 
-    val validator = singleUpdateValidator(appId, actionDesc = "recording cubiks test start", CannotUpdateCubiksTest(appId))
+    val validator = singleUpdateValidator(s"$cubiksUserId", actionDesc = "recording cubiks test start",
+      CannotUpdateCubiksTest(s"Cant update test with cubiksId $cubiksUserId"))
     collection.update(query, update, upsert = false) map validator
 
   }

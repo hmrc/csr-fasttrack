@@ -65,8 +65,8 @@ trait OnlineTestController extends BaseController {
     }
   }
 
-  def startOnlineTest(appId: String): Action[AnyContent] = Action.async { implicit request =>
-    onlineTestingRepo.startOnlineTest(appId).map { _ =>
+  def startOnlineTest(cubiksUserId: Int): Action[AnyContent] = Action.async { implicit request =>
+    onlineTestingRepo.startOnlineTest(cubiksUserId).map { _ =>
       Ok
     } recover {
         case _: CannotUpdateCubiksTest => NotFound

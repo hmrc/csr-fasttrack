@@ -52,7 +52,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
       val result = onlineTestRepo.nextApplicationReadyForOnlineTesting.futureValue
 
-      result mustBe (None)
+      result mustBe None
     }
 
     "return no application if there is only one application with adjustment needed and not confirmed" in {
@@ -61,7 +61,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
       val result = onlineTestRepo.nextApplicationReadyForOnlineTesting.futureValue
 
-      result mustBe (None)
+      result mustBe None
     }
 
     "return one application if there is one submitted application without adjustment needed" in {
@@ -622,7 +622,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       val result = onlineTestRepo.nextApplicationPassMarkProcessing("currentVersion").futureValue
 
       result must not be empty
-      result.get.applicationId mustBe(AppId)
+      result.get.applicationId mustBe AppId
     }
 
     "return no candidate if there is only one who has been already evaluated but the application status is ASSESSMENT_SCORES_ENTERED" in {
@@ -679,6 +679,28 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
       exception mustBe OnlineTestPassmarkEvaluationNotFound(appId)
     }
+  }
+
+  "start test" must {
+    "correctly update the cubiks test profile" in {
+      val date = new DateTime("2016-03-08T13:04:29.643Z")
+      val appIdWithUserId = createOnlineTest("userId", ApplicationStatuses.OnlineTestInvited, "token", Some("http://www.someurl.com"),
+        invitationDate = Some(date), expirationDate = Some(date.plusDays(7)), xmlReportSaved = Some(true), pdfReportSaved = Some(true))
+
+      val profile = onlineTestRepo.getCubiksTestProfile(appIdWithUserId.userId).futureValue
+      profile.startedDateTime mustBe None
+
+      onlineTestRepo.startOnlineTest(profile.cubiksUserId).futureValue
+
+      val startedProfile = onlineTestRepo.getCubiksTestProfile(profile.cubiksUserId).futureValue
+      val application = onlineTestRepo.getOnlineTestApplication(appIdWithUserId.applicationId).futureValue
+
+      startedProfile.startedDateTime mustBe defined
+      application.isDefined mustBe true
+      application.get.applicationStatus mustBe ApplicationStatuses.OnlineTestStarted
+
+    }
+
   }
 
   def createApplication(appId: String, userId: String, frameworkId: String, appStatus: String, needsAdjustment: Boolean,
