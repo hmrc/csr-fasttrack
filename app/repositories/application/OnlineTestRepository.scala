@@ -23,11 +23,10 @@ import model.ApplicationStatuses.BSONEnumHandler
 import model.EvaluationResults._
 import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound, UnexpectedException }
 import model.OnlineTestCommands._
-import model.ProgressStatuses
+import model._
 import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
 import model.Adjustments._
-import model.persisted.SchemeEvaluationResult
-import model.{ AdjustmentDetail, ApplicationStatuses, Commands }
+import model.persisted.{ NotificationExpiringOnlineTest, SchemeEvaluationResult }
 import org.joda.time.{ DateTime, LocalDate }
 import reactivemongo.api.DB
 import reactivemongo.api.commands.UpdateWriteResult
