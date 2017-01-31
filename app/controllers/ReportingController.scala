@@ -151,11 +151,12 @@ trait ReportingController extends BaseController {
       allLocations <- locationSchemeService.getAllSchemeLocations
     } yield {
       applications.map { application =>
-        val contactDetails = allContactDetails(application.userId.toString())
-        val fsacIndicator = assessmentCentreIndicatorRepository.calculateIndicator(Some(contactDetails.postCode.toString))
+        val fsacIndicator = allContactDetails.get(application.userId.toString()).map { contactDetails =>
+          assessmentCentreIndicatorRepository.calculateIndicator(Some(contactDetails.postCode.toString)).assessmentCentre
+        }
         val locationIds = application.locations
         val locationNames = allLocations.filter(location => locationIds.contains(location.id)).map(_.locationName)
-        CandidateProgressReportItem2(application).copy(fsacIndicator = Some(fsacIndicator.assessmentCentre), locations = locationNames)
+        CandidateProgressReportItem2(application).copy(fsacIndicator = fsacIndicator, locations = locationNames)
       }
     }
     reportFut.map { report => Ok(Json.toJson(report)) }

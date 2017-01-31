@@ -17,11 +17,10 @@
 package controllers.report
 
 import model.Commands.Implicits._
-import model.PersistedObjects.ContactDetailsWithId
 import model.ReportExchangeObjects.{ CandidateProgressReportItem2, _ }
 import model.ReportExchangeObjects.Implicits._
-import model.UniqueIdentifier
-import model.exchange.{ ContactDetailsExamples, LocationSchemesExamples }
+import model.{ AssessmentCentreIndicator, UniqueIdentifier }
+import model.exchange.{ ApplicationForCandidateProgressReportItemExamples, CandidateProgressReportItem2Examples, LocationSchemesExamples }
 import model.persisted.ContactDetailsWithIdExamples
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
@@ -33,10 +32,8 @@ import scala.language.postfixOps
 
 class CandidateProgressReportingControllerSpec extends BaseReportingControllerSpec {
   "Candidate progress report" should {
-    "return results report" in new CandidateProgressReportTestFixture {
+    "return empty list when there are no applications" in new CandidateProgressReportTestFixture {
       when(reportingRepoMock.applicationsForCandidateProgressReport(eqTo(frameworkId))).thenReturnAsync(Nil)
-      when(contactDetailsRepoMock.findAll).thenReturnAsync(ContactDetailsWithIdExamples.ContactDetailsList)
-      when(locationSchemeServiceMock.getAllSchemeLocations).thenReturnAsync(LocationSchemesExamples.LocationsSchemesList)
 
       val response = controller.createCandidateProgressReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[CandidateProgressReportItem2]]
@@ -46,71 +43,50 @@ class CandidateProgressReportingControllerSpec extends BaseReportingControllerSp
       result mustBe List.empty
     }
 
-    /*
-    "return nothing if no applications exist" in new CandidateProgressReportTestFixture {
-      when(reportingRepoMock.applicationsPassedInAssessmentCentre(any())).thenReturnAsync(Nil)
-      when(contactDetailsRepoMock.findAll).thenReturnAsync(contactDetailsList)
-
-      val response = controller.createSuccessfulCandidatesReport(frameworkId)(request).run
-      val result = contentAsJson(response).as[List[ApplicationPreferencesWithTestResultsAndContactDetails]]
+    "return report if there are applications, contact details and location schemes" in new CandidateProgressReportTestFixture {
+      val response = controller.createCandidateProgressReport(frameworkId)(request).run
+      val result = contentAsJson(response).as[List[CandidateProgressReportItem2]]
 
       status(response) mustBe OK
 
-      result mustBe empty
+      result mustBe CandidateProgressReportItem2Examples.Candidates
     }
 
-    "return nothing if no contact details exist" in new CandidateProgressReportTestFixture {
-      when(reportingRepoMock.applicationsPassedInAssessmentCentre(any())).thenReturnAsync(appPreferences)
-      when(contactDetailsRepoMock.findAll).thenReturnAsync(Nil)
+    "return report without fsac indicator if there are applications, location schemes" +
+      " but no contact details" in new CandidateProgressReportTestFixture {
+      when(contactDetailsRepoMock.findAll).thenReturnAsync(List.empty)
 
-      val response = controller.createSuccessfulCandidatesReport(frameworkId)(request).run
-      val result = contentAsJson(response).as[List[ApplicationPreferencesWithTestResultsAndContactDetails]]
+      val response = controller.createCandidateProgressReport(frameworkId)(request).run
+      val result = contentAsJson(response).as[List[CandidateProgressReportItem2]]
 
       status(response) mustBe OK
 
-      result mustBe empty
+      result mustBe CandidateProgressReportItem2Examples.CandidatesWithoutFsac
     }
-    */
+
+    "return report without location name if there are applications, contact details" +
+      " but no location schemes" in new CandidateProgressReportTestFixture {
+      when(locationSchemeServiceMock.getAllSchemeLocations).thenReturnAsync(List.empty)
+
+      val response = controller.createCandidateProgressReport(frameworkId)(request).run
+      val result = contentAsJson(response).as[List[CandidateProgressReportItem2]]
+
+      status(response) mustBe OK
+
+      result mustBe CandidateProgressReportItem2Examples.CandidatesWithoutLocationNames
+    }
   }
-
 
   trait CandidateProgressReportTestFixture extends TestFixture {
     val appId = UniqueIdentifier.randomUniqueIdentifier
     val userId = UniqueIdentifier.randomUniqueIdentifier
-/*
-    lazy val applicationPreference1 = newAppPreferences
-    lazy val contactDetails1 = newContactDetails
 
-    lazy val appPreferences = List(applicationPreference1)
-    lazy val contactDetailsList = List(contactDetails1)
-    lazy val contactDetails = newContactDetails(contactDetails1)
-    lazy val summaryScores = CandidateScoresSummary(Some(10d), Some(10d), Some(10d),
-      Some(10d), Some(10d), Some(10d), Some(20d), Some(80d))
-    lazy val schemeEvaluations = SchemeEvaluation(Some("Pass"), Some("Fail"), Some("Amber"), Some("Pass"),
-      Some("Fail"))
+    when(reportingRepoMock.applicationsForCandidateProgressReport(eqTo(frameworkId))).
+      thenReturnAsync(ApplicationForCandidateProgressReportItemExamples.Applications)
+    when(contactDetailsRepoMock.findAll).thenReturnAsync(ContactDetailsWithIdExamples.ContactDetailsList)
+    when(locationSchemeServiceMock.getAllSchemeLocations).thenReturnAsync(LocationSchemesExamples.LocationsSchemesList)
+    when(assessmentCentreIndicatorRepoMock.calculateIndicator(any())).thenReturn(AssessmentCentreIndicator("London", "London"))
 
-    private def someDouble = Some(Random.nextDouble())
-
-    def newAppPreferences =
-      ApplicationPreferencesWithTestResults(userId, appId, someRnd("location"), someRnd("location1scheme1-"),
-        someRnd("location1scheme2-"), someRnd("location"), someRnd("location2scheme1-"), someRnd("location2scheme2-"),
-        yesNoRnd, yesNoRnd,
-        PersonalInfo(someRnd("firstname-"), someRnd("lastName-"), someRnd("preferredName-"),
-          yesNoRnd, yesNoRnd, Some(new LocalDate("2001-01-01"))),
-        summaryScores, schemeEvaluations)
-
-    def newContactDetails = ContactDetailsWithId(
-      userId.toString(),
-      Address(rnd("Line 1"), None, None, None),
-      rnd("PostCode"),
-      rnd("Email"),
-      someRnd("Phone")
-    )
-
-    def newContactDetails(cd: ContactDetailsWithId) = {
-      ContactDetails(cd.phone, cd.email, cd.address, cd.postCode)
-    }
-*/
     def request = {
       FakeRequest(Helpers.GET, controllers.routes.ReportingController.createCandidateProgressReport(frameworkId).url, FakeHeaders(), "")
         .withHeaders("Content-Type" -> "application/json")

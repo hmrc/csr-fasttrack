@@ -26,22 +26,26 @@ object CandidateProgressReportItem2Examples {
   )
   val SchemePreferencesCompleted = CandidateProgressReportItem2(ApplicationIdExamples.appId2,
     Some(ProgressStatuses.SchemesPreferencesCompleted), List(Scheme.Finance, Scheme.DigitalAndTechnology),
-    List(LocationSchemesExamples.LocationSchemes1.id, LocationSchemesExamples.LocationSchemes2.id),
+    List(LocationSchemesExamples.LocationSchemes1.locationName, LocationSchemesExamples.LocationSchemes2.locationName),
     None, None, None, None, None, Some("London")
   )
-  val candidate3 = CandidateProgressReportItem2(ApplicationIdExamples.appId3,
+  val AssistanceDetailsCompleted = CandidateProgressReportItem2(ApplicationIdExamples.appId3,
     Some(ProgressStatuses.AssistanceDetailsCompleted), List(Scheme.Commercial, Scheme.DigitalAndTechnology),
-    List(LocationSchemesExamples.LocationSchemes2.id, LocationSchemesExamples.LocationSchemes3.id),
+    List(LocationSchemesExamples.LocationSchemes2.locationName, LocationSchemesExamples.LocationSchemes3.locationName),
     Some("Yes"), Some(false), Some("Yes"), Some("Yes"), Some(false), Some("London")
   )
-  val candidate4 = CandidateProgressReportItem2(ApplicationIdExamples.appId4,
+  val OccupationQuestionsCompleted = CandidateProgressReportItem2(ApplicationIdExamples.appId4,
     Some(ProgressStatuses.OccupationQuestionsCompleted), List(Scheme.Business, Scheme.Finance),
-    List(LocationSchemesExamples.LocationSchemes1.id, LocationSchemesExamples.LocationSchemes3.id),
+    List(LocationSchemesExamples.LocationSchemes1.locationName, LocationSchemesExamples.LocationSchemes3.locationName),
     Some("Yes"), Some(false), Some("Yes"), Some("Yes"), Some(false), Some("London")
   )
-  val candidate5 = CandidateProgressReportItem2(ApplicationIdExamples.appId5,
+  val ReviewCompleted = CandidateProgressReportItem2(ApplicationIdExamples.appId5,
     Some(ProgressStatuses.ReviewCompleted), List(Scheme.Business, Scheme.ProjectDelivery),
-    List(LocationSchemesExamples.LocationSchemes1.id, LocationSchemesExamples.LocationSchemes4.id),
+    List(LocationSchemesExamples.LocationSchemes1.locationName, LocationSchemesExamples.LocationSchemes4.locationName),
     Some("Yes"), Some(false), Some("Yes"), Some("Yes"), Some(false), Some("London")
   )
+  val Candidates = List(PersonalDetailsCompleted, SchemePreferencesCompleted, AssistanceDetailsCompleted,
+    OccupationQuestionsCompleted, ReviewCompleted)
+  val CandidatesWithoutFsac = Candidates.map ( _.copy(fsacIndicator = None))
+  val CandidatesWithoutLocationNames = Candidates.map(_.copy(locations = List.empty))
 }
