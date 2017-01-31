@@ -16,16 +16,8 @@
 
 package services.testdata
 
-import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
-import common.Constants.{ Yes, No }
-import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import model.Commands.{ Address }
-import model.PersistedObjects.{ ContactDetails, PersistedAnswer, PersistedQuestion, PersonalDetails }
-import model.{ Alternatives, LocationPreference, Preferences }
-import org.joda.time.LocalDate
 import repositories._
-import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository }
-import services.testdata.faker.DataFaker._
+import repositories.application.GeneralApplicationRepository
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -33,17 +25,21 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object SubmittedStatusGenerator extends SubmittedStatusGenerator {
   override val previousStatusGenerator = InProgressReviewStatusGenerator
   override val appRepository = applicationRepository
+  override val assessmentCentreIndicatorRepo = AssessmentCentreIndicatorCSVRepository
 }
 
 trait SubmittedStatusGenerator extends ConstructiveGenerator {
   val appRepository: GeneralApplicationRepository
+  val assessmentCentreIndicatorRepo: AssessmentCentreIndicatorRepository
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      submit <- appRepository.submit(candidateInPreviousStatus.applicationId.get)
+      assessmentCentreIndicator = assessmentCentreIndicatorRepo.calculateIndicator(candidateInPreviousStatus.contactDetails.map(_.postCode))
+      _ <- appRepository.updateAssessmentCentreIndicator(candidateInPreviousStatus.applicationId.get, assessmentCentreIndicator)
+      _ <- appRepository.submit(candidateInPreviousStatus.applicationId.get)
     } yield {
-      candidateInPreviousStatus
+      candidateInPreviousStatus.copy(assessmentCentreIndicator = Some(assessmentCentreIndicator))
     }
   }
 }

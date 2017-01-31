@@ -46,7 +46,7 @@ object DiversityMonitoringReport extends DiversityMonitoringReport {
 
 trait DiversityMonitoringReport {
   val qRepository: QuestionnaireRepository
-  val reportRepository: ReportingRepository
+  val reportRepository: DiversityReportRepository
   val appRepository: GeneralApplicationRepository
   val adRepository: AssistanceDetailsRepository
 

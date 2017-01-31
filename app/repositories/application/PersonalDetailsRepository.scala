@@ -19,7 +19,9 @@ package repositories.application
 import model.Exceptions.PersonalDetailsNotFound
 import model.{ ApplicationStatuses, PersistedObjects, ProgressStatuses }
 import model.ApplicationStatuses.BSONEnumHandler
-import model.PersistedObjects.{ PersonalDetails, PersonalDetailsWithUserId }
+import model.PersistedObjects.PersonalDetailsWithUserId
+import model.PersistedObjects.Implicits._
+import model.persisted.PersonalDetails
 import org.joda.time.{ DateTime, LocalDate }
 import reactivemongo.api.DB
 import reactivemongo.bson.{ BSONDocument, _ }
@@ -47,7 +49,7 @@ trait PersonalDetailsRepository {
 
 class PersonalDetailsMongoRepository(implicit mongo: () => DB)
   extends ReactiveRepository[PersonalDetails, BSONObjectID](CollectionNames.APPLICATION, mongo,
-    PersistedObjects.Implicits.persistedPersonalDetailsFormats, ReactiveMongoFormats.objectIdFormats)
+    PersonalDetails.persistedPersonalDetailsFormats, ReactiveMongoFormats.objectIdFormats)
     with PersonalDetailsRepository with ReactiveRepositoryHelpers {
 
   override def update(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
@@ -64,7 +66,10 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
       "personal-details" -> persistedPersonalDetails
     ))
 
-    collection.update(query, personalDetailsBSON, upsert = false) map { _ => () }
+    val validator = singleUpdateValidator(applicationId, actionDesc = "updating personal details",
+      PersonalDetailsNotFound(applicationId))
+
+    collection.update(query, personalDetailsBSON, upsert = false) map validator
   }
 
   def update(applicationId: String, userId: String, personalDetails: PersonalDetails,
@@ -94,24 +99,12 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
   }
 
   override def find(applicationId: String): Future[PersonalDetails] = {
-
     val query = BSONDocument("applicationId" -> applicationId)
     val projection = BSONDocument("personal-details" -> 1, "_id" -> 0)
 
     collection.find(query, projection).one[BSONDocument] map {
       case Some(document) if document.getAs[BSONDocument]("personal-details").isDefined =>
-        val root = document.getAs[BSONDocument]("personal-details").get
-        val firstName = root.getAs[String]("firstName").get
-        val lastName = root.getAs[String]("lastName").get
-        val preferredName = root.getAs[String]("preferredName").get
-        val dateOfBirth = root.getAs[LocalDate]("dateOfBirth").get
-        val aLevel = root.getAs[Boolean]("aLevel").get
-        val stemLevel = root.getAs[Boolean]("stemLevel").get
-        val civilServant = root.getAs[Boolean]("civilServant").get
-        val department = root.getAs[String]("department")
-
-        PersonalDetails(firstName, lastName, preferredName, dateOfBirth, aLevel, stemLevel, civilServant, department)
-
+        document.getAs[PersonalDetails]("personal-details").get
       case _ => throw PersonalDetailsNotFound(applicationId)
     }
   }

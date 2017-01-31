@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package mocks
+package model
 
-import model.PersistedObjects.{ DiversityReport, DiversityReportRow }
-import org.joda.time.DateTime
-import repositories.ReportingRepository
+import play.api.libs.json.Json
+import reactivemongo.bson.{ BSONDocument, BSONHandler, Macros }
 
-import scala.concurrent.Future
+final case class AssessmentCentreIndicator(area: String, assessmentCentre: String)
 
-object ReportingInMemoryRepository extends ReportingRepository {
-  override def update(location: String, timeStamp: DateTime, data: DiversityReportRow): Future[Unit] = Future.successful(Unit)
+object AssessmentCentreIndicator {
+  implicit val formats = Json.format[AssessmentCentreIndicator]
+  implicit val bsonHandler: BSONHandler[BSONDocument, AssessmentCentreIndicator] = Macros.handler[AssessmentCentreIndicator]
 
-  override def findLatest(): Future[Option[DiversityReport]] = Future.successful(None)
-
-  override def finalizeReportStatus(timeStamp: DateTime): Future[Unit] = Future.successful(Unit)
 }

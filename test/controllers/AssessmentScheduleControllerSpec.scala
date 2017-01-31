@@ -19,15 +19,16 @@ package controllers
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 
-import common.Constants.{ Yes, No }
+import common.Constants.{ No, Yes }
 import config._
 import connectors.EmailClient
 import model.AssessmentScheduleCommands.Implicits._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.Exceptions.NotFoundException
-import model.PersistedObjects.{ ContactDetails, PersonalDetails }
+import model.PersistedObjects.ContactDetails
 import model.commands.OnlineTestProgressResponse
+import model.persisted.PersonalDetails
 import org.joda.time.{ DateTime, LocalDate }
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
@@ -107,15 +108,32 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
 
   "get application for assessment allocation" should {
     "return a List of Application for Assessment allocation if there are relevant applications in the repo" in new TestFixture {
-      val response = assessmentScheduleControllerWithSampleSchedule.getApplicationForAssessmentAllocation("London", 0, 5)(FakeRequest())
-      status(response) must be(200)
 
-      val json = contentAsJson(response).as[JsValue]
+      when(mockApplicationRepository.findApplicationsForAssessmentAllocation(any[List[String]], any[Int], any[Int])).thenReturn(
+        Future.successful(
+          ApplicationForAssessmentAllocationResult(
+            List(
+              ApplicationForAssessmentAllocation(
+                "firstName1", "lastName1", "userId1", "applicationId1", No, DateTime.now
+              ),
+              ApplicationForAssessmentAllocation(
+                "firstName2", "lastName2", "userId2", "applicationId2", Yes, DateTime.now.minusDays(2)
+              )
+            ),
+            2
+          )
+        )
+      )
 
-      val result = contentAsJson(response).as[ApplicationForAssessmentAllocationResult]
-      result.result must have size 2
+      val result = controller.getApplicationForAssessmentAllocation("London", 0, 2)(FakeRequest())
+      status(result) must be(200)
+
     }
     "return an empty List of Application for Assessment allocation if there are no relevant applications in the repo" in new TestFixture {
+      when(mockApplicationRepository.findApplicationsForAssessmentAllocation(any[List[String]], any[Int], any[Int])).thenReturn(
+        Future.successful(ApplicationForAssessmentAllocationResult(Nil, 0))
+      )
+
       val response = assessmentScheduleControllerWithSampleSchedule.getApplicationForAssessmentAllocation("Manchester", 0, 5)(FakeRequest())
       status(response) must be(200)
 
@@ -400,7 +418,8 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
 
   "converting a location to an assessment centre location" should {
     "return a location when the assessment centre location is valid" in new TestFixture {
-      val result = assessmentScheduleControllerWithNoVenueDateCandidates.locationToAssessmentCentreLocation("Reading")(FakeRequest())
+
+      val result = assessmentScheduleControllerWithNoVenueDateCandidates.locationToAssessmentCentreLocation("London")(FakeRequest())
       val jsonResponse = contentAsJson(result)
 
       status(result) must be(OK)
@@ -422,7 +441,6 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
           AssessmentCentreVenueCapacityDate(LocalDate.now.plusDays(2), 5, 5)
         )))))
       when(mockAssessmentCentreRepository.assessmentCentreCapacities).thenReturn(Future.successful(locations))
-      val controller = makeAssessmentScheduleController {}
 
       val result = controller.getAssessmentCentreCapacities("London venue")(FakeRequest())
       status(result) must be(OK)
@@ -439,7 +457,6 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
           AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(3), 2, 2)
         )))))
       when(mockAssessmentCentreRepository.assessmentCentreCapacities).thenReturn(Future.successful(locations))
-      val controller = makeAssessmentScheduleController {}
 
       val result = controller.getAssessmentCentreCapacities("London venue")(FakeRequest())
       status(result) must be(OK)
@@ -459,7 +476,6 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         )
       ))
       when(mockAssessmentCentreRepository.assessmentCentreCapacities).thenReturn(Future.successful(locations))
-      val controller = makeAssessmentScheduleController {}
 
       val result = controller.assessmentCentres(FakeRequest())
 
@@ -482,6 +498,18 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     val mockContactDetailsRepository = mock[ContactDetailsRepository]
     val mockEmailClient = mock[EmailClient]
     val mockApplicationAssessmentService = mock[ApplicationAssessmentService]
+
+    val controller =  new AssessmentScheduleController {
+      override val aaRepository = mockApplicationAssessmentRepository
+      override val acRepository = mockAssessmentCentreRepository
+      override val aRepository = mockApplicationRepository
+      override val otRepository = mockOnlineTestRepository
+      override val auditService = mockAuditService
+      override val pdRepository = mockPersonalDetailsRepository
+      override val cdRepository = mockContactDetailsRepository
+      override val emailClient = mockEmailClient
+      override val aaService = mockApplicationAssessmentService
+    }
 
     def makeAssessmentScheduleController(op: => Unit) = {
       op
@@ -645,7 +673,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
 
     def applicationRepoWithSomeApplications = {
       when(mockApplicationRepository.findApplicationsForAssessmentAllocation(
-        eqTo(List("Reading")),
+        eqTo(List("Narnia")),
         eqTo(0), eqTo(5)
       )).thenReturn(Future.successful(
         ApplicationForAssessmentAllocationResult(
@@ -661,7 +689,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
       ))
 
       when(mockApplicationRepository.findApplicationsForAssessmentAllocation(
-        eqTo(List("Manchester")),
+        eqTo(List("Narnia")),
         eqTo(0), eqTo(5)
       )).thenReturn(Future.successful(
         ApplicationForAssessmentAllocationResult(List.empty, 0)
@@ -689,13 +717,14 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     }
 
     def applicationRepositoryWithOneVenueDateCandidate = {
-      when(mockApplicationRepository.find(any())).thenReturn(Future.successful(
+      when(mockApplicationRepository.find(any[List[String]])).thenReturn(Future.successful(
         List(
           Candidate(
             "userid-1",
             Some("appid-1"),
             None,
             Some("Bob"),
+            Some("Marley"),
             Some("Marley"),
             None,
             None,
@@ -710,13 +739,14 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     }
 
     def applicationRepositoryWithOneVenueOneDateOneCandidateInPMOneInAMSession = {
-      when(mockApplicationRepository.find(any())).thenReturn(Future.successful(
+      when(mockApplicationRepository.find(any[List[String]])).thenReturn(Future.successful(
         List(
           Candidate(
             "userid-1",
             Some("appid-1"),
             None,
             Some("Bob"),
+            Some("Marley"),
             Some("Marley"),
             None,
             None,
@@ -727,6 +757,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
             Some("appid-2"),
             None,
             Some("Michael"),
+            Some("Jackson"),
             Some("Jackson"),
             None,
             None,
@@ -745,13 +776,14 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     }
 
     def applicationRepositoryWithOneVenueOneDateOneNormalCandidateAndWithdrawnCandidate = {
-      when(mockApplicationRepository.find(any())).thenReturn(Future.successful(
+      when(mockApplicationRepository.find(any[List[String]])).thenReturn(Future.successful(
         List(
           Candidate(
             "userid-2",
             Some("appid-2"),
             None,
             Some("Michael"),
+            Some("Jackson"),
             Some("Jackson"),
             None,
             None,
@@ -816,13 +848,24 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         )
       ))
 
+      when(mockAssessmentCentreRepository.assessmentCentreCapacities).thenReturn(Future.successful(List(
+        AssessmentCentreLocation(
+          locationName = "London",
+          venues = List(AssessmentCentreVenue(
+            venueName = "London FTAC",
+            venueDescription = "London centre",
+            capacityDates = List(AssessmentCentreVenueCapacityDate(date = LocalDate.now, amCapacity = 18, pmCapacity = 18))
+          ))
+        )
+      )))
+
       when(mockAssessmentCentreRepository.locationsAndAssessmentCentreMapping).thenReturn(Future.successful(
         Map[String, String]("Reading" -> "London", "Manchester" -> "Manchester / Salford")
       ))
     }
 
     def applicationRepositoryWithNoVenueDateCandidates = {
-      when(mockApplicationRepository.find(any())).thenReturn(Future.successful(
+      when(mockApplicationRepository.find(any[List[String]])).thenReturn(Future.successful(
         List()
       ))
     }

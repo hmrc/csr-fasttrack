@@ -17,8 +17,9 @@
 package services.onlinetesting
 
 import connectors.EmailClient
-import model.ApplicationStatuses
+import model.{ ApplicationStatuses, ReminderNotice }
 import model.PersistedObjects.ExpiringOnlineTest
+import model.persisted.NotificationExpiringOnlineTest
 import play.api.Logger
 import repositories._
 import repositories.application.OnlineTestRepository
@@ -32,6 +33,7 @@ trait OnlineTestExpiryService {
   def processExpiredTest(expiringTest: ExpiringOnlineTest): Future[Unit]
   def emailCandidate(expiringTest: ExpiringOnlineTest, emailAddress: String): Future[Unit]
   def commitExpiredStatus(expiringTest: ExpiringOnlineTest): Future[Unit]
+  def processNextTestForReminder(reminder: model.ReminderNotice): Future[Unit]
 }
 
 class OnlineTestExpiryServiceImpl(
@@ -58,6 +60,20 @@ class OnlineTestExpiryServiceImpl(
       _ <- commitExpiredStatus(expiringTest)
     } yield ()
 
+  override def processNextTestForReminder(reminder: model.ReminderNotice): Future[Unit] =
+    otRepository.nextTestForReminder(reminder).flatMap {
+      case Some(expiringTest) => processReminder(expiringTest, reminder)
+      case None => Future.successful(())
+    }
+
+  protected def processReminder(expiringTest: NotificationExpiringOnlineTest, reminder: ReminderNotice): Future[Unit] =
+    for {
+      emailAddress <- candidateEmailAddress(expiringTest.userId)
+      _ <- otRepository.addReminderNotificationStatus(expiringTest.userId, reminder.notificationStatus)
+      _ <- emailClient.sendExpiringReminder(reminder.template, emailAddress, expiringTest.preferredName, expiringTest.expiryDate)
+      _ <- auditF(reminder.event, expiringTest.userId, Some(emailAddress))
+    } yield ()
+
   override def emailCandidate(expiringTest: ExpiringOnlineTest, emailAddress: String): Future[Unit] =
     emailClient.sendOnlineTestExpired(emailAddress, expiringTest.preferredName).map { _ =>
       audit("ExpiredOnlineTestNotificationEmailed", expiringTest, Some(emailAddress))
@@ -72,11 +88,18 @@ class OnlineTestExpiryServiceImpl(
     cdRepository.find(userId).map(_.email)
 
   private def audit(event: String, expiringTest: ExpiringOnlineTest, emailAddress: Option[String] = None): Unit = {
-    // Only log user ID (not email).
     Logger.info(s"$event for user ${expiringTest.userId}")
     auditService.logEventNoRequest(
       event,
       Map("userId" -> expiringTest.userId) ++ emailAddress.map("email" -> _).toMap
     )
+  }
+
+  private def auditF(event: String, userId: String, emailAddress: Option[String] = None): Future[Unit] = {
+    Logger.info(s"$event for user $userId")
+    Future.successful(auditService.logEventNoRequest(
+      event,
+      Map("userId" -> userId) ++ emailAddress.map("email" -> _).toMap
+    ))
   }
 }

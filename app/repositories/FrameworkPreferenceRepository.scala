@@ -17,7 +17,7 @@
 package repositories
 
 import model.PersistedObjects.PreferencesWithQualification
-import model.Preferences
+import model.{ ApplicationStatuses, Preferences }
 import reactivemongo.api.DB
 import reactivemongo.bson.{ BSONDocument, BSONObjectID, _ }
 import uk.gov.hmrc.mongo.ReactiveRepository
@@ -44,7 +44,7 @@ class FrameworkPreferenceMongoRepository(implicit mongo: () => DB)
 
     val query = BSONDocument("applicationId" -> applicationId)
     val preferencesBSON = BSONDocument("$set" -> BSONDocument(
-      "applicationStatus" -> "IN_PROGRESS",
+      "applicationStatus" -> ApplicationStatuses.InProgress,
       "progress-status.frameworks-location" -> preferences.alternatives.isDefined,
       "framework-preferences" -> preferences
     ))

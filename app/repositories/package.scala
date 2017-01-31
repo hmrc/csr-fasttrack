@@ -20,7 +20,7 @@ import model.Commands._
 import model.EvaluationResults._
 import model.FlagCandidatePersistedObject.FlagCandidate
 import model.PassmarkPersistedObjects._
-import model.PersistedObjects.{ ContactDetails, PersistedAnswer, PersonalDetails, _ }
+import model.PersistedObjects.{ ContactDetails, PersistedAnswer, _ }
 import org.joda.time.{ DateTime, DateTimeZone, LocalDate }
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.indexes.IndexType.Ascending
@@ -51,13 +51,14 @@ package object repositories {
   lazy val onlineTestRepository = new OnlineTestMongoRepository(DateTimeFactory)
   lazy val onlineTestPDFReportRepository = new OnlineTestPDFReportMongoRepository()
   lazy val testReportRepository = new TestReportMongoRepository()
-  lazy val diversityReportRepository = new ReportingMongoRepository()
+  lazy val diversityReportRepository = new DiversityReportMongoRepository()
   lazy val passMarkSettingsRepository = new PassMarkSettingsMongoRepository()
   lazy val assessmentCentrePassMarkSettingsRepository = new AssessmentCentrePassMarkSettingsMongoRepository()
   lazy val applicationAssessmentRepository = new ApplicationAssessmentMongoRepository()
   lazy val candidateAllocationMongoRepository = new CandidateAllocationMongoRepository(DateTimeFactory)
   lazy val diagnosticReportRepository = new DiagnosticReportingMongoRepository
   lazy val applicationAssessmentScoresRepository = new ApplicationAssessmentScoresMongoRepository(DateTimeFactory)
+  lazy val reportingRepository = new ReportingMongoRepository(timeZoneService)
   lazy val flagCandidateRepository = new FlagCandidateMongoRepository
   lazy val schoolsRepository = SchoolsCSVRepository
 
@@ -95,34 +96,6 @@ package object repositories {
     def write(jdtime: LocalDate) = BSONString(jdtime.toString("yyyy-MM-dd"))
   }
 
-  /** Implicit transformation for the PersistedPersonalDetails **/
-  implicit object BSONPersistedPersonalDetailsHandler extends BSONHandler[BSONDocument, PersonalDetails] {
-    def read(doc: BSONDocument): PersonalDetails = {
-      val root = doc.getAs[BSONDocument]("personal-details").get
-      val firstName = root.getAs[String]("firstName").get
-      val lastName = root.getAs[String]("lastName").get
-      val preferredName = root.getAs[String]("preferredName").get
-      val dateOfBirth = doc.getAs[LocalDate]("dateOfBirth").get
-      val aLevel = doc.getAs[Boolean]("aLevel").get
-      val stemLevel = doc.getAs[Boolean]("stemLevel").get
-      val civilServant = doc.getAs[Boolean]("civilServant").get
-      val department = doc.getAs[String]("department")
-
-      PersonalDetails(firstName, lastName, preferredName, dateOfBirth, aLevel, stemLevel, civilServant, department)
-    }
-
-    def write(psDoc: PersonalDetails) = BSONDocument(
-      "firstName" -> psDoc.firstName,
-      "lastName" -> psDoc.lastName,
-      "preferredName" -> psDoc.preferredName,
-      "dateOfBirth" -> psDoc.dateOfBirth,
-      "aLevel" -> psDoc.aLevel,
-      "stemLevel" -> psDoc.stemLevel,
-      "civilServant" -> psDoc.civilServant,
-      "department" -> psDoc.department
-    )
-  }
-
   /** Implicit transformation for the Candidate **/
   implicit object BSONCandidateHandler extends BSONHandler[BSONDocument, Candidate] {
     def read(doc: BSONDocument): Candidate = {
@@ -132,9 +105,10 @@ package object repositories {
       val psRoot = doc.getAs[BSONDocument]("personal-details")
       val firstName = psRoot.flatMap(_.getAs[String]("firstName"))
       val lastName = psRoot.flatMap(_.getAs[String]("lastName"))
+      val preferredName = psRoot.flatMap(_.getAs[String]("preferredName"))
       val dateOfBirth = psRoot.flatMap(_.getAs[LocalDate]("dateOfBirth"))
 
-      Candidate(userId, applicationId, None, firstName, lastName, dateOfBirth, None, None)
+      Candidate(userId, applicationId, None, firstName, lastName, preferredName, dateOfBirth, None, None)
     }
 
     def write(psDoc: Candidate) = BSONDocument() // this should not be used ever

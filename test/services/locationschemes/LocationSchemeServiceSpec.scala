@@ -16,7 +16,7 @@
 
 package services.locationschemes
 
-import model.PersistedObjects.PersonalDetails
+import model.persisted.PersonalDetails
 import model.Scheme._
 import model.exchange.{ LocationSchemesExamples, SchemeInfoExamples }
 import org.joda.time.LocalDate

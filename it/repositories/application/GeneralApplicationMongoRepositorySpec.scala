@@ -44,37 +44,6 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
   def repository = new GeneralApplicationMongoRepository(GBTimeZoneService)
 
   "General Application repository" must {
-    "Get overall report for an application with all fields" in {
-      val userId = generateUUID()
-      val appId = generateUUID()
-      createApplicationWithAllFields(userId, appId, "FastTrack-2015")
-
-      val result = repository.overallReport("FastTrack-2015").futureValue
-
-      result must not be empty
-      result.head must be(Report(
-        appId, Some("registered"), Some("Location1"), Some("Commercial"), Some("Digital and technology"),
-        Some("Location2"), Some("Business"), Some("Finance"),
-        Some(Yes), Some(Yes), Some(Yes), Some(Yes),
-        Some(No), Some(No), Some(No),
-        Some("this candidate has changed the email")
-      ))
-    }
-
-    "Get overall report for the minimum application" in {
-      val userId = generateUUID()
-      val appId = generateUUID()
-      createMinimumApplication(userId, appId, "FastTrack-2015")
-
-      val result = repository.overallReport("FastTrack-2015").futureValue
-
-      result must not be empty
-      result.head must be(Report(appId, Some("registered"),
-        None, None, None, None, None, None, None, None, None, None, None, None, None, None)
-      )
-
-    }
-
     "Update schemes locations and retrieve" in {
       val userId = generateUUID()
       val appId = generateUUID()
