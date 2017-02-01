@@ -48,25 +48,6 @@ object ReportExchangeObjects {
     dateOfBirth: LocalDate
   )
 
-  case class CandidateProgressReportItem(
-    applicationId: UniqueIdentifier,
-    progress: Option[String],
-    firstLocation: Option[String],
-    firstLocationFirstScheme: Option[String],
-    firstLocationSecondScheme: Option[String],
-    secondLocation: Option[String],
-    secondLocationFirstScheme: Option[String],
-    secondLocationSecondScheme: Option[String],
-    alevels: Option[String],
-    stemlevels: Option[String],
-    alternativeLocation: Option[String],
-    alternativeScheme: Option[String],
-    hasDisability: Option[String],
-    hasAdjustments: Option[String],
-    guaranteedInterview: Option[String],
-    issue: Option[String]
-  )
-
   case class CandidateProgressReportItem2(
                                            applicationId: UniqueIdentifier,
                                            progress: Option[String],
@@ -133,7 +114,7 @@ object ReportExchangeObjects {
     cubiksUserId: Option[Int]
   )
 
-  case class PassMarkReport(application: CandidateProgressReportItem,
+  case class PassMarkReport(application: ApplicationForCandidateProgressReport,
                             questionnaire: PassMarkReportQuestionnaireData,
                             testResults: PassMarkReportTestResults)
 
@@ -250,7 +231,6 @@ object ReportExchangeObjects {
   }
 
   object Implicits {
-    implicit val candidateProgressReportItemFormats = Json.format[CandidateProgressReportItem]
     implicit val candidateProgressReportItemFormats2 = Json.format[CandidateProgressReportItem2]
     implicit val applicationForCandidateProgressReportFormats = Json.format[ApplicationForCandidateProgressReport]
     implicit val candidateProgressReportItemWithPersonalDetailsFormats = Json.format[ReportWithPersonalDetails]

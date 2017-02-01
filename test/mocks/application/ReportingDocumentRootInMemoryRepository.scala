@@ -20,6 +20,7 @@ import common.Constants.{ No, Yes }
 import model.Commands._
 import model.ReportExchangeObjects._
 import model.UniqueIdentifier
+import model.exchange.ApplicationForCandidateProgressReportItemExamples
 import org.joda.time.LocalDate
 import repositories.application.ReportingRepository
 
@@ -42,15 +43,6 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
       None, None, None, None, None, None, None, None, None, None))
     Future.successful(app1 :: app2 :: Nil)
   }
-
-  override def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[CandidateProgressReportItem]] = Future.successful(List(
-    CandidateProgressReportItem(UniqueIdentifier.randomUniqueIdentifier, Some("SUBMITTED"), Some("London"), Some("Business"),
-      None, None, None, None, Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None),
-    CandidateProgressReportItem(UniqueIdentifier.randomUniqueIdentifier, Some("IN_PROGRESS"), Some("London"), Some("Business"),
-      None, None, None, None, Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None),
-    CandidateProgressReportItem(UniqueIdentifier.randomUniqueIdentifier, Some("SUBMITTED"), Some("London"), Some("Business"),
-      None, None, None, None, Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None)
-  ))
 
   override def applicationsForCandidateProgressReport(frameworkId: String):
   Future[List[ApplicationForCandidateProgressReport]] = Future.successful(List(
@@ -81,6 +73,13 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
     )
 
   override def candidateProgressReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]] = ???
+
+  override def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
+  = Future.successful(List(
+    ApplicationForCandidateProgressReportItemExamples.OccupationQuestionsCompleted,
+    ApplicationForCandidateProgressReportItemExamples.AssistanceDetailsCompleted,
+    ApplicationForCandidateProgressReportItemExamples.PersonalDetailsCompleted)
+  )
 
   override def applicationsWithAssessmentScoresAccepted(frameworkId: String): Future[List[ApplicationPreferences]] = ???
 

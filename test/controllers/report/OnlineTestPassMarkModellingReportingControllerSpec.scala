@@ -17,9 +17,10 @@
 package controllers.report
 
 import model.Commands.Implicits._
-import model.ReportExchangeObjects.{ CandidateProgressReportItem, PassMarkReport, PassMarkReportQuestionnaireData, PassMarkReportTestResults, TestResult }
+import model.ReportExchangeObjects.{ PassMarkReport, PassMarkReportQuestionnaireData, PassMarkReportTestResults, TestResult }
 import model.ReportExchangeObjects.Implicits._
 import model.UniqueIdentifier
+import model.exchange.ApplicationForCandidateProgressReportItemExamples
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
@@ -84,8 +85,8 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
   }
 
   trait PassMarkReportTestFixture extends TestFixture {
-    lazy val report1 = newReport
-    lazy val report2 = newReport
+    lazy val report1 = ApplicationForCandidateProgressReportItemExamples.PersonalDetailsCompleted
+    lazy val report2 = ApplicationForCandidateProgressReportItemExamples.ReviewCompleted
     lazy val reports = List(report1, report2)
 
     lazy val questionnaire1 = newQuestionnaire
@@ -95,12 +96,6 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
     lazy val testResults1 = newTestResults
     lazy val testResults2 = newTestResults
     lazy val testResults = Map(report1.applicationId.toString -> testResults1, report2.applicationId.toString -> testResults2)
-
-    def newReport =
-      CandidateProgressReportItem(UniqueIdentifier.randomUniqueIdentifier, Some("ONLINE_TEST_COMPLETE"),
-        someRnd("Location"), someRnd("Scheme"), maybeRnd("Scheme"),
-        maybeRnd("Location"), maybeRnd("Scheme"), maybeRnd("Scheme"),
-        yesNoRnd, yesNoRnd, yesNoRnd, yesNoRnd, yesNoRnd, yesNoRnd, yesNoRnd, Some("issue"))
 
     def newQuestionnaire =
       PassMarkReportQuestionnaireData(someRnd("Gender"), someRnd("Orientation"), someRnd("Ethnicity"),
@@ -114,8 +109,8 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
     def newTestResult = TestResult(someDouble, someDouble, someDouble, someDouble)
 
     def request = {
-      FakeRequest(Helpers.GET, controllers.routes.ReportingController.createOnlineTestPassMarkModellingReport(frameworkId).url, FakeHeaders(), "")
-        .withHeaders("Content-Type" -> "application/json")
+      FakeRequest(Helpers.GET, controllers.routes.ReportingController.createOnlineTestPassMarkModellingReport(frameworkId).url,
+        FakeHeaders(), "").withHeaders("Content-Type" -> "application/json")
     }
   }
 

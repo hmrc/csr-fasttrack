@@ -16,8 +16,8 @@
 
 package model.exchange
 
-import model.ReportExchangeObjects.ApplicationForCandidateProgressReport
-import model.{ ProgressStatuses, Scheme }
+import model.ReportExchangeObjects.{ ApplicationForCandidateProgressReport }
+import model.{ ProgressStatuses, Scheme, UniqueIdentifier }
 
 object ApplicationForCandidateProgressReportItemExamples {
   val PersonalDetailsCompleted = ApplicationForCandidateProgressReport(ApplicationIdExamples.appId1, UserIdExamples.userId1,

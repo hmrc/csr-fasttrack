@@ -44,7 +44,7 @@ import scala.concurrent.Future
 trait ReportingRepository {
   def applicationsForCandidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
 
-  def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[CandidateProgressReportItem]]
+  def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
 
   def candidateProgressReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]]
 
@@ -173,8 +173,8 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     collection.find(query, projection).cursor[BSONDocument]().collect[List]().map(_.map(docToCandidate))
   }
 
-  override def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[CandidateProgressReportItem]] =
-    candidateProgressReport(BSONDocument("$and" -> BSONArray(
+  override def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] =
+    candidateProgressReport2(BSONDocument("$and" -> BSONArray(
       BSONDocument("frameworkId" -> frameworkId),
       BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn))
     )))
@@ -187,33 +187,6 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
 
   override def applicationsForCandidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] =
     candidateProgressReport2(BSONDocument("frameworkId" -> frameworkId))
-
-  private def candidateProgressReport(query: BSONDocument): Future[List[CandidateProgressReportItem]] = {
-    val projection = BSONDocument(
-      "userId" -> "1",
-      "framework-preferences.alternatives.location" -> "1",
-      "framework-preferences.alternatives.framework" -> "1",
-      "framework-preferences.firstLocation.location" -> "1",
-      "framework-preferences.secondLocation.location" -> "1",
-      "framework-preferences.firstLocation.firstFramework" -> "1",
-      "framework-preferences.secondLocation.firstFramework" -> "1",
-      "framework-preferences.firstLocation.secondFramework" -> "1",
-      "framework-preferences.secondLocation.secondFramework" -> "1",
-      "personal-details.aLevel" -> "1",
-      "personal-details.stemLevel" -> "1",
-      "assistance-details.hasDisability" -> "1",
-      "assistance-details.needsSupportForOnlineAssessment" -> "1",
-      "assistance-details.needsSupportAtVenue" -> "1",
-      "assistance-details.guaranteedInterview" -> "1",
-      "issue" -> "1",
-      "applicationId" -> "1",
-      "progress-status" -> "2"
-    )
-
-    reportQueryWithProjections[BSONDocument](query, projection) map { lst =>
-      lst.map(docToReport)
-    }
-  }
 
   private def candidateProgressReport2(query: BSONDocument): Future[List[ApplicationForCandidateProgressReport]] = {
     val projection = BSONDocument(
@@ -436,51 +409,6 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     reportQueryWithProjections[BSONDocument](query, projection) map { lst =>
       lst.map(docToReportWithPersonalDetails)
     }
-  }
-
-  // TODO: Not sure if we will need it once Candidate Progress Report is finished
-  private def docToReport(document: BSONDocument) = {
-    val fr = document.getAs[BSONDocument]("framework-preferences")
-    val fr1 = fr.flatMap(_.getAs[BSONDocument]("firstLocation"))
-    val fr2 = fr.flatMap(_.getAs[BSONDocument]("secondLocation"))
-
-    def frLocation(root: Option[BSONDocument]) = extract("location")(root)
-
-    def frScheme1(root: Option[BSONDocument]) = extract("firstFramework")(root)
-
-    def frScheme2(root: Option[BSONDocument]) = extract("secondFramework")(root)
-
-    val personalDetails = document.getAs[BSONDocument]("personal-details")
-    val aLevel = personalDetails.flatMap(_.getAs[Boolean]("aLevel").map(booleanTranslator))
-    val stemLevel = personalDetails.flatMap(_.getAs[Boolean]("stemLevel").map(booleanTranslator))
-
-    val fpAlternatives = fr.flatMap(_.getAs[BSONDocument]("alternatives"))
-    val location = fpAlternatives.flatMap(_.getAs[Boolean]("location").map(booleanTranslator))
-    val framework = fpAlternatives.flatMap(_.getAs[Boolean]("framework").map(booleanTranslator))
-
-    val applicationId = document.getAs[String]("applicationId").getOrElse("")
-    val progress: ProgressResponse = toProgressResponse(applicationId).read(document)
-
-    val issue = document.getAs[String]("issue")
-
-    val ad = document.getAs[BSONDocument]("assistance-details")
-    val hasDisability = ad.flatMap(_.getAs[String]("hasDisability"))
-    val needsSupportForOnlineAssessment = ad.flatMap(_.getAs[Boolean]("needsSupportForOnlineAssessment"))
-    val needsSupportAtVenue = ad.flatMap(_.getAs[Boolean]("needsSupportAtVenue"))
-    // TODO: Revisit this and check if we want to return both fields. If we want to keep one decide what to do if both values are None
-    val needsAdjustments: Option[String] = (needsSupportForOnlineAssessment, needsSupportAtVenue) match {
-      case (None, None) => None
-      case (Some(true), _) => Some("Yes")
-      case (_, Some(true)) => Some("Yes")
-      case _ => Some("No")
-    }
-    val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).map { gis => if (gis) Yes else No }
-
-    CandidateProgressReportItem(
-      UniqueIdentifier(applicationId), Some(getStatus(progress)), frLocation(fr1), frScheme1(fr1), frScheme2(fr1),
-      frLocation(fr2), frScheme1(fr2), frScheme2(fr2), aLevel,
-      stemLevel, location, framework, hasDisability, needsAdjustments, guaranteedInterview, issue
-    )
   }
 
   private def docToReportWithPersonalDetails(document: BSONDocument) = {
