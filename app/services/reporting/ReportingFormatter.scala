@@ -26,9 +26,9 @@ trait ReportingFormatter {
       case Some(false) => Some("No")
       case Some(true) => {
         adjustments.flatMap(_.onlineTests.map { onlineTests =>
-          List(onlineTests.extraTimeNeeded.map(value => s"Numerical Extra time needed: ${value}%").getOrElse(""),
-            onlineTests.extraTimeNeededNumerical.map(value => s"Verbal extra time needed: ${value}%").getOrElse(""),
-            onlineTests.otherInfo.map(value => s"$value").getOrElse("")).mkString(", ")
+          List(onlineTests.extraTimeNeeded.map(value => s"Verbal Extra time needed: ${value}%"),
+            onlineTests.extraTimeNeededNumerical.map(value => s"Numerical extra time needed: ${value}%"),
+            onlineTests.otherInfo.map(value => s"$value")).flatten.mkString(", ")
         }).orElse(Some("Yes"))
       }
       case None => None
@@ -41,13 +41,13 @@ trait ReportingFormatter {
       case Some(true) => {
         adjustments.flatMap( adjustments =>
           adjustments.assessmentCenter.map { assessmentCenter =>
-            val extraTimeItems = List(
+            val specificAdjustments = List(
               assessmentCenter.extraTimeNeeded.map(value => s"Extra time needed: ${value}%"),
               assessmentCenter.otherInfo.map(value => s"$value"))
             val typeOfAdjustmentsItems: List[Option[String]] = adjustments.typeOfAdjustments.map { typeOfAdjustments =>
               typeOfAdjustments.map(Some(_))
             }.getOrElse(List.empty)
-            val allAdjustments: List[Option[String]] = (extraTimeItems ++ typeOfAdjustmentsItems)
+            val allAdjustments: List[Option[String]] = (specificAdjustments ++ typeOfAdjustmentsItems)
             allAdjustments.flatten.mkString(", ")
           }).orElse(Some("Yes"))
       }
