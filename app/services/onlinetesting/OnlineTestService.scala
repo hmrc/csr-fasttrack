@@ -116,8 +116,7 @@ trait OnlineTestService {
       invitationDate,
       expirationDate,
       invitation.authenticateUrl,
-      token,
-      isOnlineTestEnabled = true
+      token
     )
 
     invitationProcess.flatMap(
@@ -169,6 +168,16 @@ trait OnlineTestService {
           }
         }
       }
+    }
+  }
+
+  def completeOnlineTest(cubiksUserId: Int): Future[Unit] = {
+    otRepository.completeOnlineTest(cubiksUserId)
+  }
+
+  def consumeOnlineTestToken(token: String): Future[Unit] =  {
+    otRepository.getCubiksTestProfileByToken(token) flatMap { cubiksProfile =>
+      otRepository.completeOnlineTest(cubiksProfile.cubiksUserId)
     }
   }
 
