@@ -18,10 +18,12 @@ package mocks.application
 
 import factories.UUIDFactory
 import model.ApplicationStatuses
+import model.{ ApplicationStatuses, Scheme }
 import model.EvaluationResults._
 import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser }
 import model.PersistedObjects._
-import model.persisted.CubiksTestProfile
+import model.Scheme.Scheme
+import model.persisted.{ CubiksTestProfile, SchemeEvaluationResult }
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.OnlineTestRepository
 
@@ -37,6 +39,9 @@ object OnlineTestInMemoryRepository extends OnlineTestInMemoryRepository
  * @deprecated Please use Mockito
  */
 class OnlineTestInMemoryRepository extends OnlineTestRepository {
+  case class RuleCategoryResult(location1Scheme1: Result, location1Scheme2: Option[Result],
+                                location2Scheme1: Option[Result], location2Scheme2: Option[Result], alternativeScheme: Option[Result])
+
   val inMemoryRepo = new mutable.HashMap[String, RuleCategoryResult]
 
   def nextApplicationReadyForOnlineTesting: Future[Option[OnlineTestApplication]] =
@@ -84,9 +89,8 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
 
   override def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = ???
 
-  override def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult,
+  override def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
     applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
-    inMemoryRepo += applicationId -> p
     Future.successful(())
   }
 
@@ -97,7 +101,8 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
 
   def removeOnlineTestEvaluationAndReports(applicationId: String): Future[Unit] = ???
 
-  def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, version: String, p: RuleCategoryResult): Future[Unit] = ???
+  def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, version: String,
+                                                      evaluationResult: List[SchemeEvaluationResult]): Future[Unit] = ???
 
   def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = ???
 

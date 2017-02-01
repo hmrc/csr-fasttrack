@@ -24,17 +24,17 @@ import mocks._
 import mocks.application.{ DocumentRootInMemoryRepository, OnlineTestInMemoryRepository }
 import model.ApplicationStatuses
 import model.Commands.Address
-import model.OnlineTestCommands.OnlineTestApplication
+import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestProfile }
 import model.PersistedObjects.ContactDetails
 import model.exchange.OnlineTest
 import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
-import org.mockito.Matchers.any
+import org.mockito.Matchers.{ any, eq => eqTo }
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories.application.AssistanceDetailsRepository
+import repositories.application.{ AssistanceDetailsRepository, OnlineTestRepository }
 import repositories.{ ContactDetailsRepository, OnlineTestPDFReportRepository }
 import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
 import testkit.MockitoImplicits.OngoingStubbingExtensionUnit
@@ -154,6 +154,11 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     val cubiksGatewayClientMock = mock[CubiksGatewayClient]
     val emailClientMock = mock[EmailClient]
 
+    val mockOnlineTestRepository = mock[OnlineTestRepository]
+
+    def onlineTest(appId: String) = OnlineTestApplication(appId, ApplicationStatuses.Submitted, "",
+      guaranteedInterview = false, needsAdjustments = false, "", None)
+
     when(onlineTestPDFReportRepoMock.hasReport(any())).thenReturn(Future.successful(true))
     when(onlineTestPDFReportRepoMock.get(hasPDFReportApplicationId)).thenReturn(Future.successful(
       Some(testPDFContents)
@@ -169,10 +174,13 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     when(cubiksGatewayClientMock.registerApplicant(any())(any())).thenReturn(Future.successful(Registration(0)))
     when(cubiksGatewayClientMock.inviteApplicant(any())(any())).thenReturn(Future.successful(Invitation(0, "", "", "", "", 0)))
 
+    when(mockOnlineTestRepository.storeOnlineTestProfileAndUpdateStatusToInvite(any[String], any[OnlineTestProfile]))
+      .thenReturn(Future.successful(()))
+
     class OnlineTestServiceMock extends OnlineTestService {
       val appRepository = DocumentRootInMemoryRepository
       val cdRepository: ContactDetailsRepository = ContactDetailsInMemoryRepository
-      val otRepository = OnlineTestInMemoryRepository
+      val otRepository = mockOnlineTestRepository
       val otprRepository = onlineTestPDFReportRepoMock
       val trRepository = TestReportInMemoryRepository
       val adRepository = mock[AssistanceDetailsRepository]
@@ -217,11 +225,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     object TestOnlineTestController2 extends OnlineTestController {
       override val onlineTestingRepo = new OnlineTestInMemoryRepository {
         override def getOnlineTestApplication(appId: String): Future[Option[OnlineTestApplication]] = {
-          Future.successful(
-            Some(
-              OnlineTestApplication(appId, ApplicationStatuses.Submitted, "", guaranteedInterview = false, needsAdjustments = false, "", None)
-            )
-          )
+          Future.successful(Some(onlineTest(appId)))
         }
 
       }

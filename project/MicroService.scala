@@ -72,7 +72,7 @@ trait MicroService {
       javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.delay.factor=1",
       javaOptions in IntegrationTest += "-Dtestserver.port=19101"
     )
-    .settings(inConfig(IntegrationTest)((Defaults.testSettings ++ AutomateHeaderPlugin.automateFor(IntegrationTest))) : _*)
+    .settings(inConfig(IntegrationTest)(Defaults.testSettings ++ AutomateHeaderPlugin.automateFor(IntegrationTest)): _*)
     .settings(inConfig(IntegrationTest)(Defaults.itSettings))
     // Disable Scalastyle & Scalariform temporarily, as it is currently intermittently failing when building
 //    .settings(scalariformSettings: _*)

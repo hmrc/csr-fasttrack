@@ -18,14 +18,14 @@ package connectors
 
 import org.joda.time.DateTime
 import play.api.libs.json.Json
+import reactivemongo.bson.Macros
 
 object PassMarkExchangeObjects {
 
   case class SettingsResponse(
     schemes: List[SchemeResponse],
     createDate: Option[DateTime],
-    createdByUser: Option[String],
-    setting: String
+    createdByUser: Option[String]
   )
 
   case class SchemeResponse(schemeName: String, schemeThresholds: Option[SchemeThresholds])
@@ -33,35 +33,38 @@ object PassMarkExchangeObjects {
   case class SettingsCreateRequest(
     schemes: List[Scheme],
     createDate: DateTime,
-    createdByUser: String,
-    setting: String
+    createdByUser: String
   )
 
   case class Settings(
     schemes: List[Scheme],
     version: String,
     createDate: DateTime,
-    createdByUser: String,
-    setting: String
+    createdByUser: String
   )
 
+  // This is the scheme name and pass/fail thresholds for each of the test types
   case class Scheme(schemeName: String, schemeThresholds: SchemeThresholds)
 
   case class SchemeThresholds(
     competency: SchemeThreshold,
     verbal: SchemeThreshold,
     numerical: SchemeThreshold,
-    situational: SchemeThreshold,
-    combination: Option[SchemeThreshold]
+    situational: SchemeThreshold
   )
 
   case class SchemeThreshold(failThreshold: Double, passThreshold: Double)
 
   object Implicits {
-    implicit val passMarkSchemeThreshold = Json.format[SchemeThreshold]
-    implicit val passMarkSchemeThresholds = Json.format[SchemeThresholds]
+    import repositories.BSONDateTimeHandler
+    implicit val passMarkSchemeThresholdFormat = Json.format[SchemeThreshold]
+    implicit val passMarkSchemeThresholdBSONHandler = Macros.handler[SchemeThreshold]
+    implicit val passMarkSchemeThresholdsFormat = Json.format[SchemeThresholds]
+    implicit val passMarkSchemeThresholdsBSONHandler = Macros.handler[SchemeThresholds]
     implicit val passMarkSchemeFormat = Json.format[Scheme]
+    implicit val passMarkSchemeBSONHandler = Macros.handler[Scheme]
     implicit val passMarkSettingsFormat = Json.format[Settings]
+    implicit val passMarkSettingsBSONHandler = Macros.handler[Settings]
 
     implicit val passMarkSettingsCreateRequestFormat = Json.format[SettingsCreateRequest]
 
