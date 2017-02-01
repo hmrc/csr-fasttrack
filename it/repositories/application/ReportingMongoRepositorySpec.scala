@@ -41,149 +41,37 @@ class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory 
 
   def repository = new GeneralApplicationMongoRepository(GBTimeZoneService)
 
-  "General Application repository" must {
-    "Update schemes locations and retrieve" in {
+    def testDataRepo = new TestDataMongoRepository()
+
+  val testDataGeneratorService = TestDataGeneratorService
+
+  "Candidate Progress Report" must {
+    "for an application with all fields" in {
       val userId = generateUUID()
       val appId = generateUUID()
-      createMinimumApplication(userId, appId, "FastTrack")
-      val schemeLocations = List("3", "1", "2")
+      testDataRepo.createApplicationWithAllFields(userId, appId, "FastStream-2016").futureValue
 
-      repository.updateSchemeLocations(appId, schemeLocations).futureValue
-      val result = repository.getSchemeLocations(appId).futureValue
+      val result = repository.candidateProgressReport("FastStream-2016").futureValue
 
-      result must contain theSameElementsInOrderAs schemeLocations
+      result must not be empty
+      result.head mustBe CandidateProgressReportItem(userId, appId, Some("submitted"),
+        List(SchemeType.DiplomaticService, SchemeType.GovernmentOperationalResearchService), Some("Yes"),
+        Some("No"), Some("No"), None, Some("No"), Some("Yes"), Some("No"), Some("Yes"), Some("No"), Some("Yes"),
+        Some("1234567"), None, ApplicationRoute.Faststream)
     }
 
-    "Update schemes and retrieve" in {
+    "for the minimum application" in {
       val userId = generateUUID()
       val appId = generateUUID()
-      createMinimumApplication(userId, appId, "FastTrack")
-      val schemes = List(Scheme.DigitalAndTechnology, Scheme.ProjectDelivery, Scheme.Business)
+      testDataRepo.createMinimumApplication(userId, appId, "FastStream-2016").futureValue
 
-      repository.updateSchemes(appId, schemes).futureValue
-      val result = repository.getSchemes(appId).futureValue
+      val result = repository.candidateProgressReport("FastStream-2016").futureValue
 
-      result must contain theSameElementsInOrderAs schemes
-    }
-
-    "return scheme preferences not found exception" in {
-      val userId = generateUUID()
-      val appId = generateUUID()
-      createMinimumApplication(userId, appId, "FastTrack")
-
-      an[SchemePreferencesNotFound] must be thrownBy {
-        Await.result(repository.getSchemes(appId), 5 seconds)
-      }
-    }
-
-    "return location preferences not found exception" in {
-      val userId = generateUUID()
-      val appId = generateUUID()
-      createMinimumApplication(userId, appId, "FastTrack")
-
-      an[LocationPreferencesNotFound] must be thrownBy {
-        Await.result(repository.getSchemeLocations(appId), 5 seconds)
-      }
-    }
-
-    "return None for adjustments" in {
-      val userId = generateUUID()
-      val appId = generateUUID()
-      createMinimumApplication(userId, appId, "FastTrack")
-      val result = repository.findAdjustments(appId).futureValue
-      result mustBe None
-    }
-
-    "update adjustments and retrieve" in {
-      val userId = generateUUID()
-      val appId = generateUUID()
-      val adjustments = Adjustments(
-        typeOfAdjustments = Some(List("timeExtension")),
-        onlineTests = Some(AdjustmentDetail(Some(9)))
+      result must not be empty
+      result.head must be(CandidateProgressReportItem(userId, appId, Some("registered"),
+        List.empty[SchemeType], None, None, None, None, None, None, None, None, None, None, None, None, ApplicationRoute.Faststream)
       )
-      createMinimumApplication(userId, appId, "FastTrack")
-      repository.confirmAdjustments(appId, adjustments).futureValue
-
-      val result = repository.findAdjustments(appId).futureValue
-      result mustBe Some(adjustments.copy(adjustmentsConfirmed = Some(true)))
     }
-
-    "return None for adjustments comments" in {
-      val userId = generateUUID()
-      val appId = generateUUID()
-      createMinimumApplication(userId, appId, "FastTrack")
-      an[AdjustmentsCommentNotFound] mustBe thrownBy {
-        Await.result(repository.findAdjustmentsComment(appId), 5 seconds)
-      }
-    }
-
-    "update comments and retrieve" in {
-      val userId = generateUUID()
-      val appId = generateUUID()
-      val adjustmentsComment = AdjustmentsComment("adjustment comment")
-      createMinimumApplication(userId, appId, "FastTrack")
-      repository.updateAdjustmentsComment(appId, adjustmentsComment).futureValue
-
-      val result = repository.findAdjustmentsComment(appId).futureValue
-      result mustBe adjustmentsComment
-    }
-
-  }
-
-  "get progress status dates" must {
-    "correctly return the latest application status and progress status date" in {
-      val progressStatuses = Map (
-        ProgressStatuses.RegisteredProgress -> DateTime.now.minusDays(12),
-        ProgressStatuses.PersonalDetailsCompletedProgress -> DateTime.now.minusDays(11),
-        ProgressStatuses.SchemeLocationsCompletedProgress -> DateTime.now.minusDays(10),
-        ProgressStatuses.SchemesPreferencesCompletedProgress -> DateTime.now.minusDays(9),
-        ProgressStatuses.AssistanceDetailsCompletedProgress -> DateTime.now.minusDays(9),
-        ProgressStatuses.ReviewCompletedProgress -> DateTime.now.minusDays(8),
-        ProgressStatuses.StartDiversityQuestionnaireProgress -> DateTime.now.minusDays(7),
-        ProgressStatuses.DiversityQuestionsCompletedProgress -> DateTime.now.minusDays(6),
-        ProgressStatuses.EducationQuestionsCompletedProgress -> DateTime.now.minusDays(5),
-        ProgressStatuses.OccupationQuestionsCompletedProgress -> DateTime.now.minusDays(4),
-        ProgressStatuses.SubmittedProgress -> DateTime.now.minusDays(3)
-      )
-      createApplicationWithAllFields("userId", "appId", "frameworkId", ApplicationStatuses.Submitted, buildProgressStatusBSON(progressStatuses))
-
-      val result = repository.findApplicationStatusDetails("appId").futureValue
-
-      inside (result) {
-        case ApplicationStatusDetails(status, statusDate, overrideSubmissionDeadline) =>
-          status mustBe ApplicationStatuses.Submitted
-          statusDate mustEqual Some(progressStatuses(ProgressStatuses.SubmittedProgress).withZone(DateTimeZone.UTC))
-          overrideSubmissionDeadline mustBe None
-      }
-    }
-
-    "return the date the personal details were completed if the application is not submitted yet" in {
-      val progressStatuses = Map (
-        ProgressStatuses.RegisteredProgress -> DateTime.now.minusDays(12),
-        ProgressStatuses.PersonalDetailsCompletedProgress -> DateTime.now.minusDays(11),
-        ProgressStatuses.SchemeLocationsCompletedProgress -> DateTime.now.minusDays(10),
-        ProgressStatuses.SchemesPreferencesCompletedProgress -> DateTime.now.minusDays(9),
-        ProgressStatuses.AssistanceDetailsCompletedProgress -> DateTime.now.minusDays(9),
-        ProgressStatuses.ReviewCompletedProgress -> DateTime.now.minusDays(8),
-        ProgressStatuses.StartDiversityQuestionnaireProgress -> DateTime.now.minusDays(7),
-        ProgressStatuses.DiversityQuestionsCompletedProgress -> DateTime.now.minusDays(6),
-        ProgressStatuses.EducationQuestionsCompletedProgress -> DateTime.now.minusDays(5),
-        ProgressStatuses.OccupationQuestionsCompletedProgress -> DateTime.now.minusDays(4)
-     )
-
-     createApplicationWithAllFields("userId", "appId", "frameworkId", ApplicationStatuses.Created,
-        buildProgressStatusBSON(progressStatuses))
-
-      val result = repository.findApplicationStatusDetails("appId").futureValue
-
-      inside (result) {
-        case ApplicationStatusDetails(status, statusDate, overrideSubmissionDeadline) =>
-          status mustBe ApplicationStatuses.Created
-          statusDate mustBe Some(progressStatuses(ProgressStatuses.PersonalDetailsCompletedProgress).withZone(DateTimeZone.UTC))
-          overrideSubmissionDeadline mustBe None
-      }
-    }
-
   }
 
   def createApplicationWithAllFields(userId: String, appId: String, frameworkId: String,

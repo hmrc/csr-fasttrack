@@ -174,7 +174,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
   }
 
   override def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] =
-    candidateProgressReport2(BSONDocument("$and" -> BSONArray(
+    applicationsForCandidateProgressReport(BSONDocument("$and" -> BSONArray(
       BSONDocument("frameworkId" -> frameworkId),
       BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn))
     )))
@@ -186,9 +186,9 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     )))
 
   override def applicationsForCandidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] =
-    candidateProgressReport2(BSONDocument("frameworkId" -> frameworkId))
+    applicationsForCandidateProgressReport(BSONDocument("frameworkId" -> frameworkId))
 
-  private def candidateProgressReport2(query: BSONDocument): Future[List[ApplicationForCandidateProgressReport]] = {
+  private def applicationsForCandidateProgressReport(query: BSONDocument): Future[List[ApplicationForCandidateProgressReport]] = {
     val projection = BSONDocument(
       "applicationId" -> "1",
       "userId" -> "1",
