@@ -28,7 +28,8 @@ case class CreateCandidateInStatusRequest(statusData: StatusDataRequest = new St
                                           region: Option[String],
                                           loc1scheme1EvaluationResult: Option[String],
                                           loc1scheme2EvaluationResult: Option[String],
-                                          confirmedAllocation: Option[Boolean])
+                                          confirmedAllocation: Option[Boolean],
+                                          onlineTestScores: Option[OnlineTestScoresRequest])
 
 object CreateCandidateInStatusRequest {
   implicit val createCandidateInStatusRequestFormat = Json.format[CreateCandidateInStatusRequest]
@@ -44,7 +45,8 @@ object CreateCandidateInStatusRequest {
       region = None,
       loc1scheme1EvaluationResult = None,
       loc1scheme2EvaluationResult = None,
-      confirmedAllocation = None
+      confirmedAllocation = None,
+      onlineTestScores = None
     )
   }
 }

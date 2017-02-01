@@ -82,7 +82,13 @@ trait TestDataGeneratorController extends BaseController {
       region = Some("region"),
       loc1scheme1EvaluationResult = Some("loc1 scheme1 result1"),
       loc1scheme2EvaluationResult = Some("loc1 scheme2 result2"),
-      confirmedAllocation = Some(Random.bool)
+      confirmedAllocation = Some(Random.bool),
+      onlineTestScores = Some(OnlineTestScoresRequest(
+        numerical = Some("80.1"),
+        verbal = Some("80.2"),
+        situational = Some("80.3"),
+        competency = Some("80.4")
+      ))
     )
     Ok(Json.toJson(example))
   }
@@ -126,6 +132,13 @@ trait TestDataGeneratorController extends BaseController {
                                previousStatus: Option[String] = None,
                                confirmedAllocation: Boolean) = Action.async { implicit request =>
 
+    val testScores = OnlineTestScores(
+      numericalTScore = None,
+      verbalTScore = None,
+      situationalTScore = None,
+      competencyTScore = None
+    )
+
     val initialConfig = GeneratorConfig(
       personalData = PersonalData(emailPrefix = emailPrefix),
       setGis = setGis,
@@ -138,7 +151,8 @@ trait TestDataGeneratorController extends BaseController {
         case ApplicationStatuses.AllocationUnconfirmed.name => false
         case ApplicationStatuses.AllocationConfirmed.name => true
         case _ => confirmedAllocation
-      }
+      },
+      testScores = Some(testScores)
     )
     // scalastyle:on
 

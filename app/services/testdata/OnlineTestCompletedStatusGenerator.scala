@@ -37,6 +37,5 @@ trait OnlineTestCompletedStatusGenerator extends ConstructiveGenerator {
     } yield {
       candidateInPreviousStatus
     }
-
   }
 }
