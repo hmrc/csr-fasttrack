@@ -535,14 +535,19 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
 
     val projection = BSONDocument(
       "userId" -> "1",
+      "applicationId" -> "1",
+      "applicationStatus" -> "1",
       "personal-details.firstName" -> "1",
       "personal-details.lastName" -> "1",
       "personal-details.preferredName" -> "1",
       "assistance-details.guaranteedInterview" -> "1",
-      "assistance-details.typeOfAdjustments" -> "1",
+      //"assistance-details.typeOfAdjustments" -> "1",
       "assistance-details.needsSupportForOnlineAssessment" -> "1",
+      "assistance-details.needsSupportForOnlineAssessmentDescription" -> "1",
       "assistance-details.needsSupportAtVenue" -> "1",
-      "assistance-details.adjustmentsConfirmed" -> "1"
+      "assistance-details.needsSupportAtVenueDescription" -> "1",
+      "assistance-details.hasDisability" -> "1"
+      //"assistance-details.adjustmentsConfirmed" -> "1"
     )
 
     reportQueryWithProjections[BSONDocument](query, projection).map { list =>
@@ -550,18 +555,38 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
 
         val personalDetails = document.getAs[BSONDocument]("personal-details")
         val userId = document.getAs[String]("userId").getOrElse("")
+        val applicationId = document.getAs[String]("applicationId")
+        val applicationStatus = document.getAs[String]("applicationStatus").getOrElse("")
         val firstName = extract("firstName")(personalDetails)
         val lastName = extract("lastName")(personalDetails)
         val preferredName = extract("preferredName")(personalDetails)
 
         val ad = document.getAs[BSONDocument]("assistance-details")
         val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).map { gis => if (gis) Yes else No }
-        val adjustmentsConfirmed = getAdjustmentsConfirmed(ad)
-        val typesOfAdjustments = ad.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
-        val adjustments = typesOfAdjustments.getOrElse(Nil)
-        val finalTOA = if (adjustments.isEmpty) None else Some(adjustments.map(splitCamelCase).mkString("|"))
+        val needsSupportForOnlineAssessmentDescription = extract("needsSupportForOnlineAssessmentDescription")(ad)
+        //val needsSupportForOnlineAssessmentDescription = ad.flatMap(_.getAs[String]("needsSupportForOnlineAssessmentDescription"))
+        val needsSupportAtVenueDescription = extract("needsSupportAtVenueDescription")(ad)
+        val hasDisability = extract("hasDisability")(ad)
+        //val adjustmentsConfirmed = getAdjustmentsConfirmed(ad)
+        //val typesOfAdjustments = ad.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
+        //val adjustments = typesOfAdjustments.getOrElse(Nil)
+        //val finalTOA = if (adjustments.isEmpty) None else Some(adjustments.map(splitCamelCase).mkString("|"))
 
-        AdjustmentReport(userId, firstName, lastName, preferredName, None, None, finalTOA, guaranteedInterview, adjustmentsConfirmed)
+        AdjustmentReport(
+          userId,
+          applicationId,
+          applicationStatus,
+          firstName,
+          lastName,
+          preferredName,
+          None,
+          None,
+          /*finalTOA,*/
+          needsSupportForOnlineAssessmentDescription,
+          needsSupportAtVenueDescription,
+          hasDisability,
+          guaranteedInterview/*,
+          adjustmentsConfirmed*/)
       }
     }
   }
