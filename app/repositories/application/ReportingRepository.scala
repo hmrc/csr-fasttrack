@@ -223,10 +223,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       "personal-details.civilServant" -> "1",
       "schemes" -> "1",
       "scheme-locations" -> "1",
-      "assistance-details.hasDisability" -> "1",
-      "assistance-details.guaranteedInterview" -> "1",
-      "assistance-details.needsSupportForOnlineAssessment" -> "1",
-      "assistance-details.needsSupportAtVenue" -> "1"
+      "assistance-details" -> "1"
     )
 
     reportQueryWithProjectionsBSON[ApplicationForCandidateProgressReport](query, projection)

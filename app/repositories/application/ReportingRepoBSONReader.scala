@@ -21,7 +21,8 @@ import model.ApplicationStatusOrder.getStatus
 import model.Commands._
 import model.ReportExchangeObjects.{ ApplicationForCandidateProgressReport, CandidateProgressReportItem2 }
 import model.Scheme.Scheme
-import model.UniqueIdentifier
+import model.{ Adjustments, UniqueIdentifier }
+import model.exchange.AssistanceDetails
 import reactivemongo.bson.{ BSONDocument, _ }
 import repositories.{ BaseBSONReader, CommonBSONDocuments }
 
@@ -59,18 +60,17 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
       val schemes = doc.getAs[List[Scheme]]("schemes").getOrElse(List.empty)
       val schemeLocations = doc.getAs[List[String]]("scheme-locations").getOrElse(List.empty)
 
-      val adDoc = doc.getAs[BSONDocument]("assistance-details")
-      val hasDisability = adDoc.flatMap(_.getAs[String]("hasDisability"))
-      val guaranteedInterview = adDoc.flatMap(_.getAs[Boolean]("guaranteedInterview"))
-      val needsSupportForOnlineAssessment = adDoc.flatMap(_.getAs[Boolean]("needsSupportForOnlineAssessment"))
-      val needsSupportAtVenue = adDoc.flatMap(_.getAs[Boolean]("needsSupportAtVenue"))
+      val assistanceDetails = doc.getAs[AssistanceDetails]("assistance-details")
+      val adjustments = doc.getAs[Adjustments]("assistance-details")
 
       val pdDoc = doc.getAs[BSONDocument]("personal-details")
       val civilServant = pdDoc.flatMap(_.getAs[Boolean]("civilServant"))
 
       ApplicationForCandidateProgressReport(
-        UniqueIdentifier(applicationId), UniqueIdentifier(userId), Some(getStatus(progress)), schemes, schemeLocations, hasDisability,
-        guaranteedInterview, needsSupportForOnlineAssessment, needsSupportAtVenue, civilServant
+        UniqueIdentifier(applicationId), UniqueIdentifier(userId), Some(getStatus(progress)), schemes, schemeLocations,
+        assistanceDetails.map(_.hasDisability), assistanceDetails.flatMap(_.guaranteedInterview),
+        assistanceDetails.map(_.needsSupportForOnlineAssessment), assistanceDetails.map(_.needsSupportAtVenue),
+        adjustments, civilServant
       )
     }
   }

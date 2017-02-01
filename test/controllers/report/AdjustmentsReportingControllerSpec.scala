@@ -37,6 +37,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
   "Reporting controller create adjustment report" should {
     "return the adjustment report when we execute adjustment reports" in new AdjustmentsTestFixture {
       override val controller = new ReportingController {
+        override val reportingFormatter = reportingFormatterMock
         override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
         override val locationSchemeService = locationSchemeServiceMock
         override val authProviderClient: AuthProviderClient = authProviderClientMock
@@ -67,6 +68,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
 
     "return the adjustment report without contact details data" in new AdjustmentsTestFixture {
       override val controller = new ReportingController {
+        override val reportingFormatter = reportingFormatterMock
         override val locationSchemeService = locationSchemeServiceMock
         override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
@@ -91,6 +93,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
 
     "return no adjustments if there's no data on the server" in new AdjustmentsTestFixture {
       override val controller = new ReportingController {
+        override val reportingFormatter = reportingFormatterMock
         override val locationSchemeService = locationSchemeServiceMock
         override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository

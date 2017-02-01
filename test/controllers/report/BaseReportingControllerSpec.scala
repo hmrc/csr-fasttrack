@@ -22,9 +22,10 @@ import connectors.ExchangeObjects.Candidate
 import controllers.ReportingController
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
-import repositories.application.{ ReportingRepository }
+import repositories.application.ReportingRepository
 import repositories.{ ApplicationAssessmentScoresRepository, AssessmentCentreIndicatorRepository, ContactDetailsRepository, DiversityReportRepository, QuestionnaireRepository, TestReportRepository }
 import services.locationschemes.LocationSchemeService
+import services.reporting.ReportingFormatter
 import testkit.MockitoImplicits.OngoingStubbingExtension
 import testkit.UnitWithAppSpec
 
@@ -38,6 +39,7 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
     val frameworkId = "FastTrack-2015"
 
     val locationSchemeServiceMock = mock[LocationSchemeService]
+    val reportingFormatterMock = mock[ReportingFormatter]
     val assessmentCentreIndicatorRepoMock = mock[AssessmentCentreIndicatorRepository]
     val assessmentScoresRepoMock = mock[ApplicationAssessmentScoresRepository]
     val contactDetailsRepoMock = mock[ContactDetailsRepository]
@@ -52,9 +54,9 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
         Nil
     ))
 
-
-    val controller = new ReportingController {
+    trait ReportingControllerDefaultMocks {
       val locationSchemeService = locationSchemeServiceMock
+      val reportingFormatter = reportingFormatterMock
       val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
       val assessmentScoresRepository = assessmentScoresRepoMock
       val contactDetailsRepository = contactDetailsRepoMock
@@ -64,5 +66,19 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
       val testReportRepository = testReportRepoMock
       val authProviderClient = authProviderClientMock
     }
+
+    val controller = new ReportingController {
+      val locationSchemeService = locationSchemeServiceMock
+      val reportingFormatter = reportingFormatterMock
+      val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
+      val assessmentScoresRepository = assessmentScoresRepoMock
+      val contactDetailsRepository = contactDetailsRepoMock
+      val diversityReportRepository = diversityReportRepoMock
+      val questionnaireRepository = questionnaireRepoMock
+      val reportingRepository = reportingRepoMock
+      val testReportRepository = testReportRepoMock
+      val authProviderClient = authProviderClientMock
+    }
+
   }
 }

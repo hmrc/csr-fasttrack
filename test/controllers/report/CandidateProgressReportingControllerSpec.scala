@@ -86,6 +86,12 @@ class CandidateProgressReportingControllerSpec extends BaseReportingControllerSp
     when(contactDetailsRepoMock.findAll).thenReturnAsync(ContactDetailsWithIdExamples.ContactDetailsList)
     when(locationSchemeServiceMock.getAllSchemeLocations).thenReturnAsync(LocationSchemesExamples.LocationsSchemesList)
     when(assessmentCentreIndicatorRepoMock.calculateIndicator(any())).thenReturn(AssessmentCentreIndicator("London", "London"))
+    when(reportingFormatterMock.getOnlineAdjustments(eqTo(Some(true)), any())).thenReturn(Some("Yes"))
+    when(reportingFormatterMock.getOnlineAdjustments(eqTo(Some(false)), any())).thenReturn(Some("No"))
+    when(reportingFormatterMock.getOnlineAdjustments(eqTo(None), any())).thenReturn(None)
+    when(reportingFormatterMock.getAssessmentCentreAdjustments(eqTo(Some(true)), any())).thenReturn(Some("Yes"))
+    when(reportingFormatterMock.getAssessmentCentreAdjustments(eqTo(Some(false)), any())).thenReturn(Some("No"))
+    when(reportingFormatterMock.getAssessmentCentreAdjustments(eqTo(None), any())).thenReturn(None)
 
     def request = {
       FakeRequest(Helpers.GET, controllers.routes.ReportingController.createCandidateProgressReport(frameworkId).url, FakeHeaders(), "")

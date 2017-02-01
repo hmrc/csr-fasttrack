@@ -105,6 +105,7 @@ object ReportExchangeObjects {
                                                     gis: Option[Boolean],
                                                     onlineAdjustments: Option[Boolean],
                                                     assessmentCentreAdjustments: Option[Boolean],
+                                                    adjustments: Option[Adjustments],
                                                     civilServant: Option[Boolean]
                                                   )
 

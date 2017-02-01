@@ -17,7 +17,7 @@
 package controllers
 
 import connectors.AuthProviderClient
-import model.ApplicationStatusOrder
+import model.{ Adjustments, ApplicationStatusOrder }
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
 import model.PersistedObjects.Implicits._
@@ -28,6 +28,7 @@ import play.api.mvc.{ Action, AnyContent, Request }
 import repositories.application.ReportingRepository
 import repositories.{ QuestionnaireRepository, _ }
 import services.locationschemes.LocationSchemeService
+import services.reporting.ReportingFormatter
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -35,6 +36,7 @@ import scala.concurrent.Future
 
 object ReportingController extends ReportingController {
   val locationSchemeService = LocationSchemeService
+  val reportingFormatter = ReportingFormatter
   val assessmentCentreIndicatorRepository = AssessmentCentreIndicatorCSVRepository
   val assessmentScoresRepository = repositories.applicationAssessmentScoresRepository
   val contactDetailsRepository = repositories.contactDetailsRepository
@@ -50,6 +52,7 @@ trait ReportingController extends BaseController {
   import Implicits._
 
   val locationSchemeService: LocationSchemeService
+  val reportingFormatter: ReportingFormatter
   val assessmentCentreIndicatorRepository: AssessmentCentreIndicatorRepository
   val assessmentScoresRepository: ApplicationAssessmentScoresRepository
   val contactDetailsRepository: ContactDetailsRepository
@@ -151,12 +154,17 @@ trait ReportingController extends BaseController {
       allLocations <- locationSchemeService.getAllSchemeLocations
     } yield {
       applications.map { application =>
-        val fsacIndicator = allContactDetails.get(application.userId.toString()).map { contactDetails =>
+        val fsacIndicatorVal = allContactDetails.get(application.userId.toString()).map { contactDetails =>
           assessmentCentreIndicatorRepository.calculateIndicator(Some(contactDetails.postCode.toString)).assessmentCentre
         }
         val locationIds = application.locations
+        val onlineAdjustmentsVal = reportingFormatter.getOnlineAdjustments(application.onlineAdjustments, application.adjustments)
+        val assessmentCentreAdjustmentsVal = reportingFormatter.getAssessmentCentreAdjustments(
+          application.assessmentCentreAdjustments,
+          application.adjustments)
         val locationNames = allLocations.filter(location => locationIds.contains(location.id)).map(_.locationName)
-        CandidateProgressReportItem2(application).copy(fsacIndicator = fsacIndicator, locations = locationNames)
+        CandidateProgressReportItem2(application).copy(fsacIndicator = fsacIndicatorVal, locations = locationNames,
+          onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
       }
     }
     reportFut.map { report => Ok(Json.toJson(report)) }
