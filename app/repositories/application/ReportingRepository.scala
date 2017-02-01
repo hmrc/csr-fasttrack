@@ -79,13 +79,6 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     Candidate(userId, applicationId, None, firstName, lastName, Some(dateOfBirth.toString), None, None, None)
   }
 
-  def find(applicationIds: List[String]): Future[List[Candidate]] = {
-
-    val query = BSONDocument("applicationId" -> BSONDocument("$in" -> applicationIds))
-
-    collection.find(query).cursor[BSONDocument]().collect[List]().map(_.map(docToCandidate))
-  }
-
   // scalastyle:off method.length
   private def findProgress(document: BSONDocument, applicationId: String): ProgressResponse = {
 
