@@ -472,6 +472,25 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     }
   }
 
+  "Complete online test" must {
+    "update the test to complete" in {
+      val date = DateTime.now(DateTimeZone.UTC)
+      val appIdWithUserId = createOnlineTest("userId", ApplicationStatuses.Submitted, "token", Some("http://www.someurl.com"),
+        invitationDate = Some(date), expirationDate = Some(date.plusDays(7)), xmlReportSaved = Some(true), pdfReportSaved = Some(true),
+        cubiksUserId = Some(123)
+      )
+
+      onlineTestRepo.completeOnlineTest(123).futureValue
+
+      val test = onlineTestRepo.getCubiksTestProfile(123).futureValue
+      val application = helperRepo.findByUserId(appIdWithUserId.userId, "frameworkId").futureValue
+
+      test.completedDateTime mustBe defined
+      application.applicationStatus mustBe ApplicationStatuses.OnlineTestCompleted
+      application.progressResponse.onlineTest.completed mustBe true
+    }
+  }
+
   "Next application ready for report retrieving" must {
     "return None when there is no application with the status ONLINE_TEST_COMPLETED" in {
       createOnlineTest("userId1", ApplicationStatuses.OnlineTestInvited, expirationDate = DateTime.now())

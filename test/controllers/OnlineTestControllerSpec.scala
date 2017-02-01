@@ -24,7 +24,7 @@ import mocks._
 import mocks.application.{ DocumentRootInMemoryRepository, OnlineTestInMemoryRepository }
 import model.ApplicationStatuses
 import model.Commands.Address
-import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestProfile }
+import model.OnlineTestCommands.OnlineTestApplication
 import model.PersistedObjects.ContactDetails
 import model.exchange.OnlineTest
 import model.persisted.CubiksTestProfile
@@ -75,7 +75,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
 
     "return the userId if the token is valid" in new TestFixture {
       val token = "1234"
-      val result = TestOnlineTestController.completeTests(token)(createOnlineTestCompleteRequest(token)).run
+      val result = TestOnlineTestController.completeOnlineTestByToken(token)(createOnlineTestCompleteRequest(token)).run
 
       status(result) must be(200)
     }
@@ -174,7 +174,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     when(cubiksGatewayClientMock.registerApplicant(any())(any())).thenReturn(Future.successful(Registration(0)))
     when(cubiksGatewayClientMock.inviteApplicant(any())(any())).thenReturn(Future.successful(Invitation(0, "", "", "", "", 0)))
 
-    when(mockOnlineTestRepository.storeOnlineTestProfileAndUpdateStatusToInvite(any[String], any[OnlineTestProfile]))
+    when(mockOnlineTestRepository.storeOnlineTestProfileAndUpdateStatusToInvite(any[String], any[CubiksTestProfile]))
       .thenReturn(Future.successful(()))
 
     class OnlineTestServiceMock extends OnlineTestService {
@@ -253,7 +253,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     }
 
     def createOnlineTestCompleteRequest(token: String) = {
-      FakeRequest(Helpers.GET, controllers.routes.OnlineTestController.completeTests(token).url, FakeHeaders(), "")
+      FakeRequest(Helpers.GET, controllers.routes.OnlineTestController.completeOnlineTestByToken(token).url, FakeHeaders(), "")
     }
 
     def createResetOnlineTestRequest(appId: String) = {
