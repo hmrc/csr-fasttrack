@@ -43,7 +43,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
   def helperRepo = new GeneralApplicationMongoRepository(GBTimeZoneService)
   def onlineTestRepo = new OnlineTestMongoRepository(DateTimeFactory)
 
-  "Next application ready for online testing" should {
+  "Next application ready for online testing" must {
 
     "return no application if there is only one application without adjustment needed but not submitted" in {
 
@@ -125,7 +125,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "nextTestForReminder" should {
+  "nextTestForReminder" must {
     "return one record for a test about to expire in less than 3 days" in {
       val expiryDate = DateTime.now().plusHours((24 * 3) - 1)
       val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestInvited, expirationDate = expiryDate)
@@ -200,7 +200,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "Getting the next application for expiry" should {
+  "Getting the next application for expiry" must {
     "return one application if there is one expired un-started test" in {
       val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestInvited, expirationDate = DateTime.now().minusMinutes(1))
 
@@ -252,7 +252,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "Update expiry time" should {
+  "Update expiry time" must {
     "set ONLINE_TEST_INVITED to ONLINE_TEST_INVITED" in {
       updateExpiryAndAssert(ApplicationStatuses.OnlineTestInvited, ApplicationStatuses.OnlineTestInvited)
     }
@@ -278,7 +278,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "Getting the next application for failure notification" should {
+  "Getting the next application for failure notification" must {
     "return one application if there is one failed test and pdf report has been saved" in {
       val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestFailed, xmlReportSaved=Some(true), pdfReportSaved = Some(true))
 
@@ -322,27 +322,33 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "Get online test" should {
+  "Get online test" must {
     "throw an exception if there is no test for the specific user id" in {
       val result = onlineTestRepo.getCubiksTestProfile("userId").failed.futureValue
 
       result mustBe an[NotFoundException]
     }
 
-    "return an online test for the specific user id" in {
+    "return an online test for the specified user id" in {
       val date = new DateTime("2016-03-08T13:04:29.643Z")
       createOnlineTest("userId", ApplicationStatuses.OnlineTestInvited, "token", Some("http://www.someurl.com"),
         invitationDate = Some(date), expirationDate = Some(date.plusDays(7)))
 
-      val result = onlineTestRepo.getCubiksTestProfile("userId").futureValue
+      val resultByUserId = onlineTestRepo.getCubiksTestProfile("userId").futureValue
 
-      result.expirationDate.toDate mustBe new DateTime("2016-03-15T13:04:29.643Z").toDate
-      result.onlineTestUrl mustBe "http://www.someurl.com"
-      result.isOnlineTestEnabled mustBe true
+      resultByUserId.expirationDate.toDate mustBe new DateTime("2016-03-15T13:04:29.643Z").toDate
+      resultByUserId.onlineTestUrl mustBe "http://www.someurl.com"
+      resultByUserId.isOnlineTestEnabled mustBe true
+
+      val resultByCubiksId = onlineTestRepo.getCubiksTestProfile(resultByUserId.cubiksUserId).futureValue
+      resultByCubiksId mustBe resultByUserId
+
+      val resultByToken = onlineTestRepo.getCubiksTestProfileByToken(resultByCubiksId.token).futureValue
+      resultByToken mustBe resultByUserId
     }
   }
 
-  "Update status" should {
+  "Update status" must {
     "update status for the specific user id" in {
       createApplication("appId", "userId", "frameworkId", ApplicationStatuses.Submitted,
         needsAdjustment = true, adjustmentsConfirmed = false, timeExtensionAdjustments =  true)
@@ -361,20 +367,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "Consume token" should {
-    "update status to ONLINE_TEST_COMPLETED" in {
-      val date = new DateTime("2016-03-08T13:04:29.643Z")
-      createOnlineTest("userId", ApplicationStatuses.Submitted, "token", Some("http://www.someurl.com"),
-        invitationDate = Some(date), expirationDate = Some(date.plusDays(7)))
-
-      onlineTestRepo.consumeToken("token").futureValue
-
-      val result = helperRepo.findByUserId("userId", "frameworkId").futureValue
-      result.applicationStatus mustBe(ApplicationStatuses.OnlineTestCompleted)
-    }
-  }
-
-  "Store online test profile" should {
+  "Store online test profile" must {
     "update online test profile and set the status to ONLINE_TEST_INVITED" in {
       val date = new DateTime("2016-03-08T13:04:29.643Z")
       val appIdWithUserId = createOnlineTest("userId", ApplicationStatuses.Submitted, "token", Some("http://www.someurl.com"),
@@ -474,12 +467,12 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
           doc.getAs[BSONDocument]("passmarkEvaluation") mustBe empty
 
-        case None => fail("Application should have been already created and cannot be empty")
+        case None => fail("Application must have been already created and cannot be empty")
       }.futureValue
     }
   }
 
-  "Next application ready for report retrieving" should {
+  "Next application ready for report retrieving" must {
     "return None when there is no application with the status ONLINE_TEST_COMPLETED" in {
       createOnlineTest("userId1", ApplicationStatuses.OnlineTestInvited, expirationDate = DateTime.now())
       val result = onlineTestRepo.nextApplicationReadyForReportRetriving.futureValue
@@ -509,7 +502,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "Next application ready for pdf report retrieving" should {
+  "Next application ready for pdf report retrieving" must {
     "return None when the application has not an xml report saved" in {
       val date = DateTime.now()
       createOnlineTest("userId", ApplicationStatuses.OnlineTestCompleted, "token", Some("http://www.someurl.com"),
@@ -556,7 +549,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "removing a candidate's allocation status" should {
+  "removing a candidate's allocation status" must {
     "remove the status, and status flags" in {
       val appIdWithUserId = createOnlineTest(UUID.randomUUID().toString, ApplicationStatuses.AllocationConfirmed)
 
@@ -573,7 +566,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "next application ready for online test evaluation" should {
+  "next application ready for online test evaluation" must {
     "return no candidate if there is only a candidate in ONLINE_TEST_STARTED status" in {
       val AppId = UUID.randomUUID().toString
       createOnlineTestApplication(AppId, ApplicationStatuses.OnlineTestStarted)
@@ -636,7 +629,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "find passmark evaluation" should {
+  "find passmark evaluation" must {
     val appId = "AppId"
 
     "return online test passmark evaluation" in {

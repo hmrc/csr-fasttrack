@@ -108,4 +108,8 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
   override def startOnlineTest(cubiksId: Int): Future[Unit] = Future.successful(())
 
   override def getCubiksTestProfile(cubiksUserId: Int): Future[CubiksTestProfile] = ???
+
+  override def getCubiksTestProfileByToken(token: String): Future[CubiksTestProfile] = ???
+
+  override def completeOnlineTest(cubiksUserId: Int): Future[Unit] = ???
 }
