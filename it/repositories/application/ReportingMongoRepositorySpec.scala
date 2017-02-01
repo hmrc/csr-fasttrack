@@ -16,22 +16,15 @@
 
 package repositories.application
 
-import common.Constants.{ No, Yes }
 import factories.UUIDFactory
-import model.ApplicationStatuses._
-import model.Exceptions.{ AdjustmentsCommentNotFound, LocationPreferencesNotFound, SchemePreferencesNotFound }
+import model.ReportExchangeObjects.ApplicationForCandidateProgressReport
 import model._
-import model.commands.ApplicationStatusDetails
-import org.joda.time.{ DateTime, DateTimeZone }
-import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
-import repositories.{ BSONDateTimeHandler, CollectionNames }
+import repositories.{ CollectionNames }
 import services.GBTimeZoneService
-import services.testdata.{ GeneratorConfig, SubmittedStatusGenerator, TestDataGeneratorService }
+import services.testdata.{ TestDataGeneratorService }
 import testkit.MongoRepositorySpec
 
-import scala.concurrent.Await
-import scala.concurrent.duration._
 import scala.language.postfixOps
 
 class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory {
@@ -46,130 +39,27 @@ class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory 
 
   val testDataGeneratorService = TestDataGeneratorService
 
-  /*
-  def createCandidate = {
-    val initialConfig = GeneratorConfig(
-      personalData = PersonalData(emailPrefix = emailPrefix),
-      setGis = setGis,
-      cubiksUrl = cubiksUrlFromConfig,
-      region = region,
-      loc1scheme1Passmark = loc1scheme1EvaluationResult.map(Result(_)),
-      loc1scheme2Passmark = loc1scheme2EvaluationResult.map(Result(_)),
-      previousStatus = previousStatus,
-      confirmedAllocation = status match {
-        case ApplicationStatuses.AllocationUnconfirmed.name => false
-        case ApplicationStatuses.AllocationConfirmed.name => true
-        case _ => confirmedAllocation
-      },
-      testScores = Some(testScores)
-    )
-    // scalastyle:on
-
-    TestDataGeneratorService.createCandidatesInSpecificStatus(1, _ => StatusGeneratorFactory.getGenerator(status),
-      _ => initialConfig).map { candidates =>
-      Ok(Json.toJson(candidates))
-    }
-  }
-  */
 
   "Applications for Candidate Progress Report" must {
-    "for an application with all fields" ignore {
-      val userId = generateUUID()
-      val appId = generateUUID()
+    "return a report with one application when there is only one application with the corresponding fields when" +
+      "all fields are populated" in {
+      val userId = UniqueIdentifier.randomUniqueIdentifier
+      val appId = UniqueIdentifier.randomUniqueIdentifier
 
-      //testDataGeneratorService.createCandidatesInSpecificStatus(1, SubmittedStatusGenerator)
+      testDataRepo.createApplicationWithAllFields(userId.toString(), appId.toString(), "FastTrack-2015").futureValue
 
-      //testDataRepo.createApplicationWithAllFields(userId, appId, "FastStream-2016").futureValue
-
-      val result = repository.applicationsForCandidateProgressReport("FastStream-2016").futureValue
-
-      result must not be empty
-      /*result.head mustBe CandidateProgressReportItem(userId, appId, Some("submitted"),
-        List(SchemeType.DiplomaticService, SchemeType.GovernmentOperationalResearchService), Some("Yes"),
-        Some("No"), Some("No"), None, Some("No"), Some("Yes"), Some("No"), Some("Yes"), Some("No"), Some("Yes"),
-        Some("1234567"), None, ApplicationRoute.Faststream)*/
-    }
-
-    /*
-    "for the minimum application" in {
-      val userId = generateUUID()
-      val appId = generateUUID()
-      testDataRepo.createMinimumApplication(userId, appId, "FastStream-2016").futureValue
-
-      val result = repository.candidateProgressReport("FastStream-2016").futureValue
+      val result = repository.applicationsForCandidateProgressReport("FastTrack-2015").futureValue
 
       result must not be empty
-      result.head must be(CandidateProgressReportItem(userId, appId, Some("registered"),
-        List.empty[SchemeType], None, None, None, None, None, None, None, None, None, None, None, None, ApplicationRoute.Faststream)
-      )
+      result.head mustBe(ApplicationForCandidateProgressReport(appId, userId, Some("assistance_details_completed"),
+        List(Scheme.Commercial, Scheme.Business), List("2643743", "2657613"), Some("Yes"), Some(false), Some(true),
+        Some(true), Some(Adjustments(typeOfAdjustments=Some(List("onlineTestsTimeExtension", "onlineTestsOther",
+          "assessmentCenterTimeExtension", "coloured paper", "braille test paper", "room alone", "rest breaks",
+          "reader/assistant", "stand up and move around", "assessmentCenterOther")), adjustmentsConfirmed = Some(true),
+          onlineTests = Some(AdjustmentDetail(extraTimeNeeded=Some(25), extraTimeNeededNumerical=Some(60), otherInfo=Some("other adjustments"))),
+          assessmentCenter = Some(AdjustmentDetail(extraTimeNeeded=Some(30), extraTimeNeededNumerical=None,
+            otherInfo=Some("Other assessment centre adjustment")))
+        )), Some(false)))
     }
-    */
-  }
-
-  def createApplicationWithAllFields(userId: String, appId: String, frameworkId: String,
-    appStatus: ApplicationStatuses.EnumVal = ApplicationStatuses.Submitted,
-    progressStatusBSON: BSONDocument = buildProgressStatusBSON()
-  ) = {
-    val application = BSONDocument(
-      "applicationId" -> appId,
-      "userId" -> userId,
-      "frameworkId" -> frameworkId,
-      "applicationStatus" -> appStatus,
-      "framework-preferences" -> BSONDocument(
-        "firstLocation" -> BSONDocument(
-          "region" -> "Region1",
-          "location" -> "Location1",
-          "firstFramework" -> "Commercial",
-          "secondFramework" -> "Digital and technology"
-        ),
-        "secondLocation" -> BSONDocument(
-          "location" -> "Location2",
-          "firstFramework" -> "Business",
-          "secondFramework" -> "Finance"
-        ),
-        "alternatives" -> BSONDocument(
-          "location" -> true,
-          "framework" -> true
-        )
-      ),
-      "personal-details" -> BSONDocument(
-        "aLevel" -> true,
-        "stemLevel" -> true
-      ),
-      "assistance-details" -> BSONDocument(
-        "hasDisability" -> "No",
-        "needsSupportForOnlineAssessment" -> false,
-        "needsSupportAtVenue" -> false,
-        "guaranteedInterview" -> false
-      ),
-      "issue" -> "this candidate has changed the email"
-    ) ++ progressStatusBSON
-
-    repository.collection.insert(application).futureValue
-  }
-
-  private def buildProgressStatusBSON(statusesAndDates: Map[ProgressStatuses.EnumVal, DateTime] =
-    Map((ProgressStatuses.RegisteredProgress, DateTime.now))
-  ): BSONDocument = {
-    val dates = statusesAndDates.foldLeft(BSONDocument()) { (doc, map) =>
-     doc ++ BSONDocument(s"${map._1}" -> map._2)
-    }
-
-    val statuses = statusesAndDates.keys.foldLeft(BSONDocument()) { (doc, status) =>
-      doc ++ BSONDocument(s"$status" -> true)
-    }
-
-    BSONDocument(
-      "progress-status" -> statuses,
-      "progress-status-timestamp" -> dates
-    )
-  }
-
-  def createMinimumApplication(userId: String, appId: String, frameworkId: String) = {
-    repository.collection.insert(BSONDocument(
-      "applicationId" -> appId,
-      "userId" -> userId,
-      "frameworkId" -> frameworkId
-    )).futureValue
   }
 }
