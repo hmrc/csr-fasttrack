@@ -64,7 +64,7 @@ trait OnlineTestPassmarkService {
             Future.successful(None)
         }
       case _ =>
-        Logger.error("No settings exist in PassMarkSettings")
+        Logger.debug("No settings exist in PassMarkSettings - no candidates were processed")
         Future.successful(None)
     }
   }
