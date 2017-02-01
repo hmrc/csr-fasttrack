@@ -30,7 +30,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object OnlineTestPassMarkSettingsController extends OnlineTestPassMarkSettingsController {
   val pmsRepository = passMarkSettingsRepository
-  val fwRepository = frameworkRepository
+  val locSchemeRepository = FileLocationSchemeRepository
   val auditService = AuditService
   val uuidFactory = UUIDFactory
 }
@@ -38,7 +38,7 @@ object OnlineTestPassMarkSettingsController extends OnlineTestPassMarkSettingsCo
 trait OnlineTestPassMarkSettingsController extends BaseController {
 
   val pmsRepository: PassMarkSettingsRepository
-  val fwRepository: FrameworkRepository
+  val locSchemeRepository: LocationSchemeRepository
   val auditService: AuditService
   val uuidFactory: UUIDFactory
 
@@ -55,8 +55,8 @@ trait OnlineTestPassMarkSettingsController extends BaseController {
         )
 
         for {
-          names <- fwRepository.getFrameworkNames
-          createResult <- pmsRepository.create(builtSettingsObject, names)
+          schemeInfoList <- locSchemeRepository.getSchemeInfo
+          createResult <- pmsRepository.create(builtSettingsObject, schemeInfoList.map(_.name))
         } yield {
           auditService.logEvent("PassMarkSettingsCreated", Map(
             "Version" -> newVersionUUID,
@@ -71,7 +71,8 @@ trait OnlineTestPassMarkSettingsController extends BaseController {
 
   def getLatestVersion: Action[AnyContent] = Action.async { implicit request =>
     for {
-      schemeNames <- fwRepository.getFrameworkNames
+      schemeInfoList <- locSchemeRepository.getSchemeInfo
+      schemeNames = schemeInfoList.map(_.name)
       latestVersionOpt <- pmsRepository.tryGetLatestVersion(schemeNames)
     } yield {
       latestVersionOpt.map(latestVersion => {
