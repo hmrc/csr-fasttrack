@@ -19,7 +19,6 @@ package repositories.application
 import common.Constants.{ No, Yes }
 import factories.UUIDFactory
 import model.ApplicationStatuses._
-import model.ReportExchangeObjects.CandidateProgressReportItem
 import model.Exceptions.{ AdjustmentsCommentNotFound, LocationPreferencesNotFound, SchemePreferencesNotFound }
 import model._
 import model.commands.ApplicationStatusDetails

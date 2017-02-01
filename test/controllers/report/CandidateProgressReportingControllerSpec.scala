@@ -17,10 +17,10 @@
 package controllers.report
 
 import model.Commands.Implicits._
-import model.ReportExchangeObjects.{ CandidateProgressReportItem2, _ }
+import model.ReportExchangeObjects.{ CandidateProgressReportItem, _ }
 import model.ReportExchangeObjects.Implicits._
 import model.{ AssessmentCentreIndicator, UniqueIdentifier }
-import model.exchange.{ ApplicationForCandidateProgressReportItemExamples, CandidateProgressReportItem2Examples, LocationSchemesExamples }
+import model.exchange.{ ApplicationForCandidateProgressReportItemExamples, CandidateProgressReportItemExamples, LocationSchemesExamples }
 import model.persisted.ContactDetailsWithIdExamples
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
@@ -36,7 +36,7 @@ class CandidateProgressReportingControllerSpec extends BaseReportingControllerSp
       when(reportingRepoMock.applicationsForCandidateProgressReport(eqTo(frameworkId))).thenReturnAsync(Nil)
 
       val response = controller.createCandidateProgressReport(frameworkId)(request).run
-      val result = contentAsJson(response).as[List[CandidateProgressReportItem2]]
+      val result = contentAsJson(response).as[List[CandidateProgressReportItem]]
 
       status(response) mustBe OK
 
@@ -45,11 +45,11 @@ class CandidateProgressReportingControllerSpec extends BaseReportingControllerSp
 
     "return report if there are applications, contact details and location schemes" in new CandidateProgressReportTestFixture {
       val response = controller.createCandidateProgressReport(frameworkId)(request).run
-      val result = contentAsJson(response).as[List[CandidateProgressReportItem2]]
+      val result = contentAsJson(response).as[List[CandidateProgressReportItem]]
 
       status(response) mustBe OK
 
-      result mustBe CandidateProgressReportItem2Examples.Candidates
+      result mustBe CandidateProgressReportItemExamples.Candidates
     }
 
     "return report without fsac indicator if there are applications, location schemes" +
@@ -57,11 +57,11 @@ class CandidateProgressReportingControllerSpec extends BaseReportingControllerSp
       when(contactDetailsRepoMock.findAll).thenReturnAsync(List.empty)
 
       val response = controller.createCandidateProgressReport(frameworkId)(request).run
-      val result = contentAsJson(response).as[List[CandidateProgressReportItem2]]
+      val result = contentAsJson(response).as[List[CandidateProgressReportItem]]
 
       status(response) mustBe OK
 
-      result mustBe CandidateProgressReportItem2Examples.CandidatesWithoutFsac
+      result mustBe CandidateProgressReportItemExamples.CandidatesWithoutFsac
     }
 
     "return report without location name if there are applications, contact details" +
@@ -69,11 +69,11 @@ class CandidateProgressReportingControllerSpec extends BaseReportingControllerSp
       when(locationSchemeServiceMock.getAllSchemeLocations).thenReturnAsync(List.empty)
 
       val response = controller.createCandidateProgressReport(frameworkId)(request).run
-      val result = contentAsJson(response).as[List[CandidateProgressReportItem2]]
+      val result = contentAsJson(response).as[List[CandidateProgressReportItem]]
 
       status(response) mustBe OK
 
-      result mustBe CandidateProgressReportItem2Examples.CandidatesWithoutLocationNames
+      result mustBe CandidateProgressReportItemExamples.CandidatesWithoutLocationNames
     }
   }
 

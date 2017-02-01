@@ -48,7 +48,7 @@ object ReportExchangeObjects {
     dateOfBirth: LocalDate
   )
 
-  case class CandidateProgressReportItem2(
+  case class CandidateProgressReportItem(
                                            applicationId: UniqueIdentifier,
                                            progress: Option[String],
                                            schemes: List[Scheme],
@@ -61,9 +61,9 @@ object ReportExchangeObjects {
                                            fsacIndicator: Option[String]
                                          )
 
-  case object CandidateProgressReportItem2 {
-    def apply(application: ApplicationForCandidateProgressReport): CandidateProgressReportItem2 = {
-      CandidateProgressReportItem2(applicationId = application.applicationId,
+  case object CandidateProgressReportItem {
+    def apply(application: ApplicationForCandidateProgressReport): CandidateProgressReportItem = {
+      CandidateProgressReportItem(applicationId = application.applicationId,
         progress = application.progress,
         schemes = application.schemes,
         locations = application.locations,
@@ -231,7 +231,7 @@ object ReportExchangeObjects {
   }
 
   object Implicits {
-    implicit val candidateProgressReportItemFormats2 = Json.format[CandidateProgressReportItem2]
+    implicit val candidateProgressReportItemFormats2 = Json.format[CandidateProgressReportItem]
     implicit val applicationForCandidateProgressReportFormats = Json.format[ApplicationForCandidateProgressReport]
     implicit val candidateProgressReportItemWithPersonalDetailsFormats = Json.format[ReportWithPersonalDetails]
     implicit val passMarkReportTestResultFormats = Json.format[TestResult]
