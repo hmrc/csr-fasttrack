@@ -21,11 +21,10 @@ import java.io.File
 import com.typesafe.config.{ Config, ConfigFactory }
 import connectors.PassMarkExchangeObjects.Settings
 import mocks.OnlineIntegrationTestInMemoryRepository
-import model.ApplicationStatuses._
 import model.EvaluationResults._
-import model.OnlineTestCommands.CandidateScoresWithPreferencesAndPassmarkSettings
-import model.PersistedObjects.CandidateTestReport
-import model.{ ApplicationStatuses, Preferences }
+import model.OnlineTestCommands.CandidateEvaluationData
+import model.persisted.SchemeEvaluationResult
+import model.{ ApplicationStatuses, Scheme }
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.ceedubs.ficus.readers.ValueReader
@@ -33,32 +32,30 @@ import org.joda.time.DateTime
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.Logger
+import repositories.application.GeneralApplicationRepository
 import repositories.{ FrameworkPreferenceRepository, FrameworkRepository, PassMarkSettingsRepository, TestReportRepository }
-import services.onlinetesting.OnlineTestPassmarkService
+import services.onlinetesting.EvaluateOnlineTestService
 import services.passmarksettings.PassMarkSettingsService
+import services.testmodel.{ OnlineTestPassmarkServiceTest, SchemeEvaluationTestResult }
 import testkit.IntegrationSpec
 
-case class OnlineTestPassmarkServiceTest(preferences: Preferences,
-                                         scores: CandidateTestReport,
-                                         expected: ScoreEvaluationTestExpectation,
-                                         previousEvaluation: Option[ScoreEvaluationTestExpectation] = None)
+class EvaluateOnlineTestServiceSpec extends IntegrationSpec with MockitoSugar with OneAppPerSuite {
 
-class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar with OneAppPerSuite {
-
-  lazy val service = new OnlineTestPassmarkService {
+  lazy val service = new EvaluateOnlineTestService {
 
     val fpRepository = mock[FrameworkPreferenceRepository]
-    val trRepository = mock[TestReportRepository]
-    val oRepository = OnlineIntegrationTestInMemoryRepository
-    val passmarkRulesEngine = OnlineTestPassmarkService.passmarkRulesEngine
+    val testReportRepository = mock[TestReportRepository]
+    val onlineTestRepository = OnlineIntegrationTestInMemoryRepository
+    val passMarkRulesEngine = EvaluateOnlineTestService.passMarkRulesEngine
     val pmsRepository: PassMarkSettingsRepository = mock[PassMarkSettingsRepository]
     val passMarkSettingsService = new PassMarkSettingsService {
       override val fwRepository = mock[FrameworkRepository]
       override val pmsRepository = mock[PassMarkSettingsRepository]
     }
+    val applicationRepository = mock[GeneralApplicationRepository]
   }
 
-  "Online Test Passmark Service" should {
+  "Evaluate Online Test Service" should {
     "for each test in the path evaluate scores" in {
       implicit object DateTimeValueReader extends ValueReader[DateTime] {
         override def read(config: Config, path: String): DateTime = {
@@ -67,35 +64,33 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
       }
       val suites = new File("it/resources/onlineTestPassmarkServiceSpec").listFiles.filterNot(_.getName.startsWith("."))
       // Test should fail in case the path is incorrect for the env and return 0 suites
-      suites.nonEmpty must be(true)
+      suites.nonEmpty mustBe true
 
       suites.foreach { suiteName =>
         val suiteFileName = suiteName.getName
-
         val passmarkSettingsFile = new File(suiteName.getAbsolutePath + "/passmarkSettings.conf")
         require(passmarkSettingsFile.exists(), s"File does not exist: ${passmarkSettingsFile.getAbsolutePath}")
-        val passmarkSettings = ConfigFactory.parseFile(passmarkSettingsFile)
-          .as[Settings]("passmarkSettings")
+
+        val passmarkSettings = ConfigFactory.parseFile(passmarkSettingsFile).as[Settings]("passmarkSettings")
         val testCases = new File(s"it/resources/onlineTestPassmarkServiceSpec/$suiteFileName/").listFiles
 
         // Test should fail in case the path is incorrect for the env and return 0 tests
-        testCases.nonEmpty must be(true)
+        testCases.nonEmpty mustBe true
 
         testCases.filterNot(t => t.getName == "passmarkSettings.conf").foreach { testCase =>
           val testCaseFileName = testCase.getName
-          val tests: List[OnlineTestPassmarkServiceTest] = ConfigFactory.parseFile(
-            new File(testCase.getAbsolutePath)).as[List[OnlineTestPassmarkServiceTest]]("tests")
+          val tests = ConfigFactory.parseFile(new File(testCase.getAbsolutePath))
+            .as[List[OnlineTestPassmarkServiceTest]]("tests")
+
           tests.foreach { t =>
             val expected = t.expected
-            val alreadyEvaluated = t.previousEvaluation
+            val candidateScoreWithPassmark = CandidateEvaluationData(passmarkSettings,
+              t.schemes.map(Scheme.withName), t.scores, ApplicationStatuses.stringToEnum(t.applicationStatus))
 
-            val candidateScoreWithPassmark = CandidateScoresWithPreferencesAndPassmarkSettings(passmarkSettings,
-              t.preferences, t.scores, alreadyEvaluated.map(_.applicationStatus).getOrElse(ApplicationStatuses.OnlineTestCompleted))
-
-            val actual = service.oRepository.inMemoryRepo
+            val actual = service.onlineTestRepository.inMemoryRepo
             val appId = t.scores.applicationId
 
-            evaluate(appId, candidateScoreWithPassmark, alreadyEvaluated)
+            service.evaluate(candidateScoreWithPassmark)
 
             val actualResult = actual(appId)
 
@@ -103,13 +98,13 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
             Logger.info(s"Processing $testMessage")
 
             withClue(testMessage + " location1Scheme1") {
-              toStr(actualResult.result.location1Scheme1) must be(expected.location1Scheme1)
+              actualResult.evaluatedSchemes mustBe toSchemeEvaluationResult(expected.result)
             }
             withClue(testMessage + " applicationStatus") {
-              actualResult.applicationStatus must be(expected.applicationStatus)
+              actualResult.applicationStatus mustBe ApplicationStatuses.stringToEnum(expected.applicationStatus)
             }
             withClue(testMessage + " version") {
-              actualResult.version must be(passmarkSettings.version)
+              actualResult.version mustBe passmarkSettings.version
             }
           }
         }
@@ -117,34 +112,12 @@ class OnlineTestPassmarkServiceSpec extends IntegrationSpec with MockitoSugar wi
     }
   }
 
-  def evaluate(appId: String, candidateScoreWithPassmark: CandidateScoresWithPreferencesAndPassmarkSettings,
-               alreadyEvaluated: Option[ScoreEvaluationTestExpectation] = None) = {
-    candidateScoreWithPassmark.applicationStatus match {
-      case ApplicationStatuses.AssessmentScoresAccepted =>
-        require(alreadyEvaluated.isDefined, "AssessmentScoresAccepted requires already evaluated application")
-
-        alreadyEvaluated.map { currentEvaluation =>
-          val currentResult = RuleCategoryResult(
-            Result(currentEvaluation.location1Scheme1),
-            currentEvaluation.location1Scheme2.map(Result(_)),
-            currentEvaluation.location2Scheme1.map(Result(_)),
-            currentEvaluation.location2Scheme2.map(Result(_)),
-            currentEvaluation.alternativeScheme.map(Result(_))
-          )
-
-          service.oRepository.savePassMarkScore(appId, currentEvaluation.passmarkVersion.get,
-            currentResult, currentEvaluation.applicationStatus)
-        }
-
-        service.evaluateCandidateScoreWithoutChangingApplicationStatus(candidateScoreWithPassmark)
-      case ApplicationStatuses.OnlineTestCompleted =>
-        service.evaluateCandidateScore(candidateScoreWithPassmark)
-      case _ =>
-        throw new IllegalArgumentException("This status is not supported by the test framework")
-    }
-  }
-
   def toStr(r: Result): String = r.getClass.getSimpleName.split("\\$").head
+
   def toStr(r: Option[Result]): Option[String] = r.map(toStr)
+
+  def toSchemeEvaluationResult(testResult: List[SchemeEvaluationTestResult]): List[SchemeEvaluationResult] = {
+    testResult.map(t => SchemeEvaluationResult(Scheme.withName(t.scheme), Result(t.result)))
+  }
 
 }

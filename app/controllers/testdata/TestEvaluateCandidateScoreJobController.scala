@@ -14,11 +14,20 @@
  * limitations under the License.
  */
 
-package fixture
+package controllers.testdata
 
-import model.PersistedObjects.CandidateTestReport
+import play.api.mvc.Action
+import scheduler.onlinetesting.EvaluateCandidateScoreJob
+import uk.gov.hmrc.play.microservice.controller.BaseController
+import scala.concurrent.ExecutionContext.Implicits.global
 
-object TestReportFixture {
-  val FullTestReport = CandidateTestReport(applicationId = "appId", reportType = "MRA",
-    competency = None, numerical = None, verbal = None, situational = None)
+object TestEvaluateCandidateScoreJobController extends TestEvaluateCandidateScoreJobController
+
+class TestEvaluateCandidateScoreJobController extends BaseController {
+
+  def execute = Action.async { implicit request =>
+    EvaluateCandidateScoreJob.tryExecute().map { _ =>
+      Ok("Evaluate Candidate Score Job started")
+    }
+  }
 }

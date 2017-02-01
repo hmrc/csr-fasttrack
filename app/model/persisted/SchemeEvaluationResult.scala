@@ -14,11 +14,16 @@
  * limitations under the License.
  */
 
-package fixture
+package model.persisted
 
-import model.PersistedObjects.CandidateTestReport
+import model.EvaluationResults.Result
+import model.Scheme.Scheme
+import play.api.libs.json.Json
+import reactivemongo.bson.Macros
 
-object TestReportFixture {
-  val FullTestReport = CandidateTestReport(applicationId = "appId", reportType = "MRA",
-    competency = None, numerical = None, verbal = None, situational = None)
+case class SchemeEvaluationResult(scheme: Scheme, result: Result)
+
+object SchemeEvaluationResult {
+  implicit val schemeEvaluationResultHandler = Macros.handler[SchemeEvaluationResult]
+  implicit val schemeEvaluationResultFormat = Json.format[SchemeEvaluationResult]
 }

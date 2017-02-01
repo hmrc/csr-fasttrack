@@ -17,10 +17,8 @@
 package services.testdata
 
 import connectors.AuthProviderClient
-import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
 import repositories._
 import repositories.application.GeneralApplicationRepository
-import services.testdata.faker.DataFaker._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global

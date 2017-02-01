@@ -43,6 +43,7 @@ object PassMarkExchangeObjects {
     createdByUser: String
   )
 
+  // This is the scheme name and pass/fail thresholds for each of the test types
   case class Scheme(schemeName: String, schemeThresholds: SchemeThresholds)
 
   case class SchemeThresholds(

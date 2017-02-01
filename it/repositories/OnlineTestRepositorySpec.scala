@@ -51,7 +51,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
       val result = onlineTestRepo.nextApplicationReadyForOnlineTesting.futureValue
 
-      result mustBe (None)
+      result mustBe None
     }
 
     "return no application if there is only one application with adjustment needed and not confirmed" in {
@@ -60,7 +60,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
       val result = onlineTestRepo.nextApplicationReadyForOnlineTesting.futureValue
 
-      result mustBe (None)
+      result mustBe None
     }
 
     "return one application if there is one submitted application without adjustment needed" in {
@@ -606,7 +606,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       val result = onlineTestRepo.nextApplicationPassMarkProcessing("currentVersion").futureValue
 
       result must not be empty
-      result.get.applicationId mustBe(AppId)
+      result.get.applicationId mustBe AppId
     }
 
     "return no candidate if there is only one who has been already evaluated but the application status is ASSESSMENT_SCORES_ENTERED" in {
@@ -814,23 +814,27 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       case (None, None ) =>
         helperRepo.collection.insert(BSONDocument(
           "applicationId" -> appId,
+          "userId" -> appId,
           "applicationStatus" -> applicationStatus
         ))
       case (Some(xmlReportSaved), None) =>
         helperRepo.collection.insert(BSONDocument(
           "applicationId" -> appId,
+          "userId" -> appId,
           "applicationStatus" -> applicationStatus,
           "online-tests" -> BSONDocument("xmlReportSaved" -> xmlReportSaved)
         ))
       case (None, Some(alreadyEvaluatedAgainstPassmarkVersion)) =>
         helperRepo.collection.insert(BSONDocument(
           "applicationId" -> appId,
+          "userId" -> appId,
           "applicationStatus" -> applicationStatus,
           "passmarkEvaluation" -> BSONDocument("passmarkVersion" -> alreadyEvaluatedAgainstPassmarkVersion)
         ))
       case (Some(xmlReportSaved), Some(alreadyEvaluatedAgainstPassmarkVersion)) =>
         helperRepo.collection.insert(BSONDocument(
           "applicationId" -> appId,
+          "userId" -> appId,
           "applicationStatus" -> applicationStatus,
           "online-tests" -> BSONDocument("xmlReportSaved" -> xmlReportSaved),
           "passmarkEvaluation" -> BSONDocument("passmarkVersion" -> alreadyEvaluatedAgainstPassmarkVersion)
