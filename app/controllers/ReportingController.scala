@@ -216,10 +216,19 @@ trait ReportingController extends BaseController {
     for {
       applications <- prevYearCandidatesDetailsRepository.findApplicationDetails()
       contactDetails <- prevYearCandidatesDetailsRepository.findContactDetails()
+      questionnaireDetails <- prevYearCandidatesDetailsRepository.findQuestionnaireDetails()
+      assessmentCenterDetails <- prevYearCandidatesDetailsRepository.findAssessmentCenterDetails()
+      assessmentScores <- prevYearCandidatesDetailsRepository.findAssessmentScores()
     } yield {
-      Ok(applications.map {
-        app => app.csvRecord + contactDetails.getOrElse(app.userId, "")
-      }.mkString("\n"))
+      val header = List(applications._1, contactDetails._1, questionnaireDetails._1,
+        assessmentCenterDetails._1, assessmentScores._1).mkString(",")
+      val records = applications._2.map {
+        app => List(app.csvRecord, contactDetails._2.getOrElse(app.userId, ""),
+          questionnaireDetails._2.getOrElse(app.appId, ""),
+          assessmentCenterDetails._2.getOrElse(app.appId, ""),
+          assessmentScores._2.getOrElse(app.appId, "")).mkString(",")
+      }
+      Ok((header::records).mkString("\n"))
     }
   }
 

@@ -35,7 +35,6 @@ object CollectionNames {
   val APPLICATION_ASSESSMENT_2016 = "application-assessment"
   val APPLICATION_ASSESSMENT_SCORES_2016 = "application-assessment-scores"
   val CONTACT_DETAILS_2016 = "contact-details"
-  val PASS_MARK_SETTINGS_2016 = "pass-mark-settings"
   val QUESTIONNAIRE_2016 = "questionnaire"
   val ONLINE_TEST_REPORT_2016 = "online-test-report"
 }
