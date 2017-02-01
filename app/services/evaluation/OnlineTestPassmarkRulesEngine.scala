@@ -20,6 +20,7 @@ import connectors.PassMarkExchangeObjects.{ SchemeThreshold, SchemeThresholds }
 import model.EvaluationResults._
 import model.OnlineTestCommands.{ CandidateEvaluationData, TestResult }
 import model.PersistedObjects.CandidateTestReport
+import model.Scheme.Scheme
 import model.persisted.SchemeEvaluationResult
 
 trait OnlineTestPassmarkRulesEngine {
@@ -31,13 +32,13 @@ object OnlineTestPassmarkRulesEngine extends OnlineTestPassmarkRulesEngine {
 
   def evaluate(candidateData: CandidateEvaluationData): List[SchemeEvaluationResult] = {
     candidateData.schemes.map { scheme =>
-      SchemeEvaluationResult(scheme, evaluateScore(candidateData, scheme.toString))
+      SchemeEvaluationResult(scheme, evaluateScore(candidateData, scheme))
     }
   }
 
-  private def evaluateScore(candidateScores: CandidateEvaluationData, schemeName: String) = {
-    val passmark = candidateScores.passmarkSettings.schemes.find(_.schemeName == schemeName)
-      .getOrElse(throw new IllegalStateException(s"schemeName=$schemeName is not set in Passmark settings"))
+  private def evaluateScore(candidateScores: CandidateEvaluationData, scheme: Scheme) = {
+    val passmark = candidateScores.passmarkSettings.schemes.find(_.schemeName == scheme.toString)
+      .getOrElse(throw new IllegalStateException(s"schemeName=$scheme is not set in Passmark settings"))
     determineResult(candidateScores.scores, passmark.schemeThresholds)
   }
 
@@ -52,7 +53,7 @@ object OnlineTestPassmarkRulesEngine extends OnlineTestPassmarkRulesEngine {
     val testResults: Seq[Result] = resultsToPassmark.map {
       case (None, _) => Green
       case (Some(TestResult(_, _, Some(tScore), _, _, _)), passMark) => schemeResult(tScore, passMark)
-      case (Some(TestResult(_, _, None, _, _, _)), expectedPassmark) =>
+      case (Some(TestResult(_, _, None, _, _, _)), _) =>
         throw new IllegalArgumentException(s"Candidate report does not have tScore: $scores")
     }
 

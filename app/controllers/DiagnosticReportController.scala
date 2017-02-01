@@ -16,8 +16,10 @@
 
 package controllers
 
-import play.api.libs.json.Json
-import play.api.mvc.Action
+import play.api.libs.json.{ JsObject, Json }
+import play.api.mvc.{ Action, AnyContent }
+import model.PersistedObjects.Implicits.candidateTestReportFormats
+import model.CandidateScoresCommands.Implicits.CandidateScoresAndFeedbackFormats
 import repositories._
 import repositories.application.DiagnosticReportingRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -26,21 +28,48 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object DiagnosticReportController extends DiagnosticReportController {
   val drRepository: DiagnosticReportingRepository = diagnosticReportRepository
+  val trRepository: TestReportRepository = testReportRepository
+  val assessmentScoresRepo: ApplicationAssessmentScoresRepository = applicationAssessmentScoresRepository
 }
 
 trait DiagnosticReportController extends BaseController {
 
   val drRepository: DiagnosticReportingRepository
+  val trRepository: TestReportRepository
+  val assessmentScoresRepo: ApplicationAssessmentScoresRepository
 
-  def getApplicationByUserId(userId: String) = Action.async { implicit request =>
-    val applicationUser = drRepository.findByUserId(userId)
+  def getApplicationByApplicationId(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
 
-    applicationUser.map { au =>
-      Ok(Json.toJson(au))
-    } recover {
+    def mergeJsonObjects(application: JsObject, other: Option[JsObject]): JsObject = other match {
+      case Some(o) => application ++ o
+      case None => application
+    }
+
+    (for {
+      application <- drRepository.findByApplicationId(applicationId)
+      testResults <- trRepository.getReportByApplicationId(applicationId)
+      assessmentScores <- assessmentScoresRepo.tryFind(applicationId)
+    } yield {
+
+
+      val testResultsJson = testResults.map { tr =>
+        val results = Json.toJson(tr)
+        Json.obj("online-test-results" -> results)
+      }
+      val assessmentCentreResultsJson = assessmentScores.map { ar =>
+        val results = Json.toJson(ar).as[JsObject]
+        Json.obj("assessment-centre-results" -> results)
+      }
+
+      val fullJson = mergeJsonObjects(mergeJsonObjects(application, testResultsJson), assessmentCentreResultsJson)
+
+      Ok(Json.toJson(fullJson))
+    }) recover {
       case _ => NotFound
     }
   }
+
+
 
   def getAllApplications = Action { implicit request =>
     Ok.chunked(drRepository.findAll())

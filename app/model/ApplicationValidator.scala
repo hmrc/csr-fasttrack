@@ -18,7 +18,7 @@ package model
 
 import java.io.Serializable
 
-import model.PersistedObjects.PersonalDetails
+import model.persisted.PersonalDetails
 import model.exchange.AssistanceDetails
 import repositories.FrameworkRepository.Region
 // scalastyle:off cyclomatic.complexity

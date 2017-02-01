@@ -20,7 +20,7 @@ import model.ApplicationStatuses
 import model.CandidateScoresCommands.Implicits._
 import model.CandidateScoresCommands.{ ApplicationScores, CandidateScores, CandidateScoresAndFeedback, RecordCandidateScores }
 import model.Commands.ApplicationAssessment
-import model.PersistedObjects.PersonalDetails
+import model.persisted.PersonalDetails
 import org.joda.time.LocalDate
 import org.mockito.Matchers.{ eq => eqTo }
 import org.mockito.Mockito._

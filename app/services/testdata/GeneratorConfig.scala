@@ -18,12 +18,12 @@ package services.testdata
 
 import model.ApplicationStatuses
 import model.EvaluationResults.Result
-import model.PersistedObjects.PersonalDetails
+import model.commands.exchange.testdata.AssistanceDetailsData
 import model.exchange.testdata.OnlineTestScoresRequest
+import model.persisted.PersonalDetails
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 import services.testdata.faker.DataFaker.Random
-import model.commands.exchange.testdata.AssistanceDetailsData
 
   case class PersonalData(
                            emailPrefix: String = s"tesf${Random.number() - 1}",

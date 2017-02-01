@@ -21,6 +21,7 @@ import connectors.PassMarkExchangeObjects.Implicits._
 import connectors.PassMarkExchangeObjects._
 import factories.UUIDFactory
 import model.Commands.PassMarkSettingsCreateResponse
+import model.Scheme.{ Business, Commercial, DigitalAndTechnology, Finance, ProjectDelivery }
 import org.joda.time.DateTime
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
@@ -30,7 +31,7 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories.{ FrameworkRepository, PassMarkSettingsRepository }
+import repositories.{ FrameworkRepository, LocationSchemeRepository, PassMarkSettingsRepository, SchemeInfo }
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -51,8 +52,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
           SchemeResponse(mockSchemes(2).schemeName, None)
         ),
         None,
-        None,
-        "location1Scheme1"
+        None
       )
 
       val result = passMarkSettingsControllerWithNoSettings.getLatestVersion()(FakeRequest())
@@ -81,8 +81,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
           SchemeResponse(mockSchemes(2).schemeName, Some(mockSchemes(2).schemeThresholds))
         ),
         Some(mockCreateDate),
-        Some(mockCreatedByUser),
-        "location1Scheme1"
+        Some(mockCreatedByUser)
       )
 
       val result = passMarkSettingsControllerWithSettings.getLatestVersion()(FakeRequest())
@@ -120,20 +119,22 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
 
   trait TestFixture extends TestFixtureBase {
 
-    val testSchemeNames = List(
-      "TestScheme1",
-      "TestScheme2",
-      "TestScheme3"
+    val testSchemeInfos = List(
+      SchemeInfo(Business, "Business", requiresALevel = true, requiresALevelInStem = true),
+      SchemeInfo(Commercial, "Commercial", requiresALevel = true, requiresALevelInStem = true),
+      SchemeInfo(DigitalAndTechnology, "Digital and technology", requiresALevel = false, requiresALevelInStem = true)
     )
 
-    val mockFrameworkRepository = mock[FrameworkRepository]
+    val testSchemeNames = testSchemeInfos.map(_.name)
 
-    when(mockFrameworkRepository.getFrameworkNames).thenReturn(Future.successful(testSchemeNames))
+    val mockLocationSchemeRepository = mock[LocationSchemeRepository]
+
+    when(mockLocationSchemeRepository.getSchemeInfo).thenReturn(Future.successful(testSchemeInfos))
 
     val defaultSchemeThreshold = SchemeThreshold(20d, 80d)
 
     val defaultSchemeThresholds = SchemeThresholds(
-      defaultSchemeThreshold, defaultSchemeThreshold, defaultSchemeThreshold, defaultSchemeThreshold, None
+      defaultSchemeThreshold, defaultSchemeThreshold, defaultSchemeThreshold, defaultSchemeThreshold
     )
 
     val mockSchemes = List(
@@ -149,8 +150,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
       schemes = mockSchemes,
       version = mockVersion,
       createDate = mockCreateDate,
-      createdByUser = mockCreatedByUser,
-      setting = "location1Scheme1"
+      createdByUser = mockCreatedByUser
     )
 
     val mockUUIDFactory = mock[UUIDFactory]
@@ -159,7 +159,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
 
     def buildPMS(mockRepository: PassMarkSettingsRepository) = new OnlineTestPassMarkSettingsController {
       val pmsRepository = mockRepository
-      val fwRepository = mockFrameworkRepository
+      val locSchemeRepository = mockLocationSchemeRepository
       val auditService = mockAuditService
       val uuidFactory = mockUUIDFactory
     }
@@ -176,7 +176,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
                      |    "createdByUser": "TestUser",
                      |    "schemes": [
                      |        {
-                     |            "schemeName": "TestScheme1",
+                     |            "schemeName": "Business",
                      |            "schemeThresholds": {
                      |                "competency": {
                      |                    "failThreshold": 20.0,
@@ -197,7 +197,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
                      |            }
                      |        },
                      |        {
-                     |            "schemeName": "TestScheme2",
+                     |            "schemeName": "Commercial",
                      |            "schemeThresholds": {
                      |                "competency": {
                      |                    "failThreshold": 20.0,
@@ -218,7 +218,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
                      |            }
                      |        },
                      |        {
-                     |            "schemeName": "TestScheme3",
+                     |            "schemeName": "Digital and technology",
                      |            "schemeThresholds": {
                      |                "competency": {
                      |                    "failThreshold": 20.0,

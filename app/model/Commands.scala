@@ -259,7 +259,7 @@ object Commands {
                              dateOfBirth: Option[LocalDate], postCode: Option[PostCode])
 
   case class Candidate(userId: String, applicationId: Option[String], email: Option[String], firstName: Option[String], lastName: Option[String],
-                       dateOfBirth: Option[LocalDate], address: Option[Address], postCode: Option[PostCode])
+                       preferredName: Option[String], dateOfBirth: Option[LocalDate], address: Option[Address], postCode: Option[PostCode])
 
   case class ApplicationAssessment(applicationId: String, venue: String, date: LocalDate, session: String, slot: Int, confirmed: Boolean) {
     val assessmentDateTime = {

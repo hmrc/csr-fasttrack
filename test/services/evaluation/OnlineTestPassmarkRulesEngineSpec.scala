@@ -29,17 +29,15 @@ import org.scalatestplus.play.PlaySpec
 class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
   //scalastyle:off
   val PassmarkSettings = Settings(
-    Scheme(Business.toString, SchemeThresholds(competency = t(1.0, 99.0), verbal = t(5.0, 94.0), numerical = t(10.0, 90.0), situational = t(30.0, 85.0), combination = None))
-      :: Scheme(Commercial.toString, SchemeThresholds(competency = t(15.0, 94.0), verbal = t(20.0, 90.0), numerical = t(25.0, 50.0), situational = t(29.0, 80.0), combination = None))
-      :: Scheme(DigitalAndTechnology.toString, SchemeThresholds(competency = t(30.0, 80.0), verbal = t(30.0, 80.0), numerical = t(30.0, 80.0), situational = t(29.0, 80.0), combination = None))
-      :: Scheme(Finance.toString, SchemeThresholds(competency = t(50.0, 55.0), verbal = t(53.0, 70.0), numerical = t(30.0, 45.0), situational = t(20.0, 30.0), combination = None))
-      :: Scheme(ProjectDelivery.toString, SchemeThresholds(competency = t(10.0, 55.0), verbal = t(53.0, 70.0), numerical = t(30.0, 45.0), situational = t(20.0, 30.0), combination = None))
+    Scheme(Business.toString, SchemeThresholds(competency = t(1.0, 99.0), verbal = t(5.0, 94.0), numerical = t(10.0, 90.0), situational = t(30.0, 85.0)))
+      :: Scheme(Commercial.toString, SchemeThresholds(competency = t(15.0, 94.0), verbal = t(20.0, 90.0), numerical = t(25.0, 50.0), situational = t(29.0, 80.0)))
+      :: Scheme(DigitalAndTechnology.toString, SchemeThresholds(competency = t(30.0, 80.0), verbal = t(30.0, 80.0), numerical = t(30.0, 80.0), situational = t(29.0, 80.0)))
+      :: Scheme(Finance.toString, SchemeThresholds(competency = t(50.0, 55.0), verbal = t(53.0, 70.0), numerical = t(30.0, 45.0), situational = t(20.0, 30.0)))
+      :: Scheme(ProjectDelivery.toString, SchemeThresholds(competency = t(10.0, 55.0), verbal = t(53.0, 70.0), numerical = t(30.0, 45.0), situational = t(20.0, 30.0)))
       :: Nil,
     version = "testVersion",
     createDate = new DateTime(),
-    createdByUser = "testUser",
-    setting = "location1Scheme1"
-  )
+    createdByUser = "testUser")
   //scalastyle:on
 
   "Pass mark rules engine for candidate with only one scheme" should {
@@ -108,7 +106,7 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
       result mustBe List(SchemeEvaluationResult(Business, Amber))
     }
 
-    "evaluate the scheme to RED when a GIS candidate has failed one test" in {
+    "evaluate the scheme to RED when a non GIS candidate has failed one test" in {
       val candidateScores = FullTestReport.copy(
         competency = tScore(89.2),
         verbal = tScore(5.0),
@@ -117,7 +115,7 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
       )
       val result = OnlineTestPassmarkRulesEngine.evaluate(scoresWithPassmark.copy(scores = candidateScores))
 
-      result mustBe List(SchemeEvaluationResult(Business, Green))
+      result mustBe List(SchemeEvaluationResult(Business, Red))
     }
   }
 
@@ -226,13 +224,11 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
   "Pass mark rules engine for pass mark equal to fail mark" should {
     //scalastyle:off
     val PassmarkSettings = Settings(
-      Scheme(Business.toString, SchemeThresholds(competency = t(99.0, 99.0), verbal = t(94.0, 94.0), numerical = t(90.0, 90.0), situational = t(85.0, 85.0), combination = None))
+      Scheme(Business.toString, SchemeThresholds(competency = t(99.0, 99.0), verbal = t(94.0, 94.0), numerical = t(90.0, 90.0), situational = t(85.0, 85.0)))
         :: Nil,
       version = "testVersion",
       createDate = new DateTime(),
-      createdByUser = "testUser",
-      setting = "location1Scheme1"
-    )
+      createdByUser = "testUser")
     //scalastyle:on
     val schemes = List(Business)
     val scoresWithPassmark = CandidateEvaluationData(PassmarkSettings, schemes, FullTestReport, ApplicationStatuses.OnlineTestCompleted)

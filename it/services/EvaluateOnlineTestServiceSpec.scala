@@ -20,7 +20,7 @@ import java.io.File
 
 import com.typesafe.config.{ Config, ConfigFactory }
 import connectors.PassMarkExchangeObjects.Settings
-import mocks.{ OnlineIntegrationTestInMemoryRepository, PassMarkSettingsInMemoryRepository }
+import mocks.OnlineIntegrationTestInMemoryRepository
 import model.EvaluationResults._
 import model.OnlineTestCommands.CandidateEvaluationData
 import model.persisted.SchemeEvaluationResult
@@ -47,10 +47,10 @@ class EvaluateOnlineTestServiceSpec extends IntegrationSpec with MockitoSugar wi
     val testReportRepository = mock[TestReportRepository]
     val onlineTestRepository = OnlineIntegrationTestInMemoryRepository
     val passMarkRulesEngine = EvaluateOnlineTestService.passMarkRulesEngine
-    val pmsRepository: PassMarkSettingsRepository = PassMarkSettingsInMemoryRepository
+    val pmsRepository: PassMarkSettingsRepository = mock[PassMarkSettingsRepository]
     val passMarkSettingsService = new PassMarkSettingsService {
       override val fwRepository = mock[FrameworkRepository]
-      override val pmsRepository = PassMarkSettingsInMemoryRepository
+      override val pmsRepository = mock[PassMarkSettingsRepository]
     }
     val applicationRepository = mock[GeneralApplicationRepository]
   }

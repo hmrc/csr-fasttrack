@@ -170,7 +170,7 @@ class ApplicationControllerSpec extends UnitWithAppSpec {
     val mockApplicationRepository = mock[GeneralApplicationRepository]
     val mockApplicationService = mock[ApplicationService]
     when(mockApplicationService.withdraw(eqTo(ApplicationId), eqTo(aWithdrawApplicationRequest))).thenReturn(Future.successful(()))
-    when(mockApplicationRepository.review(eqTo(ApplicationId))).thenReturn(Future.successful())
+    when(mockApplicationRepository.review(eqTo(ApplicationId))).thenReturn(Future.successful(()))
 
     object TestApplicationController extends ApplicationController {
       override val appRepository: GeneralApplicationRepository = DocumentRootInMemoryRepository

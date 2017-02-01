@@ -65,12 +65,12 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
       val assessmentCapacity = capacities.head
       assessmentCapacity.locationName must be("London")
       val venue = assessmentCapacity.venues.head
-      venue.venueName must be("London (Berkeley House)")
-      venue.venueDescription must be ("Berkeley House")
+      venue.venueName must be("London FTAC")
+      venue.venueDescription must be ("FTAC")
       val capacityDate = venue.capacityDates.head
-      capacityDate.amCapacity must be(6)
-      capacityDate.pmCapacity must be(6)
-      capacityDate.date.toString(DateFormat) must be("24/5/17")
+      capacityDate.amCapacity must be(18)
+      capacityDate.pmCapacity must be(18)
+      capacityDate.date.toString(DateFormat) must be("3/5/17")
     }
 
     "reject invalid configuration" in {
@@ -93,7 +93,7 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
     }
 
     "Throw NoSuchVenueDateException when there are no sessions on the specified date" in {
-        val exception = AssessmentCentreYamlRepository.assessmentCentreCapacityDate("London (Berkeley House)",
+        val exception = AssessmentCentreYamlRepository.assessmentCentreCapacityDate("London FTAC",
           LocalDate.parse("2010-04-01")).failed.futureValue
         exception mustBe a[NoSuchVenueDateException]
     }
@@ -118,12 +118,12 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
       capacities must not be empty
       val assessmentCapacity = capacities.head
       assessmentCapacity.locationName must be("London")
-      val venue = assessmentCapacity.venues(1)
-      venue.venueName must be("London (FSAC) 1")
-      venue.venueDescription must be ("FSAC")
-      val capacityDate = venue.capacityDates.find(_.date == new LocalDate("2016-07-04")).get
-      capacityDate.amCapacity must be(6)
-      capacityDate.pmCapacity must be(6)
+      val venue = assessmentCapacity.venues(0)
+      venue.venueName must be("London FTAC")
+      venue.venueDescription must be ("FTAC")
+      val capacityDate = venue.capacityDates.find(_.date == new LocalDate("2017-07-04")).get
+      capacityDate.amCapacity must be(18)
+      capacityDate.pmCapacity must be(18)
     }
   }
 

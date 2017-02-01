@@ -59,6 +59,8 @@ object Exceptions {
 
   case class EmailTakenException() extends Exception()
 
+  case class InvalidLocationFound() extends Exception()
+
   case class DataFakingException(message: String) extends Exception(message)
 
   case class DataGenerationException(message: String) extends Exception(message)

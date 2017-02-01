@@ -96,4 +96,9 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
                                                       evaluationResult: List[SchemeEvaluationResult]): Future[Unit] = ???
 
   def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = ???
+
+  def addReminderNotificationStatus(userId: String,notificationStatus: String): scala.concurrent.Future[Unit] = ???
+
+  def nextTestForReminder(reminder: model.ReminderNotice): scala.concurrent.Future[Option[model.persisted.NotificationExpiringOnlineTest]] = ???
+
 }
