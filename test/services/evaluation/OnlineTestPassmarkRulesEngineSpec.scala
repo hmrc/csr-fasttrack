@@ -16,36 +16,37 @@
 
 package services.evaluation
 
-import connectors.PassMarkExchangeObjects.{Scheme, SchemeThreshold, SchemeThresholds, Settings}
-import fixture.PreferencesFixture
+import connectors.PassMarkExchangeObjects.{ Scheme, SchemeThreshold, SchemeThresholds, Settings }
 import fixture.TestReportFixture._
-import model.EvaluationResults.{RuleCategoryResult, _}
+import model.EvaluationResults._
 import model.OnlineTestCommands._
-import model.{ApplicationStatuses, Schemes}
+import model.Scheme._
+import model.persisted.SchemeEvaluationResult
+import model.{ ApplicationStatuses, Schemes }
 import org.joda.time.DateTime
 import org.scalatestplus.play.PlaySpec
 
 class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
   //scalastyle:off
   val PassmarkSettings = Settings(
-    Scheme(Schemes.Business, SchemeThresholds(t(1.0, 99.0), t(5.0, 94.0), t(10.0, 90.0), t(30.0, 85.0)))
-      :: Scheme(Schemes.Commercial, SchemeThresholds(t(15.0, 94.0), t(20.0, 90.0), t(25.0, 50.0), t(29.0, 80.0)))
-      :: Scheme(Schemes.DigitalAndTechnology, SchemeThresholds(t(30.0, 80.0), t(30.0, 80.0), t(30.0, 80.0), t(29.0, 80.0)))
-      :: Scheme(Schemes.Finance, SchemeThresholds(t(50.0, 55.0), t(53.0, 70.0), t(30.0, 45.0), t(20.0, 30.0)))
-      :: Scheme(Schemes.ProjectDelivery, SchemeThresholds(t(10.0, 55.0), t(53.0, 70.0), t(30.0, 45.0), t(20.0, 30.0)))
+    Scheme(Business.toString, SchemeThresholds(competency = t(1.0, 99.0), verbal = t(5.0, 94.0), numerical = t(10.0, 90.0), situational = t(30.0, 85.0)))
+      :: Scheme(Commercial.toString, SchemeThresholds(competency = t(15.0, 94.0), verbal = t(20.0, 90.0), numerical = t(25.0, 50.0), situational = t(29.0, 80.0)))
+      :: Scheme(DigitalAndTechnology.toString, SchemeThresholds(competency = t(30.0, 80.0), verbal = t(30.0, 80.0), numerical = t(30.0, 80.0), situational = t(29.0, 80.0)))
+      :: Scheme(Finance.toString, SchemeThresholds(competency = t(50.0, 55.0), verbal = t(53.0, 70.0), numerical = t(30.0, 45.0), situational = t(20.0, 30.0)))
+      :: Scheme(ProjectDelivery.toString, SchemeThresholds(competency = t(10.0, 55.0), verbal = t(53.0, 70.0), numerical = t(30.0, 45.0), situational = t(20.0, 30.0)))
       :: Nil,
     version = "testVersion",
     createDate = new DateTime(),
-    createdByUser = "testUser"
-  )
+    createdByUser = "testUser")
   //scalastyle:on
 
   "Pass mark rules engine for candidate with only one scheme" should {
-    val prefs = PreferencesFixture.preferences(Schemes.Business)
-    val scoresWithPassmark = CandidateScoresWithPreferencesAndPassmarkSettings(PassmarkSettings, prefs, FullTestReport,
-      ApplicationStatuses.OnlineTestCompleted)
+    val schemes = List(Business)
+
+    val scoresWithPassmark = CandidateEvaluationData(PassmarkSettings, schemes, FullTestReport, ApplicationStatuses.OnlineTestCompleted)
 
     "evaluate the scheme to GREEN when candidate achieves the pass mark for all tests" in {
+      // These scores pass all 4 scheme thresholds for the business scheme
       val candidateScores = FullTestReport.copy(
         competency = tScore(99.0),
         verbal = tScore(94.0),
@@ -54,19 +55,19 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
       )
       val result = OnlineTestPassmarkRulesEngine.evaluate(scoresWithPassmark.copy(scores = candidateScores))
 
-      result must be(RuleCategoryResult(Green, None, None, None, None))
+      result mustBe List(SchemeEvaluationResult(Business, Green))
     }
 
-    "evaluate the scheme to AMBER when candidate does not fail any tests but has not passed one of them" in {
+    "evaluate the scheme to AMBER when there is at least one AMBER and no REDs" in {
       val candidateScores = FullTestReport.copy(
         competency = tScore(89.2),
-        verbal = tScore(79.0),
+        verbal = tScore(100.0),
         numerical = tScore(100.0),
         situational = tScore(99.0)
       )
       val result = OnlineTestPassmarkRulesEngine.evaluate(scoresWithPassmark.copy(scores = candidateScores))
 
-      result must be(RuleCategoryResult(Amber, None, None, None, None))
+      result mustBe List(SchemeEvaluationResult(Business, Amber))
     }
 
     "evaluate the scheme to RED when a candidate has failed one test" in {
@@ -78,7 +79,7 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
       )
       val result = OnlineTestPassmarkRulesEngine.evaluate(scoresWithPassmark.copy(scores = candidateScores))
 
-      result must be(RuleCategoryResult(Red, None, None, None, None))
+      result mustBe List(SchemeEvaluationResult(Business, Red))
     }
 
     "evaluate the scheme to GREEN when a GIS candidate achieves the pass mark for all tests" in {
@@ -90,10 +91,10 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
       )
       val result = OnlineTestPassmarkRulesEngine.evaluate(scoresWithPassmark.copy(scores = candidateScores))
 
-      result must be(RuleCategoryResult(Green, None, None, None, None))
+      result mustBe List(SchemeEvaluationResult(Business, Green))
     }
 
-    "evaluate the scheme to AMBER when a GIS candidate does not fail any tests but has not passed one of them" in {
+    "evaluate the scheme to AMBER when a GIS candidate does not fail any tests and has passed one of them" in {
       val candidateScores = FullTestReport.copy(
         competency = tScore(79.2),
         verbal = None,
@@ -102,28 +103,25 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
       )
       val result = OnlineTestPassmarkRulesEngine.evaluate(scoresWithPassmark.copy(scores = candidateScores))
 
-      result must be(RuleCategoryResult(Amber, None, None, None, None))
+      result mustBe List(SchemeEvaluationResult(Business, Amber))
     }
 
-    "evaluate the scheme to RED when a GIS candidate has failed one test" in {
+    "evaluate the scheme to RED when a non GIS candidate has failed one test" in {
       val candidateScores = FullTestReport.copy(
         competency = tScore(89.2),
-        verbal = None,
-        numerical = None,
+        verbal = tScore(5.0),
+        numerical = tScore(100.0),
         situational = tScore(19.0)
       )
       val result = OnlineTestPassmarkRulesEngine.evaluate(scoresWithPassmark.copy(scores = candidateScores))
 
-      result must be(RuleCategoryResult(Red, None, None, None, None))
+      result mustBe List(SchemeEvaluationResult(Business, Red))
     }
   }
 
   "Pass mark rules engine for candidates with all schemes" should {
-    val prefs = PreferencesFixture.preferences(Schemes.Business, Some(Schemes.Commercial),
-      Some(Schemes.DigitalAndTechnology), Some(Schemes.Finance), Some(true))
-
-    val scoresWithPassmark = CandidateScoresWithPreferencesAndPassmarkSettings(PassmarkSettings, prefs, FullTestReport,
-      ApplicationStatuses.OnlineTestCompleted)
+    val schemes = List(Business, Commercial, DigitalAndTechnology, Finance, ProjectDelivery)
+    val scoresWithPassmark = CandidateEvaluationData(PassmarkSettings, schemes, FullTestReport, ApplicationStatuses.OnlineTestCompleted)
 
     "evaluate all the scheme to GREEN when a candidate achieves the pass mark for all tests" in {
       val candidateScores = FullTestReport.copy(
@@ -134,10 +132,12 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
       )
       val result = OnlineTestPassmarkRulesEngine.evaluate(scoresWithPassmark.copy(scores = candidateScores))
 
-      result must be(RuleCategoryResult(Green, Some(Green), Some(Green), Some(Green), Some(Green)))
+      result mustBe List(SchemeEvaluationResult(Business, Green), SchemeEvaluationResult(Commercial, Green),
+        SchemeEvaluationResult(DigitalAndTechnology, Green), SchemeEvaluationResult(Finance, Green),
+        SchemeEvaluationResult(ProjectDelivery, Green))
     }
 
-    "evaluate all the scheme to AMBER when a candidate does not achieve all pass marks and at least one fail mark" in {
+    "evaluate all the scheme to AMBER when a candidate does not achieve all pass marks and no failed tests" in {
       val candidateScores = FullTestReport.copy(
         competency = tScore(54.2),
         verbal = tScore(69.0),
@@ -146,7 +146,9 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
       )
       val result = OnlineTestPassmarkRulesEngine.evaluate(scoresWithPassmark.copy(scores = candidateScores))
 
-      result must be(RuleCategoryResult(Amber, Some(Amber), Some(Amber), Some(Amber), Some(Amber)))
+      result mustBe List(SchemeEvaluationResult(Business, Amber), SchemeEvaluationResult(Commercial, Amber),
+        SchemeEvaluationResult(DigitalAndTechnology, Amber), SchemeEvaluationResult(Finance, Amber),
+        SchemeEvaluationResult(ProjectDelivery, Amber))
     }
 
     "evaluate all the scheme to RED when a candidate gets a fail mark for all schemes" in {
@@ -158,24 +160,9 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
       )
       val result = OnlineTestPassmarkRulesEngine.evaluate(scoresWithPassmark.copy(scores = candidateScores))
 
-      result must be(RuleCategoryResult(Red, Some(Red), Some(Red), Some(Red), Some(Red)))
-    }
-
-    "evaluate all the scheme to GREEN and do not set Alternative Scheme when a candidate does not want alternative schemes" in {
-      val candidateScores = FullTestReport.copy(
-        competency = tScore(99.2),
-        verbal = tScore(94.0),
-        numerical = tScore(90.3),
-        situational = tScore(100.0)
-      )
-      val prefs = PreferencesFixture.preferences(Schemes.Business, Some(Schemes.Commercial),
-        Some(Schemes.DigitalAndTechnology), Some(Schemes.Finance), alternativeScheme = Some(false))
-
-      val result = OnlineTestPassmarkRulesEngine.evaluate(
-        scoresWithPassmark.copy(preferences = prefs, scores = candidateScores)
-      )
-
-      result must be(RuleCategoryResult(Green, Some(Green), Some(Green), Some(Green), None))
+      result mustBe List(SchemeEvaluationResult(Business, Red), SchemeEvaluationResult(Commercial, Red),
+        SchemeEvaluationResult(DigitalAndTechnology, Red), SchemeEvaluationResult(Finance, Red),
+        SchemeEvaluationResult(ProjectDelivery, Red))
     }
 
     "evaluate all the scheme to GREEN when a GIS candidate achieves the pass mark for all tests" in {
@@ -187,7 +174,9 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
       )
       val result = OnlineTestPassmarkRulesEngine.evaluate(scoresWithPassmark.copy(scores = candidateScores))
 
-      result must be(RuleCategoryResult(Green, Some(Green), Some(Green), Some(Green), Some(Green)))
+      result mustBe List(SchemeEvaluationResult(Business, Green), SchemeEvaluationResult(Commercial, Green),
+        SchemeEvaluationResult(DigitalAndTechnology, Green), SchemeEvaluationResult(Finance, Green),
+        SchemeEvaluationResult(ProjectDelivery, Green))
     }
 
     "evaluate all the schemes according to scores for different passmark per scheme" in {
@@ -200,17 +189,19 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
 
       val result = OnlineTestPassmarkRulesEngine.evaluate(scoresWithPassmark.copy(scores = candidateScores))
 
-      result must be(RuleCategoryResult(Red, Some(Amber), Some(Amber), Some(Green), Some(Green)))
+      result mustBe List(SchemeEvaluationResult(Business, Red), SchemeEvaluationResult(Commercial, Amber),
+        SchemeEvaluationResult(DigitalAndTechnology, Amber), SchemeEvaluationResult(Finance, Green),
+        SchemeEvaluationResult(ProjectDelivery, Green))
     }
   }
 
   "Pass mark rules engine" should {
+    val schemes = List(Business)
     "throw an exception when there is no passmark for the Scheme" in {
-      val prefs = PreferencesFixture.preferences(Schemes.Business)
-      val passmarkWithoutBusinessScheme = CandidateScoresWithPreferencesAndPassmarkSettings(
+      val passmarkWithoutBusinessScheme = CandidateEvaluationData(
         PassmarkSettings.copy(
           schemes = PassmarkSettings.schemes.filterNot(_.schemeName == Schemes.Business)
-        ), prefs, FullTestReport, ApplicationStatuses.OnlineTestCompleted
+        ), schemes, FullTestReport, ApplicationStatuses.OnlineTestCompleted
       )
 
       intercept[IllegalStateException] {
@@ -219,18 +210,52 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
     }
 
     "throw an exception when the candidate's report does not have tScore" in {
-      val prefs = PreferencesFixture.preferences(Schemes.Business)
-      val candidateScores = CandidateScoresWithPreferencesAndPassmarkSettings(
+      val candidateScores = CandidateEvaluationData(
         PassmarkSettings,
-        prefs, FullTestReport.copy(competency = noTScore),
-        ApplicationStatuses.OnlineTestCompleted
+        schemes, FullTestReport.copy(competency = noTScore), ApplicationStatuses.OnlineTestCompleted
       )
 
       intercept[IllegalArgumentException] {
         OnlineTestPassmarkRulesEngine.evaluate(candidateScores)
       }
     }
+  }
 
+  "Pass mark rules engine for pass mark equal to fail mark" should {
+    //scalastyle:off
+    val PassmarkSettings = Settings(
+      Scheme(Business.toString, SchemeThresholds(competency = t(99.0, 99.0), verbal = t(94.0, 94.0), numerical = t(90.0, 90.0), situational = t(85.0, 85.0)))
+        :: Nil,
+      version = "testVersion",
+      createDate = new DateTime(),
+      createdByUser = "testUser")
+    //scalastyle:on
+    val schemes = List(Business)
+    val scoresWithPassmark = CandidateEvaluationData(PassmarkSettings, schemes, FullTestReport, ApplicationStatuses.OnlineTestCompleted)
+
+    "evaluate the scheme to GREEN when the candidate reached the threshold" in {
+      val candidateScores = FullTestReport.copy(
+        competency = tScore(99.0),
+        verbal = tScore(94.0),
+        numerical = tScore(90.0),
+        situational = tScore(85.0)
+      )
+      val result = OnlineTestPassmarkRulesEngine.evaluate(scoresWithPassmark.copy(scores = candidateScores))
+
+      result mustBe List(SchemeEvaluationResult(Business, Green))
+    }
+
+    "evaluate the scheme to RED when the candidate does not reached the threshold" in {
+      val candidateScores = FullTestReport.copy(
+        competency = tScore(100.00),
+        verbal = tScore(100.00),
+        numerical = tScore(100.00),
+        situational = tScore(84.99)
+      )
+      val result = OnlineTestPassmarkRulesEngine.evaluate(scoresWithPassmark.copy(scores = candidateScores))
+
+      result mustBe List(SchemeEvaluationResult(Business, Red))
+    }
   }
 
   private def tScore(score: Double): Option[TestResult] = Some(TestResult("", "", Some(score), None, None, None))

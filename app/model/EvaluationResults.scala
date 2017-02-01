@@ -16,6 +16,9 @@
 
 package model
 
+import play.api.libs.json.{ Format, JsString, JsSuccess, JsValue }
+import reactivemongo.bson.{ BSON, BSONHandler, BSONString }
+
 object EvaluationResults {
   sealed trait Result {
     def toPassmark: String
@@ -36,10 +39,21 @@ object EvaluationResults {
       case "Green" => Green
       case "Amber" => Amber
     }
-  }
 
-  case class RuleCategoryResult(location1Scheme1: Result, location1Scheme2: Option[Result],
-    location2Scheme1: Option[Result], location2Scheme2: Option[Result], alternativeScheme: Option[Result])
+    implicit object BSONEnumHandler extends BSONHandler[BSONString, Result] {
+      def read(doc: BSONString) = Result(doc.value)
+
+      def write(result: Result) = BSON.write(result.toString)
+    }
+
+    implicit val resultFormat = new Format[Result] {
+      def reads(json: JsValue) = JsSuccess(Result(json.as[String]))
+
+      def writes(result: Result) = JsString(result.toString)
+    }
+
+
+  }
 
   case class CompetencyAverageResult(leadingAndCommunicatingAverage: Double, collaboratingAndPartneringAverage: Double,
     deliveringAtPaceAverage: Double, makingEffectiveDecisionsAverage: Double,

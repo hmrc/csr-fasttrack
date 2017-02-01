@@ -18,12 +18,11 @@ package services.testdata
 
 import java.util.UUID
 
-import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import model.ApplicationStatuses
-import model.EvaluationResults.RuleCategoryResult
+import model.EvaluationResults.Amber
+import model.persisted.SchemeEvaluationResult
+import model.{ ApplicationStatuses, Scheme }
 import repositories._
 import repositories.application.OnlineTestRepository
-import services.testdata.faker.DataFaker.Random
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,21 +36,12 @@ trait AwaitingAllocationStatusGenerator extends ConstructiveGenerator {
   val otRepository: OnlineTestRepository
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
-
-    def getEvaluationResult(candidate: DataGenerationResponse): RuleCategoryResult = {
-      RuleCategoryResult(
-        generatorConfig.loc1scheme1Passmark.getOrElse(Random.passmark),
-        generatorConfig.loc1scheme2Passmark,
-        None,
-        None,
-        None
-      )
-    }
+    val evaluationResult = List(SchemeEvaluationResult(Scheme.Business, Amber))
 
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       _ <- otRepository.savePassMarkScore(candidateInPreviousStatus.applicationId.get, UUID.randomUUID().toString,
-        getEvaluationResult(candidateInPreviousStatus), ApplicationStatuses.AwaitingAllocation)
+        evaluationResult, ApplicationStatuses.AwaitingAllocation)
     } yield {
       candidateInPreviousStatus
     }

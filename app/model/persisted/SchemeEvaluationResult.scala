@@ -14,17 +14,16 @@
  * limitations under the License.
  */
 
-package fixture
+package model.persisted
 
-import model.{ Alternatives, LocationPreference, Preferences }
+import model.EvaluationResults.Result
+import model.Scheme.Scheme
+import play.api.libs.json.Json
+import reactivemongo.bson.Macros
 
-object PreferencesFixture {
-  def preferences(location1Scheme1: String, location1Scheme2: Option[String] = None, location2Scheme1: Option[String] = None,
-    location2Scheme2: Option[String] = None, alternativeScheme: Option[Boolean] = None) =
-    Preferences(
-      LocationPreference("London", "London", location1Scheme1, location1Scheme2),
-      location2Scheme1.map(LocationPreference("London", "Reading", _, location2Scheme2)),
-      None,
-      alternativeScheme.map(a => Alternatives(a, a))
-    )
+case class SchemeEvaluationResult(scheme: Scheme, result: Result)
+
+object SchemeEvaluationResult {
+  implicit val schemeEvaluationResultHandler = Macros.handler[SchemeEvaluationResult]
+  implicit val schemeEvaluationResultFormat = Json.format[SchemeEvaluationResult]
 }
