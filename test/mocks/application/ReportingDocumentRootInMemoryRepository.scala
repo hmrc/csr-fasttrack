@@ -17,9 +17,11 @@
 package mocks.application
 
 import common.Constants.{ No, Yes }
+import model.Adjustments
 import model.Commands._
-import org.joda.time.{ LocalDate }
-import repositories.application.{ ReportingRepository }
+import model.report.AdjustmentReportItem
+import org.joda.time.LocalDate
+import repositories.application.ReportingRepository
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -52,12 +54,18 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
       Some(Yes), Some(Yes), Some(Yes), Some(No), Some(No), Some(No), Some(No), None)
   ))
 
-  override def adjustmentReport(frameworkId: String): Future[List[AdjustmentReport]] =
+  override def adjustmentReport(frameworkId: String): Future[List[AdjustmentReportItem]] =
     Future.successful(
       List(
-        AdjustmentReport("1", Some("John"), Some("Smith"), Some("Spiderman"), None, None, Some("Some adjustments"), Some(Yes), Some(Yes)),
-        AdjustmentReport("2", Some("James"), Some("Jones"), Some("Batman"), None, None, Some("Some adjustments"), Some(Yes), Some(No)),
-        AdjustmentReport("3", Some("Kathrine"), Some("Jones"), Some("Supergirl"), None, None, Some("Some adjustments"), Some(Yes), Some(No))
+        AdjustmentReportItem("1", Some("123"), Some("John"), Some("Smith"), Some("Spiderman"),
+          None, None, Some("Yes"), Some("SUBMITTED"), Some("time"), Some("help"), Some("Yes"),
+          Some(Adjustments(None,None,None,None)), Some("comment")),
+        AdjustmentReportItem("2", Some("123"), Some("Mary"), Some("Smith"), Some("Spiderwoman"),
+          None, None, Some("Yes"), Some("SUBMITTED"), Some("time"), Some("help"), Some("Yes"),
+          Some(Adjustments(None,None,None,None)), Some("comment")),
+        AdjustmentReportItem("3", Some("123"), Some("Peter"), Some("Smith"), Some("Spiderchild"),
+          None, None, Some("Yes"), Some("SUBMITTED"), Some("time"), Some("help"), Some("Yes"),
+          Some(Adjustments(None,None,None,None)), Some("comment"))
       )
     )
 

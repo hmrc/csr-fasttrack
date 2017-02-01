@@ -25,6 +25,7 @@ import model.Commands._
 import model.EvaluationResults._
 import model._
 import model.commands.OnlineTestProgressResponse
+import model.report.AdjustmentReportItem
 import org.joda.time.LocalDate
 import play.api.libs.json.Format
 import reactivemongo.api.{ DB, ReadPreference }
@@ -47,7 +48,7 @@ trait ReportingRepository {
 
   def overallReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]]
 
-  def adjustmentReport(frameworkId: String): Future[List[AdjustmentReport]]
+  def adjustmentReport(frameworkId: String): Future[List[AdjustmentReportItem]]
 
   def candidatesAwaitingAllocation(frameworkId: String): Future[List[CandidateAwaitingAllocation]]
 
@@ -518,7 +519,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     )
   }
 
-  def adjustmentReport(frameworkId: String): Future[List[AdjustmentReport]] = {
+  def adjustmentReport(frameworkId: String): Future[List[AdjustmentReportItem]] = {
     val query = BSONDocument("$and" ->
       BSONArray(
         BSONDocument("frameworkId" -> frameworkId),
@@ -529,7 +530,8 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
             BSONDocument("$or" -> BSONArray(
               BSONDocument("assistance-details.needsSupportForOnlineAssessment" -> true),
               BSONDocument("assistance-details.needsSupportAtVenue" -> true))),
-            BSONDocument("assistance-details.guaranteedInterview" -> true)
+            BSONDocument("assistance-details.guaranteedInterview" -> true),
+            BSONDocument("assistance-details.adjustmentsConfirmed" -> true)
           ))
       ))
 
@@ -541,13 +543,16 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       "personal-details.lastName" -> "1",
       "personal-details.preferredName" -> "1",
       "assistance-details.guaranteedInterview" -> "1",
-      //"assistance-details.typeOfAdjustments" -> "1",
       "assistance-details.needsSupportForOnlineAssessment" -> "1",
       "assistance-details.needsSupportForOnlineAssessmentDescription" -> "1",
       "assistance-details.needsSupportAtVenue" -> "1",
       "assistance-details.needsSupportAtVenueDescription" -> "1",
-      "assistance-details.hasDisability" -> "1"
-      //"assistance-details.adjustmentsConfirmed" -> "1"
+      "assistance-details.hasDisability" -> "1",
+      "assistance-details.typeOfAdjustments" -> "1",
+      "assistance-details.onlineTests" -> "1",
+      "assistance-details.assessmentCenter" -> "1",
+      "assistance-details.adjustmentsConfirmed" -> "1",
+      "assistance-details.adjustmentsComment" -> "1"
     )
 
     reportQueryWithProjections[BSONDocument](query, projection).map { list =>
@@ -556,37 +561,41 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
         val personalDetails = document.getAs[BSONDocument]("personal-details")
         val userId = document.getAs[String]("userId").getOrElse("")
         val applicationId = document.getAs[String]("applicationId")
-        val applicationStatus = document.getAs[String]("applicationStatus").getOrElse("")
+        val applicationStatus = document.getAs[String]("applicationStatus")
         val firstName = extract("firstName")(personalDetails)
         val lastName = extract("lastName")(personalDetails)
         val preferredName = extract("preferredName")(personalDetails)
 
-        val ad = document.getAs[BSONDocument]("assistance-details")
-        val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).map { gis => if (gis) Yes else No }
-        val needsSupportForOnlineAssessmentDescription = extract("needsSupportForOnlineAssessmentDescription")(ad)
-        //val needsSupportForOnlineAssessmentDescription = ad.flatMap(_.getAs[String]("needsSupportForOnlineAssessmentDescription"))
-        val needsSupportAtVenueDescription = extract("needsSupportAtVenueDescription")(ad)
-        val hasDisability = extract("hasDisability")(ad)
-        //val adjustmentsConfirmed = getAdjustmentsConfirmed(ad)
-        //val typesOfAdjustments = ad.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
-        //val adjustments = typesOfAdjustments.getOrElse(Nil)
-        //val finalTOA = if (adjustments.isEmpty) None else Some(adjustments.map(splitCamelCase).mkString("|"))
+        val assistance = document.getAs[BSONDocument]("assistance-details")
+        val gis = assistance.flatMap(_.getAs[Boolean]("guaranteedInterview")).flatMap(b => Some(booleanTranslator(b)))
+        val needsSupportForOnlineAssessmentDescription = extract("needsSupportForOnlineAssessmentDescription")(assistance)
+        val needsSupportAtVenueDescription = extract("needsSupportAtVenueDescription")(assistance)
+        val hasDisability = extract("hasDisability")(assistance)
+        val adjustmentsConfirmed = assistance.flatMap(_.getAs[Boolean]("adjustmentsConfirmed"))
+        val adjustmentsComment = extract("adjustmentsComment")(assistance)
+        val onlineTests = assistance.flatMap(_.getAs[AdjustmentDetail]("onlineTests"))
+        val assessmentCenter = assistance.flatMap(_.getAs[AdjustmentDetail]("assessmentCenter"))
+        val typeOfAdjustments = assistance.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
 
-        AdjustmentReport(
+        val adjustments = adjustmentsConfirmed.flatMap { ac =>
+          if (ac) Some(Adjustments(typeOfAdjustments, adjustmentsConfirmed, onlineTests, assessmentCenter)) else None
+        }
+
+        AdjustmentReportItem(
           userId,
           applicationId,
-          applicationStatus,
           firstName,
           lastName,
           preferredName,
           None,
           None,
-          /*finalTOA,*/
+          gis,
+          applicationStatus,
           needsSupportForOnlineAssessmentDescription,
           needsSupportAtVenueDescription,
           hasDisability,
-          guaranteedInterview/*,
-          adjustmentsConfirmed*/)
+          adjustments,
+          adjustmentsComment)
       }
     }
   }
