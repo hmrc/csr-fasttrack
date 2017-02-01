@@ -19,6 +19,7 @@ package services.testdata
 import model.ApplicationStatuses
 import model.EvaluationResults.Result
 import model.PersistedObjects.PersonalDetails
+import model.exchange.testdata.OnlineTestScoresRequest
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
 import services.testdata.faker.DataFaker.Random
@@ -61,6 +62,20 @@ import model.commands.exchange.testdata.AssistanceDetailsData
     }
   }
 
+  case class OnlineTestScores(numericalTScore: Option[Double], verbalTScore: Option[Double], situationalTScore: Option[Double],
+                              competencyTScore: Option[Double])
+
+  object OnlineTestScores {
+    def apply(onlineTestScoresRequest: OnlineTestScoresRequest): OnlineTestScores = {
+      OnlineTestScores(
+        numericalTScore = onlineTestScoresRequest.numerical.map(_.toDouble),
+        verbalTScore = onlineTestScoresRequest.verbal.map(_.toDouble),
+        situationalTScore = onlineTestScoresRequest.situational.map(_.toDouble),
+        competencyTScore = onlineTestScoresRequest.competency.map(_.toDouble)
+      )
+    }
+  }
+
   case class GeneratorConfig(
     personalData: PersonalData = PersonalData(),
     setGis: Boolean = false,
@@ -70,7 +85,8 @@ import model.commands.exchange.testdata.AssistanceDetailsData
     loc1scheme2Passmark: Option[Result] = None,
     assistanceDetails: AssistanceDetailsData = AssistanceDetailsData(),
     previousStatus: Option[String] = None,
-    confirmedAllocation: Boolean = true
+    confirmedAllocation: Boolean = true,
+    testScores: Option[OnlineTestScores] = None
   )
 
   object GeneratorConfig {
@@ -85,7 +101,8 @@ import model.commands.exchange.testdata.AssistanceDetailsData
         region = o.region,
         loc1scheme1Passmark = o.loc1scheme1EvaluationResult.map(Result.apply),
         loc1scheme2Passmark = o.loc1scheme2EvaluationResult.map(Result.apply),
-        confirmedAllocation = statusData.applicationStatus == ApplicationStatuses.AllocationConfirmed.name
+        confirmedAllocation = statusData.applicationStatus == ApplicationStatuses.AllocationConfirmed.name,
+        testScores = o.onlineTestScores.map(OnlineTestScores.apply)
       )
     }
   }

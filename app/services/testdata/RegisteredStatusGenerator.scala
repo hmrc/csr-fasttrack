@@ -63,5 +63,4 @@ trait RegisteredStatusGenerator extends BaseGenerator {
       DataGenerationResponse(generationId, user.userId.toString, None, email, firstName, lastName)
     }
   }
-
 }
