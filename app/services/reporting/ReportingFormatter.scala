@@ -44,9 +44,12 @@ trait ReportingFormatter {
             val specificAdjustments = List(
               assessmentCenter.extraTimeNeeded.map(value => s"Extra time needed: ${value}%"),
               assessmentCenter.otherInfo.map(value => s"$value"))
-            val typeOfAdjustmentsItems: List[Option[String]] = adjustments.typeOfAdjustments.map { typeOfAdjustments =>
-              typeOfAdjustments.map(Some(_))
+            val adjustmentsExcluded = List("onlineTestsTimeExtension", "onlineTestsOther", "assessmentCenterTimeExtension",
+              "assessmentCenterOther")
+            val relevantTypeOfAdjustments = adjustments.typeOfAdjustments.map {adjustments =>
+              adjustments.filterNot(adjustment => adjustmentsExcluded.contains(adjustment))
             }.getOrElse(List.empty)
+            val typeOfAdjustmentsItems: List[Option[String]] = relevantTypeOfAdjustments.map(Some(_))
             val allAdjustments: List[Option[String]] = (specificAdjustments ++ typeOfAdjustmentsItems)
             allAdjustments.flatten.mkString(", ")
           }).orElse(Some("Yes"))
