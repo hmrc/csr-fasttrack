@@ -16,17 +16,13 @@
 
 package controllers.report
 
-import connectors.AuthProviderClient
-import controllers.ReportingController
 import model.Commands.Implicits._
 import model.Commands._
 import model.OnlineTestCommands.TestResult
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
-import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import play.api.test.Helpers._
-import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, DiversityReportRepository, QuestionnaireRepository, TestReportRepository }
-import repositories.application.GeneralApplicationRepository
+import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import testkit.MockitoImplicits.OngoingStubbingExtension
 
 import scala.language.postfixOps
