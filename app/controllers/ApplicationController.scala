@@ -16,18 +16,21 @@
 
 package controllers
 
+import connectors.AssessmentScheduleExchangeObjects.LocationName
 import model.ApplicationStatusOrder
 import model.Commands._
 import model.Exceptions.{ ApplicationNotFound, CannotUpdateReview }
 import play.api.libs.json.Json
-import play.api.mvc.Action
+import play.api.mvc.{ Action, AnyContent }
 import repositories._
 import repositories.application.GeneralApplicationRepository
 import services.AuditService
 import services.application.ApplicationService
 import uk.gov.hmrc.play.microservice.controller.BaseController
+import connectors.AssessmentScheduleExchangeObjects.Implicits.locationNameFormat
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object ApplicationController extends ApplicationController {
   val appRepository = applicationRepository
@@ -100,6 +103,13 @@ trait ApplicationController extends BaseController {
       }.recover {
         case e: CannotUpdateReview => NotFound(s"cannot find application with id: ${e.applicationId}")
       }
+    }
+  }
+
+  def getAssessmentCentreIndicator(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    appRepository.findAssessmentCentreIndicator(applicationId) map {
+      case Some(indicator) => Ok(Json.toJson(LocationName(indicator.assessmentCentre)))
+      case None => NotFound("")
     }
   }
 }

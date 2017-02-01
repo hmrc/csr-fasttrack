@@ -20,8 +20,8 @@ import connectors.PassMarkExchangeObjects.Implicits._
 import connectors.PassMarkExchangeObjects._
 import factories.UUIDFactory
 import model.Commands.Implicits._
-import play.api.libs.json.Json
-import play.api.mvc.Action
+import play.api.libs.json.{ JsValue, Json }
+import play.api.mvc.{ Action, AnyContent }
 import repositories._
 import services.AuditService
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -42,7 +42,7 @@ trait OnlineTestPassMarkSettingsController extends BaseController {
   val auditService: AuditService
   val uuidFactory: UUIDFactory
 
-  def createPassMarkSettings = Action.async(parse.json) { implicit request =>
+  def createPassMarkSettings: Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[SettingsCreateRequest] { passMarkSettingsRequest =>
       {
         val newVersionUUID = uuidFactory.generateUUID()
@@ -51,8 +51,7 @@ trait OnlineTestPassMarkSettingsController extends BaseController {
           schemes = passMarkSettingsRequest.schemes,
           version = newVersionUUID,
           createDate = passMarkSettingsRequest.createDate,
-          createdByUser = passMarkSettingsRequest.createdByUser,
-          setting = passMarkSettingsRequest.setting
+          createdByUser = passMarkSettingsRequest.createdByUser
         )
 
         for {
@@ -70,7 +69,7 @@ trait OnlineTestPassMarkSettingsController extends BaseController {
     }
   }
 
-  def getLatestVersion = Action.async { implicit request =>
+  def getLatestVersion: Action[AnyContent] = Action.async { implicit request =>
     for {
       schemeNames <- fwRepository.getFrameworkNames
       latestVersionOpt <- pmsRepository.tryGetLatestVersion(schemeNames)
@@ -81,15 +80,14 @@ trait OnlineTestPassMarkSettingsController extends BaseController {
         val exchangeObject = SettingsResponse(
           schemes = responseSchemes,
           createDate = Some(latestVersion.createDate),
-          createdByUser = Some(latestVersion.createdByUser),
-          setting = latestVersion.setting
+          createdByUser = Some(latestVersion.createdByUser)
         )
 
         Ok(Json.toJson(exchangeObject))
       }).getOrElse({
         val emptyPassMarkSchemes = schemeNames.map(schemeName => SchemeResponse(schemeName, None))
 
-        val emptySettingsExchangeObject = SettingsResponse(emptyPassMarkSchemes, None, None, "location1Scheme1")
+        val emptySettingsExchangeObject = SettingsResponse(emptyPassMarkSchemes, None, None)
 
         Ok(Json.toJson(emptySettingsExchangeObject))
       })

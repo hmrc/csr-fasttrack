@@ -23,9 +23,7 @@ import model.PersistedObjects.CandidateTestReport
 import model.Schemes
 
 trait OnlineTestPassmarkRulesEngine {
-
   def evaluate(score: CandidateScoresWithPreferencesAndPassmarkSettings): RuleCategoryResult
-
 }
 
 object OnlineTestPassmarkRulesEngine extends OnlineTestPassmarkRulesEngine {
@@ -55,9 +53,7 @@ object OnlineTestPassmarkRulesEngine extends OnlineTestPassmarkRulesEngine {
       .getOrElse(throw new IllegalStateException(s"schemeName=$schemeName is not set in Passmark settings"))
 
     passmark.schemeThresholds match {
-      case threshold @ SchemeThresholds(_, _, _, _, Some(_)) =>
-        CombinationScoreProcessor.determineResult(candidateScores.scores, threshold)
-      case threshold @ SchemeThresholds(_, _, _, _, None) => IndividualScoreProcessor.determineResult(candidateScores.scores, threshold)
+      case threshold @ SchemeThresholds(_, _, _, _) => IndividualScoreProcessor.determineResult(candidateScores.scores, threshold)
     }
   }
 
@@ -117,41 +113,5 @@ object IndividualScoreProcessor extends ScoreProcessor {
     } else {
       Red
     }
-  }
-}
-
-object CombinationScoreProcessor extends ScoreProcessor {
-
-  def determineResult(scores: CandidateTestReport, thresholds: SchemeThresholds): Result = {
-    val individualResult = IndividualScoreProcessor.determineResult(scores, thresholds)
-
-    val average = averageTScore(scores)
-    val combinedThresholds = thresholds.combination
-      .getOrElse(throw new IllegalStateException("Cannot find combined passmark settings"))
-
-    if (individualResult == Red) {
-      Red
-    } else if (individualResult == Amber) {
-      if (average <= combinedThresholds.failThreshold) Red else Amber
-    } else {
-      if (average >= combinedThresholds.passThreshold) {
-        Green
-      } else if (average > combinedThresholds.failThreshold) {
-        Amber
-      } else {
-        Red
-      }
-    }
-  }
-
-  private def averageTScore(scores: CandidateTestReport) = {
-    val allScores = List(
-      scores.competency,
-      scores.verbal,
-      scores.numerical,
-      scores.situational
-    ).flatten.flatMap(_.tScore)
-
-    allScores.sum / allScores.length
   }
 }
