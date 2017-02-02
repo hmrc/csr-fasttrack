@@ -16,12 +16,15 @@
 
 package controllers
 
+import akka.stream.scaladsl.Source
 import connectors.AuthProviderClient
 import model.ApplicationStatusOrder
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
 import model.PersistedObjects.Implicits._
+import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
+import play.api.libs.streams.Streams
 import play.api.mvc.{ Action, AnyContent, Request }
 import repositories.application.{ PreviousYearCandidatesDetailsRepository, ReportingRepository }
 import repositories.{ QuestionnaireRepository, _ }
@@ -242,6 +245,39 @@ trait ReportingController extends BaseController {
         ).mkString(",")
       }
       Ok((header :: records.toList).mkString("\n"))
+    }
+  }
+
+  def streamPrevYearCandidatesDetailsReport = Action.async { implicit request =>
+    val candidateDetailsFut = prevYearCandidatesDetailsRepository.findContactDetails()
+    val questionnaireDetailsFut = prevYearCandidatesDetailsRepository.findQuestionnaireDetails()
+    val assessmentCenterDetailsFut = prevYearCandidatesDetailsRepository.findAssessmentCenterDetails()
+    val assessmentScoresFut = prevYearCandidatesDetailsRepository.findAssessmentScores()
+    for {
+      contactDetails <- candidateDetailsFut
+      questionnaireDetails <- questionnaireDetailsFut
+      assessmentCenterDetails <- assessmentCenterDetailsFut
+      assessmentScores <- assessmentScoresFut
+    } yield {
+      val header = Enumerator(
+        (
+          prevYearCandidatesDetailsRepository.applicationDetailsHeader ::
+          prevYearCandidatesDetailsRepository.contactDetailsHeader ::
+          prevYearCandidatesDetailsRepository.questionnaireDetailsHeader ::
+          prevYearCandidatesDetailsRepository.assessmentCenterDetailsHeader ::
+          prevYearCandidatesDetailsRepository.assessmentScoresHeader :: Nil
+        ).mkString(",") + "\n"
+      )
+      val candidatesStream = prevYearCandidatesDetailsRepository.applicationDetailsStream().map { app =>
+        (
+          app.csvRecord ::
+          contactDetails.records.getOrElse(app.userId, "") ::
+          questionnaireDetails.records.getOrElse(app.appId, "") ::
+          assessmentCenterDetails.records.getOrElse(app.appId, "") ::
+          assessmentScores.records.getOrElse(app.appId, "") :: Nil
+        ).mkString(",") + "\n"
+      }
+      Ok.chunked(Source.fromPublisher(Streams.enumeratorToPublisher(header.andThen(candidatesStream))))
     }
   }
 

@@ -17,6 +17,7 @@
 package repositories.application
 
 import model.Commands.{ CandidateDetailsReportItem, ReportItems }
+import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
 import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.BSONDocument
@@ -30,7 +31,37 @@ import scala.concurrent.Future
 
 trait PreviousYearCandidatesDetailsRepository {
 
+  val applicationDetailsHeader = "FrameworkId,Application status,First name,Last name,Preferred name,Date of birth," +
+    "A level,Stem level,First location region,First location,First location first framework,First location second framework," +
+    "Second location region,Second location,Second location first framework,Second location second framework,second location intended," +
+    "Alternative location,Alternative framework, Needs assistance,Type of disability, Details of disability, Guaranteed interview," +
+    "Needs adjustment,Type of adjustments,Other adjustments,Campaign referrer,Campaign other,Confirm adjustments," +
+    "Percentage of numerical time adjustment,Percentage of verbal time adjustment"
+
+  val contactDetailsHeader =  "Email,Address line1,Address line2,Address line3,Address line4,Postcode,Phone"
+
+  val questionnaireDetailsHeader = "What is your gender identity?,What is your sexual orientation?,What is your ethnic group?," +
+    "Between the ages of 11 to 16 in which school did you spend most of your education?," +
+    "Between the ages of 16 to 18 in which school did you spend most of your education?," +
+    "What was your home postcode when you were 14?,During your school years were you at any time eligible for free school meals?," +
+    "Did any of your parent(s) or guardian(s) complete a university degree course or equivalent?,Parent/guardian work status," +
+    "Which type of occupation did they have?,Did they work as an employee or were they self-employed?," +
+    "Which size would best describe their place of work?,Did they supervise any other employees?"
+
+  val assessmentCenterDetailsHeader = "Assessment venue,Assessment date,Assessment session,Assessment slot,Assessment confirmed"
+
+  val assessmentScoresHeader = "Assessment attended,Assessment incomplete,Leading and communicating interview," +
+    "Leading and communicating group exercise,Leading and communicating written exercise,Delivering at pace interview," +
+    "Delivering at pace group exercise,Delivering at pace written exercise,Making effective decisions interview," +
+    "Making effective decisions group exercise,Making effective decisions written exercise,Changing and improving interview," +
+    "Changing and improving group exercise,Changing and improving written exercise,Building capability for all interview," +
+    "Building capability for all group exercise,Building capability for all written exercise,Motivation fit interview," +
+    "Motivation fit group exercise,Motivation fit written exercise,Interview feedback,Group exercise feedback," +
+    "Written exercise feedback"
+
   def findApplicationDetails() : Future[ReportItems[CandidateDetailsReportItem]]
+
+  def applicationDetailsStream() : Enumerator[CandidateDetailsReportItem]
 
   def findContactDetails() : Future[ReportItems[String]]
 
@@ -58,13 +89,6 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
   override def findApplicationDetails(): Future[ReportItems[CandidateDetailsReportItem]] = {
     val projection = Json.obj("_id" -> 0, "progress-status" -> 0, "progress-status-dates" -> 0)
 
-    val header = "FrameworkId,Application status,First name,Last name,Preferred name,Date of birth," +
-      "A level,Stem level,First location region,First location,First location first framework,First location second framework," +
-      "Second location region,Second location,Second location first framework,Second location second framework,second location intended," +
-      "Alternative location,Alternative framework, Needs assistance,Type of disability, Details of disability, Guaranteed interview," +
-      "Needs adjustment,Type of adjustments,Other adjustments,Campaign referrer,Campaign other,Confirm adjustments," +
-      "Percentage of numerical time adjustment,Percentage of verbal time adjustment"
-
     applicationDetailsCollection.find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
       .collect[List]().map { docs =>
@@ -78,15 +102,30 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
           doc.getAs[String]("applicationId").getOrElse("") -> CandidateDetailsReportItem(doc.getAs[String]("applicationId").getOrElse(""),
             doc.getAs[String]("userId").getOrElse(""), csvContent)
         }
-        ReportItems(header, csvRecords.toMap)
+        ReportItems(applicationDetailsHeader, csvRecords.toMap)
+    }
+  }
+
+  override def applicationDetailsStream(): Enumerator[CandidateDetailsReportItem] = {
+    val projection = Json.obj("_id" -> 0, "progress-status" -> 0, "progress-status-dates" -> 0)
+
+    applicationDetailsCollection.find(Json.obj(), projection)
+      .cursor[BSONDocument](ReadPreference.primaryPreferred)
+      .enumerate().map { doc =>
+        val csvContent = makeRow(
+          List(doc.getAs[String]("frameworkId")) :::
+            List(doc.getAs[String]("applicationStatus")) :::
+            personalDetails(doc) ::: frameworkPreferences(doc) :::
+            assistanceDetails(doc):_*
+        )
+        CandidateDetailsReportItem(doc.getAs[String]("applicationId").getOrElse(""),
+          doc.getAs[String]("userId").getOrElse(""), csvContent)
     }
   }
 
   override def findContactDetails(): Future[ReportItems[String]] = {
 
     val projection = Json.obj("_id" -> 0)
-
-    val header = "Address line1,Address line2,Address line3,Address line4,Postcode,Email,Phone"
 
     contactDetailsCollection.find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
@@ -95,6 +134,7 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
              val contactDetails = doc.getAs[BSONDocument]("contact-details")
              val address = contactDetails.flatMap(_.getAs[BSONDocument]("address"))
              val csvRecord = makeRow(
+               contactDetails.flatMap(_.getAs[String]("email")),
                 address.flatMap(_.getAs[String]("line1")),
                 address.flatMap(_.getAs[String]("line2")),
                 address.flatMap(_.getAs[String]("line3")),
@@ -104,7 +144,7 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
             )
             doc.getAs[String]("userId").getOrElse("") -> csvRecord
         }
-        ReportItems(header, csvRecords.toMap)
+        ReportItems(contactDetailsHeader, csvRecords.toMap)
     }
   }
 
@@ -120,14 +160,6 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
           .orElse(q.getAs[String]("otherDetails")))
       }
     }
-
-    val header = "What is your gender identity?,What is your sexual orientation?,What is your ethnic group?," +
-      "Between the ages of 11 to 16 in which school did you spend most of your education?," +
-      "Between the ages of 16 to 18 in which school did you spend most of your education?," +
-      "What was your home postcode when you were 14?,During your school years were you at any time eligible for free school meals?," +
-      "Did any of your parent(s) or guardian(s) complete a university degree course or equivalent?,Parent/guardian work status," +
-      "Which type of occupation did they have?,Did they work as an employee or were they self-employed?," +
-      "Which size would best describe their place of work?,Did they supervise any other employees?"
 
     questionnaireCollection.find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
@@ -151,15 +183,13 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
           )
           doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
         }
-        ReportItems(header, csvRecords.toMap)
+        ReportItems(questionnaireDetailsHeader, csvRecords.toMap)
     }
   }
 
   override def findAssessmentCenterDetails(): Future[ReportItems[String]] = {
 
     val projection = Json.obj("_id" -> 0)
-
-    val header = "Assessment venue,Assessment date,Assessment session,Assessment slot,Assessment confirmed"
 
     assessmentCentersCollection.find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
@@ -174,21 +204,13 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
           )
           doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
         }
-        ReportItems(header, csvRecords.toMap)
+        ReportItems(assessmentCenterDetailsHeader, csvRecords.toMap)
     }
   }
 
   override def findAssessmentScores(): Future[ReportItems[String]] = {
 
     val projection = Json.obj("_id" -> 0)
-
-    val header = "Assessment attended,Assessment incomplete,Leading and communicating interview,Leading and communicating group exercise," +
-      "Leading and communicating written exercise,Delivering at pace interview,Delivering at pace group exercise," +
-      "Delivering at pace written exercise,Making effective decisions interview,Making effective decisions group exercise," +
-      "Making effective decisions written exercise,Changing and improving interview,Changing and improving group exercise," +
-      "Changing and improving written exercise,Building capability for all interview,Building capability for all group exercise," +
-      "Building capability for all written exercise,Motivation fit interview,Motivation fit group exercise," +
-      "Motivation fit written exercise,Interview feedback,Group exercise feedback,Written exercise feedback"
 
     assessmentScoresCollection.find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
@@ -197,7 +219,7 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
           val csvRecord = makeRow(assessmentScores(doc):_*)
           doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
        }
-      ReportItems(header, csvRecords.toMap)
+      ReportItems(assessmentScoresHeader, csvRecords.toMap)
     }
   }
 
