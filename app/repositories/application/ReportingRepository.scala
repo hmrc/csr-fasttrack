@@ -552,7 +552,8 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       "assistance-details.onlineTests" -> "1",
       "assistance-details.assessmentCenter" -> "1",
       "assistance-details.adjustmentsConfirmed" -> "1",
-      "assistance-details.adjustmentsComment" -> "1"
+      "assistance-details.adjustmentsComment" -> "1",
+      "assessment-centre-indicator" -> "2"
     )
 
     reportQueryWithProjections[BSONDocument](query, projection).map { list =>
@@ -581,6 +582,8 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
           if (ac) Some(Adjustments(typeOfAdjustments, adjustmentsConfirmed, onlineTests, assessmentCenter)) else None
         }
 
+        val assessmentCentreIndicator = document.getAs[AssessmentCentreIndicator]("assessment-centre-indicator")
+
         AdjustmentReportItem(
           userId,
           applicationId,
@@ -595,7 +598,8 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
           needsSupportAtVenueDescription,
           hasDisability,
           adjustments,
-          adjustmentsComment)
+          adjustmentsComment,
+          assessmentCentreIndicator)
       }
     }
   }
