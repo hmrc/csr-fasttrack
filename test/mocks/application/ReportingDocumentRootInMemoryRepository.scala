@@ -18,8 +18,9 @@ package mocks.application
 
 import common.Constants.{ No, Yes }
 import model.Commands._
-import org.joda.time.{ LocalDate }
-import repositories.application.{ ReportingRepository }
+import model.persisted.ApplicationForDiversityReport
+import org.joda.time.LocalDate
+import repositories.application.ReportingRepository
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -77,4 +78,7 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
   override def allApplicationAndUserIds(frameworkId: String): Future[List[PersonalDetailsAdded]] = ???
 
   override def applicationsPassedInAssessmentCentre(frameworkId: String): Future[List[ApplicationPreferencesWithTestResults]] = ???
+
+  override def diversityReport(frameworkId: String): Future[List[ApplicationForDiversityReport]] = ???
+
 }

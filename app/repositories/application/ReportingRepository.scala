@@ -20,11 +20,13 @@ import java.util.regex.Pattern
 
 import common.Constants.{ No, Yes }
 import common.StringUtils._
-import model.ApplicationStatusOrder._
+import model.ApplicationStatusOrder.{ getStatus, _ }
 import model.Commands._
 import model.EvaluationResults._
+import model.Scheme.Scheme
 import model._
 import model.commands.OnlineTestProgressResponse
+import model.persisted.ApplicationForDiversityReport
 import org.joda.time.LocalDate
 import play.api.libs.json.Format
 import reactivemongo.api.{ DB, ReadPreference }
@@ -58,6 +60,8 @@ trait ReportingRepository {
   def applicationsWithAssessmentScoresAccepted(frameworkId: String): Future[List[ApplicationPreferences]]
 
   def applicationsPassedInAssessmentCentre(frameworkId: String): Future[List[ApplicationPreferencesWithTestResults]]
+
+  def diversityReport(frameworkId: String): Future[List[ApplicationForDiversityReport]]
 }
 
 class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo: () => DB)
@@ -694,6 +698,30 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
         PersonalDetailsAdded(applicationId, userId)
       }
     }
+  }
+
+  def diversityReport(frameworkId: String): Future[List[ApplicationForDiversityReport]] = {
+    val query = BSONDocument("frameworkId" -> frameworkId)
+    val projection = BSONDocument(
+      "userId" -> "1",
+      "applicationId" -> "1",
+      "schemes" -> "1",
+      "assistance-details" -> "1",
+      "progress-status" -> "1")
+
+    collection.find(query, projection).cursor[BSONDocument]().collect[List]().map { docs =>
+      docs.map(bsonDocumentToDiversityReport)
+    }
+  }
+
+  private def bsonDocumentToDiversityReport(document: BSONDocument) = {
+    val applicationId = document.getAs[String]("applicationId").getOrElse("")
+    val userId = document.getAs[String]("userId").getOrElse("")
+    val progressResponse = findProgress(document, applicationId)
+    val latestProgressStatus = getStatus(progressResponse)
+    val schemes = document.getAs[List[Scheme]]("schemes")
+
+    ApplicationForDiversityReport(applicationId, userId, Some(latestProgressStatus), schemes, None, None, None, None)
   }
 }
 

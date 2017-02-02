@@ -17,7 +17,7 @@
 package controllers
 
 import connectors.AuthProviderClient
-import model.ApplicationStatusOrder
+import model.{ ApplicationForDiversityReportItem, ApplicationStatusOrder, DiversityReportItem }
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
 import model.PersistedObjects.Implicits._
@@ -50,8 +50,21 @@ trait ReportingController extends BaseController {
   val reportingRepository: ReportingRepository
   val authProviderClient: AuthProviderClient
 
-  def retrieveDiversityReport = Action.async { implicit request =>
-    Future.successful(NotFound)
+  def retrieveDiversityReport(frameworkId: String) = Action.async { implicit request =>
+    val reports = for {
+      applications <- reportingRepository.diversityReport(frameworkId)
+    } yield {
+      applications.map { application =>
+        val appItem = ApplicationForDiversityReportItem(
+          application.progress.map(_.toString),
+          application.schemes.getOrElse(Nil)
+        )
+        DiversityReportItem(appItem)
+      }
+    }
+    reports.map { list =>
+      Ok(Json.toJson(list))
+    }
   }
 
   def createAdjustmentReports(frameworkId: String) = Action.async { implicit request =>
