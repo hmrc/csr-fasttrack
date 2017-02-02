@@ -75,7 +75,11 @@ object DataFaker {
               case _ => venueHasFreeSlots(venue)
             }
         }
-        firstVenueWithSpace.map(_.get)
+
+        firstVenueWithSpace.map { entry =>
+          Logger.warn("=============== FVWS = " + entry)
+          entry.get
+        }
       }
     }
 
