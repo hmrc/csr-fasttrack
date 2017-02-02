@@ -25,7 +25,7 @@ import model.PersistedObjects.Implicits._
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
 import play.api.libs.streams.Streams
-import play.api.mvc.{ Action, AnyContent, Request }
+import play.api.mvc.{ Action, AnyContent, Request, Result }
 import repositories.application.{ PreviousYearCandidatesDetailsRepository, ReportingRepository }
 import repositories.{ QuestionnaireRepository, _ }
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -213,67 +213,79 @@ trait ReportingController extends BaseController {
 
   def prevYearCandidatesDetailsReport = Action.async { implicit request =>
     val applicationFut = prevYearCandidatesDetailsRepository.findApplicationDetails()
-    val candidateDetailsFut = prevYearCandidatesDetailsRepository.findContactDetails()
-    val questionnaireDetailsFut = prevYearCandidatesDetailsRepository.findQuestionnaireDetails()
-    val assessmentCenterDetailsFut = prevYearCandidatesDetailsRepository.findAssessmentCenterDetails()
-    val assessmentScoresFut = prevYearCandidatesDetailsRepository.findAssessmentScores()
     for {
       applications <- applicationFut
-      contactDetails <- candidateDetailsFut
-      questionnaireDetails <- questionnaireDetailsFut
-      assessmentCenterDetails <- assessmentCenterDetailsFut
-      assessmentScores <- assessmentScoresFut
-    } yield {
-      val header = (
-          applications.header ::
-          contactDetails.header ::
-          questionnaireDetails.header ::
-          assessmentCenterDetails.header ::
-          assessmentScores.header :: Nil
-        ).mkString(",")
+      result <- enrichPreviousYearCandidateDetails {
+        (contactDetails, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores) => {
+          val header = (
+            applications.header ::
+              contactDetails.header ::
+              questionnaireDetails.header ::
+              onlineTestReports.header ::
+              assessmentCenterDetails.header ::
+              assessmentScores.header :: Nil
+            ).mkString(",")
 
-      val records = applications.records.values.map { app => (
-          app.csvRecord ::
-          contactDetails.records.getOrElse(app.userId, "") ::
-          questionnaireDetails.records.getOrElse(app.appId, "") ::
-          assessmentCenterDetails.records.getOrElse(app.appId, "") ::
-          assessmentScores.records.getOrElse(app.appId, "") :: Nil
-        ).mkString(",")
+          val records = applications.records.values.map { app => (
+            app.csvRecord ::
+              contactDetails.records.getOrElse(app.userId, "") ::
+              questionnaireDetails.records.getOrElse(app.appId, "") ::
+              onlineTestReports.records.getOrElse(app.appId, "") ::
+              assessmentCenterDetails.records.getOrElse(app.appId, "") ::
+              assessmentScores.records.getOrElse(app.appId, "") :: Nil
+            ).mkString(",")
+          }
+          Ok((header :: records.toList).mkString("\n"))
+        }
       }
-      Ok((header :: records.toList).mkString("\n"))
+    } yield {
+      result
     }
   }
 
   def streamPrevYearCandidatesDetailsReport = Action.async { implicit request =>
+    enrichPreviousYearCandidateDetails {
+      (contactDetails, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores) => {
+        val header = Enumerator(
+          (
+            prevYearCandidatesDetailsRepository.applicationDetailsHeader ::
+              prevYearCandidatesDetailsRepository.contactDetailsHeader ::
+              prevYearCandidatesDetailsRepository.questionnaireDetailsHeader ::
+              prevYearCandidatesDetailsRepository.onlineTestReportHeader ::
+              prevYearCandidatesDetailsRepository.assessmentCenterDetailsHeader ::
+              prevYearCandidatesDetailsRepository.assessmentScoresHeader :: Nil
+            ).mkString(",") + "\n"
+        )
+        val candidatesStream = prevYearCandidatesDetailsRepository.applicationDetailsStream().map { app =>
+          (
+            app.csvRecord ::
+              contactDetails.records.getOrElse(app.userId, "") ::
+              questionnaireDetails.records.getOrElse(app.appId, "") ::
+              onlineTestReports.records.getOrElse(app.appId, "") ::
+              assessmentCenterDetails.records.getOrElse(app.appId, "") ::
+              assessmentScores.records.getOrElse(app.appId, "") :: Nil
+            ).mkString(",") + "\n"
+        }
+        Ok.chunked(Source.fromPublisher(Streams.enumeratorToPublisher(header.andThen(candidatesStream))))
+      }
+    }
+  }
+
+  private def enrichPreviousYearCandidateDetails(block: (ReportItems[String], ReportItems[String], ReportItems[String],
+    ReportItems[String], ReportItems[String]) => Result) = {
     val candidateDetailsFut = prevYearCandidatesDetailsRepository.findContactDetails()
     val questionnaireDetailsFut = prevYearCandidatesDetailsRepository.findQuestionnaireDetails()
+    val onlineTestReportsFut = prevYearCandidatesDetailsRepository.findOnlineTestReports()
     val assessmentCenterDetailsFut = prevYearCandidatesDetailsRepository.findAssessmentCenterDetails()
     val assessmentScoresFut = prevYearCandidatesDetailsRepository.findAssessmentScores()
     for {
       contactDetails <- candidateDetailsFut
       questionnaireDetails <- questionnaireDetailsFut
+      onlineTestReports <- onlineTestReportsFut
       assessmentCenterDetails <- assessmentCenterDetailsFut
       assessmentScores <- assessmentScoresFut
     } yield {
-      val header = Enumerator(
-        (
-          prevYearCandidatesDetailsRepository.applicationDetailsHeader ::
-          prevYearCandidatesDetailsRepository.contactDetailsHeader ::
-          prevYearCandidatesDetailsRepository.questionnaireDetailsHeader ::
-          prevYearCandidatesDetailsRepository.assessmentCenterDetailsHeader ::
-          prevYearCandidatesDetailsRepository.assessmentScoresHeader :: Nil
-        ).mkString(",") + "\n"
-      )
-      val candidatesStream = prevYearCandidatesDetailsRepository.applicationDetailsStream().map { app =>
-        (
-          app.csvRecord ::
-          contactDetails.records.getOrElse(app.userId, "") ::
-          questionnaireDetails.records.getOrElse(app.appId, "") ::
-          assessmentCenterDetails.records.getOrElse(app.appId, "") ::
-          assessmentScores.records.getOrElse(app.appId, "") :: Nil
-        ).mkString(",") + "\n"
-      }
-      Ok.chunked(Source.fromPublisher(Streams.enumeratorToPublisher(header.andThen(candidatesStream))))
+      block(contactDetails, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores)
     }
   }
 

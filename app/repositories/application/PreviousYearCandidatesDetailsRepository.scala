@@ -48,6 +48,11 @@ trait PreviousYearCandidatesDetailsRepository {
     "Which type of occupation did they have?,Did they work as an employee or were they self-employed?," +
     "Which size would best describe their place of work?,Did they supervise any other employees?"
 
+  val onlineTestReportHeader = "Competency status,Competency norm,Competency tscore,Competency percentile,Competency raw,Competency sten," +
+    "Numerical status,Numerical norm,Numerical tscore,Numerical percentile,Numerical raw,Numerical sten," +
+    "Verbal status,Verbal norm,Verbal tscore,Verbal percentile,Verbal raw,Verbal sten," +
+    "Situational status,Situational norm,Situational tscore,Situational percentile,Situational raw,Situational sten"
+
   val assessmentCenterDetailsHeader = "Assessment venue,Assessment date,Assessment session,Assessment slot,Assessment confirmed"
 
   val assessmentScoresHeader = "Assessment attended,Assessment incomplete,Leading and communicating interview," +
@@ -65,6 +70,8 @@ trait PreviousYearCandidatesDetailsRepository {
 
   def findContactDetails() : Future[ReportItems[String]]
 
+  def findOnlineTestReports() : Future[ReportItems[String]]
+
   def findAssessmentCenterDetails() : Future[ReportItems[String]]
 
   def findAssessmentScores() : Future[ReportItems[String]]
@@ -81,6 +88,8 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
   val contactDetailsCollection = mongo().collection[JSONCollection](CollectionNames.CONTACT_DETAILS_2016)
 
   val questionnaireCollection = mongo().collection[JSONCollection](CollectionNames.QUESTIONNAIRE_2016)
+
+  val onlineTestReportsCollection = mongo().collection[JSONCollection](CollectionNames.ONLINE_TEST_REPORT_2016)
 
   val assessmentCentersCollection = mongo().collection[JSONCollection](CollectionNames.APPLICATION_ASSESSMENT_2016)
 
@@ -184,6 +193,36 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
           doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
         }
         ReportItems(questionnaireDetailsHeader, csvRecords.toMap)
+    }
+  }
+
+  override def findOnlineTestReports(): Future[ReportItems[String]] = {
+    val projection = Json.obj("_id" -> 0)
+
+    def onlineTestScore(test: String, doc: BSONDocument) = {
+      val scoreDoc = doc.getAs[BSONDocument](test)
+        scoreDoc.flatMap(_.getAs[String]("status")) ::
+        scoreDoc.flatMap(_.getAs[String]("norm")) ::
+        scoreDoc.flatMap(_.getAs[Double]("tScore").map(_.toString)) ::
+        scoreDoc.flatMap(_.getAs[Double]("percentile").map(_.toString)) ::
+        scoreDoc.flatMap(_.getAs[Double]("raw").map(_.toString)) ::
+        scoreDoc.flatMap(_.getAs[Double]("sten").map(_.toString)) ::
+        Nil
+    }
+
+    onlineTestReportsCollection.find(Json.obj(), projection)
+      .cursor[BSONDocument](ReadPreference.primaryPreferred)
+      .collect[List]().map { docs =>
+      val csvRecords = docs.map {
+        doc => val csvRecord = makeRow(
+          onlineTestScore("competency", doc) :::
+          onlineTestScore("numerical", doc) :::
+          onlineTestScore("verbal", doc) :::
+          onlineTestScore("situational", doc):_*
+        )
+        doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
+      }
+      ReportItems(onlineTestReportHeader, csvRecords.toMap)
     }
   }
 
