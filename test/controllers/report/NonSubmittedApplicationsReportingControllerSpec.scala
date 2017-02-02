@@ -48,7 +48,6 @@ class NonSubmittedApplicationsReportingControllerSpec extends BaseReportingContr
             ) :: Nil)
           }
         }
-        override val diversityReportRepository = DiversityReportInMemoryRepository
         override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
         override val testReportRepository = TestReportInMemoryRepository
@@ -79,7 +78,6 @@ class NonSubmittedApplicationsReportingControllerSpec extends BaseReportingContr
         override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
         override val contactDetailsRepository = ContactDetailsInMemoryRepository
-        override val diversityReportRepository = DiversityReportInMemoryRepository
         override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val reportingRepository = new ReportingDocumentRootInMemoryRepository {
           override def applicationsReport(frameworkId: String): Future[List[(String, IsNonSubmitted, PreferencesWithContactDetails)]] = {

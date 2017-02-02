@@ -18,6 +18,7 @@ package services.testdata
 
 import model.ApplicationStatuses
 import model.EvaluationResults.Result
+import model.Scheme.Scheme
 import model.commands.exchange.testdata.AssistanceDetailsData
 import model.exchange.testdata.OnlineTestScoresRequest
 import model.persisted.PersonalDetails
@@ -77,16 +78,17 @@ import services.testdata.faker.DataFaker.Random
   }
 
   case class GeneratorConfig(
-    personalData: PersonalData = PersonalData(),
-    setGis: Boolean = false,
-    cubiksUrl: String,
-    region: Option[String] = None,
-    loc1scheme1Passmark: Option[Result] = None,
-    loc1scheme2Passmark: Option[Result] = None,
-    assistanceDetails: AssistanceDetailsData = AssistanceDetailsData(),
-    previousStatus: Option[String] = None,
-    confirmedAllocation: Boolean = true,
-    testScores: Option[OnlineTestScores] = None
+                              personalData: PersonalData = PersonalData(),
+                              setGis: Boolean = false,
+                              cubiksUrl: String,
+                              region: Option[String] = None,
+                              loc1scheme1Passmark: Option[Result] = None,
+                              loc1scheme2Passmark: Option[Result] = None,
+                              assistanceDetails: AssistanceDetailsData = AssistanceDetailsData(),
+                              previousStatus: Option[String] = None,
+                              confirmedAllocation: Boolean = true,
+                              testScores: Option[OnlineTestScores] = None,
+                              schemeTypes: Option[List[Scheme]] = None
   )
 
   object GeneratorConfig {
@@ -102,7 +104,8 @@ import services.testdata.faker.DataFaker.Random
         loc1scheme1Passmark = o.loc1scheme1EvaluationResult.map(Result.apply),
         loc1scheme2Passmark = o.loc1scheme2EvaluationResult.map(Result.apply),
         confirmedAllocation = statusData.applicationStatus == ApplicationStatuses.AllocationConfirmed.name,
-        testScores = o.onlineTestScores.map(OnlineTestScores.apply)
+        testScores = o.onlineTestScores.map(OnlineTestScores.apply),
+        schemeTypes = o.schemeTypes
       )
     }
   }

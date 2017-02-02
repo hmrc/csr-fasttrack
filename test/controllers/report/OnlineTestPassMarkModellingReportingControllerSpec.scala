@@ -23,8 +23,8 @@ import model.UniqueIdentifier
 import model.exchange.ApplicationForCandidateProgressReportItemExamples
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
-import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import play.api.test.Helpers._
+import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import testkit.MockitoImplicits.OngoingStubbingExtension
 
 import scala.language.postfixOps

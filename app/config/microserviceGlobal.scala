@@ -22,7 +22,6 @@ import play.api.{ Application, Logger, Play }
 import scheduler.allocation.ConfirmAttendanceReminderJob
 import scheduler.assessment._
 import scheduler.onlinetesting._
-import scheduler.reporting.DiversityMonitoringJob
 import uk.gov.hmrc.play.audit.filters.AuditFilter
 import uk.gov.hmrc.play.config.{ AppName, ControllerConfig }
 import uk.gov.hmrc.play.filters.MicroserviceFilterSupport
@@ -95,12 +94,6 @@ trait Scheduler extends RunningOfScheduledJobs {
       None
     }
 
-  private lazy val diversityMonitoringJob: Option[ScheduledJob] =
-    if (diversityMonitoringJobConfigValues.enabled) Some(DiversityMonitoringJob) else {
-      Logger.warn("diversity monitoring job is disabled")
-      None
-    }
-
   private lazy val confirmAttendanceReminderJob: Option[ScheduledJob] =
     if (confirmAttendanceReminderJobConfigValues.enabled) Some(ConfirmAttendanceReminderJob) else {
       Logger.warn("confirm attendance reminder job is disabled")
@@ -127,13 +120,12 @@ trait Scheduler extends RunningOfScheduledJobs {
   private[config] def retrieveResultsJobConfigValues = retrieveResultsJobConfig
   private[config] def retrieveOnlineTestPDFReportJobConfigValues = retrieveOnlineTestPDFReportJobConfig
   private[config] def evaluateCandidateScoreJobConfigValues = evaluateCandidateScoreJobConfig
-  private[config] def diversityMonitoringJobConfigValues = diversityMonitoringJobConfig
   private[config] def confirmAttendanceReminderJobConfigValues = confirmAttendanceReminderJobConfig
   private[config] def evaluateAssessmentScoreJobConfigValues = evaluateAssessmentScoreJobConfig
   private[config] def notifyAssessmentCentrePassedOrFailedJobConfigValues = notifyAssessmentCentrePassedOrFailedJobConfig
 
   lazy val scheduledJobs = List(sendInvitationJob, expireOnlineTestJob, failedOnlineTestJob, retrieveResultsJob, retrieveOnlineTestPDFReportJob,
-    evaluateCandidateScoreJob, diversityMonitoringJob, confirmAttendanceReminderJob, evaluateAssessmentScoreJob,
+    evaluateCandidateScoreJob, confirmAttendanceReminderJob, evaluateAssessmentScoreJob,
     notifyAssessmentCentrePassedOrFailedJob, firstReminderOnlineTestJob, secondReminderOnlineTestJob).flatten
 }
 

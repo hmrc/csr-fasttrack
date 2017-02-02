@@ -27,8 +27,7 @@ import play.api.libs.json.{ JsArray, JsValue }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
-import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, DiversityReportRepository, QuestionnaireRepository, TestReportRepository }
-
+import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, QuestionnaireRepository, TestReportRepository }
 import scala.concurrent.Future
 import scala.language.postfixOps
 
@@ -38,9 +37,9 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
     "return the adjustment report when we execute adjustment reports" in new AdjustmentsTestFixture {
       override val controller = new ReportingController {
         override val reportingFormatter = reportingFormatterMock
-        override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
         override val locationSchemeService = locationSchemeServiceMock
         override val authProviderClient: AuthProviderClient = authProviderClientMock
+        override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
         override val contactDetailsRepository = new ContactDetailsInMemoryRepository {
           override def findAll: Future[List[ContactDetailsWithId]] =
@@ -50,7 +49,6 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
               ContactDetailsWithId("3", Address("First Line", None, None, None), "HP18 9DN", "joe@bloggs.com", None)
             ))
         }
-        override val diversityReportRepository = DiversityReportInMemoryRepository
         override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
         override val testReportRepository = TestReportInMemoryRepository
@@ -73,7 +71,6 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
         override val contactDetailsRepository = new ContactDetailsInMemoryRepository
-        override val diversityReportRepository = DiversityReportInMemoryRepository
         override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
         override val testReportRepository = TestReportInMemoryRepository
@@ -98,7 +95,6 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
         override val contactDetailsRepository = ContactDetailsInMemoryRepository
-        override val diversityReportRepository = DiversityReportInMemoryRepository
         override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val reportingRepository = new ReportingDocumentRootInMemoryRepository {
           override def adjustmentReport(frameworkId: String): Future[List[AdjustmentReport]] = {

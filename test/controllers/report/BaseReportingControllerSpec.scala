@@ -23,15 +23,15 @@ import controllers.ReportingController
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import repositories.application.ReportingRepository
-import repositories.{ ApplicationAssessmentScoresRepository, AssessmentCentreIndicatorRepository, ContactDetailsRepository, DiversityReportRepository, QuestionnaireRepository, TestReportRepository }
+import repositories.{ ApplicationAssessmentScoresRepository, AssessmentCentreIndicatorRepository, ContactDetailsRepository, QuestionnaireRepository, TestReportRepository }
 import services.locationschemes.LocationSchemeService
 import services.reporting.ReportingFormatter
 import testkit.MockitoImplicits.OngoingStubbingExtension
+import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, QuestionnaireRepository, TestReportRepository }
 import testkit.UnitWithAppSpec
 
 import scala.concurrent.Future
 import scala.language.postfixOps
-import scala.util.Random
 
 class BaseReportingControllerSpec extends UnitWithAppSpec {
 
@@ -43,7 +43,6 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
     val assessmentCentreIndicatorRepoMock = mock[AssessmentCentreIndicatorRepository]
     val assessmentScoresRepoMock = mock[ApplicationAssessmentScoresRepository]
     val contactDetailsRepoMock = mock[ContactDetailsRepository]
-    val diversityReportRepoMock = mock[DiversityReportRepository]
     val questionnaireRepoMock = mock[QuestionnaireRepository]
     val reportingRepoMock = mock[ReportingRepository]
     val testReportRepoMock = mock[TestReportRepository]
@@ -60,7 +59,6 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
       val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
       val assessmentScoresRepository = assessmentScoresRepoMock
       val contactDetailsRepository = contactDetailsRepoMock
-      val diversityReportRepository = diversityReportRepoMock
       val questionnaireRepository = questionnaireRepoMock
       val reportingRepository = reportingRepoMock
       val testReportRepository = testReportRepoMock
@@ -73,7 +71,6 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
       val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
       val assessmentScoresRepository = assessmentScoresRepoMock
       val contactDetailsRepository = contactDetailsRepoMock
-      val diversityReportRepository = diversityReportRepoMock
       val questionnaireRepository = questionnaireRepoMock
       val reportingRepository = reportingRepoMock
       val testReportRepository = testReportRepoMock

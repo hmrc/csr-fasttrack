@@ -16,7 +16,6 @@
 
 package controllers.report
 
-
 import model.Commands.Implicits._
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
@@ -25,8 +24,8 @@ import model.ReportExchangeObjects.Implicits._
 import org.joda.time.LocalDate
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
-import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import play.api.test.Helpers._
+import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import testkit.MockitoImplicits.OngoingStubbingExtension
 
 import scala.language.postfixOps

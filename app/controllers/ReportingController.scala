@@ -17,7 +17,7 @@
 package controllers
 
 import connectors.AuthProviderClient
-import model.{ Adjustments, ApplicationStatusOrder }
+import model.{ ApplicationStatusOrder }
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
 import model.PersistedObjects.Implicits._
@@ -40,7 +40,6 @@ object ReportingController extends ReportingController {
   val assessmentCentreIndicatorRepository = AssessmentCentreIndicatorCSVRepository
   val assessmentScoresRepository = repositories.applicationAssessmentScoresRepository
   val contactDetailsRepository = repositories.contactDetailsRepository
-  val diversityReportRepository = repositories.diversityReportRepository
   val questionnaireRepository = repositories.questionnaireRepository
   val reportingRepository = repositories.reportingRepository
   val testReportRepository = repositories.testReportRepository
@@ -56,17 +55,13 @@ trait ReportingController extends BaseController {
   val assessmentCentreIndicatorRepository: AssessmentCentreIndicatorRepository
   val assessmentScoresRepository: ApplicationAssessmentScoresRepository
   val contactDetailsRepository: ContactDetailsRepository
-  val diversityReportRepository: DiversityReportRepository
   val questionnaireRepository: QuestionnaireRepository
   val reportingRepository: ReportingRepository
   val testReportRepository: TestReportRepository
   val authProviderClient: AuthProviderClient
 
   def retrieveDiversityReport = Action.async { implicit request =>
-    diversityReportRepository.findLatest().map {
-      case Some(report) => Ok(Json.toJson(report))
-      case None => NotFound
-    }
+    Future.successful(NotFound)
   }
 
   def createApplicationAndUserIdsReport(frameworkId: String) = Action.async { implicit request =>
