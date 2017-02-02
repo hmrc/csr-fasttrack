@@ -31,10 +31,10 @@ import repositories.{ QuestionnaireRepository, _ }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object ReportingController extends ReportingController {
   val cdRepository = contactDetailsRepository
-  val diversityReportRepository = repositories.diversityReportRepository
   val questionnaireRepository = repositories.questionnaireRepository
   val testReportRepository = repositories.testReportRepository
   val assessmentScoresRepository = repositories.applicationAssessmentScoresRepository
@@ -48,7 +48,6 @@ trait ReportingController extends BaseController {
   import Implicits._
 
   val cdRepository: ContactDetailsRepository
-  val diversityReportRepository: DiversityReportRepository
   val questionnaireRepository: QuestionnaireRepository
   val testReportRepository: TestReportRepository
   val assessmentScoresRepository: ApplicationAssessmentScoresRepository
@@ -57,10 +56,7 @@ trait ReportingController extends BaseController {
   val authProviderClient: AuthProviderClient
 
   def retrieveDiversityReport = Action.async { implicit request =>
-    diversityReportRepository.findLatest().map {
-      case Some(report) => Ok(Json.toJson(report))
-      case None => NotFound
-    }
+    Future.successful(NotFound)
   }
 
   def createAdjustmentReports(frameworkId: String) = Action.async { implicit request =>

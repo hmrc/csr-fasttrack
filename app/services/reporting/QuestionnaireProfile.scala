@@ -14,11 +14,6 @@
  * limitations under the License.
  */
 
-package fixture
+package services.reporting
 
-import model.PersistedObjects.CandidateTestReport
-
-object TestReportFixture {
-  val FullTestReport = CandidateTestReport(applicationId = "appId", reportType = "MRA",
-    competency = None, numerical = None, verbal = None, situational = None)
-}
+case class QuestionnaireProfile(questionnaire: List[Map[String, String]])

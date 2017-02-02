@@ -16,38 +16,7 @@
 
 package services.reporting
 
-import akka.actor.{ Actor, ActorRef, Props }
-
-import common.Constants.{ Yes, No }
-import model.PersistedObjects.DiversitySocioEconomic
-
-class SocioEconomicCalculator(aggregator: ActorRef) extends Actor with AnswerProcessorTrait
-  with SocioEconomicScoreCalculatorTrait with SocioEconomicCollector {
-
-  override def receive: Receive = {
-    case QuestionnaireProfile(answers) =>
-      process(answers)
-      val calculationMessage = createMessage
-
-      aggregator ! calculationMessage
-      context.stop(self)
-  }
-}
-
-trait SocioEconomicCollector extends Collector {
-
-  type Message = DiversitySocioEconomic
-
-  override val collectorMap: collection.mutable.Map[String, Int] = collection.mutable.Map(
-    ("SE-1", 0),
-    ("SE-2", 0),
-    ("SE-3", 0),
-    ("SE-4", 0),
-    ("SE-5", 0)
-  )
-
-  override def createMessage: DiversitySocioEconomic = new DiversitySocioEconomic(collectorMap.toMap)
-}
+import common.Constants.Yes
 
 trait SocioEconomicScoreCalculatorTrait extends Calculable {
 
@@ -135,8 +104,4 @@ trait SocioEconomicScoreCalculatorTrait extends Calculable {
   def getTypeOfOccupation(answer: Map[String, String]): Int = {
     TypeOfOccupation(answer("Which type of occupation did they have?"))
   }
-}
-
-object SocioEconomicCalculator {
-  def props(aggregator: ActorRef) = Props(new SocioEconomicCalculator(aggregator))
 }

@@ -26,7 +26,7 @@ import play.api.libs.json.JsArray
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.ApplicationAssessmentScoresRepository
-import repositories.application.{ PreviousYearCandidatesDetailsRepository, ReportingRepository }
+import repositories.application.ReportingRepository
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -36,7 +36,6 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
   "Reporting controller create adjustment report" should {
     "return the adjustment report when we execute adjustment reports" in new AdjustmentsTestFixture {
       override val controller = new ReportingController {
-        override val diversityReportRepository = DiversityReportInMemoryRepository
         override val cdRepository = new ContactDetailsInMemoryRepository {
           override def findAll: Future[List[ContactDetailsWithId]] =
             Future.successful(List(
@@ -65,7 +64,6 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
 
     "return the adjustment report without contact details data" in new AdjustmentsTestFixture {
       override val controller = new ReportingController {
-        override val diversityReportRepository = DiversityReportInMemoryRepository
         override val cdRepository = new ContactDetailsInMemoryRepository
         override val authProviderClient: AuthProviderClient = authProviderClientMock
         override val questionnaireRepository = QuestionnaireInMemoryRepository
@@ -93,7 +91,6 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
             Future.successful(List.empty[AdjustmentReport])
           }
         }
-        override val diversityReportRepository = DiversityReportInMemoryRepository
         override val cdRepository = ContactDetailsInMemoryRepository
         override val authProviderClient: AuthProviderClient = authProviderClientMock
         override val questionnaireRepository = QuestionnaireInMemoryRepository

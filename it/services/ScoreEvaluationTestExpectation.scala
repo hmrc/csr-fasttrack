@@ -19,16 +19,6 @@ package services
 import model.ApplicationStatuses
 import model.EvaluationResults.{ CompetencyAverageResult, PerSchemeEvaluation, Result }
 
-case class ScoreEvaluationTestExpectation(
-  location1Scheme1: String,
-  location1Scheme2: Option[String],
-  location2Scheme1: Option[String],
-  location2Scheme2: Option[String],
-  alternativeScheme: Option[String],
-  applicationStatus: ApplicationStatuses.EnumVal,
-  passmarkVersion: Option[String]
-)
-
 case class AssessmentScoreEvaluationTestExpectation(location1Scheme1: Option[String], location1Scheme2: Option[String],
                                                     location2Scheme1: Option[String], location2Scheme2: Option[String],
                                                     alternativeScheme: Option[String], applicationStatus: ApplicationStatuses.EnumVal,

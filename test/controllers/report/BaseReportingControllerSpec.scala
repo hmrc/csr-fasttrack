@@ -20,11 +20,10 @@ import config.TestFixtureBase
 import connectors.AuthProviderClient
 import connectors.ExchangeObjects.Candidate
 import controllers.ReportingController
-import org.mockito.Matchers._
+import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import repositories.application.{ PreviousYearCandidatesDetailsRepository, ReportingRepository }
-import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, DiversityReportRepository,
-QuestionnaireRepository, TestReportRepository }
+import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, QuestionnaireRepository, TestReportRepository }
 import testkit.UnitWithAppSpec
 
 import scala.concurrent.Future
@@ -46,13 +45,11 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
 
     val assessmentScoresRepoMock = mock[ApplicationAssessmentScoresRepository]
     val contactDetailsRepoMock = mock[ContactDetailsRepository]
-    val diversityReportRepoMock = mock[DiversityReportRepository]
     val questionnaireRepoMock = mock[QuestionnaireRepository]
     val reportingRepoMock = mock[ReportingRepository]
     val testReportRepoMock = mock[TestReportRepository]
 
     val controller = new ReportingController {
-      val diversityReportRepository = diversityReportRepoMock
       val cdRepository = contactDetailsRepoMock
       val authProviderClient = authProviderClientMock
       val questionnaireRepository = questionnaireRepoMock

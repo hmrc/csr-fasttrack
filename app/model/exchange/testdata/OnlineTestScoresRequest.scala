@@ -14,17 +14,15 @@
  * limitations under the License.
  */
 
-package fixture
+package model.exchange.testdata
 
-import model.{ Alternatives, LocationPreference, Preferences }
+import play.api.libs.json.Json
 
-object PreferencesFixture {
-  def preferences(location1Scheme1: String, location1Scheme2: Option[String] = None, location2Scheme1: Option[String] = None,
-    location2Scheme2: Option[String] = None, alternativeScheme: Option[Boolean] = None) =
-    Preferences(
-      LocationPreference("London", "London", location1Scheme1, location1Scheme2),
-      location2Scheme1.map(LocationPreference("London", "Reading", _, location2Scheme2)),
-      None,
-      alternativeScheme.map(a => Alternatives(a, a))
-    )
+case class OnlineTestScoresRequest(numerical: Option[String] = None,
+                            verbal: Option[String] = None,
+                            situational: Option[String] = None,
+                            competency: Option[String] = None)
+
+object OnlineTestScoresRequest {
+  implicit def onlineTestScoresFormat = Json.format[OnlineTestScoresRequest]
 }

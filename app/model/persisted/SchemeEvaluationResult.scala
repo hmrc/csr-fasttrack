@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package mocks
+package model.persisted
 
-import model.PersistedObjects.{ DiversityReport, DiversityReportRow }
-import org.joda.time.DateTime
-import repositories.DiversityReportRepository
+import model.EvaluationResults.Result
+import model.Scheme.Scheme
+import play.api.libs.json.Json
+import reactivemongo.bson.Macros
 
-import scala.concurrent.Future
+case class SchemeEvaluationResult(scheme: Scheme, result: Result)
 
-object DiversityReportInMemoryRepository extends DiversityReportRepository {
-  override def update(location: String, timeStamp: DateTime, data: DiversityReportRow): Future[Unit] = Future.successful(Unit)
-
-  override def findLatest(): Future[Option[DiversityReport]] = Future.successful(None)
-
-  override def finalizeReportStatus(timeStamp: DateTime): Future[Unit] = Future.successful(Unit)
+object SchemeEvaluationResult {
+  implicit val schemeEvaluationResultHandler = Macros.handler[SchemeEvaluationResult]
+  implicit val schemeEvaluationResultFormat = Json.format[SchemeEvaluationResult]
 }

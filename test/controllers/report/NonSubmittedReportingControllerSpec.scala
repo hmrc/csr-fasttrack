@@ -36,7 +36,6 @@ class NonSubmittedReportingControllerSpec extends BaseReportingControllerSpec {
   "Reporting controller create non-submitted applications report" should {
     "return a list of non submitted applications with phone number if contact details exist" in new NonSubmittedTestFixture {
       override val controller = new ReportingController {
-        override val diversityReportRepository = DiversityReportInMemoryRepository
         override val cdRepository = new ContactDetailsInMemoryRepository {
           override def findAll: Future[List[ContactDetailsWithId]] = {
             Future.successful(ContactDetailsWithId(
@@ -77,7 +76,6 @@ class NonSubmittedReportingControllerSpec extends BaseReportingControllerSpec {
             Future.successful(Nil)
           }
         }
-        override val diversityReportRepository = DiversityReportInMemoryRepository
         override val cdRepository = ContactDetailsInMemoryRepository
         override val authProviderClient = authProviderClientMock
         override val questionnaireRepository = QuestionnaireInMemoryRepository

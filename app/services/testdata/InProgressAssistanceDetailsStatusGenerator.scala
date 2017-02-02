@@ -29,7 +29,6 @@ object InProgressAssistanceDetailsStatusGenerator extends InProgressAssistanceDe
   override val appRepository = applicationRepository
 }
 
-// scalastyle:off method.length
 trait InProgressAssistanceDetailsStatusGenerator extends ConstructiveGenerator {
   val adRepository: AssistanceDetailsRepository
   val appRepository: GeneralApplicationRepository
@@ -47,5 +46,4 @@ trait InProgressAssistanceDetailsStatusGenerator extends ConstructiveGenerator {
       candidateInPreviousStatus.copy(assistanceDetails = Some(assistanceDetails))
     }
   }
-
 }
