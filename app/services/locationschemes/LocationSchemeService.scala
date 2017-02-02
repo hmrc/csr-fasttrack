@@ -79,6 +79,8 @@ trait LocationSchemeService {
     }
   }
 
+  def getAllSchemeLocations: Future[List[LocationSchemes]] = locationSchemeRepository.getSchemesAndLocations
+
   def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit] = {
     for {
       locationSchemes <- locationSchemeRepository.getSchemesAndLocations

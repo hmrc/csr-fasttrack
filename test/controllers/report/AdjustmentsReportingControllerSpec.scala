@@ -19,9 +19,10 @@ package controllers.report
 import connectors.AuthProviderClient
 import controllers.ReportingController
 import mocks._
-import mocks.application.{ ReportingDocumentRootInMemoryRepository }
+import mocks.application.ReportingDocumentRootInMemoryRepository
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
+import model.ReportExchangeObjects.AdjustmentReport
 import play.api.libs.json.{ JsArray, JsValue }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
@@ -35,7 +36,12 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
   "Reporting controller create adjustment report" should {
     "return the adjustment report when we execute adjustment reports" in new AdjustmentsTestFixture {
       override val controller = new ReportingController {
-        override val cdRepository = new ContactDetailsInMemoryRepository {
+        override val reportingFormatter = reportingFormatterMock
+        override val locationSchemeService = locationSchemeServiceMock
+        override val authProviderClient: AuthProviderClient = authProviderClientMock
+        override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
+        override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val contactDetailsRepository = new ContactDetailsInMemoryRepository {
           override def findAll: Future[List[ContactDetailsWithId]] =
             Future.successful(List(
               ContactDetailsWithId("1", Address("First Line", None, None, None), "HP18 9DN", "joe@bloggs.com", None),
@@ -43,11 +49,9 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
               ContactDetailsWithId("3", Address("First Line", None, None, None), "HP18 9DN", "joe@bloggs.com", None)
             ))
         }
-        override val authProviderClient: AuthProviderClient = authProviderClientMock
         override val questionnaireRepository = QuestionnaireInMemoryRepository
-        override val testReportRepository = TestReportInMemoryRepository
-        override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
+        override val testReportRepository = TestReportInMemoryRepository
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
@@ -62,12 +66,15 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
 
     "return the adjustment report without contact details data" in new AdjustmentsTestFixture {
       override val controller = new ReportingController {
-        override val cdRepository = new ContactDetailsInMemoryRepository
-        override val authProviderClient: AuthProviderClient = authProviderClientMock
-        override val questionnaireRepository = QuestionnaireInMemoryRepository
-        override val testReportRepository = TestReportInMemoryRepository
+        override val reportingFormatter = reportingFormatterMock
+        override val locationSchemeService = locationSchemeServiceMock
+        override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
         override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val contactDetailsRepository = new ContactDetailsInMemoryRepository
+        override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
+        override val testReportRepository = TestReportInMemoryRepository
+        override val authProviderClient: AuthProviderClient = authProviderClientMock
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
@@ -83,16 +90,19 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
 
     "return no adjustments if there's no data on the server" in new AdjustmentsTestFixture {
       override val controller = new ReportingController {
+        override val reportingFormatter = reportingFormatterMock
+        override val locationSchemeService = locationSchemeServiceMock
+        override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
+        override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val contactDetailsRepository = ContactDetailsInMemoryRepository
+        override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val reportingRepository = new ReportingDocumentRootInMemoryRepository {
           override def adjustmentReport(frameworkId: String): Future[List[AdjustmentReport]] = {
             Future.successful(List.empty[AdjustmentReport])
           }
         }
-        override val cdRepository = ContactDetailsInMemoryRepository
-        override val authProviderClient: AuthProviderClient = authProviderClientMock
-        override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val testReportRepository = TestReportInMemoryRepository
-        override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val authProviderClient: AuthProviderClient = authProviderClientMock
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 

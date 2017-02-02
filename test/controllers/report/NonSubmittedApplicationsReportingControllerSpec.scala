@@ -32,11 +32,15 @@ import repositories.application.{ GeneralApplicationRepository, ReportingReposit
 import scala.concurrent.Future
 import scala.language.postfixOps
 
-class NonSubmittedReportingControllerSpec extends BaseReportingControllerSpec {
+class NonSubmittedApplicationsReportingControllerSpec extends BaseReportingControllerSpec {
   "Reporting controller create non-submitted applications report" should {
     "return a list of non submitted applications with phone number if contact details exist" in new NonSubmittedTestFixture {
       override val controller = new ReportingController {
-        override val cdRepository = new ContactDetailsInMemoryRepository {
+        override val locationSchemeService = locationSchemeServiceMock
+        override val reportingFormatter = reportingFormatterMock
+        override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
+        override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val contactDetailsRepository = new ContactDetailsInMemoryRepository {
           override def findAll: Future[List[ContactDetailsWithId]] = {
             Future.successful(ContactDetailsWithId(
               "user1",
@@ -44,13 +48,12 @@ class NonSubmittedReportingControllerSpec extends BaseReportingControllerSpec {
             ) :: Nil)
           }
         }
-        override val authProviderClient: AuthProviderClient = authProviderClientMock
         override val questionnaireRepository = QuestionnaireInMemoryRepository
-        override val testReportRepository = TestReportInMemoryRepository
-        override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
+        override val testReportRepository = TestReportInMemoryRepository
+        override val authProviderClient: AuthProviderClient = authProviderClientMock
       }
-      val result = controller.createNonSubmittedAppsReports(frameworkId)(createNonSubmittedAppsReportRequest(frameworkId)).run
+      val result = controller.createNonSubmittedApplicationsReports(frameworkId)(createNonSubmittedAppsReportRequest(frameworkId)).run
 
       val finalResult = contentAsJson(result).as[List[PreferencesWithContactDetails]]
 
@@ -70,18 +73,21 @@ class NonSubmittedReportingControllerSpec extends BaseReportingControllerSpec {
 
     "return only applications based on auth provider in registered state if there is no applications created" in new NonSubmittedTestFixture {
       override val controller = new ReportingController {
+        override val locationSchemeService = locationSchemeServiceMock
+        override val reportingFormatter = reportingFormatterMock
+        override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
+        override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val contactDetailsRepository = ContactDetailsInMemoryRepository
+        override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val reportingRepository = new ReportingDocumentRootInMemoryRepository {
           override def applicationsReport(frameworkId: String): Future[List[(String, IsNonSubmitted, PreferencesWithContactDetails)]] = {
             Future.successful(Nil)
           }
         }
-        override val cdRepository = ContactDetailsInMemoryRepository
-        override val authProviderClient = authProviderClientMock
-        override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val testReportRepository = TestReportInMemoryRepository
-        override val assessmentScoresRepository: ApplicationAssessmentScoresRepository = ApplicationAssessmentScoresInMemoryRepository
+        override val authProviderClient = authProviderClientMock
       }
-      val result = controller.createNonSubmittedAppsReports(frameworkId)(createNonSubmittedAppsReportRequest(frameworkId)).run
+      val result = controller.createNonSubmittedApplicationsReports(frameworkId)(createNonSubmittedAppsReportRequest(frameworkId)).run
 
       val finalResult = contentAsJson(result).as[List[JsValue]]
 
@@ -94,7 +100,7 @@ class NonSubmittedReportingControllerSpec extends BaseReportingControllerSpec {
 
   trait NonSubmittedTestFixture extends TestFixture {
     def createNonSubmittedAppsReportRequest(frameworkId: String) = {
-      FakeRequest(Helpers.GET, controllers.routes.ReportingController.createNonSubmittedAppsReports(frameworkId).url, FakeHeaders(), "")
+      FakeRequest(Helpers.GET, controllers.routes.ReportingController.createNonSubmittedApplicationsReports(frameworkId).url, FakeHeaders(), "")
         .withHeaders("Content-Type" -> "application/json")
     }
   }

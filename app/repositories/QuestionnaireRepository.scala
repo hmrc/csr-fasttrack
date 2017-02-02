@@ -16,7 +16,7 @@
 
 package repositories
 
-import model.Commands.PassMarkReportQuestionnaireData
+import model.ReportExchangeObjects.PassMarkReportQuestionnaireData
 import model.PersistedObjects
 import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
 import play.api.libs.json._
