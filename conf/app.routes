@@ -22,9 +22,7 @@ PUT         /adjustments/comment/:applicationId                          control
 GET         /adjustments/comment/:applicationId                          controllers.AdjustmentsManagementController.findAdjustmentsComment(applicationId: String)
 DELETE      /adjustments/comment/:applicationId                          controllers.AdjustmentsManagementController.removeAdjustmentsComment(applicationId: String)
 
-
 PUT         /media/create                                                controllers.MediaController.addMedia()
-
 
 GET         /scheme-locations/eligible                                   controllers.LocationSchemeController.getEligibleSchemeLocations(applicationId: String, latitude: Option[Double] ?= None, longitude: Option[Double] ?= None)
 GET         /scheme-locations/:applicationId                             controllers.LocationSchemeController.getSchemeLocations(applicationId: String)
@@ -58,6 +56,7 @@ PUT         /questionnaire/:applicationId/:sectionKey                    control
 
 GET         /search/find-by-id/user/:userId/framework/:frameworkId       controllers.SearchForApplicantsController.findById(userId: String, frameworkId: String)
 POST        /search/find-by-criteria                                     controllers.SearchForApplicantsController.findByCriteria
+
 GET         /report/diversity-monitoring                                 controllers.ReportingController.retrieveDiversityReport
 GET         /report/adjustments/:frameworkId                             controllers.ReportingController.createAdjustmentReports(frameworkId: String)
 GET         /report/assessment-centre-allocation/:frameworkId            controllers.ReportingController.createAssessmentCentreAllocationReport(frameworkId: String)

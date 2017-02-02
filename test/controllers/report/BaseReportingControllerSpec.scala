@@ -20,27 +20,14 @@ import config.TestFixtureBase
 import connectors.AuthProviderClient
 import connectors.ExchangeObjects.Candidate
 import controllers.ReportingController
-import mocks._
-import mocks.application.DocumentRootInMemoryRepository
-import model.CandidateScoresCommands.{ CandidateScoreFeedback, CandidateScores, CandidateScoresAndFeedback }
-import model.Commands.Implicits._
-import model.Commands._
-import model.OnlineTestCommands.TestResult
-import model.PersistedObjects.ContactDetailsWithId
-import org.joda.time.LocalDate
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
-import play.api.libs.json.{ JsArray, JsValue }
-import play.api.test.Helpers._
-import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
-import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, DiversityReportRepository, QuestionnaireRepository, TestReportRepository }
-import testkit.MockitoImplicits.OngoingStubbingExtension
+import repositories.application.ReportingRepository
+import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, QuestionnaireRepository, TestReportRepository }
 import testkit.UnitWithAppSpec
 
 import scala.concurrent.Future
 import scala.language.postfixOps
-import scala.util.Random
 
 class BaseReportingControllerSpec extends UnitWithAppSpec {
 
@@ -56,13 +43,11 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
 
     val assessmentScoresRepoMock = mock[ApplicationAssessmentScoresRepository]
     val contactDetailsRepoMock = mock[ContactDetailsRepository]
-    val diversityReportRepoMock = mock[DiversityReportRepository]
     val questionnaireRepoMock = mock[QuestionnaireRepository]
     val reportingRepoMock = mock[ReportingRepository]
     val testReportRepoMock = mock[TestReportRepository]
 
     val controller = new ReportingController {
-      val diversityReportRepository = diversityReportRepoMock
       val cdRepository = contactDetailsRepoMock
       val authProviderClient = authProviderClientMock
       val questionnaireRepository = questionnaireRepoMock

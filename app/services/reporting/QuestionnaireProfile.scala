@@ -14,18 +14,6 @@
  * limitations under the License.
  */
 
-package mocks
+package services.reporting
 
-import model.PersistedObjects.{ DiversityReport, DiversityReportRow }
-import org.joda.time.DateTime
-import repositories.DiversityReportRepository
-
-import scala.concurrent.Future
-
-object DiversityReportInMemoryRepository extends DiversityReportRepository {
-  override def update(location: String, timeStamp: DateTime, data: DiversityReportRow): Future[Unit] = Future.successful(Unit)
-
-  override def findLatest(): Future[Option[DiversityReport]] = Future.successful(None)
-
-  override def finalizeReportStatus(timeStamp: DateTime): Future[Unit] = Future.successful(Unit)
-}
+case class QuestionnaireProfile(questionnaire: List[Map[String, String]])
