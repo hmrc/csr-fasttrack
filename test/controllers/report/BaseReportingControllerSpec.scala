@@ -23,6 +23,10 @@ import controllers.ReportingController
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import repositories.application.ReportingRepository
+import repositories.{ ApplicationAssessmentScoresRepository, AssessmentCentreIndicatorRepository, ContactDetailsRepository, QuestionnaireRepository, TestReportRepository }
+import services.locationschemes.LocationSchemeService
+import services.reporting.ReportingFormatter
+import testkit.MockitoImplicits.OngoingStubbingExtension
 import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, QuestionnaireRepository, TestReportRepository }
 import testkit.UnitWithAppSpec
 
@@ -34,6 +38,14 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
   trait TestFixture extends TestFixtureBase {
     val frameworkId = "FastTrack-2015"
 
+    val locationSchemeServiceMock = mock[LocationSchemeService]
+    val reportingFormatterMock = mock[ReportingFormatter]
+    val assessmentCentreIndicatorRepoMock = mock[AssessmentCentreIndicatorRepository]
+    val assessmentScoresRepoMock = mock[ApplicationAssessmentScoresRepository]
+    val contactDetailsRepoMock = mock[ContactDetailsRepository]
+    val questionnaireRepoMock = mock[QuestionnaireRepository]
+    val reportingRepoMock = mock[ReportingRepository]
+    val testReportRepoMock = mock[TestReportRepository]
     val authProviderClientMock = mock[AuthProviderClient]
     when(authProviderClientMock.candidatesReport(any())).thenReturn(Future.successful(
       Candidate("firstName1", "lastName1", Some("preferredName1"), "email1@test.com", "user1") ::
@@ -41,19 +53,29 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
         Nil
     ))
 
-    val assessmentScoresRepoMock = mock[ApplicationAssessmentScoresRepository]
-    val contactDetailsRepoMock = mock[ContactDetailsRepository]
-    val questionnaireRepoMock = mock[QuestionnaireRepository]
-    val reportingRepoMock = mock[ReportingRepository]
-    val testReportRepoMock = mock[TestReportRepository]
+    trait ReportingControllerDefaultMocks {
+      val locationSchemeService = locationSchemeServiceMock
+      val reportingFormatter = reportingFormatterMock
+      val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
+      val assessmentScoresRepository = assessmentScoresRepoMock
+      val contactDetailsRepository = contactDetailsRepoMock
+      val questionnaireRepository = questionnaireRepoMock
+      val reportingRepository = reportingRepoMock
+      val testReportRepository = testReportRepoMock
+      val authProviderClient = authProviderClientMock
+    }
 
     val controller = new ReportingController {
-      val cdRepository = contactDetailsRepoMock
-      val authProviderClient = authProviderClientMock
-      val questionnaireRepository = questionnaireRepoMock
-      val testReportRepository = testReportRepoMock
+      val locationSchemeService = locationSchemeServiceMock
+      val reportingFormatter = reportingFormatterMock
+      val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
       val assessmentScoresRepository = assessmentScoresRepoMock
+      val contactDetailsRepository = contactDetailsRepoMock
+      val questionnaireRepository = questionnaireRepoMock
       val reportingRepository = reportingRepoMock
+      val testReportRepository = testReportRepoMock
+      val authProviderClient = authProviderClientMock
     }
+
   }
 }
