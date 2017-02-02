@@ -24,7 +24,7 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import repositories.{ FrameworkRepository, PassMarkSettingsRepository }
+import repositories.{ FrameworkRepository, LocationSchemeRepository, PassMarkSettingsRepository, SchemeInfo }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -56,11 +56,13 @@ class PassMarkSettingsServiceSpec extends PlaySpec with BeforeAndAfterEach with 
   object Fixtures {
     implicit val hc = HeaderCarrier()
 
-    val fwRepositoryMock = mock[FrameworkRepository]
+    val locationSchemeRepository = mock[LocationSchemeRepository]
     val pmsRepositoryMockNoSettings = mock[PassMarkSettingsRepository]
     val pmsRepositoryMockWithSettings = mock[PassMarkSettingsRepository]
 
-    when(fwRepositoryMock.getFrameworkNames).thenReturn(Future.successful(List("TestScheme")))
+    when(locationSchemeRepository.getSchemeInfo).thenReturn(Future.successful(List(
+      SchemeInfo(model.Scheme.Commercial, "TestScheme", requiresALevel = true, requiresALevelInStem = true)
+    )))
 
     when(pmsRepositoryMockNoSettings.tryGetLatestVersion(any())).thenReturn(Future.successful(None))
     when(pmsRepositoryMockWithSettings.tryGetLatestVersion(any())).thenReturn(Future.successful(
@@ -68,6 +70,7 @@ class PassMarkSettingsServiceSpec extends PlaySpec with BeforeAndAfterEach with 
         Settings(
           List(
             Scheme(
+              model.Scheme.Commercial,
               "TestScheme",
               SchemeThresholds(
                 competency = SchemeThreshold(20d, 80d),
@@ -86,12 +89,12 @@ class PassMarkSettingsServiceSpec extends PlaySpec with BeforeAndAfterEach with 
 
     val passMarkSettingsServiceNoSettings = new PassMarkSettingsService {
       val pmsRepository: PassMarkSettingsRepository = pmsRepositoryMockNoSettings
-      val fwRepository: FrameworkRepository = fwRepositoryMock
+      val schemeLocationRepository: LocationSchemeRepository = locationSchemeRepository
     }
 
     val passMarkSettingsServiceWithSettings = new PassMarkSettingsService {
       val pmsRepository: PassMarkSettingsRepository = pmsRepositoryMockWithSettings
-      val fwRepository: FrameworkRepository = fwRepositoryMock
+      val schemeLocationRepository: LocationSchemeRepository = locationSchemeRepository
     }
   }
 

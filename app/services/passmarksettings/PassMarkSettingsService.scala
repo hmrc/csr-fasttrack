@@ -23,16 +23,16 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object PassMarkSettingsService extends PassMarkSettingsService {
-  val fwRepository = frameworkRepository
+  val schemeLocationRepository = FileLocationSchemeRepository
   val pmsRepository = passMarkSettingsRepository
 }
 
 trait PassMarkSettingsService {
-  val fwRepository: FrameworkRepository
+  val schemeLocationRepository: LocationSchemeRepository
   val pmsRepository: PassMarkSettingsRepository
 
   def tryGetLatestVersion(): Future[Option[Settings]] =
-    fwRepository.getFrameworkNames.flatMap(schemeNames => {
-      pmsRepository.tryGetLatestVersion(schemeNames)
+    schemeLocationRepository.getSchemeInfo.flatMap(schemeInfo => {
+      pmsRepository.tryGetLatestVersion(schemeInfo.map(_.id))
     })
 }

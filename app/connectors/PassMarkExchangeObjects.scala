@@ -28,7 +28,7 @@ object PassMarkExchangeObjects {
     createdByUser: Option[String]
   )
 
-  case class SchemeResponse(schemeName: String, schemeThresholds: Option[SchemeThresholds])
+  case class SchemeResponse(schemeId: String, schemeName: String, schemeThresholds: Option[SchemeThresholds])
 
   case class SettingsCreateRequest(
     schemes: List[Scheme],
@@ -43,8 +43,7 @@ object PassMarkExchangeObjects {
     createdByUser: String
   )
 
-  // This is the scheme name and pass/fail thresholds for each of the test types
-  case class Scheme(schemeName: String, schemeThresholds: SchemeThresholds)
+  case class Scheme(schemeId: model.Scheme.Scheme, schemeName: String, schemeThresholds: SchemeThresholds)
 
   case class SchemeThresholds(
     competency: SchemeThreshold,

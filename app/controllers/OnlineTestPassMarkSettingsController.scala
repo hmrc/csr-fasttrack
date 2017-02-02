@@ -56,7 +56,7 @@ trait OnlineTestPassMarkSettingsController extends BaseController {
 
         for {
           schemeInfoList <- locSchemeRepository.getSchemeInfo
-          createResult <- pmsRepository.create(builtSettingsObject, schemeInfoList.map(_.name))
+          createResult <- pmsRepository.create(builtSettingsObject, schemeInfoList.map(_.id))
         } yield {
           auditService.logEvent("PassMarkSettingsCreated", Map(
             "Version" -> newVersionUUID,
@@ -72,11 +72,12 @@ trait OnlineTestPassMarkSettingsController extends BaseController {
   def getLatestVersion: Action[AnyContent] = Action.async { implicit request =>
     for {
       schemeInfoList <- locSchemeRepository.getSchemeInfo
-      schemeNames = schemeInfoList.map(_.name)
-      latestVersionOpt <- pmsRepository.tryGetLatestVersion(schemeNames)
+      schemeIdAndNames = schemeInfoList.map(x => x.id -> x.name)
+      latestVersionOpt <- pmsRepository.tryGetLatestVersion(schemeIdAndNames.map(_._1))
     } yield {
       latestVersionOpt.map(latestVersion => {
-        val responseSchemes = latestVersion.schemes.map(scheme => SchemeResponse(scheme.schemeName, Some(scheme.schemeThresholds)))
+        val responseSchemes = latestVersion.schemes.map(scheme => SchemeResponse(scheme.schemeId.toString, scheme.schemeName,
+          Some(scheme.schemeThresholds)))
 
         val exchangeObject = SettingsResponse(
           schemes = responseSchemes,
@@ -86,7 +87,9 @@ trait OnlineTestPassMarkSettingsController extends BaseController {
 
         Ok(Json.toJson(exchangeObject))
       }).getOrElse({
-        val emptyPassMarkSchemes = schemeNames.map(schemeName => SchemeResponse(schemeName, None))
+        val emptyPassMarkSchemes = schemeIdAndNames.map { case (schemeId, schemeName) =>
+          SchemeResponse(schemeId.toString, schemeName, None)
+        }
 
         val emptySettingsExchangeObject = SettingsResponse(emptyPassMarkSchemes, None, None)
 

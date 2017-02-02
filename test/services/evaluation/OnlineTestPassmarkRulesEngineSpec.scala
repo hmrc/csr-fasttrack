@@ -29,11 +29,11 @@ import org.scalatestplus.play.PlaySpec
 class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
   //scalastyle:off
   val PassmarkSettings = Settings(
-    Scheme(Business.toString, SchemeThresholds(competency = t(1.0, 99.0), verbal = t(5.0, 94.0), numerical = t(10.0, 90.0), situational = t(30.0, 85.0)))
-      :: Scheme(Commercial.toString, SchemeThresholds(competency = t(15.0, 94.0), verbal = t(20.0, 90.0), numerical = t(25.0, 50.0), situational = t(29.0, 80.0)))
-      :: Scheme(DigitalAndTechnology.toString, SchemeThresholds(competency = t(30.0, 80.0), verbal = t(30.0, 80.0), numerical = t(30.0, 80.0), situational = t(29.0, 80.0)))
-      :: Scheme(Finance.toString, SchemeThresholds(competency = t(50.0, 55.0), verbal = t(53.0, 70.0), numerical = t(30.0, 45.0), situational = t(20.0, 30.0)))
-      :: Scheme(ProjectDelivery.toString, SchemeThresholds(competency = t(10.0, 55.0), verbal = t(53.0, 70.0), numerical = t(30.0, 45.0), situational = t(20.0, 30.0)))
+    Scheme(Business, Business.toString, SchemeThresholds(competency = t(1.0, 99.0), verbal = t(5.0, 94.0), numerical = t(10.0, 90.0), situational = t(30.0, 85.0)))
+      :: Scheme(Commercial, Commercial.toString, SchemeThresholds(competency = t(15.0, 94.0), verbal = t(20.0, 90.0), numerical = t(25.0, 50.0), situational = t(29.0, 80.0)))
+      :: Scheme(DigitalAndTechnology, DigitalAndTechnology.toString, SchemeThresholds(competency = t(30.0, 80.0), verbal = t(30.0, 80.0), numerical = t(30.0, 80.0), situational = t(29.0, 80.0)))
+      :: Scheme(Finance, Finance.toString, SchemeThresholds(competency = t(50.0, 55.0), verbal = t(53.0, 70.0), numerical = t(30.0, 45.0), situational = t(20.0, 30.0)))
+      :: Scheme(ProjectDelivery, ProjectDelivery.toString, SchemeThresholds(competency = t(10.0, 55.0), verbal = t(53.0, 70.0), numerical = t(30.0, 45.0), situational = t(20.0, 30.0)))
       :: Nil,
     version = "testVersion",
     createDate = new DateTime(),
@@ -222,14 +222,13 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
   }
 
   "Pass mark rules engine for pass mark equal to fail mark" should {
-    //scalastyle:off
     val PassmarkSettings = Settings(
-      Scheme(Business.toString, SchemeThresholds(competency = t(99.0, 99.0), verbal = t(94.0, 94.0), numerical = t(90.0, 90.0), situational = t(85.0, 85.0)))
+      Scheme(model.Scheme.Business, Business.toString, SchemeThresholds(competency = t(99.0, 99.0),
+        verbal = t(94.0, 94.0), numerical = t(90.0, 90.0), situational = t(85.0, 85.0)))
         :: Nil,
       version = "testVersion",
       createDate = new DateTime(),
       createdByUser = "testUser")
-    //scalastyle:on
     val schemes = List(Business)
     val scoresWithPassmark = CandidateEvaluationData(PassmarkSettings, schemes, FullTestReport, ApplicationStatuses.OnlineTestCompleted)
 
