@@ -16,7 +16,7 @@
 
 package repositories.application
 
-import model.Commands.CandidateDetailsReportItem
+import model.Commands.{ CandidateDetailsReportItem, ReportItems }
 import play.api.libs.json.Json
 import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.BSONDocument
@@ -30,21 +30,15 @@ import scala.concurrent.Future
 
 trait PreviousYearCandidatesDetailsRepository {
 
-  type Key = String
+  def findApplicationDetails() : Future[ReportItems[CandidateDetailsReportItem]]
 
-  type Header = String
+  def findContactDetails() : Future[ReportItems[String]]
 
-  type CsvContent = String
+  def findAssessmentCenterDetails() : Future[ReportItems[String]]
 
-  def findApplicationDetails() : Future[(Header, List[CandidateDetailsReportItem])]
+  def findAssessmentScores() : Future[ReportItems[String]]
 
-  def findContactDetails() : Future[(Header, Map[Key, CsvContent])]
-
-  def findAssessmentCenterDetails() : Future[(Header, Map[Key, CsvContent])]
-
-  def findAssessmentScores() : Future[(Header, Map[Key, CsvContent])]
-
-  def findQuestionnaireDetails() : Future[(Header, Map[Key, CsvContent])]
+  def findQuestionnaireDetails() : Future[ReportItems[String]]
 
 }
 
@@ -61,7 +55,7 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
 
   val assessmentScoresCollection = mongo().collection[JSONCollection](CollectionNames.APPLICATION_ASSESSMENT_SCORES_2016)
 
-  override def findApplicationDetails(): Future[(Header, List[CandidateDetailsReportItem])] = {
+  override def findApplicationDetails(): Future[ReportItems[CandidateDetailsReportItem]] = {
     val projection = Json.obj("_id" -> 0, "progress-status" -> 0, "progress-status-dates" -> 0)
 
     val header = "FrameworkId,Application status,First name,Last name,Preferred name,Date of birth," +
@@ -74,21 +68,21 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
     applicationDetailsCollection.find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
       .collect[List]().map { docs =>
-      val csvRecords = docs.map { doc =>
-        val csvContent = makeRow(
-          List(doc.getAs[String]("frameworkId")) :::
-          List(doc.getAs[String]("applicationStatus")) :::
-          personalDetails(doc) ::: frameworkPreferences(doc) :::
-          assistanceDetails(doc):_*
-        )
-        CandidateDetailsReportItem(doc.getAs[String]("applicationId").getOrElse(""),
-          doc.getAs[String]("userId").getOrElse(""), csvContent)
-      }
-      (header, csvRecords)
+        val csvRecords = docs.map { doc =>
+          val csvContent = makeRow(
+            List(doc.getAs[String]("frameworkId")) :::
+            List(doc.getAs[String]("applicationStatus")) :::
+            personalDetails(doc) ::: frameworkPreferences(doc) :::
+            assistanceDetails(doc):_*
+          )
+          doc.getAs[String]("applicationId").getOrElse("") -> CandidateDetailsReportItem(doc.getAs[String]("applicationId").getOrElse(""),
+            doc.getAs[String]("userId").getOrElse(""), csvContent)
+        }
+        ReportItems(header, csvRecords.toMap)
     }
   }
 
-  override def findContactDetails(): Future[(Header, Map[Key, CsvContent])] = {
+  override def findContactDetails(): Future[ReportItems[String]] = {
 
     val projection = Json.obj("_id" -> 0)
 
@@ -97,26 +91,24 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
     contactDetailsCollection.find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
       .collect[List]().map { docs =>
-       val csvRecordMap = docs.map { doc => {
-           val contactDetails = doc.getAs[BSONDocument]("contact-details")
-           val address = contactDetails.flatMap(_.getAs[BSONDocument]("address"))
-           val csvRecord = makeRow(
-              address.flatMap(_.getAs[String]("line1")),
-              address.flatMap(_.getAs[String]("line2")),
-              address.flatMap(_.getAs[String]("line3")),
-              address.flatMap(_.getAs[String]("line4")),
-              contactDetails.flatMap(_.getAs[String]("postCode")),
-              contactDetails.flatMap(_.getAs[String]("email")),
-              contactDetails.flatMap(_.getAs[String]("phone"))
-          )
-          doc.getAs[String]("userId").getOrElse("") -> csvRecord
+         val csvRecords = docs.map { doc =>
+             val contactDetails = doc.getAs[BSONDocument]("contact-details")
+             val address = contactDetails.flatMap(_.getAs[BSONDocument]("address"))
+             val csvRecord = makeRow(
+                address.flatMap(_.getAs[String]("line1")),
+                address.flatMap(_.getAs[String]("line2")),
+                address.flatMap(_.getAs[String]("line3")),
+                address.flatMap(_.getAs[String]("line4")),
+                contactDetails.flatMap(_.getAs[String]("postCode")),
+                contactDetails.flatMap(_.getAs[String]("phone"))
+            )
+            doc.getAs[String]("userId").getOrElse("") -> csvRecord
         }
-      }.toMap
-      (header, csvRecordMap)
+        ReportItems(header, csvRecords.toMap)
     }
   }
 
-  def findQuestionnaireDetails(): Future[(Header, Map[Key, CsvContent])] = {
+  def findQuestionnaireDetails(): Future[ReportItems[String]] = {
     val projection = Json.obj("_id" -> 0)
 
     def getAnswer(question: String, doc: Option[BSONDocument]) = {
@@ -140,31 +132,30 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
     questionnaireCollection.find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
       .collect[List]().map { docs =>
-       val csvRecords = docs.map { doc => {
-        val questions = doc.getAs[BSONDocument]("questions")
-        val csvRecord = makeRow(
-          getAnswer("What is your gender identity?", questions),
-          getAnswer("What is your sexual orientation?", questions),
-          getAnswer("What is your ethnic group?", questions),
-          getAnswer("Between the ages of 11 to 16, in which school did you spend most of your education?", questions),
-          getAnswer("Between the ages of 16 to 18, in which school did you spend most of your education?", questions),
-          getAnswer("What was your home postcode when you were 14?", questions),
-          getAnswer("During your school years, were you at any time eligible for free school meals?", questions),
-          getAnswer("Did any of your parent(s) or guardian(s) complete a university degree course or equivalent?", questions),
-          getAnswer("Parent/guardian work status", questions),
-          getAnswer("Which type of occupation did they have?", questions),
-          getAnswer("Did they work as an employee or were they self-employed?", questions),
-          getAnswer("Which size would best describe their place of work?", questions),
-          getAnswer("Did they supervise any other employees?", questions)
-        )
-        doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
-      }
-      }.toMap
-      (header, csvRecords)
+         val csvRecords = docs.map { doc =>
+          val questions = doc.getAs[BSONDocument]("questions")
+          val csvRecord = makeRow(
+            getAnswer("What is your gender identity?", questions),
+            getAnswer("What is your sexual orientation?", questions),
+            getAnswer("What is your ethnic group?", questions),
+            getAnswer("Between the ages of 11 to 16, in which school did you spend most of your education?", questions),
+            getAnswer("Between the ages of 16 to 18, in which school did you spend most of your education?", questions),
+            getAnswer("What was your home postcode when you were 14?", questions),
+            getAnswer("During your school years, were you at any time eligible for free school meals?", questions),
+            getAnswer("Did any of your parent(s) or guardian(s) complete a university degree course or equivalent?", questions),
+            getAnswer("Parent/guardian work status", questions),
+            getAnswer("Which type of occupation did they have?", questions),
+            getAnswer("Did they work as an employee or were they self-employed?", questions),
+            getAnswer("Which size would best describe their place of work?", questions),
+            getAnswer("Did they supervise any other employees?", questions)
+          )
+          doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
+        }
+        ReportItems(header, csvRecords.toMap)
     }
   }
 
-  override def findAssessmentCenterDetails(): Future[(Header, Map[Key, CsvContent])] = {
+  override def findAssessmentCenterDetails(): Future[ReportItems[String]] = {
 
     val projection = Json.obj("_id" -> 0)
 
@@ -173,22 +164,21 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
     assessmentCentersCollection.find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
       .collect[List]().map { docs =>
-       val csvRecords = docs.map { doc => {
-        val csvRecord = makeRow(
-          doc.getAs[String]("venue"),
-          doc.getAs[String]("date"),
-          doc.getAs[String]("session"),
-          doc.getAs[Int]("slot").map(_.toString),
-          doc.getAs[Boolean]("confirmed").map(_.toString)
-        )
-        doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
-      }
-      }.toMap
-      (header, csvRecords)
+         val csvRecords = docs.map {
+           doc => val csvRecord = makeRow(
+            doc.getAs[String]("venue"),
+            doc.getAs[String]("date"),
+            doc.getAs[String]("session"),
+            doc.getAs[Int]("slot").map(_.toString),
+            doc.getAs[Boolean]("confirmed").map(_.toString)
+          )
+          doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
+        }
+        ReportItems(header, csvRecords.toMap)
     }
   }
 
-  override def findAssessmentScores(): Future[(Header, Map[Key, CsvContent])] = {
+  override def findAssessmentScores(): Future[ReportItems[String]] = {
 
     val projection = Json.obj("_id" -> 0)
 
@@ -203,12 +193,11 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
     assessmentScoresCollection.find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
       .collect[List]().map { docs =>
-       val csvRecords = docs.map { doc => {
+       val csvRecords = docs.map { doc =>
           val csvRecord = makeRow(assessmentScores(doc):_*)
           doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
-        }
-       }.toMap
-      (header, csvRecords)
+       }
+      ReportItems(header, csvRecords.toMap)
     }
   }
 

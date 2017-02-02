@@ -107,6 +107,7 @@ object Commands {
   )
 
   case class CandidateDetailsReportItem(appId: String, userId: String, csvRecord: String)
+  case class ReportItems[A](header: String, records: Map[String, A])
 
   case class Report(applicationId: String, progress: Option[String], firstLocation: Option[String],
                     firstLocationFirstScheme: Option[String], firstLocationSecondScheme: Option[String], secondLocation: Option[String],

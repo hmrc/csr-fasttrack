@@ -213,22 +213,35 @@ trait ReportingController extends BaseController {
   }
 
   def prevYearCandidatesDetailsReport = Action.async { implicit request =>
+    val applicationFut = prevYearCandidatesDetailsRepository.findApplicationDetails()
+    val candidateDetailsFut = prevYearCandidatesDetailsRepository.findContactDetails()
+    val questionnaireDetailsFut = prevYearCandidatesDetailsRepository.findQuestionnaireDetails()
+    val assessmentCenterDetailsFut = prevYearCandidatesDetailsRepository.findAssessmentCenterDetails()
+    val assessmentScoresFut = prevYearCandidatesDetailsRepository.findAssessmentScores()
     for {
-      applications <- prevYearCandidatesDetailsRepository.findApplicationDetails()
-      contactDetails <- prevYearCandidatesDetailsRepository.findContactDetails()
-      questionnaireDetails <- prevYearCandidatesDetailsRepository.findQuestionnaireDetails()
-      assessmentCenterDetails <- prevYearCandidatesDetailsRepository.findAssessmentCenterDetails()
-      assessmentScores <- prevYearCandidatesDetailsRepository.findAssessmentScores()
+      applications <- applicationFut
+      contactDetails <- candidateDetailsFut
+      questionnaireDetails <- questionnaireDetailsFut
+      assessmentCenterDetails <- assessmentCenterDetailsFut
+      assessmentScores <- assessmentScoresFut
     } yield {
-      val header = List(applications._1, contactDetails._1, questionnaireDetails._1,
-        assessmentCenterDetails._1, assessmentScores._1).mkString(",")
-      val records = applications._2.map {
-        app => List(app.csvRecord, contactDetails._2.getOrElse(app.userId, ""),
-          questionnaireDetails._2.getOrElse(app.appId, ""),
-          assessmentCenterDetails._2.getOrElse(app.appId, ""),
-          assessmentScores._2.getOrElse(app.appId, "")).mkString(",")
+      val header = (
+          applications.header ::
+          contactDetails.header ::
+          questionnaireDetails.header ::
+          assessmentCenterDetails.header ::
+          assessmentScores.header :: Nil
+        ).mkString(",")
+
+      val records = applications.records.values.map { app => (
+          app.csvRecord ::
+          contactDetails.records.getOrElse(app.userId, "") ::
+          questionnaireDetails.records.getOrElse(app.appId, "") ::
+          assessmentCenterDetails.records.getOrElse(app.appId, "") ::
+          assessmentScores.records.getOrElse(app.appId, "") :: Nil
+        ).mkString(",")
       }
-      Ok((header::records).mkString("\n"))
+      Ok((header :: records.toList).mkString("\n"))
     }
   }
 
