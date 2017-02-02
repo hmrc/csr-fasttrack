@@ -218,7 +218,7 @@ trait ReportingController extends BaseController {
       result <- enrichPreviousYearCandidateDetails {
         (contactDetails, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores) => {
           val header = (
-            applications.header ::
+              applications.header ::
               contactDetails.header ::
               questionnaireDetails.header ::
               onlineTestReports.header ::
@@ -227,7 +227,7 @@ trait ReportingController extends BaseController {
             ).mkString(",")
 
           val records = applications.records.values.map { app => (
-            app.csvRecord ::
+              app.csvRecord ::
               contactDetails.records.getOrElse(app.userId, "") ::
               questionnaireDetails.records.getOrElse(app.appId, "") ::
               onlineTestReports.records.getOrElse(app.appId, "") ::
@@ -247,8 +247,7 @@ trait ReportingController extends BaseController {
     enrichPreviousYearCandidateDetails {
       (contactDetails, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores) => {
         val header = Enumerator(
-          (
-            prevYearCandidatesDetailsRepository.applicationDetailsHeader ::
+            ( prevYearCandidatesDetailsRepository.applicationDetailsHeader ::
               prevYearCandidatesDetailsRepository.contactDetailsHeader ::
               prevYearCandidatesDetailsRepository.questionnaireDetailsHeader ::
               prevYearCandidatesDetailsRepository.onlineTestReportHeader ::
@@ -257,8 +256,7 @@ trait ReportingController extends BaseController {
             ).mkString(",") + "\n"
         )
         val candidatesStream = prevYearCandidatesDetailsRepository.applicationDetailsStream().map { app =>
-          (
-            app.csvRecord ::
+            ( app.csvRecord ::
               contactDetails.records.getOrElse(app.userId, "") ::
               questionnaireDetails.records.getOrElse(app.appId, "") ::
               onlineTestReports.records.getOrElse(app.appId, "") ::
