@@ -143,26 +143,39 @@ trait ReportingController extends BaseController {
   }
 
   def createCandidateProgressReport(frameworkId: String) = Action.async { implicit request =>
-    val reportFut = for {
-      applications <- reportingRepository.applicationsForCandidateProgressReport(frameworkId)
-      allContactDetails <- contactDetailsRepository.findAll.map(x => x.groupBy(_.userId).mapValues(_.head))
-      allLocations <- locationSchemeService.getAllSchemeLocations
-    } yield {
+    val applicationsFut = reportingRepository.applicationsForCandidateProgressReport(frameworkId)
+    val allContactDetailsFut = contactDetailsRepository.findAll.map(x => x.groupBy(_.userId).mapValues(_.head))
+    val allLocationsFut = locationSchemeService.getAllSchemeLocations
+    val reportFut: Future[List[CandidateProgressReportItem]] = for {
+      applications <- applicationsFut
+      allContactDetails <- allContactDetailsFut
+      allLocations <- allLocationsFut
+      report <- giveCandidateProgressReports(applications, allContactDetails, allLocations)
+    } yield report
+    reportFut.map { report => Ok(Json.toJson(report)) }
+  }
+
+  private def giveCandidateProgressReports(
+                                            applications: List[ApplicationForCandidateProgressReport],
+                                            allContactDetails: Map[String, ContactDetailsWithId],
+                                            allLocations: List[LocationSchemes]): Future[List[CandidateProgressReportItem]] = {
+    Future{
       applications.map { application =>
+
         val fsacIndicatorVal = allContactDetails.get(application.userId.toString()).map { contactDetails =>
           assessmentCentreIndicatorRepository.calculateIndicator(Some(contactDetails.postCode.toString)).assessmentCentre
         }
+        val locationIds = application.locationIds
         val onlineAdjustmentsVal = reportingFormatter.getOnlineAdjustments(application.onlineAdjustments, application.adjustments)
         val assessmentCentreAdjustmentsVal = reportingFormatter.getAssessmentCentreAdjustments(
           application.assessmentCentreAdjustments,
           application.adjustments)
-        val locationNames = application.locationIds.map(locationId => allLocations.filter(_.id == locationId).
-          headOption.map{_.locationName}).flatten
+        val locationNames = locationIds.flatMap(locationId => allLocations.filter(_.id == locationId).headOption.map{_.locationName})
+
         CandidateProgressReportItem(application).copy(fsacIndicator = fsacIndicatorVal, locations = locationNames,
           onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
       }
     }
-    reportFut.map { report => Ok(Json.toJson(report)) }
   }
 
   def createNonSubmittedApplicationsReports(frameworkId: String) =
