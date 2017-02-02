@@ -135,8 +135,8 @@ trait ReportingController extends BaseController {
     } yield {
       for {
         app <- apps
-        quest <- quests.get(app.applicationId.toString())
-        appscore <- scores.get(app.applicationId.toString())
+        quest <- quests.get(app.applicationId.toString)
+        appscore <- scores.get(app.applicationId.toString)
       } yield {
         AssessmentResultsReport(app, quest, appscore)
       }
@@ -157,12 +157,12 @@ trait ReportingController extends BaseController {
         val fsacIndicatorVal = allContactDetails.get(application.userId.toString()).map { contactDetails =>
           assessmentCentreIndicatorRepository.calculateIndicator(Some(contactDetails.postCode.toString)).assessmentCentre
         }
-        val locationIds = application.locations
         val onlineAdjustmentsVal = reportingFormatter.getOnlineAdjustments(application.onlineAdjustments, application.adjustments)
         val assessmentCentreAdjustmentsVal = reportingFormatter.getAssessmentCentreAdjustments(
           application.assessmentCentreAdjustments,
           application.adjustments)
-        val locationNames = locationIds.map(locationId => allLocations.filter(_.id == locationId).headOption.map{_.locationName}).flatten
+        val locationNames = application.locationIds.map(locationId => allLocations.filter(_.id == locationId).
+          headOption.map{_.locationName}).flatten
         CandidateProgressReportItem(application).copy(fsacIndicator = fsacIndicatorVal, locations = locationNames,
           onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
       }
@@ -253,11 +253,9 @@ trait ReportingController extends BaseController {
       }
   }
 
-  private def mergeApplications(
-                                 users: Map[String, PreferencesWithContactDetails],
+  private def mergeApplications(users: Map[String, PreferencesWithContactDetails],
                                  contactDetails: List[ContactDetailsWithId],
-                                 applications: List[(String, IsNonSubmitted, PreferencesWithContactDetails)]
-                               ) = {
+                                 applications: List[(String, IsNonSubmitted, PreferencesWithContactDetails)]) = {
 
     val contactDetailsMap = contactDetails.groupBy(_.userId).mapValues(_.headOption)
     val applicationsMap = applications

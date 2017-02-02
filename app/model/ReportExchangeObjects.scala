@@ -48,8 +48,7 @@ object ReportExchangeObjects {
     dateOfBirth: LocalDate
   )
 
-  case class CandidateProgressReportItem(
-                                           applicationId: UniqueIdentifier,
+  case class CandidateProgressReportItem(applicationId: UniqueIdentifier,
                                            progress: Option[String],
                                            schemes: List[Scheme],
                                            locations: List[String],
@@ -66,23 +65,22 @@ object ReportExchangeObjects {
       CandidateProgressReportItem(applicationId = application.applicationId,
         progress = application.progress,
         schemes = application.schemes,
-        locations = application.locations,
-        disability = application.disability,
+        locations = application.locationIds,
+        disability = application.hasDisability,
         gis = application.gis,
-        onlineAdjustments = application.onlineAdjustments.map( value => if (value) {"Yes"} else {"No"}),
-        assessmentCentreAdjustments = application.assessmentCentreAdjustments.map( value => if (value) {"Yes"} else {"No"}),
+        onlineAdjustments = application.onlineAdjustments.map(fromBooleanToYesNo(_)),
+        assessmentCentreAdjustments = application.assessmentCentreAdjustments.map(fromBooleanToYesNo(_)),
         civilServant = application.civilServant,
         None)
     }
   }
 
-  case class ApplicationForCandidateProgressReport(
-                                                    applicationId: UniqueIdentifier,
+  case class ApplicationForCandidateProgressReport(applicationId: UniqueIdentifier,
                                                     userId: UniqueIdentifier,
                                                     progress: Option[String],
                                                     schemes: List[Scheme],
-                                                    locations: List[String],
-                                                    disability: Option[String],
+                                                    locationIds: List[String],
+                                                    hasDisability: Option[String],
                                                     gis: Option[Boolean],
                                                     onlineAdjustments: Option[Boolean],
                                                     assessmentCentreAdjustments: Option[Boolean],
@@ -133,12 +131,10 @@ object ReportExchangeObjects {
     socioEconomicScore: String
   )
 
-  case class PassMarkReportTestResults(
-                                        competency: Option[TestResult],
+  case class PassMarkReportTestResults(competency: Option[TestResult],
                                         numerical: Option[TestResult],
                                         verbal: Option[TestResult],
-                                        situational: Option[TestResult]
-  )
+                                        situational: Option[TestResult])
 
   case class OnlineTestPassmarkEvaluationSchemes(
     location1Scheme1: Option[String] = None,
@@ -196,24 +192,23 @@ object ReportExchangeObjects {
   case class ApplicationPreferencesWithTestResults(userId: UniqueIdentifier,
                                                    applicationId: UniqueIdentifier,
                                                    location1: Option[String],
-    location1Scheme1: Option[String],
+                                                   location1Scheme1: Option[String],
                                                    location1Scheme2: Option[String],
-    location2: Option[String],
+                                                   location2: Option[String],
                                                    location2Scheme1: Option[String],
-    location2Scheme2: Option[String],
+                                                   location2Scheme2: Option[String],
                                                    alternativeLocation: Option[String],
-    alternativeScheme: Option[String],
-    personalDetails: PersonalInfo,
-    scores: CandidateScoresSummary,
-    passmarks: SchemeEvaluation)
+                                                   alternativeScheme: Option[String],
+                                                   personalDetails: PersonalInfo,
+                                                   scores: CandidateScoresSummary,
+                                                   passmarks: SchemeEvaluation)
 
   case class ApplicationPreferencesWithTestResultsAndContactDetails(
     application: ApplicationPreferencesWithTestResults,
     contactDetails: ContactDetails
   )
 
-  case class CandidateAwaitingAllocation(
-                                          userId: String,
+  case class CandidateAwaitingAllocation(userId: String,
                                           firstName: String,
                                           lastName: String,
                                           preferredName: String,
@@ -252,4 +247,6 @@ object ReportExchangeObjects {
     implicit val successfulCandidatesReportFormats = Json.format[ApplicationPreferencesWithTestResultsAndContactDetails]
     implicit val candidateAwaitingAllocationFormats = Json.format[CandidateAwaitingAllocation]
   }
+
+  val fromBooleanToYesNo: Boolean => String = (b: Boolean) => if (b) "Yes" else "No"
 }

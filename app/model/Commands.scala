@@ -100,14 +100,7 @@ object Commands {
     occupationCompleted: Boolean = false
   )
 
-  case class ContactDetails(
-                             phone: Option[String],
-                             email: String,
-                             address: Address,
-                             postCode: PostCode)
-
-
-
+  case class ContactDetails(phone: Option[String], email: String, address: Address, postCode: PostCode)
 
   type IsNonSubmitted = Boolean
 
