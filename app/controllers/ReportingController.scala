@@ -17,16 +17,17 @@
 package controllers
 
 import connectors.AuthProviderClient
-import model.{ ApplicationForDiversityReportItem, ApplicationStatusOrder, DiversityReportItem }
+import model._
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
 import model.PersistedObjects.Implicits._
 import model.ReportExchangeObjects.Implicits._
 import model.ReportExchangeObjects.{ Implicits => _, _ }
+import org.joda.time.DateTime
 import play.api.libs.json.Json
 import play.api.mvc.{ Action, AnyContent, Request }
 import repositories.application.ReportingRepository
-import repositories.{ QuestionnaireRepository, _ }
+import repositories.{ QuestionnaireRepository, application, _ }
 import services.locationschemes.LocationSchemeService
 import services.reporting.ReportingFormatter
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -44,6 +45,7 @@ object ReportingController extends ReportingController {
   val reportingRepository = repositories.reportingRepository
   val testReportRepository = repositories.testReportRepository
   val authProviderClient = AuthProviderClient
+  val locationSchemeRepository = FileLocationSchemeRepository
 }
 
 trait ReportingController extends BaseController {
@@ -59,21 +61,49 @@ trait ReportingController extends BaseController {
   val reportingRepository: ReportingRepository
   val testReportRepository: TestReportRepository
   val authProviderClient: AuthProviderClient
+  val locationSchemeRepository: LocationSchemeRepository
 
   def retrieveDiversityReport(frameworkId: String) = Action.async { implicit request =>
-    val reports = for {
+    val diversityRows = for {
       applications <- reportingRepository.diversityReport(frameworkId)
     } yield {
+      val selectedLocations = List("York", "Yeovil", "Wrexham", "Worthing", "Warrington", "Torquay", "Telford", "Swansea", "Stockport",
+        "St Austell", "Springburn/Newlands/Govan", "Southend", "Shipley", "Sheffield", "Salisbury", "Reading", "Portsmouth",
+        "Plymouth", "Nottingham", "Norwich", "Newport", "Newcastle", "Manchester/Salford", "London",
+        "Liverpool/Bootle/Netherton", "Leeds", "High Wycombe", "Hastings", "Glasgow", "Gartcosh", "Edinburgh", "East Kilbride",
+        "Dover", "Darlington", "Croydon", "Coventry", "Corsham", "Cardiff", "Buxton", "Bristol", "Bradford", "Blackpool",
+        "Birmingham", "Bathgate", "Andover","Airdrie/Motherwell/Hamilton"
+      )
+
+      val locations = locationSchemeRepository.schemeInfoList
       applications.map { application =>
-        val appItem = ApplicationForDiversityReportItem(
-          application.progress.map(_.toString),
-          application.schemes.getOrElse(Nil)
+        val schemeNames = application.schemes.map { scheme =>
+          locations.find(_.id == scheme).getOrElse(
+            throw new IllegalArgumentException(s"Incorrect scheme id ${scheme.toString}")
+          ).name
+        }
+
+        DiversityReportRow(
+          progress = application.progress.map(_.toString).getOrElse(""),
+          selectedSchemes = schemeNames,
+          selectedLocations = selectedLocations,
+          gender = "Male",
+          sexuality = "Gay/lesbian",
+          ethnicity = "Irish",
+          disability = "Yes",
+          gis = "No",
+          onlineAdjustments = "Extra time; Numerical",
+          assessmentCentreAdjustment = "",
+          civilServant = "Yes",
+          ses = "SE-1",
+          hearAboutUs = "Google",
+          allocatedAssessmentCentre = "London"
         )
-        DiversityReportItem(appItem)
       }
     }
-    reports.map { list =>
-      Ok(Json.toJson(list))
+
+    diversityRows.map { list =>
+      Ok(Json.toJson(DiversityReport(timeStamp = DateTime.now(), data = list)))
     }
   }
 

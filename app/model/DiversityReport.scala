@@ -16,12 +16,11 @@
 
 package model
 
-import model.Scheme.Scheme
+import org.joda.time.DateTime
 import play.api.libs.json.Json
 
-case class ApplicationForDiversityReportItem(progress: Option[String],
-                                             schemes: List[Scheme])
+case class DiversityReport(timeStamp: DateTime, data: List[DiversityReportRow])
 
-object ApplicationForDiversityReportItem {
-  implicit val applicationForDiversityReportItemFormat = Json.format[ApplicationForDiversityReportItem]
+object DiversityReport {
+  implicit val diversityReportFormat = Json.format[DiversityReport]
 }

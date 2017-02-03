@@ -651,6 +651,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       "userId" -> "1",
       "applicationId" -> "1",
       "schemes" -> "1",
+      "scheme-locations" -> "1",
       "assistance-details" -> "1",
       "progress-status" -> "1")
 
@@ -664,9 +665,10 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     val userId = document.getAs[String]("userId").getOrElse("")
     val progressResponse = findProgress(document, applicationId)
     val latestProgressStatus = getStatus(progressResponse)
-    val schemes = document.getAs[List[Scheme]]("schemes")
+    val schemes = document.getAs[List[Scheme]]("schemes").getOrElse(Nil)
+    val schemesLocations = document.getAs[List[String]]("schemes-locations").getOrElse(Nil)
 
-    ApplicationForDiversityReport(applicationId, userId, Some(latestProgressStatus), schemes, None, None, None, None)
+    ApplicationForDiversityReport(applicationId, userId, Some(latestProgressStatus), schemes, schemesLocations, None, None, None, None)
   }
 }
 
