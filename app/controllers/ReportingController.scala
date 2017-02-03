@@ -18,8 +18,8 @@ package controllers
 
 import akka.stream.scaladsl.Source
 import connectors.AuthProviderClient
-import model.{ ApplicationStatusOrder }
-import model.Commands._
+import model.ApplicationStatusOrder
+import model.Commands.{ CsvExtract, _ }
 import model.PersistedObjects.ContactDetailsWithId
 import model.PersistedObjects.Implicits._
 import model.ReportExchangeObjects.Implicits._
@@ -271,14 +271,9 @@ trait ReportingController extends BaseController {
               assessmentScores.header :: Nil
             ).mkString(",")
 
-          val records = applications.records.values.map { app => (
-              app.csvRecord ::
-              contactDetails.records.getOrElse(app.userId, "") ::
-              questionnaireDetails.records.getOrElse(app.appId, "") ::
-              onlineTestReports.records.getOrElse(app.appId, "") ::
-              assessmentCenterDetails.records.getOrElse(app.appId, "") ::
-              assessmentScores.records.getOrElse(app.appId, "") :: Nil
-            ).mkString(",")
+          val records = applications.records.values.map { app =>
+            createCandidateInfoBackUpRecord(app, contactDetails, questionnaireDetails,
+              onlineTestReports, assessmentCenterDetails, assessmentScores)
           }
           Ok((header :: records.toList).mkString("\n"))
         }
@@ -301,13 +296,8 @@ trait ReportingController extends BaseController {
             ).mkString(",") + "\n"
         )
         val candidatesStream = prevYearCandidatesDetailsRepository.applicationDetailsStream().map { app =>
-            ( app.csvRecord ::
-              contactDetails.records.getOrElse(app.userId, "") ::
-              questionnaireDetails.records.getOrElse(app.appId, "") ::
-              onlineTestReports.records.getOrElse(app.appId, "") ::
-              assessmentCenterDetails.records.getOrElse(app.appId, "") ::
-              assessmentScores.records.getOrElse(app.appId, "") :: Nil
-            ).mkString(",") + "\n"
+          createCandidateInfoBackUpRecord(app, contactDetails, questionnaireDetails,
+            onlineTestReports, assessmentCenterDetails, assessmentScores) + "\n"
         }
         Ok.chunked(Source.fromPublisher(Streams.enumeratorToPublisher(header.andThen(candidatesStream))))
       }
@@ -330,6 +320,18 @@ trait ReportingController extends BaseController {
     } yield {
       block(contactDetails, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores)
     }
+  }
+
+  private def createCandidateInfoBackUpRecord(candidateDetails: CandidateDetailsReportItem, contactDetails: CsvExtract[String],
+                                              questionnaireDetails: CsvExtract[String], onlineTestReports: CsvExtract[String],
+                                              assessmentCenterDetails: CsvExtract[String], assessmentScores: CsvExtract[String]) = {
+    ( candidateDetails.csvRecord ::
+      contactDetails.records.getOrElse(candidateDetails.userId, contactDetails.emptyRecord()) ::
+      questionnaireDetails.records.getOrElse(candidateDetails.appId, questionnaireDetails.emptyRecord()) ::
+      onlineTestReports.records.getOrElse(candidateDetails.appId, onlineTestReports.emptyRecord()) ::
+      assessmentCenterDetails.records.getOrElse(candidateDetails.appId, assessmentCenterDetails.emptyRecord()) ::
+      assessmentScores.records.getOrElse(candidateDetails.appId, assessmentScores.emptyRecord()) :: Nil
+    ).mkString(",")
   }
 
   private def preferencesAndContactReports(nonSubmittedOnly: Boolean)(frameworkId: String) = Action.async { implicit request =>
