@@ -37,6 +37,7 @@ trait TestDataGeneratorService {
   def clearDatabase()(implicit hc: HeaderCarrier): Future[Unit] = {
     for {
       _ <- MongoDbConnection.mongoConnector.db().drop()
+      _ <- repositories.initIndexes
       _ <- AuthProviderClient.removeAllUsers()
       _ <- RegisteredStatusGenerator.createUser(generationId = 1,
         firstName = "Service", lastName = "Manager", email = "test_service_manager_1@mailinator.com",
