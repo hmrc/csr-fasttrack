@@ -67,6 +67,7 @@ trait ReportingController extends BaseController {
     val diversityRows = for {
       applications <- reportingRepository.diversityReport(frameworkId)
       locationSchemes <- locationSchemeRepository.getSchemesAndLocations.map(_.groupBy(_.id).mapValues(_.head))
+//      allQuestionsByAppId <- questionnaireRepository.passMarkReport
     } yield {
       val schemeInfoList = locationSchemeRepository.schemeInfoList
       applications.map { application =>
@@ -77,6 +78,7 @@ trait ReportingController extends BaseController {
         }
 
         val selectedLocations = application.schemeLocationIds.map(locationSchemes.apply).map(_.locationName)
+//        val questions = allQuestionsByAppId(application.applicationId)
 
         DiversityReportRow(
           progress = application.progress.map(_.toString).getOrElse(""),

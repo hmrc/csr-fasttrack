@@ -65,11 +65,12 @@ class QuestionnaireMongoRepository(socioEconomicCalculator: SocioEconomicScoreCa
     }
   }
 
+  // TODO LT: Replace this by progress-status
   override def passMarkReport: Future[Map[String, PassMarkReportQuestionnaireData]] = {
     // We need to ensure that the candidates have completed the last page of the questionnaire
     // however, only the first question on the employment page is mandatory, as if the answer is
     // unemployed, they don't need to answer other questions
-    val firstEmploymentQuestion = "Which type of occupation did they have?"
+    val firstEmploymentQuestion = "Did they supervise employees?"
     val query = BSONDocument(s"questions.$firstEmploymentQuestion" -> BSONDocument("$exists" -> BSONBoolean(true)))
     val queryResult = collection.find(query).cursor[BSONDocument](ReadPreference.nearest).collect[List]()
     queryResult.map(_.map(docToReport).toMap)
