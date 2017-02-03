@@ -16,7 +16,7 @@
 
 package repositories.application
 
-import model.Commands.{ CandidateDetailsReportItem, ReportItems }
+import model.Commands.{ CandidateDetailsReportItem, CsvExtract }
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
 import reactivemongo.api.{ DB, ReadPreference }
@@ -64,19 +64,19 @@ trait PreviousYearCandidatesDetailsRepository {
     "Motivation fit group exercise,Motivation fit written exercise,Interview feedback,Group exercise feedback," +
     "Written exercise feedback"
 
-  def findApplicationDetails() : Future[ReportItems[CandidateDetailsReportItem]]
+  def findApplicationDetails() : Future[CsvExtract[CandidateDetailsReportItem]]
 
   def applicationDetailsStream() : Enumerator[CandidateDetailsReportItem]
 
-  def findContactDetails() : Future[ReportItems[String]]
+  def findContactDetails() : Future[CsvExtract[String]]
 
-  def findOnlineTestReports() : Future[ReportItems[String]]
+  def findOnlineTestReports() : Future[CsvExtract[String]]
 
-  def findAssessmentCenterDetails() : Future[ReportItems[String]]
+  def findAssessmentCenterDetails() : Future[CsvExtract[String]]
 
-  def findAssessmentScores() : Future[ReportItems[String]]
+  def findAssessmentScores() : Future[CsvExtract[String]]
 
-  def findQuestionnaireDetails() : Future[ReportItems[String]]
+  def findQuestionnaireDetails() : Future[CsvExtract[String]]
 
 }
 
@@ -95,7 +95,7 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
 
   val assessmentScoresCollection = mongo().collection[JSONCollection](CollectionNames.APPLICATION_ASSESSMENT_SCORES_2016)
 
-  override def findApplicationDetails(): Future[ReportItems[CandidateDetailsReportItem]] = {
+  override def findApplicationDetails(): Future[CsvExtract[CandidateDetailsReportItem]] = {
     val projection = Json.obj("_id" -> 0, "progress-status" -> 0, "progress-status-dates" -> 0)
 
     applicationDetailsCollection.find(Json.obj(), projection)
@@ -111,7 +111,7 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
           doc.getAs[String]("applicationId").getOrElse("") -> CandidateDetailsReportItem(doc.getAs[String]("applicationId").getOrElse(""),
             doc.getAs[String]("userId").getOrElse(""), csvContent)
         }
-        ReportItems(applicationDetailsHeader, csvRecords.toMap)
+        CsvExtract(applicationDetailsHeader, csvRecords.toMap)
     }
   }
 
@@ -132,7 +132,7 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
     }
   }
 
-  override def findContactDetails(): Future[ReportItems[String]] = {
+  override def findContactDetails(): Future[CsvExtract[String]] = {
 
     val projection = Json.obj("_id" -> 0)
 
@@ -153,11 +153,11 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
             )
             doc.getAs[String]("userId").getOrElse("") -> csvRecord
         }
-        ReportItems(contactDetailsHeader, csvRecords.toMap)
+        CsvExtract(contactDetailsHeader, csvRecords.toMap)
     }
   }
 
-  def findQuestionnaireDetails(): Future[ReportItems[String]] = {
+  def findQuestionnaireDetails(): Future[CsvExtract[String]] = {
     val projection = Json.obj("_id" -> 0)
 
     def getAnswer(question: String, doc: Option[BSONDocument]) = {
@@ -192,11 +192,11 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
           )
           doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
         }
-        ReportItems(questionnaireDetailsHeader, csvRecords.toMap)
+        CsvExtract(questionnaireDetailsHeader, csvRecords.toMap)
     }
   }
 
-  override def findOnlineTestReports(): Future[ReportItems[String]] = {
+  override def findOnlineTestReports(): Future[CsvExtract[String]] = {
     val projection = Json.obj("_id" -> 0)
 
     def onlineTestScore(test: String, doc: BSONDocument) = {
@@ -222,11 +222,11 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
         )
         doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
       }
-      ReportItems(onlineTestReportHeader, csvRecords.toMap)
+      CsvExtract(onlineTestReportHeader, csvRecords.toMap)
     }
   }
 
-  override def findAssessmentCenterDetails(): Future[ReportItems[String]] = {
+  override def findAssessmentCenterDetails(): Future[CsvExtract[String]] = {
 
     val projection = Json.obj("_id" -> 0)
 
@@ -243,11 +243,11 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
           )
           doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
         }
-        ReportItems(assessmentCenterDetailsHeader, csvRecords.toMap)
+        CsvExtract(assessmentCenterDetailsHeader, csvRecords.toMap)
     }
   }
 
-  override def findAssessmentScores(): Future[ReportItems[String]] = {
+  override def findAssessmentScores(): Future[CsvExtract[String]] = {
 
     val projection = Json.obj("_id" -> 0)
 
@@ -258,7 +258,7 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
           val csvRecord = makeRow(assessmentScores(doc):_*)
           doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
        }
-      ReportItems(assessmentScoresHeader, csvRecords.toMap)
+      CsvExtract(assessmentScoresHeader, csvRecords.toMap)
     }
   }
 

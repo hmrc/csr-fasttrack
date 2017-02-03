@@ -16,8 +16,8 @@
 
 package mocks
 
-import model.Commands.PassMarkReportQuestionnaireData
 import model.PersistedObjects.PersistedQuestion
+import model.ReportExchangeObjects.PassMarkReportQuestionnaireData
 import repositories.QuestionnaireRepository
 
 import scala.concurrent.Future
