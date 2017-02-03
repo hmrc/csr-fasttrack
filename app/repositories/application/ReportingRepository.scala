@@ -666,7 +666,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     val progressResponse = findProgress(document, applicationId)
     val latestProgressStatus = getStatus(progressResponse)
     val schemes = document.getAs[List[Scheme]]("schemes").getOrElse(Nil)
-    val schemesLocations = document.getAs[List[String]]("schemes-locations").getOrElse(Nil)
+    val schemesLocations = document.getAs[List[String]]("scheme-locations").getOrElse(Nil)
 
     ApplicationForDiversityReport(applicationId, userId, Some(latestProgressStatus), schemes, schemesLocations, None, None, None, None)
   }

@@ -66,22 +66,17 @@ trait ReportingController extends BaseController {
   def retrieveDiversityReport(frameworkId: String) = Action.async { implicit request =>
     val diversityRows = for {
       applications <- reportingRepository.diversityReport(frameworkId)
+      locationSchemes <- locationSchemeRepository.getSchemesAndLocations.map(_.groupBy(_.id).mapValues(_.head))
     } yield {
-      val selectedLocations = List("York", "Yeovil", "Wrexham", "Worthing", "Warrington", "Torquay", "Telford", "Swansea", "Stockport",
-        "St Austell", "Springburn/Newlands/Govan", "Southend", "Shipley", "Sheffield", "Salisbury", "Reading", "Portsmouth",
-        "Plymouth", "Nottingham", "Norwich", "Newport", "Newcastle", "Manchester/Salford", "London",
-        "Liverpool/Bootle/Netherton", "Leeds", "High Wycombe", "Hastings", "Glasgow", "Gartcosh", "Edinburgh", "East Kilbride",
-        "Dover", "Darlington", "Croydon", "Coventry", "Corsham", "Cardiff", "Buxton", "Bristol", "Bradford", "Blackpool",
-        "Birmingham", "Bathgate", "Andover","Airdrie/Motherwell/Hamilton"
-      )
-
-      val locations = locationSchemeRepository.schemeInfoList
+      val schemeInfoList = locationSchemeRepository.schemeInfoList
       applications.map { application =>
         val schemeNames = application.schemes.map { scheme =>
-          locations.find(_.id == scheme).getOrElse(
+          schemeInfoList.find(_.id == scheme).getOrElse(
             throw new IllegalArgumentException(s"Incorrect scheme id ${scheme.toString}")
           ).name
         }
+
+        val selectedLocations = application.schemeLocationIds.map(locationSchemes.apply).map(_.locationName)
 
         DiversityReportRow(
           progress = application.progress.map(_.toString).getOrElse(""),
