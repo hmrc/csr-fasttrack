@@ -54,7 +54,7 @@ trait LocationSchemeService {
             geocodes.map{ gc => DistanceCalculator.calcMilesBetween(latitude, longitude, gc.lat, gc.lng) }.min
           }
 
-          GeoLocationSchemeResult(locationId, locationName, distance, schemeChoices.filter(scheme => availableSchemes.contains(scheme.name)))
+          GeoLocationSchemeResult(locationId, locationName, distance, schemeChoices.filter(scheme => availableSchemes.contains(scheme.id)))
       }
       sortLocations(selectedLocations, latitudeOpt.isDefined && longitudeOpt.isDefined)
     }

@@ -18,7 +18,7 @@
       "geocodes": [{"lat":51.21135, "lng":-1.49393}],
       "schemes":[
         "Finance",
-        "Project Delivery"
+        "ProjectDelivery"
       ]
     },
     {
@@ -35,8 +35,8 @@
       "geocodes": [{"lat":52.48142, "lng":-1.89983}],
       "schemes":[
         "Business",
-        "Digital and technology",
-        "Project Delivery"
+        "DigitalAndTechnology",
+        "ProjectDelivery"
       ]
     },
     {
@@ -46,7 +46,7 @@
       "schemes":[
         "Business",
         "Finance",
-        "Project Delivery"
+        "ProjectDelivery"
       ]
     },
     {
@@ -63,7 +63,7 @@
       "geocodes": [{"lat":51.45523, "lng":-2.59665}],
       "schemes":[
         "Business",
-        "Project Delivery",
+        "ProjectDelivery",
         "Commercial",
         "Finance"
       ]
@@ -73,7 +73,7 @@
       "name":"Buxton",
       "geocodes": [{"lat":53.259082, "lng":-1.91483}],
       "schemes":[
-        "Project Delivery"
+        "ProjectDelivery"
       ]
     },
     {
@@ -82,7 +82,7 @@
       "geocodes": [{"lat":51.48, "lng":-3.18}],
       "schemes":[
         "Business",
-        "Digital and technology"
+        "DigitalAndTechnology"
       ]
     },
     {
@@ -91,7 +91,7 @@
       "geocodes": [{"lat":51.43433, "lng":-2.18437}],
       "schemes":[
         "Finance",
-        "Project Delivery"
+        "ProjectDelivery"
       ]
     },
     {
@@ -100,8 +100,8 @@
       "geocodes": [{"lat":52.40656, "lng":-1.51217}],
       "schemes":[
         "Business",
-        "Digital and technology",
-        "Project Delivery",
+        "DigitalAndTechnology",
+        "ProjectDelivery",
         "Commercial"
       ]
     },
@@ -111,7 +111,7 @@
       "geocodes": [{"lat":51.38333, "lng":-0.1}],
       "schemes":[
         "Finance",
-        "Project Delivery",
+        "ProjectDelivery",
         "Commercial"
       ]
     },
@@ -178,7 +178,7 @@
       "geocodes": [{"lat":51.62907, "lng":-0.74934}],
       "schemes":[
         "Finance",
-        "Project Delivery"
+        "ProjectDelivery"
       ]
     },
     {
@@ -189,8 +189,8 @@
         "Business",
         "Commercial",
         "Finance",
-        "Project Delivery",
-        "Digital and technology"
+        "ProjectDelivery",
+        "DigitalAndTechnology"
       ]
     },
     {
@@ -204,8 +204,8 @@
       "schemes":[
         "Business",
         "Commercial",
-        "Digital and technology",
-        "Project Delivery"
+        "DigitalAndTechnology",
+        "ProjectDelivery"
       ]
     },
     {
@@ -215,9 +215,9 @@
       "schemes":[
         "Business",
         "Commercial",
-        "Digital and technology",
+        "DigitalAndTechnology",
         "Finance",
-        "Project Delivery"
+        "ProjectDelivery"
       ]
     },
     {
@@ -230,8 +230,8 @@
       "schemes":[
         "Business",
         "Commercial",
-        "Digital and technology",
-        "Project Delivery"
+        "DigitalAndTechnology",
+        "ProjectDelivery"
       ]
     },
     {
@@ -240,9 +240,9 @@
       "geocodes":[{"lat":54.97328, "lng":-1.61396}],
       "schemes":[
         "Business",
-        "Digital and technology",
+        "DigitalAndTechnology",
         "Finance",
-        "Project Delivery"
+        "ProjectDelivery"
       ]
     },
     {
@@ -251,7 +251,7 @@
       "geocodes":[{"lat":51.58774, "lng":-2.99835}],
       "schemes":[
         "Commercial",
-        "Project Delivery"
+        "ProjectDelivery"
       ]
     },
     {
@@ -269,7 +269,7 @@
       "geocodes":[{"lat":52.9536, "lng":-1.15047}],
       "schemes":[
         "Business",
-        "Project Delivery"
+        "ProjectDelivery"
       ]
     },
     {
@@ -285,7 +285,7 @@
       "name":"Portsmouth",
       "geocodes":[{"lat":50.79899, "lng":-1.09125}],
       "schemes":[
-        "Project Delivery"
+        "ProjectDelivery"
       ]
     },
     {
@@ -301,7 +301,7 @@
       "name":"Salisbury",
       "geocodes":[{"lat":51.0688, "lng":-1.7956900}],
       "schemes":[
-        "Project Delivery"
+        "ProjectDelivery"
       ]
     },
     {
@@ -311,9 +311,9 @@
       "schemes":[
         "Business",
         "Commercial",
-        "Digital and technology",
+        "DigitalAndTechnology",
         "Finance",
-        "Project Delivery"
+        "ProjectDelivery"
       ]
     },
     {
@@ -322,7 +322,7 @@
       "geocodes":[{"lat":53.83333, "lng":-1.76667}],
       "schemes":[
         "Business",
-        "Digital and technology"
+        "DigitalAndTechnology"
       ]
     },
     {
@@ -360,7 +360,7 @@
       "geocodes":[{"lat":53.40979, "lng":-2.15761}],
       "schemes":[
         "Business",
-        "Project Delivery"
+        "ProjectDelivery"
       ]
     },
     {
@@ -378,8 +378,8 @@
       "schemes":[
         "Business",
         "Commercial",
-        "Digital and technology",
-        "Project Delivery"
+        "DigitalAndTechnology",
+        "ProjectDelivery"
       ]
     },
     {
@@ -396,7 +396,7 @@
       "geocodes":[{"lat":53.39254, "lng":-2.58024}],
       "schemes":[
         "Business",
-        "Project Delivery"
+        "ProjectDelivery"
       ]
     },
     {
@@ -405,7 +405,7 @@
       "geocodes":[{"lat":50.81795, "lng":-0.37538}],
       "schemes":[
         "Business",
-        "Digital and technology",
+        "DigitalAndTechnology",
         "Finance"
       ]
     },
@@ -422,7 +422,7 @@
       "name":"Yeovil",
       "geocodes":[{"lat":50.942061, "lng":-2.633308}],
       "schemes":[
-        "Project Delivery"
+        "ProjectDelivery"
       ]
     },
     {
@@ -430,7 +430,7 @@
       "name":"York",
       "geocodes":[{"lat":53.9599, "lng":-1.087298}],
       "schemes":[
-        "Digital and technology",
+        "DigitalAndTechnology",
         "Finance"
       ]
     }
