@@ -21,9 +21,9 @@ import java.util.regex.Pattern
 import common.Constants.{ No, Yes }
 import common.StringUtils._
 import model.ApplicationStatusOrder._
+import model.{ ApplicationStatuses, _ }
 import model.Commands._
 import model.EvaluationResults._
-import model._
 import model.commands.OnlineTestProgressResponse
 import model.report.AdjustmentReportItem
 import org.joda.time.LocalDate
@@ -520,20 +520,23 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
   }
 
   def adjustmentReport(frameworkId: String): Future[List[AdjustmentReportItem]] = {
+
     val query = BSONDocument("$and" ->
       BSONArray(
         BSONDocument("frameworkId" -> frameworkId),
+        BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Created)),
         BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.InProgress)),
         BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn)),
         BSONDocument("$or" ->
           BSONArray(
-            BSONDocument("$or" -> BSONArray(
-              BSONDocument("assistance-details.needsSupportForOnlineAssessment" -> true),
-              BSONDocument("assistance-details.needsSupportAtVenue" -> true))),
+            BSONDocument("assistance-details.needsSupportForOnlineAssessment" -> true),
+            BSONDocument("assistance-details.needsSupportAtVenue" -> true),
             BSONDocument("assistance-details.guaranteedInterview" -> true),
             BSONDocument("assistance-details.adjustmentsConfirmed" -> true)
-          ))
-      ))
+          )
+        )
+      )
+    )
 
     val projection = BSONDocument(
       "userId" -> "1",
@@ -542,17 +545,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       "personal-details.firstName" -> "1",
       "personal-details.lastName" -> "1",
       "personal-details.preferredName" -> "1",
-      "assistance-details.guaranteedInterview" -> "1",
-      "assistance-details.needsSupportForOnlineAssessment" -> "1",
-      "assistance-details.needsSupportForOnlineAssessmentDescription" -> "1",
-      "assistance-details.needsSupportAtVenue" -> "1",
-      "assistance-details.needsSupportAtVenueDescription" -> "1",
-      "assistance-details.hasDisability" -> "1",
-      "assistance-details.typeOfAdjustments" -> "1",
-      "assistance-details.onlineTests" -> "1",
-      "assistance-details.assessmentCenter" -> "1",
-      "assistance-details.adjustmentsConfirmed" -> "1",
-      "assistance-details.adjustmentsComment" -> "1",
+      "assistance-details" -> "3",
       "assessment-centre-indicator" -> "2"
     )
 
