@@ -17,66 +17,42 @@
 package scheduler.onlinetesting
 
 import connectors.PassMarkExchangeObjects.Settings
-import model.OnlineTestCommands.CandidateScoresWithPreferencesAndPassmarkSettings
+import model.ApplicationStatuses
+import model.OnlineTestCommands.CandidateEvaluationData
 import model.PersistedObjects.CandidateTestReport
-import model.{ ApplicationStatuses, LocationPreference, Preferences }
 import org.joda.time.DateTime
+import org.mockito.Matchers.any
 import org.mockito.Mockito._
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.{ OneAppPerSuite, PlaySpec }
-import play.test.WithApplication
-import services.onlinetesting.OnlineTestPassmarkService
+import services.onlinetesting.EvaluateOnlineTestService
 import testkit.{ ShortTimeout, UnitWithAppSpec }
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class EvaluateCandidateScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
-  implicit val ec: ExecutionContext = ExecutionContext.global
-  import EvaluateCandidateScoreJobSpec._
 
-  val serviceMock = mock[OnlineTestPassmarkService]
-
-  object TestableEvaluateCandidateScoreJob extends EvaluateCandidateScoreJob {
-    val passmarkService = serviceMock
-  }
-
-  "evaluate candidate score job" should {
-    "evaluate the score successfully for ONLINE_TEST_COMPLETED" in {
-      when(serviceMock.nextCandidateScoreReadyForEvaluation).thenReturn(
-        Future.successful(Some(OnlineTestCompletedCandidateScore))
-      )
-      when(serviceMock.evaluateCandidateScore(OnlineTestCompletedCandidateScore)).thenReturn(Future.successful(()))
-
-      TestableEvaluateCandidateScoreJob.tryExecute().futureValue
-
-      verify(serviceMock).evaluateCandidateScore(OnlineTestCompletedCandidateScore)
+  "Evaluate candidate score job" should {
+    "skip evaluation when no candidate ready for evaluation found" in new TestFixture {
+      when(passmarkServiceMock.nextCandidateReadyForEvaluation).thenReturn(Future.successful(None))
+      evaluateCandidateScoreJob.tryExecute().futureValue
+      verify(passmarkServiceMock, never).evaluate(any[CandidateEvaluationData])
     }
 
-    "evaluate the score without changing the application status for ASSESSMENT_SCORES_ACCEPTED" in {
-      when(serviceMock.nextCandidateScoreReadyForEvaluation).thenReturn(
-        Future.successful(Some(AssessmentScoresAcceptedCandidateScore))
-      )
-      when(serviceMock.evaluateCandidateScoreWithoutChangingApplicationStatus(AssessmentScoresAcceptedCandidateScore))
-        .thenReturn(Future.successful(()))
-
-      TestableEvaluateCandidateScoreJob.tryExecute().futureValue
-
-      verify(serviceMock).evaluateCandidateScoreWithoutChangingApplicationStatus(AssessmentScoresAcceptedCandidateScore)
+    "evaluate the score successfully for ONLINE_TEST_COMPLETED" in new TestFixture {
+      val onlineTestCompletedCandidateScore = CandidateEvaluationData(
+        Settings(List(), "version", DateTime.now(), "user"), Nil, CandidateTestReport("appId", "type"),
+        ApplicationStatuses.OnlineTestCompleted)
+      when(passmarkServiceMock.nextCandidateReadyForEvaluation).thenReturn(Future.successful(Some(onlineTestCompletedCandidateScore)))
+      when(passmarkServiceMock.evaluate(onlineTestCompletedCandidateScore)).thenReturn(Future.successful(()))
+      evaluateCandidateScoreJob.tryExecute().futureValue
+      verify(passmarkServiceMock).evaluate(onlineTestCompletedCandidateScore)
     }
   }
-}
 
-object EvaluateCandidateScoreJobSpec {
-
-  val OnlineTestCompletedCandidateScore = CandidateScoresWithPreferencesAndPassmarkSettings(
-    Settings(List(), "verison", DateTime.now(), "user"),
-    Preferences(LocationPreference("region", "location", "framework", None)),
-    CandidateTestReport("appId", "type"),
-    ApplicationStatuses.OnlineTestCompleted
-  )
-
-  val AssessmentScoresAcceptedCandidateScore = OnlineTestCompletedCandidateScore.copy(
-    applicationStatus = ApplicationStatuses.AssessmentScoresAccepted
-  )
+  trait TestFixture {
+    val passmarkServiceMock = mock[EvaluateOnlineTestService]
+    val evaluateCandidateScoreJob = new EvaluateCandidateScoreJob {
+      val passmarkService = passmarkServiceMock
+    }
+  }
 }

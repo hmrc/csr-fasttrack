@@ -218,4 +218,84 @@ class TestDataMongoRepository(implicit mongo: () => DB)
     case _ => None
   }
 
+
+  //scalastyle:off method.length
+  def createApplicationWithAllFields(userId: String, appId: String, frameworkId: String,
+                                     appStatus: ApplicationStatuses.EnumVal = ApplicationStatuses.InProgress,
+                                     progressStatusBSON: BSONDocument = buildProgressStatusBSON()
+                                    ) = {
+    val application = BSONDocument(
+      "applicationId" -> appId,
+      "userId" -> userId,
+      "frameworkId" -> frameworkId,
+      "applicationStatus" -> appStatus,
+      "personal-details" -> BSONDocument(
+        "aLevel" -> true,
+        "stemLevel" -> true,
+        "civilServant" -> false
+      ),
+      "scheme-locations" -> BSONArray("2643743", "2657613"),
+      "schemes" -> BSONArray("Commercial", "Business"),
+      "assistance-details" -> BSONDocument(
+        "hasDisability" -> "Yes",
+        "hasDisabilityDescription" -> "I have one arm shorter",
+        "needsSupportForOnlineAssessment" -> true,
+        "needsSupportForOnlineAssessmentDescription" -> "I think 50% more time",
+        "needsSupportAtVenue" -> true,
+        "needsSupportAtVenueDescription" -> "I need coloured paper",
+        "guaranteedInterview" -> false,
+        "adjustmentsComment" -> "additional comments",
+        "typeOfAdjustments" -> BSONArray(
+          "onlineTestsTimeExtension",
+          "onlineTestsOther",
+          "assessmentCenterTimeExtension",
+          "coloured paper",
+          "braille test paper",
+          "room alone",
+          "rest breaks",
+          "reader/assistant",
+          "stand up and move around",
+          "assessmentCenterOther"
+        ),
+        "adjustmentsConfirmed" -> true,
+        "onlineTests" -> BSONDocument(
+          "otherInfo" -> "other adjustments",
+          "extraTimeNeededNumerical" -> 60,
+          "extraTimeNeeded" -> 25),
+        "assessmentCenter" -> BSONDocument(
+          "otherInfo" -> "Other assessment centre adjustment",
+          "extraTimeNeeded" -> 30
+        )
+      ),
+      "issue" -> "this candidate has changed the email"
+    ) ++ progressStatusBSON
+
+    collection.insert(application)
+  }
+  //scalastyle:on method.length
+
+  private def buildProgressStatusBSON(statusesAndDates: Map[ProgressStatuses.EnumVal, DateTime] =
+                                      Map((ProgressStatuses.AssistanceDetailsCompleted, DateTime.now))
+                                     ): BSONDocument = {
+    val dates = statusesAndDates.foldLeft(BSONDocument()) { (doc, map) =>
+      doc ++ BSONDocument(s"${map._1}" -> map._2)
+    }
+
+    val statuses = statusesAndDates.keys.foldLeft(BSONDocument()) { (doc, status) =>
+      doc ++ BSONDocument(s"$status" -> true)
+    }
+
+    BSONDocument(
+      "progress-status" -> statuses,
+      "progress-status-timestamp" -> dates
+    )
+  }
+
+  def createMinimumApplication(userId: String, appId: String, frameworkId: String) = {
+    collection.insert(BSONDocument(
+      "applicationId" -> appId,
+      "userId" -> userId,
+      "frameworkId" -> frameworkId
+    ))
+  }
 }

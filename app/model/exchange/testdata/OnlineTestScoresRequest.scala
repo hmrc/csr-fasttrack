@@ -14,18 +14,15 @@
  * limitations under the License.
  */
 
-package mocks
+package model.exchange.testdata
 
-import model.PersistedObjects.{ DiversityReport, DiversityReportRow }
-import org.joda.time.DateTime
-import repositories.DiversityReportRepository
+import play.api.libs.json.Json
 
-import scala.concurrent.Future
+case class OnlineTestScoresRequest(numerical: Option[String] = None,
+                            verbal: Option[String] = None,
+                            situational: Option[String] = None,
+                            competency: Option[String] = None)
 
-object DiversityReportInMemoryRepository extends DiversityReportRepository {
-  override def update(location: String, timeStamp: DateTime, data: DiversityReportRow): Future[Unit] = Future.successful(Unit)
-
-  override def findLatest(): Future[Option[DiversityReport]] = Future.successful(None)
-
-  override def finalizeReportStatus(timeStamp: DateTime): Future[Unit] = Future.successful(Unit)
+object OnlineTestScoresRequest {
+  implicit def onlineTestScoresFormat = Json.format[OnlineTestScoresRequest]
 }

@@ -18,7 +18,8 @@ package repositories
 
 import model.ApplicationStatuses._
 import model.AssessmentScheduleCommands.ApplicationForAssessmentAllocationResult
-import model.Commands.{ AdjustmentReport, _ }
+import model.ReportExchangeObjects._
+
 import model.{ ApplicationStatuses, EvaluationResults }
 import model.EvaluationResults.AssessmentRuleCategoryResult
 import model.Exceptions.ApplicationNotFound

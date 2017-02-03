@@ -16,11 +16,12 @@
 
 package services.testdata.faker
 
-import common.Constants.{ Yes, No }
+import common.Constants.{ No, Yes }
 import model.EvaluationResults
 import model.EvaluationResults.Result
 import model.Exceptions.DataFakingException
 import org.joda.time.LocalDate
+import play.api.Logger
 import repositories._
 import services.testdata.faker.DataFaker.ExchangeObjects.AvailableAssessmentSlot
 
@@ -74,7 +75,11 @@ object DataFaker {
               case _ => venueHasFreeSlots(venue)
             }
         }
-        firstVenueWithSpace.map(_.get)
+
+        firstVenueWithSpace.map { entry =>
+          Logger.warn("=============== FVWS = " + entry)
+          entry.get
+        }
       }
     }
 
@@ -88,7 +93,7 @@ object DataFaker {
           List("AM", "PM").flatMap { possibleSession =>
             takenSlotsByDateAndSession.get(capacityDate -> possibleSession) match {
               // Date with no free slots
-              case Some(slots) if slots >= 6 => None
+              case Some(slots) if slots >= 18 => None
               // Date with no assessments booked or Date with open slots (all dates have 6 slots per session)
               case _ => Some(AvailableAssessmentSlot(venue, capacityDate, possibleSession))
             }

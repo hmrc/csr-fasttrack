@@ -17,17 +17,22 @@
 package repositories
 
 object CollectionNames {
-
   val APPLICATION = "application17"
   val APPLICATION_ASSESSMENT = "application-assessment17"
   val APPLICATION_ASSESSMENT_SCORES = "application-assessment-scores17"
   val ASSESSMENT_CENTRE_PASS_MARK_SETTINGS = "assessment-centre-pass-mark-settings17"
   val CONTACT_DETAILS = "contact-details17"
-  val DIVERSITY_REPORTING = "diversity-reporting17"
   val LOCKS = "locks17"
   val MEDIA = "media17"
   val ONLINE_TEST_PDF_REPORT = "online-test-pdf-report17"
   val PASS_MARK_SETTINGS = "pass-mark-settings17"
   val QUESTIONNAIRE = "questionnaire17"
   val ONLINE_TEST_REPORT = "online-test-report17"
+
+  val APPLICATION_2016 = "application"
+  val APPLICATION_ASSESSMENT_2016 = "application-assessment"
+  val APPLICATION_ASSESSMENT_SCORES_2016 = "application-assessment-scores"
+  val CONTACT_DETAILS_2016 = "contact-details"
+  val QUESTIONNAIRE_2016 = "questionnaire"
+  val ONLINE_TEST_REPORT_2016 = "online-test-report"
 }

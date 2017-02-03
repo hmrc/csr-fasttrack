@@ -18,69 +18,31 @@ package services.evaluation
 
 import connectors.PassMarkExchangeObjects.{ SchemeThreshold, SchemeThresholds }
 import model.EvaluationResults._
-import model.OnlineTestCommands.{ CandidateScoresWithPreferencesAndPassmarkSettings, TestResult }
+import model.OnlineTestCommands.{ CandidateEvaluationData, TestResult }
 import model.PersistedObjects.CandidateTestReport
-import model.Schemes
+import model.Scheme.Scheme
+import model.persisted.SchemeEvaluationResult
 
 trait OnlineTestPassmarkRulesEngine {
-  def evaluate(score: CandidateScoresWithPreferencesAndPassmarkSettings): RuleCategoryResult
+
+  def evaluate(score: CandidateEvaluationData): List[SchemeEvaluationResult]
 }
 
 object OnlineTestPassmarkRulesEngine extends OnlineTestPassmarkRulesEngine {
 
-  def evaluate(score: CandidateScoresWithPreferencesAndPassmarkSettings): RuleCategoryResult = {
-    val prefs = score.preferences
-
-    val location1Scheme1 = prefs.firstLocation.firstFramework
-    val location1Scheme2 = prefs.firstLocation.secondFramework
-    val location2Scheme1 = prefs.secondLocation.map(s => s.firstFramework)
-    val location2Scheme2 = prefs.secondLocation.flatMap(s => s.secondFramework)
-    val alternativeScheme = prefs.alternatives.map(_.framework)
-
-    def evaluateAgainstScheme = evaluateScore(score) _
-
-    val location1Scheme1Result = evaluateAgainstScheme(location1Scheme1)
-    val location1Scheme2Result = location1Scheme2 map evaluateAgainstScheme
-    val location2Scheme1Result = location2Scheme1 map evaluateAgainstScheme
-    val location2Scheme2Result = location2Scheme2 map evaluateAgainstScheme
-    val alternativeSchemeResult = alternativeScheme collect { case true => evaluateScoreForAllSchemes(score) }
-
-    RuleCategoryResult(location1Scheme1Result, location1Scheme2Result, location2Scheme1Result, location2Scheme2Result, alternativeSchemeResult)
-  }
-
-  private def evaluateScore(candidateScores: CandidateScoresWithPreferencesAndPassmarkSettings)(schemeName: String) = {
-    val passmark = candidateScores.passmarkSettings.schemes.find(_.schemeName == schemeName)
-      .getOrElse(throw new IllegalStateException(s"schemeName=$schemeName is not set in Passmark settings"))
-
-    passmark.schemeThresholds match {
-      case threshold @ SchemeThresholds(_, _, _, _) => IndividualScoreProcessor.determineResult(candidateScores.scores, threshold)
+  def evaluate(candidateData: CandidateEvaluationData): List[SchemeEvaluationResult] = {
+    candidateData.schemes.map { scheme =>
+      SchemeEvaluationResult(scheme, evaluateScore(candidateData, scheme))
     }
   }
 
-  private def evaluateScoreForAllSchemes(score: CandidateScoresWithPreferencesAndPassmarkSettings) = {
-    val evaluation = Schemes.AllSchemes.map { scheme =>
-      evaluateScore(score)(scheme)
-    }
-
-    if (evaluation.contains(Green)) {
-      Green
-    } else if (evaluation.contains(Amber)) {
-      Amber
-    } else {
-      Red
-    }
+  private def evaluateScore(candidateScores: CandidateEvaluationData, scheme: Scheme) = {
+    val passmark = candidateScores.passmarkSettings.schemes.find(_.schemeName == scheme.toString)
+      .getOrElse(throw new IllegalStateException(s"schemeName=$scheme is not set in Passmark settings"))
+    determineResult(candidateScores.scores, passmark.schemeThresholds)
   }
-}
 
-trait ScoreProcessor {
-
-  def determineResult(scores: CandidateTestReport, passmarkThreshholds: SchemeThresholds): Result
-
-}
-
-object IndividualScoreProcessor extends ScoreProcessor {
-
-  def determineResult(scores: CandidateTestReport, thresholds: SchemeThresholds): Result = {
+  private def determineResult(scores: CandidateTestReport, thresholds: SchemeThresholds): Result = {
     val resultsToPassmark = List(
       (scores.competency, thresholds.competency),
       (scores.verbal, thresholds.verbal),
@@ -88,11 +50,10 @@ object IndividualScoreProcessor extends ScoreProcessor {
       (scores.situational, thresholds.situational)
     )
 
-    // TODO: Should we add explicit flag isGISCandidate to make sure only 2 tests are empty?
     val testResults: Seq[Result] = resultsToPassmark.map {
       case (None, _) => Green
       case (Some(TestResult(_, _, Some(tScore), _, _, _)), passMark) => schemeResult(tScore, passMark)
-      case (Some(TestResult(_, _, None, _, _, _)), expectedPassmark) =>
+      case (Some(TestResult(_, _, None, _, _, _)), _) =>
         throw new IllegalArgumentException(s"Candidate report does not have tScore: $scores")
     }
 
