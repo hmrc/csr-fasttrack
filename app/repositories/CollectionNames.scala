@@ -28,4 +28,11 @@ object CollectionNames {
   val PASS_MARK_SETTINGS = "pass-mark-settings17"
   val QUESTIONNAIRE = "questionnaire17"
   val ONLINE_TEST_REPORT = "online-test-report17"
+
+  val APPLICATION_2016 = "application"
+  val APPLICATION_ASSESSMENT_2016 = "application-assessment"
+  val APPLICATION_ASSESSMENT_SCORES_2016 = "application-assessment-scores"
+  val CONTACT_DETAILS_2016 = "contact-details"
+  val QUESTIONNAIRE_2016 = "questionnaire"
+  val ONLINE_TEST_REPORT_2016 = "online-test-report"
 }

@@ -16,6 +16,7 @@
 
 package controllers
 
+import akka.stream.scaladsl.Source
 import connectors.AuthProviderClient
 import model.{ ApplicationStatusOrder }
 import model.Commands._
@@ -23,9 +24,13 @@ import model.PersistedObjects.ContactDetailsWithId
 import model.PersistedObjects.Implicits._
 import model.ReportExchangeObjects.Implicits._
 import model.ReportExchangeObjects.{ Implicits => _, _ }
+import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
 import play.api.mvc.{ Action, AnyContent, Request }
 import repositories.application.ReportingRepository
+import play.api.libs.streams.Streams
+import play.api.mvc.{ Action, AnyContent, Request, Result }
+import repositories.application.{ PreviousYearCandidatesDetailsRepository, ReportingRepository }
 import repositories.{ QuestionnaireRepository, _ }
 import services.locationschemes.LocationSchemeService
 import services.reporting.ReportingFormatter
@@ -43,6 +48,7 @@ object ReportingController extends ReportingController {
   val questionnaireRepository = repositories.questionnaireRepository
   val reportingRepository = repositories.reportingRepository
   val testReportRepository = repositories.testReportRepository
+  val prevYearCandidatesDetailsRepository = repositories.prevYearCandidatesDetailsRepository
   val authProviderClient = AuthProviderClient
 }
 
@@ -58,6 +64,7 @@ trait ReportingController extends BaseController {
   val questionnaireRepository: QuestionnaireRepository
   val reportingRepository: ReportingRepository
   val testReportRepository: TestReportRepository
+  val prevYearCandidatesDetailsRepository: PreviousYearCandidatesDetailsRepository
   val authProviderClient: AuthProviderClient
 
   def retrieveDiversityReport = Action.async { implicit request =>
@@ -246,6 +253,82 @@ trait ReportingController extends BaseController {
 
     reports.map { list =>
       Ok(Json.toJson(list))
+    }
+  }
+
+  def prevYearCandidatesDetailsReport = Action.async { implicit request =>
+    val applicationFut = prevYearCandidatesDetailsRepository.findApplicationDetails()
+    for {
+      applications <- applicationFut
+      result <- enrichPreviousYearCandidateDetails {
+        (contactDetails, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores) => {
+          val header = (
+              applications.header ::
+              contactDetails.header ::
+              questionnaireDetails.header ::
+              onlineTestReports.header ::
+              assessmentCenterDetails.header ::
+              assessmentScores.header :: Nil
+            ).mkString(",")
+
+          val records = applications.records.values.map { app => (
+              app.csvRecord ::
+              contactDetails.records.getOrElse(app.userId, "") ::
+              questionnaireDetails.records.getOrElse(app.appId, "") ::
+              onlineTestReports.records.getOrElse(app.appId, "") ::
+              assessmentCenterDetails.records.getOrElse(app.appId, "") ::
+              assessmentScores.records.getOrElse(app.appId, "") :: Nil
+            ).mkString(",")
+          }
+          Ok((header :: records.toList).mkString("\n"))
+        }
+      }
+    } yield {
+      result
+    }
+  }
+
+  def streamPrevYearCandidatesDetailsReport = Action.async { implicit request =>
+    enrichPreviousYearCandidateDetails {
+      (contactDetails, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores) => {
+        val header = Enumerator(
+            ( prevYearCandidatesDetailsRepository.applicationDetailsHeader ::
+              prevYearCandidatesDetailsRepository.contactDetailsHeader ::
+              prevYearCandidatesDetailsRepository.questionnaireDetailsHeader ::
+              prevYearCandidatesDetailsRepository.onlineTestReportHeader ::
+              prevYearCandidatesDetailsRepository.assessmentCenterDetailsHeader ::
+              prevYearCandidatesDetailsRepository.assessmentScoresHeader :: Nil
+            ).mkString(",") + "\n"
+        )
+        val candidatesStream = prevYearCandidatesDetailsRepository.applicationDetailsStream().map { app =>
+            ( app.csvRecord ::
+              contactDetails.records.getOrElse(app.userId, "") ::
+              questionnaireDetails.records.getOrElse(app.appId, "") ::
+              onlineTestReports.records.getOrElse(app.appId, "") ::
+              assessmentCenterDetails.records.getOrElse(app.appId, "") ::
+              assessmentScores.records.getOrElse(app.appId, "") :: Nil
+            ).mkString(",") + "\n"
+        }
+        Ok.chunked(Source.fromPublisher(Streams.enumeratorToPublisher(header.andThen(candidatesStream))))
+      }
+    }
+  }
+
+  private def enrichPreviousYearCandidateDetails(block: (CsvExtract[String], CsvExtract[String], CsvExtract[String],
+    CsvExtract[String], CsvExtract[String]) => Result) = {
+    val candidateDetailsFut = prevYearCandidatesDetailsRepository.findContactDetails()
+    val questionnaireDetailsFut = prevYearCandidatesDetailsRepository.findQuestionnaireDetails()
+    val onlineTestReportsFut = prevYearCandidatesDetailsRepository.findOnlineTestReports()
+    val assessmentCenterDetailsFut = prevYearCandidatesDetailsRepository.findAssessmentCenterDetails()
+    val assessmentScoresFut = prevYearCandidatesDetailsRepository.findAssessmentScores()
+    for {
+      contactDetails <- candidateDetailsFut
+      questionnaireDetails <- questionnaireDetailsFut
+      onlineTestReports <- onlineTestReportsFut
+      assessmentCenterDetails <- assessmentCenterDetailsFut
+      assessmentScores <- assessmentScoresFut
+    } yield {
+      block(contactDetails, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores)
     }
   }
 

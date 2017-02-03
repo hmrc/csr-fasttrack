@@ -100,6 +100,10 @@ object Commands {
     occupationCompleted: Boolean = false
   )
 
+  case class CandidateDetailsReportItem(appId: String, userId: String, csvRecord: String)
+
+  case class CsvExtract[A](header: String, records: Map[String, A])
+
   case class ContactDetails(phone: Option[String], email: String, address: Address, postCode: PostCode)
 
   type IsNonSubmitted = Boolean
