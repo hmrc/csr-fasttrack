@@ -177,7 +177,8 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
                      |    "schemes": [
                      |        {
                      |            "schemeId": "Business",
-                     |            "schemeName": "Business",
+                     |            "schemeId": "Business",
+"schemeName": "Business",
                      |            "schemeThresholds": {
                      |                "competency": {
                      |                    "failThreshold": 20.0,
@@ -199,7 +200,8 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
                      |        },
                      |        {
                      |            "schemeId": "Commercial",
-                     |            "schemeName": "Commercial",
+                     |            "schemeId": "Commercial",
+"schemeName": "Commercial",
                      |            "schemeThresholds": {
                      |                "competency": {
                      |                    "failThreshold": 20.0,
@@ -221,7 +223,8 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
                      |        },
                      |        {
                      |            "schemeId": "DigitalAndTechnology",
-                     |            "schemeName": "Digital and technology",
+                     |            "schemeId": "DigitalAndTechnology",
+"schemeName": "Digital and technology",
                      |            "schemeThresholds": {
                      |                "competency": {
                      |                    "failThreshold": 20.0,
