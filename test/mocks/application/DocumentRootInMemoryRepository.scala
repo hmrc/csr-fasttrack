@@ -17,8 +17,7 @@
 package mocks.application
 
 import common.Constants.{ No, Yes }
-import model.{ Adjustments, AdjustmentsComment }
-import model.ApplicationStatuses
+import model.{ Adjustments, AdjustmentsComment, ApplicationStatuses, ProgressStatuses }
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.EvaluationResults.AssessmentRuleCategoryResult
@@ -125,5 +124,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   def updateAssessmentCentreIndicator(applicationId: String,indicator: model.AssessmentCentreIndicator): scala.concurrent.Future[Unit] = ???
 
   override def find(applicationId: String): Future[Option[Candidate]] = ???
+
+  def removeProgressStatuses(applicationId: String, progressStatuses: List[ProgressStatuses.ProgressStatus]): Future[Unit] = ???
 }
 // scalastyle:on number.of.methods

@@ -18,14 +18,14 @@ package services.onlinetesting
 
 import controllers.OnlineTestDetails
 import factories.DateTimeFactory
-import model.ApplicationStatuses
+import model.{ ApplicationStatuses, ProgressStatuses }
 import model.OnlineTestCommands.OnlineTestApplication
 import org.joda.time.DateTime
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.PlaySpec
-import repositories.application.OnlineTestRepository
+import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
 import testkit.MockitoImplicits.{ OngoingStubbingExtension, OngoingStubbingExtensionUnit }
 import testkit.MockitoSugar
 
@@ -34,23 +34,31 @@ class OnlineTestExtensionServiceSpec extends PlaySpec with ScalaFutures with Moc
 
     "add extra days onto expiry, from the expiry time, if not expired" in new TestFixture {
       when(dateTime.nowLocalTimeZone).thenReturn(now)
-      when(repository.getOnlineTestDetails(any())).thenReturnAsync(onlineTest)
-      when(repository.updateExpiryTime(any(), any())).thenReturnAsync()
+      when(otRepository.getOnlineTestDetails(any())).thenReturnAsync(onlineTest)
+      when(otRepository.updateExpiryTime(any(), any())).thenReturnAsync()
+      when(appRepository.removeProgressStatuses(any(), any())).thenReturnAsync()
 
-      service.extendExpiryTime(onlineTestApp, extraDays).futureValue mustBe (())
+      service.extendExpiryTime(onlineTestApp, oneExtraDays).futureValue mustBe (())
 
-      verify(repository).updateExpiryTime(userId, expirationDate.plusDays(extraDays))
+      verify(otRepository).getOnlineTestDetails(userId)
+      verify(otRepository).updateExpiryTime(userId, expirationDate.plusDays(oneExtraDays))
+      verify(appRepository).removeProgressStatuses(applicationId, List(ProgressStatuses.OnlineTestSecondExpiryNotification))
+      verifyNoMoreInteractions(otRepository, appRepository)
     }
 
     "add extra days onto expiry, from today, if already expired" in new TestFixture {
       val nowBeyondExpiry = expirationDate.plusDays(10)
       when(dateTime.nowLocalTimeZone).thenReturn(nowBeyondExpiry)
-      when(repository.getOnlineTestDetails(any())).thenReturnAsync(onlineTest)
-      when(repository.updateExpiryTime(any(), any())).thenReturnAsync()
+      when(otRepository.getOnlineTestDetails(any())).thenReturnAsync(onlineTest)
+      when(otRepository.updateExpiryTime(any(), any())).thenReturnAsync()
+      when(appRepository.removeProgressStatuses(any(), any())).thenReturnAsync()
 
-      service.extendExpiryTime(onlineTestApp, extraDays).futureValue mustBe (())
+      service.extendExpiryTime(onlineTestApp, fourExtraDays).futureValue mustBe (())
 
-      verify(repository).updateExpiryTime(userId, nowBeyondExpiry.plusDays(extraDays))
+      verify(otRepository).updateExpiryTime(userId, nowBeyondExpiry.plusDays(fourExtraDays))
+      verify(appRepository).removeProgressStatuses(applicationId,
+        List(ProgressStatuses.OnlineTestFirstExpiryNotification, ProgressStatuses.OnlineTestSecondExpiryNotification))
+
     }
   }
 
@@ -61,10 +69,11 @@ class OnlineTestExtensionServiceSpec extends PlaySpec with ScalaFutures with Moc
     val preferredName = "Jon"
     val emailAddress = "jon@test.com"
     val cubiksEmail = "123@test.com"
-    val extraDays = 3
+    val oneExtraDays = 1
+    val fourExtraDays = 4
     val now = DateTime.now()
     val invitationDate = now.minusDays(4)
-    val expirationDate = now.plusDays(3)
+    val expirationDate = now.plusDays(1)
     val onlineTest = OnlineTestDetails(invitationDate, expirationDate, "http://example.com/", cubiksEmail, isOnlineTestEnabled = true)
     val numericalTimeAdjustmentPercentage = 0
     val verbalTimeAdjustmentPercentage = 0
@@ -72,8 +81,9 @@ class OnlineTestExtensionServiceSpec extends PlaySpec with ScalaFutures with Moc
       applicationId, applicationStatus, userId,
       guaranteedInterview = true, needsAdjustments = true, preferredName, None
     )
-    val repository = mock[OnlineTestRepository]
+    val otRepository = mock[OnlineTestRepository]
+    val appRepository = mock[GeneralApplicationRepository]
     val dateTime = mock[DateTimeFactory]
-    val service = new OnlineTestExtensionServiceImpl(repository, dateTime)
+    val service = new OnlineTestExtensionServiceImpl(otRepository, appRepository, dateTime)
   }
 }
