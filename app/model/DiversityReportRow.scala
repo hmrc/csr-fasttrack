@@ -16,8 +16,10 @@
 
 package model
 
+import model.Scheme.Scheme
+import model.ReportExchangeObjects.{ DiversityReportDiversityAnswers, ApplicationForCandidateProgressReport }
 import play.api.libs.json.Json
-
+/*
 case class DiversityReportRow(progress: String,
                               selectedSchemes: List[String],
                               selectedLocations: List[String],
@@ -34,5 +36,46 @@ case class DiversityReportRow(progress: String,
                               allocatedAssessmentCentre: String)
 
 object DiversityReportRow {
+  implicit val diversityReportRowFormat = Json.format[DiversityReportRow]
+}
+*/
+
+case class DiversityReportRow(applicationId: UniqueIdentifier,
+                              progress: Option[String],
+                              schemes: List[Scheme],
+                              locations: List[String],
+                              disability: Option[String],
+                              gis: Option[Boolean],
+                              onlineAdjustments: Option[String],
+                              assessmentCentreAdjustments: Option[String],
+                              civilServant: Option[Boolean],
+                              gender: String,
+                              sexualOrientation: String,
+                              ethnicity: String,
+                              socialEconomicScore: String,
+                              hearAboutUs: String
+                             )
+
+case object DiversityReportRow {
+  def apply(application: ApplicationForCandidateProgressReport, diversityAnswers: DiversityReportDiversityAnswers,
+            ses: String, hearAboutUs: String): DiversityReportRow = {
+    DiversityReportRow(applicationId = application.applicationId,
+      progress = application.progress,
+      schemes = application.schemes,
+      locations = application.locationIds,
+      disability = application.hasDisability,
+      gis = application.gis,
+      onlineAdjustments = application.onlineAdjustments.map(fromBooleanToYesNo(_)),
+      assessmentCentreAdjustments = application.assessmentCentreAdjustments.map(fromBooleanToYesNo(_)),
+      civilServant = application.civilServant,
+      gender = diversityAnswers.gender,
+      sexualOrientation = diversityAnswers.sexualOrientation,
+      ethnicity = diversityAnswers.ethnicity,
+      socialEconomicScore = ses,
+      hearAboutUs = hearAboutUs
+    )
+  }
+  val fromBooleanToYesNo: Boolean => String = (b: Boolean) => if (b) "Yes" else "No"
+
   implicit val diversityReportRowFormat = Json.format[DiversityReportRow]
 }
