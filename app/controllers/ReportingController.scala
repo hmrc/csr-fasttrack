@@ -34,6 +34,7 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.util.{ Failure, Success }
 
 object ReportingController extends ReportingController {
   val locationSchemeService = LocationSchemeService
@@ -63,11 +64,13 @@ trait ReportingController extends BaseController {
   val authProviderClient: AuthProviderClient
   val locationSchemeRepository: LocationSchemeRepository
 
+  //scalastyle:off
   def retrieveDiversityReport(frameworkId: String) = Action.async { implicit request =>
-    val diversityRows = for {
+    // Future[List[Future[DiversityReportRow]]]
+    val diversityRowsFuture = for {
       applications <- reportingRepository.diversityReport(frameworkId)
       locationSchemes <- locationSchemeRepository.getSchemesAndLocations.map(_.groupBy(_.id).mapValues(_.head))
-//      allQuestionsByAppId <- questionnaireRepository.passMarkReport
+    //      allQuestionsByAppId <- questionnaireRepository.passMarkReport
     } yield {
       val schemeInfoList = locationSchemeRepository.schemeInfoList
       applications.map { application =>
@@ -78,31 +81,47 @@ trait ReportingController extends BaseController {
         }
 
         val selectedLocations = application.schemeLocationIds.map(locationSchemes.apply).map(_.locationName)
-//        val questions = allQuestionsByAppId(application.applicationId)
+        //        val questions = allQuestionsByAppId(application.applicationId)
 
-        DiversityReportRow(
-          progress = application.progress.map(_.toString).getOrElse(""),
-          selectedSchemes = schemeNames,
-          selectedLocations = selectedLocations,
-          gender = "Male",
-          sexuality = "Gay/lesbian",
-          ethnicity = "Irish",
-          disability = "Yes",
-          gis = "No",
-          onlineAdjustments = "Extra time; Numerical",
-          assessmentCentreAdjustment = "",
-          civilServant = "Yes",
-          ses = "SE-1",
-          hearAboutUs = "Google",
-          allocatedAssessmentCentre = "London"
-        )
+        val diversityDataFuture = for {
+          diversityQuestions <- questionnaireRepository.findQuestions(application.applicationId)
+        } yield {
+          println(s"****** diversity questions = $diversityQuestions")
+          val genderAnswer = diversityQuestions.getOrElse(questionnaireRepository.genderQuestionText, "")
+          println(s"genderAnswer = $genderAnswer")
+          val sexualOrientationAnswer = diversityQuestions.getOrElse(questionnaireRepository.sexualOrientationQuestionText, "")
+          println(s"sexualOrientationAnswer = $sexualOrientationAnswer")
+          val ethnicityAnswer = diversityQuestions.getOrElse(questionnaireRepository.ethnicityQuestionText, "")
+          println(s"ethnicityAnswer = $ethnicityAnswer")
+
+          DiversityReportRow(
+            progress = application.progress.map(_.toString).getOrElse(""),
+            selectedSchemes = schemeNames,
+            selectedLocations = selectedLocations,
+            gender = genderAnswer,
+            sexuality = sexualOrientationAnswer,
+            ethnicity = ethnicityAnswer,
+            disability = "Yes",
+            gis = "No",
+            onlineAdjustments = "Extra time; Numerical",
+            assessmentCentreAdjustment = "",
+            civilServant = "Yes",
+            ses = "SE-1",
+            hearAboutUs = "Google",
+            allocatedAssessmentCentre = "London"
+          )
+        }
+        diversityDataFuture
       }
     }
 
-    diversityRows.map { list =>
-      Ok(Json.toJson(DiversityReport(timeStamp = DateTime.now(), data = list)))
-    }
+    diversityRowsFuture.map { listOfFutures =>
+      Future.sequence(listOfFutures).map { list =>
+        Ok(Json.toJson(DiversityReport(timeStamp = DateTime.now(), data = list)))
+      }
+    }.flatMap { futureResult => futureResult }
   }
+  //scalastyle:on
 
   def createApplicationAndUserIdsReport(frameworkId: String) = Action.async { implicit request =>
     reportingRepository.allApplicationAndUserIds(frameworkId).map { list =>
@@ -182,6 +201,7 @@ trait ReportingController extends BaseController {
     }
   }
 
+  // HERE!!!!!!!!!!!
   def createCandidateProgressReport(frameworkId: String) = Action.async { implicit request =>
     val applicationsFut = reportingRepository.applicationsForCandidateProgressReport(frameworkId)
     val allContactDetailsFut = contactDetailsRepository.findAll.map(x => x.groupBy(_.userId).mapValues(_.head))

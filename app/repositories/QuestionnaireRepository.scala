@@ -35,6 +35,9 @@ trait QuestionnaireRepository {
   def addQuestions(applicationId: String, questions: List[PersistedQuestion]): Future[Unit]
   def findQuestions(applicationId: String): Future[Map[String, String]]
   def passMarkReport: Future[Map[String, PassMarkReportQuestionnaireData]]
+  val genderQuestionText = "What is your gender identity?"
+  val sexualOrientationQuestionText = "What is your sexual orientation?"
+  val ethnicityQuestionText = "What is your ethnic group?"
 }
 
 class QuestionnaireMongoRepository(socioEconomicCalculator: SocioEconomicScoreCalculatorTrait)(implicit mongo: () => DB)
@@ -105,9 +108,9 @@ class QuestionnaireMongoRepository(socioEconomicCalculator: SocioEconomicScoreCa
     }
 
     val applicationId = document.getAs[String]("applicationId").get
-    val gender = getAnswer("What is your gender identity?")
-    val sexualOrientation = getAnswer("What is your sexual orientation?")
-    val ethnicity = getAnswer("What is your ethnic group?")
+    val gender = getAnswer(genderQuestionText)
+    val sexualOrientation = getAnswer(sexualOrientationQuestionText)
+    val ethnicity = getAnswer(ethnicityQuestionText)
 
     val employmentStatus = getAnswer("Which type of occupation did they have?")
     val isEmployed = employmentStatus.exists(s => !s.startsWith("Unemployed"))
