@@ -112,9 +112,10 @@ trait ReportingController extends BaseController {
 //        val locationNames = locationIds.flatMap(locationId => allLocations.filter(_.id == locationId).headOption.map{_.locationName})
         val locationNames = locationIds.flatMap(locationId => allLocations.find(_.id == locationId).map{_.locationName})
 
-        val ses = "SE-1" // TODO IS: fix me
-        val hearAboutUs = "Google" // TODO IS: fix me
-        DiversityReportRow(application, diversityAnswers, ses, hearAboutUs).copy(locations = locationNames,
+        val ses = "SE-1 FIX ME" // TODO IS: fix me
+        val hearAboutUs = "Google FIX ME" // TODO IS: fix me,
+        val allocatedAssessmentCentre = "London FIX ME" // TODO IS: fix me
+        DiversityReportRow(application, diversityAnswers, ses, hearAboutUs, allocatedAssessmentCentre).copy(locations = locationNames,
           onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
       }
     }

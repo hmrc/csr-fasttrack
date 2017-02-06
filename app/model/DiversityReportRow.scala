@@ -19,60 +19,42 @@ package model
 import model.Scheme.Scheme
 import model.ReportExchangeObjects.{ DiversityReportDiversityAnswers, ApplicationForCandidateProgressReport }
 import play.api.libs.json.Json
-/*
-case class DiversityReportRow(progress: String,
-                              selectedSchemes: List[String],
-                              selectedLocations: List[String],
-                              gender: String,
-                              sexuality: String,
-                              ethnicity: String,
-                              disability: String,
-                              gis: String,
-                              onlineAdjustments: String,
-                              assessmentCentreAdjustment: String,
-                              civilServant: String,
-                              ses: String,
-                              hearAboutUs: String,
-                              allocatedAssessmentCentre: String)
-
-object DiversityReportRow {
-  implicit val diversityReportRowFormat = Json.format[DiversityReportRow]
-}
-*/
 
 case class DiversityReportRow(applicationId: UniqueIdentifier,
                               progress: Option[String],
                               schemes: List[Scheme],
                               locations: List[String],
+                              gender: String,
+                              sexualOrientation: String,
+                              ethnicity: String,
                               disability: Option[String],
                               gis: Option[Boolean],
                               onlineAdjustments: Option[String],
                               assessmentCentreAdjustments: Option[String],
                               civilServant: Option[Boolean],
-                              gender: String,
-                              sexualOrientation: String,
-                              ethnicity: String,
                               socialEconomicScore: String,
-                              hearAboutUs: String
+                              hearAboutUs: String,
+                              allocatedAssessmentCentre: String
                              )
 
 case object DiversityReportRow {
   def apply(application: ApplicationForCandidateProgressReport, diversityAnswers: DiversityReportDiversityAnswers,
-            ses: String, hearAboutUs: String): DiversityReportRow = {
+            ses: String, hearAboutUs: String, allocatedAssessmentCentre: String): DiversityReportRow = {
     DiversityReportRow(applicationId = application.applicationId,
       progress = application.progress,
       schemes = application.schemes,
       locations = application.locationIds,
+      gender = diversityAnswers.gender,
+      sexualOrientation = diversityAnswers.sexualOrientation,
+      ethnicity = diversityAnswers.ethnicity,
       disability = application.hasDisability,
       gis = application.gis,
       onlineAdjustments = application.onlineAdjustments.map(fromBooleanToYesNo(_)),
       assessmentCentreAdjustments = application.assessmentCentreAdjustments.map(fromBooleanToYesNo(_)),
       civilServant = application.civilServant,
-      gender = diversityAnswers.gender,
-      sexualOrientation = diversityAnswers.sexualOrientation,
-      ethnicity = diversityAnswers.ethnicity,
       socialEconomicScore = ses,
-      hearAboutUs = hearAboutUs
+      hearAboutUs = hearAboutUs,
+      allocatedAssessmentCentre = allocatedAssessmentCentre
     )
   }
   val fromBooleanToYesNo: Boolean => String = (b: Boolean) => if (b) "Yes" else "No"
