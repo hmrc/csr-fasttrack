@@ -16,7 +16,7 @@
 
 package services.reporting
 
-trait SocioEconomicScoreCalculator extends Calculable {
+trait SocioEconomicScoreCalculator {
   private val TypeOfOccupation: Map[String, Int] = Map(
     "Modern professional" -> 1,
     "Clerical and intermediate" -> 2,
@@ -60,3 +60,5 @@ trait SocioEconomicScoreCalculator extends Calculable {
     TypeOfOccupation(answer(EmploymentStatus.Question2))
   }
 }
+
+object SocioEconomicScoreCalculator extends SocioEconomicScoreCalculator

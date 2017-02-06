@@ -29,7 +29,7 @@ import play.api.mvc.{ Action, AnyContent, Request }
 import repositories.application.ReportingRepository
 import repositories.{ QuestionnaireRepository, application, _ }
 import services.locationschemes.LocationSchemeService
-import services.reporting.ReportingFormatter
+import services.reporting.{ ReportingFormatter, SocioEconomicScoreCalculator }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -47,6 +47,7 @@ object ReportingController extends ReportingController {
   val authProviderClient = AuthProviderClient
   val locationSchemeRepository = FileLocationSchemeRepository
   val mediaRepository = repositories.mediaRepository
+  val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
 }
 
 trait ReportingController extends BaseController {
@@ -64,6 +65,7 @@ trait ReportingController extends BaseController {
   val authProviderClient: AuthProviderClient
   val locationSchemeRepository: LocationSchemeRepository
   val mediaRepository: MediaRepository
+  val socioEconomicScoreCalculator: SocioEconomicScoreCalculator
 
   def retrieveDiversityReport(frameworkId: String) = Action.async { implicit request =>
     val applicationsFut = reportingRepository.applicationsForCandidateProgressReport(frameworkId)
@@ -75,7 +77,8 @@ trait ReportingController extends BaseController {
       allContactDetails <- allContactDetailsFut
       allLocations <- allLocationsFut
       allDiversityQuestions <- allQuestionsFut
-      report <- buildDiversityReportRows(applications, allContactDetails, allLocations, allDiversityQuestions)
+      allMedia <- mediaRepository.findAll()
+      report <- buildDiversityReportRows(applications, allContactDetails, allLocations, allDiversityQuestions, allMedia)
     } yield report
     reportFut.map { report => Ok(Json.toJson(report)) }
   }
@@ -102,7 +105,8 @@ trait ReportingController extends BaseController {
   private def buildDiversityReportRows(applications: List[ApplicationForCandidateProgressReport],
                                    allContactDetails: Map[String, ContactDetailsWithId],
                                    allLocations: List[LocationSchemes],
-                                   allDiversityQuestions: Map[String, Map[String, String]]): Future[List[DiversityReportRow]] = {
+                                   allDiversityQuestions: Map[String, Map[String, String]],
+                                   allMedia: Map[UniqueIdentifier, String]): Future[List[DiversityReportRow]] = {
     Future{
       applications.map { application =>
         val diversityAnswers = extractDiversityAnswers(application, allDiversityQuestions)
@@ -111,11 +115,9 @@ trait ReportingController extends BaseController {
         val assessmentCentreAdjustmentsVal = reportingFormatter.getAssessmentCentreAdjustments(
           application.assessmentCentreAdjustments,
           application.adjustments)
-//        val locationNames = locationIds.flatMap(locationId => allLocations.filter(_.id == locationId).headOption.map{_.locationName})
         val locationNames = locationIds.flatMap(locationId => allLocations.find(_.id == locationId).map{_.locationName})
-
-        val ses = "SE-1" // TODO IS: fix me
-        val hearAboutUs = "Google" // TODO IS: fix me
+        val ses = socioEconomicScoreCalculator.calculate(allDiversityQuestions(application.applicationId.toString))
+        val hearAboutUs = allMedia.getOrElse(application.userId, "")
         DiversityReportRow(application, diversityAnswers, ses, hearAboutUs).copy(locations = locationNames,
           onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
       }

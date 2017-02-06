@@ -25,7 +25,7 @@ import org.mockito.Mockito._
 import repositories.application.ReportingRepository
 import repositories.{ ApplicationAssessmentScoresRepository, AssessmentCentreIndicatorRepository, ContactDetailsRepository, LocationSchemeRepository, MediaRepository, QuestionnaireRepository, TestReportRepository }
 import services.locationschemes.LocationSchemeService
-import services.reporting.ReportingFormatter
+import services.reporting.{ ReportingFormatter, SocioEconomicScoreCalculator }
 import testkit.MockitoImplicits.OngoingStubbingExtension
 import testkit.UnitWithAppSpec
 
@@ -78,6 +78,7 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
       val authProviderClient = authProviderClientMock
       val locationSchemeRepository = locationSchemeRepositoryMock
       val mediaRepository = mediaRepositoryMock
+      val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
     }
 
   }
