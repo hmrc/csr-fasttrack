@@ -27,7 +27,7 @@ import reactivemongo.api.indexes.IndexType.Ascending
 import reactivemongo.bson._
 import repositories.application._
 import services.GBTimeZoneService
-import services.reporting.SocioEconomicScoreCalculatorTrait
+import services.reporting.SocioEconomicScoreCalculator
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
@@ -47,7 +47,7 @@ package object repositories {
   lazy val assistanceDetailsRepository = new AssistanceDetailsMongoRepository()
   lazy val frameworkRepository = new FrameworkYamlRepository()
   lazy val frameworkPreferenceRepository = new FrameworkPreferenceMongoRepository()
-  lazy val questionnaireRepository = new QuestionnaireMongoRepository(new SocioEconomicScoreCalculatorTrait {})
+  lazy val questionnaireRepository = new QuestionnaireMongoRepository(new SocioEconomicScoreCalculator {})
   lazy val onlineTestRepository = new OnlineTestMongoRepository(DateTimeFactory)
   lazy val onlineTestPDFReportRepository = new OnlineTestPDFReportMongoRepository()
   lazy val testReportRepository = new TestReportMongoRepository()

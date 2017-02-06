@@ -23,7 +23,7 @@ import play.api.libs.json._
 import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.Producer.nameValue2Producer
 import reactivemongo.bson._
-import services.reporting.SocioEconomicScoreCalculatorTrait
+import services.reporting.SocioEconomicScoreCalculator
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -40,7 +40,7 @@ trait QuestionnaireRepository {
   val ethnicityQuestionText = "What is your ethnic group?"
 }
 
-class QuestionnaireMongoRepository(socioEconomicCalculator: SocioEconomicScoreCalculatorTrait)(implicit mongo: () => DB)
+class QuestionnaireMongoRepository(socioEconomicCalculator: SocioEconomicScoreCalculator)(implicit mongo: () => DB)
   extends ReactiveRepository[PersistedAnswer, BSONObjectID](CollectionNames.QUESTIONNAIRE, mongo,
     PersistedObjects.Implicits.answerFormats, ReactiveMongoFormats.objectIdFormats) with QuestionnaireRepository {
 

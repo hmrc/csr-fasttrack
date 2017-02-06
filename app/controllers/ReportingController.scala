@@ -47,6 +47,7 @@ object ReportingController extends ReportingController {
   val testReportRepository = repositories.testReportRepository
   val authProviderClient = AuthProviderClient
   val locationSchemeRepository = FileLocationSchemeRepository
+  val mediaRepository = repositories.mediaRepository
 }
 
 trait ReportingController extends BaseController {
@@ -63,6 +64,7 @@ trait ReportingController extends BaseController {
   val testReportRepository: TestReportRepository
   val authProviderClient: AuthProviderClient
   val locationSchemeRepository: LocationSchemeRepository
+  val mediaRepository: MediaRepository
 
   //scalastyle:off
   def retrieveDiversityReport(frameworkId: String) = Action.async { implicit request =>

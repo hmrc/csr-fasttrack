@@ -27,7 +27,7 @@ import play.api.libs.json.{ JsArray, JsValue }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
-import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, LocationSchemeRepository, QuestionnaireRepository, TestReportRepository }
+import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, LocationSchemeRepository, MediaRepository, QuestionnaireRepository, TestReportRepository }
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -54,6 +54,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
         override val testReportRepository = TestReportInMemoryRepository
         override val locationSchemeRepository = mock[LocationSchemeRepository]
+        override val mediaRepository = mock[MediaRepository]
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
@@ -78,6 +79,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val testReportRepository = TestReportInMemoryRepository
         override val authProviderClient: AuthProviderClient = authProviderClientMock
         override val locationSchemeRepository = mock[LocationSchemeRepository]
+        override val mediaRepository = mock[MediaRepository]
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
@@ -107,6 +109,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val testReportRepository = TestReportInMemoryRepository
         override val authProviderClient: AuthProviderClient = authProviderClientMock
         override val locationSchemeRepository = mock[LocationSchemeRepository]
+        override val mediaRepository = mock[MediaRepository]
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
