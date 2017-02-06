@@ -26,8 +26,9 @@ import model.PersistedObjects.ContactDetailsWithId
 import play.api.libs.json.JsValue
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import play.api.test.Helpers._
-import repositories.{ ApplicationAssessmentScoresRepository, LocationSchemeRepository }
+import repositories.{ ApplicationAssessmentScoresRepository, LocationSchemeRepository, MediaRepository }
 import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
+import services.reporting.SocioEconomicScoreCalculator
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -53,6 +54,8 @@ class NonSubmittedApplicationsReportingControllerSpec extends BaseReportingContr
         override val testReportRepository = TestReportInMemoryRepository
         override val authProviderClient: AuthProviderClient = authProviderClientMock
         override val locationSchemeRepository = locationSchemeRepositoryMock
+        override val mediaRepository = mediaRepositoryMock
+        override val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
       }
       val result = controller.createNonSubmittedApplicationsReports(frameworkId)(createNonSubmittedAppsReportRequest(frameworkId)).run
 
@@ -88,6 +91,8 @@ class NonSubmittedApplicationsReportingControllerSpec extends BaseReportingContr
         override val testReportRepository = TestReportInMemoryRepository
         override val authProviderClient = authProviderClientMock
         override val locationSchemeRepository = locationSchemeRepositoryMock
+        override val mediaRepository = mediaRepositoryMock
+        override val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
       }
       val result = controller.createNonSubmittedApplicationsReports(frameworkId)(createNonSubmittedAppsReportRequest(frameworkId)).run
 

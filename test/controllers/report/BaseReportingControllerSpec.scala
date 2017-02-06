@@ -23,9 +23,9 @@ import controllers.ReportingController
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import repositories.application.ReportingRepository
-import repositories.{ ApplicationAssessmentScoresRepository, AssessmentCentreIndicatorRepository, ContactDetailsRepository, LocationSchemeRepository, QuestionnaireRepository, TestReportRepository }
+import repositories.{ ApplicationAssessmentScoresRepository, AssessmentCentreIndicatorRepository, ContactDetailsRepository, LocationSchemeRepository, MediaRepository, QuestionnaireRepository, TestReportRepository }
 import services.locationschemes.LocationSchemeService
-import services.reporting.ReportingFormatter
+import services.reporting.{ ReportingFormatter, SocioEconomicScoreCalculator }
 import testkit.MockitoImplicits.OngoingStubbingExtension
 import testkit.UnitWithAppSpec
 
@@ -47,6 +47,7 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
     val testReportRepoMock = mock[TestReportRepository]
     val authProviderClientMock = mock[AuthProviderClient]
     val locationSchemeRepositoryMock = mock[LocationSchemeRepository]
+    val mediaRepositoryMock = mock[MediaRepository]
     when(authProviderClientMock.candidatesReport(any())).thenReturn(Future.successful(
       Candidate("firstName1", "lastName1", Some("preferredName1"), "email1@test.com", "user1") ::
         Candidate("firstName2", "lastName2", None, "email2@test.com", "user2") ::
@@ -76,6 +77,8 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
       val testReportRepository = testReportRepoMock
       val authProviderClient = authProviderClientMock
       val locationSchemeRepository = locationSchemeRepositoryMock
+      val mediaRepository = mediaRepositoryMock
+      val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
     }
 
   }
