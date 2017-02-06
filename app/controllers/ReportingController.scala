@@ -34,7 +34,6 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-import scala.util.{ Failure, Success }
 
 object ReportingController extends ReportingController {
   val locationSchemeService = LocationSchemeService
@@ -64,64 +63,62 @@ trait ReportingController extends BaseController {
   val authProviderClient: AuthProviderClient
   val locationSchemeRepository: LocationSchemeRepository
 
-  //scalastyle:off
   def retrieveDiversityReport(frameworkId: String) = Action.async { implicit request =>
-    // Future[List[Future[DiversityReportRow]]]
-    val diversityRowsFuture = for {
-      applications <- reportingRepository.diversityReport(frameworkId)
-      locationSchemes <- locationSchemeRepository.getSchemesAndLocations.map(_.groupBy(_.id).mapValues(_.head))
-    //      allQuestionsByAppId <- questionnaireRepository.passMarkReport
-    } yield {
-      val schemeInfoList = locationSchemeRepository.schemeInfoList
-      applications.map { application =>
-        val schemeNames = application.schemes.map { scheme =>
-          schemeInfoList.find(_.id == scheme).getOrElse(
-            throw new IllegalArgumentException(s"Incorrect scheme id ${scheme.toString}")
-          ).name
-        }
+    val applicationsFut = reportingRepository.applicationsForCandidateProgressReport(frameworkId)
+    val allContactDetailsFut = contactDetailsRepository.findAll.map(x => x.groupBy(_.userId).mapValues(_.head))
+    val allLocationsFut = locationSchemeService.getAllSchemeLocations
+    val allQuestionsFut = questionnaireRepository.diversityReport
+    val reportFut: Future[List[DiversityReportRow]] = for {
+      applications <- applicationsFut
+      allContactDetails <- allContactDetailsFut
+      allLocations <- allLocationsFut
+      allDiversityQuestions <- allQuestionsFut
+      report <- buildDiversityReportRows(applications, allContactDetails, allLocations, allDiversityQuestions)
+    } yield report
+    reportFut.map { report => Ok(Json.toJson(report)) }
+  }
 
-        val selectedLocations = application.schemeLocationIds.map(locationSchemes.apply).map(_.locationName)
-        //        val questions = allQuestionsByAppId(application.applicationId)
-
-        val diversityDataFuture = for {
-          diversityQuestions <- questionnaireRepository.findQuestions(application.applicationId)
-        } yield {
-          println(s"****** diversity questions = $diversityQuestions")
-          val genderAnswer = diversityQuestions.getOrElse(questionnaireRepository.genderQuestionText, "")
-          println(s"genderAnswer = $genderAnswer")
-          val sexualOrientationAnswer = diversityQuestions.getOrElse(questionnaireRepository.sexualOrientationQuestionText, "")
-          println(s"sexualOrientationAnswer = $sexualOrientationAnswer")
-          val ethnicityAnswer = diversityQuestions.getOrElse(questionnaireRepository.ethnicityQuestionText, "")
-          println(s"ethnicityAnswer = $ethnicityAnswer")
-
-          DiversityReportRow(
-            progress = application.progress.map(_.toString).getOrElse(""),
-            selectedSchemes = schemeNames,
-            selectedLocations = selectedLocations,
-            gender = genderAnswer,
-            sexuality = sexualOrientationAnswer,
-            ethnicity = ethnicityAnswer,
-            disability = "Yes",
-            gis = "No",
-            onlineAdjustments = "Extra time; Numerical",
-            assessmentCentreAdjustment = "",
-            civilServant = "Yes",
-            ses = "SE-1",
-            hearAboutUs = "Google",
-            allocatedAssessmentCentre = "London"
-          )
-        }
-        diversityDataFuture
-      }
+  private def extractDiversityAnswers(application: ApplicationForCandidateProgressReport,
+                                      allDiversityQuestions: Map[String, Map[String, String]]) = {
+    def getDiversityAnswerForQuestion(applicationId: String, questionText: String,
+                                              allDiversityQuestions: Map[String, Map[String, String]]) = {
+      allDiversityQuestions.get(applicationId).map { questionMap => questionMap.getOrElse(questionText, "") }.getOrElse("")
     }
 
-    diversityRowsFuture.map { listOfFutures =>
-      Future.sequence(listOfFutures).map { list =>
-        Ok(Json.toJson(DiversityReport(timeStamp = DateTime.now(), data = list)))
-      }
-    }.flatMap { futureResult => futureResult }
+    val genderAnswer = getDiversityAnswerForQuestion(application.applicationId.toString,
+      QuestionnaireRepository.genderQuestionText, allDiversityQuestions)
+
+    val sexualOrientationAnswer = getDiversityAnswerForQuestion(application.applicationId.toString,
+      QuestionnaireRepository.sexualOrientationQuestionText, allDiversityQuestions)
+
+    val ethnicityAnswer = getDiversityAnswerForQuestion(application.applicationId.toString,
+      QuestionnaireRepository.ethnicityQuestionText, allDiversityQuestions)
+
+    DiversityReportDiversityAnswers(genderAnswer, sexualOrientationAnswer, ethnicityAnswer)
   }
-  //scalastyle:on
+
+  private def buildDiversityReportRows(applications: List[ApplicationForCandidateProgressReport],
+                                   allContactDetails: Map[String, ContactDetailsWithId],
+                                   allLocations: List[LocationSchemes],
+                                   allDiversityQuestions: Map[String, Map[String, String]]): Future[List[DiversityReportRow]] = {
+    Future{
+      applications.map { application =>
+        val diversityAnswers = extractDiversityAnswers(application, allDiversityQuestions)
+        val locationIds = application.locationIds
+        val onlineAdjustmentsVal = reportingFormatter.getOnlineAdjustments(application.onlineAdjustments, application.adjustments)
+        val assessmentCentreAdjustmentsVal = reportingFormatter.getAssessmentCentreAdjustments(
+          application.assessmentCentreAdjustments,
+          application.adjustments)
+//        val locationNames = locationIds.flatMap(locationId => allLocations.filter(_.id == locationId).headOption.map{_.locationName})
+        val locationNames = locationIds.flatMap(locationId => allLocations.find(_.id == locationId).map{_.locationName})
+
+        val ses = "SE-1" // TODO IS: fix me
+        val hearAboutUs = "Google" // TODO IS: fix me
+        DiversityReportRow(application, diversityAnswers, ses, hearAboutUs).copy(locations = locationNames,
+          onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
+      }
+    }
+  }
 
   def createApplicationAndUserIdsReport(frameworkId: String) = Action.async { implicit request =>
     reportingRepository.allApplicationAndUserIds(frameworkId).map { list =>
@@ -201,7 +198,6 @@ trait ReportingController extends BaseController {
     }
   }
 
-  // HERE!!!!!!!!!!!
   def createCandidateProgressReport(frameworkId: String) = Action.async { implicit request =>
     val applicationsFut = reportingRepository.applicationsForCandidateProgressReport(frameworkId)
     val allContactDetailsFut = contactDetailsRepository.findAll.map(x => x.groupBy(_.userId).mapValues(_.head))

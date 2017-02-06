@@ -35,6 +35,10 @@ trait QuestionnaireRepository {
   def addQuestions(applicationId: String, questions: List[PersistedQuestion]): Future[Unit]
   def findQuestions(applicationId: String): Future[Map[String, String]]
   def passMarkReport: Future[Map[String, PassMarkReportQuestionnaireData]]
+  def diversityReport: Future[Map[String, Map[String, String]]]
+}
+
+object QuestionnaireRepository {
   val genderQuestionText = "What is your gender identity?"
   val sexualOrientationQuestionText = "What is your sexual orientation?"
   val ethnicityQuestionText = "What is your ethnic group?"
@@ -68,7 +72,25 @@ class QuestionnaireMongoRepository(socioEconomicCalculator: SocioEconomicScoreCa
     }
   }
 
-  // TODO LT: Replace this by progress-status
+  override def diversityReport: Future[Map[String, Map[String, String]]] = {
+
+    val query = BSONDocument()
+    val queryResult = collection.find(query).cursor[BSONDocument]().collect[List]().map { listOfDocs =>
+      listOfDocs.map { d =>
+        val applicationId = d.getAs[String]("applicationId").get
+        val questionsDoc = d.getAs[BSONDocument]("questions")
+
+        val qAndA = questionsDoc.toList.flatMap(_.elements).map {
+          case (question, _) =>
+            val answer = getAnswer(questionsDoc, question).getOrElse("Unknown")
+            (question, answer)
+        }.toMap
+        applicationId -> qAndA
+      }.toMap
+    }
+    queryResult
+  }
+
   override def passMarkReport: Future[Map[String, PassMarkReportQuestionnaireData]] = {
     // We need to ensure that the candidates have completed the last page of the questionnaire
     // however, only the first question on the employment page is mandatory, as if the answer is
@@ -99,30 +121,32 @@ class QuestionnaireMongoRepository(socioEconomicCalculator: SocioEconomicScoreCa
     }
   }
 
+  private def getAnswer(questionsDoc: Option[BSONDocument], question: String): Option[String] = {
+    val questionDoc = questionsDoc.flatMap(_.getAs[BSONDocument](question))
+    val answer = questionDoc.flatMap(_.getAs[String]("answer"))
+    answer
+  }
+
   private def docToReport(document: BSONDocument): (String, PassMarkReportQuestionnaireData) = {
+    import QuestionnaireRepository._
     val questionsDoc = document.getAs[BSONDocument]("questions")
-    def getAnswer(question: String): Option[String] = {
-      val questionDoc = questionsDoc.flatMap(_.getAs[BSONDocument](question))
-      val answer = questionDoc.flatMap(_.getAs[String]("answer"))
-      answer
-    }
 
     val applicationId = document.getAs[String]("applicationId").get
-    val gender = getAnswer(genderQuestionText)
-    val sexualOrientation = getAnswer(sexualOrientationQuestionText)
-    val ethnicity = getAnswer(ethnicityQuestionText)
+    val gender = getAnswer(questionsDoc, genderQuestionText)
+    val sexualOrientation = getAnswer(questionsDoc, sexualOrientationQuestionText)
+    val ethnicity = getAnswer(questionsDoc, ethnicityQuestionText)
 
-    val employmentStatus = getAnswer("Which type of occupation did they have?")
+    val employmentStatus = getAnswer(questionsDoc, "Which type of occupation did they have?")
     val isEmployed = employmentStatus.exists(s => !s.startsWith("Unemployed"))
     val parentEmploymentStatus = if (isEmployed) Some("Employed") else employmentStatus
     val parentOccupation = if (isEmployed) employmentStatus else None
 
-    val parentEmployedOrSelf = getAnswer("Did they work as an employee or were they self-employed?")
-    val parentCompanySize = getAnswer("Which size would best describe their place of work?")
+    val parentEmployedOrSelf = getAnswer(questionsDoc, "Did they work as an employee or were they self-employed?")
+    val parentCompanySize = getAnswer(questionsDoc, "Which size would best describe their place of work?")
 
     val qAndA = questionsDoc.toList.flatMap(_.elements).map {
       case (question, _) =>
-        val answer = getAnswer(question).getOrElse("Unknown")
+        val answer = getAnswer(questionsDoc, question).getOrElse("Unknown")
         (question, answer)
     }.toMap
 
