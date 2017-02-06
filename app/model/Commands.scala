@@ -100,6 +100,14 @@ object Commands {
     occupationCompleted: Boolean = false
   )
 
+  case class CandidateDetailsReportItem(appId: String, userId: String, csvRecord: String)
+
+  case class CsvExtract[A](header: String, records: Map[String, A]) {
+
+    def emptyRecord() = List.fill(header.split(",").length)("\"\"").mkString(",")
+
+  }
+
   case class ContactDetails(phone: Option[String], email: String, address: Address, postCode: PostCode)
 
   type IsNonSubmitted = Boolean
