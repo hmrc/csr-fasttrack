@@ -21,7 +21,7 @@ import model.Exceptions.InvalidStatusException
 
 object StatusGeneratorFactory {
   // scalastyle:off cyclomatic.complexity
-  def getGenerator(status: String) = {
+  def getGenerator(status: String): BaseGenerator = {
     status match {
       case "REGISTERED" => RegisteredStatusGenerator
       case ApplicationStatuses.Created.name => CreatedStatusGenerator
@@ -59,4 +59,3 @@ object StatusGeneratorFactory {
   }
   // scalastyle:on cyclomatic.complexity
 }
-

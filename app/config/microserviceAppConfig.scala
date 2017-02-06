@@ -78,9 +78,6 @@ case class CubiksGatewayVerbalAndNumericalAssessment(
 
 case class ReportConfig(xmlReportId: Int, pdfReportId: Int, localeCode: String, suppressValidation: Boolean = false)
 
-case class DiversityMonitoringJobConfig(enabled: Boolean, lockId: Option[String], initialDelaySecs: Option[Int],
-  intervalSecs: Option[Int], forceStopActorsSecs: Option[Int])
-
 case class AssessmentCentresLocationsConfig(yamlFilePath: String)
 case class AssessmentCentresConfig(yamlFilePath: String)
 
@@ -109,8 +106,6 @@ object MicroserviceAppConfig extends ServicesConfig {
     configuration.underlying.as[ScheduledJobConfig]("scheduling.online-testing.first-reminder-expiry-tests-job")
   lazy val secondReminderOnlineTestJobConfig =
     configuration.underlying.as[ScheduledJobConfig]("scheduling.online-testing.second-reminder-expiry-tests-job")
-  lazy val diversityMonitoringJobConfig =
-    configuration.underlying.as[DiversityMonitoringJobConfig]("scheduling.diversity-monitoring-job")
   lazy val retrieveResultsJobConfig =
     configuration.underlying.as[WaitingScheduledJobConfig]("scheduling.online-testing.retrieve-results-job")
   lazy val retrieveOnlineTestPDFReportJobConfig =

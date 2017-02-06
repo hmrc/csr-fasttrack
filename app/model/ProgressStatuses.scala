@@ -19,6 +19,8 @@ package model
 
 object ProgressStatuses extends Enum {
 
+  type ProgressStatus = Value
+
   sealed case class EnumVal(name: String, weight: Int) extends Value with Ordered[EnumVal] {
 
     override def compare(that: EnumVal): Int = this.weight compare that.weight

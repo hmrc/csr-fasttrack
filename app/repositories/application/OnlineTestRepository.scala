@@ -23,17 +23,13 @@ import model.EvaluationResults._
 import model.Exceptions._
 import model.OnlineTestCommands._
 import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
-import model.persisted.{ CubiksTestProfile, NotificationExpiringOnlineTest }
-import model.{ ApplicationStatuses, Commands, ProgressStatuses, ReminderNotice }
-import org.joda.time.{ DateTime, LocalDate }
+import model.persisted.{ CubiksTestProfile, NotificationExpiringOnlineTest, SchemeEvaluationResult }
 import model._
-import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
 import model.Adjustments._
-import model.persisted.{ NotificationExpiringOnlineTest, SchemeEvaluationResult }
-import org.joda.time.{ DateTime, LocalDate }
+import org.joda.time.{DateTime, LocalDate}
 import reactivemongo.api.DB
 import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID }
+import reactivemongo.bson.{BSONArray, BSONDocument, BSONObjectID}
 import repositories._
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats

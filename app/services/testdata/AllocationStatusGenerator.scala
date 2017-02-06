@@ -41,7 +41,7 @@ trait AllocationStatusGenerator extends ConstructiveGenerator {
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
 
-    def getApplicationAssessment(candidate: DataGenerationResponse) = {
+    def getApplicationAssessment(candidate: DataGenerationResponse): Future[ApplicationAssessment] = {
       for {
         availableAssessment <- Random.availableAssessmentVenueAndDate
       } yield {

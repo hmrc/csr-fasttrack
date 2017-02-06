@@ -27,7 +27,7 @@ abstract class TestFixtureBase extends MockitoSugar {
   val mockAuditService: AuditService = mock[AuditService]
   val unit: Unit = ()
 
-  def rnd(prefix: String) = s"$prefix-${Random.nextInt(100)}"
+  def rnd(prefix: String) = s"$prefix${Random.nextInt(100)}"
   def maybe[A](value: => A): Option[A] = if (Random.nextBoolean()) Some(value) else None
   def maybeRnd(prefix: String): Option[String] = maybe(rnd(prefix))
   def someRnd(prefix: String) = Some(rnd(prefix))

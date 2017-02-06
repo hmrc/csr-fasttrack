@@ -16,10 +16,11 @@
 
 package repositories
 
-import model.Commands.PassMarkReportTestResults
+import model.ReportExchangeObjects.PassMarkReportTestResults
 import model.OnlineTestCommands.TestResult
 import model.PersistedObjects.CandidateTestReport
 import model.PersistedObjects.Implicits._
+import model.ReportExchangeObjects
 import play.api.libs.json.Format
 import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.{ BSONDocument, BSONDouble, BSONObjectID }
@@ -116,12 +117,10 @@ class TestReportMongoRepository(implicit mongo: () => DB)
   }
 
   private def docToReport(document: BSONDocument): (String, PassMarkReportTestResults) = {
-    def getTest(testName: String): Option[TestResult] = {
+    def getTest(testName: String): Option[ReportExchangeObjects.TestResult] = {
       val test = document.getAs[BSONDocument](testName)
       test.map { t =>
-        TestResult(
-          "N/A",
-          "N/A",
+        ReportExchangeObjects.TestResult(
           t.getAs[BSONDouble]("tScore").map(_.value),
           t.getAs[BSONDouble]("percentile").map(_.value),
           t.getAs[BSONDouble]("raw").map(_.value),

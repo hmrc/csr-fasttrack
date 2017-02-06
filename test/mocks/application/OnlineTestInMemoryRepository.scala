@@ -17,13 +17,14 @@
 package mocks.application
 
 import factories.UUIDFactory
-import model.ApplicationStatuses
 import model.{ ApplicationStatuses, Scheme }
+import model.PersistedObjects._
+import model.persisted.{ CubiksTestProfile, SchemeEvaluationResult }
 import model.EvaluationResults._
 import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser }
 import model.PersistedObjects._
 import model.Scheme.Scheme
-import model.persisted.{ CubiksTestProfile, SchemeEvaluationResult }
+import model.persisted.SchemeEvaluationResult
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.OnlineTestRepository
 
