@@ -16,10 +16,10 @@
 
 package services.onlinetesting
 
-import controllers.OnlineTestDetails
-import factories.DateTimeFactory
+import factories.{ DateTimeFactory, UUIDFactory }
 import model.{ ApplicationStatuses, ProgressStatuses }
 import model.OnlineTestCommands.OnlineTestApplication
+import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
@@ -34,13 +34,13 @@ class OnlineTestExtensionServiceSpec extends PlaySpec with ScalaFutures with Moc
 
     "add extra days onto expiry, from the expiry time, if not expired" in new TestFixture {
       when(dateTime.nowLocalTimeZone).thenReturn(now)
-      when(otRepository.getOnlineTestDetails(any())).thenReturnAsync(onlineTest)
+      when(otRepository.getCubiksTestProfile(any[String])).thenReturnAsync(onlineTest)
       when(otRepository.updateExpiryTime(any(), any())).thenReturnAsync()
       when(appRepository.removeProgressStatuses(any(), any())).thenReturnAsync()
 
       service.extendExpiryTime(onlineTestApp, oneExtraDays).futureValue mustBe (())
 
-      verify(otRepository).getOnlineTestDetails(userId)
+      verify(otRepository).getCubiksTestProfile(userId)
       verify(otRepository).updateExpiryTime(userId, expirationDate.plusDays(oneExtraDays))
       verify(appRepository).removeProgressStatuses(applicationId, List(ProgressStatuses.OnlineTestSecondExpiryNotification))
       verifyNoMoreInteractions(otRepository, appRepository)
@@ -49,7 +49,7 @@ class OnlineTestExtensionServiceSpec extends PlaySpec with ScalaFutures with Moc
     "add extra days onto expiry, from today, if already expired" in new TestFixture {
       val nowBeyondExpiry = expirationDate.plusDays(10)
       when(dateTime.nowLocalTimeZone).thenReturn(nowBeyondExpiry)
-      when(otRepository.getOnlineTestDetails(any())).thenReturnAsync(onlineTest)
+      when(otRepository.getCubiksTestProfile(any[String])).thenReturnAsync(onlineTest)
       when(otRepository.updateExpiryTime(any(), any())).thenReturnAsync()
       when(appRepository.removeProgressStatuses(any(), any())).thenReturnAsync()
 
@@ -74,7 +74,15 @@ class OnlineTestExtensionServiceSpec extends PlaySpec with ScalaFutures with Moc
     val now = DateTime.now()
     val invitationDate = now.minusDays(4)
     val expirationDate = now.plusDays(1)
-    val onlineTest = OnlineTestDetails(invitationDate, expirationDate, "http://example.com/", cubiksEmail, isOnlineTestEnabled = true)
+    val onlineTest = CubiksTestProfile(
+      cubiksUserId = 123,
+      participantScheduleId = 111,
+      invitationDate = invitationDate,
+      expirationDate = expirationDate,
+      onlineTestUrl = "http://www.google.co.uk",
+      token = UUIDFactory.generateUUID(),
+      isOnlineTestEnabled = true
+    )
     val numericalTimeAdjustmentPercentage = 0
     val verbalTimeAdjustmentPercentage = 0
     val onlineTestApp = OnlineTestApplication(

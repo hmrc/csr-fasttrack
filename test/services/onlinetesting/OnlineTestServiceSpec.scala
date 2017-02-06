@@ -19,8 +19,7 @@ package services.onlinetesting
 import config._
 import connectors.ExchangeObjects._
 import connectors.{ CSREmailClient, CubiksGatewayClient }
-import controllers.OnlineTestDetails
-import factories.{DateTimeFactory, UUIDFactory}
+import factories.{ DateTimeFactory, UUIDFactory }
 import model.ApplicationStatuses._
 import model.Commands
 import factories.{ DateTimeFactory, UUIDFactory }
@@ -29,6 +28,7 @@ import model.Commands._
 import model.Exceptions.{ ConnectorException, NotFoundException }
 import model.OnlineTestCommands._
 import model.PersistedObjects.ContactDetails
+import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
@@ -37,6 +37,7 @@ import org.scalatest.Inside.inside
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
+import play.api.mvc.RequestHeader
 import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository, OnlineTestRepository }
 import repositories.{ ContactDetailsRepository, OnlineTestPDFReportRepository, TestReportRepository }
 import services.AuditService
@@ -129,11 +130,20 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
   val AuthenticateUrl = "http://localhost/authenticate"
   val invitation = Invitation(CubiksUserId, EmailCubiks, AccessCode, LogonUrl, AuthenticateUrl, ScheduleId)
 
+  val validInviteDate = new DateTime(2016, 5, 21, 0, 0)
+  val validExpireDate = new DateTime(2016, 6, 9, 0, 0)
   val InvitationDate = DateTime.parse("2016-05-11")
   val ExpirationDate = InvitationDate.plusDays(7)
-  val onlineTestProfile = OnlineTestProfile(CubiksUserId, Token, AuthenticateUrl, InvitationDate, ExpirationDate,
-    standardScheduleIdMock)
 
+  val onlineTestProfile = CubiksTestProfile(
+    cubiksUserId = CubiksUserId,
+    participantScheduleId = standardScheduleIdMock,
+    invitationDate = InvitationDate,
+    expirationDate = ExpirationDate,
+    onlineTestUrl = AuthenticateUrl,
+    token = Token,
+    isOnlineTestEnabled = true
+  )
   val Postcode = "WC2B 4"
   val EmailContactDetails = "emailfjjfjdf@mailinator.com"
   val contactDetails = ContactDetails(Address("Aldwych road"), Postcode, EmailContactDetails, Some("111111"))
@@ -146,22 +156,22 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
 
   "get online test" should {
     "throw an exception if the user does not exist" in new OnlineTest {
-      doThrow(classOf[NotFoundException]).when(otRepositoryMock).getOnlineTestDetails("nonexistent-userid")
+      doThrow(classOf[NotFoundException]).when(otRepositoryMock).getCubiksTestProfile("nonexistent-userid")
       intercept[NotFoundException] {
         onlineTestService.getOnlineTest("nonexistent-userid")
       }
     }
 
-    val validInviteDate = new DateTime(2016, 5, 21, 0, 0)
-    val validExpireDate = new DateTime(2016, 6, 9, 0, 0)
 
     "return a valid set of aggregated online test data if the user id is valid" in new OnlineTest {
-      when(otRepositoryMock.getOnlineTestDetails("valid-userid")).thenReturn(Future.successful(
-        OnlineTestDetails(
-          inviteDate = validInviteDate,
-          expireDate = validExpireDate,
-          onlineTestLink = "http://www.google.co.uk",
-          cubiksEmailAddress = "test@test.com",
+      when(otRepositoryMock.getCubiksTestProfile("valid-userid")).thenReturn(Future.successful(
+        CubiksTestProfile(
+          cubiksUserId = 123,
+          participantScheduleId = 111,
+          invitationDate = validInviteDate,
+          expirationDate = validExpireDate,
+          onlineTestUrl = "http://www.google.co.uk",
+          token = UUIDFactory.generateUUID(),
           isOnlineTestEnabled = true
         )
       ))
@@ -184,7 +194,6 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
 
       val result = onlineTestService.getOnlineTest("valid-userid").futureValue
 
-      result.cubiksEmailAddress must equal("test@test.com")
       result.isOnlineTestEnabled must equal(true)
       result.pdfReportAvailable must equal(false)
       result.onlineTestLink must equal("http://www.google.co.uk")
@@ -281,6 +290,7 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
         verify(auditServiceMock, times(3)).logEventNoRequest(any[String], any[Map[String, String]])
       }
     "audit 'OnlineTestInvitationProcessComplete' on success" in new OnlineTest {
+
       when(cubiksGatewayClientMock.registerApplicant(eqTo(registerApplicant))(any[HeaderCarrier]))
         .thenReturn(Future.successful(registration))
       when(cubiksGatewayClientMock.inviteApplicant(eqTo(inviteApplicant))(any[HeaderCarrier]))
@@ -297,8 +307,8 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
       when(trRepositoryMock.remove(ApplicationId)).thenReturn(Future.successful(()))
 
       val unit = ()
-      val result = onlineTestService.registerAndInviteApplicant(applicationForOnlineTestingWithNoTimeAdjustments)
-      result.futureValue mustBe unit
+      val result = onlineTestService.registerAndInviteApplicant(applicationForOnlineTestingWithNoTimeAdjustments).futureValue
+      result mustBe unit
 
       verify(emailClientMock).sendOnlineTestInvitation(eqTo(EmailContactDetails), eqTo(PreferredName), eqTo(ExpirationDate))(
         any[HeaderCarrier]

@@ -50,7 +50,7 @@ class OnlineTestExtensionServiceImpl(
   }
 
   private def getExpiryDate(userId: String): Future[DateTime] =
-    otRepository.getOnlineTestDetails(userId).map(_.expireDate)
+    otRepository.getCubiksTestProfile(userId).map(_.expirationDate)
 
   private def calculateNewExpiryDate(expiryDate: DateTime, extraDays: Int): DateTime =
     max(dateTime.nowLocalTimeZone, expiryDate).plusDays(extraDays)

@@ -68,12 +68,15 @@ GET         /report/pass-mark-personal-data/:frameworkId                 control
 GET         /report/non-submitted-applications/:frameworkId              controllers.ReportingController.createNonSubmittedApplicationsReports(frameworkId: String)
 GET         /report/preferences-and-contact/:frameworkId                 controllers.ReportingController.createPreferencesAndContactReports(frameworkId: String)
 GET         /report/successful-candidates/:frameworkId                   controllers.ReportingController.createSuccessfulCandidatesReport(frameworkId: String)
+GET         /report/candidates-details/previous-year                     controllers.ReportingController.prevYearCandidatesDetailsReport
+GET         /report/candidates-details-stream/previous-year              controllers.ReportingController.streamPrevYearCandidatesDetailsReport
 
 GET         /diagnostic/user/:applicationId                              controllers.DiagnosticReportController.getApplicationByApplicationId(applicationId: String)
 GET         /diagnostic/all-users                                        controllers.DiagnosticReportController.getAllApplications
 
 GET         /online-test/candidate/:userId                               controllers.OnlineTestController.getOnlineTest(userId: String)
 POST        /online-test/candidate/:userId/status                        controllers.OnlineTestController.onlineTestStatusUpdate(userId: String)
+PUT         /online-test/:cubiksUserId/start                             controllers.OnlineTestController.startOnlineTest(cubiksUserId: Int)
 POST        /online-test/complete/:token                                 controllers.OnlineTestController.completeTests(token: String)
 POST        /online-test/reset/:appId                                    controllers.OnlineTestController.resetOnlineTests(appId: String)
 POST        /online-test/extend/:appId                                   controllers.OnlineTestController.extendOnlineTests(appId: String)
