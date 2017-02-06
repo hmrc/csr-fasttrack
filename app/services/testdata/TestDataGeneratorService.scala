@@ -19,6 +19,7 @@ package services.testdata
 import connectors.AuthProviderClient
 import connectors.AuthProviderClient.UserRole
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
+import model.testdata.GeneratorConfig
 import repositories.MongoDbConnection
 import services.testdata.faker.DataFaker.Random
 import uk.gov.hmrc.play.http.HeaderCarrier

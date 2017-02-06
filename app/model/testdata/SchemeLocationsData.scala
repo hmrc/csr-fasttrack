@@ -14,14 +14,18 @@
  * limitations under the License.
  */
 
-package services.testdata
+package model.testdata
 
-import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import model.testdata.GeneratorConfig
-import uk.gov.hmrc.play.http.HeaderCarrier
+import services.testdata.faker.DataFaker.Random
 
-import scala.concurrent.Future
+case class SchemeLocationsData(schemeLocations: List[String] = List.empty)
 
-trait BaseGenerator {
-  def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse]
+case object SchemeLocationsData {
+  def apply(schemeLocationsDataRequest: model.exchange.testdata.SchemeLocationsDataRequest, generatorId: Int): SchemeLocationsData = {
+    schemeLocationsDataRequest.schemeLocations.map{ schemeLocations =>
+      SchemeLocationsData(schemeLocations)
+    }.getOrElse {
+      SchemeLocationsData(Random.schemeLocations)
+    }
+  }
 }

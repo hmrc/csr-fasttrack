@@ -14,14 +14,17 @@
  * limitations under the License.
  */
 
-package services.testdata
+package model.testdata
 
-import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import model.testdata.GeneratorConfig
-import uk.gov.hmrc.play.http.HeaderCarrier
+case class StatusData(applicationStatus: String,
+                      previousApplicationStatus: Option[String] = None,
+                      progressStatus: Option[String] = None)
 
-import scala.concurrent.Future
-
-trait BaseGenerator {
-  def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse]
+object StatusData {
+  def apply(o: model.exchange.testdata.StatusDataRequest): StatusData = {
+    StatusData(applicationStatus = o.applicationStatus,
+      previousApplicationStatus = o.previousApplicationStatus,
+      progressStatus = o.progressStatus
+    )
+  }
 }

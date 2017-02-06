@@ -26,6 +26,7 @@ import model.EvaluationResults.Result
 import model.Exceptions.EmailTakenException
 import model.exchange.testdata._
 import model.ProgressStatuses._
+import model.testdata.{ GeneratorConfig, OnlineTestScores, PersonalData }
 import play.api.Play
 import play.api.libs.json.{ JsObject, JsString, Json }
 import play.api.mvc.{ Action, RequestHeader }
@@ -67,7 +68,11 @@ trait TestDataGeneratorController extends BaseController {
         postCode = Some("QQ1 1QQ"),
         country = Some("America")
       )),
-      assistanceDetailsData = Some(AssistanceDetailsRequest(
+      schemesData = Some(SchemesDataRequest(Some(List(Scheme.Business, Scheme.Commercial, Scheme.Finance,
+        Scheme.DigitalAndTechnology, Scheme.ProjectDelivery)))),
+      schemeLocationsData = Some(SchemeLocationsDataRequest(Some(List("Airdrie/Motherwell/Hamilton", "Bathgate",
+        "Croydon", "Glasgow", "Newcastle", "London")))),
+        assistanceDetailsData = Some(AssistanceDetailsDataRequest(
         hasDisability = Some("false"),
         hasDisabilityDescription = Some(Random.hasDisabilityDescription),
         setGis = Some(false),

@@ -19,6 +19,7 @@ package services.testdata
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.ApplicationStatuses
 import model.AssessmentEvaluationCommands.AssessmentPassmarkPreferencesAndScores
+import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.GeneralApplicationRepository
 import scheduler.assessment.EvaluateAssessmentScoreJob
