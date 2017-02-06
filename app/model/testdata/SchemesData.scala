@@ -36,7 +36,7 @@ import model.Scheme
 import model.Scheme.Scheme
 import services.testdata.faker.DataFaker.Random
 
-case class SchemesData(schemes: List[Scheme] = List(Scheme.Commercial, Scheme.DigitalAndTechnology))
+case class SchemesData(schemes: List[Scheme] = List(Scheme.Commercial, Scheme.Business))
 
 case object SchemesData {
   def apply(schemesDataRequest: model.exchange.testdata.SchemesDataRequest, generatorId: Int): SchemesData = {
