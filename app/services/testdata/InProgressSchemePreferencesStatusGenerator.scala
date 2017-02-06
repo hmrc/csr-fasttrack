@@ -17,7 +17,6 @@
 package services.testdata
 
 import model._
-import play.api.mvc.RequestHeader
 import repositories._
 import repositories.application.GeneralApplicationRepository
 import services.testdata.faker.DataFaker._
@@ -59,7 +58,8 @@ trait InProgressSchemePreferencesStatusGenerator extends ConstructiveGenerator {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       frameworkPrefs <- getFrameworkPrefs
       _ <- appRepository.updateSchemeLocations(candidateInPreviousStatus.applicationId.get, List("2643743", "2657613"))
-      _ <- appRepository.updateSchemes(candidateInPreviousStatus.applicationId.get, List(Scheme.Commercial, Scheme.Business))
+      _ <- appRepository.updateSchemes(candidateInPreviousStatus.applicationId.get,
+        generatorConfig.schemeTypes.getOrElse(List(Scheme.Commercial, Scheme.Business)))
     } yield {
       candidateInPreviousStatus.copy(
         schemePreferences = Some(frameworkPrefs)

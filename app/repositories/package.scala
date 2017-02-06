@@ -51,7 +51,6 @@ package object repositories {
   lazy val onlineTestRepository = new OnlineTestMongoRepository(DateTimeFactory)
   lazy val onlineTestPDFReportRepository = new OnlineTestPDFReportMongoRepository()
   lazy val testReportRepository = new TestReportMongoRepository()
-  lazy val diversityReportRepository = new DiversityReportMongoRepository()
   lazy val passMarkSettingsRepository = new PassMarkSettingsMongoRepository()
   lazy val assessmentCentrePassMarkSettingsRepository = new AssessmentCentrePassMarkSettingsMongoRepository()
   lazy val applicationAssessmentRepository = new ApplicationAssessmentMongoRepository()
@@ -61,6 +60,7 @@ package object repositories {
   lazy val reportingRepository = new ReportingMongoRepository(timeZoneService)
   lazy val flagCandidateRepository = new FlagCandidateMongoRepository
   lazy val schoolsRepository = SchoolsCSVRepository
+  lazy val prevYearCandidatesDetailsRepository = new PreviousYearCandidatesDetailsMongoRepository()
 
   /** Create indexes */
   Await.result(Future.sequence(List(
@@ -135,13 +135,6 @@ package object repositories {
   implicit val cdHandler: BSONHandler[BSONDocument, ContactDetails] = Macros.handler[ContactDetails]
   implicit val addressHandler: BSONHandler[BSONDocument, Address] = Macros.handler[Address]
   implicit val answerHandler: BSONHandler[BSONDocument, PersistedAnswer] = Macros.handler[PersistedAnswer]
-  implicit val diversityEthnicityHandler: BSONHandler[BSONDocument, DiversityEthnicity] = Macros.handler[DiversityEthnicity]
-  implicit val diversitySocioEconomicsHandler: BSONHandler[BSONDocument, DiversitySocioEconomic] = Macros.handler[DiversitySocioEconomic]
-  implicit val diversityGenderHandler: BSONHandler[BSONDocument, DiversityGender] =
-    Macros.handler[DiversityGender]
-  implicit val diversitySexualityyHandler: BSONHandler[BSONDocument, DiversitySexuality] =
-    Macros.handler[DiversitySexuality]
-  implicit val diversityReportRowHandler: BSONHandler[BSONDocument, DiversityReportRow] = Macros.handler[DiversityReportRow]
   implicit val candidateScoresHandler: BSONHandler[BSONDocument, CandidateScores] = Macros.handler[CandidateScores]
   implicit val candidateScoreFeedback: BSONHandler[BSONDocument, CandidateScoreFeedback] = Macros.handler[CandidateScoreFeedback]
   implicit val candidateScoresAndFeedback: BSONHandler[BSONDocument, CandidateScoresAndFeedback] = Macros.handler[CandidateScoresAndFeedback]

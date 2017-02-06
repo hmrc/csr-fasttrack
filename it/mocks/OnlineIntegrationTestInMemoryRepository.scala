@@ -20,17 +20,16 @@ import model.EvaluationResults._
 import model.{ ApplicationStatuses, ReminderNotice }
 import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser }
 import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
-import model.persisted.{ CubiksTestProfile, NotificationExpiringOnlineTest }
+import model.Scheme.Scheme
+import model.persisted.{ CubiksTestProfile, NotificationExpiringOnlineTest, SchemeEvaluationResult }
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.OnlineTestRepository
 
 import scala.collection.mutable
 import scala.concurrent.Future
 
-/**
-  * @deprecated Please use Mockito
-  */
-case class TestableResult(result: RuleCategoryResult, version: String, applicationStatus: ApplicationStatuses.EnumVal)
+case class TestableResult(version: String, evaluatedSchemes: List[SchemeEvaluationResult],
+                          applicationStatus: ApplicationStatuses.EnumVal)
 
 /**
   * @deprecated Please use Mockito
@@ -83,16 +82,9 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
 
   override def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = ???
 
-  override def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult,
-    applicationStatus: ApplicationStatuses.EnumVal
-  ): Future[Unit] = {
-    inMemoryRepo += applicationId -> TestableResult(p, version, applicationStatus)
-    Future.successful(())
-  }
-
-  def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, newVersion: String, p: RuleCategoryResult): Future[Unit] = {
-    val updatedResult = inMemoryRepo(applicationId).copy(result = p, version = newVersion)
-    inMemoryRepo += applicationId -> updatedResult
+  override def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
+    applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
+    inMemoryRepo += applicationId -> TestableResult(version, evaluationResult, applicationStatus)
     Future.successful(())
   }
 

@@ -16,7 +16,7 @@
 
 package repositories
 
-import model.Commands.PassMarkReportQuestionnaireData
+import model.ReportExchangeObjects.PassMarkReportQuestionnaireData
 import model.PersistedObjects.{PersistedAnswer, PersistedQuestion}
 import org.mockito.Matchers.{eq => eqTo, _}
 import org.mockito.Mockito._
@@ -27,7 +27,7 @@ import testkit.MongoRepositorySpec
 class QuestionnaireRepositorySpec extends MongoRepositorySpec with MockitoSugar {
 
   override val collectionName = CollectionNames.QUESTIONNAIRE
-  
+
   "The Questionnaire Repo" should {
 
     "create collection, append questions to the application and overwrite existing questions" in new Fixture {

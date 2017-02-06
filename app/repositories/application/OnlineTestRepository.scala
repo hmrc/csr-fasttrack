@@ -22,17 +22,16 @@ import model.ApplicationStatuses.BSONEnumHandler
 import model.EvaluationResults._
 import model.Exceptions._
 import model.OnlineTestCommands._
-import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
-import model.persisted.{ CubiksTestProfile, NotificationExpiringOnlineTest }
-import model.{ ApplicationStatuses, Commands, ProgressStatuses, ReminderNotice }
-import org.joda.time.{ DateTime, LocalDate }
-import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
+import model.PersistedObjects.{ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation}
+import model.persisted.{CubiksTestProfile, NotificationExpiringOnlineTest}
+import model._
+import org.joda.time.{DateTime, LocalDate}
 import model.Adjustments._
-import model.{ AdjustmentDetail, ApplicationStatuses, Commands }
-import org.joda.time.{ DateTime, LocalDate }
+import model.persisted.{NotificationExpiringOnlineTest, SchemeEvaluationResult}
+import org.joda.time.{DateTime, LocalDate}
 import reactivemongo.api.DB
 import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID }
+import reactivemongo.bson.{BSONArray, BSONDocument, BSONObjectID}
 import repositories._
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
@@ -72,10 +71,8 @@ trait OnlineTestRepository {
 
   def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]]
 
-  def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult,
+  def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
     applicationStatus: ApplicationStatuses.EnumVal): Future[Unit]
-
-  def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, version: String, p: RuleCategoryResult): Future[Unit]
 
   def removeCandidateAllocationStatus(applicationId: String): Future[Unit]
 
@@ -390,32 +387,23 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = {
-    val query =
-      BSONDocument("$or" ->
-        BSONArray(
-          BSONDocument(
-            "$and" -> BSONArray(
-              BSONDocument("online-tests.xmlReportSaved" -> true),
-              BSONDocument("passmarkEvaluation.passmarkVersion" -> BSONDocument("$exists" -> false))
-            )
-          ),
-          BSONDocument(
-            "$and" -> BSONArray(
-              BSONDocument("passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)),
-              BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingOnlineTestReevaluation)
-            )
-          ),
-          BSONDocument(
-            "$and" -> BSONArray(
-              BSONDocument("passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)),
-              BSONDocument("applicationStatus" -> ApplicationStatuses.AssessmentScoresAccepted)
-            )
-          )
-        ))
+    val query = BSONDocument("$or" -> BSONArray(
+      BSONDocument(
+        "applicationStatus" -> ApplicationStatuses.OnlineTestCompleted,
+        "online-tests.xmlReportSaved" -> true,
+        "passmarkEvaluation.passmarkVersion" -> BSONDocument("$exists" -> false)),
+      BSONDocument(
+        "applicationStatus" -> ApplicationStatuses.AwaitingOnlineTestReevaluation,
+        "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)),
+      BSONDocument(
+        "applicationStatus" -> ApplicationStatuses.AssessmentScoresAccepted,
+        "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion))
+
+    ))
 
     selectRandom(query).map(_.map { doc =>
-      val applicationId = doc.getAs[String]("applicationId").getOrElse("")
-      val userId = doc.getAs[String]("userId").getOrElse("")
+      val applicationId = doc.getAs[String]("applicationId").get
+      val userId = doc.getAs[String]("userId").get
       val applicationStatus = doc.getAs[ApplicationStatuses.EnumVal]("applicationStatus")
         .getOrElse(throw new IllegalStateException("applicationStatus must be defined"))
 
@@ -423,8 +411,8 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     })
   }
 
-  def savePassMarkScore(applicationId: String, version: String, p: RuleCategoryResult,
-    applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
+  def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
+                        applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
 
     val progressStatus = applicationStatus match {
@@ -435,12 +423,10 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
 
     val passMarkEvaluation = BSONDocument("$set" ->
       BSONDocument(
-        "passmarkEvaluation" ->
-          BSONDocument("passmarkVersion" -> version, "location1Scheme1" -> p.location1Scheme1.toString).
-            add(schemeToBSON("location1Scheme2" -> p.location1Scheme2)).
-            add(schemeToBSON("location2Scheme1" -> p.location2Scheme1)).
-            add(schemeToBSON("location2Scheme2" -> p.location2Scheme2)).
-            add(schemeToBSON("alternativeScheme" -> p.alternativeScheme)),
+        "passmarkEvaluation" -> BSONDocument(
+          "passmarkVersion" -> version,
+          "result" -> evaluationResult
+        ),
         "applicationStatus" -> applicationStatus,
         s"progress-status.$progressStatus" -> true
       ))
@@ -451,22 +437,6 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   private def schemeToBSON(scheme: (String, Option[Result])) = scheme._2 match {
     case Some(s) => BSONDocument(scheme._1 -> s.toString)
     case _ => BSONDocument.empty
-  }
-
-  def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, version: String, p: RuleCategoryResult): Future[Unit] = {
-    val query = BSONDocument("applicationId" -> applicationId)
-
-    val passMarkEvaluation = BSONDocument("$set" ->
-      BSONDocument(
-        "passmarkEvaluation" ->
-          BSONDocument("passmarkVersion" -> version, "location1Scheme1" -> p.location1Scheme1.toString).
-            add(schemeToBSON("location1Scheme2" -> p.location1Scheme2)).
-            add(schemeToBSON("location2Scheme1" -> p.location2Scheme1)).
-            add(schemeToBSON("location2Scheme2" -> p.location2Scheme2)).
-            add(schemeToBSON("alternativeScheme" -> p.alternativeScheme))
-      ))
-
-    collection.update(query, passMarkEvaluation, upsert = false).map(checkUpdateWriteResult)
   }
 
   def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal,

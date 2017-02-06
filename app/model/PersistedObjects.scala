@@ -64,15 +64,6 @@ object PersistedObjects {
 
   case class UserIdAndPhoneNumber(userId: String, phoneNumber: Option[PhoneNumber])
 
-  case class DiversityEthnicity(collector: Map[String, Int])
-  case class DiversitySocioEconomic(collector: Map[String, Int])
-  case class DiversityGender(collector: Map[String, Int])
-  case class DiversitySexuality(collector: Map[String, Int])
-
-  case class DiversityReportRow(location: String, region: String, total: Int, haveDisabilities: Int, collector: Map[String, Int])
-
-  case class DiversityReport(timeStamp: DateTime, data: List[DiversityReportRow])
-
   case class CandidateTestReport(applicationId: String, reportType: String,
     competency: Option[TestResult] = None, numerical: Option[TestResult] = None,
     verbal: Option[TestResult] = None, situational: Option[TestResult] = None) {
@@ -110,6 +101,7 @@ object PersistedObjects {
 
   case class PreferencesWithQualification(preferences: Preferences, aLevel: Boolean, stemLevel: Boolean)
 
+
   object Implicits {
     implicit val applicationStatusFormats = Json.format[ApplicationStatus]
     implicit val addressFormats = Json.format[Address]
@@ -121,12 +113,6 @@ object PersistedObjects {
     implicit val questionFormats = Json.format[PersistedQuestion]
     implicit val personalDetailsWithUserIdFormats = Json.format[PersonalDetailsWithUserId]
 
-    implicit val diversityEthnicityFormats = Json.format[DiversityEthnicity]
-    implicit val diversitySocioEconomicFormats = Json.format[DiversitySocioEconomic]
-    implicit val diversityGenderAndDisabilityFormats = Json.format[DiversityGender]
-    implicit val diversitySexualityFormats = Json.format[DiversitySexuality]
-    implicit val diversityReportRowFormats = Json.format[DiversityReportRow]
-    implicit val diversityReportFormats = Json.format[DiversityReport]
     implicit val testFormats = Json.format[TestResult]
     implicit val candidateTestReportFormats = Json.format[CandidateTestReport]
     implicit val allocatedCandidateFormats = Json.format[AllocatedCandidate]
@@ -135,5 +121,6 @@ object PersistedObjects {
 
     implicit val onlineTestPdfReportFormats = Json.format[OnlineTestPDFReport]
     implicit val preferencesWithQualificationFormats = Json.format[PreferencesWithQualification]
+
   }
 }
