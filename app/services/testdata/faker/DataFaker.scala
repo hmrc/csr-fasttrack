@@ -218,7 +218,7 @@ object DataFaker {
     def schemeLocations: List[String] = {
       // TODO: change 5 to 42 once all scheme locations are added to this list
       val size = number(Some(6))
-      randList(List("Airdrie/Motherwell/Hamilton", "Bathgate", "Croydon", "Glasgow", "Newcastle", "London"), size)
+      randList(List("2648579", "2646914", "2651513", "2654142", "2655603", "2657613"), size)
     }
 
     def hasDisabilityDescription: String = randOne(List("I am too tall", "I am too good", "I get bored easily"))

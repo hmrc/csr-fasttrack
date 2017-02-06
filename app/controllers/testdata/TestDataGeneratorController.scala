@@ -70,8 +70,7 @@ trait TestDataGeneratorController extends BaseController {
       )),
       schemesData = Some(SchemesDataRequest(Some(List(Scheme.Business, Scheme.Commercial, Scheme.Finance,
         Scheme.DigitalAndTechnology, Scheme.ProjectDelivery)))),
-      schemeLocationsData = Some(SchemeLocationsDataRequest(Some(List("Airdrie/Motherwell/Hamilton", "Bathgate",
-        "Croydon", "Glasgow", "Newcastle", "London")))),
+      schemeLocationsData = Some(SchemeLocationsDataRequest(Some(List("2648579", "2646914", "2651513", "2654142", "2655603", "2657613")))),
         assistanceDetailsData = Some(AssistanceDetailsDataRequest(
         hasDisability = Some("false"),
         hasDisabilityDescription = Some(Random.hasDisabilityDescription),
@@ -81,7 +80,6 @@ trait TestDataGeneratorController extends BaseController {
         assessmentCentreAdjustments = Some(false),
         assessmentCentreAdjustmentsDescription = Some(Random.assessmentCentreAdjustmentDescription)
       )),
-      schemeTypes = Some(List(Scheme.Commercial, Scheme.Business)),
       isCivilServant = Some(Random.bool),
       hasDegree = Some(Random.bool),
       region = Some("region"),
@@ -125,7 +123,8 @@ trait TestDataGeneratorController extends BaseController {
     }
   }
 
-  // scalastyle:off parameter.number
+  //scalastyle:off parameter.number
+  //scalastyle:off method.length
   @deprecated("Use 'createCandidatesInStatusPOST' version instead", "30/12/2016")
   def createCandidatesInStatus(status: String,
                                numberToGenerate: Int,
@@ -137,35 +136,38 @@ trait TestDataGeneratorController extends BaseController {
                                previousStatus: Option[String] = None,
                                confirmedAllocation: Boolean) = Action.async { implicit request =>
 
-    val testScores = OnlineTestScores(
-      numericalTScore = None,
-      verbalTScore = None,
-      situationalTScore = None,
-      competencyTScore = None
+    val hasDisability: Option[String] = if (setGis) { Some("Yes") } else { None }
+
+    val testScoresReq = OnlineTestScoresRequest(
+      numerical = None,
+      verbal = None,
+      situational = None,
+      competency = None
     )
 
-    val initialConfig = GeneratorConfig(
-      personalData = PersonalData(emailPrefix = emailPrefix),
-      setGis = setGis,
-      cubiksUrl = cubiksUrlFromConfig,
+    val createCandidateRequest = CreateCandidateInStatusRequest(
+      statusData = StatusDataRequest(status, previousStatus, None),
+      personalData = Some(PersonalDataRequest(emailPrefix = Some(emailPrefix))),
+      assistanceDetailsData = Some(AssistanceDetailsDataRequest(setGis = Some(setGis), hasDisability = hasDisability)),
+      schemesData = None,
+      schemeLocationsData = None,
       region = region,
-      loc1scheme1Passmark = loc1scheme1EvaluationResult.map(Result(_)),
-      loc1scheme2Passmark = loc1scheme2EvaluationResult.map(Result(_)),
-      previousStatus = previousStatus,
+      loc1scheme1EvaluationResult = loc1scheme1EvaluationResult,
+      loc1scheme2EvaluationResult = loc1scheme2EvaluationResult,
       confirmedAllocation = status match {
-        case ApplicationStatuses.AllocationUnconfirmed.name => false
-        case ApplicationStatuses.AllocationConfirmed.name => true
-        case _ => confirmedAllocation
+        case ApplicationStatuses.AllocationUnconfirmed.name => Some(false)
+        case ApplicationStatuses.AllocationConfirmed.name => Some(true)
+        case _ => Some(confirmedAllocation)
       },
-      testScores = Some(testScores)
+      isCivilServant = None,
+      hasDegree = None,
+      onlineTestScores = Some(testScoresReq)
     )
     // scalastyle:on
-
-    TestDataGeneratorService.createCandidatesInSpecificStatus(numberToGenerate, _ => StatusGeneratorFactory.getGenerator(status),
-      _ => initialConfig).map { candidates =>
-      Ok(Json.toJson(candidates))
-    }
+    createCandidateInStatus(status, GeneratorConfig.apply(cubiksUrlFromConfig, createCandidateRequest), numberToGenerate)
   }
+  //scalastyle:on method.length
+  //scalastyle:on parameter.number
 
   def createCandidatesInStatusPOST(numberToGenerate: Int) = Action.async(parse.json) { implicit request =>
     withJsonBody[CreateCandidateInStatusRequest] { body =>
@@ -174,7 +176,7 @@ trait TestDataGeneratorController extends BaseController {
   }
 
   private def createCandidateInStatus(status: String, config: (Int) => GeneratorConfig, numberToGenerate: Int)
-                                     (implicit hc: HeaderCarrier, rh: RequestHeader) = {
+                                     (implicit hc: HeaderCarrier) = {
     try {
       TestDataGeneratorService.createCandidatesInSpecificStatus(
         numberToGenerate,

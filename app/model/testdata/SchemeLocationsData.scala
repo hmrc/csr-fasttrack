@@ -18,7 +18,7 @@ package model.testdata
 
 import services.testdata.faker.DataFaker.Random
 
-case class SchemeLocationsData(schemeLocations: List[String] = List.empty)
+case class SchemeLocationsData(schemeLocations: List[String] = List("2643123", "2641673", "2643743"))
 
 case object SchemeLocationsData {
   def apply(schemeLocationsDataRequest: model.exchange.testdata.SchemeLocationsDataRequest, generatorId: Int): SchemeLocationsData = {

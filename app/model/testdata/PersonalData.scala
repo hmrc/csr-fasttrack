@@ -41,19 +41,19 @@ case class PersonalData(
 
 object PersonalData {
 
-  def apply(o: model.exchange.testdata.PersonalDataRequest, generatorId: Int): PersonalData = {
+  def apply(request: model.exchange.testdata.PersonalDataRequest, generatorId: Int): PersonalData = {
     val default = PersonalData()
-    val fname = o.firstName.getOrElse(Random.getFirstname(generatorId))
-    val emailPrefix = o.emailPrefix.map(e => s"$e-$generatorId")
+    val fname = request.firstName.getOrElse(Random.getFirstname(generatorId))
+    val emailPrefix = request.emailPrefix.map(e => s"$e-$generatorId")
 
     PersonalData(
       emailPrefix = emailPrefix.getOrElse(s"tesf${Random.number()}-$generatorId"),
       firstName = fname,
-      lastName = o.lastName.getOrElse(Random.getLastname(generatorId)),
-      preferredName = o.preferredName,
-      dob = o.dateOfBirth.map(x => LocalDate.parse(x, DateTimeFormat.forPattern("yyyy-MM-dd"))).getOrElse(default.dob),
-      postCode = o.postCode,
-      country = o.country
+      lastName = request.lastName.getOrElse(Random.getLastname(generatorId)),
+      preferredName = request.preferredName,
+      dob = request.dateOfBirth.map(x => LocalDate.parse(x, DateTimeFormat.forPattern("yyyy-MM-dd"))).getOrElse(default.dob),
+      postCode = request.postCode,
+      country = request.country
     )
   }
 }

@@ -38,7 +38,6 @@ object OnlineTestScores {
 case class GeneratorConfig(
                             personalData: PersonalData = PersonalData(),
                             assistanceDetails: AssistanceDetailsData = AssistanceDetailsData(),
-                            schemeTypes: Option[List[Scheme]] = None,
                             schemesData: SchemesData = SchemesData(),
                             schemeLocationsData: SchemeLocationsData = SchemeLocationsData(),
                               setGis: Boolean = false,
@@ -58,7 +57,6 @@ object GeneratorConfig {
     GeneratorConfig(
       personalData = request.personalData.map(PersonalData(_, generatorId)).getOrElse(PersonalData()),
       assistanceDetails = request.assistanceDetailsData.map(AssistanceDetailsData(_, generatorId)).getOrElse(AssistanceDetailsData()),
-      schemeTypes = request.schemeTypes,
       schemesData = request.schemesData.map(SchemesData(_, generatorId)).getOrElse(SchemesData()),
       schemeLocationsData = request.schemeLocationsData.map(SchemeLocationsData(_, generatorId)).getOrElse(SchemeLocationsData()),
       previousStatus = statusData.previousApplicationStatus,

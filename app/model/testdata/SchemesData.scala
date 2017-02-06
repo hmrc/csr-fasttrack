@@ -32,10 +32,11 @@ package model.testdata
  * limitations under the License.
  */
 
+import model.Scheme
 import model.Scheme.Scheme
 import services.testdata.faker.DataFaker.Random
 
-case class SchemesData(schemes: List[Scheme] = List.empty)
+case class SchemesData(schemes: List[Scheme] = List(Scheme.Commercial, Scheme.DigitalAndTechnology))
 
 case object SchemesData {
   def apply(schemesDataRequest: model.exchange.testdata.SchemesDataRequest, generatorId: Int): SchemesData = {
