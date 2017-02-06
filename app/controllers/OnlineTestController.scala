@@ -16,10 +16,11 @@
 
 package controllers
 
+import model.Exceptions.CannotUpdateCubiksTest
 import model.{ ApplicationStatuses, Commands }
-import org.joda.time.DateTime
-import play.api.libs.json.Json
+import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc._
+import model.persisted.CubiksTestProfile
 import repositories._
 import repositories.application.OnlineTestRepository
 import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
@@ -28,16 +29,6 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-case class OnlineTestDetails(
-  inviteDate: DateTime, expireDate: DateTime, onlineTestLink: String,
-  cubiksEmailAddress: String, isOnlineTestEnabled: Boolean
-)
-
-case class OnlineTest(
-  inviteDate: DateTime, expireDate: DateTime, onlineTestLink: String,
-  cubiksEmailAddress: String, isOnlineTestEnabled: Boolean, pdfReportAvailable: Boolean
-)
-
 case class OnlineTestStatus(status: ApplicationStatuses.EnumVal)
 
 case class OnlineTestExtension(extraDays: Int)
@@ -45,7 +36,7 @@ case class OnlineTestExtension(extraDays: Int)
 case class UserIdWrapper(userId: String)
 
 object OnlineTestController extends OnlineTestController {
-  override val onlineRepository: OnlineTestRepository = onlineTestRepository
+  override val onlineTestingRepo: OnlineTestRepository = onlineTestRepository
   override val onlineTestingService: OnlineTestService = OnlineTestService
   override val onlineTestExtensionService: OnlineTestExtensionService = OnlineTestExtensionService
   override val onlineTestPDFReportRepo: OnlineTestPDFReportRepository = onlineTestPDFReportRepository
@@ -53,25 +44,33 @@ object OnlineTestController extends OnlineTestController {
 
 trait OnlineTestController extends BaseController {
 
-  val onlineRepository: OnlineTestRepository
+  val onlineTestingRepo: OnlineTestRepository
   val onlineTestingService: OnlineTestService
   val onlineTestExtensionService: OnlineTestExtensionService
   val onlineTestPDFReportRepo: OnlineTestPDFReportRepository
 
   import Commands.Implicits._
 
-  def getOnlineTest(userId: String) = Action.async { implicit request =>
+  def getOnlineTest(userId: String): Action[AnyContent] = Action.async { implicit request =>
     onlineTestingService.getOnlineTest(userId).map { onlineTest =>
       Ok(Json.toJson(onlineTest))
     } recover {
-      case e => NotFound
+      case _ => NotFound
     }
   }
 
-  def onlineTestStatusUpdate(userId: String) = Action.async(parse.json) { implicit request =>
+  def onlineTestStatusUpdate(userId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[OnlineTestStatus] { onlineTestStatus =>
-      onlineRepository.updateStatus(userId, onlineTestStatus.status).map { _ => Ok }
+      onlineTestingRepo.updateStatus(userId, onlineTestStatus.status).map { _ => Ok }
     }
+  }
+
+  def startOnlineTest(cubiksUserId: Int): Action[AnyContent] = Action.async { implicit request =>
+    onlineTestingRepo.startOnlineTest(cubiksUserId).map { _ =>
+      Ok
+    } recover {
+        case _: CannotUpdateCubiksTest => NotFound
+      }
   }
 
   /**
@@ -82,22 +81,22 @@ trait OnlineTestController extends BaseController {
    *
    * @return
    */
-  def completeTests(token: String) = Action.async { implicit request =>
-    onlineRepository.consumeToken(token).map(_ => Ok)
+  def completeTests(token: String): Action[AnyContent] = Action.async { implicit request =>
+    onlineTestingRepo.consumeToken(token).map(_ => Ok)
   }
 
-  def resetOnlineTests(appId: String) = Action.async { implicit request =>
+  def resetOnlineTests(appId: String): Action[AnyContent] = Action.async { implicit request =>
 
-    onlineRepository.getOnlineTestApplication(appId).flatMap {
+    onlineTestingRepo.getOnlineTestApplication(appId).flatMap {
       case Some(onlineTestApp) =>
         onlineTestingService.registerAndInviteApplicant(onlineTestApp).map { _ => Ok }
       case _ => Future.successful(NotFound)
     }
   }
 
-  def extendOnlineTests(appId: String) = Action.async(parse.json) { implicit request =>
+  def extendOnlineTests(appId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[OnlineTestExtension] { extension =>
-      onlineRepository.getOnlineTestApplication(appId).flatMap {
+      onlineTestingRepo.getOnlineTestApplication(appId).flatMap {
         case Some(onlineTestApp) =>
           onlineTestExtensionService.extendExpiryTime(onlineTestApp, extension.extraDays).map { _ => Ok }
         case _ => Future.successful(NotFound)
@@ -105,15 +104,14 @@ trait OnlineTestController extends BaseController {
     }
   }
 
-  def getPDFReport(applicationId: String) = Action.async { implicit request =>
+  def getPDFReport(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
     onlineTestPDFReportRepo.get(applicationId).map {
-      case Some(report) => {
+      case Some(report) =>
         Ok(report).as("application/pdf")
           .withHeaders(
             "Content-type" -> "application/pdf",
             "Content-Disposition" -> s"""attachment;filename="report-$applicationId.pdf""""
           )
-      }
       case _ => NotFound
     }
   }
