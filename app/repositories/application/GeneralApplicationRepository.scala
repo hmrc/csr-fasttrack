@@ -109,6 +109,8 @@ trait GeneralApplicationRepository {
   def getSchemes(applicationId: String): Future[List[Scheme]]
 
   def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit]
+
+  def removeProgressStatuses(applicationId: String, progressStatuses: List[ProgressStatuses.ProgressStatus]): Future[Unit]
 }
 
 // scalastyle:on number.of.methods
@@ -221,7 +223,24 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     }
   }
 
+  override def removeProgressStatuses(applicationId: String, progressStatuses: List[ProgressStatuses.ProgressStatus]): Future[Unit] = {
+    require(progressStatuses.nonEmpty, "Progress statuses to remove cannot be empty")
 
+    val query = BSONDocument("applicationId" -> applicationId)
+
+    val statusesToUnset = progressStatuses.flatMap { progressStatus =>
+      Map(
+        s"progress-status.${progressStatus.name}" -> BSONString(""),
+        s"progress-status-timestamp.${progressStatus.name}" -> BSONString("")
+      )
+    }
+
+    val unsetDoc = BSONDocument("$unset" -> BSONDocument(statusesToUnset))
+
+    val validator = singleUpdateValidator(applicationId, actionDesc = "removing progress and app status")
+
+    collection.update(query, unsetDoc) map validator
+  }
 
   def findApplicationStatusDetails(applicationId: String): Future[ApplicationStatusDetails] = {
 
