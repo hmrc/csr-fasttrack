@@ -312,9 +312,9 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
       secondLocation.flatMap(_.getAs[String]("location")),
       secondLocation.flatMap(_.getAs[String]("firstFramework")),
       secondLocation.flatMap(_.getAs[String]("secondFramework")),
-      frameworkPrefs.flatMap(_.getAs[String]("secondLocationIntended")),
-      alternatives.flatMap(_.getAs[String]("location")),
-      alternatives.flatMap(_.getAs[String]("framework"))
+      frameworkPrefs.flatMap(_.getAs[Boolean]("secondLocationIntended").map(_.toString)),
+      alternatives.flatMap(_.getAs[Boolean]("location").map(_.toString)),
+      alternatives.flatMap(_.getAs[Boolean]("framework").map(_.toString))
     )
   }
 
