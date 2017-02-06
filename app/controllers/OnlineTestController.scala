@@ -48,7 +48,7 @@ trait OnlineTestController extends BaseController {
   val onlineTestExtensionService: OnlineTestExtensionService
   val onlineTestPDFReportRepo: OnlineTestPDFReportRepository
 
-  val restTestPermittedStatuses = List(ApplicationStatuses.OnlineTestInvited, ApplicationStatuses.OnlineTestStarted,
+  val resetTestPermittedStatuses = List(ApplicationStatuses.OnlineTestInvited, ApplicationStatuses.OnlineTestStarted,
     ApplicationStatuses.OnlineTestExpired, ApplicationStatuses.OnlineTestFailed, ApplicationStatuses.OnlineTestCompleted,
     ApplicationStatuses.OnlineTestFailedNotified, ApplicationStatuses.AwaitingOnlineTestReevaluation, ApplicationStatuses.AwaitingAllocation
   )
@@ -93,7 +93,7 @@ trait OnlineTestController extends BaseController {
 
     onlineTestingRepo.getOnlineTestApplication(appId).flatMap {
       case Some(onlineTestApp) =>
-        if (restTestPermittedStatuses.contains(onlineTestApp.applicationStatus)) {
+        if (resetTestPermittedStatuses.contains(onlineTestApp.applicationStatus)) {
           onlineTestingService.registerAndInviteApplicant(onlineTestApp).map { _ => Ok }
         } else {
           Future.successful(BadRequest(s"Cannot reset tests for candidate in state ${onlineTestApp.applicationStatus}"))
