@@ -17,7 +17,6 @@
 package controllers
 
 import config.TestFixtureBase
-import mocks.MediaInMemoryRepository
 import model.Commands.AddMedia
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
