@@ -24,7 +24,6 @@ import reactivemongo.bson.{ BSON, BSONHandler, BSONString }
 import scala.language.implicitConversions
 /*
  * Taken from https://gist.github.com/viktorklang/1057513
- * Credit to viktorlang
  */
 
 trait Enum { //DIY enum type

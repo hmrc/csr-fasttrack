@@ -18,18 +18,20 @@ package controllers
 
 import config._
 import connectors.ExchangeObjects._
-import connectors.{CubiksGatewayClient, EmailClient}
+import connectors.{ CubiksGatewayClient, EmailClient }
 import model.ApplicationStatuses
-import model.OnlineTestCommands.{OnlineTestApplication, OnlineTestProfile}
+import model.OnlineTestCommands.OnlineTestApplication
+import model.exchange.OnlineTest
+import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
 import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.Helpers._
-import play.api.test.{FakeHeaders, FakeRequest, Helpers}
-import repositories.OnlineTestPDFReportRepository
+import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.application.OnlineTestRepository
-import services.onlinetesting.{OnlineTestExtensionService, OnlineTestService}
+import repositories.OnlineTestPDFReportRepository
+import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
 import testkit.MockitoImplicits.OngoingStubbingExtensionUnit
 import testkit.UnitWithAppSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -40,6 +42,10 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
   "Get Online Test" must {
 
     "get an online test" in new TestFixture {
+      when(mockOnlineTestService.getOnlineTest(any[String])).thenReturn(Future.successful(
+        OnlineTest(123, DateTime.now, DateTime.now, "http://www.google.co.uk", "token")
+      ))
+
       val userId = ""
 
       val result = TestOnlineTestController.getOnlineTest(userId)(createOnlineTestRequest(userId)).run
@@ -175,7 +181,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
 
     val onlineTestApplication = OnlineTestApplication("appId", ApplicationStatuses.Submitted, "",
       guaranteedInterview = false, needsAdjustments = false, "", None)
-    val onlineTest = OnlineTest(date, date.plusDays(4), "http://www.google.co.uk", "123@test.com", isOnlineTestEnabled = true,
+    val onlineTest = OnlineTest(123, date, date.plusDays(4), "http://www.google.co.uk", "123@test.com", isOnlineTestEnabled = true,
     pdfReportAvailable = false)
 
     when(onlineTestExtensionServiceMock.extendExpiryTime(any(), any())).thenReturnAsync()
@@ -194,17 +200,18 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     when(cubiksGatewayClientMock.registerApplicant(any())(any())).thenReturn(Future.successful(Registration(0)))
     when(cubiksGatewayClientMock.inviteApplicant(any())(any())).thenReturn(Future.successful(Invitation(0, "", "", "", "", 0)))
 
-    when(mockOnlineTestRepository.storeOnlineTestProfileAndUpdateStatusToInvite(any[String], any[OnlineTestProfile]))
+    when(mockOnlineTestRepository.storeOnlineTestProfileAndUpdateStatusToInvite(any[String], any[CubiksTestProfile]))
       .thenReturn(Future.successful(()))
 
     when(mockOnlineTestService.getOnlineTest(any[String])).thenReturn(Future.successful(onlineTest))
     when(mockOnlineTestRepository.getOnlineTestApplication(any[String])).thenReturn(Future.successful(Some(onlineTestApplication)))
 
     object TestOnlineTestController extends OnlineTestController {
-      override val onlineRepository = mockOnlineTestRepository
+      override val onlineTestingRepo = mockOnlineTestRepository
       override val onlineTestingService = mockOnlineTestService
       override val onlineTestExtensionService = onlineTestExtensionServiceMock
       override val onlineTestPDFReportRepo = onlineTestPDFReportRepoMock
+
     }
 
     def createOnlineTestRequest(userId: String) = {
