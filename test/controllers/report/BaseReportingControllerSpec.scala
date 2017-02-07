@@ -22,6 +22,7 @@ import connectors.ExchangeObjects.Candidate
 import controllers.ReportingController
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
+import repositories.application.{ PreviousYearCandidatesDetailsRepository, ReportingRepository }
 import repositories.application.ReportingRepository
 import repositories.{ ApplicationAssessmentScoresRepository, AssessmentCentreIndicatorRepository, ContactDetailsRepository, LocationSchemeRepository, MediaRepository, QuestionnaireRepository, TestReportRepository }
 import services.locationschemes.LocationSchemeService
@@ -40,6 +41,7 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
     val locationSchemeServiceMock = mock[LocationSchemeService]
     val reportingFormatterMock = mock[ReportingFormatter]
     val assessmentCentreIndicatorRepoMock = mock[AssessmentCentreIndicatorRepository]
+    val previousYearContactDetailsRepositoryMock = mock[PreviousYearCandidatesDetailsRepository]
     val assessmentScoresRepoMock = mock[ApplicationAssessmentScoresRepository]
     val contactDetailsRepoMock = mock[ContactDetailsRepository]
     val questionnaireRepoMock = mock[QuestionnaireRepository]
@@ -76,6 +78,7 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
       val reportingRepository = reportingRepoMock
       val testReportRepository = testReportRepoMock
       val authProviderClient = authProviderClientMock
+      val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
       val locationSchemeRepository = locationSchemeRepositoryMock
       val mediaRepository = mediaRepositoryMock
       val socioEconomicScoreCalculator = SocioEconomicScoreCalculator

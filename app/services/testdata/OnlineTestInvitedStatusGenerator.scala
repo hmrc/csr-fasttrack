@@ -19,7 +19,7 @@ package services.testdata
 import java.util.UUID
 
 import connectors.testdata.ExchangeObjects.OnlineTestProfileResponse
-import model.OnlineTestCommands.OnlineTestProfile
+import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
 import repositories._
 import repositories.application.OnlineTestRepository
@@ -36,14 +36,13 @@ trait OnlineTestInvitedStatusGenerator extends ConstructiveGenerator {
   val otRepository: OnlineTestRepository
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
-
-    val onlineTestProfile = OnlineTestProfile(
+    val onlineTestProfile = CubiksTestProfile(
       cubiksUserId = 117344,
-      token = UUID.randomUUID().toString,
+      participantScheduleId = 149245,
+      invitationDate = DateTime.now().minusDays(7),
+      expirationDate = DateTime.now(),
       onlineTestUrl = generatorConfig.cubiksUrl,
-      invitationDate = DateTime.now(),
-      expirationDate = DateTime.now().plusDays(7),
-      participantScheduleId = 149245
+      token = UUID.randomUUID().toString
     )
 
     for {

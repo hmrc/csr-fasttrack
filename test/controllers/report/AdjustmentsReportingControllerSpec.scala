@@ -22,6 +22,7 @@ import mocks._
 import mocks.application.ReportingDocumentRootInMemoryRepository
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
+import play.api.libs.json.JsArray
 import model.ReportExchangeObjects.AdjustmentReport
 import play.api.libs.json.{ JsArray, JsValue }
 import play.api.test.Helpers._
@@ -29,6 +30,9 @@ import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
 import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, LocationSchemeRepository, MediaRepository, QuestionnaireRepository, TestReportRepository }
 import services.reporting.SocioEconomicScoreCalculator
+
+import repositories.ApplicationAssessmentScoresRepository
+import repositories.application.ReportingRepository
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -53,6 +57,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         }
         override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
+        override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
         override val testReportRepository = TestReportInMemoryRepository
         override val locationSchemeRepository = mock[LocationSchemeRepository]
         override val mediaRepository = mock[MediaRepository]
@@ -78,6 +83,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val contactDetailsRepository = new ContactDetailsInMemoryRepository
         override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
+        override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
         override val testReportRepository = TestReportInMemoryRepository
         override val authProviderClient: AuthProviderClient = authProviderClientMock
         override val locationSchemeRepository = mock[LocationSchemeRepository]
@@ -111,6 +117,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         }
         override val testReportRepository = TestReportInMemoryRepository
         override val authProviderClient: AuthProviderClient = authProviderClientMock
+        override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
         override val locationSchemeRepository = mock[LocationSchemeRepository]
         override val mediaRepository = mock[MediaRepository]
         override val socioEconomicScoreCalculator = SocioEconomicScoreCalculator

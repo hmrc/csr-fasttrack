@@ -24,8 +24,10 @@ import model.Commands.Implicits._
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
 import play.api.libs.json.JsValue
-import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import play.api.test.Helpers._
+import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
+import repositories.ApplicationAssessmentScoresRepository
+import repositories.application.ReportingRepository
 import repositories.{ ApplicationAssessmentScoresRepository, LocationSchemeRepository, MediaRepository }
 import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
 import services.reporting.SocioEconomicScoreCalculator
@@ -53,6 +55,7 @@ class NonSubmittedApplicationsReportingControllerSpec extends BaseReportingContr
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
         override val testReportRepository = TestReportInMemoryRepository
         override val authProviderClient: AuthProviderClient = authProviderClientMock
+        override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
         override val locationSchemeRepository = locationSchemeRepositoryMock
         override val mediaRepository = mediaRepositoryMock
         override val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
@@ -90,6 +93,7 @@ class NonSubmittedApplicationsReportingControllerSpec extends BaseReportingContr
         }
         override val testReportRepository = TestReportInMemoryRepository
         override val authProviderClient = authProviderClientMock
+        override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
         override val locationSchemeRepository = locationSchemeRepositoryMock
         override val mediaRepository = mediaRepositoryMock
         override val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
