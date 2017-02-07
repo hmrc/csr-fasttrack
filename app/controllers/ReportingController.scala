@@ -118,7 +118,9 @@ trait ReportingController extends BaseController {
         val locationNames = locationIds.flatMap(locationId => allLocations.find(_.id == locationId).map{_.locationName})
         val ses = socioEconomicScoreCalculator.calculate(allDiversityQuestions(application.applicationId.toString))
         val hearAboutUs = allMedia.getOrElse(application.userId, "")
-        val allocatedAssessmentCentre = "London FIX ME" // TODO IS: fix me
+        val allocatedAssessmentCentre = allContactDetails.get(application.userId.toString()).map { contactDetails =>
+            assessmentCentreIndicatorRepository.calculateIndicator(Some(contactDetails.postCode.toString)).assessmentCentre
+        }
         DiversityReportRow(application, diversityAnswers, ses, hearAboutUs, allocatedAssessmentCentre).copy(locations = locationNames,
           onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
       }

@@ -34,12 +34,12 @@ case class DiversityReportRow(applicationId: UniqueIdentifier,
                               civilServant: Option[Boolean],
                               socialEconomicScore: String,
                               hearAboutUs: String,
-                              allocatedAssessmentCentre: String
+                              allocatedAssessmentCentre: Option[String]
                              )
 
 case object DiversityReportRow {
   def apply(application: ApplicationForCandidateProgressReport, diversityAnswers: DiversityReportDiversityAnswers,
-            ses: String, hearAboutUs: String, allocatedAssessmentCentre: String): DiversityReportRow = {
+            ses: String, hearAboutUs: String, allocatedAssessmentCentre: Option[String]): DiversityReportRow = {
     DiversityReportRow(applicationId = application.applicationId,
       progress = application.progress,
       schemes = application.schemes,
