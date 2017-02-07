@@ -33,7 +33,7 @@ case class EmploymentStatus(answer: Map[String, String]) {
     case Some(Question3AnswerSelfEmployedWithEmployees) if smallCompany => EmployersSmallOrganisations
     case Some(Question3AnswerSelfEmployedWithEmployees) => EmployersLargeOrnanisations
     case Some(Question3AnswerEmployee) => calculateForEmployee
-    case None | Some(AnswerUnknown) => SelfEmployedNoEmployees
+    case None | Some(AnswerUnknown) => NotApplicable
     case unsupportedValue =>
       throw new IllegalStateException(s"Unsupported answer to the question 3: $unsupportedValue")
   }

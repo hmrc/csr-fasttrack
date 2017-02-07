@@ -43,17 +43,14 @@ trait SocioEconomicScoreCalculator {
     val employmentStatusSizeValue = EmploymentStatus(answer).employmentStatusSize
     if (employmentStatusSizeValue > 0) {
       val typeOfOccupation = getTypeOfOccupation(answer)
-      calculateSocioEconomicScore(employmentStatusSizeValue, typeOfOccupation)
+      buildScoreString(employmentStatusSizeValue, typeOfOccupation)
     } else {
       "N/A"
     }
   }
 
-  private def calculateSocioEconomicScore(employmentStatusSizeValue: Int, typeOfOccupation: Int): String = {
-    employmentStatusSizeValue match {
-      case 0 => ""
-      case _ => s"SE-${socioEconomicScoreMatrix(typeOfOccupation - 1)(employmentStatusSizeValue - 1)}"
-    }
+  private def buildScoreString(employmentStatusSizeValue: Int, typeOfOccupation: Int): String = {
+    s"SE-${socioEconomicScoreMatrix(typeOfOccupation - 1)(employmentStatusSizeValue - 1)}"
   }
 
   private def getTypeOfOccupation(answer: Map[String, String]) = {

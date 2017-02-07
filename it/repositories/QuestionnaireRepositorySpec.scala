@@ -59,7 +59,7 @@ class QuestionnaireRepositorySpec extends MongoRepositorySpec with MockitoSugar 
       result2("where?") must be("")
     }
 
-    // TODO IS: look at this test
+    // TODO Remove ignore and fix the test when passmark story is implemented
     "return data relevant to the pass mark modelling report" ignore new Fixture {
       when(socioEconomicCalculator.calculate(any())).thenReturn("SES Score")
       submitQuestionnaires()
@@ -68,7 +68,7 @@ class QuestionnaireRepositorySpec extends MongoRepositorySpec with MockitoSugar 
 
       report mustBe Map(
         applicationId1 -> PassMarkReportQuestionnaireData(
-          Some("Male"), Some("Straight"), Some("Black"), Some("Unemployed"), None, Some("Self-employed"),
+          Some("Male"), Some("Lesbian"), Some("Black"), Some("Unemployed"), None, Some("Self-employed"),
           None, "SES Score"),
         applicationId2 -> PassMarkReportQuestionnaireData(
           Some("Female"), Some("Lesbian"), Some("White"), Some("Employed"), Some("Modern professional"), Some("Part-time employed"),
@@ -76,7 +76,7 @@ class QuestionnaireRepositorySpec extends MongoRepositorySpec with MockitoSugar 
       )
     }
 
-    // TODO IS: look at this test - the questionnaire repo does not call the calculator!!!!
+    // TODO Remove ignore and fix the test when passmark story is implemented
     "calculate the socioeconomic score for the pass mark modelling report" ignore new Fixture {
       when(socioEconomicCalculator.calculate(any())).thenReturn("SES Score")
       submitQuestionnaire()
@@ -85,7 +85,7 @@ class QuestionnaireRepositorySpec extends MongoRepositorySpec with MockitoSugar 
 
       verify(socioEconomicCalculator).calculate(Map(
         "What is your gender identity?" -> "Male",
-        "What is your sexual orientation?" -> "Straight",
+        "What is your sexual orientation?" -> "Lesbian",
         "What is your ethnic group?" -> "Black",
         "Which type of occupation did they have?" -> "Unemployed",
         "Did they work as an employee or were they self-employed?" -> "Self-employed",
@@ -100,7 +100,7 @@ class QuestionnaireRepositorySpec extends MongoRepositorySpec with MockitoSugar 
     val applicationId3 = "partiallyCompleteId"
     val submittedQuestionnaire1 = List(
       PersistedQuestion("What is your gender identity?", PersistedAnswer(Some("Male"), None, None)),
-      PersistedQuestion("What is your sexual orientation?", PersistedAnswer(Some("Straight"), None, None)),
+      PersistedQuestion("What is your sexual orientation?", PersistedAnswer(Some("Lesbian"), None, None)),
       PersistedQuestion("What is your ethnic group?", PersistedAnswer(Some("Black"), None, None)),
       PersistedQuestion("Which type of occupation did they have?", PersistedAnswer(Some("Unemployed"), None, None)),
       PersistedQuestion("Did they work as an employee or were they self-employed?", PersistedAnswer(Some("Self-employed"), None, None)),
