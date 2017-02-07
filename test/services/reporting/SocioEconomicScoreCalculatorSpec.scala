@@ -78,9 +78,9 @@ object SocioEconomicCalculatorSpec {
   )
 
   val employersSmallOrganisations: Map[String, String] = Map(
-    "When you were 14, what kind of work did your highest-earning parent or guardian do?" -> "Clerical and intermediate",
+    "When you were 14, what kind of work did your highest-earning parent or guardian do?" -> "Clerical (office work) and intermediate",
     "Did they work as an employee or were they self-employed?" -> "Self-employed with employees",
-    "Which type of occupation did they have?" -> "Clerical and intermediate",
+    "Which type of occupation did they have?" -> "Clerical (office work) and intermediate",
     "Which size would best describe their place of work?" -> "Small (1 to 24 employees)"
   )
 

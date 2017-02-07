@@ -19,7 +19,7 @@ package services.reporting
 trait SocioEconomicScoreCalculator {
   private val TypeOfOccupation: Map[String, Int] = Map(
     "Modern professional" -> 1,
-    "Clerical and intermediate" -> 2,
+    "Clerical (office work) and intermediate" -> 2,
     "Senior managers and administrators" -> 3,
     "Technical and craft" -> 4,
     "Semi-routine manual and service" -> 5,
