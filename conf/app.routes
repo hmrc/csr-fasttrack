@@ -59,7 +59,7 @@ PUT         /questionnaire/:applicationId/:sectionKey                    control
 GET         /search/find-by-id/user/:userId/framework/:frameworkId       controllers.SearchForApplicantsController.findById(userId: String, frameworkId: String)
 POST        /search/find-by-criteria                                     controllers.SearchForApplicantsController.findByCriteria
 
-GET         /report/diversity-monitoring                                 controllers.ReportingController.retrieveDiversityReport
+GET         /report/diversity-monitoring/:frameworkId                    controllers.ReportingController.createDiversityReport(frameworkId: String)
 GET         /report/application-user-ids/:frameworkId                    controllers.ReportingController.createApplicationAndUserIdsReport(frameworkId: String)
 GET         /report/adjustments/:frameworkId                             controllers.ReportingController.createAdjustmentReports(frameworkId: String)
 GET         /report/assessment-centre-allocation/:frameworkId            controllers.ReportingController.createAssessmentCentreAllocationReport(frameworkId: String)

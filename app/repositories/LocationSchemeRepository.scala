@@ -69,14 +69,18 @@ trait LocationSchemeRepository {
 
   def getSchemesAndLocations: Future[List[LocationSchemes]] = cachedLocationSchemes
 
-  // TODO: Needs updating with correct scheme data
+  @deprecated("Use 'schemeInfoList' without Future version", "03/02/2017")
   def getSchemeInfo: Future[List[SchemeInfo]] = {
-    Future.successful(List(
+    Future.successful(schemeInfoList)
+  }
+
+  def schemeInfoList: List[SchemeInfo] = {
+    List(
       SchemeInfo(Business, "Business", requiresALevel = false, requiresALevelInStem = false),
       SchemeInfo(Commercial, "Commercial", requiresALevel = false, requiresALevelInStem = false),
       SchemeInfo(DigitalAndTechnology, "Digital and technology", requiresALevel = true, requiresALevelInStem = true),
       SchemeInfo(Finance, "Finance", requiresALevel = false, requiresALevelInStem = false),
       SchemeInfo(ProjectDelivery, "Project delivery", requiresALevel = true, requiresALevelInStem = false)
-    ))
+    )
   }
 }

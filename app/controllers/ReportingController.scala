@@ -18,22 +18,27 @@ package controllers
 
 import akka.stream.scaladsl.Source
 import connectors.AuthProviderClient
+import model._
+import model.Commands._
 import model.ApplicationStatusOrder
 import model.Commands.{ CsvExtract, _ }
 import model.PersistedObjects.ContactDetailsWithId
 import model.PersistedObjects.Implicits._
 import model.ReportExchangeObjects.Implicits._
 import model.ReportExchangeObjects.{ Implicits => _, _ }
+import model.report.DiversityReportItem
+import org.joda.time.DateTime
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
 import play.api.mvc.{ Action, AnyContent, Request }
 import repositories.application.ReportingRepository
+import repositories.{ QuestionnaireRepository, application, _ }
 import play.api.libs.streams.Streams
 import play.api.mvc.{ Action, AnyContent, Request, Result }
 import repositories.application.{ PreviousYearCandidatesDetailsRepository, ReportingRepository }
 import repositories.{ QuestionnaireRepository, _ }
 import services.locationschemes.LocationSchemeService
-import services.reporting.ReportingFormatter
+import services.reporting.{ ReportingFormatter, SocioEconomicScoreCalculator }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -50,6 +55,9 @@ object ReportingController extends ReportingController {
   val testReportRepository = repositories.testReportRepository
   val prevYearCandidatesDetailsRepository = repositories.prevYearCandidatesDetailsRepository
   val authProviderClient = AuthProviderClient
+  val locationSchemeRepository = FileLocationSchemeRepository
+  val mediaRepository = repositories.mediaRepository
+  val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
 }
 
 trait ReportingController extends BaseController {
@@ -66,9 +74,68 @@ trait ReportingController extends BaseController {
   val testReportRepository: TestReportRepository
   val prevYearCandidatesDetailsRepository: PreviousYearCandidatesDetailsRepository
   val authProviderClient: AuthProviderClient
+  val locationSchemeRepository: LocationSchemeRepository
+  val mediaRepository: MediaRepository
+  val socioEconomicScoreCalculator: SocioEconomicScoreCalculator
 
-  def retrieveDiversityReport = Action.async { implicit request =>
-    Future.successful(NotFound)
+  def createDiversityReport(frameworkId: String) = Action.async { implicit request =>
+    val applicationsFut = reportingRepository.diversityReport(frameworkId)
+    val allContactDetailsFut = contactDetailsRepository.findAll.map(x => x.groupBy(_.userId).mapValues(_.head))
+    val allLocationsFut = locationSchemeService.getAllSchemeLocations
+    val allQuestionsFut = questionnaireRepository.diversityReport
+    val reportFut: Future[List[DiversityReportItem]] = for {
+      applications <- applicationsFut
+      allContactDetails <- allContactDetailsFut
+      allLocations <- allLocationsFut
+      allDiversityQuestions <- allQuestionsFut
+      allMedia <- mediaRepository.findAll()
+      report <- buildDiversityReportRows(applications, allContactDetails, allLocations, allDiversityQuestions, allMedia)
+    } yield report
+    reportFut.map { report => Ok(Json.toJson(report)) }
+  }
+
+  private def extractDiversityAnswers(application: ApplicationForCandidateProgressReport,
+                                      allDiversityQuestions: Map[String, Map[String, String]]) = {
+    def getDiversityAnswerForQuestion(applicationId: String, questionText: String,
+                                              allDiversityQuestions: Map[String, Map[String, String]]) = {
+      allDiversityQuestions.get(applicationId).map { questionMap => questionMap.getOrElse(questionText, "") }.getOrElse("")
+    }
+
+    val genderAnswer = getDiversityAnswerForQuestion(application.applicationId.toString,
+      QuestionnaireRepository.genderQuestionText, allDiversityQuestions)
+
+    val sexualOrientationAnswer = getDiversityAnswerForQuestion(application.applicationId.toString,
+      QuestionnaireRepository.sexualOrientationQuestionText, allDiversityQuestions)
+
+    val ethnicityAnswer = getDiversityAnswerForQuestion(application.applicationId.toString,
+      QuestionnaireRepository.ethnicityQuestionText, allDiversityQuestions)
+
+    DiversityReportDiversityAnswers(genderAnswer, sexualOrientationAnswer, ethnicityAnswer)
+  }
+
+  private def buildDiversityReportRows(applications: List[ApplicationForCandidateProgressReport],
+                                   allContactDetails: Map[String, ContactDetailsWithId],
+                                   allLocations: List[LocationSchemes],
+                                   allDiversityQuestions: Map[String, Map[String, String]],
+                                   allMedia: Map[UniqueIdentifier, String]): Future[List[DiversityReportItem]] = {
+    Future{
+      applications.map { application =>
+        val diversityAnswers = extractDiversityAnswers(application, allDiversityQuestions)
+        val locationIds = application.locationIds
+        val onlineAdjustmentsVal = reportingFormatter.getOnlineAdjustments(application.onlineAdjustments, application.adjustments)
+        val assessmentCentreAdjustmentsVal = reportingFormatter.getAssessmentCentreAdjustments(
+          application.assessmentCentreAdjustments,
+          application.adjustments)
+        val locationNames = locationIds.flatMap(locationId => allLocations.find(_.id == locationId).map{_.locationName})
+        val ses = socioEconomicScoreCalculator.calculate(allDiversityQuestions(application.applicationId.toString))
+        val hearAboutUs = allMedia.getOrElse(application.userId, "")
+        val allocatedAssessmentCentre = allContactDetails.get(application.userId.toString()).map { contactDetails =>
+            assessmentCentreIndicatorRepository.calculateIndicator(Some(contactDetails.postCode.toString)).assessmentCentre
+        }
+        DiversityReportItem(application, diversityAnswers, ses, hearAboutUs, allocatedAssessmentCentre).copy(locations = locationNames,
+          onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
+      }
+    }
   }
 
   def createApplicationAndUserIdsReport(frameworkId: String) = Action.async { implicit request =>
@@ -228,7 +295,6 @@ trait ReportingController extends BaseController {
 
   def createPreferencesAndContactReports(frameworkId: String) =
     preferencesAndContactReports(nonSubmittedOnly = false)(frameworkId)
-
 
   def createSuccessfulCandidatesReport(frameworkId: String) = Action.async { implicit request =>
 

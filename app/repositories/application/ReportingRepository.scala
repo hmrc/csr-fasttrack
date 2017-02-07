@@ -20,10 +20,11 @@ import java.util.regex.Pattern
 
 import common.Constants.{ No, Yes }
 import common.StringUtils._
-import model.ApplicationStatusOrder._
+import model.ApplicationStatusOrder.{ getStatus, _ }
 import model.Commands._
 import model.EvaluationResults._
 import model.ReportExchangeObjects._
+import model.Scheme.Scheme
 import model._
 import model.commands.OnlineTestProgressResponse
 import org.joda.time.LocalDate
@@ -59,6 +60,9 @@ trait ReportingRepository {
   def applicationsWithAssessmentScoresAccepted(frameworkId: String): Future[List[ApplicationPreferences]]
 
   def applicationsPassedInAssessmentCentre(frameworkId: String): Future[List[ApplicationPreferencesWithTestResults]]
+
+  // The progress report contains common data for diversity
+  def diversityReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
 }
 
 class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo: () => DB)
@@ -639,6 +643,26 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
         ApplicationUserIdReport(UniqueIdentifier(applicationId), UniqueIdentifier(userId))
       }
     }
+  }
+
+  def diversityReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] = {
+    val query = BSONDocument(
+      "frameworkId" -> frameworkId,
+      "applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn),
+      "progress-status.questionnaire.diversity_questions_completed" -> BSONDocument("$exists" -> true)
+    )
+
+    val projection = BSONDocument(
+      "applicationId" -> "1",
+      "userId" -> "1",
+      "progress-status" -> "1",
+      "personal-details.civilServant" -> "1",
+      "schemes" -> "1",
+      "scheme-locations" -> "1",
+      "assistance-details" -> "1"
+    )
+
+    reportQueryWithProjectionsBSON[ApplicationForCandidateProgressReport](query, projection)
   }
 }
 
