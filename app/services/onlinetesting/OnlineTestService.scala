@@ -116,8 +116,7 @@ trait OnlineTestService {
       invitationDate,
       expirationDate,
       invitation.authenticateUrl,
-      token,
-      isOnlineTestEnabled = true
+      token
     )
 
     invitationProcess.flatMap(
@@ -169,6 +168,16 @@ trait OnlineTestService {
           }
         }
       }
+    }
+  }
+
+  def completeOnlineTest(cubiksUserId: Int): Future[Unit] = {
+    otRepository.completeOnlineTest(cubiksUserId)
+  }
+
+  def consumeOnlineTestToken(token: String): Future[Unit] =  {
+    otRepository.getCubiksTestProfileByToken(token) flatMap { cubiksProfile =>
+      otRepository.completeOnlineTest(cubiksProfile.cubiksUserId)
     }
   }
 
@@ -261,7 +270,7 @@ trait OnlineTestService {
   }
 
   private[services] def buildInviteApplication(application: OnlineTestApplication, token: String, userId: Int, scheduleId: Int) = {
-    val onlineTestCompletedUrl = gatewayConfig.candidateAppUrl + "/fset-fast-track/online-tests/complete/" + token
+    val onlineTestCompletedUrl = gatewayConfig.candidateAppUrl + s"/fset-fast-track/online-tests/by-token/$token/complete"
     if (application.guaranteedInterview) {
       InviteApplicant(scheduleId, userId, onlineTestCompletedUrl, None)
     } else {

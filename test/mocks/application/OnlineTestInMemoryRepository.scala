@@ -17,11 +17,12 @@
 package mocks.application
 
 import factories.UUIDFactory
-import model.ApplicationStatuses
+import model.{ ApplicationStatuses, Scheme }
+import model.PersistedObjects._
+import model.persisted.{ CubiksTestProfile, SchemeEvaluationResult }
 import model.EvaluationResults._
 import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser }
 import model.PersistedObjects._
-import model.persisted.CubiksTestProfile
 import model.Scheme.Scheme
 import model.persisted.SchemeEvaluationResult
 import org.joda.time.{ DateTime, LocalDate }
@@ -113,4 +114,8 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
   override def startOnlineTest(cubiksId: Int): Future[Unit] = Future.successful(())
 
   override def getCubiksTestProfile(cubiksUserId: Int): Future[CubiksTestProfile] = ???
+
+  override def getCubiksTestProfileByToken(token: String): Future[CubiksTestProfile] = ???
+
+  override def completeOnlineTest(cubiksUserId: Int): Future[Unit] = ???
 }

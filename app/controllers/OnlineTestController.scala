@@ -77,6 +77,14 @@ trait OnlineTestController extends BaseController {
       }
   }
 
+  def completeOnlineTest(cubiksUserId: Int): Action[AnyContent] = Action.async { implicit request =>
+    onlineTestingRepo.completeOnlineTest(cubiksUserId).map { _ =>
+      Ok
+    } recover {
+        case _: CannotUpdateCubiksTest => NotFound
+      }
+  }
+
   /**
    * Note that this function will result with an ok even if the token is invalid.
    * This is done on purpose. We want to update the status of the user if the token is correct, but if for
@@ -85,7 +93,7 @@ trait OnlineTestController extends BaseController {
    *
    * @return
    */
-  def completeTests(token: String): Action[AnyContent] = Action.async { implicit request =>
+  def completeOnlineTestByToken(token: String): Action[AnyContent] = Action.async { implicit request =>
     onlineTestingRepo.consumeToken(token).map(_ => Ok)
   }
 
