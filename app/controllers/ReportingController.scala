@@ -181,7 +181,7 @@ trait ReportingController extends BaseController {
           val assessmentCentreAdjustmentsVal = reportingFormatter.getAssessmentCentreAdjustments(
             application.assessmentCentreAdjustments,
             application.adjustments)
-          val locationNames = locationIds.flatMap(locationId => allLocations.filter(_.id == locationId).headOption.map {
+          val locationNames = locationIds.flatMap(locationId => allLocations.find(_.id == locationId).map {
             _.locationName
           })
           CandidateProgressReportItem(application).copy(fsacIndicator = fsacIndicatorVal, locations = locationNames,
