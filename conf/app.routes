@@ -30,6 +30,8 @@ PUT         /scheme-locations/:applicationId                             control
 GET         /schemes/:applicationId                                      controllers.LocationSchemeController.getSchemes(applicationId: String)
 PUT         /schemes/:applicationId                                      controllers.LocationSchemeController.updateSchemes(applicationId: String)
 GET         /schemes/eligible/:applicationId                             controllers.LocationSchemeController.getEligibleSchemes(applicationId: String)
+GET         /available/schemes                                           controllers.LocationSchemeController.getAvailableSchemes
+
 
 PUT         /pass-mark-settings/create                                   controllers.OnlineTestPassMarkSettingsController.createPassMarkSettings
 GET         /pass-mark-settings/getLatestVersion                         controllers.OnlineTestPassMarkSettingsController.getLatestVersion

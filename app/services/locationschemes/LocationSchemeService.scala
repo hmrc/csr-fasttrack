@@ -65,7 +65,8 @@ trait LocationSchemeService {
         personalDetails <- pdRepository.find(applicationId)
         schemes <- locationSchemeRepository.getSchemeInfo
       } yield {
-        schemes.filterNot(s => s.requiresALevel && !personalDetails.aLevel || s.requiresALevelInStem && !personalDetails.stemLevel)
+        schemes.filterNot(s => s.requiresALevel && !(personalDetails.aLevel || personalDetails.stemLevel)
+          || s.requiresALevelInStem && !personalDetails.stemLevel)
       }
   }
 
@@ -100,6 +101,8 @@ trait LocationSchemeService {
         schemes.find(_.id == schemeId).getOrElse(throw NotFoundException(Some(s"Scheme $schemeId not found"))))
     }
   }
+
+  def getAvailableSchemes : Future[List[SchemeInfo]] = locationSchemeRepository.getSchemeInfo
 
   def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit] = {
     appRepository.updateSchemes(applicationId, schemeNames)

@@ -72,11 +72,11 @@ trait LocationSchemeRepository {
   // TODO: Needs updating with correct scheme data
   def getSchemeInfo: Future[List[SchemeInfo]] = {
     Future.successful(List(
-      SchemeInfo(Business, "Business", requiresALevel = true, requiresALevelInStem = true),
-      SchemeInfo(Commercial, "Commercial", requiresALevel = true, requiresALevelInStem = true),
-      SchemeInfo(DigitalAndTechnology, "Digital and technology", requiresALevel = false, requiresALevelInStem = true),
-      SchemeInfo(Finance, "Finance", requiresALevel = true, requiresALevelInStem = false),
-      SchemeInfo(ProjectDelivery, "Project Delivery", requiresALevel = false, requiresALevelInStem = false)
+      SchemeInfo(Business, "Business", requiresALevel = false, requiresALevelInStem = false),
+      SchemeInfo(Commercial, "Commercial", requiresALevel = false, requiresALevelInStem = false),
+      SchemeInfo(DigitalAndTechnology, "Digital and technology", requiresALevel = true, requiresALevelInStem = true),
+      SchemeInfo(Finance, "Finance", requiresALevel = false, requiresALevelInStem = false),
+      SchemeInfo(ProjectDelivery, "Project delivery", requiresALevel = true, requiresALevelInStem = false)
     ))
   }
 }
