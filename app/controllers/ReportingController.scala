@@ -184,16 +184,13 @@ trait ReportingController extends BaseController {
           val locationNames = locationIds.flatMap(locationId => allLocations.filter(_.id == locationId).headOption.map {
             _.locationName
           })
-
           CandidateProgressReportItem(application).copy(fsacIndicator = fsacIndicatorVal, locations = locationNames,
             onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
-        }
-        }
+        }}
         val defaultReportItem = CandidateProgressReportItem(ApplicationForCandidateProgressReport(None,
           UniqueIdentifier(user.userId), Some(ProgressStatuses.Registered), List.empty, List.empty, None, None, None, None, None, None))
         reportItem.getOrElse(defaultReportItem)
-      }
-      }
+      }}
     }
   }
 
