@@ -35,6 +35,8 @@ object QuestionnaireInMemoryRepository extends QuestionnaireRepository with InMe
 
   override def passMarkReport: Future[Map[String, PassMarkReportQuestionnaireData]] =
     Future.successful(Map.empty[String, PassMarkReportQuestionnaireData])
+
+  override def diversityReport: Future[Map[String, Map[String, String]]] = Future.successful(Map.empty)
 }
 
 case class QuestionnaireNotFound(applicationId: String) extends Exception

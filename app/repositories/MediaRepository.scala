@@ -16,12 +16,12 @@
 
 package repositories
 
-import model.Commands
+import model.{ Commands, UniqueIdentifier }
 import model.Commands._
 import model.Exceptions.CannotAddMedia
 import reactivemongo.api.DB
 import reactivemongo.api.commands.WriteResult
-import reactivemongo.bson.BSONObjectID
+import reactivemongo.bson.{ BSONDocument, BSONObjectID }
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -30,6 +30,8 @@ import scala.concurrent.Future
 
 trait MediaRepository {
   def create(addMedia: AddMedia): Future[Unit]
+
+  def findAll(): Future[Map[UniqueIdentifier, String]]
 }
 
 class MediaMongoRepository(implicit mongo: () => DB)
@@ -39,5 +41,16 @@ class MediaMongoRepository(implicit mongo: () => DB)
   override def create(addMedia: AddMedia): Future[Unit] = insert(addMedia).map { _ => ()
   } recover {
     case e: WriteResult => throw new CannotAddMedia(addMedia.userId)
+  }
+
+  def findAll(): Future[Map[UniqueIdentifier, String]] = {
+    val query = BSONDocument()
+    collection.find(query).cursor[BSONDocument]().collect[List]().map {
+      _.map { d =>
+        val userId = d.getAs[String]("userId").get
+        val media = d.getAs[String]("media").getOrElse("")
+        UniqueIdentifier(userId) -> media
+      }.toMap
+    }
   }
 }
