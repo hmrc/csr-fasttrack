@@ -20,7 +20,9 @@ import config._
 import connectors.ExchangeObjects._
 import connectors.{ CubiksGatewayClient, EmailClient }
 import model.ApplicationStatuses
+import model.Commands.Address
 import model.OnlineTestCommands.OnlineTestApplication
+import model.PersistedObjects.ContactDetails
 import model.exchange.OnlineTest
 import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
@@ -80,7 +82,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     "return the userId if the token is valid" in new TestFixture {
       val token = "1234"
       when(mockOnlineTestRepository.consumeToken(token)).thenReturn(Future.successful(unit))
-      val result = TestOnlineTestController.completeTests(token)(createOnlineTestCompleteRequest(token)).run
+      val result = TestOnlineTestController.completeOnlineTestByToken(token)(createOnlineTestCompleteRequest(token)).run
 
       status(result) must be(200)
     }
@@ -226,7 +228,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     }
 
     def createOnlineTestCompleteRequest(token: String) = {
-      FakeRequest(Helpers.GET, controllers.routes.OnlineTestController.completeTests(token).url, FakeHeaders(), "")
+      FakeRequest(Helpers.PUT, controllers.routes.OnlineTestController.completeOnlineTestByToken(token).url, FakeHeaders(), "")
     }
 
     def createResetOnlineTestRequest(appId: String) = {

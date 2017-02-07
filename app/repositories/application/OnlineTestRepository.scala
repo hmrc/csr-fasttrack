@@ -22,12 +22,10 @@ import model.ApplicationStatuses.BSONEnumHandler
 import model.EvaluationResults._
 import model.Exceptions._
 import model.OnlineTestCommands._
-import model.PersistedObjects.{ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation}
-import model.persisted.{CubiksTestProfile, NotificationExpiringOnlineTest}
+import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
+import model.persisted.{ CubiksTestProfile, NotificationExpiringOnlineTest, SchemeEvaluationResult }
 import model._
-import org.joda.time.{DateTime, LocalDate}
 import model.Adjustments._
-import model.persisted.{NotificationExpiringOnlineTest, SchemeEvaluationResult}
 import org.joda.time.{DateTime, LocalDate}
 import reactivemongo.api.DB
 import reactivemongo.api.commands.UpdateWriteResult
@@ -52,6 +50,8 @@ trait OnlineTestRepository {
   def nextApplicationReadyForPDFReportRetrieving(): Future[Option[OnlineTestApplicationWithCubiksUser]]
 
   def getCubiksTestProfile(userId: String): Future[CubiksTestProfile]
+
+  def getCubiksTestProfileByToken(token: String): Future[CubiksTestProfile]
 
   def getCubiksTestProfile(cubiksUserId: Int): Future[CubiksTestProfile]
 
@@ -86,8 +86,11 @@ trait OnlineTestRepository {
   def addReminderNotificationStatus(userId: String, notificationStatus: String): Future[Unit]
 
   def startOnlineTest(cubiksUserId: Int): Future[Unit]
+
+  def completeOnlineTest(cubiksUserId: Int): Future[Unit]
 }
 
+// scalastyle:off number.of.methods
 class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
   extends ReactiveRepository[CubiksTestProfile, BSONObjectID](CollectionNames.APPLICATION, mongo,
     model.persisted.CubiksTestProfile.format, ReactiveMongoFormats.objectIdFormats)
@@ -111,7 +114,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       BSONDocument("$set" -> BSONDocument(
         s"progress-status.$flag" -> true,
         "applicationStatus" -> status,
-        "online-tests.completionDate" -> DateTime.now
+        "online-tests.completedDateTime" -> DateTime.now
       ))
     } else {
       BSONDocument("$set" -> BSONDocument(
@@ -123,28 +126,29 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   override def getCubiksTestProfile(userId: String): Future[CubiksTestProfile] = {
-
     val query = BSONDocument("userId" -> userId)
-    val projection = BSONDocument("online-tests" -> 1, "_id" -> 0)
+    val exception = NotFoundException(Some(s"No online test found for userId $userId"))
+    getCubiksTestProfile(query, exception)
+  }
 
-    collection.find(query, projection).one[BSONDocument] map {
-      case Some(document) if document.getAs[BSONDocument]("online-tests").isDefined =>
-        document.getAs[CubiksTestProfile]("online-tests").getOrElse(throw NotFoundException(Some(s"No online test found for userId $userId")))
-
-      case _ => throw NotFoundException()
-    }
+  override def getCubiksTestProfileByToken(token: String): Future[CubiksTestProfile] = {
+    val query = BSONDocument("online-tests.token" -> token)
+    val exception = NotFoundException(Some(s"No online test found for token $token"))
+    getCubiksTestProfile(query, exception)
   }
 
   override def getCubiksTestProfile(cubiksUserId: Int): Future[CubiksTestProfile] = {
-
     val query = BSONDocument("online-tests.cubiksUserId" -> cubiksUserId)
+    val exception = NotFoundException(Some(s"No online test found for cubiksId $cubiksUserId"))
+    getCubiksTestProfile(query, exception)
+  }
+
+  private def getCubiksTestProfile(query: BSONDocument, exception: NotFoundException): Future[CubiksTestProfile] = {
     val projection = BSONDocument("online-tests" -> 1, "_id" -> 0)
 
     collection.find(query, projection).one[BSONDocument] map {
       case Some(document) if document.getAs[BSONDocument]("online-tests").isDefined =>
-        document.getAs[CubiksTestProfile]("online-tests").getOrElse(throw NotFoundException(
-          Some(s"No online test found for cubiksId $cubiksUserId"))
-        )
+        document.getAs[CubiksTestProfile]("online-tests").getOrElse(throw exception)
 
       case _ => throw NotFoundException()
     }
@@ -212,6 +216,23 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     val applicationStatusBSON = applicationStatus(ApplicationStatuses.OnlineTestCompleted)
 
     collection.update(query, applicationStatusBSON, upsert = false).map { _ => () }
+  }
+
+  override def completeOnlineTest(cubiksUserId: Int): Future[Unit] = {
+    val query  = BSONDocument(
+      "online-tests.cubiksUserId" -> cubiksUserId,
+      "applicationStatus" -> ApplicationStatuses.OnlineTestStarted
+    )
+
+    val update = BSONDocument("$set" -> BSONDocument(
+      "applicationStatus" -> ApplicationStatuses.OnlineTestCompleted,
+      s"progress-status.${ProgressStatuses.OnlineTestCompletedProgress}" -> true,
+      "online-tests.completedDateTime" -> DateTime.now
+    ))
+
+    val validator = singleUpdateValidator(s"$cubiksUserId", actionDesc = "recording cubiks test completion",
+      CannotUpdateCubiksTest(s"Cant update test with cubiksId $cubiksUserId"))
+    collection.update(query, update, upsert = false) map validator
   }
 
   override def storeOnlineTestProfileAndUpdateStatusToInvite(applicationId: String, cubiksTestProfile: CubiksTestProfile): Future[Unit] = {
@@ -532,3 +553,4 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     writeResult.errmsg.map(msg => throw UnexpectedException(s"Database update failed: $msg"))
   }
 }
+// scalastyle:on
