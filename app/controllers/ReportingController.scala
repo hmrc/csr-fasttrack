@@ -68,7 +68,7 @@ trait ReportingController extends BaseController {
   val socioEconomicScoreCalculator: SocioEconomicScoreCalculator
 
   def retrieveDiversityReport(frameworkId: String) = Action.async { implicit request =>
-    val applicationsFut = reportingRepository.applicationsForCandidateProgressReport(frameworkId)
+    val applicationsFut = reportingRepository.diversityReport(frameworkId)
     val allContactDetailsFut = contactDetailsRepository.findAll.map(x => x.groupBy(_.userId).mapValues(_.head))
     val allLocationsFut = locationSchemeService.getAllSchemeLocations
     val allQuestionsFut = questionnaireRepository.diversityReport

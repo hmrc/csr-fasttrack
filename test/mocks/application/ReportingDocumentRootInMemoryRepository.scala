@@ -90,6 +90,6 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
 
   override def applicationsPassedInAssessmentCentre(frameworkId: String): Future[List[ApplicationPreferencesWithTestResults]] = ???
 
-  override def diversityReport(frameworkId: String): Future[List[ApplicationForDiversityReport]] = ???
+  override def diversityReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] = ???
 
 }
