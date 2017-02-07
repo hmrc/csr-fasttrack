@@ -62,7 +62,8 @@ trait ReportingRepository {
 
   def applicationsPassedInAssessmentCentre(frameworkId: String): Future[List[ApplicationPreferencesWithTestResults]]
 
-  def diversityReport(frameworkId: String): Future[List[ApplicationForDiversityReport]]
+  // The progress report contains common data for diversity
+  def diversityReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
 }
 
 class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo: () => DB)
@@ -645,19 +646,24 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     }
   }
 
-  def diversityReport(frameworkId: String): Future[List[ApplicationForDiversityReport]] = {
-    val query = BSONDocument("frameworkId" -> frameworkId)
+  def diversityReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] = {
+    val query = BSONDocument(
+      "frameworkId" -> frameworkId,
+      "applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn),
+      "progress-status.questionnaire.diversity_questions_completed" -> BSONDocument("$exists" -> true)
+    )
+
     val projection = BSONDocument(
-      "userId" -> "1",
       "applicationId" -> "1",
+      "userId" -> "1",
+      "progress-status" -> "1",
+      "personal-details.civilServant" -> "1",
       "schemes" -> "1",
       "scheme-locations" -> "1",
-      "assistance-details" -> "1",
-      "progress-status" -> "1")
+      "assistance-details" -> "1"
+    )
 
-    collection.find(query, projection).cursor[BSONDocument]().collect[List]().map { docs =>
-      docs.map(bsonDocumentToDiversityReport)
-    }
+    reportQueryWithProjectionsBSON[ApplicationForCandidateProgressReport](query, projection)
   }
 
   private def bsonDocumentToDiversityReport(document: BSONDocument) = {
