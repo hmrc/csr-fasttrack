@@ -21,31 +21,42 @@ import common.Constants.Yes
 case class EmploymentStatus(answer: Map[String, String]) {
   import EmploymentStatus._
 
-  private val employedOrSelfEmployed = answer.get(Question1).contains("Employed")
-  private val unemployedOrUnknown = !employedOrSelfEmployed
+  private val unemployedOrUnknown = answer.get(Question1AndQuestion2).contains("Unknown") ||
+    answer.get(Question1AndQuestion2).forall(_.startsWith("Unemployed"))
+
   private val smallCompany = answer.get(Question4).contains("Small (1 to 24 employees)")
   private val superviseAnyEmployees = answer.get(Question5).contains(Yes)
 
   def employmentStatusSize = answer.get(Question3) match {
     case _ if unemployedOrUnknown => NotApplicable
-    case (Some("Self-employed/freelancer without employees")) => SelfEmployedNoEmployees
-    case (Some("Self-employed with employees")) if smallCompany => EmployersSmallOrganisations
-    case (Some("Self-employed with employees")) => EmployersLargeOrnanisations
-    case (Some("Employee")) => calculateForEmployee
+    case Some(Question3AnswerSelfEmployedWithoutEmployees) => SelfEmployedNoEmployees
+    case Some(Question3AnswerSelfEmployedWithEmployees) if smallCompany => EmployersSmallOrganisations
+    case Some(Question3AnswerSelfEmployedWithEmployees) => EmployersLargeOrnanisations
+    case Some(Question3AnswerEmployee) => calculateForEmployee
+    case None | Some(AnswerUnknown) => SelfEmployedNoEmployees
+    case unsupportedValue =>
+      throw new IllegalStateException(s"Unsupported answer to the question 3: $unsupportedValue")
   }
 
-  private def calculateForEmployee = answer.get(Question2) match {
-    case (Some("Senior managers and administrators")) if smallCompany => ManagersSmallOrganisations
-    case (Some("Senior managers and administrators")) => ManagersLargeOrganisations
-    case (Some(_)) if superviseAnyEmployees => Supervisors
-    case (Some(_)) => OtherEmployees
+  private def calculateForEmployee = answer.get(Question1AndQuestion2) match {
+    case Some(Question1AndQuestion2AnswerSeniorManagers) if smallCompany => ManagersSmallOrganisations
+    case Some(Question1AndQuestion2AnswerSeniorManagers) => ManagersLargeOrganisations
+    case Some(_) if superviseAnyEmployees => Supervisors
+    case Some(_) => OtherEmployees
+    case unsupportedValue =>
+      throw new IllegalStateException(s"Unsupported answer to the question 1 or 2: $unsupportedValue")
   }
 }
 
 case object EmploymentStatus {
-  val Question1 = "When you were 14, was your highest-earning parent or guardian employed?"
-  val Question2 = "Which type of occupation did they have?"
+  val AnswerUnknown = "Unknown"
+  // The answer for both: question #1 and question #2 is kept under the question #1
+  val Question1AndQuestion2 = "When you were 14, what kind of work did your highest-earning parent or guardian do?"
+  val Question1AndQuestion2AnswerSeniorManagers = "Senior managers and administrators"
   val Question3 = "Did they work as an employee or were they self-employed?"
+  val Question3AnswerSelfEmployedWithoutEmployees = "Self-employed/freelancer without employees"
+  val Question3AnswerSelfEmployedWithEmployees = "Self-employed with employees"
+  val Question3AnswerEmployee = "Employee"
   val Question4 = "Which size would best describe their place of work?"
   val Question5 = "Did they supervise any other employees?"
 

@@ -57,7 +57,7 @@ trait SocioEconomicScoreCalculator {
   }
 
   private def getTypeOfOccupation(answer: Map[String, String]) = {
-    TypeOfOccupation(answer(EmploymentStatus.Question2))
+    TypeOfOccupation(answer(EmploymentStatus.Question1AndQuestion2))
   }
 }
 

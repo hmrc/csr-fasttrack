@@ -71,41 +71,41 @@ class SocioEconomicScoreCalculatorSpec extends PlaySpec {
 
 object SocioEconomicCalculatorSpec {
   val employersLargeOrnanisations: Map[String, String] = Map(
-    "When you were 14, was your highest-earning parent or guardian employed?" -> "Employed",
+    "When you were 14, what kind of work did your highest-earning parent or guardian do?" -> "Modern professional",
     "Did they work as an employee or were they self-employed?" -> "Self-employed with employees",
     "Which type of occupation did they have?" -> "Modern professional",
     "Which size would best describe their place of work?" -> "Large (over 24 employees)"
   )
 
   val employersSmallOrganisations: Map[String, String] = Map(
-    "When you were 14, was your highest-earning parent or guardian employed?" -> "Employed",
+    "When you were 14, what kind of work did your highest-earning parent or guardian do?" -> "Clerical and intermediate",
     "Did they work as an employee or were they self-employed?" -> "Self-employed with employees",
     "Which type of occupation did they have?" -> "Clerical and intermediate",
     "Which size would best describe their place of work?" -> "Small (1 to 24 employees)"
   )
 
   val selfEmployedNoEmployees: Map[String, String] = Map(
-    "When you were 14, was your highest-earning parent or guardian employed?" -> "Employed",
+    "When you were 14, what kind of work did your highest-earning parent or guardian do?" -> "Technical and craft",
     "Did they work as an employee or were they self-employed?" -> "Self-employed/freelancer without employees",
     "Which type of occupation did they have?" -> "Technical and craft"
   )
 
   val managersLargeOrganisations: Map[String, String] = Map(
-    "When you were 14, was your highest-earning parent or guardian employed?" -> "Employed",
+    "When you were 14, what kind of work did your highest-earning parent or guardian do?" -> "Senior managers and administrators",
     "Did they work as an employee or were they self-employed?" -> "Employee",
     "Which type of occupation did they have?" -> "Senior managers and administrators",
     "Which size would best describe their place of work?" -> "Large (over 24 employees)"
   )
 
   val managersSmallOrganisations: Map[String, String] = Map(
-    "When you were 14, was your highest-earning parent or guardian employed?" -> "Employed",
+    "When you were 14, what kind of work did your highest-earning parent or guardian do?" -> "Senior managers and administrators",
     "Did they work as an employee or were they self-employed?" -> "Employee",
     "Which type of occupation did they have?" -> "Senior managers and administrators",
     "Which size would best describe their place of work?" -> "Small (1 to 24 employees)"
   )
 
   val supervisors: Map[String, String] = Map(
-    "When you were 14, was your highest-earning parent or guardian employed?" -> "Employed",
+    "When you were 14, what kind of work did your highest-earning parent or guardian do?" -> "Semi-routine manual and service",
     "Did they work as an employee or were they self-employed?" -> "Employee",
     "Which type of occupation did they have?" -> "Semi-routine manual and service",
     "Which size would best describe their place of work?" -> "N/A",
@@ -113,7 +113,7 @@ object SocioEconomicCalculatorSpec {
   )
 
   val otherEmployees: Map[String, String] = Map(
-    "When you were 14, was your highest-earning parent or guardian employed?" -> "Employed",
+    "When you were 14, what kind of work did your highest-earning parent or guardian do?" -> "Routine manual and service",
     "Did they work as an employee or were they self-employed?" -> "Employee",
     "Which type of occupation did they have?" -> "Routine manual and service",
     "Which size would best describe their place of work?" -> "N/A",
@@ -121,15 +121,15 @@ object SocioEconomicCalculatorSpec {
   )
 
   val unemployed: Map[String, String] = Map(
-    "When you were 14, was your highest-earning parent or guardian employed?" -> "Unemployed"
+    "When you were 14, what kind of work did your highest-earning parent or guardian do?" -> "Unemployed"
   )
 
   val unemployedSeekingWork: Map[String, String] = Map(
-    "When you were 14, was your highest-earning parent or guardian employed?" -> "Unemployed but seeking work"
+    "When you were 14, what kind of work did your highest-earning parent or guardian do?" -> "Unemployed but seeking work"
   )
 
   val prefersNotToSay: Map[String, String] = Map(
-    "When you were 14, was your highest-earning parent or guardian employed?" -> "Unknown"
+    "When you were 14, what kind of work did your highest-earning parent or guardian do?" -> "Unknown"
   )
 
 }
