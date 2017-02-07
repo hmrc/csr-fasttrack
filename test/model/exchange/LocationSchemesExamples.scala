@@ -16,16 +16,17 @@
 
 package model.exchange
 
+import model.Scheme._
 import repositories.{ Geocode, LocationSchemes }
 
 object LocationSchemesExamples {
-  val LocationSchemes1 = LocationSchemes("id1", "testLocation1", List(Geocode(2.0, 5.0)),
-    schemes = List("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem"))
-  val LocationSchemes2 = LocationSchemes("id2", "testLocation2", List(Geocode(6.0, 2.0)),
-    schemes = List("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem"))
-  val LocationSchemes3 = LocationSchemes("id3", "testLocation3", List(Geocode(2.5, 2.6)),
-    schemes = List("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem"))
+
+  val schemes = List(Business, Commercial, ProjectDelivery)
+
+  val LocationSchemes1 = LocationSchemes("id1", "testLocation1", List(Geocode(2.0, 5.0)), schemes)
+  val LocationSchemes2 = LocationSchemes("id2", "testLocation2", List(Geocode(6.0, 2.0)), schemes)
+  val LocationSchemes3 = LocationSchemes("id3", "testLocation3", List(Geocode(2.5, 2.6)), schemes)
   val LocationSchemes4 = LocationSchemes("id4", "testLocation4", List(Geocode(1.0, 1.0), Geocode(10.0, 2.0), Geocode(12.0, 5.0)),
-    schemes = List("SchemeNoALevels", "SchemeALevels", "SchemeALevelsStem"))
+    schemes)
   val LocationsSchemesList = List(LocationSchemes1, LocationSchemes2, LocationSchemes3, LocationSchemes4)
 }
