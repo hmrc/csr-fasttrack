@@ -23,9 +23,6 @@ import model.UniqueIdentifier
 import model.exchange.ApplicationForCandidateProgressReportItemExamples
 import org.joda.time.LocalDate
 import repositories.application.ReportingRepository
-import model.persisted.ApplicationForDiversityReport
-import org.joda.time.LocalDate
-import repositories.application.ReportingRepository
 
 import scala.collection.mutable
 import scala.concurrent.Future

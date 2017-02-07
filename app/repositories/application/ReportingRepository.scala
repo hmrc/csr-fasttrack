@@ -27,7 +27,6 @@ import model.ReportExchangeObjects._
 import model.Scheme.Scheme
 import model._
 import model.commands.OnlineTestProgressResponse
-import model.persisted.ApplicationForDiversityReport
 import org.joda.time.LocalDate
 import play.api.libs.json.Format
 import reactivemongo.api.{ DB, ReadPreference }
@@ -664,17 +663,6 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     )
 
     reportQueryWithProjectionsBSON[ApplicationForCandidateProgressReport](query, projection)
-  }
-
-  private def bsonDocumentToDiversityReport(document: BSONDocument) = {
-    val applicationId = document.getAs[String]("applicationId").getOrElse("")
-    val userId = document.getAs[String]("userId").getOrElse("")
-    val progressResponse = findProgress(document, applicationId)
-    val latestProgressStatus = getStatus(progressResponse)
-    val schemes = document.getAs[List[Scheme]]("schemes").getOrElse(Nil)
-    val schemesLocations = document.getAs[List[String]]("scheme-locations").getOrElse(Nil)
-
-    ApplicationForDiversityReport(applicationId, userId, Some(latestProgressStatus), schemes, schemesLocations, None, None, None, None)
   }
 }
 
