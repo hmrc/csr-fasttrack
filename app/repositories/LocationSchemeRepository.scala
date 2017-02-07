@@ -26,7 +26,7 @@ import play.api.libs.functional.syntax._
 import model.Scheme._
 import scala.concurrent.Future
 
-case class LocationSchemes(id: String, locationName: String, geocodes: List[Geocode], schemes: List[String])
+case class LocationSchemes(id: String, locationName: String, geocodes: List[Geocode], schemes: List[Scheme])
 
 case class Geocode(lat:Double, lng:Double)
 
@@ -36,7 +36,7 @@ object LocationSchemes {
     (__ \ "id").read[String] and
     (__ \ "name").read[String] and
       (__ \ "geocodes").read[List[Geocode]] and
-      (__ \ "schemes").read[List[String]]
+      (__ \ "schemes").read[List[Scheme]]
     ) (LocationSchemes.apply _)
 
   implicit val geocodesWriter = Json.writes[Geocode]
