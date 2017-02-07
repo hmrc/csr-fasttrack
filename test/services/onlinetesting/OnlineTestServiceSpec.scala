@@ -58,7 +58,7 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
   val numericalTimeInMinutesMaximum = 12
 
   val emailDomainMock = "mydomain.com"
-  val onlineTestCompletedUrlMock = "http://localhost:8000/fset-fast-track/online-tests/complete/"
+  def onlineTestCompletedUrlMock(token: String) = s"http://localhost:8000/fset-fast-track/online-tests/by-token/$token/complete"
   val gisScheduledIdMock = 11111
   val standardScheduleIdMock = 22222
 
@@ -112,11 +112,11 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
   val ScheduleId = standardScheduleIdMock
 
   val inviteApplicant = InviteApplicant(ScheduleId, CubiksUserId,
-    onlineTestCompletedUrlMock + Token, None)
+    onlineTestCompletedUrlMock(Token), None)
   val inviteApplicantGisWithNoTimeAdjustments = InviteApplicant(ScheduleId, CubiksUserId,
-    onlineTestCompletedUrlMock + Token, None)
+    onlineTestCompletedUrlMock(Token), None)
   val inviteApplicantNoGisWithNoTimeAdjustments = InviteApplicant(ScheduleId, CubiksUserId,
-    onlineTestCompletedUrlMock + Token, None)
+    onlineTestCompletedUrlMock(Token), None)
 
   val timeAdjustmentsForInviteApplicant = List(
     TimeAdjustments(VerbalAndNumericalAssessmentId, VerbalSectionId, 7),
@@ -124,7 +124,7 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
   )
 
   val inviteApplicantNoGisWithTimeAdjustments = InviteApplicant(ScheduleId, CubiksUserId,
-    onlineTestCompletedUrlMock + Token, None, timeAdjustmentsForInviteApplicant)
+    onlineTestCompletedUrlMock(Token), None, timeAdjustmentsForInviteApplicant)
   val AccessCode = "fdkfdfj"
   val LogonUrl = "http://localhost/logonUrl"
   val AuthenticateUrl = "http://localhost/authenticate"
