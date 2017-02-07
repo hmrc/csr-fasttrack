@@ -302,7 +302,7 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
     val frameworkPrefs = doc.getAs[BSONDocument]("framework-preferences")
     val firstLocation = frameworkPrefs.flatMap(_.getAs[BSONDocument]("firstLocation"))
     val secondLocation = frameworkPrefs.flatMap(_.getAs[BSONDocument]("secondLocation"))
-    val alternatives = doc.getAs[BSONDocument]("alternatives")
+    val alternatives = frameworkPrefs.flatMap(_.getAs[BSONDocument]("alternatives"))
     List(
       firstLocation.flatMap(_.getAs[String]("region")),
       firstLocation.flatMap(_.getAs[String]("location")),

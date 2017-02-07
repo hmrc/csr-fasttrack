@@ -19,7 +19,6 @@ package controllers
 import config._
 import connectors.ExchangeObjects._
 import connectors.{ CubiksGatewayClient, EmailClient }
-import mocks.application.OnlineTestInMemoryRepository
 import model.ApplicationStatuses
 import model.Commands.Address
 import model.OnlineTestCommands.OnlineTestApplication
@@ -27,7 +26,7 @@ import model.PersistedObjects.ContactDetails
 import model.exchange.OnlineTest
 import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
-import org.mockito.Matchers.{ any, eq => eqTo }
+import org.mockito.Matchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.Helpers._
@@ -42,7 +41,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 
 class OnlineTestControllerSpec extends UnitWithAppSpec {
-  "Get Online Test" should {
+  "Get Online Test" must {
 
     "get an online test" in new TestFixture {
       when(mockOnlineTestService.getOnlineTest(any[String])).thenReturn(Future.successful(
@@ -50,6 +49,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
       ))
 
       val userId = ""
+
       val result = TestOnlineTestController.getOnlineTest(userId)(createOnlineTestRequest(userId)).run
       val jsonResponse = contentAsJson(result)
 
@@ -57,11 +57,12 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     }
   }
 
-  "Update Online Test Status" should {
+  "Update Online Test Status" must {
 
     "update an online test status" in new TestFixture {
-
-      when(mockOnlineTestRepository.updateStatus("1234", ApplicationStatuses.OnlineTestStarted)).thenReturn(Future.successful(unit))
+      when(mockOnlineTestRepository.updateStatus(any[String], any[ApplicationStatuses.EnumVal])).thenReturn(
+        Future.successful(unit)
+      )
 
       val result = TestOnlineTestController.onlineTestStatusUpdate("1234")(createOnlineTestStatusRequest(
         "1234",
@@ -76,7 +77,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     }
   }
 
-  "Asking for a userId with a token" should {
+  "Asking for a userId with a token" must {
 
     "return the userId if the token is valid" in new TestFixture {
       val token = "1234"
@@ -87,25 +88,33 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     }
   }
 
-  "Reset online tests" should {
+  "Reset online tests" must {
 
     "fail if application not found" in new TestFixture {
-      val appId = ""
-      when(mockOnlineTestRepository.getOnlineTestApplication(appId)).thenReturn(Future.successful(None))
+      val appId = "appId"
+      when(mockOnlineTestRepository.getOnlineTestApplication(any[String])).thenReturn(Future.successful(None))
       val result = TestOnlineTestController.resetOnlineTests(appId)(createResetOnlineTestRequest(appId)).run
 
       status(result) must be(NOT_FOUND)
+    }
+
+    "fail if the candidate is not in a valid application status for reset" in new TestFixture {
+
+      when(mockOnlineTestRepository.getOnlineTestApplication(any[String])).thenReturn(
+        Future.successful(Some(onlineTestApplication.copy(applicationId = "appId", applicationStatus = ApplicationStatuses.Withdrawn)))
+      )
+
+      val result = TestOnlineTestController.resetOnlineTests("appId")(createResetOnlineTestRequest("appId")).run
+
+      status(result) mustBe BAD_REQUEST
+
     }
 
     "successfully reset the online test status" in new TestFixture {
       val appId = "appId"
-      val testApplication = OnlineTestApplication(appId, ApplicationStatuses.OnlineTestStarted, "userId", guaranteedInterview = false,
-        needsAdjustments = false, preferredName = "prefName", adjustmentDetail = None
-      )
-
-      when(mockOnlineTestRepository.getOnlineTestApplication(any[String])).thenReturn(Future.successful(Some(testApplication)))
+      val testApplication = onlineTestApplication.copy(applicationId = "appId", applicationStatus = ApplicationStatuses.OnlineTestStarted)
+      when(mockOnlineTestRepository.getOnlineTestApplication(any[String])).thenReturn( Future.successful(Some(testApplication)))
       when(mockOnlineTestService.registerAndInviteApplicant(testApplication)).thenReturn(Future.successful(unit))
-
 
       val result = TestOnlineTestController.resetOnlineTests(appId)(createResetOnlineTestRequest(appId)).run
 
@@ -114,12 +123,13 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
 
   }
 
-  "Extend online tests" should {
+  "Extend online tests" must {
 
     "fail if application not found" in new TestFixture {
-      val appId = ""
+      val appId = "appId"
       val extraDays = 5
-      when(mockOnlineTestRepository.getOnlineTestApplication(appId)).thenReturn(Future.successful(None))
+
+      when(mockOnlineTestRepository.getOnlineTestApplication(any[String])).thenReturn(Future.successful(None))
       val result = TestOnlineTestController.extendOnlineTests(appId)(createExtendOnlineTests(appId, extraDays))
 
       status(result) must be(NOT_FOUND)
@@ -135,7 +145,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
 
   }
 
-  "Get PDF Report" should {
+  "Get PDF Report" must {
     "return a valid report if one exists" in new TestFixture {
       val result = TestOnlineTestController.getPDFReport(hasPDFReportApplicationId)(FakeRequest())
 
@@ -157,12 +167,12 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
 
     implicit val hc = HeaderCarrier()
 
+    val date = DateTime.now
     val hasPDFReportApplicationId = "has-pdf-report-application-id"
     val hasNoPDFReportApplicationId = "has-no-pdf-report-application-id"
     val testPDFContents = Array[Byte](0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20)
 
     val onlineTestExtensionServiceMock = mock[OnlineTestExtensionService]
-    when(onlineTestExtensionServiceMock.extendExpiryTime(any(), any())).thenReturnAsync()
 
     val onlineTestPDFReportRepoMock = mock[OnlineTestPDFReportRepository]
     val cubiksGatewayClientMock = mock[CubiksGatewayClient]
@@ -171,9 +181,12 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     val mockOnlineTestRepository = mock[OnlineTestRepository]
     val mockOnlineTestService = mock[OnlineTestService]
 
-    def onlineTest(appId: String) = OnlineTestApplication(appId, ApplicationStatuses.Submitted, "",
+    val onlineTestApplication = OnlineTestApplication("appId", ApplicationStatuses.Submitted, "",
       guaranteedInterview = false, needsAdjustments = false, "", None)
+    val onlineTest = OnlineTest(123, date, date.plusDays(4), "http://www.google.co.uk", "123@test.com", isOnlineTestEnabled = true,
+    pdfReportAvailable = false)
 
+    when(onlineTestExtensionServiceMock.extendExpiryTime(any(), any())).thenReturnAsync()
     when(onlineTestPDFReportRepoMock.hasReport(any())).thenReturn(Future.successful(true))
     when(onlineTestPDFReportRepoMock.get(hasPDFReportApplicationId)).thenReturn(Future.successful(
       Some(testPDFContents)
@@ -192,14 +205,15 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     when(mockOnlineTestRepository.storeOnlineTestProfileAndUpdateStatusToInvite(any[String], any[CubiksTestProfile]))
       .thenReturn(Future.successful(()))
 
-      when(mockOnlineTestRepository.getOnlineTestApplication(any[String])).thenReturn(Future.successful(Some(onlineTest("123"))))
-
+    when(mockOnlineTestService.getOnlineTest(any[String])).thenReturn(Future.successful(onlineTest))
+    when(mockOnlineTestRepository.getOnlineTestApplication(any[String])).thenReturn(Future.successful(Some(onlineTestApplication)))
 
     object TestOnlineTestController extends OnlineTestController {
       override val onlineTestingRepo = mockOnlineTestRepository
       override val onlineTestingService = mockOnlineTestService
       override val onlineTestExtensionService = onlineTestExtensionServiceMock
       override val onlineTestPDFReportRepo = onlineTestPDFReportRepoMock
+
     }
 
     def createOnlineTestRequest(userId: String) = {

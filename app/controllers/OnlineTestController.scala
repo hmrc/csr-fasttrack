@@ -17,13 +17,12 @@
 package controllers
 
 import model.Exceptions.CannotUpdateCubiksTest
-import model.{ ApplicationStatuses, Commands }
-import play.api.libs.json.{ JsValue, Json }
+import model.{ApplicationStatuses, Commands}
+import play.api.libs.json.{JsValue, Json}
 import play.api.mvc._
-import model.persisted.CubiksTestProfile
 import repositories._
 import repositories.application.OnlineTestRepository
-import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
+import services.onlinetesting.{OnlineTestExtensionService, OnlineTestService}
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -48,6 +47,11 @@ trait OnlineTestController extends BaseController {
   val onlineTestingService: OnlineTestService
   val onlineTestExtensionService: OnlineTestExtensionService
   val onlineTestPDFReportRepo: OnlineTestPDFReportRepository
+
+  val resetTestPermittedStatuses = List(ApplicationStatuses.OnlineTestInvited, ApplicationStatuses.OnlineTestStarted,
+    ApplicationStatuses.OnlineTestExpired, ApplicationStatuses.OnlineTestFailed, ApplicationStatuses.OnlineTestCompleted,
+    ApplicationStatuses.OnlineTestFailedNotified, ApplicationStatuses.AwaitingOnlineTestReevaluation, ApplicationStatuses.AwaitingAllocation
+  )
 
   import Commands.Implicits._
 
@@ -97,7 +101,12 @@ trait OnlineTestController extends BaseController {
 
     onlineTestingRepo.getOnlineTestApplication(appId).flatMap {
       case Some(onlineTestApp) =>
-        onlineTestingService.registerAndInviteApplicant(onlineTestApp).map { _ => Ok }
+        if (resetTestPermittedStatuses.contains(onlineTestApp.applicationStatus)) {
+          onlineTestingService.registerAndInviteApplicant(onlineTestApp).map { _ => Ok }
+        } else {
+          Future.successful(BadRequest(s"Cannot reset tests for candidate in state ${onlineTestApp.applicationStatus}"))
+        }
+
       case _ => Future.successful(NotFound)
     }
   }
