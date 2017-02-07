@@ -75,6 +75,8 @@ object ReportExchangeObjects {
     }
   }
 
+  case class DiversityReportDiversityAnswers(gender: String, sexualOrientation: String, ethnicity: String)
+
   case class ApplicationForCandidateProgressReport(applicationId: Option[UniqueIdentifier],
                                                     userId: UniqueIdentifier,
                                                     progress: Option[String],
