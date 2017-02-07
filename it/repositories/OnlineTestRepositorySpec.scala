@@ -19,10 +19,10 @@ package repositories
 import java.util.UUID
 
 import factories.DateTimeFactory
-import model.{ AdjustmentDetail, ApplicationStatuses, FirstReminder, ProgressStatuses, SecondReminder }
+import model._
 import model.Adjustments._
 import model.ApplicationStatuses._
-import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound }
+import model.Exceptions._
 import model.OnlineTestCommands.OnlineTestApplicationWithCubiksUser
 import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
 import org.joda.time.{ DateTime, DateTimeZone }
@@ -259,8 +259,11 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     "set ONLINE_TEST_STARTED tests to ONLINE_TEST_STARTED" in {
       updateExpiryAndAssert(ApplicationStatuses.OnlineTestStarted, ApplicationStatuses.OnlineTestStarted)
     }
-    "set EXPIRED tests to INVITED" in {
-      updateExpiryAndAssert(ApplicationStatuses.OnlineTestExpired, ApplicationStatuses.OnlineTestInvited)
+    "not update expired tests" in {
+      val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestExpired, expirationDate = DateTime.now)
+      val result = onlineTestRepo.updateExpiryTime(appIdWithUserId.userId, DateTime.now.plusDays(5)).failed.futureValue
+
+      result mustBe a[CannotExtendCubiksTest]
     }
 
     def updateExpiryAndAssert(currentStatus: ApplicationStatuses.EnumVal, newStatus: ApplicationStatuses.EnumVal) = {
