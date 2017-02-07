@@ -14,33 +14,34 @@
  * limitations under the License.
  */
 
-package model
+package model.report
 
+import model.ReportExchangeObjects.{ ApplicationForCandidateProgressReport, DiversityReportDiversityAnswers }
 import model.Scheme.Scheme
-import model.ReportExchangeObjects.{ DiversityReportDiversityAnswers, ApplicationForCandidateProgressReport }
+import model.UniqueIdentifier
 import play.api.libs.json.Json
 
-case class DiversityReportRow(applicationId: UniqueIdentifier,
-                              progress: Option[String],
-                              schemes: List[Scheme],
-                              locations: List[String],
-                              gender: String,
-                              sexualOrientation: String,
-                              ethnicity: String,
-                              disability: Option[String],
-                              gis: Option[Boolean],
-                              onlineAdjustments: Option[String],
-                              assessmentCentreAdjustments: Option[String],
-                              civilServant: Option[Boolean],
-                              socialEconomicScore: String,
-                              hearAboutUs: String,
-                              allocatedAssessmentCentre: Option[String]
+case class DiversityReportItem(applicationId: UniqueIdentifier,
+                               progress: Option[String],
+                               schemes: List[Scheme],
+                               locations: List[String],
+                               gender: String,
+                               sexualOrientation: String,
+                               ethnicity: String,
+                               disability: Option[String],
+                               gis: Option[Boolean],
+                               onlineAdjustments: Option[String],
+                               assessmentCentreAdjustments: Option[String],
+                               civilServant: Option[Boolean],
+                               socialEconomicScore: String,
+                               hearAboutUs: String,
+                               allocatedAssessmentCentre: Option[String]
                              )
 
-case object DiversityReportRow {
+case object DiversityReportItem {
   def apply(application: ApplicationForCandidateProgressReport, diversityAnswers: DiversityReportDiversityAnswers,
-            ses: String, hearAboutUs: String, allocatedAssessmentCentre: Option[String]): DiversityReportRow = {
-    DiversityReportRow(applicationId = application.applicationId,
+            ses: String, hearAboutUs: String, allocatedAssessmentCentre: Option[String]): DiversityReportItem = {
+    DiversityReportItem(applicationId = application.applicationId,
       progress = application.progress,
       schemes = application.schemes,
       locations = application.locationIds,
@@ -59,5 +60,5 @@ case object DiversityReportRow {
   }
   val fromBooleanToYesNo: Boolean => String = (b: Boolean) => if (b) "Yes" else "No"
 
-  implicit val diversityReportRowFormat = Json.format[DiversityReportRow]
+  implicit val diversityReportRowFormat = Json.format[DiversityReportItem]
 }

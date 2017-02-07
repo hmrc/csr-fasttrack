@@ -26,6 +26,7 @@ import model.PersistedObjects.ContactDetailsWithId
 import model.PersistedObjects.Implicits._
 import model.ReportExchangeObjects.Implicits._
 import model.ReportExchangeObjects.{ Implicits => _, _ }
+import model.report.DiversityReportItem
 import org.joda.time.DateTime
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
@@ -77,12 +78,12 @@ trait ReportingController extends BaseController {
   val mediaRepository: MediaRepository
   val socioEconomicScoreCalculator: SocioEconomicScoreCalculator
 
-  def retrieveDiversityReport(frameworkId: String) = Action.async { implicit request =>
+  def createDiversityReport(frameworkId: String) = Action.async { implicit request =>
     val applicationsFut = reportingRepository.diversityReport(frameworkId)
     val allContactDetailsFut = contactDetailsRepository.findAll.map(x => x.groupBy(_.userId).mapValues(_.head))
     val allLocationsFut = locationSchemeService.getAllSchemeLocations
     val allQuestionsFut = questionnaireRepository.diversityReport
-    val reportFut: Future[List[DiversityReportRow]] = for {
+    val reportFut: Future[List[DiversityReportItem]] = for {
       applications <- applicationsFut
       allContactDetails <- allContactDetailsFut
       allLocations <- allLocationsFut
@@ -116,7 +117,7 @@ trait ReportingController extends BaseController {
                                    allContactDetails: Map[String, ContactDetailsWithId],
                                    allLocations: List[LocationSchemes],
                                    allDiversityQuestions: Map[String, Map[String, String]],
-                                   allMedia: Map[UniqueIdentifier, String]): Future[List[DiversityReportRow]] = {
+                                   allMedia: Map[UniqueIdentifier, String]): Future[List[DiversityReportItem]] = {
     Future{
       applications.map { application =>
         val diversityAnswers = extractDiversityAnswers(application, allDiversityQuestions)
@@ -131,7 +132,7 @@ trait ReportingController extends BaseController {
         val allocatedAssessmentCentre = allContactDetails.get(application.userId.toString()).map { contactDetails =>
             assessmentCentreIndicatorRepository.calculateIndicator(Some(contactDetails.postCode.toString)).assessmentCentre
         }
-        DiversityReportRow(application, diversityAnswers, ses, hearAboutUs, allocatedAssessmentCentre).copy(locations = locationNames,
+        DiversityReportItem(application, diversityAnswers, ses, hearAboutUs, allocatedAssessmentCentre).copy(locations = locationNames,
           onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
       }
     }
@@ -294,7 +295,6 @@ trait ReportingController extends BaseController {
 
   def createPreferencesAndContactReports(frameworkId: String) =
     preferencesAndContactReports(nonSubmittedOnly = false)(frameworkId)
-
 
   def createSuccessfulCandidatesReport(frameworkId: String) = Action.async { implicit request =>
 
