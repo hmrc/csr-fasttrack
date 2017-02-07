@@ -59,6 +59,10 @@ class SocioEconomicScoreCalculatorSpec extends PlaySpec {
       calculator.calculate(unemployed) must be("N/A")
     }
 
+    "calculate the score of Unknown if the answer to question number 3 is Unknown" in {
+      calculator.calculate(prefersNotToSayForQuestion3) must be("N/A")
+    }
+
     "calculate the score of unemployed but seeking work" in {
       calculator.calculate(unemployedSeekingWork) must be("N/A")
     }
@@ -118,6 +122,11 @@ object SocioEconomicCalculatorSpec {
     "Which type of occupation did they have?" -> "Routine manual and service",
     "Which size would best describe their place of work?" -> "N/A",
     "Did they supervise any other employees?" -> No
+  )
+
+  val prefersNotToSayForQuestion3: Map[String, String] = Map(
+    "When you were 14, what kind of work did your highest-earning parent or guardian do?" -> "Routine manual and service",
+    "Did they work as an employee or were they self-employed?" -> "Unknown"
   )
 
   val unemployed: Map[String, String] = Map(
