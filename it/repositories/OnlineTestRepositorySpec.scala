@@ -19,10 +19,10 @@ package repositories
 import java.util.UUID
 
 import factories.DateTimeFactory
-import model.{ AdjustmentDetail, ApplicationStatuses, FirstReminder, ProgressStatuses, SecondReminder }
+import model._
 import model.Adjustments._
 import model.ApplicationStatuses._
-import model.Exceptions.{ NotFoundException, OnlineTestFirstLocationResultNotFound, OnlineTestPassmarkEvaluationNotFound }
+import model.Exceptions._
 import model.OnlineTestCommands.OnlineTestApplicationWithCubiksUser
 import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
 import org.joda.time.{ DateTime, DateTimeZone }
@@ -475,7 +475,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
   "Complete online test" must {
     "update the test to complete" in {
       val date = DateTime.now(DateTimeZone.UTC)
-      val appIdWithUserId = createOnlineTest("userId", ApplicationStatuses.Submitted, "token", Some("http://www.someurl.com"),
+      val appIdWithUserId = createOnlineTest("userId", ApplicationStatuses.OnlineTestStarted, "token", Some("http://www.someurl.com"),
         invitationDate = Some(date), expirationDate = Some(date.plusDays(7)), xmlReportSaved = Some(true), pdfReportSaved = Some(true),
         cubiksUserId = Some(123)
       )
@@ -488,6 +488,18 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       test.completedDateTime mustBe defined
       application.applicationStatus mustBe ApplicationStatuses.OnlineTestCompleted
       application.progressResponse.onlineTest.completed mustBe true
+    }
+
+    "Not update the test if it is not in progress" in {
+      val date = DateTime.now(DateTimeZone.UTC)
+      val appIdWithUserId = createOnlineTest("userId", ApplicationStatuses.Withdrawn, "token", Some("http://www.someurl.com"),
+        invitationDate = Some(date), expirationDate = Some(date.plusDays(7)), xmlReportSaved = Some(true), pdfReportSaved = Some(true),
+        cubiksUserId = Some(123)
+      )
+
+      val result = onlineTestRepo.completeOnlineTest(123).failed.futureValue
+
+      result mustBe a[CannotUpdateCubiksTest]
     }
   }
 

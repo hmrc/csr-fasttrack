@@ -219,7 +219,11 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   override def completeOnlineTest(cubiksUserId: Int): Future[Unit] = {
-    val query  = BSONDocument("online-tests.cubiksUserId" -> cubiksUserId)
+    val query  = BSONDocument(
+      "online-tests.cubiksUserId" -> cubiksUserId,
+      "applicationStatus" -> ApplicationStatuses.OnlineTestStarted
+    )
+
     val update = BSONDocument("$set" -> BSONDocument(
       "applicationStatus" -> ApplicationStatuses.OnlineTestCompleted,
       s"progress-status.${ProgressStatuses.OnlineTestCompletedProgress}" -> true,
