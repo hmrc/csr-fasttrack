@@ -29,11 +29,11 @@ import org.scalatestplus.play.PlaySpec
 class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
   //scalastyle:off
   val PassmarkSettings = Settings(
-    Scheme(Business.toString, SchemeThresholds(competency = t(1.0, 99.0), verbal = t(5.0, 94.0), numerical = t(10.0, 90.0), situational = t(30.0, 85.0)))
-      :: Scheme(Commercial.toString, SchemeThresholds(competency = t(15.0, 94.0), verbal = t(20.0, 90.0), numerical = t(25.0, 50.0), situational = t(29.0, 80.0)))
-      :: Scheme(DigitalAndTechnology.toString, SchemeThresholds(competency = t(30.0, 80.0), verbal = t(30.0, 80.0), numerical = t(30.0, 80.0), situational = t(29.0, 80.0)))
-      :: Scheme(Finance.toString, SchemeThresholds(competency = t(50.0, 55.0), verbal = t(53.0, 70.0), numerical = t(30.0, 45.0), situational = t(20.0, 30.0)))
-      :: Scheme(ProjectDelivery.toString, SchemeThresholds(competency = t(10.0, 55.0), verbal = t(53.0, 70.0), numerical = t(30.0, 45.0), situational = t(20.0, 30.0)))
+    Scheme(Business.name, SchemeThresholds(competency = t(1.0, 99.0), verbal = t(5.0, 94.0), numerical = t(10.0, 90.0), situational = t(30.0, 85.0)))
+      :: Scheme(Commercial.name, SchemeThresholds(competency = t(15.0, 94.0), verbal = t(20.0, 90.0), numerical = t(25.0, 50.0), situational = t(29.0, 80.0)))
+      :: Scheme(DigitalAndTechnology.name, SchemeThresholds(competency = t(30.0, 80.0), verbal = t(30.0, 80.0), numerical = t(30.0, 80.0), situational = t(29.0, 80.0)))
+      :: Scheme(Finance.name, SchemeThresholds(competency = t(50.0, 55.0), verbal = t(53.0, 70.0), numerical = t(30.0, 45.0), situational = t(20.0, 30.0)))
+      :: Scheme(ProjectDelivery.name, SchemeThresholds(competency = t(10.0, 55.0), verbal = t(53.0, 70.0), numerical = t(30.0, 45.0), situational = t(20.0, 30.0)))
       :: Nil,
     version = "testVersion",
     createDate = new DateTime(),

@@ -24,6 +24,14 @@ object Scheme extends Enumeration {
 
   val Business, Commercial, DigitalAndTechnology, Finance, ProjectDelivery = Value
 
+  val names: Map[Scheme, String] = Map(
+    Business -> "Business",
+    Commercial -> "Commercial",
+    DigitalAndTechnology -> "Digital and technology",
+    Finance -> "Finance",
+    ProjectDelivery -> "Project Delivery"
+  )
+
   implicit val schemeFormat = new Format[Scheme] {
     def reads(json: JsValue) = JsSuccess(Scheme.withName(json.as[String]))
 
@@ -35,4 +43,11 @@ object Scheme extends Enumeration {
 
     def write(scheme: Scheme) = BSON.write(scheme.toString)
   }
+
+  class SchemeWithNames(scheme: Scheme) {
+    def name = names(scheme)
+  }
+
+  implicit def schemeToSchemeWithName(scheme: Scheme): SchemeWithNames = new SchemeWithNames(scheme)
 }
+
