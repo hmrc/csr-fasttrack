@@ -65,8 +65,9 @@ trait LocationSchemeService {
         personalDetails <- pdRepository.find(applicationId)
         schemes <- locationSchemeRepository.getSchemeInfo
       } yield {
-        schemes.filterNot(s => s.requiresALevel && !(personalDetails.aLevel || personalDetails.stemLevel)
-          || s.requiresALevelInStem && !personalDetails.stemLevel)
+        schemes.filterNot(s =>
+          (s.requiresALevel && !(personalDetails.aLevel || personalDetails.stemLevel)) ||
+          (s.requiresALevelInStem && !personalDetails.stemLevel))
       }
   }
 
