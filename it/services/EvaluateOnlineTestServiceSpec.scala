@@ -31,9 +31,11 @@ import net.ceedubs.ficus.readers.ValueReader
 import org.joda.time.DateTime
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
+import connectors.PassMarkExchangeObjects.Implicits._
+import model.Scheme.Scheme
 import play.Logger
 import repositories.application.GeneralApplicationRepository
-import repositories.{ FrameworkPreferenceRepository, FrameworkRepository, PassMarkSettingsRepository, TestReportRepository }
+import repositories.{ FrameworkPreferenceRepository, LocationSchemeRepository, PassMarkSettingsRepository, TestReportRepository }
 import services.onlinetesting.EvaluateOnlineTestService
 import services.passmarksettings.PassMarkSettingsService
 import services.testmodel.{ OnlineTestPassmarkServiceTest, SchemeEvaluationTestResult }
@@ -49,7 +51,7 @@ class EvaluateOnlineTestServiceSpec extends IntegrationSpec with MockitoSugar wi
     val passMarkRulesEngine = EvaluateOnlineTestService.passMarkRulesEngine
     val pmsRepository: PassMarkSettingsRepository = mock[PassMarkSettingsRepository]
     val passMarkSettingsService = new PassMarkSettingsService {
-      override val fwRepository = mock[FrameworkRepository]
+      override val schemeLocationRepository = mock[LocationSchemeRepository]
       override val pmsRepository = mock[PassMarkSettingsRepository]
     }
     val applicationRepository = mock[GeneralApplicationRepository]
@@ -62,6 +64,13 @@ class EvaluateOnlineTestServiceSpec extends IntegrationSpec with MockitoSugar wi
           DateTime.parse(config.getString(path))
         }
       }
+
+      implicit val SchemeValueReader = new ValueReader[model.Scheme.Scheme] {
+        override def read(config: Config, path: String): model.Scheme = {
+          Scheme.withName(config.getString(path))
+        }
+      }
+
       val suites = new File("it/resources/onlineTestPassmarkServiceSpec").listFiles.filterNot(_.getName.startsWith("."))
       // Test should fail in case the path is incorrect for the env and return 0 suites
       suites.nonEmpty mustBe true

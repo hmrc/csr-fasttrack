@@ -47,9 +47,9 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
 
       val expectedEmptySettingsResponse = SettingsResponse(
         schemes = List(
-          SchemeResponse(mockSchemes.head.schemeName, None),
-          SchemeResponse(mockSchemes(1).schemeName, None),
-          SchemeResponse(mockSchemes(2).schemeName, None)
+          SchemeResponse(mockSchemes.head.schemeId.toString, mockSchemes.head.schemeName, None),
+          SchemeResponse(mockSchemes(1).schemeId.toString, mockSchemes(1).schemeName, None),
+          SchemeResponse(mockSchemes(2).schemeId.toString, mockSchemes(2).schemeName, None)
         ),
         None,
         None
@@ -76,9 +76,9 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
 
       val expectedSettingsResponse = SettingsResponse(
         schemes = List(
-          SchemeResponse(mockSchemes.head.schemeName, Some(mockSchemes.head.schemeThresholds)),
-          SchemeResponse(mockSchemes(1).schemeName, Some(mockSchemes(1).schemeThresholds)),
-          SchemeResponse(mockSchemes(2).schemeName, Some(mockSchemes(2).schemeThresholds))
+          SchemeResponse(mockSchemes.head.schemeId.toString, mockSchemes.head.schemeName, Some(mockSchemes.head.schemeThresholds)),
+          SchemeResponse(mockSchemes(1).schemeId.toString, mockSchemes(1).schemeName, Some(mockSchemes(1).schemeThresholds)),
+          SchemeResponse(mockSchemes(2).schemeId.toString, mockSchemes(2).schemeName, Some(mockSchemes(2).schemeThresholds))
         ),
         Some(mockCreateDate),
         Some(mockCreatedByUser)
@@ -113,7 +113,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
 
       status(result) must be(200)
 
-      verify(passMarkSettingsRepositoryWithExpectations).create(eqTo(mockSettings), eqTo(testSchemeNames))
+      verify(passMarkSettingsRepositoryWithExpectations).create(eqTo(mockSettings), eqTo(testSchemeInfos.map(_.id)))
     }
   }
 
@@ -138,9 +138,9 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
     )
 
     val mockSchemes = List(
-      Scheme(testSchemeNames.head, defaultSchemeThresholds),
-      Scheme(testSchemeNames(1), defaultSchemeThresholds),
-      Scheme(testSchemeNames(2), defaultSchemeThresholds)
+      Scheme(testSchemeInfos.head.id, testSchemeInfos.head.name, defaultSchemeThresholds),
+      Scheme(testSchemeInfos(1).id, testSchemeInfos(1).name, defaultSchemeThresholds),
+      Scheme(testSchemeInfos(2).id, testSchemeInfos(2).name, defaultSchemeThresholds)
     )
     val mockVersion = "uuid-1"
     val mockCreateDate = new DateTime(1459504800000L)
@@ -176,7 +176,9 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
                      |    "createdByUser": "TestUser",
                      |    "schemes": [
                      |        {
-                     |            "schemeName": "Business",
+                     |            "schemeId": "Business",
+                     |            "schemeId": "Business",
+"schemeName": "Business",
                      |            "schemeThresholds": {
                      |                "competency": {
                      |                    "failThreshold": 20.0,
@@ -197,7 +199,9 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
                      |            }
                      |        },
                      |        {
-                     |            "schemeName": "Commercial",
+                     |            "schemeId": "Commercial",
+                     |            "schemeId": "Commercial",
+"schemeName": "Commercial",
                      |            "schemeThresholds": {
                      |                "competency": {
                      |                    "failThreshold": 20.0,
@@ -218,7 +222,9 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
                      |            }
                      |        },
                      |        {
-                     |            "schemeName": "Digital and technology",
+                     |            "schemeId": "DigitalAndTechnology",
+                     |            "schemeId": "DigitalAndTechnology",
+"schemeName": "Digital and technology",
                      |            "schemeThresholds": {
                      |                "competency": {
                      |                    "failThreshold": 20.0,
