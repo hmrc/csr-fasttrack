@@ -39,8 +39,8 @@ trait OnlineTestInvitedStatusGenerator extends ConstructiveGenerator {
     val onlineTestProfile = CubiksTestProfile(
       cubiksUserId = 117344,
       participantScheduleId = 149245,
-      invitationDate = DateTime.now().minusDays(3),
-      expirationDate = DateTime.now().plusDays(4),
+      invitationDate = DateTime.now(),
+      expirationDate = DateTime.now().plusDays(7),
       onlineTestUrl = generatorConfig.cubiksUrl,
       token = UUID.randomUUID().toString
     )
