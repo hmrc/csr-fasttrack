@@ -86,7 +86,7 @@ class AdjustmentManagementServiceSpec extends BaseServiceSpec {
     val actionTriggeredBy = "adminId"
 
     val candidate = Candidate(userId, Some(appId), Some(email), Some(firstName), Some(lastName), Some(preferredName), None, None, None)
-    val contactDetails = ContactDetails(Address("line1"), "TW11ER", email, None)
+    val contactDetails = ContactDetails(false, Address("line1"), Some("TW11ER"), None, email, None)
 
     val onlineTestsAdjustments = Adjustments(typeOfAdjustments = Some(List("timeExtension")),
       onlineTests = Some(AdjustmentDetail(extraTimeNeeded = Some(9), extraTimeNeededNumerical = Some(12))))

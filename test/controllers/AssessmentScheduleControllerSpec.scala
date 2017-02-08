@@ -908,10 +908,10 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
 
     def contactDetailsRepository = {
       when(mockContactDetailsRepository.find(eqTo("userid-1"))).thenReturn(
-        Future.successful(ContactDetails(Address("address1"), "postCode1", "email1@mailinator.com", Some("11111111")))
+        Future.successful(ContactDetails(false, Address("address1"), Some("postCode1"), None, "email1@mailinator.com", Some("11111111")))
       )
       when(mockContactDetailsRepository.find(eqTo("userid-2"))).thenReturn(
-        Future.successful(ContactDetails(Address("address2"), "postCode2", "email2@mailinator.com", Some("22222222")))
+        Future.successful(ContactDetails(false, Address("address2"), Some("postCode2"), None, "email2@mailinator.com", Some("22222222")))
       )
     }
 

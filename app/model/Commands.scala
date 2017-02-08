@@ -53,14 +53,18 @@ object Commands {
     preferredName: String,
     email: String,
     dateOfBirth: LocalDate,
+    outsideUk: Boolean,
     address: Address,
-    postCode: PostCode,
+    postCode: Option[PostCode],
+    country: Option[String],
     phone: Option[PhoneNumber],
     aLevel: Boolean,
     stemLevel: Boolean,
     civilServant: Boolean,
     department: Option[String]
-  )
+  ) {
+    require(outsideUk && country.isDefined || !outsideUk && postCode.isDefined, "Either post code or country is mandatory")
+  }
 
   case class AssessmentScores(
     entered: Boolean = false,
@@ -108,7 +112,7 @@ object Commands {
 
   }
 
-  case class ContactDetails(phone: Option[String], email: String, address: Address, postCode: PostCode)
+  case class ContactDetails(phone: Option[String], email: String, address: Address, postCode: Option[PostCode])
 
   type IsNonSubmitted = Boolean
 

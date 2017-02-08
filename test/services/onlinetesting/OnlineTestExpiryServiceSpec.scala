@@ -176,7 +176,7 @@ class OnlineTestExpiryServiceSpec extends PlaySpec with ScalaFutures with Mockit
     val preferredName = "Jon"
     val emailAddress = "jon@test.com"
     val expirationDate = DateTime.now().plusHours((24 * 3) - 1)
-    val contactDetails = ContactDetails(Address("line 1"), "HP27 9JU", emailAddress, None)
+    val contactDetails = ContactDetails(false, Address("line 1"), Some("HP27 9JU"), None, emailAddress, None)
     val expiringTest = ExpiringOnlineTest(applicationId, userId, preferredName)
     val testForNotification = NotificationExpiringOnlineTest(applicationId, userId, preferredName, expirationDate)
     def hc = HeaderCarrier()

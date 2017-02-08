@@ -35,7 +35,11 @@ trait SubmittedStatusGenerator extends ConstructiveGenerator {
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      assessmentCentreIndicator = assessmentCentreIndicatorRepo.calculateIndicator(candidateInPreviousStatus.contactDetails.map(_.postCode))
+      postCode = for {
+        cd <- candidateInPreviousStatus.contactDetails
+        ps <- cd.postCode
+      } yield ps
+      assessmentCentreIndicator = assessmentCentreIndicatorRepo.calculateIndicator(postCode)
       _ <- appRepository.updateAssessmentCentreIndicator(candidateInPreviousStatus.applicationId.get, assessmentCentreIndicator)
       _ <- appRepository.submit(candidateInPreviousStatus.applicationId.get)
     } yield {

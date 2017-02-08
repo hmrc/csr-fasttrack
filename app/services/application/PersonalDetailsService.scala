@@ -48,7 +48,7 @@ trait PersonalDetailsService {
   } yield {
     UpdateGeneralDetails(
       pd.firstName, pd.lastName, pd.preferredName, cd.email, pd.dateOfBirth,
-      cd.address, cd.postCode, cd.phone,
+      cd.outsideUk, cd.address, cd.postCode, cd.country, cd.phone,
       pd.aLevel, pd.stemLevel, civilServant = pd.civilServant, pd.department
     )
   }

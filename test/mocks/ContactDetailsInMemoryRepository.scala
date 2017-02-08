@@ -29,7 +29,7 @@ class ContactDetailsInMemoryRepository extends ContactDetailsRepository with InM
   // Seed with test data.
   inMemoryRepo +=
     "000-000" ->
-    ContactDetails(Address("First Line", None, None, None), "HP18 9DN", "joe@bloggs.com", None)
+    ContactDetails(false, Address("First Line", None, None, None), Some("HP18 9DN"), None, "joe@bloggs.com", None)
 
   override def notFound(userId: String) = throw new ContactDetailsNotFound(userId)
 

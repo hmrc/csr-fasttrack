@@ -43,8 +43,8 @@ class NonSubmittedApplicationsReportingControllerSpec extends BaseReportingContr
         override val contactDetailsRepository = new ContactDetailsInMemoryRepository {
           override def findAll: Future[List[ContactDetailsWithId]] = {
             Future.successful(ContactDetailsWithId(
-              "user1",
-              Address("First Line", None, None, None), "HP18 9DN", "joe@bloggs.com", Some("123456789")
+              "user1", false,
+              Address("First Line", None, None, None), Some("HP18 9DN"), None, "joe@bloggs.com", Some("123456789")
             ) :: Nil)
           }
         }
