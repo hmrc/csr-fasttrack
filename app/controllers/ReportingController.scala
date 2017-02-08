@@ -132,7 +132,7 @@ trait ReportingController extends BaseController {
           val ses = socioEconomicScoreCalculator.calculate(allDiversityQuestions(appId.toString()))
           val hearAboutUs = allMedia.getOrElse(application.userId, "")
           val allocatedAssessmentCentre = allContactDetails.get(application.userId.toString()).map { contactDetails =>
-            assessmentCentreIndicatorRepository.calculateIndicator(Some(contactDetails.postCode.toString)).assessmentCentre
+            assessmentCentreIndicatorRepository.calculateIndicator(Some(contactDetails.postCode)).assessmentCentre
           }
           DiversityReportItem(application, diversityAnswers, ses, hearAboutUs, allocatedAssessmentCentre).copy(locations = locationNames,
             onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
