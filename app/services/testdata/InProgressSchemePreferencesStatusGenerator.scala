@@ -16,14 +16,12 @@
 
 package services.testdata
 
-import model._
+import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.GeneralApplicationRepository
-import services.testdata.faker.DataFaker._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 object InProgressSchemePreferencesStatusGenerator extends InProgressSchemePreferencesStatusGenerator {
   override val previousStatusGenerator = InProgressPersonalDetailsStatusGenerator
@@ -35,34 +33,17 @@ trait InProgressSchemePreferencesStatusGenerator extends ConstructiveGenerator {
 
   // scalastyle:off method.length
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
-    def getFrameworkPrefs: Future[Preferences] = {
-      for {
-        randomRegion <- Random.region
-        region = generatorConfig.region.getOrElse(randomRegion)
-        firstLocation <- Random.location(region)
-        secondLocation <- Random.location(region, List(firstLocation))
-      } yield {
-        Preferences(
-          LocationPreference(region, firstLocation, "Commercial", None),
-          None,
-          None,
-          Some(Alternatives(
-            Random.bool,
-            Random.bool
-          ))
-        )
-      }
-    }
+    val schemesData = generatorConfig.schemesData.schemes
+    val schemeLocationsData = generatorConfig.schemeLocationsData.schemeLocations
 
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      frameworkPrefs <- getFrameworkPrefs
-      _ <- appRepository.updateSchemeLocations(candidateInPreviousStatus.applicationId.get, List("2643743", "2657613"))
-      _ <- appRepository.updateSchemes(candidateInPreviousStatus.applicationId.get,
-        generatorConfig.schemeTypes.getOrElse(List(Scheme.Commercial, Scheme.Business)))
+      _ <- appRepository.updateSchemeLocations(candidateInPreviousStatus.applicationId.get, schemeLocationsData)
+      _ <- appRepository.updateSchemes(candidateInPreviousStatus.applicationId.get, schemesData)
     } yield {
       candidateInPreviousStatus.copy(
-        schemePreferences = Some(frameworkPrefs)
+        schemes = Some(schemesData.map { scheme => SchemeInfo(scheme, scheme.toString, false, false)}),
+        schemeLocations = Some(schemeLocationsData)
       )
     }
   }

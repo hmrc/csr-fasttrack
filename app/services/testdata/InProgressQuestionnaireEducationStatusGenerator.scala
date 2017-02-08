@@ -18,6 +18,7 @@ package services.testdata
 
 import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
 import model.ProgressStatuses
+import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.GeneralApplicationRepository
 import services.testdata.faker.DataFaker._

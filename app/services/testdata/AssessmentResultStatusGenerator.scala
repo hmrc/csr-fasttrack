@@ -19,8 +19,10 @@ package services.testdata
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.ApplicationStatuses
 import model.EvaluationResults._
+import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.GeneralApplicationRepository
+
 import scala.concurrent.duration._
 import language.postfixOps
 import services.testdata.faker.DataFaker.Random

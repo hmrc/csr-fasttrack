@@ -31,19 +31,20 @@ class LocationSchemeServiceSpec extends UnitSpec {
 
   "Location Scheme service" should {
 
-    "return a list of location/scheme combinations without A-level requirements" in new TestFixture {
+    "return a list of eligible schemes for stem level (stem level is inclusive of A-level)" in new TestFixture {
       when(pdRepoMock.find(appId)).thenReturn(Future.successful(personalDetailsMock.copy(aLevel = false, stemLevel = true)))
       val result = service.getEligibleSchemes(appId).futureValue
-      result must contain theSameElementsAs List(SchemeInfoExamples.NoALevelsScheme)
+      result must contain theSameElementsAs List(SchemeInfoExamples.NoALevelsScheme, SchemeInfoExamples.ALevelsScheme,
+        SchemeInfoExamples.ALevelsStemScheme)
     }
 
-    "return a list of location/scheme combinations with A-level requirements" in new TestFixture {
+    "return a list of schemes with A-level requirements" in new TestFixture {
       when(pdRepoMock.find(appId)).thenReturn(Future.successful(personalDetailsMock.copy(aLevel = true, stemLevel = false)))
       val result = service.getEligibleSchemes(appId).futureValue
       result must contain theSameElementsAs List(SchemeInfoExamples.NoALevelsScheme, SchemeInfoExamples.ALevelsScheme)
     }
 
-    "return a list of location/scheme combinations with STEM A-level requirements" in new TestFixture {
+    "return a list of eligible schemes for stem and A-level requirements" in new TestFixture {
       when(pdRepoMock.find(appId)).thenReturn(Future.successful(personalDetailsMock.copy(aLevel = true, stemLevel = true)))
       val result = service.getEligibleSchemes(appId).futureValue
       result must contain theSameElementsAs List(SchemeInfoExamples.NoALevelsScheme, SchemeInfoExamples.ALevelsScheme,

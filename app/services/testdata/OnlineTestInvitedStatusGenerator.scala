@@ -19,6 +19,7 @@ package services.testdata
 import java.util.UUID
 
 import connectors.testdata.ExchangeObjects.OnlineTestProfileResponse
+import model.testdata.GeneratorConfig
 import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
 import repositories._

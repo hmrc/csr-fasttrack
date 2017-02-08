@@ -189,25 +189,20 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   override def updateExpiryTime(userId: String, expirationDate: DateTime): Future[Unit] = {
+    import model.ApplicationStatuses.BSONEnumHandler
 
-    val queryUser = BSONDocument("userId" -> userId)
-    val queryUserExpired = BSONDocument("userId" -> userId, "applicationStatus" -> ApplicationStatuses.OnlineTestExpired)
-    val newExpiryTime = BSONDocument("$set" -> BSONDocument(
+    val query= BSONDocument("userId" -> userId,
+      "applicationStatus" ->  BSONDocument("$in" -> List(ApplicationStatuses.OnlineTestInvited, ApplicationStatuses.OnlineTestStarted))
+    )
+
+    val update = BSONDocument("$set" -> BSONDocument(
       "online-tests.expirationDate" -> expirationDate
     ))
-    val newStatus = BSONDocument("$set" -> BSONDocument(
-      s"progress-status.${ProgressStatuses.OnlineTestExpiredProgress}" -> false,
-      s"progress-status.${ProgressStatuses.OnlineTestInvitedProgress}" -> true,
-      "applicationStatus" -> ApplicationStatuses.OnlineTestInvited
-    ))
 
-    for {
-      status <- collection.update(queryUser, newExpiryTime, upsert = false)
-      _ <- collection.update(queryUserExpired, newStatus, upsert = false)
-    } yield {
-      if (status.n == 0) throw new NotFoundException(s"updateStatus didn't update anything for userId:$userId")
-      if (status.n > 1) throw UnexpectedException(s"updateStatus somehow updated more than one record for userId:$userId")
-    }
+    val validator = singleUpdateValidator(userId, actionDesc = "extending cubiks test",
+      CannotExtendCubiksTest(s"Cannot extend test for userId $userId"))
+
+    collection.update(query, update) map validator
   }
 
   override def consumeToken(token: String): Future[Unit] = {
