@@ -42,7 +42,7 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
       val civilServant = pdDoc.flatMap(_.getAs[Boolean]("civilServant"))
 
       ApplicationForCandidateProgressReport(
-        UniqueIdentifier(applicationId), UniqueIdentifier(userId), Some(getStatus(progress)), schemes, schemeLocations,
+        Some(UniqueIdentifier(applicationId)), UniqueIdentifier(userId), Some(getStatus(progress)), schemes, schemeLocations,
         assistanceDetails.map(_.hasDisability), assistanceDetails.flatMap(_.guaranteedInterview),
         assistanceDetails.map(_.needsSupportForOnlineAssessment), assistanceDetails.map(_.needsSupportAtVenue),
         adjustments, civilServant

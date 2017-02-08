@@ -41,7 +41,7 @@ case class DiversityReportItem(applicationId: UniqueIdentifier,
 case object DiversityReportItem {
   def apply(application: ApplicationForCandidateProgressReport, diversityAnswers: DiversityReportDiversityAnswers,
             ses: String, hearAboutUs: String, allocatedAssessmentCentre: Option[String]): DiversityReportItem = {
-    DiversityReportItem(applicationId = application.applicationId,
+    DiversityReportItem(applicationId = application.applicationId.get,
       progress = application.progress,
       schemes = application.schemes,
       locations = application.locationIds,
