@@ -36,13 +36,19 @@ case class AdjustmentsComment(
   comment: String
 )
 
-object Adjustments {
+object AdjustmentDetail {
   implicit val adjustmentDetailFormat = Json.format[AdjustmentDetail]
   implicit val adjustmentDetailMacro = Macros.handler[AdjustmentDetail]
+}
 
-  implicit val adjustmentsFormat = Json.format[Adjustments]
-  implicit val adjustmentsMacro = Macros.handler[Adjustments]
-
+object AdjustmentsComment {
   implicit val adjustmentsCommentFormat = Json.format[AdjustmentsComment]
   implicit val adjustmentsCommentMacro = Macros.handler[AdjustmentsComment]
 }
+
+object Adjustments {
+  implicit val adjustmentsFormat = Json.format[Adjustments]
+  implicit val adjustmentsMacro = Macros.handler[Adjustments]
+}
+
+

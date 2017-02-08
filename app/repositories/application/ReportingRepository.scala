@@ -27,6 +27,7 @@ import model.EvaluationResults._
 import model.ReportExchangeObjects._
 import model._
 import model.commands.OnlineTestProgressResponse
+import model.exchange.AssistanceDetails
 import model.report.AdjustmentReportItem
 import org.joda.time.LocalDate
 import play.api.libs.json.Format
@@ -498,13 +499,10 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
         val lastName = extract("lastName")(personalDetails)
         val preferredName = extract("preferredName")(personalDetails)
 
+        val assistanceDetails = document.getAs[AssistanceDetails]("assistance-details")
         val assistance = document.getAs[BSONDocument]("assistance-details")
-        val gis = assistance.flatMap(_.getAs[Boolean]("guaranteedInterview")).flatMap(b => Some(booleanTranslator(b)))
-        val needsSupportForOnlineAssessmentDescription = extract("needsSupportForOnlineAssessmentDescription")(assistance)
-        val needsSupportAtVenueDescription = extract("needsSupportAtVenueDescription")(assistance)
-        val hasDisability = extract("hasDisability")(assistance)
         val adjustmentsConfirmed = assistance.flatMap(_.getAs[Boolean]("adjustmentsConfirmed"))
-        val adjustmentsComment = extract("adjustmentsComment")(assistance)
+        val adjustmentsComment = assistance.flatMap(_.getAs[String]("adjustmentsComment")).map(AdjustmentsComment(_))
         val onlineTests = assistance.flatMap(_.getAs[AdjustmentDetail]("onlineTests"))
         val assessmentCenter = assistance.flatMap(_.getAs[AdjustmentDetail]("assessmentCenter"))
         val typeOfAdjustments = assistance.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
@@ -523,11 +521,8 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
           preferredName,
           None,
           None,
-          gis,
           applicationStatus,
-          needsSupportForOnlineAssessmentDescription,
-          needsSupportAtVenueDescription,
-          hasDisability,
+          assistanceDetails,
           adjustments,
           adjustmentsComment,
           assessmentCentreIndicator)

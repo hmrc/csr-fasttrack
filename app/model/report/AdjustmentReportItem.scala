@@ -16,7 +16,8 @@
 
 package model.report
 
-import model.{ Adjustments, AssessmentCentreIndicator }
+import model.exchange.AssistanceDetails
+import model.{ Adjustments, AdjustmentsComment, AssessmentCentreIndicator }
 import play.api.libs.json.Json
 
 final case class AdjustmentReportItem(
@@ -27,13 +28,14 @@ final case class AdjustmentReportItem(
   preferredName: Option[String],
   email: Option[String],
   telephone: Option[String],
-  gis: Option[String],
+  //gis: Option[String],
   applicationStatus: Option[String],
-  needsSupportForOnlineAssessmentDescription: Option[String],
-  needsSupportAtVenueDescription: Option[String],
-  hasDisability: Option[String],
+  //needsSupportForOnlineAssessmentDescription: Option[String],
+  //needsSupportAtVenueDescription: Option[String],
+  //hasDisability: Option[String],
+  assistanceDetails: Option[AssistanceDetails],
   adjustments: Option[Adjustments],
-  adjustmentsComment: Option[String],
+  adjustmentsComment: Option[AdjustmentsComment],
   assessmentCentreIndicator: Option[AssessmentCentreIndicator]
 )
 

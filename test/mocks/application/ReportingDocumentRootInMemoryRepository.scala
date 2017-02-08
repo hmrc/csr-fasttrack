@@ -17,12 +17,11 @@
 package mocks.application
 
 import common.Constants.{ No, Yes }
-import model.{ Adjustments, AssessmentCentreIndicator }
+import model._
 import model.Commands._
 import model.report.AdjustmentReportItem
 import model.ReportExchangeObjects._
-import model.UniqueIdentifier
-import model.exchange.ApplicationForCandidateProgressReportItemExamples
+import model.exchange.{ ApplicationForCandidateProgressReportItemExamples, AssistanceDetails }
 import org.joda.time.LocalDate
 import repositories.application.ReportingRepository
 
@@ -60,14 +59,14 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
     Future.successful(
       List(
         AdjustmentReportItem("1", Some("123"), Some("John"), Some("Smith"), Some("Spiderman"),
-          None, None, Some("Yes"), Some("SUBMITTED"), Some("time"), Some("help"), Some("Yes"),
-          Some(Adjustments(None,None,None,None)), Some("comment"), Some(AssessmentCentreIndicator("Sutton", "London"))),
+          None, None, Some("SUBMITTED"), Some(AssistanceDetails("Yes", None, Some(true), true, Some("more time"), true, Some("big chair"))),
+          Some(Adjustments(None,None,None,None)), Some(AdjustmentsComment("comment")), Some(AssessmentCentreIndicator("Sutton", "London"))),
         AdjustmentReportItem("2", Some("123"), Some("Mary"), Some("Smith"), Some("Spiderwoman"),
-          None, None, Some("Yes"), Some("SUBMITTED"), Some("time"), Some("help"), Some("Yes"),
-          Some(Adjustments(None,None,None,None)), Some("comment"), Some(AssessmentCentreIndicator("Sutton", "London"))),
+          None, None, Some("SUBMITTED"), Some(AssistanceDetails("Yes", None, Some(true), true, Some("more time"), true, Some("big chair"))),
+          Some(Adjustments(None,None,None,None)), Some(AdjustmentsComment("comment")), Some(AssessmentCentreIndicator("Sutton", "London"))),
         AdjustmentReportItem("3", Some("123"), Some("Peter"), Some("Smith"), Some("Spiderchild"),
-          None, None, Some("Yes"), Some("SUBMITTED"), Some("time"), Some("help"), Some("Yes"),
-          Some(Adjustments(None,None,None,None)), Some("comment"),Some(AssessmentCentreIndicator("Sutton", "London")))
+          None, None, Some("SUBMITTED"), Some(AssistanceDetails("Yes", None, Some(true), true, Some("more time"), true, Some("big chair"))),
+          Some(Adjustments(None,None,None,None)), Some(AdjustmentsComment("comment")),Some(AssessmentCentreIndicator("Sutton", "London")))
       )
     )
 
