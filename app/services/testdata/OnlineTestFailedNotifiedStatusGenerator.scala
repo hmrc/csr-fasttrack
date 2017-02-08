@@ -17,6 +17,7 @@
 package services.testdata
 
 import model._
+import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.OnlineTestRepository
 import uk.gov.hmrc.play.http.HeaderCarrier

@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-package services.testdata
+package model.exchange.testdata
 
-import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import model.testdata.GeneratorConfig
-import uk.gov.hmrc.play.http.HeaderCarrier
+import model.Scheme.Scheme
+import play.api.libs.json._
 
-import scala.concurrent.Future
+case class SchemesDataRequest(schemes: Option[List[Scheme]])
 
-trait BaseGenerator {
-  def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse]
+object SchemesDataRequest {
+  implicit val schemesDataRequestFormat = Json.format[SchemesDataRequest]
 }

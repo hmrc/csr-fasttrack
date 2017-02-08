@@ -17,6 +17,7 @@
 package services.testdata
 
 import connectors.AuthProviderClient
+import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.GeneralApplicationRepository
 import uk.gov.hmrc.play.http.HeaderCarrier

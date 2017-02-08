@@ -22,6 +22,7 @@ import model.exchange.AssistanceDetails
 import model.{ AssessmentCentreIndicator, Preferences }
 import model.persisted.PersonalDetails
 import play.api.libs.json.Json
+import repositories.SchemeInfo
 
 object ExchangeObjects {
 
@@ -38,7 +39,8 @@ object ExchangeObjects {
     contactDetails: Option[ContactDetails] = None,
     personalDetails: Option[PersonalDetails] = None,
     assistanceDetails: Option[AssistanceDetails] = None,
-    schemePreferences: Option[Preferences] = None,
+    schemes: Option[List[SchemeInfo]] = None,
+    schemeLocations: Option[List[String]] = None,
     assessmentCentreIndicator: Option[AssessmentCentreIndicator] = None
   )
 

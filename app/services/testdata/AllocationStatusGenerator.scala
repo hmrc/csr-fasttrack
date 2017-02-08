@@ -19,6 +19,7 @@ package services.testdata
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.ApplicationStatuses
 import model.Commands.ApplicationAssessment
+import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.OnlineTestRepository
 import services.testdata.faker.DataFaker.Random
