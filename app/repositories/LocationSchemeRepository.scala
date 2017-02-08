@@ -77,11 +77,11 @@ trait LocationSchemeRepository {
 
   def schemeInfoList: List[SchemeInfo] = {
     List(
-      SchemeInfo(Business, "Business", requiresALevel = true, requiresALevelInStem = true),
-      SchemeInfo(Commercial, "Commercial", requiresALevel = true, requiresALevelInStem = true),
-      SchemeInfo(DigitalAndTechnology, "Digital and technology", requiresALevel = false, requiresALevelInStem = true),
-      SchemeInfo(Finance, "Finance", requiresALevel = true, requiresALevelInStem = false),
-      SchemeInfo(ProjectDelivery, "Project Delivery", requiresALevel = false, requiresALevelInStem = false)
+      SchemeInfo(Business, Business.name, requiresALevel = true, requiresALevelInStem = true),
+      SchemeInfo(Commercial, Commercial.name, requiresALevel = true, requiresALevelInStem = true),
+      SchemeInfo(DigitalAndTechnology, DigitalAndTechnology.name, requiresALevel = false, requiresALevelInStem = true),
+      SchemeInfo(Finance, Finance.name, requiresALevel = true, requiresALevelInStem = false),
+      SchemeInfo(ProjectDelivery, ProjectDelivery.name, requiresALevel = false, requiresALevelInStem = false)
     )
   }
 }
