@@ -259,8 +259,11 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     "set ONLINE_TEST_STARTED tests to ONLINE_TEST_STARTED" in {
       updateExpiryAndAssert(ApplicationStatuses.OnlineTestStarted, ApplicationStatuses.OnlineTestStarted)
     }
-    "set EXPIRED tests to INVITED" in {
-      updateExpiryAndAssert(ApplicationStatuses.OnlineTestExpired, ApplicationStatuses.OnlineTestInvited)
+    "not update expired tests" in {
+      val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestExpired, expirationDate = DateTime.now)
+      val result = onlineTestRepo.updateExpiryTime(appIdWithUserId.userId, DateTime.now.plusDays(5)).failed.futureValue
+
+      result mustBe a[CannotExtendCubiksTest]
     }
 
     def updateExpiryAndAssert(currentStatus: ApplicationStatuses.EnumVal, newStatus: ApplicationStatuses.EnumVal) = {
