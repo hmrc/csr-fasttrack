@@ -17,10 +17,11 @@
 package mocks.application
 
 import common.Constants.{ No, Yes }
+import model._
 import model.Commands._
+import model.report.AdjustmentReportItem
 import model.ReportExchangeObjects._
-import model.UniqueIdentifier
-import model.exchange.ApplicationForCandidateProgressReportItemExamples
+import model.exchange.{ ApplicationForCandidateProgressReportItemExamples, AssistanceDetails }
 import org.joda.time.LocalDate
 import repositories.application.ReportingRepository
 
@@ -54,12 +55,18 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
       Some("SUBMITTED"), List.empty, List.empty, None, None, None, None, None, None)
   ))
 
-  override def adjustmentReport(frameworkId: String): Future[List[AdjustmentReport]] =
+  override def adjustmentReport(frameworkId: String): Future[List[AdjustmentReportItem]] =
     Future.successful(
       List(
-        AdjustmentReport("1", Some("John"), Some("Smith"), Some("Spiderman"), None, None, Some("Some adjustments"), Some(Yes), Some(Yes)),
-        AdjustmentReport("2", Some("James"), Some("Jones"), Some("Batman"), None, None, Some("Some adjustments"), Some(Yes), Some(No)),
-        AdjustmentReport("3", Some("Kathrine"), Some("Jones"), Some("Supergirl"), None, None, Some("Some adjustments"), Some(Yes), Some(No))
+        AdjustmentReportItem("1", Some("123"), Some("John"), Some("Smith"), Some("Spiderman"),
+          None, None, Some("SUBMITTED"), Some(AssistanceDetails("Yes", None, Some(true), true, Some("more time"), true, Some("big chair"))),
+          Some(Adjustments(None,None,None,None)), Some(AdjustmentsComment("comment")), Some(AssessmentCentreIndicator("Sutton", "London"))),
+        AdjustmentReportItem("2", Some("123"), Some("Mary"), Some("Smith"), Some("Spiderwoman"),
+          None, None, Some("SUBMITTED"), Some(AssistanceDetails("Yes", None, Some(true), true, Some("more time"), true, Some("big chair"))),
+          Some(Adjustments(None,None,None,None)), Some(AdjustmentsComment("comment")), Some(AssessmentCentreIndicator("Sutton", "London"))),
+        AdjustmentReportItem("3", Some("123"), Some("Peter"), Some("Smith"), Some("Spiderchild"),
+          None, None, Some("SUBMITTED"), Some(AssistanceDetails("Yes", None, Some(true), true, Some("more time"), true, Some("big chair"))),
+          Some(Adjustments(None,None,None,None)), Some(AdjustmentsComment("comment")),Some(AssessmentCentreIndicator("Sutton", "London")))
       )
     )
 
