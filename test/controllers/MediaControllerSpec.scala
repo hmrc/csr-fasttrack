@@ -17,7 +17,7 @@
 package controllers
 
 import config.TestFixtureBase
-import mocks.MediaInMemoryRepository
+import model.Commands.AddMedia
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import org.scalatestplus.play.PlaySpec
@@ -29,6 +29,7 @@ import repositories.MediaRepository
 import services.AuditService
 import uk.gov.hmrc.play.http.HeaderCarrier
 
+import scala.concurrent.Future
 import scala.language.postfixOps
 
 class MediaControllerSpec extends PlaySpec with Results {
@@ -63,8 +64,10 @@ class MediaControllerSpec extends PlaySpec with Results {
   }
 
   trait TestFixture extends TestFixtureBase {
+    val mockMediaRepository = mock[MediaRepository]
+    when(mockMediaRepository.create(any[AddMedia])).thenReturn(Future.successful(()))
     object TestMediaController extends MediaController {
-      override val mRepository: MediaRepository = MediaInMemoryRepository
+      override val mRepository: MediaRepository = mockMediaRepository
       override val auditService: AuditService = mockAuditService
     }
 

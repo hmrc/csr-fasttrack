@@ -16,13 +16,12 @@
 
 package mocks
 
-import controllers.OnlineTestDetails
 import model.EvaluationResults._
 import model.{ ApplicationStatuses, ReminderNotice }
-import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser, OnlineTestProfile }
+import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser }
 import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
 import model.Scheme.Scheme
-import model.persisted.{ NotificationExpiringOnlineTest, SchemeEvaluationResult }
+import model.persisted.{ CubiksTestProfile, NotificationExpiringOnlineTest, SchemeEvaluationResult }
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.OnlineTestRepository
 
@@ -45,9 +44,17 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
       needsAdjustments = false, "Test Preferred Name", None
     )))
 
-  def getOnlineTestDetails(userId: String): Future[OnlineTestDetails] = Future.successful {
+  def getCubiksTestProfile(userId: String): Future[CubiksTestProfile] = Future.successful {
     val date = DateTime.now
-    OnlineTestDetails(date, date.plusDays(4), "http://www.google.co.uk", "123@test.com", isOnlineTestEnabled = true)
+    CubiksTestProfile(
+      cubiksUserId = 123,
+      participantScheduleId = 111,
+      invitationDate = date,
+      expirationDate = date.plusDays(7),
+      onlineTestUrl = "http://www.google.co.uk",
+      token = "222222",
+      isOnlineTestEnabled = true
+    )
   }
 
   def updateStatus(userId: String, status: ApplicationStatuses.EnumVal): Future[Unit] = Future.successful(Unit)
@@ -56,7 +63,7 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
 
   def consumeToken(token: String): Future[Unit] = Future.successful(Unit)
 
-  def storeOnlineTestProfileAndUpdateStatusToInvite(applicationId: String, onlineTestProfile: OnlineTestProfile): Future[Unit] =
+  def storeOnlineTestProfileAndUpdateStatusToInvite(applicationId: String, onlineTestProfile: CubiksTestProfile): Future[Unit] =
     Future.successful(Unit)
 
   def getOnlineTestApplication(appId: String): Future[Option[OnlineTestApplication]] = Future.successful(None)
@@ -95,4 +102,12 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
   def nextTestForReminder(reminder: ReminderNotice): Future[Option[NotificationExpiringOnlineTest]] = ???
 
   def addReminderNotificationStatus(userId: String, notificationStatus: String): Future[Unit] = ???
+
+  override def startOnlineTest(cubiksUserId: Int): Future[Unit] = Future.successful(())
+
+  override def getCubiksTestProfile(cubiksUserId: Int): Future[CubiksTestProfile] = ???
+
+  override def getCubiksTestProfileByToken(token: String): Future[CubiksTestProfile] = ???
+
+  override def completeOnlineTest(cubiksUserId: Int): Future[Unit] = ???
 }

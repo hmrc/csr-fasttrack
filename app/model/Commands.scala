@@ -102,7 +102,11 @@ object Commands {
 
   case class CandidateDetailsReportItem(appId: String, userId: String, csvRecord: String)
 
-  case class CsvExtract[A](header: String, records: Map[String, A])
+  case class CsvExtract[A](header: String, records: Map[String, A]) {
+
+    def emptyRecord() = List.fill(header.split(",").length)("\"\"").mkString(",")
+
+  }
 
   case class ContactDetails(phone: Option[String], email: String, address: Address, postCode: PostCode)
 
@@ -199,8 +203,6 @@ object Commands {
     implicit def fromCommandToPersistedQuestion(q: Question): PersistedQuestion =
       PersistedQuestion(q.question, PersistedAnswer(q.answer.answer, q.answer.otherDetails, q.answer.unknown))
 
-    implicit val onlineTestDetailsFormat = Json.format[OnlineTestDetails]
-    implicit val onlineTestFormat = Json.format[OnlineTest]
     implicit val onlineTestStatusFormats = Json.format[OnlineTestStatus]
     implicit val onlineTestExtensionFormats = Json.format[OnlineTestExtension]
     implicit val userIdWrapperFormats = Json.format[UserIdWrapper]

@@ -27,6 +27,10 @@ import play.api.libs.json.JsArray
 import play.api.libs.json.{ JsArray, JsValue }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
+import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
+import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, LocationSchemeRepository, MediaRepository, QuestionnaireRepository, TestReportRepository }
+import services.reporting.SocioEconomicScoreCalculator
+
 import repositories.ApplicationAssessmentScoresRepository
 import repositories.application.ReportingRepository
 
@@ -55,6 +59,9 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
         override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
         override val testReportRepository = TestReportInMemoryRepository
+        override val locationSchemeRepository = mock[LocationSchemeRepository]
+        override val mediaRepository = mock[MediaRepository]
+        override val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
@@ -79,6 +86,9 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
         override val testReportRepository = TestReportInMemoryRepository
         override val authProviderClient: AuthProviderClient = authProviderClientMock
+        override val locationSchemeRepository = mock[LocationSchemeRepository]
+        override val mediaRepository = mock[MediaRepository]
+        override val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
@@ -108,6 +118,9 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val testReportRepository = TestReportInMemoryRepository
         override val authProviderClient: AuthProviderClient = authProviderClientMock
         override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
+        override val locationSchemeRepository = mock[LocationSchemeRepository]
+        override val mediaRepository = mock[MediaRepository]
+        override val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 

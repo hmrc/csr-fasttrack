@@ -14,22 +14,26 @@
  * limitations under the License.
  */
 
-package mocks
+package model.exchange
 
-import model.Commands.AddMedia
-import repositories.MediaRepository
+import org.joda.time.DateTime
+import play.api.libs.json.Json
 
-import scala.collection.mutable
-import scala.concurrent.Future
+case class OnlineTest(
+  cubiksUserId: Int,
+  inviteDate: DateTime,
+  expireDate: DateTime,
+  onlineTestLink: String,
+  token: String,
+  isOnlineTestEnabled: Boolean = false,
+  pdfReportAvailable: Boolean = false,
+  startedDateTime: Option[DateTime] = None,
+  completedDateTime: Option[DateTime] = None
+) {
+  def isStarted: Boolean = startedDateTime.isDefined
+  def isCompleted: Boolean = completedDateTime.isDefined
+}
 
-object MediaInMemoryRepository extends MediaRepository {
-
-  override def create(addMedia: AddMedia): Future[Unit] = {
-
-    inMemoryRepo += addMedia.userId -> addMedia
-    Future.successful(Unit)
-  }
-
-  val inMemoryRepo = new mutable.HashMap[String, AddMedia]
-
+object OnlineTest {
+  implicit val format = Json.format[OnlineTest]
 }
