@@ -28,8 +28,7 @@ case class PersonalData(
                          preferredName: Option[String] = None,
                          dob: LocalDate = new LocalDate(1981, 5, 21),
                          postCode: Option[String] = None,
-                         country: Option[String] = None,
-                         edipCompleted: Option[Boolean] = None
+                         country: Option[String] = None
                        ) {
   def getPreferredName: String = preferredName.getOrElse(s"Pref$firstName")
 
