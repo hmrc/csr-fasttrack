@@ -96,20 +96,19 @@ trait ReportingController extends BaseController {
     reportFut.map { report => Ok(Json.toJson(report)) }
   }
 
-  private def extractDiversityAnswers(application: ApplicationForCandidateProgressReport,
-                                      allDiversityQuestions: Map[String, Map[String, String]]) = {
+  private def extractDiversityAnswers(appId: UniqueIdentifier, allDiversityQuestions: Map[String, Map[String, String]]) = {
     def getDiversityAnswerForQuestion(applicationId: String, questionText: String,
                                               allDiversityQuestions: Map[String, Map[String, String]]) = {
       allDiversityQuestions.get(applicationId).map { questionMap => questionMap.getOrElse(questionText, "") }.getOrElse("")
     }
 
-    val genderAnswer = getDiversityAnswerForQuestion(application.applicationId.toString,
+    val genderAnswer = getDiversityAnswerForQuestion(appId.toString(),
       QuestionnaireRepository.genderQuestionText, allDiversityQuestions)
 
-    val sexualOrientationAnswer = getDiversityAnswerForQuestion(application.applicationId.toString,
+    val sexualOrientationAnswer = getDiversityAnswerForQuestion(appId.toString(),
       QuestionnaireRepository.sexualOrientationQuestionText, allDiversityQuestions)
 
-    val ethnicityAnswer = getDiversityAnswerForQuestion(application.applicationId.toString,
+    val ethnicityAnswer = getDiversityAnswerForQuestion(appId.toString(),
       QuestionnaireRepository.ethnicityQuestionText, allDiversityQuestions)
 
     DiversityReportDiversityAnswers(genderAnswer, sexualOrientationAnswer, ethnicityAnswer)
@@ -122,20 +121,24 @@ trait ReportingController extends BaseController {
                                    allMedia: Map[UniqueIdentifier, String]): Future[List[DiversityReportItem]] = {
     Future{
       applications.map { application =>
-        val diversityAnswers = extractDiversityAnswers(application, allDiversityQuestions)
-        val locationIds = application.locationIds
-        val onlineAdjustmentsVal = reportingFormatter.getOnlineAdjustments(application.onlineAdjustments, application.adjustments)
-        val assessmentCentreAdjustmentsVal = reportingFormatter.getAssessmentCentreAdjustments(
-          application.assessmentCentreAdjustments,
-          application.adjustments)
-        val locationNames = locationIds.flatMap(locationId => allLocations.find(_.id == locationId).map{_.locationName})
-        val ses = socioEconomicScoreCalculator.calculate(allDiversityQuestions(application.applicationId.toString))
-        val hearAboutUs = allMedia.getOrElse(application.userId, "")
-        val allocatedAssessmentCentre = allContactDetails.get(application.userId.toString()).map { contactDetails =>
-            assessmentCentreIndicatorRepository.calculateIndicator(Some(contactDetails.postCode.toString)).assessmentCentre
+        val diversityReportItem = application.applicationId.map { appId =>
+          val diversityAnswers = extractDiversityAnswers(appId, allDiversityQuestions)
+          val locationIds = application.locationIds
+          val onlineAdjustmentsVal = reportingFormatter.getOnlineAdjustments(application.onlineAdjustments, application.adjustments)
+          val assessmentCentreAdjustmentsVal = reportingFormatter.getAssessmentCentreAdjustments(
+            application.assessmentCentreAdjustments,
+            application.adjustments)
+          val locationNames = locationIds.flatMap(locationId => allLocations.find(_.id == locationId).map{_.locationName})
+          val ses = socioEconomicScoreCalculator.calculate(allDiversityQuestions(appId.toString()))
+          val hearAboutUs = allMedia.getOrElse(application.userId, "")
+          val allocatedAssessmentCentre = allContactDetails.get(application.userId.toString()).map { contactDetails =>
+            assessmentCentreIndicatorRepository.calculateIndicator(Some(contactDetails.postCode)).assessmentCentre
+          }
+          DiversityReportItem(application, diversityAnswers, ses, hearAboutUs, allocatedAssessmentCentre).copy(locations = locationNames,
+            onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
         }
-        DiversityReportItem(application, diversityAnswers, ses, hearAboutUs, allocatedAssessmentCentre).copy(locations = locationNames,
-          onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
+        diversityReportItem.getOrElse(throw new IllegalStateException(s"Application Id does not exist in diversity report generation " +
+          s"for the user Id = ${application.userId}"))
       }
     }
   }
