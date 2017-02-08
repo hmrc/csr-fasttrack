@@ -22,8 +22,8 @@ import mocks._
 import mocks.application.ReportingDocumentRootInMemoryRepository
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
+import model.report.AdjustmentReportItem
 import play.api.libs.json.JsArray
-import model.ReportExchangeObjects.AdjustmentReport
 import play.api.libs.json.{ JsArray, JsValue }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
@@ -111,8 +111,8 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val contactDetailsRepository = ContactDetailsInMemoryRepository
         override val questionnaireRepository = QuestionnaireInMemoryRepository
         override val reportingRepository = new ReportingDocumentRootInMemoryRepository {
-          override def adjustmentReport(frameworkId: String): Future[List[AdjustmentReport]] = {
-            Future.successful(List.empty[AdjustmentReport])
+          override def adjustmentReport(frameworkId: String): Future[List[AdjustmentReportItem]] = {
+            Future.successful(List.empty[AdjustmentReportItem])
           }
         }
         override val testReportRepository = TestReportInMemoryRepository

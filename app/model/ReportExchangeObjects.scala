@@ -25,16 +25,6 @@ import org.joda.time.{ DateTime, LocalDate }
 import play.api.libs.json.Json
 
 object ReportExchangeObjects {
-  case class AdjustmentReport(userId: String,
-                               firstName: Option[String],
-                               lastName: Option[String],
-                               preferredName: Option[String],
-                               email: Option[String],
-                               telephone: Option[String],
-                               adjustments: Option[String],
-                               gis: Option[String],
-                               adjustmentsConfirmed: Option[String])
-
   case class ApplicationUserIdReport(applicationId: UniqueIdentifier, userId: UniqueIdentifier)
 
   case class AssessmentCentreAllocationReport(
@@ -48,7 +38,7 @@ object ReportExchangeObjects {
     dateOfBirth: LocalDate
   )
 
-  case class CandidateProgressReportItem(applicationId: UniqueIdentifier,
+  case class CandidateProgressReportItem(applicationId: Option[UniqueIdentifier],
                                            progress: Option[String],
                                            schemes: List[Scheme],
                                            locations: List[String],
@@ -77,7 +67,7 @@ object ReportExchangeObjects {
 
   case class DiversityReportDiversityAnswers(gender: String, sexualOrientation: String, ethnicity: String)
 
-  case class ApplicationForCandidateProgressReport(applicationId: UniqueIdentifier,
+  case class ApplicationForCandidateProgressReport(applicationId: Option[UniqueIdentifier],
                                                     userId: UniqueIdentifier,
                                                     progress: Option[String],
                                                     schemes: List[Scheme],
@@ -232,7 +222,6 @@ object ReportExchangeObjects {
     implicit val applicationForCandidateProgressReportFormats = Json.format[ApplicationForCandidateProgressReport]
     implicit val candidateProgressReportItemWithPersonalDetailsFormats = Json.format[ReportWithPersonalDetails]
     implicit val passMarkReportTestResultFormats = Json.format[TestResult]
-    implicit val adjustmentReportFormats = Json.format[AdjustmentReport]
     implicit val assessmentCentreAllocationReportFormats = Json.format[AssessmentCentreAllocationReport]
     implicit val passMarkReportTestResultsFormats = Json.format[PassMarkReportTestResults]
     implicit val passMarkReportQuestionnaireDataFormats = Json.format[PassMarkReportQuestionnaireData]

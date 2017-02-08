@@ -20,20 +20,21 @@ import model.Commands.Implicits._
 import model.ReportExchangeObjects.{ CandidateProgressReportItem, _ }
 import model.ReportExchangeObjects.Implicits._
 import model.{ AssessmentCentreIndicator, UniqueIdentifier }
-import model.exchange.{ ApplicationForCandidateProgressReportItemExamples, CandidateProgressReportItemExamples, LocationSchemesExamples }
+import model.exchange.{ ApplicationForCandidateProgressReportItemExamples, CandidateExamples, CandidateProgressReportItemExamples, LocationSchemesExamples }
 import model.persisted.ContactDetailsWithIdExamples
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import play.api.test.Helpers._
 import testkit.MockitoImplicits.OngoingStubbingExtension
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.language.postfixOps
 
 class CandidateProgressReportingControllerSpec extends BaseReportingControllerSpec {
   "Candidate progress report" should {
-    "return empty list when there are no applications" in new CandidateProgressReportTestFixture {
-      when(reportingRepoMock.applicationsForCandidateProgressReport(eqTo(frameworkId))).thenReturnAsync(Nil)
+    "return empty list when there are no candidates registered" in new CandidateProgressReportTestFixture {
+      when(authProviderClientMock.candidatesReport(any[HeaderCarrier])).thenReturnAsync(Nil)
 
       val response = controller.createCandidateProgressReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[CandidateProgressReportItem]]
@@ -92,6 +93,7 @@ class CandidateProgressReportingControllerSpec extends BaseReportingControllerSp
     when(reportingFormatterMock.getAssessmentCentreAdjustments(eqTo(Some(true)), any())).thenReturn(Some("Yes"))
     when(reportingFormatterMock.getAssessmentCentreAdjustments(eqTo(Some(false)), any())).thenReturn(Some("No"))
     when(reportingFormatterMock.getAssessmentCentreAdjustments(eqTo(None), any())).thenReturn(None)
+    when(authProviderClientMock.candidatesReport(any[HeaderCarrier])).thenReturnAsync(CandidateExamples.Candidates)
 
     def request = {
       FakeRequest(Helpers.GET, controllers.routes.ReportingController.createCandidateProgressReport(frameworkId).url, FakeHeaders(), "")

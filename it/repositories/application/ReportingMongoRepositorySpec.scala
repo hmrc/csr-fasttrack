@@ -51,7 +51,7 @@ class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory 
       val result = repository.applicationsForCandidateProgressReport("FastTrack-2015").futureValue
 
       result must not be empty
-      result.head mustBe(ApplicationForCandidateProgressReport(appId, userId, Some("assistance_details_completed"),
+      result.head mustBe(ApplicationForCandidateProgressReport(Some(appId), userId, Some("assistance_details_completed"),
         List(Scheme.Commercial, Scheme.Business), List("2643743", "2657613"), Some("Yes"), Some(false), Some(true),
         Some(true), Some(Adjustments(typeOfAdjustments=Some(List("onlineTestsTimeExtension", "onlineTestsOther",
           "assessmentCenterTimeExtension", "coloured paper", "braille test paper", "room alone", "rest breaks",

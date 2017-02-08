@@ -93,7 +93,7 @@ object DataFaker {
           List("AM", "PM").flatMap { possibleSession =>
             takenSlotsByDateAndSession.get(capacityDate -> possibleSession) match {
               // Date with no free slots
-              case Some(slots) if slots >= 18 => None
+              //case Some(slots) if slots >= 18 => None
               // Date with no assessments booked or Date with open slots (all dates have 6 slots per session)
               case _ => Some(AvailableAssessmentSlot(venue, capacityDate, possibleSession))
             }
