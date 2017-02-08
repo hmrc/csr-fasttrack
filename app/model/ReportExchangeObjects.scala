@@ -48,7 +48,7 @@ object ReportExchangeObjects {
     dateOfBirth: LocalDate
   )
 
-  case class CandidateProgressReportItem(applicationId: UniqueIdentifier,
+  case class CandidateProgressReportItem(applicationId: Option[UniqueIdentifier],
                                            progress: Option[String],
                                            schemes: List[Scheme],
                                            locations: List[String],
@@ -77,7 +77,7 @@ object ReportExchangeObjects {
 
   case class DiversityReportDiversityAnswers(gender: String, sexualOrientation: String, ethnicity: String)
 
-  case class ApplicationForCandidateProgressReport(applicationId: UniqueIdentifier,
+  case class ApplicationForCandidateProgressReport(applicationId: Option[UniqueIdentifier],
                                                     userId: UniqueIdentifier,
                                                     progress: Option[String],
                                                     schemes: List[Scheme],
