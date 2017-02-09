@@ -32,7 +32,5 @@ trait PassMarkSettingsService {
   val pmsRepository: PassMarkSettingsRepository
 
   def tryGetLatestVersion(): Future[Option[Settings]] =
-    fwRepository.getFrameworkNames.flatMap(schemeNames => {
-      pmsRepository.tryGetLatestVersion(schemeNames)
-    })
+      pmsRepository.tryGetLatestVersion()
 }

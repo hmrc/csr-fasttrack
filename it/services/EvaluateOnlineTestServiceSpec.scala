@@ -62,6 +62,13 @@ class EvaluateOnlineTestServiceSpec extends IntegrationSpec with MockitoSugar wi
           DateTime.parse(config.getString(path))
         }
       }
+
+      implicit object SchemeReader extends ValueReader[Scheme.Scheme] {
+        override def read(config: Config, path: String): Scheme.Scheme = {
+          Scheme.withName(config.getString(path))
+        }
+      }
+
       val suites = new File("it/resources/onlineTestPassmarkServiceSpec").listFiles.filterNot(_.getName.startsWith("."))
       // Test should fail in case the path is incorrect for the env and return 0 suites
       suites.nonEmpty mustBe true

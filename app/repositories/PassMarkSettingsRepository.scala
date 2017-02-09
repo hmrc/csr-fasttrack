@@ -33,23 +33,23 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait PassMarkSettingsRepository {
-  def create(settings: Settings, schemeNames: List[String]): Future[PassMarkSettingsCreateResponse]
+  def create(settings: Settings, schemes: List[model.Scheme.Scheme]): Future[PassMarkSettingsCreateResponse]
 
-  def tryGetLatestVersion(schemeNames: List[String]): Future[Option[Settings]]
+  def tryGetLatestVersion(): Future[Option[Settings]]
 }
 
 class PassMarkSettingsMongoRepository(implicit mongo: () => DB)
   extends ReactiveRepository[Settings, BSONObjectID](CollectionNames.PASS_MARK_SETTINGS, mongo,
     PassMarkExchangeObjects.Implicits.passMarkSettingsFormat, ReactiveMongoFormats.objectIdFormats) with PassMarkSettingsRepository {
 
-  override def create(settings: Settings, schemeNames: List[String]): Future[PassMarkSettingsCreateResponse] = {
+  override def create(settings: Settings, schemes: List[model.Scheme.Scheme]): Future[PassMarkSettingsCreateResponse] = {
     collection.insert(settings) flatMap { _ =>
-      tryGetLatestVersion(schemeNames).map(createResponse =>
+      tryGetLatestVersion().map(createResponse =>
         PassMarkSettingsCreateResponse(createResponse.get.version, createResponse.get.createDate))
     }
   }
 
-  override def tryGetLatestVersion(schemeNames: List[String]): Future[Option[Settings]] = {
+  override def tryGetLatestVersion(): Future[Option[Settings]] = {
     val query = BSONDocument()
     val sort = new JsObject(Map("createDate" -> JsNumber(-1)))
 

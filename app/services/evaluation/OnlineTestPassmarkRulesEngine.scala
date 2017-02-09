@@ -37,7 +37,7 @@ object OnlineTestPassmarkRulesEngine extends OnlineTestPassmarkRulesEngine {
   }
 
   private def evaluateScore(candidateScores: CandidateEvaluationData, scheme: Scheme) = {
-    val passmark = candidateScores.passmarkSettings.schemes.find(_.schemeName == scheme.toString)
+    val passmark = candidateScores.passmarkSettings.schemes.find(_.schemeName == scheme)
       .getOrElse(throw new IllegalStateException(s"schemeName=$scheme is not set in Passmark settings"))
     determineResult(candidateScores.scores, passmark.schemeThresholds)
   }
