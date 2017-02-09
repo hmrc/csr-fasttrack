@@ -20,12 +20,16 @@ import java.util.regex.Pattern
 
 import common.Constants.{ No, Yes }
 import common.StringUtils._
-import model.ApplicationStatusOrder._
+import model.{ ApplicationStatuses, _ }
+import model.ApplicationStatusOrder.{ getStatus, _ }
 import model.Commands._
 import model.EvaluationResults._
 import model.ReportExchangeObjects._
+import model.Scheme.Scheme
 import model._
 import model.commands.OnlineTestProgressResponse
+import model.exchange.AssistanceDetails
+import model.report.AdjustmentReportItem
 import org.joda.time.LocalDate
 import play.api.libs.json.Format
 import reactivemongo.api.{ DB, ReadPreference }
@@ -48,7 +52,7 @@ trait ReportingRepository {
 
   def candidateProgressReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]]
 
-  def adjustmentReport(frameworkId: String): Future[List[AdjustmentReport]]
+  def adjustmentReport(frameworkId: String): Future[List[AdjustmentReportItem]]
 
   def candidatesAwaitingAllocation(frameworkId: String): Future[List[CandidateAwaitingAllocation]]
 
@@ -59,6 +63,9 @@ trait ReportingRepository {
   def applicationsWithAssessmentScoresAccepted(frameworkId: String): Future[List[ApplicationPreferences]]
 
   def applicationsPassedInAssessmentCentre(frameworkId: String): Future[List[ApplicationPreferencesWithTestResults]]
+
+  // The progress report contains common data for diversity
+  def diversityReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
 }
 
 class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo: () => DB)
@@ -455,31 +462,34 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     )
   }
 
-  def adjustmentReport(frameworkId: String): Future[List[AdjustmentReport]] = {
+  def adjustmentReport(frameworkId: String): Future[List[AdjustmentReportItem]] = {
+
     val query = BSONDocument("$and" ->
       BSONArray(
         BSONDocument("frameworkId" -> frameworkId),
+        BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Created)),
         BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.InProgress)),
         BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn)),
         BSONDocument("$or" ->
           BSONArray(
-            BSONDocument("$or" -> BSONArray(
-              BSONDocument("assistance-details.needsSupportForOnlineAssessment" -> true),
-              BSONDocument("assistance-details.needsSupportAtVenue" -> true))),
-            BSONDocument("assistance-details.guaranteedInterview" -> true)
-          ))
-      ))
+            BSONDocument("assistance-details.needsSupportForOnlineAssessment" -> true),
+            BSONDocument("assistance-details.needsSupportAtVenue" -> true),
+            BSONDocument("assistance-details.guaranteedInterview" -> true),
+            BSONDocument("assistance-details.adjustmentsConfirmed" -> true)
+          )
+        )
+      )
+    )
 
     val projection = BSONDocument(
       "userId" -> "1",
+      "applicationId" -> "1",
+      "applicationStatus" -> "1",
       "personal-details.firstName" -> "1",
       "personal-details.lastName" -> "1",
       "personal-details.preferredName" -> "1",
-      "assistance-details.guaranteedInterview" -> "1",
-      "assistance-details.typeOfAdjustments" -> "1",
-      "assistance-details.needsSupportForOnlineAssessment" -> "1",
-      "assistance-details.needsSupportAtVenue" -> "1",
-      "assistance-details.adjustmentsConfirmed" -> "1"
+      "assistance-details" -> "3",
+      "assessment-centre-indicator" -> "2"
     )
 
     reportQueryWithProjections[BSONDocument](query, projection).map { list =>
@@ -487,18 +497,39 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
 
         val personalDetails = document.getAs[BSONDocument]("personal-details")
         val userId = document.getAs[String]("userId").getOrElse("")
+        val applicationId = document.getAs[String]("applicationId")
+        val applicationStatus = document.getAs[String]("applicationStatus")
         val firstName = extract("firstName")(personalDetails)
         val lastName = extract("lastName")(personalDetails)
         val preferredName = extract("preferredName")(personalDetails)
 
-        val ad = document.getAs[BSONDocument]("assistance-details")
-        val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).map { gis => if (gis) Yes else No }
-        val adjustmentsConfirmed = getAdjustmentsConfirmed(ad)
-        val typesOfAdjustments = ad.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
-        val adjustments = typesOfAdjustments.getOrElse(Nil)
-        val finalTOA = if (adjustments.isEmpty) None else Some(adjustments.map(splitCamelCase).mkString("|"))
+        val assistanceDetails = document.getAs[AssistanceDetails]("assistance-details")
+        val assistance = document.getAs[BSONDocument]("assistance-details")
+        val adjustmentsConfirmed = assistance.flatMap(_.getAs[Boolean]("adjustmentsConfirmed"))
+        val adjustmentsComment = assistance.flatMap(_.getAs[String]("adjustmentsComment")).map(AdjustmentsComment(_))
+        val onlineTests = assistance.flatMap(_.getAs[AdjustmentDetail]("onlineTests"))
+        val assessmentCenter = assistance.flatMap(_.getAs[AdjustmentDetail]("assessmentCenter"))
+        val typeOfAdjustments = assistance.flatMap(_.getAs[List[String]]("typeOfAdjustments"))
 
-        AdjustmentReport(userId, firstName, lastName, preferredName, None, None, finalTOA, guaranteedInterview, adjustmentsConfirmed)
+        val adjustments = adjustmentsConfirmed.flatMap { ac =>
+          if (ac) Some(Adjustments(typeOfAdjustments, adjustmentsConfirmed, onlineTests, assessmentCenter)) else None
+        }
+
+        val assessmentCentreIndicator = document.getAs[AssessmentCentreIndicator]("assessment-centre-indicator")
+
+        AdjustmentReportItem(
+          userId,
+          applicationId,
+          firstName,
+          lastName,
+          preferredName,
+          None,
+          None,
+          applicationStatus,
+          assistanceDetails,
+          adjustments,
+          adjustmentsComment,
+          assessmentCentreIndicator)
       }
     }
   }
@@ -639,6 +670,26 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
         ApplicationUserIdReport(UniqueIdentifier(applicationId), UniqueIdentifier(userId))
       }
     }
+  }
+
+  def diversityReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] = {
+    val query = BSONDocument(
+      "frameworkId" -> frameworkId,
+      "applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn),
+      "progress-status.questionnaire.diversity_questions_completed" -> BSONDocument("$exists" -> true)
+    )
+
+    val projection = BSONDocument(
+      "applicationId" -> "1",
+      "userId" -> "1",
+      "progress-status" -> "1",
+      "personal-details.civilServant" -> "1",
+      "schemes" -> "1",
+      "scheme-locations" -> "1",
+      "assistance-details" -> "1"
+    )
+
+    reportQueryWithProjectionsBSON[ApplicationForCandidateProgressReport](query, projection)
   }
 }
 

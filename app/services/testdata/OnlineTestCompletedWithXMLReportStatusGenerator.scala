@@ -18,6 +18,7 @@ package services.testdata
 
 import model.OnlineTestCommands.TestResult
 import model.PersistedObjects._
+import model.testdata.{ GeneratorConfig, OnlineTestScores }
 import repositories._
 import repositories.application.OnlineTestRepository
 import uk.gov.hmrc.play.http.HeaderCarrier

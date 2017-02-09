@@ -16,6 +16,7 @@
 
 package model
 
+// scalastyle:off number.of.methods
 object Exceptions {
   sealed class ConnectorException(message: String) extends Exception(message)
 
@@ -24,6 +25,8 @@ object Exceptions {
   }
 
   case class CannotUpdateCubiksTest(m: String) extends Exception(m)
+
+  case class CannotExtendCubiksTest(m: String) extends Exception(m)
 
   case class UnexpectedException(m: String) extends Exception(m)
 
@@ -81,3 +84,4 @@ object Exceptions {
 
   case class CannotRemoveAdjustmentsComment(applicationId: String) extends Exception(applicationId)
 }
+// scalastyle:on

@@ -46,7 +46,7 @@ trait LocationSchemeService {
 
       val selectedLocations = locationsWithSchemes.collect {
         case LocationSchemes(locationId, locationName, geocodes, availableSchemes)
-          if schemeChoices.map(_.name).intersect(availableSchemes).nonEmpty =>
+          if schemeChoices.map(_.id).intersect(availableSchemes).nonEmpty =>
           val distance = for {
             latitude <- latitudeOpt
             longitude <- longitudeOpt
@@ -54,7 +54,7 @@ trait LocationSchemeService {
             geocodes.map{ gc => DistanceCalculator.calcMilesBetween(latitude, longitude, gc.lat, gc.lng) }.min
           }
 
-          GeoLocationSchemeResult(locationId, locationName, distance, schemeChoices.filter(scheme => availableSchemes.contains(scheme.name)))
+          GeoLocationSchemeResult(locationId, locationName, distance, schemeChoices.filter(scheme => availableSchemes.contains(scheme.id)))
       }
       sortLocations(selectedLocations, latitudeOpt.isDefined && longitudeOpt.isDefined)
     }
@@ -65,7 +65,9 @@ trait LocationSchemeService {
         personalDetails <- pdRepository.find(applicationId)
         schemes <- locationSchemeRepository.getSchemeInfo
       } yield {
-        schemes.filterNot(s => s.requiresALevel && !personalDetails.aLevel || s.requiresALevelInStem && !personalDetails.stemLevel)
+        schemes.filterNot(s =>
+          (s.requiresALevel && !(personalDetails.aLevel || personalDetails.stemLevel)) ||
+          (s.requiresALevelInStem && !personalDetails.stemLevel))
       }
   }
 
@@ -100,6 +102,8 @@ trait LocationSchemeService {
         schemes.find(_.id == schemeId).getOrElse(throw NotFoundException(Some(s"Scheme $schemeId not found"))))
     }
   }
+
+  def getAvailableSchemes : Future[List[SchemeInfo]] = locationSchemeRepository.getSchemeInfo
 
   def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit] = {
     appRepository.updateSchemes(applicationId, schemeNames)

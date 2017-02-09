@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package mocks
+package model.exchange.testdata
 
-import model.Commands.AddMedia
-import repositories.MediaRepository
+import play.api.libs.json._
 
-import scala.collection.mutable
-import scala.concurrent.Future
+case class SchemeLocationsDataRequest(schemeLocations: Option[List[String]])
 
-object MediaInMemoryRepository extends MediaRepository {
-
-  override def create(addMedia: AddMedia): Future[Unit] = {
-
-    inMemoryRepo += addMedia.userId -> addMedia
-    Future.successful(Unit)
-  }
-
-  val inMemoryRepo = new mutable.HashMap[String, AddMedia]
-
+object SchemeLocationsDataRequest {
+  implicit val schemeLocationsDataRequestFormat = Json.format[SchemeLocationsDataRequest]
 }

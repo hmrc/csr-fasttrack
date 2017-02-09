@@ -17,6 +17,7 @@
 package services.testdata
 
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
+import model.testdata.GeneratorConfig
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future

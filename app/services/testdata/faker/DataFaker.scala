@@ -17,7 +17,7 @@
 package services.testdata.faker
 
 import common.Constants.{ No, Yes }
-import model.EvaluationResults
+import model.{ EvaluationResults, Scheme }
 import model.EvaluationResults.Result
 import model.Exceptions.DataFakingException
 import org.joda.time.LocalDate
@@ -27,6 +27,7 @@ import services.testdata.faker.DataFaker.ExchangeObjects.AvailableAssessmentSlot
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import model.Scheme.Scheme
 
 //scalastyle:off number.of.methods
 object DataFaker {
@@ -56,6 +57,21 @@ object DataFaker {
     }
 
     def randNumber = randOne(List(1,2,3,4,5,6,7,8,9))
+
+    def randList[T](options: List[T], size: Int, cannotBe: List[T] = Nil): List[T] = {
+      if (size > 0) {
+
+        val filtered = options.filterNot(cannotBe.contains)
+        if (filtered.isEmpty) {
+          throw DataFakingException(s"There were no items left after filtering.")
+        } else {
+          val newItem = util.Random.shuffle(filtered).head
+          newItem :: randList(options, size - 1, newItem :: cannotBe)
+        }
+      } else {
+        Nil
+      }
+    }
 
     def randomStreetSuffix = randOne(StreetSuffixes.list)
 
@@ -93,7 +109,7 @@ object DataFaker {
           List("AM", "PM").flatMap { possibleSession =>
             takenSlotsByDateAndSession.get(capacityDate -> possibleSession) match {
               // Date with no free slots
-              case Some(slots) if slots >= 18 => None
+              //case Some(slots) if slots >= 18 => None
               // Date with no assessments booked or Date with open slots (all dates have 6 slots per session)
               case _ => Some(AvailableAssessmentSlot(venue, capacityDate, possibleSession))
             }
@@ -192,6 +208,18 @@ object DataFaker {
     }
 
     def yesNoPreferNotToSay = randOne(List("Yes", "No", "I don't know/prefer not to say"))
+
+    def schemes: List[Scheme] = {
+      val size = number(Some(5))
+      randList(List(Scheme.Business, Scheme.Commercial, Scheme.DigitalAndTechnology,
+        Scheme.Finance, Scheme.ProjectDelivery), size)
+    }
+
+    // TODO: we should consider the schemes to generate de Scheme locations
+    def schemeLocations: List[String] = {
+      val size = number(Some(6))
+      randList(List("2648579", "2646914", "2651513", "2654142", "2655603", "2657613"), size)
+    }
 
     def hasDisabilityDescription: String = randOne(List("I am too tall", "I am too good", "I get bored easily"))
 

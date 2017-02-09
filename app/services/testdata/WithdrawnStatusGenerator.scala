@@ -18,6 +18,7 @@ package services.testdata
 
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.ApplicationStatuses
+import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.{ GeneralApplicationMongoRepository, GeneralApplicationRepository }
 import uk.gov.hmrc.play.http.HeaderCarrier

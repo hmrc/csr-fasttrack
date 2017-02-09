@@ -20,6 +20,7 @@ import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.Commands.Address
 import model.PersistedObjects.ContactDetails
 import model.persisted.PersonalDetails
+import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.testdata.faker.DataFaker.Random

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package model.commands.exchange.testdata
+package model.testdata
 
 import services.testdata.faker.DataFaker.Random
 
@@ -37,7 +37,7 @@ case class AssistanceDetailsData(
 }
 
 case object AssistanceDetailsData {
-  def apply(adr: model.exchange.testdata.AssistanceDetailsRequest, generatorId: Int): AssistanceDetailsData = {
+  def apply(adr: model.exchange.testdata.AssistanceDetailsDataRequest, generatorId: Int): AssistanceDetailsData = {
     val hasDisabilityFinalValue = adr.hasDisability.getOrElse(Random.yesNoPreferNotToSay)
     val hasDisabilityDescriptionFinalValue: Option[String] =
       if (hasDisabilityFinalValue == "Yes") {

@@ -17,6 +17,7 @@
 package services.testdata
 
 import model.ProgressStatuses
+import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository }
 import uk.gov.hmrc.play.http.HeaderCarrier

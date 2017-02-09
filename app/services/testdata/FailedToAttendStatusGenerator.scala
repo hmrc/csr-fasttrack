@@ -20,8 +20,9 @@ import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.ApplicationStatuses
 import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.Commands.ApplicationAssessment
+import model.testdata.GeneratorConfig
 import repositories._
-import repositories.application.{GeneralApplicationRepository, OnlineTestRepository}
+import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
 import services.testdata.faker.DataFaker.Random
 import uk.gov.hmrc.play.http.HeaderCarrier
 

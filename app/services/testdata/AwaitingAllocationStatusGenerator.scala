@@ -20,6 +20,7 @@ import java.util.UUID
 
 import model.EvaluationResults.Amber
 import model.persisted.SchemeEvaluationResult
+import model.testdata.GeneratorConfig
 import model.{ ApplicationStatuses, Scheme }
 import repositories._
 import repositories.application.OnlineTestRepository
