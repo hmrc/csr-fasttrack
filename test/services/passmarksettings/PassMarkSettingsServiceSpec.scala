@@ -43,7 +43,7 @@ class PassMarkSettingsServiceSpec extends PlaySpec with BeforeAndAfterEach with 
         assert(resultOpt.nonEmpty)
         val result = resultOpt.get
         assert(result.schemes.size == 1)
-        assert(result.schemes.head.schemeName == "TestScheme")
+        assert(result.schemes.head.schemeName == model.Scheme.Business)
         assert(result.schemes.head.schemeThresholds.competency.failThreshold == 20d)
         assert(result.schemes.head.schemeThresholds.competency.passThreshold == 80d)
         assert(result.version == "aVersion")
@@ -60,15 +60,13 @@ class PassMarkSettingsServiceSpec extends PlaySpec with BeforeAndAfterEach with 
     val pmsRepositoryMockNoSettings = mock[PassMarkSettingsRepository]
     val pmsRepositoryMockWithSettings = mock[PassMarkSettingsRepository]
 
-    when(fwRepositoryMock.getFrameworkNames).thenReturn(Future.successful(List("TestScheme")))
-
-    when(pmsRepositoryMockNoSettings.tryGetLatestVersion(any())).thenReturn(Future.successful(None))
-    when(pmsRepositoryMockWithSettings.tryGetLatestVersion(any())).thenReturn(Future.successful(
+    when(pmsRepositoryMockNoSettings.tryGetLatestVersion()).thenReturn(Future.successful(None))
+    when(pmsRepositoryMockWithSettings.tryGetLatestVersion()).thenReturn(Future.successful(
       Some(
         Settings(
           List(
             Scheme(
-              "TestScheme",
+              model.Scheme.Business,
               SchemeThresholds(
                 competency = SchemeThreshold(20d, 80d),
                 verbal = SchemeThreshold(20d, 80d),

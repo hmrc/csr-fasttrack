@@ -41,7 +41,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
     "Return a settings objects with schemes but no thresholds if there are no settings saved" in new TestFixture {
       val passMarkSettingsRepositoryMockWithNoSettings = mock[PassMarkSettingsRepository]
 
-      when(passMarkSettingsRepositoryMockWithNoSettings.tryGetLatestVersion(any())).thenReturn(Future.successful(None))
+      when(passMarkSettingsRepositoryMockWithNoSettings.tryGetLatestVersion()).thenReturn(Future.successful(None))
 
       val passMarkSettingsControllerWithNoSettings = buildPMS(passMarkSettingsRepositoryMockWithNoSettings)
 
@@ -66,7 +66,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
 
       val passMarkSettingsRepositoryMockWithSettings = mock[PassMarkSettingsRepository]
 
-      when(passMarkSettingsRepositoryMockWithSettings.tryGetLatestVersion(any())).thenReturn(Future.successful(
+      when(passMarkSettingsRepositoryMockWithSettings.tryGetLatestVersion()).thenReturn(Future.successful(
         Some(
           mockSettings
         )
@@ -125,7 +125,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
       SchemeInfo(DigitalAndTechnology, "Digital and technology", requiresALevel = false, requiresALevelInStem = true)
     )
 
-    val testSchemeNames = testSchemeInfos.map(_.name)
+    val testSchemeNames = testSchemeInfos.map(_.id)
 
     val mockLocationSchemeRepository = mock[LocationSchemeRepository]
 
@@ -218,7 +218,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
                      |            }
                      |        },
                      |        {
-                     |            "schemeName": "Digital and technology",
+                     |            "schemeName": "DigitalAndTechnology",
                      |            "schemeThresholds": {
                      |                "competency": {
                      |                    "failThreshold": 20.0,
