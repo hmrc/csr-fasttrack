@@ -61,7 +61,7 @@ trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
       def makeRandAddressOption = if (Random.bool) { Some(Random.addressLine) } else { None }
 
       ContactDetails(
-        false,
+        generatorConfig.personalData.outsideUk,
         Address(
           Random.addressLine,
           makeRandAddressOption,
