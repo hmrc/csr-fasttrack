@@ -16,15 +16,13 @@
 
 package model
 
-import java.io.Serializable
 
 import model.persisted.PersonalDetails
 import model.exchange.AssistanceDetails
-import repositories.FrameworkRepository.Region
 // scalastyle:off cyclomatic.complexity
-case class ApplicationValidator(gd: PersonalDetails, ad: AssistanceDetails, sl: Option[Preferences], availableRegions: List[Region]) {
+case class ApplicationValidator(gd: PersonalDetails, ad: AssistanceDetails) {
 
-  def validate: Boolean = validateGeneralDetails && validateAssistanceDetails && validateSchemes
+  def validate: Boolean = validateGeneralDetails && validateAssistanceDetails
 
   def validateGeneralDetails: Boolean =
     !(gd.firstName.isEmpty || gd.lastName.isEmpty || gd.preferredName.isEmpty)
@@ -62,32 +60,4 @@ case class ApplicationValidator(gd: PersonalDetails, ad: AssistanceDetails, sl: 
 
   }
 
-  def validateSchemes: Boolean = {
-
-    def preferenceToPair(locationPreference: LocationPreference) = locationPreference.secondFramework match {
-      case Some(framework) => List(
-        (locationPreference.region, locationPreference.location, locationPreference.firstFramework),
-        (locationPreference.region, locationPreference.location, framework)
-      )
-      case None => List((locationPreference.region, locationPreference.location, locationPreference.firstFramework))
-    }
-
-    val validPairs: List[(String, String, String)] = for {
-      region <- availableRegions
-      location <- region.locations
-      framework <- location.frameworks
-    } yield {
-      (region.name, location.name, framework.name)
-    }
-
-    val allPreferencesToPairs: List[Serializable] = sl.map { preference =>
-      preferenceToPair(preference.firstLocation) ++ preference.secondLocation.map(pref => preferenceToPair(pref)).getOrElse(List())
-    }.getOrElse(List())
-
-    allPreferencesToPairs.forall { p =>
-      validPairs.contains(p)
-    }
-
-  }
-  // scalastyle:on cyclomatic.complexity
 }

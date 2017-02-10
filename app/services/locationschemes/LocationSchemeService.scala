@@ -16,11 +16,14 @@
 
 package services.locationschemes
 
-import model.Exceptions.{ InvalidLocationFound, NotFoundException }
+import model.Exceptions.{ NotEligibleForLocation, NotEligibleForScheme, NotFoundException }
 import model.Scheme.Scheme
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import repositories.{ FileLocationSchemeRepository, LocationSchemeRepository, LocationSchemes, _ }
+import services.AuditService
 import services.locationschemes.exchangeobjects.GeoLocationSchemeResult
+import uk.gov.hmrc.play.http.HeaderCarrier
+import play.api.mvc.RequestHeader
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -29,12 +32,14 @@ object LocationSchemeService extends LocationSchemeService {
   val locationSchemeRepository = FileLocationSchemeRepository
   val appRepository = applicationRepository
   val pdRepository = personalDetailsRepository
+  val auditService = AuditService
 }
 
 trait LocationSchemeService {
   val locationSchemeRepository: LocationSchemeRepository
   val appRepository: GeneralApplicationRepository
   val pdRepository: PersonalDetailsRepository
+  val auditService: AuditService
 
   def getEligibleSchemeLocations(applicationId: String, latitudeOpt: Option[Double] = None, longitudeOpt: Option[Double] = None)
   : Future[List[GeoLocationSchemeResult]] = {
@@ -84,10 +89,11 @@ trait LocationSchemeService {
   def getAllSchemeLocations: Future[List[LocationSchemes]] = locationSchemeRepository.getSchemesAndLocations
 
   def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit] = {
+    require(locationIds.nonEmpty, "Location preferences must not be empty")
     for {
-      locationSchemes <- locationSchemeRepository.getSchemesAndLocations
-      _ <- locationIds.isEmpty || locationIds.diff(locationSchemes.map(_.id)).nonEmpty match {
-        case true => Future.failed(throw InvalidLocationFound())
+      eligibleSchemeLocations <- getEligibleSchemeLocations(applicationId)
+      _ <- locationIds.diff(eligibleSchemeLocations.map(_.locationId)).nonEmpty match {
+        case true => Future.failed(throw NotEligibleForLocation())
         case false => appRepository.updateSchemeLocations(applicationId, locationIds)
       }
     } yield {}
@@ -106,7 +112,24 @@ trait LocationSchemeService {
   def getAvailableSchemes : Future[List[SchemeInfo]] = locationSchemeRepository.getSchemeInfo
 
   def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit] = {
-    appRepository.updateSchemes(applicationId, schemeNames)
+    require(schemeNames.nonEmpty, "Scheme preferences must not be empty")
+    for {
+      eligibleSchemes <- getEligibleSchemes(applicationId)
+      _ <- schemeNames.diff(eligibleSchemes.map(_.id)).nonEmpty match {
+        case true => Future.failed(throw NotEligibleForScheme())
+        case false => appRepository.updateSchemes(applicationId, schemeNames)
+      }
+    } yield {}
+  }
+
+  def removeSchemes(applicationId: String)(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
+    auditService.logEvent(s"SchemePreferencesRemoved for candidate with application $applicationId")
+    appRepository.removeSchemes(applicationId)
+  }
+
+  def removeSchemeLocations(applicationId: String)(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
+    auditService.logEvent(s"SchemeLocationPreferencesRemoved for candidate with application $applicationId")
+    appRepository.removeSchemeLocations(applicationId)
   }
 
   private def sortLocations(locations: List[GeoLocationSchemeResult], sortByDistance: Boolean) = {

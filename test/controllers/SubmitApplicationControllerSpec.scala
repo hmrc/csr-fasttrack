@@ -22,7 +22,7 @@ import connectors.EmailClient
 import common.Constants.No
 import model.Commands.{ Address, PostCode }
 import model.PersistedObjects.ContactDetails
-import model.{ AssessmentCentreIndicator, LocationPreference, Preferences }
+import model.{ AssessmentCentreIndicator, LocationPreference, Preferences, Scheme }
 import model.exchange.AssistanceDetails
 import model.persisted.PersonalDetails
 import org.joda.time.LocalDate
@@ -83,8 +83,6 @@ class SubmitApplicationControllerSpec extends PlaySpec with Results with OneAppP
     val mockAppRepo = mock[GeneralApplicationRepository]
     val mockPdRepo = mock[PersonalDetailsRepository]
     val mockAdService = mock[AssistanceDetailsService]
-    val mockFrameworkPrefRepo = mock[FrameworkPreferenceRepository]
-    val mockFrameworkRegionsRepo = mock[FrameworkRepository]
     val mockCdRepo = mock[ContactDetailsRepository]
     val mockEmailClient = mock[EmailClient]
     val mockAssessmentCentreIndicatorRepo = mock[AssessmentCentreIndicatorRepository]
@@ -93,8 +91,6 @@ class SubmitApplicationControllerSpec extends PlaySpec with Results with OneAppP
       override val appRepository: GeneralApplicationRepository = mockAppRepo
       override val pdRepository: PersonalDetailsRepository = mockPdRepo
       override val adService: AssistanceDetailsService = mockAdService
-      override val frameworkPrefRepository: FrameworkPreferenceRepository = mockFrameworkPrefRepo
-      override val frameworkRegionsRepository: FrameworkRepository = mockFrameworkRegionsRepo
       override val cdRepository: ContactDetailsRepository = mockCdRepo
       override val auditService: AuditService = mockAuditService
       override val emailClient: EmailClient = mockEmailClient
@@ -111,13 +107,14 @@ class SubmitApplicationControllerSpec extends PlaySpec with Results with OneAppP
     when(mockCdRepo.find(any[String])).thenReturn(Future.successful(ContactDetails(false, address, Some("QQ1 1QQ"): Option[PostCode],
       None, "test@test.com", phone = None
     )))
-    when(mockFrameworkPrefRepo.tryGetPreferences(any[String])).thenReturn(Future.successful(
-      Some(Preferences(LocationPreference("London", "London", "framework", None)))
+
+    when(mockAppRepo.getSchemes(any[String])).thenReturn(Future.successful(
+      List(Scheme.Business)
     ))
-    when(mockFrameworkRegionsRepo.getFrameworksByRegionFilteredByQualification(any[CandidateHighestQualification]))
-      .thenReturn(Future.successful(List(
-        Region("London", List(Location("London", List(Framework("framework", CandidateHighestQualification(2))))))
-      )))
+
+    when(mockAppRepo.getSchemeLocations(any[String])).thenReturn(Future.successful(
+      List("123456")
+    ))
 
     def submitApplicationRequest(userId: String, applicationId: String) = {
       FakeRequest(Helpers.PUT, controllers.routes.SubmitApplicationController.submitApplication(userId, applicationId).url, FakeHeaders(), "")
