@@ -138,7 +138,7 @@ class OnlineTestFailureServiceSpec extends PlaySpec with ScalaFutures with Mocki
     val userId = "xyz"
     val preferredName = "Jon"
     val emailAddress = "jon@test.com"
-    val contactDetails = ContactDetails(Address("line 1"), "HP27 9JU", emailAddress, None)
+    val contactDetails = ContactDetails(false, Address("line 1"), Some("HP27 9JU"), None, emailAddress, None)
     val failedTest = ApplicationForNotification(applicationId, userId, preferredName, ApplicationStatuses.OnlineTestFailed)
     def hc = HeaderCarrier()
 

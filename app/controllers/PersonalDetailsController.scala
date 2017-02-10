@@ -41,7 +41,7 @@ trait PersonalDetailsController extends BaseController {
     withJsonBody[UpdateGeneralDetails] { req =>
       val personalDetails = PersonalDetails(req.firstName, req.lastName, req.preferredName, req.dateOfBirth, req.aLevel,
         req.stemLevel, req.civilServant, req.department)
-      val contactDetails = ContactDetails(req.address, req.postCode, req.email, req.phone)
+      val contactDetails = ContactDetails(req.outsideUk, req.address, req.postCode, req.country, req.email, req.phone)
 
       personalDetailsService.update(userId, applicationId, personalDetails, contactDetails).map { _ =>
         Created

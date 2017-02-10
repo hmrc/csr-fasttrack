@@ -37,7 +37,7 @@ class CandidateAllocationServiceSpec extends PlaySpec with ScalaFutures with Moc
 
   val candidate = AllocatedCandidate(PersonalDetailsWithUserId("Alice", "userId"), "app1", LocalDate.now().plusDays(3))
   val applicationAssessment = ApplicationAssessment("app1", "London 1", LocalDate.now().plusDays(3), "AM", 1, false)
-  val candidateContact = ContactDetails(Address("Aldwych road"), "AB CDE", "alice@test.com", None)
+  val candidateContact = ContactDetails(false, Address("Aldwych road"), Some("AB CDE"), None, "alice@test.com", None)
 
   val caRepositoryMock = mock[CandidateAllocationRepository]
   val cdRepositoryMock = mock[ContactDetailsRepository]

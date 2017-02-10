@@ -141,14 +141,14 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
 
     when(cdRepositoryMock.findByPostCode(any[String])).thenReturn(
       Future.successful(
-        List(ContactDetailsWithId(userId = "123", address = testAddress, postCode = "QQ1 1QQ", email = testEmail,
+        List(ContactDetailsWithId(userId = "123", false, address = testAddress, postCode = Some("QQ1 1QQ"), None, email = testEmail,
           phone = None))
       )
     )
 
     when(cdRepositoryMock.findByUserIds(any[List[String]])).thenReturn(
       Future.successful(
-        List(ContactDetailsWithId(userId = "123", address = testAddress, postCode = "QQ1 1QQ", email = testEmail,
+        List(ContactDetailsWithId(userId = "123", false, address = testAddress, postCode = Some("QQ1 1QQ"), None, email = testEmail,
           phone = None))
       )
     )

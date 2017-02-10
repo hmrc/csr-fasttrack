@@ -55,7 +55,7 @@ trait SearchForApplicantsController extends BaseController {
       psRepository.find(application.applicationId).flatMap { pd =>
         cdRepository.find(userId).map { cd =>
           Ok(Json.toJson(Candidate(userId, Some(application.applicationId), None, Some(pd.firstName),
-            Some(pd.lastName), Some(pd.preferredName), Some(pd.dateOfBirth), Some(cd.address), Some(cd.postCode))))
+            Some(pd.lastName), Some(pd.preferredName), Some(pd.dateOfBirth), Some(cd.address), cd.postCode)))
         }.recover {
           case e: ContactDetailsNotFound => Ok(Json.toJson(Candidate(userId, Some(application.applicationId), None, Some(pd.firstName),
             Some(pd.lastName), Some(pd.preferredName), Some(pd.dateOfBirth), None, None)))

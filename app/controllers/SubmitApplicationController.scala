@@ -59,7 +59,7 @@ trait SubmitApplicationController extends BaseController {
 
         if (ApplicationValidator(personalDetails, assistanceDetails).validate) {
           appRepository.submit(applicationId).flatMap { _ =>
-            val assessmentCentreIndicator = assessmentCentreIndicatorRepo.calculateIndicator(Some(contactDetails.postCode))
+            val assessmentCentreIndicator = assessmentCentreIndicatorRepo.calculateIndicator(contactDetails.postCode)
             auditService.logEvent("ApplicationSubmitted")
             appRepository.updateAssessmentCentreIndicator(applicationId, assessmentCentreIndicator).flatMap { _ =>
               auditService.logEvent("AssessmentCentreIndicatorSet")
