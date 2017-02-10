@@ -49,28 +49,16 @@ trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
 
       def makeRandAddressOption = if (Random.bool) { Some(Random.addressLine) } else { None }
 
-      case class PostCodeCountry(postCode: Option[String], country: Option[String])
-
-      val postCodeCountry = if (!generatorConfig.personalData.postCode.isDefined && !generatorConfig.personalData.country.isDefined) {
-        if (Random.bool) {
-          PostCodeCountry(Some(Random.postCode), None)
-        } else {
-          PostCodeCountry(None, Some(Random.country))
-        }
-      } else {
-        PostCodeCountry(generatorConfig.personalData.postCode, generatorConfig.personalData.country)
-      }
-
       ContactDetails(
-        false,
+        generatorConfig.personalData.country.isDefined,
         Address(
           Random.addressLine,
           makeRandAddressOption,
           makeRandAddressOption,
           makeRandAddressOption
         ),
-        postCodeCountry.postCode,
-        postCodeCountry.country,
+        generatorConfig.personalData.postCode,
+        generatorConfig.personalData.country,
         generatorConfig.personalData.emailPrefix,
         Some("07770 774 914")
       )

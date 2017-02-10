@@ -46,14 +46,27 @@ object PersonalData {
     val fname = request.firstName.getOrElse(Random.getFirstname(generatorId))
     val emailPrefix = request.emailPrefix.map(e => s"$e-$generatorId")
 
+    case class PostCodeCountry(postCode: Option[String], country: Option[String])
+
+    val postCodeCountry = if (!request.postCode.isDefined && !request.country.isDefined) {
+      if (Random.bool) {
+        PostCodeCountry(Some(Random.postCode), None)
+      } else {
+        PostCodeCountry(None, Some(Random.country))
+      }
+    } else {
+      PostCodeCountry(request.postCode, request.country)
+    }
+
+
     PersonalData(
       emailPrefix = emailPrefix.getOrElse(s"tesf${Random.number()}-$generatorId"),
       firstName = fname,
       lastName = request.lastName.getOrElse(Random.getLastname(generatorId)),
       preferredName = request.preferredName,
       dob = request.dateOfBirth.map(x => LocalDate.parse(x, DateTimeFormat.forPattern("yyyy-MM-dd"))).getOrElse(default.dob),
-      postCode = request.postCode,
-      country = request.country
+      postCode = postCodeCountry.postCode,
+      country = postCodeCountry.country
     )
   }
 }
