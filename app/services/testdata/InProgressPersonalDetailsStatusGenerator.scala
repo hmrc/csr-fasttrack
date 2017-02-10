@@ -61,13 +61,19 @@ trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
       def makeRandAddressOption = if (Random.bool) { Some(Random.addressLine) } else { None }
 
       ContactDetails(
+        false,
         Address(
           Random.addressLine,
           makeRandAddressOption,
           makeRandAddressOption,
           makeRandAddressOption
         ),
-        generatorConfig.personalData.postCode.getOrElse(Random.postCode),
+        if (generatorConfig.personalData.country.isEmpty) {
+          generatorConfig.personalData.postCode.orElse(Some(Random.postCode))
+        } else {
+          None
+        },
+        generatorConfig.personalData.country,
         candidateInformation.email,
         Some("07770 774 914")
       )

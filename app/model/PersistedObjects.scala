@@ -30,19 +30,27 @@ object PersistedObjects {
   case class PersonalDetailsWithUserId(preferredName: String, userId: String)
 
   case class ContactDetails(
+    outsideUk: Boolean,
     address: Address,
-    postCode: PostCode,
+    postCode: Option[PostCode],
+    country: Option[String],
     email: String,
     phone: Option[PhoneNumber]
-  )
+  ) {
+    require(outsideUk && country.isDefined || !outsideUk && postCode.isDefined, "Either post code or country is mandatory")
+  }
 
   case class ContactDetailsWithId(
     userId: String,
+    outsideUk: Boolean,
     address: Address,
-    postCode: PostCode,
+    postCode: Option[PostCode],
+    country: Option[String],
     email: String,
     phone: Option[PhoneNumber]
-  )
+  ) {
+    require(outsideUk && country.isDefined || !outsideUk && postCode.isDefined, "Either post code or country is mandatory")
+  }
 
   case class ExpiringOnlineTest(
     applicationId: String,

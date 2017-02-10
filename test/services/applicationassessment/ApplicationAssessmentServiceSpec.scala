@@ -226,7 +226,7 @@ class ApplicationAssessmentServiceSpec extends PlaySpec with MockitoSugar with S
   trait ApplicationAssessmentServiceFixture {
     implicit val hc = HeaderCarrier()
 
-    val contactDetails = ContactDetails(Address("address1"), "postCode1", "email@mailinator.com", Some("11111111"))
+    val contactDetails = ContactDetails(false, Address("address1"), Some("postCode1"), None, "email@mailinator.com", Some("11111111"))
     when(cdRepositoryMock.find("userId1")).thenReturn(Future.successful(contactDetails))
 
     val applicationAssessmentService = new ApplicationAssessmentService {

@@ -100,8 +100,10 @@ class SuccessfulCandidatesReportingControllerSpec extends BaseReportingControlle
 
     def newContactDetails = ContactDetailsWithId(
       userId.toString(),
+      false,
       Address(rnd("Line 1"), None, None, None),
-      rnd("PostCode"),
+      Some(rnd("PostCode")),
+      None,
       rnd("Email"),
       someRnd("Phone")
     )

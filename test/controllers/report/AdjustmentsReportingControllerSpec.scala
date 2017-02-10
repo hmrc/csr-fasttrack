@@ -50,9 +50,9 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val contactDetailsRepository = new ContactDetailsInMemoryRepository {
           override def findAll: Future[List[ContactDetailsWithId]] =
             Future.successful(List(
-              ContactDetailsWithId("1", Address("First Line", None, None, None), "HP18 9DN", "joe@bloggs.com", None),
-              ContactDetailsWithId("2", Address("First Line", None, None, None), "HP18 9DN", "joe@bloggs.com", None),
-              ContactDetailsWithId("3", Address("First Line", None, None, None), "HP18 9DN", "joe@bloggs.com", None)
+              ContactDetailsWithId("1", false, Address("First Line", None, None, None), Some("HP18 9DN"), None, "joe@bloggs.com", None),
+              ContactDetailsWithId("2", false, Address("First Line", None, None, None), Some("HP18 9DN"), None, "joe@bloggs.com", None),
+              ContactDetailsWithId("3", false, Address("First Line", None, None, None), Some("HP18 9DN"), None, "joe@bloggs.com", None)
             ))
         }
         override val questionnaireRepository = QuestionnaireInMemoryRepository

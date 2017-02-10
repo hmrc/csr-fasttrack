@@ -49,6 +49,7 @@ class PersonalDetailsControllerSpec extends UnitWithAppSpec {
                        |  "preferredName":"Superman",
                        |  "email":"super@man.com",
                        |  "dateOfBirth":"2015-07-10",
+                       |  "outsideUk":false,
                        |  "address": {
                        |      "line1":"North Pole 1",
                        |      "line2":"North Pole 2",

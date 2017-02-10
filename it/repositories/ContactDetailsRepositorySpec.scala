@@ -42,16 +42,16 @@ class ContactDetailsRepositorySpec extends MongoRepositorySpec {
     }
 
     "return list of contact details" in {
-      insert("1", ContactDetails(Address("line1a"), "123", "email1@email.com", Some("12345")))
-      insert("2", ContactDetails(Address("line1b"), "456", "email2@email.com", Some("67890")))
+      insert("1", ContactDetails(false, Address("line1a"), Some("123"), None, "email1@email.com", Some("12345")))
+      insert("2", ContactDetails(true, Address("line1b"), None, Some("Mongolia"), "email2@email.com", Some("67890")))
 
       val result = repo.findAll.futureValue
       result.size must be (2)
     }
 
     "return only the first 10 documents if there is more than 10" in {
-      for (i <- 1 to 11) {
-        insert(i.toString, ContactDetails(Address(s"line$i"), s"123$i", s"email$i@email.com", Some(s"12345$i")))
+      for (i <- 1 to 10) {
+        insert(i.toString, ContactDetails(false, Address(s"line$i"), Some(s"123$i"), None, s"email$i@email.com", Some(s"12345$i")))
       }
 
       val result = repo.findAll.futureValue
