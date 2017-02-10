@@ -57,7 +57,7 @@ object ApplicationStatusOrder {
     (progress.personalDetails, PersonalDetailsCompletedProgress.weight, PersonalDetailsCompletedProgress),
     (progress.hasSchemeLocations, SchemeLocationsCompletedProgress.weight, SchemeLocationsCompletedProgress),
     (progress.hasSchemes, SchemesPreferencesCompletedProgress.weight, SchemesPreferencesCompletedProgress),
-    (progress.assistanceDetails, SchemesPreferencesCompletedProgress.weight, AssistanceDetailsCompletedProgress),
+    (progress.assistanceDetails, AssistanceDetailsCompletedProgress.weight, AssistanceDetailsCompletedProgress),
 
     (progress.questionnaire.diversityStarted, StartDiversityQuestionnaireProgress.weight, StartDiversityQuestionnaireProgress),
     (progress.questionnaire.diversityCompleted, DiversityQuestionsCompletedProgress.weight, DiversityQuestionsCompletedProgress),
