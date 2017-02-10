@@ -19,9 +19,8 @@ package controllers
 import connectors.{CSREmailClient, EmailClient}
 import model.ApplicationValidator
 import play.api.mvc.Action
-import repositories.FrameworkRepository.CandidateHighestQualification
 import repositories._
-import repositories.application.{AssistanceDetailsRepository, GeneralApplicationRepository, PersonalDetailsRepository}
+import repositories.application.{GeneralApplicationRepository, PersonalDetailsRepository}
 import services.AuditService
 import services.assistancedetails.AssistanceDetailsService
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -33,8 +32,6 @@ object SubmitApplicationController extends SubmitApplicationController {
   override val adService: AssistanceDetailsService = AssistanceDetailsService
   override val pdRepository: PersonalDetailsRepository = personalDetailsRepository
   override val cdRepository: ContactDetailsMongoRepository = contactDetailsRepository
-  override val frameworkPrefRepository: FrameworkPreferenceMongoRepository = frameworkPreferenceRepository
-  override val frameworkRegionsRepository: FrameworkRepository = frameworkRepository
   override val appRepository: GeneralApplicationRepository = applicationRepository
   override val emailClient = CSREmailClient
   override val auditService = AuditService
@@ -45,8 +42,6 @@ trait SubmitApplicationController extends BaseController {
   val adService: AssistanceDetailsService
   val pdRepository: PersonalDetailsRepository
   val cdRepository: ContactDetailsRepository
-  val frameworkPrefRepository: FrameworkPreferenceRepository
-  val frameworkRegionsRepository: FrameworkRepository
   val appRepository: GeneralApplicationRepository
   val emailClient: EmailClient
   val auditService: AuditService
@@ -58,13 +53,11 @@ trait SubmitApplicationController extends BaseController {
         personalDetails <- pdRepository.find(applicationId)
         assistanceDetails <- adService.find(applicationId, userId)
         contactDetails <- cdRepository.find(userId)
-        schemePreferences <- frameworkPrefRepository.tryGetPreferences(applicationId)
-        availableRegions <- frameworkRegionsRepository.getFrameworksByRegionFilteredByQualification(
-          CandidateHighestQualification.from(personalDetails)
-        )
+        schemePreferences <- appRepository.getSchemes(applicationId)
+        schemeLocationPreferences <- appRepository.getSchemeLocations(applicationId)
       } yield {
 
-        if (ApplicationValidator(personalDetails, assistanceDetails, schemePreferences, availableRegions).validate) {
+        if (ApplicationValidator(personalDetails, assistanceDetails).validate) {
           appRepository.submit(applicationId).flatMap { _ =>
             val assessmentCentreIndicator = assessmentCentreIndicatorRepo.calculateIndicator(contactDetails.postCode)
             auditService.logEvent("ApplicationSubmitted")

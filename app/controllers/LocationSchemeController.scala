@@ -74,4 +74,12 @@ trait LocationSchemeController extends BaseController {
       locationSchemeService.updateSchemes(applicationId, schemeNames).map { _ => Ok }
     }
   }
+
+  def removeSchemes(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    locationSchemeService.removeSchemes(applicationId).map { _ => Ok }
+  }
+
+  def removeSchemeLocations(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    locationSchemeService.removeSchemeLocations(applicationId).map { _ => Ok }
+  }
 }

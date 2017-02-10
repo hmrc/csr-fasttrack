@@ -110,6 +110,10 @@ trait GeneralApplicationRepository {
 
   def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit]
 
+  def removeSchemes(applicationId: String): Future[Unit]
+
+  def removeSchemeLocations(applicationId: String): Future[Unit]
+
   def removeProgressStatuses(applicationId: String, progressStatuses: List[ProgressStatuses.ProgressStatus]): Future[Unit]
 }
 
@@ -677,6 +681,24 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       "schemes" -> schemeNames
     ))
     collection.update(query, schemePreferencesBSON, upsert = false) map { _ => () }
+  }
+
+  override def removeSchemes(applicationId: String): Future[Unit] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    val schemePreferencesBSON = BSONDocument("$unset" -> BSONDocument(
+      s"progress-status.${ProgressStatuses.SchemesPreferencesCompletedProgress}" -> BSONString(""),
+      "schemes" -> BSONString("")
+    ))
+    collection.update(query, schemePreferencesBSON, upsert = false) map { _ => () }
+  }
+
+  override def removeSchemeLocations(applicationId: String): Future[Unit] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    val schemeLocationsBSON = BSONDocument("$unset" -> BSONDocument(
+      s"progress-status.${ProgressStatuses.SchemeLocationsCompletedProgress}" -> BSONString(""),
+      "scheme-locations" -> BSONString("")
+    ))
+    collection.update(query, schemeLocationsBSON, upsert = false) map { _ => () }
   }
 
   private def resultToBSON(schemeName: String, result: Option[EvaluationResults.Result]): BSONDocument = result match {
