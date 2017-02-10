@@ -43,22 +43,23 @@ trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
 
   //scalastyle:off method.length
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
-    def getPersonalDetails(candidateInformation: DataGenerationResponse) = {
-      PersonalDetails(
-        candidateInformation.firstName,
-        candidateInformation.lastName,
-        generatorConfig.personalData.getPreferredName,
-        generatorConfig.personalData.dob,
-        aLevel = false,
-        stemLevel = false,
-        civilServant = false,
-        department = None
-      )
-    }
+    val personalDetails = generatorConfig.personalData.personalDetails
 
     def getContactDetails(candidateInformation: DataGenerationResponse) = {
 
       def makeRandAddressOption = if (Random.bool) { Some(Random.addressLine) } else { None }
+
+      case class PostCodeCountry(postCode: Option[String], country: Option[String])
+
+      val postCodeCountry = if (!generatorConfig.personalData.postCode.isDefined && !generatorConfig.personalData.country.isDefined) {
+        if (Random.bool) {
+          PostCodeCountry(Some(Random.postCode), None)
+        } else {
+          PostCodeCountry(None, Some(Random.country))
+        }
+      } else {
+        PostCodeCountry(generatorConfig.personalData.postCode, generatorConfig.personalData.country)
+      }
 
       ContactDetails(
         false,
@@ -68,26 +69,21 @@ trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
           makeRandAddressOption,
           makeRandAddressOption
         ),
-        if (generatorConfig.personalData.country.isEmpty) {
-          generatorConfig.personalData.postCode.orElse(Some(Random.postCode))
-        } else {
-          None
-        },
-        generatorConfig.personalData.country,
-        candidateInformation.email,
+        postCodeCountry.postCode,
+        postCodeCountry.country,
+        generatorConfig.personalData.emailPrefix,
         Some("07770 774 914")
       )
     }
 
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      pd = getPersonalDetails(candidateInPreviousStatus)
       cd = getContactDetails(candidateInPreviousStatus)
       _ <- pdRepository.update(candidateInPreviousStatus.applicationId.get, candidateInPreviousStatus.userId,
-        pd, List(model.ApplicationStatuses.Created), model.ApplicationStatuses.InProgress)
+        personalDetails, List(model.ApplicationStatuses.Created), model.ApplicationStatuses.InProgress)
       _ <- cdRepository.update(candidateInPreviousStatus.userId, cd)
     } yield {
-      candidateInPreviousStatus.copy(personalDetails = Some(pd), contactDetails = Some(cd))
+      candidateInPreviousStatus.copy(personalDetails = Some(personalDetails), contactDetails = Some(cd))
 
     }
   }

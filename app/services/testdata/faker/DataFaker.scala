@@ -235,7 +235,9 @@ object DataFaker {
     def postCode: String = {
       s"${Random.upperLetter}${Random.upperLetter}1 2${Random.upperLetter}${Random.upperLetter}"
     }
-
+    def country: String = {
+      randOne(List("France", "Spain", "Germany", "Nigeria", "Australia", "Colombia"))
+    }
   }
 }
 //scalastyle:on number.of.methods

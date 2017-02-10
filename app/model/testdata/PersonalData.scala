@@ -16,6 +16,7 @@
 
 package model.testdata
 
+import model.Commands.{ Address, PhoneNumber, PostCode }
 import model.persisted.PersonalDetails
 import org.joda.time.LocalDate
 import org.joda.time.format.DateTimeFormat
@@ -27,7 +28,7 @@ case class PersonalData(
                          lastName: String = Random.getLastname(1),
                          preferredName: Option[String] = None,
                          dob: LocalDate = new LocalDate(1981, 5, 21),
-                         postCode: Option[String] = None,
+                         postCode: Option[String] = Some(Random.postCode),
                          country: Option[String] = None
                        ) {
   def getPreferredName: String = preferredName.getOrElse(s"Pref$firstName")
