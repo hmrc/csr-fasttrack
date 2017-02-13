@@ -50,7 +50,7 @@ trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
       def makeRandAddressOption = if (Random.bool) { Some(Random.addressLine) } else { None }
 
       ContactDetails(
-        generatorConfig.personalData.country.isDefined,
+        generatorConfig.personalData.outsideUk,
         Address(
           Random.addressLine,
           makeRandAddressOption,

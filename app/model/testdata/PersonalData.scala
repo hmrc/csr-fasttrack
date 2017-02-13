@@ -28,9 +28,11 @@ case class PersonalData(
                          lastName: String = Random.getLastname(1),
                          preferredName: Option[String] = None,
                          dob: LocalDate = new LocalDate(1981, 5, 21),
+                         outsideUk: Boolean = false,
                          postCode: Option[String] = Some(Random.postCode),
                          country: Option[String] = None
                        ) {
+
   def getPreferredName: String = preferredName.getOrElse(s"Pref$firstName")
 
   def personalDetails: PersonalDetails = {
@@ -42,6 +44,11 @@ case class PersonalData(
 object PersonalData {
 
   def apply(request: model.exchange.testdata.PersonalDataRequest, generatorId: Int): PersonalData = {
+    require((request.postCode, request.country) match {
+      case (Some(_), Some(_)) => false
+      case _ => true
+    }, "Cannot populate both post code and country")
+
     val default = PersonalData()
     val fname = request.firstName.getOrElse(Random.getFirstname(generatorId))
     val emailPrefix = request.emailPrefix.map(e => s"$e-$generatorId")
@@ -65,6 +72,7 @@ object PersonalData {
       lastName = request.lastName.getOrElse(Random.getLastname(generatorId)),
       preferredName = request.preferredName,
       dob = request.dateOfBirth.map(x => LocalDate.parse(x, DateTimeFormat.forPattern("yyyy-MM-dd"))).getOrElse(default.dob),
+      outsideUk = postCodeCountry.country.isDefined,
       postCode = postCodeCountry.postCode,
       country = postCodeCountry.country
     )
