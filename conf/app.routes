@@ -69,7 +69,6 @@ GET         /report/assessment-results/:frameworkId                      control
 GET         /report/candidate-progress/:frameworkId                      controllers.ReportingController.createCandidateProgressReport(frameworkId: String)
 GET         /report/pass-mark-modelling/:frameworkId                     controllers.ReportingController.createOnlineTestPassMarkModellingReport(frameworkId: String)
 GET         /report/pass-mark-personal-data/:frameworkId                 controllers.ReportingController.createOnlineTestPassMarkWithPersonalDataReport(frameworkId: String)
-GET         /report/non-submitted-applications/:frameworkId              controllers.ReportingController.createNonSubmittedApplicationsReports(frameworkId: String)
 GET         /report/preferences-and-contact/:frameworkId                 controllers.ReportingController.createPreferencesAndContactReports(frameworkId: String)
 GET         /report/successful-candidates/:frameworkId                   controllers.ReportingController.createSuccessfulCandidatesReport(frameworkId: String)
 GET         /report/candidates-details/previous-year                     controllers.ReportingController.prevYearCandidatesDetailsReport

@@ -266,10 +266,6 @@ trait ReportingController extends BaseController {
     }
   }
 
-
-  def createNonSubmittedApplicationsReports(frameworkId: String) =
-    preferencesAndContactReports(nonSubmittedOnly = true)(frameworkId)
-
   def createOnlineTestPassMarkModellingReport(frameworkId: String) = Action.async { implicit request =>
       val reports =
         for {
