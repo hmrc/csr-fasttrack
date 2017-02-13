@@ -53,6 +53,28 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
       val result = repository.getSchemeLocations(appId).futureValue
 
       result must contain theSameElementsInOrderAs schemeLocations
+
+      val progress = repository.findProgress(appId).futureValue
+      progress.hasSchemeLocations mustBe true
+    }
+
+    "Remove scheme locations and retrieve" in {
+      val userId = generateUUID()
+      val appId = generateUUID()
+      createMinimumApplication(userId, appId, "FastTrack")
+      val schemeLocations = List("3", "1", "2")
+
+      repository.updateSchemeLocations(appId, schemeLocations).futureValue
+      val result = repository.getSchemeLocations(appId).futureValue
+      result must contain theSameElementsInOrderAs schemeLocations
+
+      repository.removeSchemeLocations(appId).futureValue
+      val progress = repository.findProgress(appId).futureValue
+      progress.hasSchemeLocations mustBe false
+
+      an[LocationPreferencesNotFound] must be thrownBy {
+        Await.result(repository.getSchemeLocations(appId), 5 seconds)
+      }
     }
 
     "Update schemes and retrieve" in {
@@ -65,6 +87,28 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
       val result = repository.getSchemes(appId).futureValue
 
       result must contain theSameElementsInOrderAs schemes
+
+      val progress = repository.findProgress(appId).futureValue
+      progress.hasSchemes mustBe true
+    }
+
+    "Remove schemes and retrieve" in {
+      val userId = generateUUID()
+      val appId = generateUUID()
+      createMinimumApplication(userId, appId, "FastTrack")
+      val schemes = List(Scheme.DigitalAndTechnology, Scheme.ProjectDelivery, Scheme.Business)
+
+      repository.updateSchemes(appId, schemes).futureValue
+      val resultedSchemes = repository.getSchemes(appId).futureValue
+      resultedSchemes must contain theSameElementsInOrderAs schemes
+
+      repository.removeSchemes(appId).futureValue
+      val progress = repository.findProgress(appId).futureValue
+      progress.hasSchemes mustBe false
+
+      an[SchemePreferencesNotFound] must be thrownBy {
+        Await.result(repository.getSchemes(appId), 5 seconds)
+      }
     }
 
     "return scheme preferences not found exception" in {

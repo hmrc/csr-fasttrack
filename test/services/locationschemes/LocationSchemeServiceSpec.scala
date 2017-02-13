@@ -23,6 +23,7 @@ import org.joda.time.LocalDate
 import org.mockito.Mockito._
 import repositories.LocationSchemeRepository
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
+import services.AuditService
 import testkit.UnitSpec
 
 import scala.concurrent.Future
@@ -62,6 +63,7 @@ class LocationSchemeServiceSpec extends UnitSpec {
     val locationSchemeRepoMock = mock[LocationSchemeRepository]
     val pdRepoMock = mock[PersonalDetailsRepository]
     val appRepoMock = mock[GeneralApplicationRepository]
+    val auditMock = mock[AuditService]
     val appId = "application-1"
     val personalDetailsMock = PersonalDetails("", "", "", LocalDate.now(), aLevel = false, stemLevel = false,
       civilServant = false, department = None)
@@ -85,6 +87,7 @@ class LocationSchemeServiceSpec extends UnitSpec {
       val locationSchemeRepository = locationSchemeRepoMock
       val pdRepository = pdRepoMock
       val appRepository = appRepoMock
+      val auditService = auditMock
     }
   }
 }

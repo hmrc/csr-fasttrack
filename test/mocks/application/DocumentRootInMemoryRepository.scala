@@ -126,5 +126,9 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   override def find(applicationId: String): Future[Option[Candidate]] = ???
 
   def removeProgressStatuses(applicationId: String, progressStatuses: List[ProgressStatuses.ProgressStatus]): Future[Unit] = ???
+
+  override def removeSchemes(applicationId: String): Future[Unit] = ???
+
+  override def removeSchemeLocations(applicationId: String): Future[Unit] = ???
 }
 // scalastyle:on number.of.methods
