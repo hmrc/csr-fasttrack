@@ -44,10 +44,9 @@ object PersonalData {
 
   def apply(request: model.exchange.testdata.PersonalDataRequest, generatorId: Int): PersonalData = {
     require((request.postCode, request.country) match {
-      case (None, None) => false
       case (Some(_), Some(_)) => false
       case _ => true
-    }, "Either post code or country must be populated but not both")
+    }, "Cannot populate both post code and country")
 
     val default = PersonalData()
     val fname = request.firstName.getOrElse(Random.getFirstname(generatorId))
