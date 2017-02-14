@@ -24,6 +24,7 @@ import services.locationschemes.LocationSchemeService
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object LocationSchemeController extends LocationSchemeController {
   val locationSchemeService = LocationSchemeService
@@ -44,10 +45,8 @@ trait LocationSchemeController extends BaseController {
     }
   }
 
-  def getAvailableSchemes : Action[AnyContent] = Action.async { implicit request =>
-    locationSchemeService.getAvailableSchemes.map {
-      schemes => Ok(Json.toJson(schemes))
-    }
+  def getAvailableSchemes : Action[AnyContent] = Action { implicit request =>
+      Ok(Json.toJson(locationSchemeService.getAvailableSchemes))
   }
 
   def getEligibleSchemeLocations(applicationId: String,
