@@ -20,27 +20,36 @@ import java.util.concurrent.{ ArrayBlockingQueue, ThreadPoolExecutor, TimeUnit }
 
 import config.ScheduledJobConfig
 import connectors.CSREmailClient
+import play.api.Logger
 import repositories._
 import scheduler.clustering.SingleInstanceScheduledJob
 import services.AuditService
-import services.onlinetesting.{ OnlineTestFailureService, OnlineTestFailureServiceImpl }
+import services.onlinetesting.{ OnlineTestResultService, OnlineTestResultServiceImpl }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-object FailedOnlineTestJob extends FailedOnlineTestJob {
-  val service = new OnlineTestFailureServiceImpl(
+object OnlineTestResultJob extends OnlineTestResultJob {
+  val onlineTestResult = new OnlineTestResultServiceImpl(
     onlineTestRepository, contactDetailsRepository, CSREmailClient, AuditService, HeaderCarrier()
   )
 }
 
-trait FailedOnlineTestJob extends SingleInstanceScheduledJob with FailedOnlineTestJobConfig {
-  val service: OnlineTestFailureService
+trait OnlineTestResultJob extends SingleInstanceScheduledJob with FailedOnlineTestJobConfig {
+  val onlineTestResult: OnlineTestResultService
 
   override implicit val ec = ExecutionContext.fromExecutor(new ThreadPoolExecutor(2, 2, 180, TimeUnit.SECONDS, new ArrayBlockingQueue(4)))
 
-  def tryExecute()(implicit ec: ExecutionContext): Future[Unit] =
-    service.processNextFailedTest()
+  def tryExecute()(implicit ec: ExecutionContext): Future[Unit] = {
+    onlineTestResult.nextCandidateReadyForSendingOnlineTestResult.flatMap {
+      case None =>
+        Logger.debug("No candidates found for OnlineTestResultJob")
+        Future.successful(())
+      case Some(app) =>
+        Logger.debug(s"Notify candidate about an online test result for applicationId=${app.applicationId}")
+        onlineTestResult.notifyCandidateAboutOnlineTestResult(app)
+    }
+  }
 }
 
 trait FailedOnlineTestJobConfig extends BasicJobConfig[ScheduledJobConfig] {

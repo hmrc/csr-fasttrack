@@ -26,10 +26,10 @@ import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUse
 import model.persisted.{ CubiksTestProfile, NotificationExpiringOnlineTest, SchemeEvaluationResult }
 import model._
 import model.Adjustments._
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.{ DateTime, LocalDate }
 import reactivemongo.api.DB
 import reactivemongo.api.commands.UpdateWriteResult
-import reactivemongo.bson.{BSONArray, BSONDocument, BSONObjectID}
+import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID }
 import repositories._
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
@@ -41,7 +41,7 @@ import scala.util.Try
 trait OnlineTestRepository {
   def nextApplicationPendingExpiry: Future[Option[ExpiringOnlineTest]]
 
-  def nextApplicationPendingFailure: Future[Option[ApplicationForNotification]]
+  def nextApplicationReadyForSendingOnlineTestResult: Future[Option[ApplicationForNotification]]
 
   def nextApplicationReadyForOnlineTesting: Future[Option[OnlineTestApplication]]
 
@@ -55,7 +55,11 @@ trait OnlineTestRepository {
 
   def getCubiksTestProfile(cubiksUserId: Int): Future[CubiksTestProfile]
 
+  @deprecated("Use safer version with guarded statuses", "13/02/2017")
   def updateStatus(userId: String, status: ApplicationStatuses.EnumVal): Future[Unit]
+
+  def updateStatus(userId: String, currentStatuses: List[ApplicationStatuses.EnumVal],
+                   newStatus: ApplicationStatuses.EnumVal): Future[Unit]
 
   def updateExpiryTime(userId: String, expirationDate: DateTime): Future[Unit]
 
@@ -108,6 +112,8 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       case OnlineTestExpired => ProgressStatuses.OnlineTestExpiredProgress
       case OnlineTestFailed => ProgressStatuses.OnlineTestFailedProgress
       case OnlineTestFailedNotified => ProgressStatuses.OnlineTestFailedNotifiedProgress
+      case AwaitingAllocation => ProgressStatuses.AwaitingOnlineTestAllocationProgress
+      case AwaitingAllocationNotified => ProgressStatuses.AwaitingOnlineTestAllocationNotifiedProgress
     }
 
     if (flag == ProgressStatuses.OnlineTestCompletedProgress) {
@@ -154,6 +160,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     }
   }
 
+  @deprecated("Use safer version with guarded statuses", "13/02/2017")
   override def updateStatus(userId: String, status: ApplicationStatuses.EnumVal): Future[Unit] = {
     val query = BSONDocument("userId" -> userId)
     val applicationStatusBSON = applicationStatus(status)
@@ -164,6 +171,23 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       case _ =>
     }
   }
+
+  override def updateStatus(userId: String, currentStatuses: List[ApplicationStatuses.EnumVal],
+                            newStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
+    val query = BSONDocument(
+      "userId" -> userId,
+      "applicationStatus" -> BSONDocument("$in" -> currentStatuses)
+    )
+
+    val applicationStatusBSON = applicationStatus(newStatus)
+
+    collection.update(query, applicationStatusBSON, upsert = false) map {
+      case r if r.n == 0 => throw new NotFoundException(s"updateStatus didn't update anything for userId:$userId")
+      case r if r.n > 1 => throw UnexpectedException(s"updateStatus somehow updated more than one record for userId:$userId")
+      case _ =>
+    }
+  }
+
 
   override def startOnlineTest(cubiksUserId: Int): Future[Unit] = {
     val query = BSONDocument("online-tests.cubiksUserId" -> cubiksUserId)
@@ -243,6 +267,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       s"progress-status.$OnlineTestFailedProgress" -> "",
       s"progress-status.$OnlineTestFailedNotifiedProgress" -> "",
       s"progress-status.$AwaitingOnlineTestAllocationProgress" -> "",
+      s"progress-status.$AwaitingOnlineTestAllocationNotifiedProgress" -> "",
       "passmarkEvaluation" -> ""
     )) ++ BSONDocument("$set" -> BSONDocument(
       s"progress-status.$OnlineTestInvitedProgress" -> true,
@@ -276,9 +301,12 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     selectRandom(query).map(_.map(bsonDocToExpiringOnlineTest))
   }
 
-  def nextApplicationPendingFailure: Future[Option[ApplicationForNotification]] = {
+  def nextApplicationReadyForSendingOnlineTestResult: Future[Option[ApplicationForNotification]] = {
     val query = BSONDocument("$and" -> BSONArray(
-      BSONDocument("applicationStatus" -> ApplicationStatuses.OnlineTestFailed),
+      BSONDocument("$or" -> BSONArray(
+        BSONDocument("applicationStatus" -> ApplicationStatuses.OnlineTestFailed),
+        BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingAllocation)
+      )),
       BSONDocument("online-tests.pdfReportSaved" -> true)
     ))
     selectRandom(query).map(_.map(bsonDocToApplicationForNotification))

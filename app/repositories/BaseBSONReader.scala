@@ -68,6 +68,7 @@ trait BaseBSONReader {
           failed = getProgress(ProgressStatuses.OnlineTestFailedProgress),
           failedNotified = getProgress(ProgressStatuses.OnlineTestFailedNotifiedProgress),
           awaitingAllocation = getProgress(ProgressStatuses.AwaitingOnlineTestAllocationProgress),
+          awaitingAllocationNotified = getProgress(ProgressStatuses.AwaitingOnlineTestAllocationNotifiedProgress),
           allocationConfirmed = getProgress(ProgressStatuses.AllocationConfirmedProgress),
           allocationUnconfirmed = getProgress(ProgressStatuses.AllocationUnconfirmedProgress)
         ),

@@ -35,6 +35,8 @@ object ApplicationStatuses extends Enum {
   val OnlineTestFailedNotified = EnumVal("ONLINE_TEST_FAILED_NOTIFIED")
   val AwaitingOnlineTestReevaluation = EnumVal("AWAITING_ONLINE_TEST_RE_EVALUATION")
   val AwaitingAllocation = EnumVal("AWAITING_ALLOCATION")
+  // TODO LT: Add this new status 'everywhere'
+  val AwaitingAllocationNotified = EnumVal("AWAITING_ALLOCATION_NOTIFIED")
   val FailedToAttend = EnumVal("FAILED_TO_ATTEND")
   val AllocationUnconfirmed = EnumVal("ALLOCATION_UNCONFIRMED")
   val AllocationConfirmed = EnumVal("ALLOCATION_CONFIRMED")

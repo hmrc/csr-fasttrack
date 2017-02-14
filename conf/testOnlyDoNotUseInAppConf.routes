@@ -18,4 +18,5 @@ GET         /candidate-application/test-data-generator/create-admin-users       
 GET         /candidate-application/test-data-generator/create-candidates/:status        controllers.testdata.TestDataGeneratorController.createCandidatesInStatus(status: String, numberToGenerate: Int ?= 1, emailPrefix: String, setGis: Boolean ?= false, region: Option[String], loc1scheme1EvaluationResult: Option[String], loc1scheme2EvaluationResult: Option[String], previousStatus: Option[String] ?= None, confirmedAllocation: Boolean ?= true)
 POST        /candidate-application/test-data-generator/create-candidates                controllers.testdata.TestDataGeneratorController.createCandidatesInStatusPOST(numberToGenerate: Int ?= 1)
 GET         /candidate-application/test-data-generator/example                          controllers.testdata.TestDataGeneratorController.requestExample
-GET         /candidate-application/evaluate-candidate                                   controllers.testdata.TestEvaluateCandidateScoreJobController.execute
+GET         /candidate-application/evaluate-candidate                                   controllers.testdata.TestJobsController.evaluateCandidate
+GET         /candidate-application/send-online-test-result                              controllers.testdata.TestJobsController.sendOnlineTestResult

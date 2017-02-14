@@ -58,9 +58,9 @@ trait Scheduler extends RunningOfScheduledJobs {
       None
     }
 
-  private lazy val failedOnlineTestJob: Option[ScheduledJob] =
-    if (failedOnlineTestJobConfigValues.enabled) Some(FailedOnlineTestJob) else {
-      Logger.warn("Failed online test job is disabled")
+  private lazy val onlineTestResultJob: Option[ScheduledJob] =
+    if (failedOnlineTestJobConfigValues.enabled) Some(OnlineTestResultJob) else {
+      Logger.warn("Online test result job is disabled")
       None
     }
 
@@ -124,7 +124,7 @@ trait Scheduler extends RunningOfScheduledJobs {
   private[config] def evaluateAssessmentScoreJobConfigValues = evaluateAssessmentScoreJobConfig
   private[config] def notifyAssessmentCentrePassedOrFailedJobConfigValues = notifyAssessmentCentrePassedOrFailedJobConfig
 
-  lazy val scheduledJobs = List(sendInvitationJob, expireOnlineTestJob, failedOnlineTestJob, retrieveResultsJob, retrieveOnlineTestPDFReportJob,
+  lazy val scheduledJobs = List(sendInvitationJob, expireOnlineTestJob, onlineTestResultJob, retrieveResultsJob, retrieveOnlineTestPDFReportJob,
     evaluateCandidateScoreJob, confirmAttendanceReminderJob, evaluateAssessmentScoreJob,
     notifyAssessmentCentrePassedOrFailedJob, firstReminderOnlineTestJob, secondReminderOnlineTestJob).flatten
 }

@@ -63,7 +63,7 @@ trait CSREmailClient extends EmailClient {
       Map("name" -> name)
     )
 
-  override def sendOnlineTestFailed(to: String, name: String)(implicit hc: HeaderCarrier) =
+  override def sendOnlineTestResultReady(to: String, name: String)(implicit hc: HeaderCarrier) =
     sendEmail(
       to,
       "csr_app_online_test_failed",
@@ -132,7 +132,7 @@ trait EmailClient extends WSHttp {
                                   assessmentCenterAdjustments: String)(implicit hc: HeaderCarrier): Future[Unit]
   def sendOnlineTestInvitation(to: String, name: String, expireDateTime: DateTime)(implicit hc: HeaderCarrier): Future[Unit]
   def sendOnlineTestExpired(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit]
-  def sendOnlineTestFailed(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit]
+  def sendOnlineTestResultReady(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit]
   def sendConfirmAttendance(to: String, name: String, assessmentDateTime: DateTime,
     confirmByDate: LocalDate)(implicit hc: HeaderCarrier): Future[Unit]
   def sendReminderToConfirmAttendance(to: String, name: String, assessmentDateTime: DateTime,

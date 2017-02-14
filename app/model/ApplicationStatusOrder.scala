@@ -74,6 +74,8 @@ object ApplicationStatusOrder {
     (progress.onlineTest.failed, OnlineTestFailedProgress.weight, OnlineTestFailedProgress),
     (progress.onlineTest.failedNotified, OnlineTestFailedNotifiedProgress.weight, OnlineTestFailedNotifiedProgress),
     (progress.onlineTest.awaitingAllocation, AwaitingOnlineTestAllocationProgress.weight, AwaitingOnlineTestAllocationProgress),
+    (progress.onlineTest.awaitingAllocationNotified, AwaitingOnlineTestAllocationNotifiedProgress.weight,
+      AwaitingOnlineTestAllocationNotifiedProgress),
     (progress.onlineTest.allocationUnconfirmed, AllocationUnconfirmedProgress.weight, AllocationUnconfirmedProgress),
     (progress.onlineTest.allocationConfirmed, AllocationConfirmedProgress.weight, AllocationConfirmedProgress),
     (progress.assessmentScores.entered, AssessmentScoresEnteredProgress.weight, AssessmentScoresEnteredProgress),

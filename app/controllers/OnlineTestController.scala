@@ -48,9 +48,16 @@ trait OnlineTestController extends BaseController {
   val onlineTestExtensionService: OnlineTestExtensionService
   val onlineTestPDFReportRepo: OnlineTestPDFReportRepository
 
-  val resetTestPermittedStatuses = List(ApplicationStatuses.OnlineTestInvited, ApplicationStatuses.OnlineTestStarted,
-    ApplicationStatuses.OnlineTestExpired, ApplicationStatuses.OnlineTestFailed, ApplicationStatuses.OnlineTestCompleted,
-    ApplicationStatuses.OnlineTestFailedNotified, ApplicationStatuses.AwaitingOnlineTestReevaluation, ApplicationStatuses.AwaitingAllocation
+  val resetTestPermittedStatuses = List(
+    ApplicationStatuses.OnlineTestInvited,
+    ApplicationStatuses.OnlineTestStarted,
+    ApplicationStatuses.OnlineTestExpired,
+    ApplicationStatuses.OnlineTestFailed,
+    ApplicationStatuses.OnlineTestCompleted,
+    ApplicationStatuses.OnlineTestFailedNotified,
+    ApplicationStatuses.AwaitingOnlineTestReevaluation,
+    ApplicationStatuses.AwaitingAllocation,
+    ApplicationStatuses.AwaitingAllocationNotified
   )
 
   import Commands.Implicits._

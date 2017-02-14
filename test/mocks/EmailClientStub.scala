@@ -32,7 +32,7 @@ object EmailClientStub extends EmailClient {
   override def sendOnlineTestExpired(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit] =
     Future.successful(Unit)
 
-  override def sendOnlineTestFailed(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit] =
+  override def sendOnlineTestResultReady(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit] =
     Future.successful(Unit)
 
   override def sendConfirmAttendance(to: String, name: String, assessmentDateTime: DateTime, confirmByDate: LocalDate)(

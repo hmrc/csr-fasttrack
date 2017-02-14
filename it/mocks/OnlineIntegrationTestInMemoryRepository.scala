@@ -16,6 +16,7 @@
 
 package mocks
 
+import model.ApplicationStatuses.EnumVal
 import model.EvaluationResults._
 import model.{ ApplicationStatuses, ReminderNotice }
 import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser }
@@ -88,7 +89,7 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
     Future.successful(())
   }
 
-  override def nextApplicationPendingFailure: Future[Option[ApplicationForNotification]] = Future.successful(None)
+  override def nextApplicationReadyForSendingOnlineTestResult: Future[Option[ApplicationForNotification]] = Future.successful(None)
 
   def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal,
     expireDate: Option[LocalDate]): Future[Unit] = Future.successful(())
@@ -110,4 +111,6 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
   override def getCubiksTestProfileByToken(token: String): Future[CubiksTestProfile] = ???
 
   override def completeOnlineTest(cubiksUserId: Int): Future[Unit] = ???
+
+  override def updateStatus(userId: String, currentStatuses: List[EnumVal], newStatus: EnumVal): Future[Unit] = ???
 }

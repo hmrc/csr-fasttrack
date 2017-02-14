@@ -198,6 +198,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
           failed = getProgress(ProgressStatuses.OnlineTestFailedProgress),
           failedNotified = getProgress(ProgressStatuses.OnlineTestFailedNotifiedProgress),
           awaitingAllocation = getProgress(ProgressStatuses.AwaitingOnlineTestAllocationProgress),
+          awaitingAllocationNotified = getProgress(ProgressStatuses.AwaitingOnlineTestAllocationNotifiedProgress),
           allocationConfirmed = getProgress(ProgressStatuses.AllocationConfirmedProgress),
           allocationUnconfirmed = getProgress(ProgressStatuses.AllocationUnconfirmedProgress)
         ),
@@ -355,7 +356,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   override def findApplicationsForAssessmentAllocation(locations: List[String], start: Int,
                                                        end: Int): Future[ApplicationForAssessmentAllocationResult] = {
     val query = BSONDocument("$and" -> BSONArray(
-      BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingAllocation),
+      BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingAllocationNotified),
       BSONDocument("assessment-centre-indicator.assessmentCentre" -> BSONDocument("$in" -> locations))
     ))
 
