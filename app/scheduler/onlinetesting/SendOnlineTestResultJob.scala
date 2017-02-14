@@ -24,37 +24,37 @@ import play.api.Logger
 import repositories._
 import scheduler.clustering.SingleInstanceScheduledJob
 import services.AuditService
-import services.onlinetesting.{ OnlineTestResultService, OnlineTestResultServiceImpl }
+import services.onlinetesting.{ SendOnlineTestResultService, SendOnlineTestResultServiceImpl }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-object OnlineTestResultJob extends OnlineTestResultJob {
-  val onlineTestResult = new OnlineTestResultServiceImpl(
+object SendOnlineTestResultJob extends SendOnlineTestResultJob {
+  val sendOnlineTestResult = new SendOnlineTestResultServiceImpl(
     onlineTestRepository, contactDetailsRepository, CSREmailClient, AuditService, HeaderCarrier()
   )
 }
 
-trait OnlineTestResultJob extends SingleInstanceScheduledJob with FailedOnlineTestJobConfig {
-  val onlineTestResult: OnlineTestResultService
+trait SendOnlineTestResultJob extends SingleInstanceScheduledJob with SendOnlineTestResultJobConfig {
+  val sendOnlineTestResult: SendOnlineTestResultService
 
   override implicit val ec = ExecutionContext.fromExecutor(new ThreadPoolExecutor(2, 2, 180, TimeUnit.SECONDS, new ArrayBlockingQueue(4)))
 
   def tryExecute()(implicit ec: ExecutionContext): Future[Unit] = {
-    onlineTestResult.nextCandidateReadyForSendingOnlineTestResult.flatMap {
+    sendOnlineTestResult.nextCandidateReadyForSendingOnlineTestResult.flatMap {
       case None =>
-        Logger.debug("No candidates found for OnlineTestResultJob")
+        Logger.debug("No candidates found for SendOnlineTestResultJob")
         Future.successful(())
       case Some(app) =>
         Logger.debug(s"Notify candidate about an online test result for applicationId=${app.applicationId}")
-        onlineTestResult.notifyCandidateAboutOnlineTestResult(app)
+        sendOnlineTestResult.notifyCandidateAboutOnlineTestResult(app)
     }
   }
 }
 
-trait FailedOnlineTestJobConfig extends BasicJobConfig[ScheduledJobConfig] {
+trait SendOnlineTestResultJobConfig extends BasicJobConfig[ScheduledJobConfig] {
   this: SingleInstanceScheduledJob =>
-  override val conf = config.MicroserviceAppConfig.failedOnlineTestJobConfig
-  val configPrefix = "scheduling.online-testing.failed-test-job."
-  val name = "FailedOnlineTestJob"
+  override val conf = config.MicroserviceAppConfig.sendOnlineTestResultJobConfig
+  val configPrefix = "scheduling.send-online-test-result-job."
+  val name = "SendOnlineTestResultJob"
 }

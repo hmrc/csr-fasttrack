@@ -23,24 +23,24 @@ import play.api.Logger
 import repositories._
 import repositories.application.OnlineTestRepository
 import services.AuditService
-import services.onlinetesting.OnlineTestResultServiceImpl._
+import services.onlinetesting.SendOnlineTestResultServiceImpl._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-trait OnlineTestResultService {
+trait SendOnlineTestResultService {
 
   def nextCandidateReadyForSendingOnlineTestResult: Future[Option[ApplicationForNotification]]
 
   def notifyCandidateAboutOnlineTestResult(failedTest: ApplicationForNotification): Future[Unit]
 }
 
-class OnlineTestResultServiceImpl(otRepository: OnlineTestRepository,
-                                  cdRepository: ContactDetailsRepository,
-                                  emailClient: EmailClient,
-                                  auditService: AuditService,
-                                  newHeaderCarrier: => HeaderCarrier
-                                 )(implicit executor: ExecutionContext) extends OnlineTestResultService {
+class SendOnlineTestResultServiceImpl(otRepository: OnlineTestRepository,
+                                      cdRepository: ContactDetailsRepository,
+                                      emailClient: EmailClient,
+                                      auditService: AuditService,
+                                      newHeaderCarrier: => HeaderCarrier
+                                     )(implicit executor: ExecutionContext) extends SendOnlineTestResultService {
 
   private implicit def headerCarrier = newHeaderCarrier
 
@@ -89,7 +89,7 @@ class OnlineTestResultServiceImpl(otRepository: OnlineTestRepository,
   }
 }
 
-object OnlineTestResultServiceImpl {
+object SendOnlineTestResultServiceImpl {
 
   sealed trait AuditEvent
 

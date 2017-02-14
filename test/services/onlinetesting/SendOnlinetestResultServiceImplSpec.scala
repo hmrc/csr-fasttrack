@@ -28,13 +28,13 @@ import org.scalatestplus.play.PlaySpec
 import repositories.ContactDetailsRepository
 import repositories.application.OnlineTestRepository
 import services.AuditService
-import services.onlinetesting.OnlineTestResultServiceImpl.{ OnlineTestResultReadyEmailSent, OnlineTestResultReadyUpdated }
+import services.onlinetesting.SendOnlineTestResultServiceImpl.{ OnlineTestResultReadyEmailSent, OnlineTestResultReadyUpdated }
 import testkit.MockitoSugar
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class OnlinetestResultServiceImplSpec extends PlaySpec with ScalaFutures with MockitoSugar {
+class SendOnlinetestResultServiceImplSpec extends PlaySpec with ScalaFutures with MockitoSugar {
 
   "Notify candidate about online test result" should {
 
@@ -117,7 +117,7 @@ class OnlinetestResultServiceImplSpec extends PlaySpec with ScalaFutures with Mo
     val cdRepository = mock[ContactDetailsRepository]
     val emailClient = mock[EmailClient]
     val audit = mock[AuditService]
-    val service = new OnlineTestResultServiceImpl(otRepository, cdRepository, emailClient, audit, hc)(ec)
+    val service = new SendOnlineTestResultServiceImpl(otRepository, cdRepository, emailClient, audit, hc)(ec)
 
     when(cdRepository.find(any[String])).thenReturn(Future.successful(contactDetails))
     when(otRepository.updateStatus(any[String], any[List[ApplicationStatuses.EnumVal]],
