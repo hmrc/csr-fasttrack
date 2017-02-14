@@ -245,8 +245,8 @@ trait ReportingController extends BaseController {
       val applicationsMap = applications.map(application => (application.userId -> application)).toMap
       users.map { user => {
         val reportItem = applicationsMap.get(UniqueIdentifier(user.userId)).map { application => {
-          val fsacIndicatorVal = allContactDetails.get(user.userId.toString()).map { contactDetails =>
-            application.assessmentCentreIndicator.map(_.assessmentCentre).getOrElse("")
+          val fsacIndicatorVal = allContactDetails.get(user.userId.toString()).flatMap { contactDetails =>
+            application.assessmentCentreIndicator.map(_.assessmentCentre)
           }
           val locationIds = application.locationIds
           val onlineAdjustmentsVal = reportingFormatter.getOnlineAdjustments(application.onlineAdjustments, application.adjustments)
