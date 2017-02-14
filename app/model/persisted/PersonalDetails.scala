@@ -30,7 +30,7 @@ case class PersonalDetails(
                             civilServant: Boolean = false,
                             department: Option[String] = None
                           ) {
-  require((civilServant && department.isDefined) || (!civilServant && department.isEmpty))
+  require((civilServant && department.isDefined) || (!civilServant && department.isEmpty), "Civil Servants must have a department")
 }
 
 case object PersonalDetails {

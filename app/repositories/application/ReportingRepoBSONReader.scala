@@ -19,9 +19,9 @@ package repositories.application
 import common.Constants.{ No, Yes }
 import model.ApplicationStatusOrder.getStatus
 import model.Commands._
-import model.ReportExchangeObjects.{ ApplicationForCandidateProgressReport }
+import model.ReportExchangeObjects.ApplicationForCandidateProgressReport
 import model.Scheme.Scheme
-import model.{ Adjustments, UniqueIdentifier }
+import model.{ Adjustments, AssessmentCentreIndicator, UniqueIdentifier }
 import model.exchange.AssistanceDetails
 import reactivemongo.bson.{ BSONDocument, _ }
 import repositories.{ BaseBSONReader, CommonBSONDocuments }
@@ -41,11 +41,13 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
       val pdDoc = doc.getAs[BSONDocument]("personal-details")
       val civilServant = pdDoc.flatMap(_.getAs[Boolean]("civilServant"))
 
+      val assessmentCentreIndicator = doc.getAs[AssessmentCentreIndicator]("assessment-centre-indicator")
+
       ApplicationForCandidateProgressReport(
         Some(UniqueIdentifier(applicationId)), UniqueIdentifier(userId), Some(getStatus(progress)), schemes, schemeLocations,
         assistanceDetails.map(_.hasDisability), assistanceDetails.flatMap(_.guaranteedInterview),
         assistanceDetails.map(_.needsSupportForOnlineAssessment), assistanceDetails.map(_.needsSupportAtVenue),
-        adjustments, civilServant
+        adjustments, civilServant, assessmentCentreIndicator
       )
     }
   }

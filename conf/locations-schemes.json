@@ -277,7 +277,8 @@
       "name":"Plymouth",
       "geocodes":[{"lat":50.376289, "lng":-4.143841}],
       "schemes":[
-        "Business"
+        "Business",
+        "ProjectDelivery"
       ]
     },
     {

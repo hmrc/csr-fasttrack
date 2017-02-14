@@ -75,9 +75,9 @@ class LocationSchemeServiceSpec extends UnitSpec {
           LocationSchemesExamples.LocationSchemes3, LocationSchemesExamples.LocationSchemes4
         )))
 
-    when(locationSchemeRepoMock.getSchemeInfo).thenReturn(Future.successful(
+    when(locationSchemeRepoMock.schemeInfoList).thenReturn(
       List(SchemeInfoExamples.NoALevelsScheme, SchemeInfoExamples.ALevelsScheme, SchemeInfoExamples.ALevelsStemScheme)
-    ))
+    )
 
     when(appRepoMock.getSchemes(appId)).thenReturn(Future.successful(
       List(Business, Commercial, ProjectDelivery)
