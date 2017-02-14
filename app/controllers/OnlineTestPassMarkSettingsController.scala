@@ -55,8 +55,7 @@ trait OnlineTestPassMarkSettingsController extends BaseController {
         )
 
         for {
-          schemeInfoList <- locSchemeRepository.getSchemeInfo
-          createResult <- pmsRepository.create(builtSettingsObject, schemeInfoList.map(_.id))
+          createResult <- pmsRepository.create(builtSettingsObject, locSchemeRepository.schemeInfoList.map(_.id))
         } yield {
           auditService.logEvent("PassMarkSettingsCreated", Map(
             "Version" -> newVersionUUID,
@@ -71,9 +70,8 @@ trait OnlineTestPassMarkSettingsController extends BaseController {
 
   def getLatestVersion: Action[AnyContent] = Action.async { implicit request =>
     for {
-      schemeInfoList <- locSchemeRepository.getSchemeInfo
-      schemes = schemeInfoList.map(_.id)
       latestVersionOpt <- pmsRepository.tryGetLatestVersion()
+      schemes = locSchemeRepository.schemeInfoList.map(_.id)
     } yield {
       latestVersionOpt.map(latestVersion => {
         val responseSchemes = latestVersion.schemes.map(scheme => SchemeResponse(scheme.schemeName, Some(scheme.schemeThresholds)))

@@ -68,7 +68,7 @@ trait LocationSchemeService {
   def getEligibleSchemes(applicationId: String): Future[List[SchemeInfo]] = {
       for {
         personalDetails <- pdRepository.find(applicationId)
-        schemes <- locationSchemeRepository.getSchemeInfo
+        schemes = locationSchemeRepository.schemeInfoList
       } yield {
         schemes.filterNot(s =>
           (s.requiresALevel && !(personalDetails.aLevel || personalDetails.stemLevel)) ||
@@ -102,14 +102,14 @@ trait LocationSchemeService {
   def getSchemes(applicationId: String): Future[List[SchemeInfo]] = {
     for {
       schemeIds <- appRepository.getSchemes(applicationId)
-      schemes <- locationSchemeRepository.getSchemeInfo
+      schemes = locationSchemeRepository.schemeInfoList
     } yield {
       schemeIds.map(schemeId =>
         schemes.find(_.id == schemeId).getOrElse(throw NotFoundException(Some(s"Scheme $schemeId not found"))))
     }
   }
 
-  def getAvailableSchemes : Future[List[SchemeInfo]] = locationSchemeRepository.getSchemeInfo
+  def getAvailableSchemes: List[SchemeInfo] = locationSchemeRepository.schemeInfoList
 
   def updateSchemes(applicationId: String, schemeNames: List[Scheme]): Future[Unit] = {
     require(schemeNames.nonEmpty, "Scheme preferences must not be empty")

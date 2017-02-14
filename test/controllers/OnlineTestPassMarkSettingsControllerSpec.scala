@@ -129,7 +129,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
 
     val mockLocationSchemeRepository = mock[LocationSchemeRepository]
 
-    when(mockLocationSchemeRepository.getSchemeInfo).thenReturn(Future.successful(testSchemeInfos))
+    when(mockLocationSchemeRepository.schemeInfoList).thenReturn(testSchemeInfos)
 
     val defaultSchemeThreshold = SchemeThreshold(20d, 80d)
 
