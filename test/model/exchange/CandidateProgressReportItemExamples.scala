@@ -22,27 +22,27 @@ import model.{ ProgressStatuses, Scheme }
 object CandidateProgressReportItemExamples {
   val PersonalDetailsCompleted = CandidateProgressReportItem(Some(ApplicationIdExamples.appId1),
     Some(ProgressStatuses.PersonalDetailsCompleted), List.empty, List.empty,
-    None, None, None, None, Some(false), Some("London")
+    None, None, None, None, Some(false), Some("")
   )
   val SchemePreferencesCompleted = CandidateProgressReportItem(Some(ApplicationIdExamples.appId2),
     Some(ProgressStatuses.SchemesPreferencesCompleted), List(Scheme.Finance, Scheme.DigitalAndTechnology),
     List(LocationSchemesExamples.LocationSchemes1.locationName, LocationSchemesExamples.LocationSchemes2.locationName),
-    None, None, None, None, None, Some("London")
+    None, None, None, None, None, Some("")
   )
   val AssistanceDetailsCompleted = CandidateProgressReportItem(Some(ApplicationIdExamples.appId3),
     Some(ProgressStatuses.AssistanceDetailsCompleted), List(Scheme.Commercial, Scheme.DigitalAndTechnology),
     List(LocationSchemesExamples.LocationSchemes2.locationName, LocationSchemesExamples.LocationSchemes3.locationName),
-    Some("Yes"), Some(false), Some("Yes"), Some("Yes"), Some(false), Some("London")
+    Some("Yes"), Some(false), Some("Yes"), Some("Yes"), Some(false), Some("")
   )
   val OccupationQuestionsCompleted = CandidateProgressReportItem(Some(ApplicationIdExamples.appId4),
     Some(ProgressStatuses.OccupationQuestionsCompleted), List(Scheme.Business, Scheme.Finance),
     List(LocationSchemesExamples.LocationSchemes1.locationName, LocationSchemesExamples.LocationSchemes3.locationName),
-    Some("Yes"), Some(false), Some("Yes"), Some("Yes"), Some(false), Some("London")
+    Some("Yes"), Some(false), Some("Yes"), Some("Yes"), Some(false), Some("")
   )
   val ReviewCompleted = CandidateProgressReportItem(Some(ApplicationIdExamples.appId5),
     Some(ProgressStatuses.ReviewCompleted), List(Scheme.Business, Scheme.ProjectDelivery),
     List(LocationSchemesExamples.LocationSchemes1.locationName, LocationSchemesExamples.LocationSchemes4.locationName),
-    Some("Yes"), Some(false), Some("Yes"), Some("Yes"), Some(false), Some("London")
+    Some("Yes"), Some(false), Some("Yes"), Some("Yes"), Some(false), Some("")
   )
   val Candidates = List(PersonalDetailsCompleted, SchemePreferencesCompleted, AssistanceDetailsCompleted,
     OccupationQuestionsCompleted, ReviewCompleted)

@@ -246,7 +246,7 @@ trait ReportingController extends BaseController {
       users.map { user => {
         val reportItem = applicationsMap.get(UniqueIdentifier(user.userId)).map { application => {
           val fsacIndicatorVal = allContactDetails.get(user.userId.toString()).map { contactDetails =>
-            assessmentCentreIndicatorRepository.calculateIndicator(Some(contactDetails.postCode.toString)).assessmentCentre
+            application.assessmentCentreIndicator.map(_.assessmentCentre).getOrElse("")
           }
           val locationIds = application.locationIds
           val onlineAdjustmentsVal = reportingFormatter.getOnlineAdjustments(application.onlineAdjustments, application.adjustments)
@@ -260,7 +260,7 @@ trait ReportingController extends BaseController {
             onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
         }}
         val defaultReportItem = CandidateProgressReportItem(ApplicationForCandidateProgressReport(None,
-          UniqueIdentifier(user.userId), Some(ProgressStatuses.Registered), List.empty, List.empty, None, None, None, None, None, None))
+          UniqueIdentifier(user.userId), Some(ProgressStatuses.Registered), List.empty, List.empty, None, None, None, None, None, None, None))
         reportItem.getOrElse(defaultReportItem)
       }}
     }
