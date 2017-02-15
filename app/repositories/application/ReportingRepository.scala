@@ -122,8 +122,8 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
           awaitingReevaluation = getProgress(ProgressStatuses.AwaitingOnlineTestReevaluationProgress),
           failed = getProgress(ProgressStatuses.OnlineTestFailedProgress),
           failedNotified = getProgress(ProgressStatuses.OnlineTestFailedNotifiedProgress),
-          awaitingAllocation = getProgress(ProgressStatuses.AwaitingOnlineTestAllocationProgress),
-          awaitingAllocationNotified = getProgress(ProgressStatuses.AwaitingOnlineTestAllocationNotifiedProgress),
+          awaitingAllocation = getProgress(ProgressStatuses.AwaitingAllocationProgress),
+          awaitingAllocationNotified = getProgress(ProgressStatuses.AwaitingAllocationNotifiedProgress),
           allocationConfirmed = getProgress(ProgressStatuses.AllocationConfirmedProgress),
           allocationUnconfirmed = getProgress(ProgressStatuses.AllocationUnconfirmedProgress)
         ),

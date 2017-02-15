@@ -430,7 +430,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
           s"${ProgressStatuses.AwaitingOnlineTestReevaluationProgress}" -> true,
           s"${ProgressStatuses.OnlineTestFailedProgress}" -> true,
           s"${ProgressStatuses.OnlineTestFailedNotifiedProgress}" -> true,
-          s"${ProgressStatuses.AwaitingOnlineTestAllocationProgress}" -> true
+          s"${ProgressStatuses.AwaitingAllocationProgress}" -> true
         ),
         "online-tests" -> CubiksTestProfile(
           cubiksUserId =  1111,

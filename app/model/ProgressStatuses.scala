@@ -66,8 +66,8 @@ object ProgressStatuses extends Enum {
   val OnlineTestFailedProgress = EnumVal(ApplicationStatuses.OnlineTestFailed.name.toLowerCase, 160)
   val OnlineTestFailedNotifiedProgress = EnumVal(ApplicationStatuses.OnlineTestFailedNotified.name.toLowerCase, 170)
 
-  val AwaitingOnlineTestAllocationProgress = EnumVal(ApplicationStatuses.AwaitingAllocation.name.toLowerCase, 180)
-  val AwaitingOnlineTestAllocationNotifiedProgress = EnumVal(ApplicationStatuses.AwaitingAllocationNotified.name.toLowerCase, 185)
+  val AwaitingAllocationProgress = EnumVal(ApplicationStatuses.AwaitingAllocation.name.toLowerCase, 180)
+  val AwaitingAllocationNotifiedProgress = EnumVal(ApplicationStatuses.AwaitingAllocationNotified.name.toLowerCase, 185)
   val AllocationUnconfirmedProgress = EnumVal(ApplicationStatuses.AllocationUnconfirmed.name.toLowerCase, 190)
 
   val AllocationConfirmedProgress = EnumVal(ApplicationStatuses.AllocationConfirmed.name.toLowerCase, 200)

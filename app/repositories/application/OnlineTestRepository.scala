@@ -112,8 +112,8 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       case OnlineTestExpired => ProgressStatuses.OnlineTestExpiredProgress
       case OnlineTestFailed => ProgressStatuses.OnlineTestFailedProgress
       case OnlineTestFailedNotified => ProgressStatuses.OnlineTestFailedNotifiedProgress
-      case AwaitingAllocation => ProgressStatuses.AwaitingOnlineTestAllocationProgress
-      case AwaitingAllocationNotified => ProgressStatuses.AwaitingOnlineTestAllocationNotifiedProgress
+      case AwaitingAllocation => ProgressStatuses.AwaitingAllocationProgress
+      case AwaitingAllocationNotified => ProgressStatuses.AwaitingAllocationNotifiedProgress
     }
 
     if (flag == ProgressStatuses.OnlineTestCompletedProgress) {
@@ -181,6 +181,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
 
     val applicationStatusBSON = applicationStatus(newStatus)
 
+    // TODO: Use singleUpdateValidator as it has the logic already
     collection.update(query, applicationStatusBSON, upsert = false) map {
       case r if r.n == 0 => throw new NotFoundException(s"updateStatus didn't update anything for userId:$userId")
       case r if r.n > 1 => throw UnexpectedException(s"updateStatus somehow updated more than one record for userId:$userId")
@@ -266,8 +267,8 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       s"progress-status.$AwaitingOnlineTestReevaluationProgress" -> "",
       s"progress-status.$OnlineTestFailedProgress" -> "",
       s"progress-status.$OnlineTestFailedNotifiedProgress" -> "",
-      s"progress-status.$AwaitingOnlineTestAllocationProgress" -> "",
-      s"progress-status.$AwaitingOnlineTestAllocationNotifiedProgress" -> "",
+      s"progress-status.$AwaitingAllocationProgress" -> "",
+      s"progress-status.$AwaitingAllocationNotifiedProgress" -> "",
       "passmarkEvaluation" -> ""
     )) ++ BSONDocument("$set" -> BSONDocument(
       s"progress-status.$OnlineTestInvitedProgress" -> true,
@@ -462,7 +463,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     val progressStatus = applicationStatus match {
       case ApplicationStatuses.AwaitingOnlineTestReevaluation => ProgressStatuses.AwaitingOnlineTestReevaluationProgress
       case ApplicationStatuses.OnlineTestFailed => ProgressStatuses.OnlineTestFailedProgress
-      case ApplicationStatuses.AwaitingAllocation => ProgressStatuses.AwaitingOnlineTestAllocationProgress
+      case ApplicationStatuses.AwaitingAllocation => ProgressStatuses.AwaitingAllocationProgress
     }
 
     val passMarkEvaluation = BSONDocument("$set" ->
@@ -529,8 +530,8 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     val deAllocationSet = BSONDocument("$set" -> {
       BSONDocument(
         "applicationStatus" -> ApplicationStatuses.AwaitingAllocation,
-        s"progress-status.${ProgressStatuses.AwaitingOnlineTestAllocationProgress}" -> true,
-        s"progress-status-dates.${ProgressStatuses.AwaitingOnlineTestAllocationProgress}" -> LocalDate.now()
+        s"progress-status.${ProgressStatuses.AwaitingAllocationProgress}" -> true,
+        s"progress-status-dates.${ProgressStatuses.AwaitingAllocationProgress}" -> LocalDate.now()
       )
     })
 
