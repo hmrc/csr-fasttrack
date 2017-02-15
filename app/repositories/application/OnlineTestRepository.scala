@@ -245,27 +245,21 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     )
 
     val update = BSONDocument(
-      "$push" -> BSONDocument(
+      "$addToSet" -> BSONDocument(
         "online-tests.completed" -> assessmentId
       )
     )
 
     val validator = singleUpdateValidator(s"$cubiksUserId", actionDesc = "recording cubiks test completion",
       CannotUpdateCubiksTest(s"Cant update test with cubiksId $cubiksUserId"))
-    val result = for {
+
+    for {
       _ <- collection.update(query, update, upsert = false) map validator
       testProfile <- getCubiksTestProfile(cubiksUserId)
-    } yield {
-      val allAssessments = if (isGis) cubiksGatewayConfig.gisAssessmentIds else cubiksGatewayConfig.nonGisAssessmentIds
-      val isCompleted = testProfile.hasAllAssessmentsCompleted(allAssessments)
-      if (isCompleted) {
-        completeAllAssessments(cubiksUserId)
-      } else {
-        Future.successful(())
-      }
-    }
-
-    result.flatMap(identity)
+      allAssessments = if (isGis) cubiksGatewayConfig.gisAssessmentIds else cubiksGatewayConfig.nonGisAssessmentIds
+      isCompleted = testProfile.hasAllAssessmentsCompleted(allAssessments)
+      _ <- if (isCompleted) completeAllAssessments(cubiksUserId) else Future.successful(())
+    } yield {}
   }
 
   private def completeAllAssessments(cubiksUserId: Int): Future[Unit] = {

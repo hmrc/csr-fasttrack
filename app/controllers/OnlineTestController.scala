@@ -86,18 +86,15 @@ trait OnlineTestController extends BaseController {
   }
 
   def completeOnlineTest(cubiksUserId: Int, assessmentId: Int): Action[AnyContent] = Action.async { implicit request =>
-    val result = for {
+    (for {
       assistanceDetails <- assistanceDetailsRepo.find(cubiksUserId)
       isGis = assistanceDetails.isGis
+      _ <- onlineTestingRepo.completeOnlineTest(cubiksUserId, assessmentId, isGis)
     } yield {
-      onlineTestingRepo.completeOnlineTest(cubiksUserId, assessmentId, isGis).map { _ =>
-        Ok
-      } recover {
-        case _: CannotUpdateCubiksTest => NotFound
-      }
+      Ok
+    }).recover {
+      case _: CannotUpdateCubiksTest => NotFound
     }
-
-    result.flatMap(identity)
   }
 
   /**
