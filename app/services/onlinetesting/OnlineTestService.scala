@@ -171,16 +171,6 @@ trait OnlineTestService {
     }
   }
 
-  def completeOnlineTest(cubiksUserId: Int): Future[Unit] = {
-    otRepository.completeOnlineTest(cubiksUserId)
-  }
-
-  def consumeOnlineTestToken(token: String): Future[Unit] =  {
-    otRepository.getCubiksTestProfileByToken(token) flatMap { cubiksProfile =>
-      otRepository.completeOnlineTest(cubiksProfile.cubiksUserId)
-    }
-  }
-
   def startOnlineTest(cubiksUserId: Int): Future[Unit] = {
     otRepository.getCubiksTestProfile(cubiksUserId) flatMap { cubiksTest =>
       if (cubiksTest.startedDateTime.isDefined) {

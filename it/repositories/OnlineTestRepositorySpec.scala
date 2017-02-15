@@ -480,21 +480,55 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
   }
 
   "Complete online test" must {
-    "update the test to complete" in {
+    "update the test to complete after 3 callbacks for non GIS" in {
       val date = DateTime.now(DateTimeZone.UTC)
       val appIdWithUserId = createOnlineTest("userId", ApplicationStatuses.OnlineTestStarted, "token", Some("http://www.someurl.com"),
         invitationDate = Some(date), expirationDate = Some(date.plusDays(7)), xmlReportSaved = Some(true), pdfReportSaved = Some(true),
         cubiksUserId = Some(123)
       )
 
-      onlineTestRepo.completeOnlineTest(123).futureValue
+      onlineTestRepo.completeOnlineTest(123, 131, isGis = false).futureValue
 
-      val test = onlineTestRepo.getCubiksTestProfile(123).futureValue
-      val application = helperRepo.findByUserId(appIdWithUserId.userId, "frameworkId").futureValue
+      val testAfterFirstCallback = onlineTestRepo.getCubiksTestProfile(123).futureValue
+      val applicationAfterFirstCallback = helperRepo.findByUserId(appIdWithUserId.userId, "frameworkId").futureValue
+      testAfterFirstCallback.completedDateTime mustBe empty
+      applicationAfterFirstCallback.applicationStatus mustBe ApplicationStatuses.OnlineTestStarted
+      applicationAfterFirstCallback.progressResponse.onlineTest.completed mustBe false
 
-      test.completedDateTime mustBe defined
-      application.applicationStatus mustBe ApplicationStatuses.OnlineTestCompleted
-      application.progressResponse.onlineTest.completed mustBe true
+      onlineTestRepo.completeOnlineTest(123, 127, isGis = false).futureValue
+      onlineTestRepo.completeOnlineTest(123, 132, isGis = false).futureValue
+      val testAfterLastCallback = onlineTestRepo.getCubiksTestProfile(123).futureValue
+      val applicationAfterLastCallback = helperRepo.findByUserId(appIdWithUserId.userId, "frameworkId").futureValue
+
+      testAfterLastCallback.completedDateTime mustBe defined
+
+      applicationAfterLastCallback.applicationStatus mustBe ApplicationStatuses.OnlineTestCompleted
+      applicationAfterLastCallback.progressResponse.onlineTest.completed mustBe true
+    }
+
+    "update the test to complete after 2 callbacks for GIS" in {
+      val date = DateTime.now(DateTimeZone.UTC)
+      val appIdWithUserId = createOnlineTest("userId", ApplicationStatuses.OnlineTestStarted, "token", Some("http://www.someurl.com"),
+        invitationDate = Some(date), expirationDate = Some(date.plusDays(7)), xmlReportSaved = Some(true), pdfReportSaved = Some(true),
+        cubiksUserId = Some(123)
+      )
+
+      onlineTestRepo.completeOnlineTest(123, 131, isGis = true).futureValue
+
+      val testAfterFirstCallback = onlineTestRepo.getCubiksTestProfile(123).futureValue
+      val applicationAfterFirstCallback = helperRepo.findByUserId(appIdWithUserId.userId, "frameworkId").futureValue
+      testAfterFirstCallback.completedDateTime mustBe empty
+      applicationAfterFirstCallback.applicationStatus mustBe ApplicationStatuses.OnlineTestStarted
+      applicationAfterFirstCallback.progressResponse.onlineTest.completed mustBe false
+
+      onlineTestRepo.completeOnlineTest(123, 127, isGis = true).futureValue
+      val testAfterLastCallback = onlineTestRepo.getCubiksTestProfile(123).futureValue
+      val applicationAfterLastCallback = helperRepo.findByUserId(appIdWithUserId.userId, "frameworkId").futureValue
+
+      testAfterLastCallback.completedDateTime mustBe defined
+
+      applicationAfterLastCallback.applicationStatus mustBe ApplicationStatuses.OnlineTestCompleted
+      applicationAfterLastCallback.progressResponse.onlineTest.completed mustBe true
     }
 
     "Not update the test if it is not in progress" in {
@@ -504,7 +538,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
         cubiksUserId = Some(123)
       )
 
-      val result = onlineTestRepo.completeOnlineTest(123).failed.futureValue
+      val result = onlineTestRepo.completeOnlineTest(123, 1, isGis = true).failed.futureValue
 
       result mustBe a[CannotUpdateCubiksTest]
     }

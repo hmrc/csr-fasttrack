@@ -110,7 +110,7 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
 
   override def getCubiksTestProfileByToken(token: String): Future[CubiksTestProfile] = ???
 
-  override def completeOnlineTest(cubiksUserId: Int): Future[Unit] = ???
+  override def completeOnlineTest(cubiksUserId: Int, assessmentId: Int, isGis: Boolean): Future[Unit] = ???
 
   override def updateStatus(userId: String, currentStatuses: List[EnumVal], newStatus: EnumVal): Future[Unit] = ???
 }

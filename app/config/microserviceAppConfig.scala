@@ -54,7 +54,19 @@ case class CubiksGatewayConfig(url: String, scheduleIds: CubiksGatewaysScheduleI
   verbalAndNumericalAssessment: CubiksGatewayVerbalAndNumericalAssessment,
   competenceAssessment: CubiksGatewayStandardAssessment,
   situationalAssessment: CubiksGatewayStandardAssessment,
-  reportConfig: ReportConfig, candidateAppUrl: String, emailDomain: String)
+  reportConfig: ReportConfig, candidateAppUrl: String, emailDomain: String) {
+
+  val nonGisAssessmentIds: List[Int] = List(
+    verbalAndNumericalAssessment.assessmentId,
+    competenceAssessment.assessmentId,
+    situationalAssessment.assessmentId
+  )
+
+  val gisAssessmentIds: List[Int] = List(
+    competenceAssessment.assessmentId,
+    situationalAssessment.assessmentId
+  )
+}
 
 case class CubiksGatewaysScheduleIds(standard: Int, gis: Int)
 

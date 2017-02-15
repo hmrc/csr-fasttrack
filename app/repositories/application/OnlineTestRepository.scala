@@ -91,7 +91,7 @@ trait OnlineTestRepository {
 
   def startOnlineTest(cubiksUserId: Int): Future[Unit]
 
-  def completeOnlineTest(cubiksUserId: Int): Future[Unit]
+  def completeOnlineTest(cubiksUserId: Int, assessmentId: Int, isGis: Boolean): Future[Unit]
 }
 
 // scalastyle:off number.of.methods
@@ -230,14 +230,41 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   override def consumeToken(token: String): Future[Unit] = {
-    val query = BSONDocument("online-tests.token" -> token)
+    val query = BSONDocument(
+      "online-tests.token" -> token,
+      "applicationStatus" -> ApplicationStatuses.OnlineTestStarted
+    )
 
     val applicationStatusBSON = applicationStatus(ApplicationStatuses.OnlineTestCompleted)
 
     collection.update(query, applicationStatusBSON, upsert = false).map { _ => () }
   }
 
-  override def completeOnlineTest(cubiksUserId: Int): Future[Unit] = {
+  override def completeOnlineTest(cubiksUserId: Int, assessmentId: Int, isGis: Boolean): Future[Unit] = {
+    val query  = BSONDocument(
+      "online-tests.cubiksUserId" -> cubiksUserId,
+      "applicationStatus" -> ApplicationStatuses.OnlineTestStarted
+    )
+
+    val update = BSONDocument(
+      "$addToSet" -> BSONDocument(
+        "online-tests.completed" -> assessmentId
+      )
+    )
+
+    val validator = singleUpdateValidator(s"$cubiksUserId", actionDesc = "recording cubiks test completion",
+      CannotUpdateCubiksTest(s"Cant update test with cubiksId $cubiksUserId"))
+
+    for {
+      _ <- collection.update(query, update, upsert = false) map validator
+      testProfile <- getCubiksTestProfile(cubiksUserId)
+      allAssessments = if (isGis) cubiksGatewayConfig.gisAssessmentIds else cubiksGatewayConfig.nonGisAssessmentIds
+      isCompleted = testProfile.hasAllAssessmentsCompleted(allAssessments)
+      _ <- if (isCompleted) completeAllAssessments(cubiksUserId) else Future.successful(())
+    } yield {}
+  }
+
+  private def completeAllAssessments(cubiksUserId: Int): Future[Unit] = {
     val query  = BSONDocument(
       "online-tests.cubiksUserId" -> cubiksUserId,
       "applicationStatus" -> ApplicationStatuses.OnlineTestStarted
