@@ -17,6 +17,7 @@
 package mocks.application
 
 import factories.UUIDFactory
+import model.ApplicationStatuses.EnumVal
 import model.{ ApplicationStatuses, Scheme }
 import model.PersistedObjects._
 import model.persisted.{ CubiksTestProfile, SchemeEvaluationResult }
@@ -76,7 +77,7 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
 
   def nextApplicationPendingExpiry: Future[Option[ExpiringOnlineTest]] = Future.successful(None)
 
-  def nextApplicationPendingFailure: Future[Option[ApplicationForNotification]] = Future.successful(None)
+  def nextApplicationReadyForSendingOnlineTestResult: Future[Option[ApplicationForNotification]] = Future.successful(None)
 
   def nextApplicationReadyForReportRetriving: Future[Option[OnlineTestApplicationWithCubiksUser]] = Future.successful(None)
 
@@ -118,4 +119,6 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
   override def getCubiksTestProfileByToken(token: String): Future[CubiksTestProfile] = ???
 
   override def completeOnlineTest(cubiksUserId: Int): Future[Unit] = ???
+
+  override def updateStatus(userId: String, currentStatuses: List[EnumVal], newStatus: EnumVal): Future[Unit] = ???
 }

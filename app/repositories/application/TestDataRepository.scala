@@ -134,7 +134,7 @@ class TestDataMongoRepository(implicit mongo: () => DB)
 
     val progress = createProgress(personalDetails, frameworks, assistanceDetails, submitted, withdrawn)
 
-    val applicationStatus = if (onlyAwaitingAllocation) ApplicationStatuses.AwaitingAllocation else chooseOne(applicationStatuses)
+    val applicationStatus = if (onlyAwaitingAllocation) ApplicationStatuses.AwaitingAllocationNotified else chooseOne(applicationStatuses)
     var document = BSONDocument(
       "applicationId" -> id.toString,
       "userId" -> id.toString,

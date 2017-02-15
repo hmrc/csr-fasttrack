@@ -281,47 +281,51 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     }
   }
 
-  "Getting the next application for failure notification" must {
-    "return one application if there is one failed test and pdf report has been saved" in {
-      val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestFailed, xmlReportSaved=Some(true), pdfReportSaved = Some(true))
+  "Next application ready for sending online test result" must {
 
-      val result = onlineTestRepo.nextApplicationPendingFailure.futureValue
+    "return one application if there is one failed test and pdf report has been saved" in {
+      val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestFailed, xmlReportSaved = Some(true), pdfReportSaved = Some(true))
+
+      val result = onlineTestRepo.nextApplicationReadyForSendingOnlineTestResult.futureValue
 
       result mustBe Some(ApplicationForNotification(appIdWithUserId.applicationId,
         appIdWithUserId.userId, "Test Preferred Name", ApplicationStatuses.OnlineTestFailed))
     }
 
-    "return no application if there is one failed test but pdf report has not been saved" in {
-      createOnlineTest(ApplicationStatuses.OnlineTestFailed, xmlReportSaved=Some(true), pdfReportSaved=Some(false))
+    "return one application if there is one passed test and pdf report has been saved" in {
+      val appIdWithUserId = createOnlineTest(ApplicationStatuses.AwaitingAllocation, xmlReportSaved = Some(true), pdfReportSaved = Some(true))
 
-      val result = onlineTestRepo.nextApplicationPendingFailure.futureValue
+      val result = onlineTestRepo.nextApplicationReadyForSendingOnlineTestResult.futureValue
+
+      result mustBe Some(ApplicationForNotification(appIdWithUserId.applicationId,
+        appIdWithUserId.userId, "Test Preferred Name", ApplicationStatuses.AwaitingAllocation))
+    }
+
+    "return no application if there is one failed test but pdf report has not been saved" in {
+      createOnlineTest(ApplicationStatuses.OnlineTestFailed, xmlReportSaved = Some(true), pdfReportSaved = Some(false))
+
+      val result = onlineTestRepo.nextApplicationReadyForSendingOnlineTestResult.futureValue
 
       result mustBe None
     }
 
-    "return no applications if there are applications which don't require notifying of failure" in {
+    "return no application if there is one passed test but pdf report has not been saved" in {
+      createOnlineTest(ApplicationStatuses.AwaitingAllocation, xmlReportSaved = Some(true), pdfReportSaved = Some(false))
+
+      val result = onlineTestRepo.nextApplicationReadyForSendingOnlineTestResult.futureValue
+
+      result mustBe None
+    }
+
+    "return no applications if there are onlt applications which don't require notifying" in {
       createOnlineTest(ApplicationStatuses.OnlineTestStarted)
       createOnlineTest(ApplicationStatuses.OnlineTestInvited)
       createOnlineTest(ApplicationStatuses.OnlineTestFailedNotified)
+      createOnlineTest(ApplicationStatuses.AwaitingAllocationNotified)
 
-      val result = onlineTestRepo.nextApplicationPendingFailure.futureValue
+      val result = onlineTestRepo.nextApplicationReadyForSendingOnlineTestResult.futureValue
 
       result mustBe None
-    }
-
-    "return a random application from a choice of multiple failed tests" in {
-      createOnlineTest("userId1", ApplicationStatuses.OnlineTestFailed, xmlReportSaved=Some(true), pdfReportSaved = Some(true))
-      createOnlineTest("userId2", ApplicationStatuses.OnlineTestFailed, xmlReportSaved=Some(true), pdfReportSaved = Some(true))
-      createOnlineTest("userId3", ApplicationStatuses.OnlineTestFailed, xmlReportSaved=Some(true), pdfReportSaved = Some(true))
-
-      val userIds = (1 to 15).map { _ =>
-        val result = onlineTestRepo.nextApplicationPendingFailure.futureValue
-        result.get.userId
-      }
-
-      userIds must contain("userId1")
-      userIds must contain("userId2")
-      userIds must contain("userId3")
     }
   }
 
@@ -426,7 +430,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
           s"${ProgressStatuses.AwaitingOnlineTestReevaluationProgress}" -> true,
           s"${ProgressStatuses.OnlineTestFailedProgress}" -> true,
           s"${ProgressStatuses.OnlineTestFailedNotifiedProgress}" -> true,
-          s"${ProgressStatuses.AwaitingOnlineTestAllocationProgress}" -> true
+          s"${ProgressStatuses.AwaitingAllocationProgress}" -> true
         ),
         "online-tests" -> CubiksTestProfile(
           cubiksUserId =  1111,

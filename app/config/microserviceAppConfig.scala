@@ -100,8 +100,8 @@ object MicroserviceAppConfig extends ServicesConfig {
     configuration.underlying.as[ScheduledJobConfig]("scheduling.online-testing.send-invitation-job")
   lazy val expireOnlineTestJobConfig =
     configuration.underlying.as[ScheduledJobConfig]("scheduling.online-testing.expiry-job")
-  lazy val failedOnlineTestJobConfig =
-    configuration.underlying.as[ScheduledJobConfig]("scheduling.online-testing.failed-test-job")
+  lazy val sendOnlineTestResultJobConfig =
+    configuration.underlying.as[ScheduledJobConfig]("scheduling.online-testing.send-online-test-result-job")
   lazy val firstReminderOnlineTestJobConfig =
     configuration.underlying.as[ScheduledJobConfig]("scheduling.online-testing.first-reminder-expiry-tests-job")
   lazy val secondReminderOnlineTestJobConfig =

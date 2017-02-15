@@ -27,6 +27,7 @@ case class OnlineTestProgressResponse(
                                        failed: Boolean = false,
                                        failedNotified: Boolean = false,
                                        awaitingAllocation: Boolean = false,
+                                       awaitingAllocationNotified: Boolean = false,
                                        allocationConfirmed: Boolean = false,
                                        allocationUnconfirmed: Boolean = false
                                      )
