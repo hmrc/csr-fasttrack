@@ -154,7 +154,8 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
   val MinimumAssessmentTime = 6
   val MaximumAssessmentTime = 12
 
-  "get online test" should {
+
+  "get online test" must {
     "throw an exception if the user does not exist" in new OnlineTest {
       doThrow(classOf[NotFoundException]).when(otRepositoryMock).getCubiksTestProfile("nonexistent-userid")
       intercept[NotFoundException] {
@@ -202,7 +203,7 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
     }
   }
 
-  "register and invite application" should {
+  "register and invite application" must {
     "fail if registration fails" in new OnlineTest {
       when(cubiksGatewayClientMock.registerApplicant(any[RegisterApplicant])(any[HeaderCarrier])).
         thenReturn(Future.failed(new ConnectorException(ErrorMessage)))
@@ -321,7 +322,7 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
     }
   }
 
-  "get time adjustments" should {
+  "get time adjustments" must {
     "return None if application's time adjustments are empty" in new OnlineTest {
       onlineTestService.getTimeAdjustments(applicationForOnlineTestingWithNoTimeAdjustments) mustBe Nil
     }
@@ -343,7 +344,7 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
     }
   }
 
-  "get adjusted time" should {
+  "get adjusted time" must {
     "return minimum if percentage is zero" in new OnlineTest {
       val result = onlineTestService.getAdjustedTime(minimum = 6, maximum = 12, percentageToIncrease = 0)
       result mustBe 6
@@ -366,7 +367,7 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
     }
   }
 
-  "build invite application" should {
+  "build invite application" must {
     "return an InviteApplication with no time adjustments if gis and application has no time adjustments" in new OnlineTest {
       onlineTestService.buildInviteApplication(applicationForOnlineTestingGisWithNoTimeAdjustments, Token, CubiksUserId,
         ScheduleId) mustBe inviteApplicantGisWithNoTimeAdjustments
@@ -385,6 +386,29 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
     "return an InviteApplication with time adjustments if no gis and application has time adjustments" in new OnlineTest {
       onlineTestService.buildInviteApplication(applicationForOnlineTestingWithTimeAdjustments, Token, CubiksUserId,
         ScheduleId) mustBe inviteApplicantNoGisWithTimeAdjustments
+    }
+  }
+
+  "start online test" must {
+    "update the test started date" in new OnlineTest {
+      when(otRepositoryMock.getCubiksTestProfile(any[Int])).thenReturn(Future.successful(onlineTestProfile))
+      when(otRepositoryMock.startOnlineTest(any[Int])).thenReturn(Future.successful(()))
+
+      onlineTestService.startOnlineTest(123).futureValue
+
+      verify(otRepositoryMock).startOnlineTest(any[Int])
+
+    }
+
+    "not update the test if it is already started" in new OnlineTest {
+      when(otRepositoryMock.getCubiksTestProfile(any[Int])).thenReturn(Future.successful(
+        onlineTestProfile.copy(startedDateTime = Some(DateTime.now)))
+      )
+
+      onlineTestService.startOnlineTest(123).futureValue
+
+      verify(otRepositoryMock, times(0)).startOnlineTest(any[Int])
+
     }
   }
 
