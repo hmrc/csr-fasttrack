@@ -219,7 +219,6 @@ class TestDataMongoRepository(implicit mongo: () => DB)
     case _ => None
   }
 
-
   //scalastyle:off method.length
   def createApplicationWithAllFields(userId: String, appId: String, frameworkId: String,
                                      appStatus: ApplicationStatuses.EnumVal = ApplicationStatuses.InProgress,

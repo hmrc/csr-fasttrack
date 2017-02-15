@@ -19,26 +19,25 @@ package repositories.application
 import factories.UUIDFactory
 import model.ReportExchangeObjects.ApplicationForCandidateProgressReport
 import model._
-import reactivemongo.json.ImplicitBSONHandlers
-import repositories.{ CollectionNames }
+import reactivemongo.bson.BSONDocument
+import repositories.CollectionNames
 import services.GBTimeZoneService
-import services.testdata.{ TestDataGeneratorService }
+import services.testdata.TestDataGeneratorService
 import testkit.MongoRepositorySpec
 
 import scala.language.postfixOps
 
 class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory {
 
-  import ImplicitBSONHandlers._
-
   val collectionName = CollectionNames.APPLICATION
 
   def repository = new ReportingMongoRepository(GBTimeZoneService)
 
-    def testDataRepo = new TestDataMongoRepository()
+  def testDataRepo = new TestDataMongoRepository()
 
   val testDataGeneratorService = TestDataGeneratorService
 
+  val frameworkId = "FastTrack-2015"
 
   "Applications for Candidate Progress Report" must {
     "return a report with one application when there is only one application with the corresponding fields when" +
@@ -46,12 +45,12 @@ class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory 
       val userId = UniqueIdentifier.randomUniqueIdentifier
       val appId = UniqueIdentifier.randomUniqueIdentifier
 
-      testDataRepo.createApplicationWithAllFields(userId.toString(), appId.toString(), "FastTrack-2015").futureValue
+      testDataRepo.createApplicationWithAllFields(userId.toString(), appId.toString(), frameworkId).futureValue
 
-      val result = repository.applicationsForCandidateProgressReport("FastTrack-2015").futureValue
+      val result = repository.applicationsForCandidateProgressReport(frameworkId).futureValue
 
       result must not be empty
-      result.head mustBe(ApplicationForCandidateProgressReport(Some(appId), userId, Some("assistance_details_completed"),
+      result.head mustBe ApplicationForCandidateProgressReport(Some(appId), userId, Some("assistance_details_completed"),
         List(Scheme.Commercial, Scheme.Business), List("2643743", "2657613"), Some("Yes"), Some(false), Some(true),
         Some(true), Some(Adjustments(typeOfAdjustments=Some(List("onlineTestsTimeExtension", "onlineTestsOther",
           "assessmentCenterTimeExtension", "coloured paper", "braille test paper", "room alone", "rest breaks",
@@ -59,7 +58,45 @@ class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory 
           onlineTests = Some(AdjustmentDetail(extraTimeNeeded=Some(25), extraTimeNeededNumerical=Some(60), otherInfo=Some("other adjustments"))),
           assessmentCenter = Some(AdjustmentDetail(extraTimeNeeded=Some(30), extraTimeNeededNumerical=None,
             otherInfo=Some("Other assessment centre adjustment")))
-        )), Some(false)))
+        )), Some(false))
+    }
+  }
+
+  "Diversity report" must {
+    "return a report with one application when there is only one application with all fields populated" in {
+      val userId = UniqueIdentifier.randomUniqueIdentifier
+      val appId = UniqueIdentifier.randomUniqueIdentifier
+
+      val progressStatusDocument = BSONDocument(
+        "progress-status" -> BSONDocument(
+          "personal_details_completed" -> true,
+          "schemes_preferences_completed" -> true,
+          "scheme_locations_completed" -> true,
+          "assistance_details_completed" -> true,
+          "questionnaire" -> BSONDocument(
+           "start_questionnaire" -> true,
+            "diversity_questions_completed" -> true
+          )
+        )
+      )
+
+      testDataRepo.createApplicationWithAllFields(userId.toString(), appId.toString(), frameworkId,
+        progressStatusBSON = progressStatusDocument).futureValue
+
+      val result = repository.diversityReport(frameworkId).futureValue
+
+      result must not be empty
+
+      result.head mustBe ApplicationForCandidateProgressReport(Some(appId), userId, Some("diversity_questions_completed"),
+        List(Scheme.Commercial, Scheme.Business), List("2643743", "2657613"), Some("Yes"), Some(false), Some(true),
+        Some(true), Some(Adjustments(typeOfAdjustments=Some(List("onlineTestsTimeExtension", "onlineTestsOther",
+          "assessmentCenterTimeExtension", "coloured paper", "braille test paper", "room alone", "rest breaks",
+          "reader/assistant", "stand up and move around", "assessmentCenterOther")), adjustmentsConfirmed = Some(true),
+          onlineTests = Some(AdjustmentDetail(extraTimeNeeded=Some(25), extraTimeNeededNumerical=Some(60),
+            otherInfo=Some("other adjustments"))),
+        assessmentCenter = Some(AdjustmentDetail(extraTimeNeeded=Some(30), extraTimeNeededNumerical=None,
+          otherInfo=Some("Other assessment centre adjustment")))
+        )), Some(false))
     }
   }
 }
