@@ -171,6 +171,16 @@ trait OnlineTestService {
     }
   }
 
+  def startOnlineTest(cubiksUserId: Int): Future[Unit] = {
+    otRepository.getCubiksTestProfile(cubiksUserId) flatMap { cubiksTest =>
+      if (cubiksTest.startedDateTime.isDefined) {
+        Future.successful(())
+      } else {
+        otRepository.startOnlineTest(cubiksUserId)
+      }
+    }
+  }
+
   private def registerApplicant(application: OnlineTestApplication, token: String): Future[Int] = {
     val preferredName = CubiksSanitizer.sanitizeFreeText(application.preferredName)
     val registerApplicant = RegisterApplicant(preferredName, "", token + "@" + gatewayConfig.emailDomain)

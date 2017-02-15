@@ -189,7 +189,6 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     }
   }
 
-
   override def startOnlineTest(cubiksUserId: Int): Future[Unit] = {
     val query = BSONDocument("online-tests.cubiksUserId" -> cubiksUserId)
     val update = BSONDocument("$set" -> BSONDocument(
