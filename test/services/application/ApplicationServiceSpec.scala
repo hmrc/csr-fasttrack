@@ -18,13 +18,17 @@ package services.application
 
 import model.Commands._
 import model.Exceptions.NotFoundException
-import org.mockito.Matchers.{ eq => eqTo }
+import model.PersistedObjects.ContactDetails
+import model.persisted.PersonalDetails
+import org.joda.time.LocalDate
+import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import repositories.application.GeneralApplicationRepository
+import repositories.ContactDetailsRepository
+import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
 import services.applicationassessment.ApplicationAssessmentService
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -62,12 +66,53 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
     }
   }
 
+  "editDetails" should {
+    "edit candidate details in an happy path scenario" in new ApplicationServiceFixture {
+      when(contactDetailsRepositoryMock.find(any[String])).thenReturn(Future.successful(currentContactDetails))
+      when(personalDetailsRepositoryMock.find(any[String])).thenReturn(Future.successful(currentPersonalDetails))
+      when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturn(Future.successful())
+      when(personalDetailsRepositoryMock.update(any[String], any[String], any[PersonalDetails])).thenReturn(Future.successful())
+
+      val result = applicationService.editDetails(userId, applicationId, editedDetails)
+      result.futureValue mustBe (())
+
+      verify(contactDetailsRepositoryMock).find(eqTo(userId))
+      verify(personalDetailsRepositoryMock).find(applicationId)
+
+      verify(personalDetailsRepositoryMock).update(eqTo(applicationId), eqTo(userId), eqTo(expectedPersonalDetails))
+      verify(contactDetailsRepositoryMock).update(eqTo(userId), eqTo(expectedContactDetails))
+      verifyNoMoreInteractions(personalDetailsRepositoryMock, contactDetailsRepositoryMock)
+    }
+
+    "edit candidate shout stop executing if an operation fails" in new ApplicationServiceFixture {
+      when(contactDetailsRepositoryMock.find(any[String])).thenReturn(failedFuture)
+      when(personalDetailsRepositoryMock.find(any[String])).thenReturn(Future.successful(currentPersonalDetails))
+      when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturn(Future.successful())
+      when(personalDetailsRepositoryMock.update(any[String], any[String], any[PersonalDetails])).thenReturn(Future.successful())
+
+      val result = applicationService.editDetails(userId, applicationId, editedDetails).failed.futureValue
+      result mustBe (error)
+
+      verify(contactDetailsRepositoryMock).find(eqTo(userId))
+      verify(personalDetailsRepositoryMock).find(applicationId)
+
+      verifyNoMoreInteractions(personalDetailsRepositoryMock, contactDetailsRepositoryMock)
+    }
+
+  }
+
   trait ApplicationServiceFixture {
+    import model.PersistedObjects.ContactDetails
     implicit val hc = HeaderCarrier()
+
+    val userId = "a22b033f-846c-4712-9d19-357819f7491c"
+    val applicationId = "2a1046ce-2af7-4626-9052-3e01365ccd54"
 
     val appRepositoryMock = mock[GeneralApplicationRepository]
     val appAssessServiceMock = mock[ApplicationAssessmentService]
     val auditServiceMock = mock[AuditService]
+    val contactDetailsRepositoryMock = mock[ContactDetailsRepository]
+    val personalDetailsRepositoryMock = mock[PersonalDetailsRepository]
 
     when(appRepositoryMock.withdraw(eqTo(ApplicationId), eqTo(withdrawApplicationRequest))).thenReturn(Future.successful(()))
     when(appAssessServiceMock.removeFromApplicationAssessmentSlot(eqTo(ApplicationId))).thenReturn(Future.successful(()))
@@ -77,6 +122,41 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       val appRepository = appRepositoryMock
       val appAssessService = appAssessServiceMock
       val auditService = auditServiceMock
+      val contactDetailsRepository = contactDetailsRepositoryMock
+      val personalDetailsRepository = personalDetailsRepositoryMock
     }
+
+    val currentAddress = Address("First Line", Some("line2"), None, None)
+    val newAddress = Address("new 1 Line", Some("new 2 Line"), Some("new 3 Line"), None)
+    val currentContactDetails = ContactDetails(false, currentAddress, Some("N1 3GF"), None, "mazurka@jjj.yyy", Some("0988726353"))
+    val currentPersonalDetails = PersonalDetails(
+      firstName = "Marcel",
+      lastName = "Cerdan",
+      preferredName = "Casablanca Clouter",
+      dateOfBirth = LocalDate.parse("1916-07-22")
+    )
+    val editedDetails = CandidateEditableDetails(
+      firstName = "Salvador",
+      lastName = "Sanchez",
+      preferredName = "Chava",
+      dateOfBirth = LocalDate.parse("1959-01-26"),
+      address = newAddress,
+      outsideUk = Some(true),
+      country = Some("Mexico"),
+      postCode = None,
+      phone = Some("2222909090")
+    )
+
+    val expectedPersonalDetails = PersonalDetails(
+      firstName = "Salvador",
+      lastName = "Sanchez",
+      preferredName = "Chava",
+      dateOfBirth = LocalDate.parse("1959-01-26")
+    )
+
+    val expectedContactDetails = ContactDetails(true, newAddress, None, Some("Mexico"), "mazurka@jjj.yyy", Some("2222909090"))
+
+    val error = new RuntimeException("Something bad happened")
+    val failedFuture = Future.failed(error)
   }
 }

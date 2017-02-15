@@ -15,6 +15,7 @@ PUT         /application/review/:applicationId                           control
 PUT         /application/submit/:userId/:applicationId                   controllers.SubmitApplicationController.submitApplication(userId: String, applicationId: String)
 PUT         /application/withdraw/:applicationId                         controllers.ApplicationController.applicationWithdraw(applicationId: String)
 GET         /application/:applicationId/assessment-centre-indicator      controllers.ApplicationController.getAssessmentCentreIndicator(applicationId: String)
+PUT         /application/edit-details/:userId/:applicationId             controllers.ApplicationController.editCandidateDetails(userId: String, applicationId: String)
 
 PUT         /adjustments/details/:applicationId/:actionTriggeredBy       controllers.AdjustmentsManagementController.confirmAdjustments(applicationId:String, actionTriggeredBy:String)
 GET         /adjustments/details/:applicationId                          controllers.AdjustmentsManagementController.findAdjustments(applicationId: String)

@@ -112,4 +112,14 @@ trait ApplicationController extends BaseController {
       case None => NotFound("")
     }
   }
+
+  def editCandidateDetails(userId: String, applicationId: String) = Action.async(parse.json) { implicit request =>
+    withJsonBody[CandidateEditableDetails] { editRequest =>
+      applicationService.editDetails(userId, applicationId, editRequest).map { _ =>
+        Ok
+      }.recover {
+        case e: ApplicationNotFound => NotFound(s"cannot find application for user with id: ${e.id}")
+      }
+    }
+  }
 }
