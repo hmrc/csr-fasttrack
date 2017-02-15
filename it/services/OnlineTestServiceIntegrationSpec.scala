@@ -61,8 +61,8 @@ class OnlineTestServiceIntegrationSpec extends IntegrationSpec with MockitoSugar
 
   when(cubiksGatewayClientMock.downloadXmlReport(any[Int])(any[HeaderCarrier]))
     .thenReturn(Future.successful {
-      val VerbalTestName = "Logiks Verbal and Numerical - Verbal"
-      val NumericalTestName = "Logiks Verbal and Numerical - Numerical"
+      val VerbalTestName = "Logiks Verbal and Numerical (Intermediate) - Verbal"
+      val NumericalTestName = "Logiks Verbal and Numerical (Intermediate) - Numerical"
       val CompetencyTestName = "Cubiks Factors"
       val SituationalTestName = "Civil Service Fast Track Apprentice SJQ"
 
