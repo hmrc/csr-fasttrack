@@ -33,7 +33,7 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
       val indexes = indexesWithFields(repo)
       indexes must contain (List("_id"))
       indexes must contain (List("applicationId"))
-      indexes.size must be (2)
+      indexes.size mustBe 2
     }
 
     val CandidateScoresWithFeedback = CandidateScoresAndFeedback("app1", Some(true), assessmentIncomplete = false,
@@ -47,31 +47,25 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
 
     "create a new application scores and feedback document" in {
       val result = repository.save(CandidateScoresWithFeedback).futureValue
-
-      repository.tryFind("app1").futureValue must be (Some(CandidateScoresWithFeedback))
+      repository.tryFind("app1").futureValue mustBe Some(CandidateScoresWithFeedback)
     }
 
     "return already stored application scores" in {
       repository.save(CandidateScoresWithFeedback).futureValue
-
       val result = repository.tryFind("app1").futureValue
-
-      result must be (Some(CandidateScoresWithFeedback))
+      result mustBe Some(CandidateScoresWithFeedback)
     }
 
     "return no application score if it does not exist" in {
       val result = repository.tryFind("app1").futureValue
-
-      result must be (None)
+      result mustBe None
     }
 
     "update already saved application scores and feedback document" in {
       repository.save(CandidateScoresWithFeedback).futureValue
       val updatedApplicationScores = CandidateScoresWithFeedback.copy(attendancy = Some(false))
-
       val result = repository.save(updatedApplicationScores).futureValue
-
-      repository.tryFind("app1").futureValue must be (Some(updatedApplicationScores))
+      repository.tryFind("app1").futureValue mustBe Some(updatedApplicationScores)
     }
 
     "retrieve all application scores and feedback documents" in {

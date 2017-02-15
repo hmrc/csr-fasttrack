@@ -34,7 +34,7 @@ class ContactDetailsRepositorySpec extends MongoRepositorySpec {
       val indexes = indexesWithFields(repo)
       indexes must contain (List("_id"))
       indexes must contain (List("userId"))
-      indexes.size must be (2)
+      indexes.size mustBe 2
     }
 
     "return empty list for empty contact details" in {
@@ -42,20 +42,20 @@ class ContactDetailsRepositorySpec extends MongoRepositorySpec {
     }
 
     "return list of contact details" in {
-      insert("1", ContactDetails(false, Address("line1a"), Some("123"), None, "email1@email.com", Some("12345")))
-      insert("2", ContactDetails(true, Address("line1b"), None, Some("Mongolia"), "email2@email.com", Some("67890")))
+      insert("1", ContactDetails(outsideUk = false, Address("line1a"), Some("123"), None, "email1@email.com", Some("12345")))
+      insert("2", ContactDetails(outsideUk = true, Address("line1b"), None, Some("Mongolia"), "email2@email.com", Some("67890")))
 
       val result = repo.findAll.futureValue
-      result.size must be (2)
+      result.size mustBe 2
     }
 
     "return only the first 10 documents if there is more than 10" in {
       for (i <- 1 to 10) {
-        insert(i.toString, ContactDetails(false, Address(s"line$i"), Some(s"123$i"), None, s"email$i@email.com", Some(s"12345$i")))
+        insert(i.toString, ContactDetails(outsideUk = false, Address(s"line$i"), Some(s"123$i"), None, s"email$i@email.com", Some(s"12345$i")))
       }
 
       val result = repo.findAll.futureValue
-      result.size must be (10)
+      result.size mustBe 10
     }
   }
 

@@ -42,5 +42,4 @@ class AssessmentCentreIndicatorCSVRepositorySpec extends UnitWithAppSpec with Sh
       result mustBe AssessmentCentreIndicator("East Central London", "London")
     }
   }
-
 }

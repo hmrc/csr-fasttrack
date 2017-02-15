@@ -44,14 +44,11 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
   def onlineTestRepo = new OnlineTestMongoRepository(DateTimeFactory)
 
   "Next application ready for online testing" must {
-
     "return no application if there is only one application without adjustment needed but not submitted" in {
-
       createApplication("appId", "userId", "frameworkId", ApplicationStatuses.InProgress, needsAdjustment = false, adjustmentsConfirmed = false,
         timeExtensionAdjustments = false)
 
       val result = onlineTestRepo.nextApplicationReadyForOnlineTesting.futureValue
-
       result mustBe None
     }
 
@@ -60,7 +57,6 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
         timeExtensionAdjustments = false)
 
       val result = onlineTestRepo.nextApplicationReadyForOnlineTesting.futureValue
-
       result mustBe None
     }
 
@@ -76,7 +72,6 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       result.get.needsAdjustments mustBe false
       result.get.adjustmentDetail.isEmpty mustBe true
     }
-
 
     "return one application if there is one submitted application with no time adjustment needed and adjustments confirmed" in {
       createApplication("appId", "userId1", "frameworkId1", "SUBMITTED", needsAdjustment = true, adjustmentsConfirmed = true,
@@ -136,6 +131,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       result.get.preferredName mustBe "Test Preferred Name"
       result.get.expiryDate.getMillis mustBe expiryDate.getMillis
     }
+
     "return no record for a test about to expire in more than 3 days" in {
       val expiryDate = DateTime.now().plusHours((24 * 3) + 1)
       val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestInvited, expirationDate = expiryDate)
@@ -143,6 +139,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
       result mustBe None
     }
+
     "return no record for a test about to expire in less than 3 days but completed" in {
       val expiryDate = DateTime.now().plusHours((24 * 3) - 1)
       val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestCompleted, expirationDate = expiryDate)
@@ -150,6 +147,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
       result mustBe None
     }
+
     "return no record for a test about to expire in less than 3 days but failed" in {
       val expiryDate = DateTime.now().plusHours((24 * 3) - 1)
       val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestFailed, expirationDate = expiryDate)
@@ -157,6 +155,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
       result mustBe None
     }
+
     "return no record for first reminder when a notification has already been sent" in {
       val expirationDate = DateTime.now().plusHours((24 * 3) - 1)
       helperRepo.collection.insert(BSONDocument(
@@ -256,9 +255,11 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     "set ONLINE_TEST_INVITED to ONLINE_TEST_INVITED" in {
       updateExpiryAndAssert(ApplicationStatuses.OnlineTestInvited, ApplicationStatuses.OnlineTestInvited)
     }
+
     "set ONLINE_TEST_STARTED tests to ONLINE_TEST_STARTED" in {
       updateExpiryAndAssert(ApplicationStatuses.OnlineTestStarted, ApplicationStatuses.OnlineTestStarted)
     }
+
     "not update expired tests" in {
       val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestExpired, expirationDate = DateTime.now)
       val result = onlineTestRepo.updateExpiryTime(appIdWithUserId.userId, DateTime.now.plusDays(5)).failed.futureValue
@@ -282,7 +283,6 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
   }
 
   "Next application ready for sending online test result" must {
-
     "return one application if there is one failed test and pdf report has been saved" in {
       val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestFailed, xmlReportSaved = Some(true), pdfReportSaved = Some(true))
 
@@ -539,7 +539,6 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       )
 
       val result = onlineTestRepo.completeOnlineTest(123, 1, isGis = true).failed.futureValue
-
       result mustBe a[CannotUpdateCubiksTest]
     }
   }
@@ -559,7 +558,6 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       )
 
       val result = onlineTestRepo.nextApplicationReadyForReportRetriving.futureValue
-
       result.get mustBe OnlineTestApplicationWithCubiksUser(appIdWithUserId.applicationId, appIdWithUserId.userId, 123)
     }
 
@@ -569,7 +567,6 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
         invitationDate = Some(date), expirationDate = Some(date.plusDays(7)), Some(123), Some(true))
 
       val result = onlineTestRepo.nextApplicationReadyForReportRetriving.futureValue
-
       result mustBe None
     }
   }
@@ -591,7 +588,6 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
         pdfReportSaved = Some(true))
 
       val result = onlineTestRepo.nextApplicationReadyForPDFReportRetrieving().futureValue
-
       result mustBe None
     }
 
@@ -603,7 +599,6 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
         pdfReportSaved = None)
 
       val result = onlineTestRepo.nextApplicationReadyForPDFReportRetrieving().futureValue
-
       result.get mustBe OnlineTestApplicationWithCubiksUser(appIdWithUserId.applicationId, appIdWithUserId.userId, 123)
     }
 
@@ -616,7 +611,6 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       )
 
       val result = onlineTestRepo.nextApplicationReadyForPDFReportRetrieving().futureValue
-
       result.get mustBe OnlineTestApplicationWithCubiksUser(appIdWithUserId.applicationId, appIdWithUserId.userId, 123)
     }
   }
@@ -626,8 +620,8 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       val appIdWithUserId = createOnlineTest(UUID.randomUUID().toString, ApplicationStatuses.AllocationConfirmed)
 
       val result = onlineTestRepo.removeCandidateAllocationStatus(appIdWithUserId.applicationId).futureValue
-
-      result mustBe (())
+      val unit = ()
+      result mustBe unit
 
       val checkResult = onlineTestRepo.collection
         .find(BSONDocument("applicationId" -> appIdWithUserId.applicationId)).one[BSONDocument].futureValue
@@ -644,7 +638,6 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       createOnlineTestApplication(AppId, ApplicationStatuses.OnlineTestStarted)
 
       val result = onlineTestRepo.nextApplicationPassMarkProcessing("currentVersion").futureValue
-
       result mustBe empty
     }
 
@@ -696,7 +689,6 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
         xmlReportSavedOpt = Some(true), alreadyEvaluatedAgainstPassmarkVersionOpt = Some("currentVersion"))
 
       val result = onlineTestRepo.nextApplicationPassMarkProcessing("currentVersion").futureValue
-
       result mustBe empty
     }
   }
@@ -718,7 +710,6 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       )).futureValue
 
       val result = onlineTestRepo.findPassmarkEvaluation(appId).futureValue
-
       result mustBe OnlineTestPassmarkEvaluation(Red, Some(Amber), Some(Green), Some(Green), Some(Amber))
     }
 
@@ -731,7 +722,6 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       )).futureValue
 
       val exception = onlineTestRepo.findPassmarkEvaluation(appId).failed.futureValue
-
       exception mustBe OnlineTestFirstLocationResultNotFound(appId)
     }
 
@@ -741,7 +731,6 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       )).futureValue
 
       val exception = onlineTestRepo.findPassmarkEvaluation(appId).failed.futureValue
-
       exception mustBe OnlineTestPassmarkEvaluationNotFound(appId)
     }
   }
@@ -763,9 +752,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       startedProfile.startedDateTime mustBe defined
       application.isDefined mustBe true
       application.get.applicationStatus mustBe ApplicationStatuses.OnlineTestStarted
-
     }
-
   }
 
   def createApplication(appId: String, userId: String, frameworkId: String, appStatus: String, needsAdjustment: Boolean,
@@ -925,8 +912,6 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
     }
 
     result.futureValue
-
     appId
   }
-
 }
