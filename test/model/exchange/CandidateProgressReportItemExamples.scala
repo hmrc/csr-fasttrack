@@ -23,6 +23,7 @@ object CandidateProgressReportItemExamples {
   val PersonalDetailsCompleted = CandidateProgressReportItem(Some(ApplicationIdExamples.appId1),
     Some(ProgressStatuses.PersonalDetailsCompleted), List.empty, List.empty,
     None, None, None, None, Some(false), None
+
   )
   val SchemePreferencesCompleted = CandidateProgressReportItem(Some(ApplicationIdExamples.appId2),
     Some(ProgressStatuses.SchemesPreferencesCompleted), List(Scheme.Finance, Scheme.DigitalAndTechnology),
