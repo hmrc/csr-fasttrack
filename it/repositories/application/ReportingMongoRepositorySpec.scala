@@ -50,15 +50,35 @@ class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory 
       val result = repository.applicationsForCandidateProgressReport(frameworkId).futureValue
 
       result must not be empty
-      result.head mustBe ApplicationForCandidateProgressReport(Some(appId), userId, Some("assistance_details_completed"),
-        List(Scheme.Commercial, Scheme.Business), List("2643743", "2657613"), Some("Yes"), Some(false), Some(true),
-        Some(true), Some(Adjustments(typeOfAdjustments=Some(List("onlineTestsTimeExtension", "onlineTestsOther",
-          "assessmentCenterTimeExtension", "coloured paper", "braille test paper", "room alone", "rest breaks",
-          "reader/assistant", "stand up and move around", "assessmentCenterOther")), adjustmentsConfirmed = Some(true),
-          onlineTests = Some(AdjustmentDetail(extraTimeNeeded=Some(25), extraTimeNeededNumerical=Some(60), otherInfo=Some("other adjustments"))),
-          assessmentCenter = Some(AdjustmentDetail(extraTimeNeeded=Some(30), extraTimeNeededNumerical=None,
-            otherInfo=Some("Other assessment centre adjustment")))
-        )), Some(false))
+      result.head mustBe ApplicationForCandidateProgressReport(
+        applicationId = Some(appId),
+        userId = userId,
+        progress = Some("assistance_details_completed"),
+        schemes = List(Scheme.Commercial,Scheme.Business),
+        locationIds = List("2643743", "2657613"),
+        hasDisability = Some("Yes"),
+        gis = Some(false),
+        onlineAdjustments = Some(true),
+        assessmentCentreAdjustments = Some(true),
+        adjustments = Some(Adjustments(
+          typeOfAdjustments=Some(List("onlineTestsTimeExtension", "onlineTestsOther", "assessmentCenterTimeExtension",
+            "coloured paper", "braille test paper", "room alone", "rest breaks", "reader/assistant",
+            "stand up and move around", "assessmentCenterOther")),
+          adjustmentsConfirmed = Some(true),
+          onlineTests = Some(AdjustmentDetail(
+            extraTimeNeeded = Some(25),
+            extraTimeNeededNumerical = Some(60),
+            otherInfo = Some("other adjustments"))
+          ),
+          assessmentCenter = Some(AdjustmentDetail(
+            extraTimeNeeded = Some(30),
+            extraTimeNeededNumerical = None,
+            otherInfo = Some("Other assessment centre adjustment"))
+          )
+        )),
+        civilServant = Some(false),
+        assessmentCentreIndicator = None
+      )
     }
   }
 
@@ -74,7 +94,7 @@ class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory 
           "scheme_locations_completed" -> true,
           "assistance_details_completed" -> true,
           "questionnaire" -> BSONDocument(
-           "start_questionnaire" -> true,
+            "start_questionnaire" -> true,
             "diversity_questions_completed" -> true
           )
         )
@@ -87,16 +107,35 @@ class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory 
 
       result must not be empty
 
-      result.head mustBe ApplicationForCandidateProgressReport(Some(appId), userId, Some("diversity_questions_completed"),
-        List(Scheme.Commercial, Scheme.Business), List("2643743", "2657613"), Some("Yes"), Some(false), Some(true),
-        Some(true), Some(Adjustments(typeOfAdjustments=Some(List("onlineTestsTimeExtension", "onlineTestsOther",
-          "assessmentCenterTimeExtension", "coloured paper", "braille test paper", "room alone", "rest breaks",
-          "reader/assistant", "stand up and move around", "assessmentCenterOther")), adjustmentsConfirmed = Some(true),
-          onlineTests = Some(AdjustmentDetail(extraTimeNeeded=Some(25), extraTimeNeededNumerical=Some(60),
-            otherInfo=Some("other adjustments"))),
-        assessmentCenter = Some(AdjustmentDetail(extraTimeNeeded=Some(30), extraTimeNeededNumerical=None,
-          otherInfo=Some("Other assessment centre adjustment")))
-        )), Some(false))
+      result.head mustBe ApplicationForCandidateProgressReport(
+        applicationId = Some(appId),
+        userId = userId,
+        progress = Some("diversity_questions_completed"),
+        schemes = List(Scheme.Commercial, Scheme.Business),
+        locationIds = List("2643743", "2657613"),
+        hasDisability = Some("Yes"),
+        gis = Some(false),
+        onlineAdjustments = Some(true),
+        assessmentCentreAdjustments = Some(true),
+        adjustments = Some(Adjustments(
+          typeOfAdjustments=Some(List("onlineTestsTimeExtension", "onlineTestsOther", "assessmentCenterTimeExtension",
+            "coloured paper", "braille test paper", "room alone", "rest breaks", "reader/assistant",
+            "stand up and move around", "assessmentCenterOther")),
+          adjustmentsConfirmed = Some(true),
+          onlineTests = Some(AdjustmentDetail(
+            extraTimeNeeded = Some(25),
+            extraTimeNeededNumerical = Some(60),
+            otherInfo = Some("other adjustments"))
+          ),
+          assessmentCenter = Some(AdjustmentDetail(
+            extraTimeNeeded = Some(30),
+            extraTimeNeededNumerical = None,
+            otherInfo = Some("Other assessment centre adjustment"))
+          )
+        )),
+        civilServant = Some(false),
+        assessmentCentreIndicator = None
+      )
     }
   }
 }

@@ -77,7 +77,8 @@ object ReportExchangeObjects {
                                                     onlineAdjustments: Option[Boolean],
                                                     assessmentCentreAdjustments: Option[Boolean],
                                                     adjustments: Option[Adjustments],
-                                                    civilServant: Option[Boolean]
+                                                    civilServant: Option[Boolean],
+                                                    assessmentCentreIndicator: Option[AssessmentCentreIndicator]
                                                   )
 
   case class ReportWithPersonalDetails(
