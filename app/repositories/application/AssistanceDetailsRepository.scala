@@ -32,6 +32,8 @@ trait AssistanceDetailsRepository {
   def update(applicationId: String, userId: String, ad: AssistanceDetails): Future[Unit]
 
   def find(applicationId: String): Future[AssistanceDetails]
+
+  def find(cubiksUserId: Int): Future[AssistanceDetails]
 }
 
 class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
@@ -64,6 +66,18 @@ class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
         document.getAs[AssistanceDetails](AssistanceDetailsCollection).get
 
       case _ => throw AssistanceDetailsNotFound(applicationId)
+    }
+  }
+
+  override def find(cubiksUserId: Int): Future[AssistanceDetails] = {
+    val query = BSONDocument("online-tests.cubiksUserId" -> cubiksUserId)
+    val projection = BSONDocument(AssistanceDetailsCollection -> 1, "_id" -> 0)
+
+    collection.find(query, projection).one[BSONDocument] map {
+      case Some(document) if document.getAs[BSONDocument](AssistanceDetailsCollection).isDefined =>
+        document.getAs[AssistanceDetails](AssistanceDetailsCollection).get
+
+      case _ => throw AssistanceDetailsNotFound(s"cubiksUserId=$cubiksUserId")
     }
   }
 }

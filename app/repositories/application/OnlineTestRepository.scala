@@ -91,7 +91,7 @@ trait OnlineTestRepository {
 
   def startOnlineTest(cubiksUserId: Int): Future[Unit]
 
-  def completeOnlineTest(cubiksUserId: Int): Future[Unit]
+  def completeOnlineTest(cubiksUserId: Int, assessmentId: Int, isGis: Boolean): Future[Unit]
 }
 
 // scalastyle:off number.of.methods
@@ -238,7 +238,37 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     collection.update(query, applicationStatusBSON, upsert = false).map { _ => () }
   }
 
-  override def completeOnlineTest(cubiksUserId: Int): Future[Unit] = {
+  override def completeOnlineTest(cubiksUserId: Int, assessmentId: Int, isGis: Boolean): Future[Unit] = {
+    val query  = BSONDocument(
+      "online-tests.cubiksUserId" -> cubiksUserId,
+      "applicationStatus" -> ApplicationStatuses.OnlineTestStarted
+    )
+
+    val update = BSONDocument(
+      "$push" -> BSONDocument(
+        "online-tests.completed" -> assessmentId
+      )
+    )
+
+    val validator = singleUpdateValidator(s"$cubiksUserId", actionDesc = "recording cubiks test completion",
+      CannotUpdateCubiksTest(s"Cant update test with cubiksId $cubiksUserId"))
+    val result = for {
+      _ <- collection.update(query, update, upsert = false) map validator
+      testProfile <- getCubiksTestProfile(cubiksUserId)
+    } yield {
+      val allAssessments = if (isGis) cubiksGatewayConfig.gisAssessmentIds else cubiksGatewayConfig.nonGisAssessmentIds
+      val isCompleted = testProfile.hasAllAssessmentsCompleted(allAssessments)
+      if (isCompleted) {
+        completeAllAssessments(cubiksUserId)
+      } else {
+        Future.successful(())
+      }
+    }
+
+    result.flatMap(identity)
+  }
+
+  private def completeAllAssessments(cubiksUserId: Int): Future[Unit] = {
     val query  = BSONDocument(
       "online-tests.cubiksUserId" -> cubiksUserId,
       "applicationStatus" -> ApplicationStatuses.OnlineTestStarted

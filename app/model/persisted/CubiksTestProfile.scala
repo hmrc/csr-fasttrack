@@ -16,6 +16,7 @@
 
 package model.persisted
 
+import config.CubiksGatewayConfig
 import org.joda.time.DateTime
 import play.api.libs.json.Json
 import reactivemongo.bson.{ BSONDocument, BSONHandler, Macros }
@@ -32,8 +33,20 @@ case class CubiksTestProfile(
   startedDateTime: Option[DateTime] = None,
   completedDateTime: Option[DateTime] = None,
   xmlReportSaved: Boolean = false,
-  pdfReportSaved: Boolean = false
-)
+  pdfReportSaved: Boolean = false,
+  completed: Option[List[Int]] = None
+) {
+
+  // There are two ways to determine if the test profile is completed
+  // 1. If it has all assessments id in the "completed" List
+  // 2. If there is completedDate set (by token completion)
+  // There may be the case where completed List does not have all assessments,
+  // but the test is considered as completed, as it may be completed by token
+  def hasAllAssessmentsCompleted(allAssessmentIds: List[Int]): Boolean = {
+    val completedAssessments = completed.getOrElse(Nil)
+    allAssessmentIds.nonEmpty && allAssessmentIds.forall(id => completedAssessments.contains(id))
+  }
+}
 
 object CubiksTestProfile {
   implicit val format = Json.format[CubiksTestProfile]

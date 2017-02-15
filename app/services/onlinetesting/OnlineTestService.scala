@@ -171,16 +171,6 @@ trait OnlineTestService {
     }
   }
 
-  def completeOnlineTest(cubiksUserId: Int): Future[Unit] = {
-    otRepository.completeOnlineTest(cubiksUserId)
-  }
-
-  def consumeOnlineTestToken(token: String): Future[Unit] =  {
-    otRepository.getCubiksTestProfileByToken(token) flatMap { cubiksProfile =>
-      otRepository.completeOnlineTest(cubiksProfile.cubiksUserId)
-    }
-  }
-
   private def registerApplicant(application: OnlineTestApplication, token: String): Future[Int] = {
     val preferredName = CubiksSanitizer.sanitizeFreeText(application.preferredName)
     val registerApplicant = RegisterApplicant(preferredName, "", token + "@" + gatewayConfig.emailDomain)
