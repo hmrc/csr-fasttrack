@@ -231,7 +231,10 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   override def consumeToken(token: String): Future[Unit] = {
-    val query = BSONDocument("online-tests.token" -> token)
+    val query = BSONDocument(
+      "online-tests.token" -> token,
+      "applicationStatus" -> ApplicationStatuses.OnlineTestStarted
+    )
 
     val applicationStatusBSON = applicationStatus(ApplicationStatuses.OnlineTestCompleted)
 
