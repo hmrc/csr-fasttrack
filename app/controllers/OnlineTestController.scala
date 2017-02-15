@@ -17,12 +17,12 @@
 package controllers
 
 import model.Exceptions.CannotUpdateCubiksTest
-import model.{ApplicationStatuses, Commands}
-import play.api.libs.json.{JsValue, Json}
+import model.{ ApplicationStatuses, Commands }
+import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc._
 import repositories._
-import repositories.application.OnlineTestRepository
-import services.onlinetesting.{OnlineTestExtensionService, OnlineTestService}
+import repositories.application.{ AssistanceDetailsRepository, OnlineTestRepository }
+import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -39,14 +39,15 @@ object OnlineTestController extends OnlineTestController {
   override val onlineTestingService: OnlineTestService = OnlineTestService
   override val onlineTestExtensionService: OnlineTestExtensionService = OnlineTestExtensionService
   override val onlineTestPDFReportRepo: OnlineTestPDFReportRepository = onlineTestPDFReportRepository
+  override val assistanceDetailsRepo: AssistanceDetailsRepository = assistanceDetailsRepository
 }
 
 trait OnlineTestController extends BaseController {
-
   val onlineTestingRepo: OnlineTestRepository
   val onlineTestingService: OnlineTestService
   val onlineTestExtensionService: OnlineTestExtensionService
   val onlineTestPDFReportRepo: OnlineTestPDFReportRepository
+  val assistanceDetailsRepo: AssistanceDetailsRepository
 
   val resetTestPermittedStatuses = List(
     ApplicationStatuses.OnlineTestInvited,
@@ -84,12 +85,16 @@ trait OnlineTestController extends BaseController {
       }
   }
 
-  def completeOnlineTest(cubiksUserId: Int): Action[AnyContent] = Action.async { implicit request =>
-    onlineTestingRepo.completeOnlineTest(cubiksUserId).map { _ =>
+  def completeOnlineTest(cubiksUserId: Int, assessmentId: Int): Action[AnyContent] = Action.async { implicit request =>
+    (for {
+      assistanceDetails <- assistanceDetailsRepo.find(cubiksUserId)
+      isGis = assistanceDetails.isGis
+      _ <- onlineTestingRepo.completeOnlineTest(cubiksUserId, assessmentId, isGis)
+    } yield {
       Ok
-    } recover {
-        case _: CannotUpdateCubiksTest => NotFound
-      }
+    }).recover {
+      case _: CannotUpdateCubiksTest => NotFound
+    }
   }
 
   /**

@@ -28,7 +28,9 @@ case class AssistanceDetails(hasDisability: String,
                              needsSupportForOnlineAssessmentDescription: Option[String],
                              needsSupportAtVenue: Boolean,
                              needsSupportAtVenueDescription: Option[String]
-                             )
+                             ) {
+  def isGis = guaranteedInterview.getOrElse(false)
+}
 
 object AssistanceDetails {
   implicit val assistanceDetailsFormat = Json.format[AssistanceDetails]

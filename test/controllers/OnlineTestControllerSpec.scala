@@ -26,12 +26,12 @@ import model.PersistedObjects.ContactDetails
 import model.exchange.OnlineTest
 import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
-import org.mockito.Matchers.{any, eq => eqTo}
+import org.mockito.Matchers.{ any, eq => eqTo }
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories.application.OnlineTestRepository
+import repositories.application.{ AssistanceDetailsRepository, OnlineTestRepository }
 import repositories.OnlineTestPDFReportRepository
 import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
 import testkit.MockitoImplicits.OngoingStubbingExtensionUnit
@@ -175,6 +175,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     val onlineTestExtensionServiceMock = mock[OnlineTestExtensionService]
 
     val onlineTestPDFReportRepoMock = mock[OnlineTestPDFReportRepository]
+    val assistanceDetailsRepositoryMock = mock[AssistanceDetailsRepository]
     val cubiksGatewayClientMock = mock[CubiksGatewayClient]
     val emailClientMock = mock[EmailClient]
 
@@ -213,7 +214,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
       override val onlineTestingService = mockOnlineTestService
       override val onlineTestExtensionService = onlineTestExtensionServiceMock
       override val onlineTestPDFReportRepo = onlineTestPDFReportRepoMock
-
+      override val assistanceDetailsRepo = assistanceDetailsRepositoryMock
     }
 
     def createOnlineTestRequest(userId: String) = {
