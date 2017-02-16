@@ -16,7 +16,7 @@
 
 package services.testdata
 
-import model.ProgressStatuses
+import model.{ ApplicationStatuses, ProgressStatuses }
 import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository }
@@ -44,7 +44,10 @@ trait InProgressAssistanceDetailsStatusGenerator extends ConstructiveGenerator {
       _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get,
         ProgressStatuses.AssistanceDetailsCompletedProgress)
     } yield {
-      candidateInPreviousStatus.copy(assistanceDetails = Some(assistanceDetails))
+      candidateInPreviousStatus.copy(
+        applicationStatus = ApplicationStatuses.InProgress,
+        assistanceDetails = Some(assistanceDetails)
+      )
     }
   }
 }

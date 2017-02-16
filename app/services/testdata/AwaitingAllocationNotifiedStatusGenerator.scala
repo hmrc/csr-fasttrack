@@ -17,6 +17,7 @@
 package services.testdata
 
 import model.ApplicationStatuses
+import model.ApplicationStatuses.EnumVal
 import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.OnlineTestRepository
@@ -24,20 +25,22 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object OnlineTestCompletedStatusGenerator extends OnlineTestCompletedStatusGenerator {
-  override val previousStatusGenerator = OnlineTestStartedStatusGenerator
+object AwaitingAllocationNotifiedStatusGenerator extends StatusUpdateGenerator {
+  override val previousStatusGenerator = AwaitingAllocationStatusGenerator
   override val otRepository = onlineTestRepository
+  override val newApplicationStatus: EnumVal = ApplicationStatuses.AwaitingAllocationNotified
 }
 
-trait OnlineTestCompletedStatusGenerator extends ConstructiveGenerator {
+trait StatusUpdateGenerator extends ConstructiveGenerator {
   val otRepository: OnlineTestRepository
+  val newApplicationStatus: ApplicationStatuses.EnumVal
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      _ <- otRepository.consumeToken(candidateInPreviousStatus.onlineTestProfile.get.token)
+      _ <- otRepository.updateStatus(candidateInPreviousStatus.userId, newApplicationStatus)
     } yield {
-      candidateInPreviousStatus.copy(applicationStatus = ApplicationStatuses.OnlineTestCompleted)
+      candidateInPreviousStatus.copy(applicationStatus = newApplicationStatus)
     }
   }
 }

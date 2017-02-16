@@ -45,7 +45,7 @@ trait FailedToAttendStatusGenerator extends ConstructiveGenerator {
       _ <- aasRepository.save(CandidateScoresAndFeedback(candidateInPreviousStatus.applicationId.get, Some(false), true))
       _ <- aRepository.updateStatus(candidateInPreviousStatus.applicationId.get, ApplicationStatuses.FailedToAttend)
     } yield {
-      candidateInPreviousStatus
+      candidateInPreviousStatus.copy(applicationStatus = ApplicationStatuses.FailedToAttend)
     }
 
   }
