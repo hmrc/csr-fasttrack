@@ -69,7 +69,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   override def findApplicationsForAssessmentAllocation(locations: List[String], start: Int,
     end: Int): Future[ApplicationForAssessmentAllocationResult] = {
     Future.successful(ApplicationForAssessmentAllocationResult(List(ApplicationForAssessmentAllocation("firstName", "lastName", "userId1",
-      "applicationId1", No, DateTime.now)), 1))
+      "applicationId1", needsAdjustment = false, DateTime.now, 1988)), 1))
   }
 
   override def submit(applicationId: String): Future[Unit] = Future.successful(Unit)

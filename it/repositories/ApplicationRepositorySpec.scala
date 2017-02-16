@@ -94,7 +94,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
   "find applications for assessment allocation" must {
     "return an empty list when there are no applications" in {
       lazy val testData = new TestDataMongoRepository()
-      testData.createApplications(0, onlyAwaitingAllocation = false).futureValue
+      testData.createApplications(0).futureValue
 
       val result = applicationRepo.findApplicationsForAssessmentAllocation(List("London"), 0, 5).futureValue
       result mustBe a[ApplicationForAssessmentAllocationResult]
@@ -102,7 +102,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     }
     "return an empty list when there are no applications awaiting for allocation" in {
       lazy val testData = new TestDataMongoRepository()
-      testData.createApplications(200, onlyAwaitingAllocation = false).futureValue
+      testData.createApplications(200).futureValue
 
       val result = applicationRepo.findApplicationsForAssessmentAllocation(List("London"), 0, 5).futureValue
       result mustBe a[ApplicationForAssessmentAllocationResult]
@@ -110,7 +110,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     }
     "return a one item list when there are applications awaiting for allocation and start item and end item is the same" in {
       lazy val testData = new TestDataMongoRepository()
-      testData.createApplications(200, onlyAwaitingAllocation = true).futureValue
+      testData.createApplications(200, onlyAwaitingAllocation = true)
 
       val result =  applicationRepo.findApplicationsForAssessmentAllocation(List("London"), 2, 2).futureValue
       result mustBe a[ApplicationForAssessmentAllocationResult]
@@ -118,7 +118,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     }
     "return a non empty list when there are applications" in {
       lazy val testData = new TestDataMongoRepository()
-      testData.createApplications(200, onlyAwaitingAllocation = true).futureValue
+      testData.createApplications(200, onlyAwaitingAllocation = true)
 
       val result =  applicationRepo.findApplicationsForAssessmentAllocation(List("London"), 0, 5).futureValue
       result mustBe a[ApplicationForAssessmentAllocationResult]
