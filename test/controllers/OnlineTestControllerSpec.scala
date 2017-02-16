@@ -21,6 +21,7 @@ import connectors.ExchangeObjects._
 import connectors.{ CubiksGatewayClient, EmailClient }
 import model.ApplicationStatuses
 import model.Commands.Address
+import model.Exceptions.CannotUpdateCubiksTest
 import model.OnlineTestCommands.OnlineTestApplication
 import model.PersistedObjects.ContactDetails
 import model.exchange.OnlineTest
@@ -74,6 +75,25 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
       ))
 
       status(result) must be(200)
+    }
+  }
+
+  "Start Online Test Status" must {
+
+    "return 200" in new TestFixture {
+      when(mockOnlineTestService.startOnlineTest(any[Int])).thenReturn(Future.successful(unit))
+
+      val result = TestOnlineTestController.startOnlineTest(1234)(createOnlineTestStartRequest(1234)).run
+
+      status(result) mustBe 200
+    }
+
+    "return 404 if the cubiks test does not exist" in new TestFixture {
+      when(mockOnlineTestService.startOnlineTest(any[Int])).thenReturn(Future.failed(CannotUpdateCubiksTest("1234")))
+
+      val result = TestOnlineTestController.startOnlineTest(1234)(createOnlineTestStartRequest(1234)).run
+
+      status(result) mustBe 404
     }
   }
 
@@ -226,6 +246,10 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
       val json = Json.parse(jsonString)
       FakeRequest(Helpers.POST, controllers.routes.OnlineTestController.onlineTestStatusUpdate(userId).url, FakeHeaders(), json)
         .withHeaders("Content-Type" -> "application/json")
+    }
+
+    def createOnlineTestStartRequest(cubiksUserId: Int) = {
+      FakeRequest(Helpers.PUT, controllers.routes.OnlineTestController.startOnlineTest(cubiksUserId).url, FakeHeaders(), "")
     }
 
     def createOnlineTestCompleteRequest(token: String) = {

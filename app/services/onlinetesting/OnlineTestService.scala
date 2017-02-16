@@ -171,6 +171,16 @@ trait OnlineTestService {
     }
   }
 
+  def startOnlineTest(cubiksUserId: Int): Future[Unit] = {
+    otRepository.getCubiksTestProfile(cubiksUserId) flatMap { cubiksTest =>
+      if (cubiksTest.startedDateTime.isDefined) {
+        Future.successful(())
+      } else {
+        otRepository.startOnlineTest(cubiksUserId)
+      }
+    }
+  }
+
   private def registerApplicant(application: OnlineTestApplication, token: String): Future[Int] = {
     val preferredName = CubiksSanitizer.sanitizeFreeText(application.preferredName)
     val registerApplicant = RegisterApplicant(preferredName, "", token + "@" + gatewayConfig.emailDomain)
@@ -270,8 +280,8 @@ trait OnlineTestService {
   }
 
   private def toCandidateTestReport(appId: String, tests: Map[String, TestResult]) = {
-    val VerbalTestName = "Logiks Verbal and Numerical - Verbal"
-    val NumericalTestName = "Logiks Verbal and Numerical - Numerical"
+    val VerbalTestName = "Logiks Verbal and Numerical (Intermediate) - Verbal"
+    val NumericalTestName = "Logiks Verbal and Numerical (Intermediate) - Numerical"
     val CompetencyTestName = "Cubiks Factors"
     val SituationalTestName = "Civil Service Fast Track Apprentice SJQ"
 
