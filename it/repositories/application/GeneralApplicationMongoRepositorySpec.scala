@@ -16,23 +16,21 @@
 
 package repositories.application
 
-import common.Constants.{ No, Yes }
 import factories.UUIDFactory
+import model.ApplicationStatuses._
 import model.Exceptions.{ AdjustmentsCommentNotFound, LocationPreferencesNotFound, SchemePreferencesNotFound }
 import model._
-import model.ApplicationStatuses._
 import model.commands.ApplicationStatusDetails
 import org.joda.time.{ DateTime, DateTimeZone }
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
-import repositories.CollectionNames
-import repositories.BSONDateTimeHandler
+import repositories.{ BSONDateTimeHandler, CollectionNames }
 import services.GBTimeZoneService
 import testkit.MongoRepositorySpec
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import language.postfixOps
+import scala.language.postfixOps
 
 class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory {
 
@@ -116,7 +114,7 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
       val appId = generateUUID()
       createMinimumApplication(userId, appId, "FastTrack")
 
-      an[SchemePreferencesNotFound] must be thrownBy {
+      an[SchemePreferencesNotFound] mustBe thrownBy {
         Await.result(repository.getSchemes(appId), 5 seconds)
       }
     }
@@ -126,7 +124,7 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
       val appId = generateUUID()
       createMinimumApplication(userId, appId, "FastTrack")
 
-      an[LocationPreferencesNotFound] must be thrownBy {
+      an[LocationPreferencesNotFound] mustBe thrownBy {
         Await.result(repository.getSchemeLocations(appId), 5 seconds)
       }
     }
@@ -228,7 +226,6 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
           overrideSubmissionDeadline mustBe None
       }
     }
-
   }
 
   def createApplicationWithAllFields(userId: String, appId: String, frameworkId: String,

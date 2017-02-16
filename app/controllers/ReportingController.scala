@@ -18,23 +18,14 @@ package controllers
 
 import akka.stream.scaladsl.Source
 import connectors.{ AuthProviderClient, ExchangeObjects }
-import model.{ ApplicationStatusOrder, ProgressStatuses, UniqueIdentifier }
-import connectors.AuthProviderClient
-import model._
-import model.Commands._
-import model.ApplicationStatusOrder
 import model.Commands.{ CsvExtract, _ }
 import model.PersistedObjects.ContactDetailsWithId
-import model.PersistedObjects.Implicits._
 import model.ReportExchangeObjects.Implicits._
 import model.ReportExchangeObjects.{ Implicits => _, _ }
 import model.report.DiversityReportItem
-import org.joda.time.DateTime
+import model.{ ApplicationStatusOrder, ProgressStatuses, UniqueIdentifier }
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
-import play.api.mvc.{ Action, AnyContent, Request }
-import repositories.application.ReportingRepository
-import repositories.{ QuestionnaireRepository, application, _ }
 import play.api.libs.streams.Streams
 import play.api.mvc.{ Action, AnyContent, Request, Result }
 import repositories.application.{ PreviousYearCandidatesDetailsRepository, ReportingRepository }
@@ -242,7 +233,7 @@ trait ReportingController extends BaseController {
                                             allContactDetails: Map[String, ContactDetailsWithId],
                                             allLocations: List[LocationSchemes]): Future[List[CandidateProgressReportItem]] = {
     Future {
-      val applicationsMap = applications.map(application => (application.userId -> application)).toMap
+      val applicationsMap = applications.map(application => application.userId -> application).toMap
       users.map { user => {
         val reportItem = applicationsMap.get(UniqueIdentifier(user.userId)).map { application => {
           val fsacIndicatorVal = allContactDetails.get(user.userId.toString()).flatMap { contactDetails =>

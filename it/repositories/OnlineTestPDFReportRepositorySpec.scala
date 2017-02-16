@@ -37,7 +37,7 @@ class OnlineTestPDFReportRepositorySpec extends MongoRepositorySpec {
       val indexes = indexesWithFields(repo)
       indexes must contain (List("_id"))
       indexes must contain (List("applicationId"))
-      indexes.size must be (2)
+      indexes.size mustBe 2
     }
 
   }
@@ -45,7 +45,7 @@ class OnlineTestPDFReportRepositorySpec extends MongoRepositorySpec {
   "get" should {
     "return no online test pdf report if online-test-pdf-report collection is empty" in {
       val result = onlineTestPDFReportRepo.get(ApplicationId1).futureValue
-      result must be(None)
+      result mustBe None
     }
   }
 
@@ -53,13 +53,13 @@ class OnlineTestPDFReportRepositorySpec extends MongoRepositorySpec {
     "return no online test pdf report if report is not found" in {
       onlineTestPDFReportRepo.save(ApplicationId1, Content)
       val result = onlineTestPDFReportRepo.get(OnlineTestPDFReportNotFound).futureValue
-      result must be(None)
+      result mustBe None
     }
 
     "return online test pdf report when report exist and there is only one report" in {
       onlineTestPDFReportRepo.save(ApplicationId1, Content).futureValue
       val result = onlineTestPDFReportRepo.get(ApplicationId1).futureValue
-      result.get.deep must be (Content.deep)
+      result.get.deep mustBe Content.deep
     }
 
     "return corresponding online test pdf report when report exist and there are several reports" in {
@@ -67,7 +67,7 @@ class OnlineTestPDFReportRepositorySpec extends MongoRepositorySpec {
       onlineTestPDFReportRepo.save(ApplicationId2, Content).futureValue
 
       val result = onlineTestPDFReportRepo.get(ApplicationId2).futureValue
-      result.get.deep must be (Content.deep)
+      result.get.deep mustBe Content.deep
     }
   }
 

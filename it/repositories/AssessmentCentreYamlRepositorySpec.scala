@@ -21,7 +21,6 @@ import org.joda.time.LocalDate
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.Logger
-import play.test.WithApplication
 import testkit.IntegrationSpec
 
 class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSugar with OneAppPerSuite {
@@ -31,8 +30,8 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
     "return non empty mapping" in {
       val mapping = AssessmentCentreYamlRepository.locationsAndAssessmentCentreMapping.futureValue
       mapping must not be empty
-      mapping("London") must be("London")
-      mapping("Cardiff") must be("Bristol")
+      mapping("London") mustBe "London"
+      mapping("Cardiff") mustBe "Bristol"
     }
 
     "be consistent with regions-locations-frameworks" in {
@@ -50,10 +49,10 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
       }
 
       withClue("missingLocationsInAssessmentCentresMapping") {
-        missingLocationsInAssessmentCentresMapping must be(empty)
+        missingLocationsInAssessmentCentresMapping mustBe empty
       }
       withClue("missingLocationsInFrameworkRepo") {
-        missingLocationsInFrameworkRepo must be(empty)
+        missingLocationsInFrameworkRepo mustBe empty
       }
     }
   }
@@ -63,14 +62,14 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
       val capacities = AssessmentCentreYamlRepository.assessmentCentreCapacities.futureValue
       capacities must not be empty
       val assessmentCapacity = capacities.head
-      assessmentCapacity.locationName must be("London")
+      assessmentCapacity.locationName mustBe "London"
       val venue = assessmentCapacity.venues.head
-      venue.venueName must be("London FTAC")
-      venue.venueDescription must be ("FTAC")
+      venue.venueName mustBe "London FTAC"
+      venue.venueDescription mustBe "FTAC"
       val capacityDate = venue.capacityDates.head
-      capacityDate.amCapacity must be(18)
-      capacityDate.pmCapacity must be(18)
-      capacityDate.date.toString(DateFormat) must be("3/5/17")
+      capacityDate.amCapacity mustBe 18
+      capacityDate.pmCapacity mustBe 18
+      capacityDate.date.toString(DateFormat) mustBe "3/5/17"
     }
 
     "reject invalid configuration" in {
@@ -98,7 +97,7 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
         exception mustBe a[NoSuchVenueDateException]
     }
 
-    "Return date capacity information for a venue on a date with valid inputs" is (pending)
+    "Return date capacity information for a venue on a date with valid inputs" is pending
 
   }
 
@@ -117,13 +116,13 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
       val capacities = repo.assessmentCentreCapacities.futureValue
       capacities must not be empty
       val assessmentCapacity = capacities.head
-      assessmentCapacity.locationName must be("London")
+      assessmentCapacity.locationName mustBe "London"
       val venue = assessmentCapacity.venues(0)
-      venue.venueName must be("London FTAC")
-      venue.venueDescription must be ("FTAC")
+      venue.venueName mustBe "London FTAC"
+      venue.venueDescription mustBe "FTAC"
       val capacityDate = venue.capacityDates.find(_.date == new LocalDate("2017-07-04")).get
-      capacityDate.amCapacity must be(18)
-      capacityDate.pmCapacity must be(18)
+      capacityDate.amCapacity mustBe 18
+      capacityDate.pmCapacity mustBe 18
     }
   }
 
@@ -134,5 +133,4 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
       l <- r.locations
     } yield l.name).toSet
   }
-
 }
