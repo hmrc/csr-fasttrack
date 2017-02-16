@@ -45,7 +45,7 @@ trait AssessmentScoresAcceptedStatusGenerator extends ConstructiveGenerator {
       appId = candidateInPreviousStatus.applicationId.get
       _ <- aRepository.updateStatus(appId, ApplicationStatuses.AssessmentScoresAccepted)
     } yield {
-      candidateInPreviousStatus
+      candidateInPreviousStatus.copy(applicationStatus = ApplicationStatuses.AssessmentScoresAccepted)
     }
   }
 }

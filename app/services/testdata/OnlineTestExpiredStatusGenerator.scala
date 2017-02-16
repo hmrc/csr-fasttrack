@@ -56,9 +56,12 @@ trait OnlineTestExpiredStatusGenerator extends ConstructiveGenerator {
       _ <- otRepository.storeOnlineTestProfileAndUpdateStatusToInvite(candidateInPreviousStatus.applicationId.get, onlineTestProfile)
       - <- otRepository.updateStatus(candidateInPreviousStatus.userId, ApplicationStatuses.OnlineTestExpired)
     } yield {
-      candidateInPreviousStatus.copy(onlineTestProfile = Some(
-        OnlineTestProfileResponse(onlineTestProfile.cubiksUserId, onlineTestProfile.token, onlineTestProfile.onlineTestUrl)
-      ))
+      candidateInPreviousStatus.copy(
+        applicationStatus = ApplicationStatuses.OnlineTestExpired,
+        onlineTestProfile = Some(
+          OnlineTestProfileResponse(onlineTestProfile.cubiksUserId, onlineTestProfile.token, onlineTestProfile.onlineTestUrl)
+        )
+      )
     }
   }
 }

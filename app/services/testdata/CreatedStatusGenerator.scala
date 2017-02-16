@@ -17,6 +17,7 @@
 package services.testdata
 
 import connectors.AuthProviderClient
+import model.ApplicationStatuses
 import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.GeneralApplicationRepository
@@ -39,6 +40,7 @@ trait CreatedStatusGenerator extends ConstructiveGenerator {
       applicationId <- createApplication(candidateInPreviousStatus.userId)
     } yield {
       candidateInPreviousStatus.copy(
+        applicationStatus = ApplicationStatuses.Created,
         applicationId = Some(applicationId)
       )
     }

@@ -38,7 +38,7 @@ trait OnlineTestFailedNotifiedStatusGenerator extends ConstructiveGenerator {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       _ <- otRepository.updateStatus(candidateInPreviousStatus.userId, ApplicationStatuses.OnlineTestFailedNotified)
     } yield {
-      candidateInPreviousStatus
+      candidateInPreviousStatus.copy(applicationStatus = ApplicationStatuses.OnlineTestFailedNotified)
     }
   }
 }
