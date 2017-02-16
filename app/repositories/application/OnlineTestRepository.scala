@@ -555,7 +555,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
 
     val deAllocationSet = BSONDocument("$set" -> {
       BSONDocument(
-        "applicationStatus" -> ApplicationStatuses.AwaitingAllocation,
+        "applicationStatus" -> ApplicationStatuses.AwaitingAllocationNotified,
         s"progress-status.${ProgressStatuses.AwaitingAllocationProgress}" -> true,
         s"progress-status-dates.${ProgressStatuses.AwaitingAllocationProgress}" -> LocalDate.now()
       )
