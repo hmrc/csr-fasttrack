@@ -38,17 +38,13 @@ import scala.concurrent.{ ExecutionContext, Future }
 class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with MockitoSugar with ScalaFutures {
   implicit val ec: ExecutionContext = ExecutionContext.global
 
-  val ApplicationId = "1111-1111"
-  val withdrawApplicationRequest = WithdrawApplicationRequest("reason", Some("other reason"), "Candidate")
-  val auditDetails = Map("applicationId" -> ApplicationId, "withdrawRequest" -> withdrawApplicationRequest.toString)
-
   "withdraw an application" should {
     "work and log audit event" in new ApplicationServiceFixture {
       val result = applicationService.withdraw(ApplicationId, withdrawApplicationRequest)
       result.futureValue mustBe (())
 
       verify(appAssessServiceMock).deleteApplicationAssessment(eqTo(ApplicationId))
-      verify(auditServiceMock).logEventNoRequest("ApplicationWithdrawn", auditDetails)
+      verify(auditServiceMock).logEventNoRequest("ApplicationWithdrawn", withdrawAuditDetails)
     }
   }
 
@@ -62,7 +58,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       result.futureValue mustBe (())
 
       verify(appAssessServiceMock).deleteApplicationAssessment(eqTo(ApplicationId))
-      verify(auditServiceMock).logEventNoRequest("ApplicationWithdrawn", auditDetails)
+      verify(auditServiceMock).logEventNoRequest("ApplicationWithdrawn", withdrawAuditDetails)
     }
   }
 
@@ -73,30 +69,31 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturn(Future.successful())
       when(personalDetailsRepositoryMock.update(any[String], any[String], any[PersonalDetails])).thenReturn(Future.successful())
 
-      val result = applicationService.editDetails(userId, applicationId, editedDetails)
+      val result = applicationService.editDetails(userId, ApplicationId, editedDetails)
       result.futureValue mustBe (())
 
       verify(contactDetailsRepositoryMock).find(eqTo(userId))
-      verify(personalDetailsRepositoryMock).find(applicationId)
+      verify(personalDetailsRepositoryMock).find(ApplicationId)
 
-      verify(personalDetailsRepositoryMock).update(eqTo(applicationId), eqTo(userId), eqTo(expectedPersonalDetails))
+      verify(personalDetailsRepositoryMock).update(eqTo(ApplicationId), eqTo(userId), eqTo(expectedPersonalDetails))
       verify(contactDetailsRepositoryMock).update(eqTo(userId), eqTo(expectedContactDetails))
-      verifyNoMoreInteractions(personalDetailsRepositoryMock, contactDetailsRepositoryMock)
+      verify(auditServiceMock).logEventNoRequest("ApplicationEdited", editAuditDetails)
+      verifyNoMoreInteractions(personalDetailsRepositoryMock, contactDetailsRepositoryMock, auditServiceMock)
     }
 
-    "edit candidate shout stop executing if an operation fails" in new ApplicationServiceFixture {
+    "stop executing if an operation fails" in new ApplicationServiceFixture {
       when(contactDetailsRepositoryMock.find(any[String])).thenReturn(failedFuture)
       when(personalDetailsRepositoryMock.find(any[String])).thenReturn(Future.successful(currentPersonalDetails))
       when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturn(Future.successful())
       when(personalDetailsRepositoryMock.update(any[String], any[String], any[PersonalDetails])).thenReturn(Future.successful())
 
-      val result = applicationService.editDetails(userId, applicationId, editedDetails).failed.futureValue
+      val result = applicationService.editDetails(userId, ApplicationId, editedDetails).failed.futureValue
       result mustBe (error)
 
       verify(contactDetailsRepositoryMock).find(eqTo(userId))
-      verify(personalDetailsRepositoryMock).find(applicationId)
+      verify(personalDetailsRepositoryMock).find(ApplicationId)
 
-      verifyNoMoreInteractions(personalDetailsRepositoryMock, contactDetailsRepositoryMock)
+      verifyNoMoreInteractions(personalDetailsRepositoryMock, contactDetailsRepositoryMock, auditServiceMock)
     }
 
   }
@@ -105,8 +102,9 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
     import model.PersistedObjects.ContactDetails
     implicit val hc = HeaderCarrier()
 
+    val ApplicationId = "1111-1111"
     val userId = "a22b033f-846c-4712-9d19-357819f7491c"
-    val applicationId = "2a1046ce-2af7-4626-9052-3e01365ccd54"
+    val withdrawApplicationRequest = WithdrawApplicationRequest("reason", Some("other reason"), "Candidate")
 
     val appRepositoryMock = mock[GeneralApplicationRepository]
     val appAssessServiceMock = mock[ApplicationAssessmentService]
@@ -158,5 +156,8 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
 
     val error = new RuntimeException("Something bad happened")
     val failedFuture = Future.failed(error)
+
+    val withdrawAuditDetails = Map("applicationId" -> ApplicationId, "withdrawRequest" -> withdrawApplicationRequest.toString)
+    val editAuditDetails = Map("applicationId" -> ApplicationId, "editRequest" -> editedDetails.toString)
   }
 }

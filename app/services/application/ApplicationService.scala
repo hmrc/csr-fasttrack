@@ -75,7 +75,12 @@ trait ApplicationService {
               phone = editRequest.phone
             )) :: Nil
       )
-    } yield ()
+    } yield {
+      auditService.logEventNoRequest(
+        "ApplicationEdited",
+        Map("applicationId" -> applicationId, "editRequest" -> editRequest.toString)
+      )
+    }
   }
 
 }
