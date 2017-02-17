@@ -1,338 +1,102 @@
-London:
-  - London FTAC:
-      description: FTAC
-      capacities:
-         - date: 03/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 04/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 05/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 06/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 09/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 10/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 11/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 12/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 13/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 16/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 17/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 18/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 19/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 20/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 13/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 14/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 15/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 17/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 22/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 23/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 24/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 30/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 01/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 04/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 06/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 07/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 08/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 27/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 28/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 29/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 01/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 02/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 03/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 04/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 05/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 09/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 10/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 11/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 12/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 15/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 16/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 17/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 18/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 19/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 22/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 23/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 24/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 25/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 26/08/17
-           amCapacity: 18
-           pmCapacity: 18
-
-Manchester:
-  - Manchester FTAC:
-      description: The Cresent Centre
-      capacities:
-         - date: 09/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 10/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 15/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 22/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 29/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 05/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 12/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 19/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 24/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 25/08/17
-           amCapacity: 18
-           pmCapacity: 18
-
 Newcastle:
-  - Newcastle Longbenton:
+  - Newcastle (FSAC):
+      description: FSAC
+      capacities:
+         - date: 4/4/2017
+           amCapacity: 18
+           pmCapacity: 18
+         - date: 5/4/2017
+           amCapacity: 18
+           pmCapacity: 18
+         - date: 10/4/2017
+           amCapacity: 18
+           pmCapacity: 18
+         - date: 18/4/2017
+           amCapacity: 18
+           pmCapacity: 18
+         - date: 21/4/2017
+           amCapacity: 18
+           pmCapacity: 18
+         - date: 28/4/2017
+           amCapacity: 18
+           pmCapacity: 18
+         - date: 3/5/2017
+           amCapacity: 18
+           pmCapacity: 18
+  - Newcastle (Longbenton):
       description: Longbenton
       capacities:
-         - date: 03/05/17
+         - date: 8/4/2017
+           amCapacity: 36
+           pmCapacity: 36
+         - date: 22/4/2017
+           amCapacity: 36
+           pmCapacity: 36
+         - date: 6/5/2017
+           amCapacity: 36
+           pmCapacity: 36
+         - date: 13/5/2017
+           amCapacity: 36
+           pmCapacity: 36
+         - date: 20/5/2017
+           amCapacity: 36
+           pmCapacity: 36
+         - date: 27/5/2017
+           amCapacity: 36
+           pmCapacity: 36
+         
+Manchester:
+  - Manchester (Trinity Bridge House):
+      description: Trinity Bridge House
+      capacities:
+         - date: 3/4/2017
            amCapacity: 18
            pmCapacity: 18
-         - date: 04/05/17
+         - date: 4/4/2017
            amCapacity: 18
            pmCapacity: 18
-         - date: 05/05/17
+         - date: 21/4/2017
            amCapacity: 18
            pmCapacity: 18
-         - date: 06/05/17
+         - date: 28/4/2017
            amCapacity: 18
            pmCapacity: 18
-         - date: 09/05/17
+         - date: 3/5/2017
            amCapacity: 18
            pmCapacity: 18
-         - date: 10/05/17
+         
+London:
+  - London (Euston Tower):
+      description: Euston Tower
+      capacities:
+         - date: 3/5/2017
            amCapacity: 18
            pmCapacity: 18
-         - date: 11/05/17
+         - date: 5/5/2017
            amCapacity: 18
            pmCapacity: 18
-         - date: 12/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 13/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 16/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 17/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 18/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 19/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 20/05/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 13/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 14/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 15/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 17/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 22/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 23/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 24/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 30/06/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 01/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 04/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 06/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 07/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 08/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 27/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 28/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 29/07/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 01/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 02/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 03/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 04/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 05/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 09/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 10/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 11/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 12/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 15/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 16/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 17/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 18/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 19/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 22/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 23/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 24/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 25/08/17
-           amCapacity: 18
-           pmCapacity: 18
-         - date: 26/08/17
-           amCapacity: 18
-           pmCapacity: 18
+  - London (FSAC):
+      description: FSAC
+      capacities:
+         - date: 8/4/2017
+           amCapacity: 36
+           pmCapacity: 36
+         - date: 22/4/2017
+           amCapacity: 36
+           pmCapacity: 36
+         - date: 29/4/2017
+           amCapacity: 36
+           pmCapacity: 36
+         - date: 6/5/2017
+           amCapacity: 36
+           pmCapacity: 36
+         - date: 13/5/2017
+           amCapacity: 36
+           pmCapacity: 36
+         - date: 20/5/2017
+           amCapacity: 36
+           pmCapacity: 36
+         - date: 27/5/2017
+           amCapacity: 36
+           pmCapacity: 36
+         
