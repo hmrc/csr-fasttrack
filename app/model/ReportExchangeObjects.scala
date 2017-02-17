@@ -33,9 +33,9 @@ object ReportExchangeObjects {
     preferredName: String,
     emailAddress: String,
     phoneNumber: String,
-    preferredLocation1: String,
+    dateOfBirth: LocalDate,
     adjustments: Option[String],
-    dateOfBirth: LocalDate
+    assessmentCentreLocation: String
   )
 
   case class CandidateProgressReportItem(applicationId: Option[UniqueIdentifier],
@@ -205,9 +205,9 @@ object ReportExchangeObjects {
                                           firstName: String,
                                           lastName: String,
                                           preferredName: String,
-                                          preferredLocation1: String,
+                                          dateOfBirth: LocalDate,
                                           adjustments: Option[String],
-                                          dateOfBirth: LocalDate
+                                          assessmentCentreLocation: String
                                         )
 
   case class TestResult(tScore: Option[Double], percentile: Option[Double], raw: Option[Double], sten: Option[Double])

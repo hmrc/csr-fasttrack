@@ -66,8 +66,8 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
     "edit candidate details in an happy path scenario" in new ApplicationServiceFixture {
       when(contactDetailsRepositoryMock.find(any[String])).thenReturn(Future.successful(currentContactDetails))
       when(personalDetailsRepositoryMock.find(any[String])).thenReturn(Future.successful(currentPersonalDetails))
-      when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturn(Future.successful())
-      when(personalDetailsRepositoryMock.update(any[String], any[String], any[PersonalDetails])).thenReturn(Future.successful())
+      when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturn(Future.successful(()))
+      when(personalDetailsRepositoryMock.update(any[String], any[String], any[PersonalDetails])).thenReturn(Future.successful(()))
 
       val result = applicationService.editDetails(userId, ApplicationId, editedDetails)
       result.futureValue mustBe (())
@@ -84,8 +84,8 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
     "stop executing if an operation fails" in new ApplicationServiceFixture {
       when(contactDetailsRepositoryMock.find(any[String])).thenReturn(failedFuture)
       when(personalDetailsRepositoryMock.find(any[String])).thenReturn(Future.successful(currentPersonalDetails))
-      when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturn(Future.successful())
-      when(personalDetailsRepositoryMock.update(any[String], any[String], any[PersonalDetails])).thenReturn(Future.successful())
+      when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturn(Future.successful(()))
+      when(personalDetailsRepositoryMock.update(any[String], any[String], any[PersonalDetails])).thenReturn(Future.successful(()))
 
       val result = applicationService.editDetails(userId, ApplicationId, editedDetails).failed.futureValue
       result mustBe (error)
