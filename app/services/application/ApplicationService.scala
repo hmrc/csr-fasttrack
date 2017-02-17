@@ -16,19 +16,21 @@
 
 package services.application
 
-import model.Commands.WithdrawApplicationRequest
+import model.Commands.{ CandidateEditableDetails, WithdrawApplicationRequest }
 import model.Exceptions.NotFoundException
 import repositories._
-import repositories.application.GeneralApplicationRepository
+import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
 import services.applicationassessment.ApplicationAssessmentService
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ ExecutionContext, Future }
 
 object ApplicationService extends ApplicationService {
   val appRepository = applicationRepository
   val appAssessService = ApplicationAssessmentService
   val auditService = AuditService
+  val personalDetailsRepository = repositories.personalDetailsRepository
+  val contactDetailsRepository = repositories.contactDetailsRepository
 }
 
 trait ApplicationService {
@@ -37,8 +39,10 @@ trait ApplicationService {
   val appRepository: GeneralApplicationRepository
   val appAssessService: ApplicationAssessmentService
   val auditService: AuditService
+  val contactDetailsRepository: ContactDetailsRepository
+  val personalDetailsRepository: PersonalDetailsRepository
 
-  def withdraw(applicationId: String, withdrawRequest: WithdrawApplicationRequest) = {
+  def withdraw(applicationId: String, withdrawRequest: WithdrawApplicationRequest): Future[Unit] = {
     appRepository.withdraw(applicationId, withdrawRequest).flatMap { result =>
       auditService.logEventNoRequest(
         "ApplicationWithdrawn",
@@ -49,4 +53,34 @@ trait ApplicationService {
       }
     }
   }
+
+  def editDetails(userId: String, applicationId: String, editRequest: CandidateEditableDetails): Future[Unit] = {
+    val currentCdFut = contactDetailsRepository.find(userId)
+    val currentPdFut = personalDetailsRepository.find(applicationId)
+    for {
+      currentCd <- currentCdFut
+      currentPd <- currentPdFut
+      _ <- Future.sequence(
+            personalDetailsRepository.update(applicationId, userId, currentPd.copy(
+              firstName = editRequest.firstName,
+              lastName = editRequest.lastName,
+              preferredName = editRequest.preferredName,
+              dateOfBirth = editRequest.dateOfBirth
+            )) ::
+            contactDetailsRepository.update(userId, currentCd.copy(
+              outsideUk = editRequest.outsideUk.getOrElse(editRequest.country.isDefined),
+              address = editRequest.address,
+              postCode = editRequest.postCode,
+              country = editRequest.country,
+              phone = editRequest.phone
+            )) :: Nil
+      )
+    } yield {
+      auditService.logEventNoRequest(
+        "ApplicationEdited",
+        Map("applicationId" -> applicationId, "editRequest" -> editRequest.toString)
+      )
+    }
+  }
+
 }
