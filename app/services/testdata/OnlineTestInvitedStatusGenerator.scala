@@ -19,6 +19,7 @@ package services.testdata
 import java.util.UUID
 
 import connectors.testdata.ExchangeObjects.OnlineTestProfileResponse
+import model.ApplicationStatuses
 import model.testdata.GeneratorConfig
 import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
@@ -50,9 +51,12 @@ trait OnlineTestInvitedStatusGenerator extends ConstructiveGenerator {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       _ <- otRepository.storeOnlineTestProfileAndUpdateStatusToInvite(candidateInPreviousStatus.applicationId.get, onlineTestProfile)
     } yield {
-      candidateInPreviousStatus.copy(onlineTestProfile = Some(
-        OnlineTestProfileResponse(onlineTestProfile.cubiksUserId, onlineTestProfile.token, onlineTestProfile.onlineTestUrl)
-      ))
+      candidateInPreviousStatus.copy(
+        applicationStatus = ApplicationStatuses.OnlineTestInvited,
+        onlineTestProfile = Some(
+          OnlineTestProfileResponse(onlineTestProfile.cubiksUserId, onlineTestProfile.token, onlineTestProfile.onlineTestUrl)
+        )
+      )
     }
   }
 }

@@ -19,7 +19,7 @@ package connectors.testdata
 import model.Commands.ApplicationAssessment
 import model.PersistedObjects.ContactDetails
 import model.exchange.AssistanceDetails
-import model.{ AssessmentCentreIndicator, Preferences }
+import model.{ ApplicationStatuses, AssessmentCentreIndicator, Preferences }
 import model.persisted.PersonalDetails
 import play.api.libs.json.Json
 import repositories.SchemeInfo
@@ -30,6 +30,7 @@ object ExchangeObjects {
     generationId: Int,
     userId: String,
     applicationId: Option[String],
+    applicationStatus: ApplicationStatuses.EnumVal,
     email: String,
     firstName: String,
     lastName: String,

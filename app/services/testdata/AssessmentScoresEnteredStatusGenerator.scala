@@ -60,7 +60,7 @@ trait AssessmentScoresEnteredStatusGenerator extends ConstructiveGenerator {
       _ <- aasRepository.save(getScoresAndFeedback(candidateInPreviousStatus.applicationId.get))
       _ <- aRepository.updateStatus(candidateInPreviousStatus.applicationId.get, ApplicationStatuses.AssessmentScoresEntered)
     } yield {
-      candidateInPreviousStatus
+      candidateInPreviousStatus.copy(applicationStatus = ApplicationStatuses.AssessmentScoresEntered)
     }
   }
 }

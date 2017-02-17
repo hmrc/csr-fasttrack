@@ -16,8 +16,9 @@
 
 package controllers
 
-import model.Exceptions.CannotUpdateCubiksTest
+import model.Exceptions.{ AssistanceDetailsNotFound, CannotUpdateCubiksTest, NotFoundException }
 import model.{ ApplicationStatuses, Commands }
+import play.api.Logger
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc._
 import repositories._
@@ -67,7 +68,9 @@ trait OnlineTestController extends BaseController {
     onlineTestingService.getOnlineTest(userId).map { onlineTest =>
       Ok(Json.toJson(onlineTest))
     } recover {
-      case _ => NotFound
+      case e =>
+        Logger.warn(s"Cannot get online test for userId=$userId", e)
+        NotFound
     }
   }
 
@@ -81,8 +84,13 @@ trait OnlineTestController extends BaseController {
     onlineTestingService.startOnlineTest(cubiksUserId).map { _ =>
       Ok
     } recover {
-        case _: CannotUpdateCubiksTest => NotFound
-      }
+        case _: CannotUpdateCubiksTest =>
+          Logger.warn(s"Online Test for cubiksUserId=$cubiksUserId cannot be updated")
+          NotFound
+        case _: NotFoundException =>
+          Logger.warn(s"cubiksUserId=$cubiksUserId not found for Start Online Test")
+          NotFound
+    }
   }
 
   def completeOnlineTest(cubiksUserId: Int, assessmentId: Int): Action[AnyContent] = Action.async { implicit request =>
@@ -93,7 +101,15 @@ trait OnlineTestController extends BaseController {
     } yield {
       Ok
     }).recover {
-      case _: CannotUpdateCubiksTest => NotFound
+      case _: AssistanceDetailsNotFound =>
+        Logger.warn(s"Assistance details for cubiksUserId=$cubiksUserId cannot be found in complete Online Test")
+        NotFound
+      case _: CannotUpdateCubiksTest =>
+        Logger.warn(s"Online Test for cubiksUserId=$cubiksUserId cannot be updated in complete Online Test")
+        NotFound
+      case e: NotFoundException =>
+        Logger.warn(s"Online Test for cubiksUserId=$cubiksUserId cannot be updated. Not found: ${e.getMessage}")
+        NotFound
     }
   }
 
