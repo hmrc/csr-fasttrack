@@ -44,7 +44,7 @@ Newcastle:
          - date: 27/5/2017
            amCapacity: 36
            pmCapacity: 36
-     
+         
 Manchester:
   - Manchester (Trinity Bridge House):
       description: Trinity Bridge House
@@ -64,7 +64,7 @@ Manchester:
          - date: 3/5/2017
            amCapacity: 18
            pmCapacity: 18
-     
+         
 London:
   - London (Euston Tower):
       description: Euston Tower
@@ -99,4 +99,4 @@ London:
          - date: 27/5/2017
            amCapacity: 36
            pmCapacity: 36
-     
+         
