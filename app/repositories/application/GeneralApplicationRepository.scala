@@ -372,7 +372,6 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
           "personal-details.firstName" -> true,
           "personal-details.lastName" -> true,
           "personal-details.dateOfBirth" -> true,
-          "assistance-details.needsSupportForOnlineAssessment" -> true,
           "assistance-details.needsSupportAtVenue" -> true,
           "online-tests.invitationDate" -> true
         )
@@ -734,7 +733,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val firstName = personalDetails.getAs[String]("firstName").get
     val lastName = personalDetails.getAs[String]("lastName").get
     val birthYear = personalDetails.getAs[LocalDate]("dateOfBirth").get.getYear
-    val needsAdjustment = doc.getAs[AssistanceDetails]("assistance-details").exists(_.needsSupportAtVenue)
+    val needsAdjustment = doc.getAs[BSONDocument]("assistance-details").flatMap(_.getAs[Boolean]("needsSupportAtVenue")).getOrElse(false)
     val onlineTestDetails = doc.getAs[BSONDocument]("online-tests").get
     val invitationDate = onlineTestDetails.getAs[DateTime]("invitationDate").get
 
