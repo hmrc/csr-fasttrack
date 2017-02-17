@@ -33,7 +33,7 @@ import model.Commands.Implicits.applicationAssessmentFormat
 import model.Exceptions.NotFoundException
 import model.{ ApplicationStatusOrder, Commands, ProgressStatuses }
 import org.joda.time.LocalDate
-import play.api.libs.json.Json
+import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent, Result }
 import repositories.AssessmentCentreLocation.assessmentCentreVenueFormat
 import repositories._
@@ -164,7 +164,7 @@ trait AssessmentScheduleController extends BaseController {
     }
   }
 
-  def allocate() = Action.async(parse.json) { implicit request =>
+  def allocate(): Action[JsValue] = Action.async(parse.json) { implicit request =>
     def allocateCandidate(allocation: ApplicationAssessment): Future[Unit] = {
       if (allocation.confirmed) {
         otRepository.saveCandidateAllocationStatus(allocation.applicationId, AllocationConfirmed, None)

@@ -114,10 +114,10 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
           ApplicationForAssessmentAllocationResult(
             List(
               ApplicationForAssessmentAllocation(
-                "firstName1", "lastName1", "userId1", "applicationId1", No, DateTime.now
+                "firstName1", "lastName1", "userId1", "applicationId1", needsAdjustment = false, DateTime.now, 1988
               ),
               ApplicationForAssessmentAllocation(
-                "firstName2", "lastName2", "userId2", "applicationId2", Yes, DateTime.now.minusDays(2)
+                "firstName2", "lastName2", "userId2", "applicationId2", needsAdjustment = true, DateTime.now.minusDays(2), 1988
               )
             ),
             2
@@ -679,10 +679,10 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         ApplicationForAssessmentAllocationResult(
           List(
             ApplicationForAssessmentAllocation(
-              "firstName1", "lastName1", "userId1", "applicationId1", No, DateTime.now
+              "firstName1", "lastName1", "userId1", "applicationId1", needsAdjustment = false, DateTime.now, 1988
             ),
             ApplicationForAssessmentAllocation(
-              "firstName2", "lastName2", "userId2", "applicationId2", Yes, DateTime.now.minusDays(2)
+              "firstName2", "lastName2", "userId2", "applicationId2", needsAdjustment = true, DateTime.now.minusDays(2), 1988
             )
           ), 2
         )
