@@ -36,13 +36,13 @@ trait PersonalDetailsRepository {
 
   val errorCode = 500
 
-  def update(applicationId: String, userId: String, personalDetails: PersonalDetails): Future[Unit]
+  def updatePersonalDetailsAndStatus(applicationId: String, userId: String, personalDetails: PersonalDetails): Future[Unit]
 
-  def update(appId: String, userId: String, personalDetails: PersonalDetails,
+  def updatePersonalDetailsAndStatus(appId: String, userId: String, personalDetails: PersonalDetails,
     requiredApplicationStatuses: Seq[ApplicationStatuses.EnumVal],
     newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit]
 
-  def updatePersonalDetailsOnly(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit]
+  def update(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit]
 
   def find(applicationId: String): Future[PersonalDetails]
 
@@ -54,7 +54,7 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
     PersonalDetails.persistedPersonalDetailsFormats, ReactiveMongoFormats.objectIdFormats)
     with PersonalDetailsRepository with ReactiveRepositoryHelpers {
 
-  override def update(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
+  override def updatePersonalDetailsAndStatus(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
 
     val persistedPersonalDetails = PersonalDetails(pd.firstName, pd.lastName, pd.preferredName, pd.dateOfBirth,
       pd.aLevel, pd.stemLevel, pd.civilServant, pd.department)
@@ -74,27 +74,10 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
     collection.update(query, personalDetailsBSON, upsert = false) map validator
   }
 
-  override def updatePersonalDetailsOnly(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
-
-    val persistedPersonalDetails = PersonalDetails(pd.firstName, pd.lastName, pd.preferredName, pd.dateOfBirth,
-      pd.aLevel, pd.stemLevel, pd.civilServant, pd.department)
-
-    val query = BSONDocument("applicationId" -> applicationId, "userId" -> userId)
-
-    val personalDetailsBSON = BSONDocument("$set" -> BSONDocument(
-      "personal-details" -> persistedPersonalDetails
-    ))
-
-    val validator = singleUpdateValidator(applicationId, actionDesc = "updating personal details",
-      PersonalDetailsNotFound(applicationId))
-
-    collection.update(query, personalDetailsBSON, upsert = false) map validator
-  }
-
-  def update(applicationId: String, userId: String, personalDetails: PersonalDetails,
-    requiredApplicationStatuses: Seq[ApplicationStatuses.EnumVal],
-    newApplicationStatus: ApplicationStatuses.EnumVal
-  ): Future[Unit] = {
+  def updatePersonalDetailsAndStatus(applicationId: String, userId: String, personalDetails: PersonalDetails,
+             requiredApplicationStatuses: Seq[ApplicationStatuses.EnumVal],
+             newApplicationStatus: ApplicationStatuses.EnumVal
+            ): Future[Unit] = {
     val PersonalDetailsCollection = "personal-details"
 
     val query = BSONDocument("$and" -> BSONArray(
@@ -115,6 +98,23 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
       PersonalDetailsNotFound(applicationId))
 
     collection.update(query, personalDetailsBSON) map validator
+  }
+
+  override def update(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
+
+    val persistedPersonalDetails = PersonalDetails(pd.firstName, pd.lastName, pd.preferredName, pd.dateOfBirth,
+      pd.aLevel, pd.stemLevel, pd.civilServant, pd.department)
+
+    val query = BSONDocument("applicationId" -> applicationId, "userId" -> userId)
+
+    val personalDetailsBSON = BSONDocument("$set" -> BSONDocument(
+      "personal-details" -> persistedPersonalDetails
+    ))
+
+    val validator = singleUpdateValidator(applicationId, actionDesc = "updating personal details",
+      PersonalDetailsNotFound(applicationId))
+
+    collection.update(query, personalDetailsBSON, upsert = false) map validator
   }
 
   override def find(applicationId: String): Future[PersonalDetails] = {

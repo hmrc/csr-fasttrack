@@ -36,7 +36,7 @@ trait PersonalDetailsService {
 
   def update(userId: String, applicationId: String, personalDetails: PersonalDetails, contactDetails: ContactDetails)
     (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = for {
-     _ <- personalDetailsRepo.update(applicationId, userId, personalDetails)
+     _ <- personalDetailsRepo.updatePersonalDetailsAndStatus(applicationId, userId, personalDetails)
      _ <- contactDetailsRepo.update(userId, contactDetails)
   } yield {
     auditService.logEvent("PersonalDetailsSaved")
