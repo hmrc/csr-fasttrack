@@ -553,23 +553,19 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   def removeCandidateAllocationStatus(applicationId: String): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
 
-    val deAllocationSet = BSONDocument("$set" -> {
-      BSONDocument(
+    val deAllocationSet = BSONDocument("$set" -> BSONDocument(
         "applicationStatus" -> ApplicationStatuses.AwaitingAllocationNotified,
         s"progress-status.${ProgressStatuses.AwaitingAllocationProgress}" -> true,
         s"progress-status-dates.${ProgressStatuses.AwaitingAllocationProgress}" -> LocalDate.now()
-      )
-    })
+    ))
 
-    val deAllocationUnset = BSONDocument("$unset" -> {
-      BSONDocument(
+    val deAllocationUnset = BSONDocument("$unset" -> BSONDocument(
         s"progress-status.${ProgressStatuses.AllocationConfirmedProgress}" -> "",
         s"progress-status.${ProgressStatuses.AllocationUnconfirmedProgress}" -> "",
         s"progress-status-dates.${ProgressStatuses.AllocationConfirmedProgress}" -> "",
         s"progress-status-dates.${ProgressStatuses.AllocationUnconfirmedProgress}" -> "",
         "allocation-expire-date" -> ""
-      )
-    })
+    ))
 
     collection.update(query, deAllocationSet, upsert = false).map(checkUpdateWriteResult).flatMap(_ =>
       collection.update(query, deAllocationUnset, upsert = false).map(checkUpdateWriteResult))
