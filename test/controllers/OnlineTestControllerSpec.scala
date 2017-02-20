@@ -20,10 +20,11 @@ import config._
 import connectors.ExchangeObjects._
 import connectors.{ CubiksGatewayClient, EmailClient }
 import model.ApplicationStatuses
-import model.Commands.Address
+import model.Commands.{ Address, ProgressResponse }
 import model.Exceptions.CannotUpdateCubiksTest
 import model.OnlineTestCommands.OnlineTestApplication
 import model.PersistedObjects.ContactDetails
+import model.commands.OnlineTestProgressResponse
 import model.exchange.OnlineTest
 import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
@@ -32,7 +33,7 @@ import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories.application.{ AssistanceDetailsRepository, OnlineTestRepository }
+import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository, OnlineTestRepository }
 import repositories.OnlineTestPDFReportRepository
 import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
 import testkit.MockitoImplicits.OngoingStubbingExtensionUnit
@@ -166,7 +167,21 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
   }
 
   "Get PDF Report" must {
-    "return a valid report if one exists" in new TestFixture {
+    "return a valid report if one exists for Awaiting Allocation Notified" in new TestFixture {
+      when(generalApplicationRepositoryMock.findProgress(any[String])).thenReturn(Future.successful(
+        ProgressResponse("").copy(onlineTest = OnlineTestProgressResponse(awaitingAllocationNotified = true))))
+      val result = TestOnlineTestController.getPDFReport(hasPDFReportApplicationId)(FakeRequest())
+
+      status(result) mustBe OK
+      headers(result).get("Content-Type").get mustEqual "application/pdf"
+      headers(result).get("Content-Disposition").get must startWith("attachment;")
+      headers(result).get("Content-Disposition").get must include("""filename="report-""")
+      contentAsBytes(result) mustEqual testPDFContents
+    }
+
+    "return a valid report if one exists for Online Test Faild Notified" in new TestFixture {
+      when(generalApplicationRepositoryMock.findProgress(any[String])).thenReturn(Future.successful(
+        ProgressResponse("").copy(onlineTest = OnlineTestProgressResponse(failedNotified = true))))
       val result = TestOnlineTestController.getPDFReport(hasPDFReportApplicationId)(FakeRequest())
 
       status(result) mustBe OK
@@ -196,6 +211,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
 
     val onlineTestPDFReportRepoMock = mock[OnlineTestPDFReportRepository]
     val assistanceDetailsRepositoryMock = mock[AssistanceDetailsRepository]
+    val generalApplicationRepositoryMock = mock[GeneralApplicationRepository]
     val cubiksGatewayClientMock = mock[CubiksGatewayClient]
     val emailClientMock = mock[EmailClient]
 
@@ -228,6 +244,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
 
     when(mockOnlineTestService.getOnlineTest(any[String])).thenReturn(Future.successful(onlineTest))
     when(mockOnlineTestRepository.getOnlineTestApplication(any[String])).thenReturn(Future.successful(Some(onlineTestApplication)))
+    when(generalApplicationRepositoryMock.findProgress(any[String])).thenReturn(Future.successful(ProgressResponse("")))
 
     object TestOnlineTestController extends OnlineTestController {
       override val onlineTestingRepo = mockOnlineTestRepository
@@ -235,6 +252,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
       override val onlineTestExtensionService = onlineTestExtensionServiceMock
       override val onlineTestPDFReportRepo = onlineTestPDFReportRepoMock
       override val assistanceDetailsRepo = assistanceDetailsRepositoryMock
+      override val generalApplicationRepository = generalApplicationRepositoryMock
     }
 
     def createOnlineTestRequest(userId: String) = {
