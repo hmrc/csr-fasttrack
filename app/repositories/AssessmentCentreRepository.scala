@@ -35,7 +35,8 @@ case class AssessmentCentreLocation(locationName: String, venues: List[Assessmen
 
 case class AssessmentCentreVenue(venueName: String, venueDescription: String, capacityDates: List[AssessmentCentreVenueCapacityDate])
 
-case class AssessmentCentreVenueCapacityDate(date: LocalDate, amCapacity: Int, pmCapacity: Int)
+case class AssessmentCentreVenueCapacityDate(date: LocalDate, amCapacity: Int, pmCapacity: Int,
+                                             amMinViableAttendees: Int, am )
 
 object AssessmentCentreLocation {
   implicit val assessmentCentreCapacityDateFormat = Json.format[AssessmentCentreVenueCapacityDate]
