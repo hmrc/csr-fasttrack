@@ -362,17 +362,18 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
     collection.runCommand(JSONCountCommand.Count(query)).flatMap { c =>
       val count = c.count
+
       if (count == 0) {
         Future.successful(ApplicationForAssessmentAllocationResult(List.empty, 0))
       } else {
         val projection = BSONDocument(
-          "userId" -> 1,
-          "applicationId" -> 1,
-          "personal-details.firstName" -> 1,
-          "personal-details.lastName" -> 1,
-          "assistance-details.needsSupportForOnlineAssessment" -> 1,
-          "assistance-details.needsSupportAtVenue" -> 1,
-          "online-tests.invitationDate" -> 1
+          "userId" -> true,
+          "applicationId" -> true,
+          "personal-details.firstName" -> true,
+          "personal-details.lastName" -> true,
+          "personal-details.dateOfBirth" -> true,
+          "assistance-details.needsSupportAtVenue" -> true,
+          "online-tests.invitationDate" -> true
         )
         val sort = new JsObject(Map("online-tests.invitationDate" -> JsNumber(1)))
 
@@ -731,10 +732,12 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val personalDetails = doc.getAs[BSONDocument]("personal-details").get
     val firstName = personalDetails.getAs[String]("firstName").get
     val lastName = personalDetails.getAs[String]("lastName").get
-    val needsAdjustment = doc.getAs[AssistanceDetails]("assistance-details").exists(_.needsSupportAtVenue)
+    val birthYear = personalDetails.getAs[LocalDate]("dateOfBirth").get.getYear
+    val needsAdjustment = doc.getAs[BSONDocument]("assistance-details").flatMap(_.getAs[Boolean]("needsSupportAtVenue")).getOrElse(false)
     val onlineTestDetails = doc.getAs[BSONDocument]("online-tests").get
     val invitationDate = onlineTestDetails.getAs[DateTime]("invitationDate").get
-    ApplicationForAssessmentAllocation(firstName, lastName, userId, applicationId, if (needsAdjustment) Yes else No, invitationDate)
+
+    ApplicationForAssessmentAllocation(firstName, lastName, userId, applicationId, needsAdjustment, invitationDate, birthYear)
   }
 
   private def bsonDocToApplicationForNotification(doc: BSONDocument) = {

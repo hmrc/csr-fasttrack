@@ -16,12 +16,13 @@
 
 package controllers
 
-import model.Exceptions.CannotUpdateCubiksTest
+import model.Exceptions.{ AssistanceDetailsNotFound, CannotUpdateCubiksTest, NotFoundException }
 import model.{ ApplicationStatuses, Commands }
+import play.api.Logger
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc._
 import repositories._
-import repositories.application.{ AssistanceDetailsRepository, OnlineTestRepository }
+import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository, OnlineTestRepository }
 import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -40,6 +41,7 @@ object OnlineTestController extends OnlineTestController {
   override val onlineTestExtensionService: OnlineTestExtensionService = OnlineTestExtensionService
   override val onlineTestPDFReportRepo: OnlineTestPDFReportRepository = onlineTestPDFReportRepository
   override val assistanceDetailsRepo: AssistanceDetailsRepository = assistanceDetailsRepository
+  override val generalApplicationRepository: GeneralApplicationRepository = applicationRepository
 }
 
 trait OnlineTestController extends BaseController {
@@ -48,6 +50,7 @@ trait OnlineTestController extends BaseController {
   val onlineTestExtensionService: OnlineTestExtensionService
   val onlineTestPDFReportRepo: OnlineTestPDFReportRepository
   val assistanceDetailsRepo: AssistanceDetailsRepository
+  val generalApplicationRepository: GeneralApplicationRepository
 
   val resetTestPermittedStatuses = List(
     ApplicationStatuses.OnlineTestInvited,
@@ -67,7 +70,9 @@ trait OnlineTestController extends BaseController {
     onlineTestingService.getOnlineTest(userId).map { onlineTest =>
       Ok(Json.toJson(onlineTest))
     } recover {
-      case _ => NotFound
+      case e =>
+        Logger.warn(s"Cannot get online test for userId=$userId", e)
+        NotFound
     }
   }
 
@@ -81,8 +86,13 @@ trait OnlineTestController extends BaseController {
     onlineTestingService.startOnlineTest(cubiksUserId).map { _ =>
       Ok
     } recover {
-        case _: CannotUpdateCubiksTest => NotFound
-      }
+        case _: CannotUpdateCubiksTest =>
+          Logger.warn(s"Online Test for cubiksUserId=$cubiksUserId cannot be updated")
+          NotFound
+        case _: NotFoundException =>
+          Logger.warn(s"cubiksUserId=$cubiksUserId not found for Start Online Test")
+          NotFound
+    }
   }
 
   def completeOnlineTest(cubiksUserId: Int, assessmentId: Int): Action[AnyContent] = Action.async { implicit request =>
@@ -93,7 +103,15 @@ trait OnlineTestController extends BaseController {
     } yield {
       Ok
     }).recover {
-      case _: CannotUpdateCubiksTest => NotFound
+      case _: AssistanceDetailsNotFound =>
+        Logger.warn(s"Assistance details for cubiksUserId=$cubiksUserId cannot be found in complete Online Test")
+        NotFound
+      case _: CannotUpdateCubiksTest =>
+        Logger.warn(s"Online Test for cubiksUserId=$cubiksUserId cannot be updated in complete Online Test")
+        NotFound
+      case e: NotFoundException =>
+        Logger.warn(s"Online Test for cubiksUserId=$cubiksUserId cannot be updated. Not found: ${e.getMessage}")
+        NotFound
     }
   }
 
@@ -134,8 +152,11 @@ trait OnlineTestController extends BaseController {
   }
 
   def getPDFReport(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
-    onlineTestPDFReportRepo.get(applicationId).map {
-      case Some(report) =>
+    for {
+      app <- generalApplicationRepository.findProgress(applicationId)
+      reportOpt <- onlineTestPDFReportRepo.get(applicationId)
+    } yield reportOpt match {
+      case Some(report) if app.onlineTest.failedNotified || app.onlineTest.awaitingAllocationNotified =>
         Ok(report).as("application/pdf")
           .withHeaders(
             "Content-type" -> "application/pdf",

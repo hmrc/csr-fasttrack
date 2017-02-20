@@ -51,8 +51,13 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
-    <logger name="org.asynchttpclient.netty.channel.DefaultChannelPool" level="WARN"/>
+    <logger name="io.netty.util.ResourceLeakDetectorFactory" level="INFO" />
+    <logger name="org.jboss.netty.channel.socket.nio" level="WARN" />
+    <logger name="io.netty.buffer" level="WARN"/>
+    <logger name="org.asynchttpclient.netty.handler" level="INFO"/>
+    <logger name="org.asynchttpclient.netty.channel" level="INFO"/>
 
+    <logger name="com.google.inject.internal" level="WARN" />
     <logger name="javax.management.mbeanserver" level="WARN"/>
     <logger name="akka.event" level="INFO"/>
     <logger name="net.sf.ehcache" level="INFO"/>

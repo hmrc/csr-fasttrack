@@ -47,7 +47,7 @@ trait AssessmentResultNotifiedStatusGenerator extends ConstructiveGenerator {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       _ <- aRepository.updateStatus(candidateInPreviousStatus.applicationId.get, status)
     } yield {
-      candidateInPreviousStatus
+      candidateInPreviousStatus.copy(applicationStatus = status)
     }
   }
 }

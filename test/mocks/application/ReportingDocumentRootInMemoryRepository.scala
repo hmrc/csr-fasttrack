@@ -73,9 +73,9 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
   override def candidatesAwaitingAllocation(frameworkId: String): Future[List[CandidateAwaitingAllocation]] =
     Future.successful(
       List(
-        CandidateAwaitingAllocation("1", "John", "Smith", "Spiderman", "London", Some("Some adjustments"), new LocalDate(1988, 1, 21)),
-        CandidateAwaitingAllocation("2", "James", "Jones", "Batman", "Bournemouth", Some("Some adjustments"), new LocalDate(1992, 11, 30)),
-        CandidateAwaitingAllocation("3", "Katherine", "Jones", "Supergirl", "Queer Camel", None, new LocalDate(1990, 2, 12))
+        CandidateAwaitingAllocation("1", "John", "Smith", "Spiderman", new LocalDate(1988, 1, 21), Some("Some adjustments"), "London"),
+        CandidateAwaitingAllocation("2", "James", "Jones", "Batman", new LocalDate(1992, 11, 30), Some("Some adjustments"), "Bournemouth"),
+        CandidateAwaitingAllocation("3", "Katherine", "Jones", "Supergirl", new LocalDate(1990, 2, 12), None, "Queer Camel")
       )
     )
 

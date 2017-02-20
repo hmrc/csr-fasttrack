@@ -55,11 +55,14 @@ object AssessmentCentreYamlConverter extends App {
         (region, sortedVenuesInRegion)
     }
 
-  lazy val stringToWrite = parsedYaml.map { case (loc, venues) =>
-    val venuesStrList = venues.map { case (venueDescription, venueDetails) =>
+  lazy val stringToWrite = parsedYaml.flatMap { case (loc, venues) =>
+
+    val filterVenuesWithSlots: List[AssessmentVenue] => List[AssessmentVenue] = _.filter(_.capacityInfo.length == 3)
+
+    val venuesStrList = venues.collect { case (venueDescription, venueDetails) if filterVenuesWithSlots(venueDetails).nonEmpty  =>
 
       val capacities = "" +
-          "      capacities:\n"+ venueDetails.map { venueInfo =>
+          "      capacities:\n" + filterVenuesWithSlots(venueDetails).map { venueInfo =>
 
           s"""         - date: ${venueInfo.capacityInfo.head}
             |           amCapacity: ${venueInfo.capacityInfo(1)}
@@ -71,11 +74,16 @@ object AssessmentCentreYamlConverter extends App {
            |$capacities""".stripMargin
     }
 
-    val venuesStr = venuesStrList.mkString("\n")
-
-    s"""$loc:
-       |$venuesStr
-     """.stripMargin
+    venuesStrList.nonEmpty match {
+      case true =>
+        val venuesStr = venuesStrList.mkString("\n")
+        Some(
+            s"""$loc:
+               |$venuesStr
+         """.stripMargin
+        )
+      case false => None
+    }
   }
 
   println("#################################################")

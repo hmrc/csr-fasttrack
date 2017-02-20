@@ -34,7 +34,7 @@ trait EvaluateCandidateScoreJob extends SingleInstanceScheduledJob with Evaluate
     passmarkService.nextCandidateReadyForEvaluation.flatMap {
       case None =>
         Logger.debug("All candidates are already evaluated")
-        Future.successful()
+        Future.successful(())
       case Some(applicationScore) =>
         Logger.debug(s"Online Test Evaluation started for appId=${applicationScore.scores.applicationId}")
         passmarkService.evaluate(applicationScore)

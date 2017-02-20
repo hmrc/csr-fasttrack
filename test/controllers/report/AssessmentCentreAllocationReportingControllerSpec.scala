@@ -70,8 +70,8 @@ class AssessmentCentreAllocationReportingControllerSpec extends BaseReportingCon
       def toReport(candidate: CandidateAwaitingAllocation, contact: ContactDetailsWithId) = {
         import candidate._
         import contact._
-        AssessmentCentreAllocationReport(firstName, lastName, preferredName, email, phone.getOrElse(""),
-          preferredLocation1, adjustments, dateOfBirth)
+        AssessmentCentreAllocationReport(firstName, lastName, preferredName, email, phone.getOrElse(""), dateOfBirth,
+          adjustments, assessmentCentreLocation)
       }
 
     }
@@ -91,9 +91,9 @@ class AssessmentCentreAllocationReportingControllerSpec extends BaseReportingCon
       rnd("FirstName"),
       rnd("LastName"),
       rnd("PreferredName"),
-      rnd("PrefLocation1"),
+      new LocalDate(2000, 1, 1),
       someRnd("Adjustments"),
-      new LocalDate(2000, 1, 1)
+      rnd("London")
     )
 
     def newContactDetails(id: String) = ContactDetailsWithId(

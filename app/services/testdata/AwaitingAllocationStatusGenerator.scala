@@ -44,7 +44,7 @@ trait AwaitingAllocationStatusGenerator extends ConstructiveGenerator {
       _ <- otRepository.savePassMarkScore(candidateInPreviousStatus.applicationId.get, UUID.randomUUID().toString,
         evaluationResult, ApplicationStatuses.AwaitingAllocation)
     } yield {
-      candidateInPreviousStatus
+      candidateInPreviousStatus.copy(applicationStatus = ApplicationStatuses.AwaitingAllocation)
     }
   }
 }

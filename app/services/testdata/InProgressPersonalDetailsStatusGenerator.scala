@@ -17,6 +17,7 @@
 package services.testdata
 
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
+import model.ApplicationStatuses
 import model.Commands.Address
 import model.PersistedObjects.ContactDetails
 import model.persisted.PersonalDetails
@@ -49,9 +50,6 @@ trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
         candidateInformation.lastName,
         generatorConfig.personalData.getPreferredName,
         generatorConfig.personalData.dob,
-        aLevel = false,
-        stemLevel = false,
-        civilServant = false,
         department = None
       )
     }
@@ -87,7 +85,10 @@ trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
         pd, List(model.ApplicationStatuses.Created), model.ApplicationStatuses.InProgress)
       _ <- cdRepository.update(candidateInPreviousStatus.userId, cd)
     } yield {
-      candidateInPreviousStatus.copy(personalDetails = Some(pd), contactDetails = Some(cd))
+      candidateInPreviousStatus.copy(
+        applicationStatus = ApplicationStatuses.InProgress,
+        personalDetails = Some(pd), contactDetails = Some(cd)
+      )
 
     }
   }

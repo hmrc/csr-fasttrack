@@ -18,6 +18,7 @@ package services.testdata
 
 import connectors.AuthProviderClient
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
+import model.ApplicationStatuses
 import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
@@ -49,7 +50,7 @@ trait RegisteredStatusGenerator extends BaseGenerator {
     for {
       user <- createUser(generationId, email, firstName, lastName, preferredName, AuthProviderClient.CandidateRole)
     } yield {
-      DataGenerationResponse(generationId, user.userId, None, email, firstName, lastName)
+      DataGenerationResponse(generationId, user.userId, None, ApplicationStatuses.Created, email, firstName, lastName)
     }
   }
 
@@ -61,7 +62,7 @@ trait RegisteredStatusGenerator extends BaseGenerator {
       token <- authProviderClient.getToken(email)
       _ <- authProviderClient.activate(email, token)
     } yield {
-      DataGenerationResponse(generationId, user.userId.toString, None, email, firstName, lastName)
+      DataGenerationResponse(generationId, user.userId.toString, None, ApplicationStatuses.Created, email, firstName, lastName)
     }
   }
 }

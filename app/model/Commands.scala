@@ -79,8 +79,6 @@ object Commands {
     failedNotified: Boolean = false
   )
 
-
-
   case class ProgressResponse(
     applicationId: String,
     personalDetails: Boolean = false,
@@ -179,6 +177,18 @@ object Commands {
     info: Option[AssessmentCentrePassMarkInfo]
   )
 
+  case class CandidateEditableDetails(
+    firstName: String,
+    lastName: String,
+    preferredName: String,
+    dateOfBirth: LocalDate,
+    outsideUk: Option[Boolean],
+    address: Address,
+    postCode: Option[PostCode],
+    country: Option[String],
+    phone: Option[PhoneNumber]
+  )
+
   object Implicits {
     implicit val mediaFormats = Json.format[AddMedia]
     implicit val addressFormat = Json.format[Address]
@@ -216,5 +226,7 @@ object Commands {
     implicit val applicationAssessmentFormat = Json.format[ApplicationAssessment]
     implicit val phoneAndEmailFormat = Json.format[ContactDetails]
     implicit val assessmentCentrePassMarkSettingsResponseFormat = Json.format[AssessmentCentrePassMarkSettingsResponse]
+
+    implicit val candidateEditableDetailsFormat = Json.format[CandidateEditableDetails]
   }
 }

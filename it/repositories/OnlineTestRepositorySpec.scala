@@ -439,7 +439,6 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
           expirationDate = DateTime.now.minusDays(3),
           onlineTestUrl = "http://www.google.co.uk",
           token = "previousToken",
-          isOnlineTestEnabled = true,
           startedDateTime = Some(DateTime.now),
           completedDateTime = Some(DateTime.now),
           xmlReportSaved = true,
@@ -627,7 +626,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
         .find(BSONDocument("applicationId" -> appIdWithUserId.applicationId)).one[BSONDocument].futureValue
 
       checkResult.isDefined mustBe true
-      checkResult.get.getAs[ApplicationStatuses.EnumVal]("applicationStatus").get mustBe ApplicationStatuses.AwaitingAllocation
+      checkResult.get.getAs[ApplicationStatuses.EnumVal]("applicationStatus").get mustBe ApplicationStatuses.AwaitingAllocationNotified
       checkResult.get.get("progress-status-dates.allocation_unconfirmed").isDefined mustBe false
     }
   }

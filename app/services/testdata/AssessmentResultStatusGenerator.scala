@@ -130,7 +130,7 @@ trait AssessmentResultStatusGenerator extends ConstructiveGenerator {
       _ <- aRepository.saveAssessmentScoreEvaluation(appId, "version1", getAssessmentRuleCategoryResult,
         status)
     } yield {
-      candidateInPreviousStatus
+      candidateInPreviousStatus.copy(applicationStatus = status)
     }
   }
 }

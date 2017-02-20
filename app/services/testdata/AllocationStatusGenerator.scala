@@ -71,6 +71,7 @@ trait AllocationStatusGenerator extends ConstructiveGenerator {
         _ <- otRepository.saveCandidateAllocationStatus(candidateInPreviousStatus.applicationId.get, newStatus, None)
       } yield {
         candidateInPreviousStatus.copy(
+          applicationStatus = newStatus,
           applicationAssessment = Some(randomAssessment)
         )
       }

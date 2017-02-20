@@ -16,6 +16,7 @@
 
 package services.testdata
 
+import model.ApplicationStatuses
 import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.GeneralApplicationRepository
@@ -44,7 +45,10 @@ trait SubmittedStatusGenerator extends ConstructiveGenerator {
       _ <- appRepository.updateAssessmentCentreIndicator(candidateInPreviousStatus.applicationId.get, assessmentCentreIndicator)
       _ <- appRepository.submit(candidateInPreviousStatus.applicationId.get)
     } yield {
-      candidateInPreviousStatus.copy(assessmentCentreIndicator = Some(assessmentCentreIndicator))
+      candidateInPreviousStatus.copy(
+        applicationStatus = ApplicationStatuses.Submitted,
+        assessmentCentreIndicator = Some(assessmentCentreIndicator)
+      )
     }
   }
 }

@@ -43,6 +43,7 @@ object StatusGeneratorFactory {
       case ApplicationStatuses.OnlineTestFailed.name => OnlineTestFailedStatusGenerator
       case ApplicationStatuses.OnlineTestFailedNotified.name => OnlineTestFailedNotifiedStatusGenerator
       case ApplicationStatuses.AwaitingAllocation.name => AwaitingAllocationStatusGenerator
+      case ApplicationStatuses.AwaitingAllocationNotified.name => AwaitingAllocationNotifiedStatusGenerator
       case ApplicationStatuses.AllocationConfirmed.name => AllocationStatusGenerator
       case ApplicationStatuses.AllocationUnconfirmed.name => AllocationStatusGenerator
       case ApplicationStatuses.FailedToAttend.name => FailedToAttendStatusGenerator

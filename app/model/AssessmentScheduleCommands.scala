@@ -20,8 +20,16 @@ import org.joda.time.DateTime
 import play.api.libs.json.{ Format, Json }
 
 object AssessmentScheduleCommands {
-  case class ApplicationForAssessmentAllocation(firstName: String, lastName: String, userId: String, applicationId: String,
-    needsAdjustment: String, invitationDate: DateTime)
+  case class ApplicationForAssessmentAllocation(
+    firstName: String,
+    lastName: String,
+    userId: String,
+    applicationId: String,
+    needsAdjustment: Boolean,
+    invitationDate: DateTime,
+    birthYear: Int
+  )
+
   case class ApplicationForAssessmentAllocationResult(result: List[ApplicationForAssessmentAllocation], total: Int)
 
   case class CandidateAllocation(candidateName: String, onlineTestDate: DateTime, hasAdjustment: Boolean,

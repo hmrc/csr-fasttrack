@@ -199,7 +199,7 @@ trait ReportingController extends BaseController {
     }
   }
 
-  def createAdjustmentReports(frameworkId: String) = Action.async { implicit request =>
+  def createAdjustmentReports(frameworkId: String): Action[AnyContent] = Action.async { implicit request =>
     val reports =
       for {
         applications <- reportingRepository.adjustmentReport(frameworkId)
@@ -219,7 +219,7 @@ trait ReportingController extends BaseController {
     }
   }
 
-  def createAssessmentCentreAllocationReport(frameworkId: String) = Action.async { implicit request =>
+  def createAssessmentCentreAllocationReport(frameworkId: String): Action[AnyContent] = Action.async { implicit request =>
     val reports =
       for {
         applications <- reportingRepository.candidatesAwaitingAllocation(frameworkId)
@@ -235,9 +235,9 @@ trait ReportingController extends BaseController {
           a.preferredName,
           c.email,
           c.phone.getOrElse(""),
-          a.preferredLocation1,
+          a.dateOfBirth,
           a.adjustments,
-          a.dateOfBirth
+          a.assessmentCentreLocation
         )
       }
 
