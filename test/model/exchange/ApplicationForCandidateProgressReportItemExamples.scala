@@ -39,11 +39,21 @@ object ApplicationForCandidateProgressReportItemExamples {
     List(LocationSchemesExamples.LocationSchemes1.id, LocationSchemesExamples.LocationSchemes3.id),
     Some("Yes"), Some(false), Some(true), Some(true), None, Some(false), None
   )
-  val ReviewCompleted = ApplicationForCandidateProgressReport(Some(ApplicationIdExamples.appId5), UserIdExamples.userId5,
-    Some(ProgressStatuses.ReviewCompleted), List(Scheme.Business, Scheme.ProjectDelivery),
-    List(LocationSchemesExamples.LocationSchemes1.id, LocationSchemesExamples.LocationSchemes4.id),
-    Some("Yes"), Some(false), Some(true), Some(true), None, Some(false), None
+  val ReviewCompleted = ApplicationForCandidateProgressReport(
+    applicationId = Some(ApplicationIdExamples.appId5),
+    userId = UserIdExamples.userId5,
+    progress = Some(ProgressStatuses.ReviewCompleted),
+    schemes = List(Scheme.Business,Scheme.ProjectDelivery),
+    locationIds = List(LocationSchemesExamples.LocationSchemes1.id, LocationSchemesExamples.LocationSchemes4.id),
+    hasDisability = Some("Yes"),
+    gis = Some(false),
+    onlineAdjustments = Some(true),
+    assessmentCentreAdjustments = Some(true),
+    adjustments = None,
+    civilServant = Some(false),
+    assessmentCentreIndicator = None
   )
+
   val Applications = List(PersonalDetailsCompleted, SchemePreferencesCompleted, AssistanceDetailsCompleted,
     OccupationQuestionsCompleted, ReviewCompleted)
 }
