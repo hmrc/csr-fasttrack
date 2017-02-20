@@ -21,7 +21,7 @@ import model.Commands.ContactDetails
 import model.Commands.Implicits._
 import model.CandidateScoresCommands.Implicits._
 import model.Scheme.Scheme
-import org.joda.time.{ DateTime, LocalDate }
+import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
 object ReportExchangeObjects {
@@ -105,14 +105,11 @@ object ReportExchangeObjects {
     cubiksUserId: Option[Int]
   )
 
-  case class PassMarkReport(application: ApplicationForCandidateProgressReport,
-                            questionnaire: PassMarkReportQuestionnaireData,
-                            testResults: PassMarkReportTestResults)
-
   case class PassMarkReportWithPersonalData(application: ReportWithPersonalDetails,
                                             testResults: PassMarkReportTestResults,
                                             contactDetails: ContactDetails)
 
+  // TODO: delete this class once we rebuild the assessment results report
   case class PassMarkReportQuestionnaireData(
     gender: Option[String],
     sexualOrientation: Option[String],
@@ -226,7 +223,6 @@ object ReportExchangeObjects {
     implicit val assessmentCentreAllocationReportFormats = Json.format[AssessmentCentreAllocationReport]
     implicit val passMarkReportTestResultsFormats = Json.format[PassMarkReportTestResults]
     implicit val passMarkReportQuestionnaireDataFormats = Json.format[PassMarkReportQuestionnaireData]
-    implicit val passMarkReportFormats = Json.format[PassMarkReport]
     implicit val passMarkReportWithPersonalDataFormats = Json.format[PassMarkReportWithPersonalData]
     implicit val ApplicationUserIdFormats = Json.format[ApplicationUserIdReport]
     implicit val passmarkEvaluationSchemesFormats = Json.format[OnlineTestPassmarkEvaluationSchemes]

@@ -81,13 +81,6 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
 
   override def candidateProgressReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]] = ???
 
-  override def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
-  = Future.successful(List(
-    ApplicationForCandidateProgressReportItemExamples.OccupationQuestionsCompleted,
-    ApplicationForCandidateProgressReportItemExamples.AssistanceDetailsCompleted,
-    ApplicationForCandidateProgressReportItemExamples.PersonalDetailsCompleted)
-  )
-
   override def applicationsWithAssessmentScoresAccepted(frameworkId: String): Future[List[ApplicationPreferences]] = ???
 
   override def allApplicationAndUserIds(frameworkId: String): Future[List[ApplicationUserIdReport]] = ???
@@ -96,4 +89,5 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
 
   override def diversityReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] = ???
 
+  override def passMarkReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] = ???
 }
