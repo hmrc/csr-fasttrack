@@ -174,7 +174,6 @@ trait ReportingController extends BaseController {
           val ses = allDiversityQuestions.get(appId.toString()).map {
             questions => socioEconomicScoreCalculator.calculate(questions)
           }.getOrElse("N/A")
-//          val ses = socioEconomicScoreCalculator.calculate(allDiversityQuestions(appId.toString()))
           val hearAboutUs = allMedia.getOrElse(application.userId, "")
           val allocatedAssessmentCentre = allContactDetails.get(application.userId.toString()).map { contactDetails =>
             assessmentCentreIndicatorRepository.calculateIndicator(contactDetails.postCode).assessmentCentre
