@@ -22,7 +22,7 @@ import play.api.Logger
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc._
 import repositories._
-import repositories.application.{ AssistanceDetailsRepository, OnlineTestRepository }
+import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository, OnlineTestRepository }
 import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -41,6 +41,7 @@ object OnlineTestController extends OnlineTestController {
   override val onlineTestExtensionService: OnlineTestExtensionService = OnlineTestExtensionService
   override val onlineTestPDFReportRepo: OnlineTestPDFReportRepository = onlineTestPDFReportRepository
   override val assistanceDetailsRepo: AssistanceDetailsRepository = assistanceDetailsRepository
+  override val generalApplicationRepository: GeneralApplicationRepository = applicationRepository
 }
 
 trait OnlineTestController extends BaseController {
@@ -49,6 +50,7 @@ trait OnlineTestController extends BaseController {
   val onlineTestExtensionService: OnlineTestExtensionService
   val onlineTestPDFReportRepo: OnlineTestPDFReportRepository
   val assistanceDetailsRepo: AssistanceDetailsRepository
+  val generalApplicationRepository: GeneralApplicationRepository
 
   val resetTestPermittedStatuses = List(
     ApplicationStatuses.OnlineTestInvited,
@@ -150,8 +152,11 @@ trait OnlineTestController extends BaseController {
   }
 
   def getPDFReport(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
-    onlineTestPDFReportRepo.get(applicationId).map {
-      case Some(report) =>
+    for {
+      app <- generalApplicationRepository.findProgress(applicationId)
+      reportOpt <- onlineTestPDFReportRepo.get(applicationId)
+    } yield reportOpt match {
+      case Some(report) if app.onlineTest.failedNotified || app.onlineTest.awaitingAllocationNotified =>
         Ok(report).as("application/pdf")
           .withHeaders(
             "Content-type" -> "application/pdf",
