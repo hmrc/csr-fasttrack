@@ -42,6 +42,8 @@ trait PersonalDetailsRepository {
     requiredApplicationStatuses: Seq[ApplicationStatuses.EnumVal],
     newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit]
 
+  def updatePersonalDetailsOnly(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit]
+
   def find(applicationId: String): Future[PersonalDetails]
 
   def findPersonalDetailsWithUserId(applicationId: String): Future[PersonalDetailsWithUserId]
@@ -63,6 +65,23 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
       "applicationStatus" -> ApplicationStatuses.InProgress,
       s"progress-status.${ProgressStatuses.PersonalDetailsCompletedProgress}" -> true,
       s"progress-status-timestamp.${ProgressStatuses.PersonalDetailsCompletedProgress}" -> DateTime.now(),
+      "personal-details" -> persistedPersonalDetails
+    ))
+
+    val validator = singleUpdateValidator(applicationId, actionDesc = "updating personal details",
+      PersonalDetailsNotFound(applicationId))
+
+    collection.update(query, personalDetailsBSON, upsert = false) map validator
+  }
+
+  override def updatePersonalDetailsOnly(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
+
+    val persistedPersonalDetails = PersonalDetails(pd.firstName, pd.lastName, pd.preferredName, pd.dateOfBirth,
+      pd.aLevel, pd.stemLevel, pd.civilServant, pd.department)
+
+    val query = BSONDocument("applicationId" -> applicationId, "userId" -> userId)
+
+    val personalDetailsBSON = BSONDocument("$set" -> BSONDocument(
       "personal-details" -> persistedPersonalDetails
     ))
 

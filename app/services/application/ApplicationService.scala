@@ -61,7 +61,7 @@ trait ApplicationService {
       currentCd <- currentCdFut
       currentPd <- currentPdFut
       _ <- Future.sequence(
-            personalDetailsRepository.update(applicationId, userId, currentPd.copy(
+            personalDetailsRepository.updatePersonalDetailsOnly(applicationId, userId, currentPd.copy(
               firstName = editRequest.firstName,
               lastName = editRequest.lastName,
               preferredName = editRequest.preferredName,
