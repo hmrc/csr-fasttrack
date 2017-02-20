@@ -67,7 +67,8 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       when(contactDetailsRepositoryMock.find(any[String])).thenReturn(Future.successful(currentContactDetails))
       when(personalDetailsRepositoryMock.find(any[String])).thenReturn(Future.successful(currentPersonalDetails))
       when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturn(Future.successful(()))
-      when(personalDetailsRepositoryMock.update(any[String], any[String], any[PersonalDetails])).thenReturn(Future.successful(()))
+      when(personalDetailsRepositoryMock.updatePersonalDetailsOnly(any[String], any[String], any[PersonalDetails]))
+        .thenReturn(Future.successful(()))
 
       val result = applicationService.editDetails(userId, ApplicationId, editedDetails)
       result.futureValue mustBe (())
@@ -75,7 +76,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       verify(contactDetailsRepositoryMock).find(eqTo(userId))
       verify(personalDetailsRepositoryMock).find(ApplicationId)
 
-      verify(personalDetailsRepositoryMock).update(eqTo(ApplicationId), eqTo(userId), eqTo(expectedPersonalDetails))
+      verify(personalDetailsRepositoryMock).updatePersonalDetailsOnly(eqTo(ApplicationId), eqTo(userId), eqTo(expectedPersonalDetails))
       verify(contactDetailsRepositoryMock).update(eqTo(userId), eqTo(expectedContactDetails))
       verify(auditServiceMock).logEventNoRequest("ApplicationEdited", editAuditDetails)
       verifyNoMoreInteractions(personalDetailsRepositoryMock, contactDetailsRepositoryMock, auditServiceMock)
@@ -85,7 +86,8 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       when(contactDetailsRepositoryMock.find(any[String])).thenReturn(failedFuture)
       when(personalDetailsRepositoryMock.find(any[String])).thenReturn(Future.successful(currentPersonalDetails))
       when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturn(Future.successful(()))
-      when(personalDetailsRepositoryMock.update(any[String], any[String], any[PersonalDetails])).thenReturn(Future.successful(()))
+      when(personalDetailsRepositoryMock.updatePersonalDetailsOnly(any[String], any[String], any[PersonalDetails]))
+        .thenReturn(Future.successful(()))
 
       val result = applicationService.editDetails(userId, ApplicationId, editedDetails).failed.futureValue
       result mustBe (error)

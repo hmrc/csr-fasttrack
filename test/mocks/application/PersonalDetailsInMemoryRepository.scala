@@ -49,6 +49,10 @@ object PersonalDetailsInMemoryRepository extends PersonalDetailsRepository with 
     requiredStatuses: Seq[ApplicationStatuses.EnumVal], newApplicationStatus: ApplicationStatuses.EnumVal
   ): Future[Unit] = Future.successful(())
 
+  override def updatePersonalDetailsOnly(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
+    Future.successful(())
+  }
+
   override def notFound(applicationId: String) = throw PersonalDetailsNotFound(applicationId)
 
   def findPersonalDetailsWithUserId(applicationId: String): Future[PersonalDetailsWithUserId] = ???
