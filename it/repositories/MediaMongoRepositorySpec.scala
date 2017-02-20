@@ -25,7 +25,7 @@ class MediaMongoRepositorySpec extends MongoRepositorySpec {
       mediaRepo.create(media1).futureValue
       mediaRepo.create(media2).futureValue
 
-      val result = mediaRepo.findAll().futureValue
+      val result = mediaRepo.findAll.futureValue
 
       result must contain theSameElementsAs Map(
         user1 -> "media1",
