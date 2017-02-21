@@ -81,8 +81,9 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
           _ <- aRepository.updateStatus(applicationId, newStatus)
         } yield {
           auditService.logEvent("ApplicationScoresAndFeedbackSaved", Map("applicationId" -> applicationId))
+          auditService.logEvent(s"ApplicationStatusSetTo$newStatus", Map("applicationId" -> applicationId))
         }
-      case _ => throw new IllegalStateException(",Attendance must be confirmed to save scores and feedback")
+      case _ => Future { throw new IllegalStateException("Attendance must be confirmed to save scores and feedback") }
     }
   }
 
