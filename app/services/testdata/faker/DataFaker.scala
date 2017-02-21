@@ -100,7 +100,7 @@ object DataFaker {
     }
 
     private def venueHasFreeSlots(venue: AssessmentCentreVenue): Future[Option[AvailableAssessmentSlot]] = {
-      applicationAssessmentRepository.applicationAssessmentsForVenue(venue.venueName).map { assessments =>
+      applicationAssessmentRepository.findAllForVenue(venue.venueName).map { assessments =>
         val takenSlotsByDateAndSession = assessments.groupBy(slot => slot.date -> slot.session).map {
           case (date, numOfAssessments) => (date, numOfAssessments.length)
         }

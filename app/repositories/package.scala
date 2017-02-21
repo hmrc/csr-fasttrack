@@ -54,7 +54,7 @@ package object repositories {
   lazy val testReportRepository = new TestReportMongoRepository()
   lazy val passMarkSettingsRepository = new PassMarkSettingsMongoRepository()
   lazy val assessmentCentrePassMarkSettingsRepository = new AssessmentCentrePassMarkSettingsMongoRepository()
-  lazy val applicationAssessmentRepository = new ApplicationAssessmentMongoRepository()
+  lazy val applicationAssessmentRepository = new AssessmentCentreAllocationMongoRepository()
   lazy val candidateAllocationMongoRepository = new CandidateAllocationMongoRepository(DateTimeFactory)
   lazy val diagnosticReportRepository = new DiagnosticReportingMongoRepository
   lazy val applicationAssessmentScoresRepository = new ApplicationAssessmentScoresMongoRepository(DateTimeFactory)

@@ -17,7 +17,7 @@
 package services.allocation
 
 import connectors.{ CSREmailClient, EmailClient }
-import model.Commands.ApplicationAssessment
+import model.Commands.AssessmentCentreAllocation
 import model.PersistedObjects.{ AllocatedCandidate, ContactDetails }
 import org.joda.time.DateTime
 import play.api.Logger
@@ -38,7 +38,7 @@ object CandidateAllocationService extends CandidateAllocationService {
 
 trait CandidateAllocationService {
   val caRepository: CandidateAllocationRepository
-  val aaRepository: ApplicationAssessmentRepository
+  val aaRepository: AssessmentCentreAllocationRepository
   val cdRepository: ContactDetailsRepository
   val emailClient: EmailClient
   val auditService: AuditService
@@ -53,7 +53,7 @@ trait CandidateAllocationService {
 
   def sendEmailConfirmationReminder(candidate: AllocatedCandidate): Future[Unit] = {
     for {
-      assessment <- aaRepository.find(candidate.applicationId)
+      assessment <- aaRepository.findOne(candidate.applicationId)
       contactDetails <- cdRepository.find(candidate.candidateDetails.userId)
       _ <- sendEmail(candidate, contactDetails, assessment)
       _ <- caRepository.saveAllocationReminderSentDate(candidate.applicationId, DateTime.now())
@@ -62,7 +62,7 @@ trait CandidateAllocationService {
   }
 
   private def sendEmail(candidate: AllocatedCandidate, contactDetails: ContactDetails,
-    assessment: ApplicationAssessment): Future[Unit] = {
+    assessment: AssessmentCentreAllocation): Future[Unit] = {
     emailClient.sendReminderToConfirmAttendance(contactDetails.email, candidate.candidateDetails.preferredName,
       assessment.assessmentDateTime, candidate.expireDate) map { _ =>
       audit("AllocationReminderEmailSent", candidate.candidateDetails.userId, contactDetails.email)

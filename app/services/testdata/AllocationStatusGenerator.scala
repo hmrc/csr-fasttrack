@@ -18,7 +18,7 @@ package services.testdata
 
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.ApplicationStatuses
-import model.Commands.ApplicationAssessment
+import model.Commands.AssessmentCentreAllocation
 import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.OnlineTestRepository
@@ -38,15 +38,15 @@ object AllocationStatusGenerator extends AllocationStatusGenerator {
 
 trait AllocationStatusGenerator extends ConstructiveGenerator {
   val otRepository: OnlineTestRepository
-  val aaRepository: ApplicationAssessmentRepository
+  val aaRepository: AssessmentCentreAllocationRepository
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
 
-    def getApplicationAssessment(candidate: DataGenerationResponse): Future[ApplicationAssessment] = {
+    def getApplicationAssessment(candidate: DataGenerationResponse): Future[AssessmentCentreAllocation] = {
       for {
         availableAssessment <- Random.availableAssessmentVenueAndDate
       } yield {
-        ApplicationAssessment(
+        AssessmentCentreAllocation(
           candidate.applicationId.get,
           availableAssessment.venue.venueName,
           availableAssessment.date,

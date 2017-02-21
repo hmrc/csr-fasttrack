@@ -56,7 +56,7 @@ trait ApplicationAssessmentService extends ApplicationStatusCalculator {
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-  val appAssessRepository: ApplicationAssessmentRepository
+  val appAssessRepository: AssessmentCentreAllocationRepository
   val otRepository: OnlineTestRepository
   val aRepository: GeneralApplicationRepository
   val aasRepository: ApplicationAssessmentScoresRepository

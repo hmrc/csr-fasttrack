@@ -19,7 +19,7 @@ package controllers
 import model.ApplicationStatuses
 import model.CandidateScoresCommands.Implicits._
 import model.CandidateScoresCommands.{ ApplicationScores, CandidateScores, CandidateScoresAndFeedback, RecordCandidateScores }
-import model.Commands.ApplicationAssessment
+import model.Commands.AssessmentCentreAllocation
 import model.persisted.PersonalDetails
 import org.joda.time.LocalDate
 import org.mockito.Matchers.{ eq => eqTo }
@@ -28,7 +28,7 @@ import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
-import repositories.{ ApplicationAssessmentRepository, ApplicationAssessmentScoresRepository }
+import repositories.{ AssessmentCentreAllocationRepository, ApplicationAssessmentScoresRepository }
 import testkit.UnitWithAppSpec
 
 import scala.concurrent.Future
@@ -43,12 +43,12 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
 
   "Get Candidate Scores" should {
     val assessmentDate = LocalDate.now.minusDays(1)
-    val applicationAssessment = ApplicationAssessment("app1", "London (FSAC) 1", assessmentDate, "am", 1, confirmed = false)
+    val applicationAssessment = AssessmentCentreAllocation("app1", "London (FSAC) 1", assessmentDate, "am", 1, confirmed = false)
     val personalDetails = PersonalDetails("John", "Smith", "Jon", LocalDate.now().minusYears(15), aLevel = true,
       stemLevel = false, civilServant = false, department = None)
 
     "return basic candidate information when there is no score submitted" in new TestFixture {
-      when(mockApplicationAssessmentRepository.find("app1")).thenReturn(Future.successful(applicationAssessment))
+      when(mockApplicationAssessmentRepository.findOne("app1")).thenReturn(Future.successful(applicationAssessment))
       when(mockPersonalDetailsRepository.find("app1")).thenReturn(Future.successful(personalDetails))
       when(mockApplicationAssessmentScoresRepository.tryFind("app1")).thenReturn(Future.successful(None))
 
@@ -61,7 +61,7 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
     }
 
     "return basic candidate information and score with feedback when they have been submitted" in new TestFixture {
-      when(mockApplicationAssessmentRepository.find("app1")).thenReturn(Future.successful(applicationAssessment))
+      when(mockApplicationAssessmentRepository.findOne("app1")).thenReturn(Future.successful(applicationAssessment))
       when(mockPersonalDetailsRepository.find("app1")).thenReturn(Future.successful(personalDetails))
       when(mockApplicationAssessmentScoresRepository.tryFind("app1")).thenReturn(Future.successful(Some(CandidateScoresWithFeedback)))
 
@@ -114,7 +114,7 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
   }
 
   trait TestFixture {
-    val mockApplicationAssessmentRepository = mock[ApplicationAssessmentRepository]
+    val mockApplicationAssessmentRepository = mock[AssessmentCentreAllocationRepository]
     val mockPersonalDetailsRepository = mock[PersonalDetailsRepository]
     val mockApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
     val mockApplicationRepository = mock[GeneralApplicationRepository]

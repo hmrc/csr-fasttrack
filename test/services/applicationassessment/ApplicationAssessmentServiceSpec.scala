@@ -45,7 +45,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 class ApplicationAssessmentServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
   implicit val ec: ExecutionContext = ExecutionContext.global
 
-  val applicationAssessmentRepositoryMock = mock[ApplicationAssessmentRepository]
+  val applicationAssessmentRepositoryMock = mock[AssessmentCentreAllocationRepository]
   val onlineTestRepositoryMock = mock[OnlineTestRepository]
   val auditServiceMock = mock[AuditService]
   val emailClientMock = mock[EmailClient]

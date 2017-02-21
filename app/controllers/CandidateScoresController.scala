@@ -22,7 +22,7 @@ import model.CandidateScoresCommands.{ ApplicationScores, CandidateScoresAndFeed
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
-import repositories.{ ApplicationAssessmentRepository, ApplicationAssessmentScoresRepository }
+import repositories.{ AssessmentCentreAllocationRepository, ApplicationAssessmentScoresRepository }
 import services.AuditService
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -40,13 +40,13 @@ object CandidateScoresController extends CandidateScoresController {
 }
 
 trait CandidateScoresController extends BaseController {
-  val aaRepository: ApplicationAssessmentRepository
+  val aaRepository: AssessmentCentreAllocationRepository
   val pRepository: PersonalDetailsRepository
   val aasRepository: ApplicationAssessmentScoresRepository
   val aRepository: GeneralApplicationRepository
 
   def getCandidateScores(applicationId: String) = Action.async { implicit request =>
-    val assessment = aaRepository.find(applicationId)
+    val assessment = aaRepository.findOne(applicationId)
     val candidate = pRepository.find(applicationId)
     val applicationScores = aasRepository.tryFind(applicationId)
 

@@ -52,7 +52,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
   import ImplicitBSONHandlers._
 
   lazy val service = new ApplicationAssessmentService {
-    val appAssessRepository: ApplicationAssessmentRepository = mock[ApplicationAssessmentRepository]
+    val appAssessRepository: AssessmentCentreAllocationRepository = mock[AssessmentCentreAllocationRepository]
     val aasRepository: ApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
     val fpRepository: FrameworkPreferenceRepository = mock[FrameworkPreferenceRepository]
     val otRepository: OnlineTestRepository = mock[OnlineTestRepository]
