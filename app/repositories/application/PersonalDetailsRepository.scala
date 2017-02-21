@@ -56,9 +56,6 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
 
   override def updatePersonalDetailsAndStatus(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
 
-    //val persistedPersonalDetails = PersonalDetails(pd.firstName, pd.lastName, pd.preferredName, pd.dateOfBirth,
-    //  pd.aLevel, pd.stemLevel, pd.civilServant, pd.department)
-
     val query = BSONDocument("applicationId" -> applicationId, "userId" -> userId)
 
     val personalDetailsBSON = BSONDocument("$set" -> BSONDocument(
@@ -78,7 +75,6 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
              requiredApplicationStatuses: Seq[ApplicationStatuses.EnumVal],
              newApplicationStatus: ApplicationStatuses.EnumVal
             ): Future[Unit] = {
-    val PersonalDetailsCollection = "personal-details"
 
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId, "userId" -> userId),
@@ -89,7 +85,7 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
       BSONDocument(
         s"progress-status.${ProgressStatuses.PersonalDetailsCompletedProgress}" -> true,
         s"progress-status-timestamp.${ProgressStatuses.PersonalDetailsCompletedProgress}" -> DateTime.now(),
-        PersonalDetailsCollection -> personalDetails,
+        "personal-details" -> personalDetails,
         "applicationStatus" -> newApplicationStatus
       )
     )
@@ -101,9 +97,6 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
   }
 
   override def update(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
-
-    //val persistedPersonalDetails = PersonalDetails(pd.firstName, pd.lastName, pd.preferredName, pd.dateOfBirth,
-    //  pd.aLevel, pd.stemLevel, pd.civilServant, pd.department)
 
     val query = BSONDocument("applicationId" -> applicationId, "userId" -> userId)
 

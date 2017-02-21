@@ -21,24 +21,7 @@ class PersonalDetailsMongoRepositorySpec extends MongoRepositorySpec with UUIDFa
   val userId = "userId"
 
   "Personal details repository" should {
-    "find a candidate after he has been updated (not civil servant)" in {
-      val appId = createApplication()
-      repository.updatePersonalDetailsAndStatus(appId, userId, ExpectedPersonalDetails).futureValue
-
-      val result = repository.find(appId).futureValue
-      result mustBe ExpectedPersonalDetails
-    }
-
-    "find a candidate after he has been updated (civil servant)" in {
-      val appId = createApplication()
-
-      repository.updatePersonalDetailsAndStatus(appId, userId, ExpectedPersonalDetails).futureValue
-
-      val result = repository.find(appId).futureValue
-      result mustBe ExpectedPersonalDetails
-    }
-
-    "update personal details and status" in {
+    "update personal details and status and find candidate afterwards" in {
       val appId = createApplicationInStatus("AWAITING_ALLOCATION")
       repository.updatePersonalDetailsAndStatus(appId, userId, ExpectedPersonalDetails).futureValue
       val statusDetails = generalApplicationRepo.findApplicationStatusDetails(appId).futureValue
@@ -48,7 +31,7 @@ class PersonalDetailsMongoRepositorySpec extends MongoRepositorySpec with UUIDFa
       personalDetails mustBe ExpectedPersonalDetails
     }
 
-    "update personal details with a given status" in {
+    "update personal details with a given status and find candidate afterwards" in {
       val appId = createApplicationInStatus("AWAITING_ALLOCATION")
       repository.updatePersonalDetailsAndStatus(appId, userId, ExpectedPersonalDetails,
         ApplicationStatuses.AwaitingAllocation :: Nil, ApplicationStatuses.AllocationConfirmed).futureValue
