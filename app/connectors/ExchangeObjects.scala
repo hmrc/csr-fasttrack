@@ -28,7 +28,7 @@ object ExchangeObjects {
   case class UserEmail(to: List[String], templateId: String, parameters: Map[String, String])
 
   case class Candidate(firstName: String, lastName: String, preferredName: Option[String], email: String, userId: String)
-  case class UserAuth(firstName: String, lastName: String, email: Option[String], preferredName: Option[String], role: Option[String],
+  case class AuthProviderUserDetails(firstName: String, lastName: String, email: Option[String], preferredName: Option[String], role: Option[String],
                   disabled: Option[Boolean])
 
   // Cubiks Gateway Requests
@@ -58,7 +58,7 @@ object ExchangeObjects {
     email: Option[String], preferredName: Option[String], role: Option[String], disabled: Option[Boolean])
 
   object Implicits {
-    implicit val userAuthFormat = Json.format[UserAuth]
+    implicit val authProviderUserDetailsFormat = Json.format[AuthProviderUserDetails]
     implicit val userEmailFormat = Json.format[UserEmail]
     implicit val candidateFormat = Json.format[Candidate]
     implicit val registrationFormat = Json.format[Registration]

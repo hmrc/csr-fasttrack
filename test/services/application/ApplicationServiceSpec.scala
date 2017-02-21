@@ -17,7 +17,7 @@
 package services.application
 
 import connectors.AuthProviderClient
-import connectors.ExchangeObjects.{ UpdateDetailsRequest, UserAuth }
+import connectors.ExchangeObjects.{ UpdateDetailsRequest, AuthProviderUserDetails }
 import model.Commands._
 import model.Exceptions.NotFoundException
 import model.PersistedObjects.ContactDetails
@@ -68,7 +68,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
     "edit candidate details in an happy path scenario" in new ApplicationServiceFixture {
       when(contactDetailsRepositoryMock.find(any[String])).thenReturn(Future.successful(currentContactDetails))
       when(personalDetailsRepositoryMock.find(any[String])).thenReturn(Future.successful(currentPersonalDetails))
-      when(authProviderClientMock.findByUserId(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Some(currentUserAuth)))
+      when(authProviderClientMock.findByUserId(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Some(currentUser)))
       when(authProviderClientMock.update(any[String], any[UpdateDetailsRequest])(any[HeaderCarrier])).thenReturn(Future.successful(()))
       when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturn(Future.successful(()))
       when(personalDetailsRepositoryMock.updatePersonalDetailsOnly(any[String], any[String], any[PersonalDetails]))
@@ -91,7 +91,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
     "stop executing if an operation fails" in new ApplicationServiceFixture {
       when(contactDetailsRepositoryMock.find(any[String])).thenReturn(failedFuture)
       when(personalDetailsRepositoryMock.find(any[String])).thenReturn(Future.successful(currentPersonalDetails))
-      when(authProviderClientMock.findByUserId(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Some(currentUserAuth)))
+      when(authProviderClientMock.findByUserId(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Some(currentUser)))
       when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturn(Future.successful(()))
       when(authProviderClientMock.update(any[String], any[UpdateDetailsRequest])(any[HeaderCarrier])).thenReturn(Future.successful(()))
       when(personalDetailsRepositoryMock.updatePersonalDetailsOnly(any[String], any[String], any[PersonalDetails]))
@@ -146,7 +146,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       preferredName = "Casablanca Clouter",
       dateOfBirth = LocalDate.parse("1916-07-22")
     )
-    val currentUserAuth = UserAuth(
+    val currentUser = AuthProviderUserDetails(
       firstName = "Marcel",
       lastName = "Cerdan",
       email = Some("marcel.cerdan@email.con"),
@@ -177,10 +177,10 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
     val expectedUpdateDetailsRequest = UpdateDetailsRequest(
       editedDetails.firstName,
       editedDetails.lastName,
-      currentUserAuth.email,
+      currentUser.email,
       Some(editedDetails.preferredName),
-      currentUserAuth.role,
-      currentUserAuth.disabled
+      currentUser.role,
+      currentUser.disabled
     )
 
     val expectedContactDetails = ContactDetails(true, newAddress, None, Some("Mexico"), "mazurka@jjj.yyy", Some("2222909090"))

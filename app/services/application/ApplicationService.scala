@@ -17,7 +17,7 @@
 package services.application
 
 import connectors.AuthProviderClient
-import connectors.ExchangeObjects.{ UpdateDetailsRequest, UserAuth }
+import connectors.ExchangeObjects.{ UpdateDetailsRequest, AuthProviderUserDetails }
 import model.Commands.{ CandidateEditableDetails, WithdrawApplicationRequest }
 import model.Exceptions.NotFoundException
 import repositories._
@@ -62,7 +62,7 @@ trait ApplicationService {
 
   def editDetails(userId: String, applicationId: String, editRequest: CandidateEditableDetails)(implicit hc: HeaderCarrier): Future[Unit] = {
 
-    val userFut: Future[UserAuth] = authProviderClient.findByUserId(userId).flatMap {
+    val userFut: Future[AuthProviderUserDetails] = authProviderClient.findByUserId(userId).flatMap {
       case Some(u) => Future.successful(u)
       case _ => UserNotFoundError
     }
@@ -98,7 +98,7 @@ trait ApplicationService {
     }
   }
 
-  private def toUpdateDetailsRequest(editRequest: CandidateEditableDetails, user: UserAuth): UpdateDetailsRequest = {
+  private def toUpdateDetailsRequest(editRequest: CandidateEditableDetails, user: AuthProviderUserDetails): UpdateDetailsRequest = {
     UpdateDetailsRequest(editRequest.firstName, editRequest.lastName, user.email, Some(editRequest.preferredName), user.role, user.disabled)
   }
 

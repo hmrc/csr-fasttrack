@@ -134,9 +134,9 @@ trait AuthProviderClient {
     }
   }
 
-  def findByUserId(userId: String)(implicit hc: HeaderCarrier): Future[Option[UserAuth]] = {
+  def findByUserId(userId: String)(implicit hc: HeaderCarrier): Future[Option[AuthProviderUserDetails]] = {
     WSHttp.POST(s"$url/service/$ServiceName/findUserById", FindByUserIdRequest(userId.toString())).map { response =>
-      response.json.asOpt[UserAuth]
+      response.json.asOpt[AuthProviderUserDetails]
     }.recover {
       case Upstream4xxResponse(_, REQUEST_ENTITY_TOO_LARGE, _, _) =>
         throw new TooManyResultsException(s"Too many results were returned, narrow your search parameters")
