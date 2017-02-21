@@ -19,23 +19,27 @@ package scheduler.assessment
 import java.util.concurrent.{ ArrayBlockingQueue, ThreadPoolExecutor, TimeUnit }
 
 import config.ScheduledJobConfig
+import model.EmptyRequestHeader
 import scheduler.clustering.SingleInstanceScheduledJob
 import scheduler.onlinetesting.BasicJobConfig
 import services.applicationassessment.AssessmentCentreService
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 object NotifyAssessmentCentrePassedOrFailedJob extends NotifyAssessmentCentrePassedOrFailedJob {
-  val applicationAssessmentService: AssessmentCentreService = AssessmentCentreService
+  val assessmentCentreService: AssessmentCentreService = AssessmentCentreService
 }
 
 trait NotifyAssessmentCentrePassedOrFailedJob extends SingleInstanceScheduledJob with NotifyAssessmentCentrePassedOrFailedJobConfig {
-  val applicationAssessmentService: AssessmentCentreService
+  val assessmentCentreService: AssessmentCentreService
 
   override implicit val ec = ExecutionContext.fromExecutor(new ThreadPoolExecutor(2, 2, 180, TimeUnit.SECONDS, new ArrayBlockingQueue(4)))
+  implicit val hc = HeaderCarrier()
+  implicit val rh = EmptyRequestHeader
 
   def tryExecute()(implicit ec: ExecutionContext): Future[Unit] =
-    applicationAssessmentService.processNextAssessmentCentrePassedOrFailedApplication
+    assessmentCentreService.processNextAssessmentCentrePassedOrFailedApplication
 }
 
 trait NotifyAssessmentCentrePassedOrFailedJobConfig extends BasicJobConfig[ScheduledJobConfig] {

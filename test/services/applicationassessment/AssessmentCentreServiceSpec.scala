@@ -25,7 +25,7 @@ import model.EvaluationResults._
 import model.Exceptions.{ IncorrectStatusInApplicationException, NotFoundException }
 import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
 import model.PersistedObjects.{ ApplicationForNotification, ContactDetails, OnlineTestPassmarkEvaluation, PreferencesWithQualification }
-import model.{ ApplicationStatuses, EvaluationResults, LocationPreference, Preferences }
+import model._
 import org.joda.time.DateTime
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
@@ -33,7 +33,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.time.{ Seconds, Span }
 import org.scalatestplus.play.PlaySpec
-import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
+import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
 import repositories.{ ApplicationAssessmentScoresRepository, _ }
 import services.AuditService
 import services.evaluation.AssessmentCentrePassmarkRulesEngine
@@ -42,7 +42,7 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class ApplicationAssessmentServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
+class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
   implicit val ec: ExecutionContext = ExecutionContext.global
 
   val applicationAssessmentRepositoryMock = mock[AssessmentCentreAllocationRepository]
@@ -55,11 +55,14 @@ class ApplicationAssessmentServiceSpec extends PlaySpec with MockitoSugar with S
   val fpRepositoryMock = mock[FrameworkPreferenceRepository]
   val cdRepositoryMock = mock[ContactDetailsRepository]
   val passmarkRulesEngineMock = mock[AssessmentCentrePassmarkRulesEngine]
+  val personalDetailsRepoMock = mock[PersonalDetailsRepository]
 
   val ApplicationId = "1111-1111"
   val NotFoundApplicationId = "Not-Found-Id"
 
   override implicit def patienceConfig = PatienceConfig(timeout = scaled(Span(5, Seconds)))
+  implicit val hc = HeaderCarrier()
+  implicit val rh = EmptyRequestHeader
 
   val auditDetails = Map(
     "applicationId" -> ApplicationId
@@ -224,9 +227,9 @@ class ApplicationAssessmentServiceSpec extends PlaySpec with MockitoSugar with S
   }
 
   trait ApplicationAssessmentServiceFixture {
-    implicit val hc = HeaderCarrier()
 
-    val contactDetails = ContactDetails(false, Address("address1"), Some("postCode1"), None, "email@mailinator.com", Some("11111111"))
+    val contactDetails = ContactDetails(outsideUk = false, Address("address1"), Some("postCode1"), None, "email@mailinator.com",
+     Some("11111111"))
     when(cdRepositoryMock.find("userId1")).thenReturn(Future.successful(contactDetails))
 
     val applicationAssessmentService = new AssessmentCentreService {
@@ -240,6 +243,7 @@ class ApplicationAssessmentServiceSpec extends PlaySpec with MockitoSugar with S
       val fpRepository: FrameworkPreferenceRepository = fpRepositoryMock
       val cdRepository = cdRepositoryMock
       val passmarkRulesEngine: AssessmentCentrePassmarkRulesEngine = passmarkRulesEngineMock
+      val personalDetailsRepo: PersonalDetailsRepository = personalDetailsRepoMock
     }
   }
 }

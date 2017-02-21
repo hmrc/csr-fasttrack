@@ -16,16 +16,22 @@
 
 package scheduler.assessment
 
+import model.EmptyRequestHeader
 import model.OnlineTestCommands.OnlineTestApplicationWithCubiksUser
 import org.mockito.Mockito._
+import play.api.mvc.RequestHeader
 import play.test.WithApplication
 import services.applicationassessment.AssessmentCentreService
 import testkit.{ ExtendedTimeout, UnitWithAppSpec }
+import uk.gov.hmrc.play.http.HeaderCarrier
+import org.mockito.Matchers.any
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 class NotifyAssessmentCentrePassedOrFailedJobSpec extends UnitWithAppSpec with ExtendedTimeout {
   implicit val ec: ExecutionContext = ExecutionContext.global
+  implicit val hc = HeaderCarrier()
+  implicit val rh = EmptyRequestHeader
 
   "process next assessment centre passed or failed application" should {
     "work" in new TestFixture {
@@ -34,11 +40,12 @@ class NotifyAssessmentCentrePassedOrFailedJobSpec extends UnitWithAppSpec with E
   }
 
   trait TestFixture extends WithApplication {
-    val applicationAssessmentServiceMock = mock[AssessmentCentreService]
-    when(applicationAssessmentServiceMock.processNextAssessmentCentrePassedOrFailedApplication).thenReturn(Future.successful(()))
+    val mockAssessmentCentreService = mock[AssessmentCentreService]
+    when(mockAssessmentCentreService.processNextAssessmentCentrePassedOrFailedApplication(any[HeaderCarrier], any[RequestHeader]))
+      .thenReturn(Future.successful(()))
 
     object Job extends NotifyAssessmentCentrePassedOrFailedJob {
-      override val applicationAssessmentService = applicationAssessmentServiceMock
+      val assessmentCentreService = mockAssessmentCentreService
     }
 
     val application = OnlineTestApplicationWithCubiksUser("appId1", "userId1", 2)

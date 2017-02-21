@@ -16,24 +16,25 @@
 
 package controllers
 
-import model.ApplicationStatuses
+import model.CandidateScoresCommands.{ CandidateScores, CandidateScoresAndFeedback }
 import model.CandidateScoresCommands.Implicits._
-import model.CandidateScoresCommands.{ ApplicationScores, CandidateScores, CandidateScoresAndFeedback, RecordCandidateScores }
-import model.Commands.AssessmentCentreAllocation
-import model.persisted.PersonalDetails
-import org.joda.time.LocalDate
-import org.mockito.Matchers.{ eq => eqTo }
+import model.EmptyRequestHeader
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
-import repositories.{ AssessmentCentreAllocationRepository, ApplicationAssessmentScoresRepository }
+import services.applicationassessment.AssessmentCentreService
 import testkit.UnitWithAppSpec
+import org.mockito.Matchers._
+import play.api.mvc.RequestHeader
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
 class CandidateScoresControllerSpec extends UnitWithAppSpec {
+
+  implicit val hc = HeaderCarrier()
+  implicit val rh = EmptyRequestHeader
 
   val CandidateScoresWithFeedback = CandidateScoresAndFeedback("app1", Some(true), assessmentIncomplete = false,
     CandidateScores(Some(4.0), Some(3.0), Some(2.0)), CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
@@ -41,72 +42,24 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
     CandidateScores(Some(4.0), Some(3.0), Some(2.0)), CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
     CandidateScores(Some(4.0), Some(3.0), Some(2.0)))
 
-  "Get Candidate Scores" should {
-    val assessmentDate = LocalDate.now.minusDays(1)
-    val applicationAssessment = AssessmentCentreAllocation("app1", "London (FSAC) 1", assessmentDate, "am", 1, confirmed = false)
-    val personalDetails = PersonalDetails("John", "Smith", "Jon", LocalDate.now().minusYears(15), aLevel = true,
-      stemLevel = false, civilServant = false, department = None)
-
-    "return basic candidate information when there is no score submitted" in new TestFixture {
-      when(mockApplicationAssessmentRepository.findOne("app1")).thenReturn(Future.successful(applicationAssessment))
-      when(mockPersonalDetailsRepository.find("app1")).thenReturn(Future.successful(personalDetails))
-      when(mockApplicationAssessmentScoresRepository.tryFind("app1")).thenReturn(Future.successful(None))
-
-      val result = TestCandidateScoresController.getCandidateScores("app1")(createGetCandidateScores("app1")).run
-
-      status(result) must be(200)
-
-      val recordCandidateScores = contentAsJson(result).as[ApplicationScores]
-      recordCandidateScores must be(ApplicationScores(RecordCandidateScores("John", "Smith", "London (FSAC) 1", assessmentDate), None))
-    }
-
-    "return basic candidate information and score with feedback when they have been submitted" in new TestFixture {
-      when(mockApplicationAssessmentRepository.findOne("app1")).thenReturn(Future.successful(applicationAssessment))
-      when(mockPersonalDetailsRepository.find("app1")).thenReturn(Future.successful(personalDetails))
-      when(mockApplicationAssessmentScoresRepository.tryFind("app1")).thenReturn(Future.successful(Some(CandidateScoresWithFeedback)))
-
-      val result = TestCandidateScoresController.getCandidateScores("app1")(createGetCandidateScores("app1")).run
-
-      status(result) must be(200)
-
-      val recordCandidateScores = contentAsJson(result).as[ApplicationScores]
-      recordCandidateScores must be(ApplicationScores(RecordCandidateScores("John", "Smith", "London (FSAC) 1",
-        assessmentDate), Some(CandidateScoresWithFeedback)))
-    }
-  }
-
   "Save Candidate Scores" should {
     "save candidate scores & feedback and update application status" in new TestFixture {
-      when(mockApplicationAssessmentScoresRepository.save(CandidateScoresWithFeedback)).thenReturn(Future.successful(()))
-      when(mockApplicationRepository.updateStatus("app1", ApplicationStatuses.AssessmentScoresEntered)).thenReturn(Future.successful(()))
+      when(mockAssessmentCentreService.saveScoresAndFeedback(any[String], any[CandidateScoresAndFeedback])
+        (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
 
       val result = TestCandidateScoresController.createCandidateScoresAndFeedback("app1")(
         createSaveCandidateScoresAndFeedback("app1", Json.toJson(CandidateScoresWithFeedback).toString())
       )
 
       status(result) must be(CREATED)
-      verify(mockApplicationAssessmentScoresRepository).save(CandidateScoresWithFeedback)
-      verify(mockApplicationRepository).updateStatus("app1", ApplicationStatuses.AssessmentScoresEntered)
-    }
-
-    "mark application status as FAILED_TO_ATTEND when candidate didn't show and save the score" in new TestFixture {
-      val candidateScores = CandidateScoresAndFeedback("app1", Some(false), assessmentIncomplete = false)
-      when(mockApplicationAssessmentScoresRepository.save(candidateScores)).thenReturn(Future.successful(()))
-      when(mockApplicationRepository.updateStatus("app1", ApplicationStatuses.FailedToAttend)).thenReturn(Future.successful(()))
-
-      val result = TestCandidateScoresController.createCandidateScoresAndFeedback("app1")(
-        createSaveCandidateScoresAndFeedback("app1", Json.toJson(candidateScores).toString())
-      )
-
-      status(result) must be(CREATED)
-      verify(mockApplicationAssessmentScoresRepository).save(candidateScores)
-      verify(mockApplicationRepository).updateStatus("app1", ApplicationStatuses.FailedToAttend)
     }
 
     "return Bad Request when attendancy is not set" in new TestFixture {
-      val candidateScores = CandidateScoresAndFeedback("app1", attendancy = None, assessmentIncomplete = false)
+      when(mockAssessmentCentreService.saveScoresAndFeedback(any[String], any[CandidateScoresAndFeedback])
+        (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(new IllegalStateException("blah")))
+
       val result = TestCandidateScoresController.createCandidateScoresAndFeedback("app1")(
-        createSaveCandidateScoresAndFeedback("app1", Json.toJson(candidateScores).toString())
+        createSaveCandidateScoresAndFeedback("app1", Json.toJson(CandidateScoresWithFeedback).toString())
       )
 
       status(result) must be(BAD_REQUEST)
@@ -114,21 +67,10 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
   }
 
   trait TestFixture {
-    val mockApplicationAssessmentRepository = mock[AssessmentCentreAllocationRepository]
-    val mockPersonalDetailsRepository = mock[PersonalDetailsRepository]
-    val mockApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
-    val mockApplicationRepository = mock[GeneralApplicationRepository]
+    val mockAssessmentCentreService = mock[AssessmentCentreService]
 
     object TestCandidateScoresController extends CandidateScoresController {
-      val aaRepository = mockApplicationAssessmentRepository
-      val pRepository = mockPersonalDetailsRepository
-      val aasRepository = mockApplicationAssessmentScoresRepository
-      val aRepository = mockApplicationRepository
-    }
-
-    def createGetCandidateScores(applicationId: String) = {
-      FakeRequest(Helpers.GET, controllers.routes.CandidateScoresController.getCandidateScores(applicationId).url, FakeHeaders(), "")
-        .withHeaders("Content-Type" -> "application/json")
+      override def assessmentCentreService: AssessmentCentreService = mockAssessmentCentreService
     }
 
     def createSaveCandidateScoresAndFeedback(applicationId: String, jsonString: String) = {
