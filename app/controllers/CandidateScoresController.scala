@@ -33,7 +33,6 @@ object CandidateScoresController extends CandidateScoresController {
 
   import repositories._
 
-  val auditService = auditService
   val aaRepository = applicationAssessmentRepository
   val pRepository = personalDetailsRepository
   val aasRepository = applicationAssessmentScoresRepository
@@ -41,7 +40,6 @@ object CandidateScoresController extends CandidateScoresController {
 }
 
 trait CandidateScoresController extends BaseController {
-  val auditService: AuditService
   val aaRepository: ApplicationAssessmentRepository
   val pRepository: PersonalDetailsRepository
   val aasRepository: ApplicationAssessmentScoresRepository
@@ -64,13 +62,13 @@ trait CandidateScoresController extends BaseController {
   def createCandidateScoresAndFeedback(applicationId: String) = Action.async(parse.json) { implicit request =>
     withJsonBody[CandidateScoresAndFeedback] { candidateScoresAndFeedback =>
       candidateScoresAndFeedback.attendancy match {
-        case Some(attendance) =>
-          val newStatus = if (attendance) ApplicationStatuses.AssessmentScoresEntered else ApplicationStatuses.FailedToAttend
+        case Some(attendancy) =>
+          val newStatus = if (attendancy) ApplicationStatuses.AssessmentScoresEntered else ApplicationStatuses.FailedToAttend
           for {
             _ <- aasRepository.save(candidateScoresAndFeedback)
             _ <- aRepository.updateStatus(applicationId, newStatus)
           } yield {
-            auditService.logEvent("ApplicationScoresAndFeedbackSaved", Map("applicationId" -> applicationId))
+            //auditService.logEvent("ApplicationScoresAndFeedbackSaved", Map("applicationId" -> applicationId))
             Created
           }
         case _ =>
@@ -82,8 +80,6 @@ trait CandidateScoresController extends BaseController {
   }
 
   def acceptCandidateScoresAndFeedback(applicationId: String) = Action.async { implicit request =>
-
-    aRepository.updateStatus(applicationId, ApplicationStatuses.AssessmentScoresAccepted).map(_ =>
-      Ok(""))
+    aRepository.updateStatus(applicationId, ApplicationStatuses.AssessmentScoresAccepted).map(_ => Ok)
   }
 }

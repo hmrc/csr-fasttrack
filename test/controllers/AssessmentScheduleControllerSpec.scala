@@ -48,7 +48,7 @@ import scala.concurrent.Future
 
 class AssessmentScheduleControllerSpec extends PlaySpec with Results
   with MockitoSugar with ScalaFutures {
-  val mockAssessmentCentreRepository = mock[AssessmentCentreRepository]
+  val mockAssessmentCentreRepository = mock[AssessmentCentreLocationRepository]
 
   "Get Assessment Schedule" should {
     "return a valid schedule" in new TestFixture {

@@ -48,7 +48,7 @@ import scala.util.Try
 
 object AssessmentScheduleController extends AssessmentScheduleController {
   val aaRepository = applicationAssessmentRepository
-  val acRepository = AssessmentCentreYamlRepository
+  val acRepository = AssessmentCentreLocationYamlRepository
   val aRepository = applicationRepository
   val otRepository = onlineTestRepository
   val auditService = AuditService
@@ -60,7 +60,7 @@ object AssessmentScheduleController extends AssessmentScheduleController {
 
 trait AssessmentScheduleController extends BaseController {
   val aaRepository: ApplicationAssessmentRepository
-  val acRepository: AssessmentCentreRepository
+  val acRepository: AssessmentCentreLocationRepository
   val aRepository: GeneralApplicationRepository
   val otRepository: OnlineTestRepository
   val auditService: AuditService

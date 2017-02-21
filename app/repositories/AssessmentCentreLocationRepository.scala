@@ -43,7 +43,7 @@ object AssessmentCentreLocation {
   implicit val assessmentCentreLocationFormat = Json.format[AssessmentCentreLocation]
 }
 
-trait AssessmentCentreRepository {
+trait AssessmentCentreLocationRepository {
 
   def locationsAndAssessmentCentreMapping: Future[Map[String, String]]
 
@@ -52,7 +52,7 @@ trait AssessmentCentreRepository {
   def assessmentCentreCapacityDate(venue: String, date: LocalDate): Future[AssessmentCentreVenueCapacityDate]
 }
 
-trait AssessmentCentreRepositoryImpl extends AssessmentCentreRepository {
+trait AssessmentCentreLocationRepositoryImpl extends AssessmentCentreLocationRepository {
 
   import play.api.Play.current
 
@@ -119,7 +119,7 @@ trait AssessmentCentreRepositoryImpl extends AssessmentCentreRepository {
   }
 }
 
-object AssessmentCentreYamlRepository extends AssessmentCentreRepositoryImpl {
+object AssessmentCentreLocationYamlRepository extends AssessmentCentreLocationRepositoryImpl {
   import config.MicroserviceAppConfig.{ assessmentCentresConfig, assessmentCentresLocationsConfig }
 
   override val assessmentCentresConfigPath = assessmentCentresConfig.yamlFilePath

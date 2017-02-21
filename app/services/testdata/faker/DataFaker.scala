@@ -80,7 +80,7 @@ object DataFaker {
     def passmark: Result = randOne(List(EvaluationResults.Green, EvaluationResults.Amber, EvaluationResults.Red))
 
     def availableAssessmentVenueAndDate: Future[AvailableAssessmentSlot] = {
-      AssessmentCentreYamlRepository.assessmentCentreCapacities.flatMap { assessmentCentreLocations =>
+      AssessmentCentreLocationYamlRepository.assessmentCentreCapacities.flatMap { assessmentCentreLocations =>
 
         val randomisedVenues = util.Random.shuffle(assessmentCentreLocations.flatMap(_.venues))
 
@@ -120,14 +120,14 @@ object DataFaker {
     }
 
     def region: Future[String] = {
-      AssessmentCentreYamlRepository.locationsAndAssessmentCentreMapping.map { locationsToAssessmentCentres =>
+      AssessmentCentreLocationYamlRepository.locationsAndAssessmentCentreMapping.map { locationsToAssessmentCentres =>
         val locationToRegion = locationsToAssessmentCentres.values.filterNot(_.startsWith("TestAssessment"))
         randOne(locationToRegion.toList)
       }
     }
 
     def location(region: String, cannotBe: List[String] = Nil): Future[String] = {
-      AssessmentCentreYamlRepository.locationsAndAssessmentCentreMapping.map { locationsToAssessmentCentres =>
+      AssessmentCentreLocationYamlRepository.locationsAndAssessmentCentreMapping.map { locationsToAssessmentCentres =>
         val locationsInRegion = locationsToAssessmentCentres.filter(_._2 == region).keys.toList
         randOne(locationsInRegion, cannotBe)
       }
