@@ -59,46 +59,54 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
 
       val expectedJson =
         s"""
-           | {
-           |    "locations": [
-           |        {
-           |            "name": "Narnia",
-           |            "venues": [
-           |                {
-           |                    "name": "Test Venue 1",
-           |                    "usedCapacityDates": [
-           |                        {
-           |                            "amUsedCapacity": {
-           |                                "hasUnconfirmedAttendees": true,
-           |                                "usedCapacity": 2
-           |                            },
-           |                            "date": "2015-04-25",
-           |                            "pmUsedCapacity": {
-           |                                "hasUnconfirmedAttendees": true,
-           |                                "usedCapacity": 1
-           |                            }
-           |                        }
-           |                    ]
-           |                },
-           |                {
-           |                    "name": "Test Venue 2",
-           |                    "usedCapacityDates": [
-           |                        {
-           |                            "amUsedCapacity": {
-           |                                "hasUnconfirmedAttendees": false,
-           |                                "usedCapacity": 0
-           |                            },
-           |                            "date": "2015-04-27",
-           |                            "pmUsedCapacity": {
-           |                                "hasUnconfirmedAttendees": false,
-           |                                "usedCapacity": 0
-           |                            }
-           |                        }
-           |                    ]
-           |                }
-           |            ]
-           |        }
-           |    ]
+        {
+           |   "locations":[
+           |      {
+           |         "name":"Narnia",
+           |         "venues":[
+           |            {
+           |               "name":"Test Venue 1",
+           |               "usedCapacityDates":[
+           |                  {
+           |                     "date":"2015-04-25",
+           |                     "amUsedCapacity":{
+           |                        "usedCapacity":2,
+           |                        "confirmedAttendees":0,
+           |                        "minViableAttendees":10,
+           |                        "preferredAttendeeMargin":4
+           |                     },
+           |                     "pmUsedCapacity":{
+           |                        "usedCapacity":1,
+           |                        "confirmedAttendees":0,
+           |                        "minViableAttendees":10,
+           |                        "preferredAttendeeMargin":4
+           |                     }
+           |                  }
+           |               ]
+           |            },
+           |            {
+           |               "name":"Test Venue 2",
+           |               "usedCapacityDates":[
+           |                  {
+           |                     "date":"2015-04-27",
+           |                     "amUsedCapacity":{
+           |                        "usedCapacity":0,
+           |                        "confirmedAttendees":0,
+           |                        "minViableAttendees":10,
+           |                        "preferredAttendeeMargin":4
+           |                     },
+           |                     "pmUsedCapacity":{
+           |                        "usedCapacity":0,
+           |                        "confirmedAttendees":0,
+           |                        "minViableAttendees":10,
+           |                        "preferredAttendeeMargin":4
+           |                     }
+           |                  }
+           |               ]
+           |            }
+           |         ]
+           |      }
+           |   ]
            |}
          """.stripMargin
 
