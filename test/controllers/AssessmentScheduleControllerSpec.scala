@@ -434,11 +434,11 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     "do not return past dates" in new TestFixture {
       val locations = List(AssessmentCentreLocation("London", List(AssessmentCentreVenue("London venue", "",
         List(
-          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(1), 1, 1),
-          AssessmentCentreVenueCapacityDate(LocalDate.now, 2, 2),
-          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(1), 3, 3),
-          AssessmentCentreVenueCapacityDate(LocalDate.now.plusDays(1), 4, 4),
-          AssessmentCentreVenueCapacityDate(LocalDate.now.plusDays(2), 5, 5)
+          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(1), 1, 1, 10, 4, 10, 4),
+          AssessmentCentreVenueCapacityDate(LocalDate.now, 2, 2, 10, 4, 10, 4),
+          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(1), 3, 3, 10, 4, 10, 4),
+          AssessmentCentreVenueCapacityDate(LocalDate.now.plusDays(1), 4, 4, 10, 4, 10, 4),
+          AssessmentCentreVenueCapacityDate(LocalDate.now.plusDays(2), 5, 5, 10, 4, 10, 4)
         )))))
       when(mockAssessmentCentreRepository.assessmentCentreCapacities).thenReturn(Future.successful(locations))
 
@@ -452,9 +452,9 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     "return empty list of slots if all dates are in the past" in new TestFixture {
       val locations = List(AssessmentCentreLocation("London", List(AssessmentCentreVenue("London venue", "",
         List(
-          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(1), 1, 1),
-          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(2), 2, 2),
-          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(3), 2, 2)
+          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(1), 1, 1, 10, 4, 10, 4),
+          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(2), 2, 2, 10, 4, 10, 4),
+          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(3), 2, 2, 10, 4, 10, 4)
         )))))
       when(mockAssessmentCentreRepository.assessmentCentreCapacities).thenReturn(Future.successful(locations))
 
@@ -650,7 +650,11 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
                   AssessmentCentreVenueCapacityDate(
                     DateTime.parse("2015-04-25").toLocalDate,
                     2,
-                    3
+                    3,
+                    10,
+                    4,
+                    10,
+                    4
                   )
                 )
               ),
@@ -661,7 +665,11 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
                   AssessmentCentreVenueCapacityDate(
                     DateTime.parse("2015-04-27").toLocalDate,
                     1,
-                    6
+                    6,
+                    10,
+                    4,
+                    10,
+                    4
                   )
                 )
               )
@@ -711,7 +719,11 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         AssessmentCentreVenueCapacityDate(
           LocalDate.parse("2015-04-25"),
           2,
-          3
+          3,
+          10,
+          4,
+          10,
+          4
         )
       ))
     }
@@ -844,7 +856,11 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         AssessmentCentreVenueCapacityDate(
           LocalDate.parse("2015-04-25"),
           3,
-          6
+          6,
+          10,
+          4,
+          10,
+          4
         )
       ))
 
@@ -854,7 +870,9 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
           venues = List(AssessmentCentreVenue(
             venueName = "London FTAC",
             venueDescription = "London centre",
-            capacityDates = List(AssessmentCentreVenueCapacityDate(date = LocalDate.now, amCapacity = 18, pmCapacity = 18))
+            capacityDates = List(
+              AssessmentCentreVenueCapacityDate(date = LocalDate.now, amCapacity = 18, pmCapacity = 18, 10, 4, 10, 4)
+            )
           ))
         )
       )))

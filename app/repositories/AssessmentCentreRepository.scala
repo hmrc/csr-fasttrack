@@ -110,7 +110,11 @@ trait AssessmentCentreRepositoryImpl extends AssessmentCentreRepository {
                 AssessmentCentreVenueCapacityDate(
                   LocalDate.parse(capacityBlock("date"), AssessmentCentreDateFormat),
                   capacityBlock("amCapacity").asInstanceOf[Int],
-                  capacityBlock("pmCapacity").asInstanceOf[Int]
+                  capacityBlock("pmCapacity").asInstanceOf[Int],
+                  capacityBlock("amMinViableAttendees").asInstanceOf[Int],
+                  capacityBlock("amPreferredAttendeeMargin").asInstanceOf[Int],
+                  capacityBlock("pmMinViableAttendees").asInstanceOf[Int],
+                  capacityBlock("pmPreferredAttendeeMargin").asInstanceOf[Int]
                 )
               }.toList)
           }.toList
