@@ -24,13 +24,12 @@ trait ReportingFormatter {
   def getOnlineAdjustments(onlineAdjustments: Option[Boolean], adjustments: Option[Adjustments]): Option[String] = {
     onlineAdjustments match {
       case Some(false) => Some("No")
-      case Some(true) => {
+      case Some(true) =>
         adjustments.flatMap(_.onlineTests.map { onlineTests =>
-          List(onlineTests.extraTimeNeeded.map(value => s"Verbal extra time needed: ${value}%"),
-            onlineTests.extraTimeNeededNumerical.map(value => s"Numerical extra time needed: ${value}%"),
+          List(onlineTests.extraTimeNeeded.map(value => s"Verbal extra time needed: $value%"),
+            onlineTests.extraTimeNeededNumerical.map(value => s"Numerical extra time needed: $value%"),
             onlineTests.otherInfo.map(value => s"$value")).flatten.mkString(", ")
         }).orElse(Some("Yes"))
-      }
       case None => None
     }
   }
@@ -38,10 +37,10 @@ trait ReportingFormatter {
   def getAssessmentCentreAdjustments(assessmentCentreAdjustments: Option[Boolean], adjustments: Option[Adjustments]) = {
     assessmentCentreAdjustments match {
       case Some(false) => Some("No")
-      case Some(true) => {
+      case Some(true) =>
         adjustments.map( adjustmentsVal => {
           val specificAdjustments = adjustmentsVal.assessmentCenter.map { assessmentCenter =>
-            List(assessmentCenter.extraTimeNeeded.map(value => s"Extra time needed: ${value}%"),
+            List(assessmentCenter.extraTimeNeeded.map(value => s"Extra time needed: $value%"),
               assessmentCenter.otherInfo.map(value => s"$value"))
           }.getOrElse(List.empty)
           val typeOfAdjustments: List[Option[String]] = {
@@ -52,10 +51,9 @@ trait ReportingFormatter {
             }.getOrElse(List.empty)
             relevantTypeOfAdjustments.map(Some(_))
           }
-          val allAdjustments: List[Option[String]] = (specificAdjustments ++ typeOfAdjustments)
+          val allAdjustments: List[Option[String]] = specificAdjustments ++ typeOfAdjustments
           allAdjustments.flatten.mkString(", ")
         }).orElse(Some("Yes"))
-      }
       case None => None
     }
   }

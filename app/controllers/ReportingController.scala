@@ -22,7 +22,7 @@ import model.Commands.{ CsvExtract, _ }
 import model.PersistedObjects.ContactDetailsWithId
 import model.ReportExchangeObjects.Implicits._
 import model.ReportExchangeObjects.{ Implicits => _, _ }
-import model.report.DiversityReportItem
+import model.report.{ PassMarkReportItem, DiversityReportItem }
 import model.{ ApplicationStatusOrder, ProgressStatuses, UniqueIdentifier }
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
@@ -81,7 +81,7 @@ trait ReportingController extends BaseController {
       allContactDetails <- allContactDetailsFut
       allLocations <- allLocationsFut
       allDiversityQuestions <- allQuestionsFut
-      allMedia <- mediaRepository.findAll()
+      allMedia <- mediaRepository.findAll
       report <- buildDiversityReportRows(applications, allContactDetails, allLocations, allDiversityQuestions, allMedia)
     } yield report
     reportFut.map { report => Ok(Json.toJson(report)) }
@@ -129,6 +129,64 @@ trait ReportingController extends BaseController {
             onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
         }
         diversityReportItem.getOrElse(throw new IllegalStateException(s"Application Id does not exist in diversity report generation " +
+          s"for the user Id = ${application.userId}"))
+      }
+    }
+  }
+
+  def createOnlineTestPassMarkModellingReport(frameworkId: String) = Action.async { implicit request =>
+    // Start the futures running
+    val applicationsFut = reportingRepository.passMarkReport(frameworkId)
+    val allContactDetailsFut = contactDetailsRepository.findAll.map(x => x.groupBy(_.userId).mapValues(_.head))
+    val allLocationsFut = locationSchemeService.getAllSchemeLocations
+    val allQuestionsFut = questionnaireRepository.passMarkReport
+    val allTestResultsFut = testReportRepository.getOnlineTestReports
+    // Process the futures
+    val reportFut: Future[List[PassMarkReportItem]] = for {
+      applications <- applicationsFut
+      allContactDetails <- allContactDetailsFut
+      allLocations <- allLocationsFut
+      allDiversityQuestions <- allQuestionsFut
+      allTestScores <- allTestResultsFut
+      allMedia <- mediaRepository.findAll
+      report <- buildPassMarkReportRows(applications, allContactDetails, allLocations, allDiversityQuestions, allMedia, allTestScores)
+    } yield report
+    reportFut.map { report => Ok(Json.toJson(report)) }
+  }
+
+  private def buildPassMarkReportRows(applications: List[ApplicationForCandidateProgressReport],
+                                      allContactDetails: Map[String, ContactDetailsWithId],
+                                      allLocations: List[LocationSchemes],
+                                      allDiversityQuestions: Map[String, Map[String, String]],
+                                      allMedia: Map[UniqueIdentifier, String],
+                                      allTestResults: Map[String, PassMarkReportTestResults]): Future[List[PassMarkReportItem]] = {
+    val passMarkResultsEmpty = PassMarkReportTestResults(competency = None, numerical = None, verbal = None, situational = None)
+    Future{
+      applications.map { application =>
+        val passMarkReportItem = application.applicationId.map { appId =>
+          val diversityAnswers = extractDiversityAnswers(appId, allDiversityQuestions)
+          val locationIds = application.locationIds
+          val onlineAdjustmentsVal = reportingFormatter.getOnlineAdjustments(application.onlineAdjustments, application.adjustments)
+          val assessmentCentreAdjustmentsVal = reportingFormatter.getAssessmentCentreAdjustments(
+            application.assessmentCentreAdjustments,
+            application.adjustments)
+          val locationNames = locationIds.flatMap(locationId => allLocations.find(_.id == locationId).map {_.locationName} )
+          val ses = allDiversityQuestions.get(appId.toString()).map {
+            questions => socioEconomicScoreCalculator.calculate(questions)
+          }.getOrElse("N/A")
+          val hearAboutUs = allMedia.getOrElse(application.userId, "")
+          val allocatedAssessmentCentre = allContactDetails.get(application.userId.toString()).map { contactDetails =>
+            assessmentCentreIndicatorRepository.calculateIndicator(contactDetails.postCode).assessmentCentre
+          }
+          val testResults = allTestResults.getOrElse(appId.toString(), passMarkResultsEmpty)
+          PassMarkReportItem(application, diversityAnswers, ses, hearAboutUs, allocatedAssessmentCentre, testResults)
+            .copy(
+              locations = locationNames,
+              onlineAdjustments = onlineAdjustmentsVal,
+              assessmentCentreAdjustments = assessmentCentreAdjustmentsVal
+            )
+        }
+        passMarkReportItem.getOrElse(throw new IllegalStateException(s"Application Id does not exist in pass mark report generation " +
           s"for the user Id = ${application.userId}"))
       }
     }
@@ -188,7 +246,7 @@ trait ReportingController extends BaseController {
   }
 
   def createAssessmentResultsReport(frameworkId: String) = Action.async { implicit request =>
-
+/*
     val applications = reportingRepository.applicationsWithAssessmentScoresAccepted(frameworkId)
     val allQuestions = questionnaireRepository.passMarkReport
     val allScores = assessmentScoresRepository.allScores
@@ -210,6 +268,9 @@ trait ReportingController extends BaseController {
     reports.map { list =>
       Ok(Json.toJson(list))
     }
+*/
+    // TODO fix this when we rebuild this report
+    ???
   }
 
   def createCandidateProgressReport(frameworkId: String) = Action.async { implicit request =>
@@ -254,25 +315,6 @@ trait ReportingController extends BaseController {
           UniqueIdentifier(user.userId), Some(ProgressStatuses.Registered), List.empty, List.empty, None, None, None, None, None, None, None))
         reportItem.getOrElse(defaultReportItem)
       }}
-    }
-  }
-
-  def createOnlineTestPassMarkModellingReport(frameworkId: String) = Action.async { implicit request =>
-      val reports =
-        for {
-          applications <- reportingRepository.candidateProgressReportNotWithdrawn(frameworkId)
-          questionnaires <- questionnaireRepository.passMarkReport
-          testResults <- testReportRepository.getOnlineTestReports
-        } yield {
-          for {
-            a <- applications
-            q <- questionnaires.get(a.applicationId.toString)
-            t <- testResults.get(a.applicationId.toString)
-          } yield PassMarkReport(a, q, t)
-        }
-
-    reports.map { list =>
-      Ok(Json.toJson(list))
     }
   }
 

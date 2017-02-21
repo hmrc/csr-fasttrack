@@ -31,7 +31,7 @@ import scala.concurrent.Future
 trait MediaRepository {
   def create(addMedia: AddMedia): Future[Unit]
 
-  def findAll(): Future[Map[UniqueIdentifier, String]]
+  def findAll: Future[Map[UniqueIdentifier, String]]
 }
 
 class MediaMongoRepository(implicit mongo: () => DB)
@@ -43,7 +43,7 @@ class MediaMongoRepository(implicit mongo: () => DB)
     case e: WriteResult => throw new CannotAddMedia(addMedia.userId)
   }
 
-  def findAll(): Future[Map[UniqueIdentifier, String]] = {
+  def findAll: Future[Map[UniqueIdentifier, String]] = {
     val query = BSONDocument()
     collection.find(query).cursor[BSONDocument]().collect[List]().map {
       _.map { d =>

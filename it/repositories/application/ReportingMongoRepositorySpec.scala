@@ -39,6 +39,39 @@ class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory 
 
   val frameworkId = "FastTrack-2015"
 
+  private def expectedApplicationForCandidateProgressReport(appId: UniqueIdentifier,
+                                                            userId: UniqueIdentifier,
+                                                            progressState: Option[String]) =
+    ApplicationForCandidateProgressReport(
+      applicationId = Some(appId),
+      userId = userId,
+      progress = progressState,
+      schemes = List(Scheme.Commercial, Scheme.Business),
+      locationIds = List("2643743", "2657613"),
+      hasDisability = Some("Yes"),
+      gis = Some(false),
+      onlineAdjustments = Some(true),
+      assessmentCentreAdjustments = Some(true),
+      adjustments = Some(Adjustments(
+        typeOfAdjustments=Some(List("onlineTestsTimeExtension", "onlineTestsOther", "assessmentCenterTimeExtension",
+          "coloured paper", "braille test paper", "room alone", "rest breaks", "reader/assistant",
+          "stand up and move around", "assessmentCenterOther")),
+        adjustmentsConfirmed = Some(true),
+        onlineTests = Some(AdjustmentDetail(
+          extraTimeNeeded = Some(25),
+          extraTimeNeededNumerical = Some(60),
+          otherInfo = Some("other adjustments"))
+        ),
+        assessmentCenter = Some(AdjustmentDetail(
+          extraTimeNeeded = Some(30),
+          extraTimeNeededNumerical = None,
+          otherInfo = Some("Other assessment centre adjustment"))
+        )
+      )),
+      civilServant = Some(false),
+      assessmentCentreIndicator = None
+  )
+
   "Applications for Candidate Progress Report" must {
     "return a report with one application when there is only one application with the corresponding fields when" +
       "all fields are populated" in {
@@ -48,37 +81,9 @@ class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory 
       testDataRepo.createApplicationWithAllFields(userId.toString(), appId.toString(), frameworkId).futureValue
 
       val result = repository.applicationsForCandidateProgressReport(frameworkId).futureValue
-
       result must not be empty
-      result.head mustBe ApplicationForCandidateProgressReport(
-        applicationId = Some(appId),
-        userId = userId,
-        progress = Some("assistance_details_completed"),
-        schemes = List(Scheme.Commercial,Scheme.Business),
-        locationIds = List("2643743", "2657613"),
-        hasDisability = Some("Yes"),
-        gis = Some(false),
-        onlineAdjustments = Some(true),
-        assessmentCentreAdjustments = Some(true),
-        adjustments = Some(Adjustments(
-          typeOfAdjustments=Some(List("onlineTestsTimeExtension", "onlineTestsOther", "assessmentCenterTimeExtension",
-            "coloured paper", "braille test paper", "room alone", "rest breaks", "reader/assistant",
-            "stand up and move around", "assessmentCenterOther")),
-          adjustmentsConfirmed = Some(true),
-          onlineTests = Some(AdjustmentDetail(
-            extraTimeNeeded = Some(25),
-            extraTimeNeededNumerical = Some(60),
-            otherInfo = Some("other adjustments"))
-          ),
-          assessmentCenter = Some(AdjustmentDetail(
-            extraTimeNeeded = Some(30),
-            extraTimeNeededNumerical = None,
-            otherInfo = Some("Other assessment centre adjustment"))
-          )
-        )),
-        civilServant = Some(false),
-        assessmentCentreIndicator = None
-      )
+      val expected = expectedApplicationForCandidateProgressReport(appId, userId, Some("assistance_details_completed"))
+      result.head mustBe expected
     }
   }
 
@@ -104,38 +109,40 @@ class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory 
         progressStatusBSON = progressStatusDocument).futureValue
 
       val result = repository.diversityReport(frameworkId).futureValue
-
       result must not be empty
+      val expected = expectedApplicationForCandidateProgressReport(appId, userId, Some("diversity_questions_completed"))
+      result.head mustBe expected
+    }
+  }
 
-      result.head mustBe ApplicationForCandidateProgressReport(
-        applicationId = Some(appId),
-        userId = userId,
-        progress = Some("diversity_questions_completed"),
-        schemes = List(Scheme.Commercial, Scheme.Business),
-        locationIds = List("2643743", "2657613"),
-        hasDisability = Some("Yes"),
-        gis = Some(false),
-        onlineAdjustments = Some(true),
-        assessmentCentreAdjustments = Some(true),
-        adjustments = Some(Adjustments(
-          typeOfAdjustments=Some(List("onlineTestsTimeExtension", "onlineTestsOther", "assessmentCenterTimeExtension",
-            "coloured paper", "braille test paper", "room alone", "rest breaks", "reader/assistant",
-            "stand up and move around", "assessmentCenterOther")),
-          adjustmentsConfirmed = Some(true),
-          onlineTests = Some(AdjustmentDetail(
-            extraTimeNeeded = Some(25),
-            extraTimeNeededNumerical = Some(60),
-            otherInfo = Some("other adjustments"))
+  "Pass mark report" must {
+    "return a report with one application when there is only one application with all fields populated" in {
+      val userId = UniqueIdentifier.randomUniqueIdentifier
+      val appId = UniqueIdentifier.randomUniqueIdentifier
+
+      val progressStatusDocument = BSONDocument(
+        "progress-status" -> BSONDocument(
+          "personal_details_completed" -> true,
+          "schemes_preferences_completed" -> true,
+          "scheme_locations_completed" -> true,
+          "assistance_details_completed" -> true,
+          "questionnaire" -> BSONDocument(
+            "start_questionnaire" -> true,
+            "diversity_questions_completed" -> true,
+            "education_questions_completed" -> true,
+            "occupation_questions_completed" -> true
           ),
-          assessmentCenter = Some(AdjustmentDetail(
-            extraTimeNeeded = Some(30),
-            extraTimeNeededNumerical = None,
-            otherInfo = Some("Other assessment centre adjustment"))
-          )
-        )),
-        civilServant = Some(false),
-        assessmentCentreIndicator = None
+          "online_test_completed" -> true
+        )
       )
+
+      testDataRepo.createApplicationWithAllFields(userId.toString(), appId.toString(), frameworkId,
+        progressStatusBSON = progressStatusDocument).futureValue
+
+      val result = repository.passMarkReport(frameworkId).futureValue
+      result must not be empty
+      val expected = expectedApplicationForCandidateProgressReport(appId, userId, Some("online_test_completed"))
+      result.head mustBe expected
     }
   }
 }
