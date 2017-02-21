@@ -33,7 +33,7 @@ object CandidateScoresController extends CandidateScoresController {
 
   import repositories._
 
-  val aaRepository = applicationAssessmentRepository
+  val aaRepository = assessmentCentreAllocationRepository
   val pRepository = personalDetailsRepository
   val aasRepository = applicationAssessmentScoresRepository
   val aRepository = applicationRepository

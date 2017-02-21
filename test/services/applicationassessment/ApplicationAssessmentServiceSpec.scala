@@ -74,15 +74,15 @@ class ApplicationAssessmentServiceSpec extends PlaySpec with MockitoSugar with S
     when(onlineTestRepositoryMock.removeCandidateAllocationStatus(eqTo(ApplicationId))).thenReturn(Future.successful(()))
 
     "return a deletion success response when an application id exists" in new ApplicationAssessmentServiceFixture {
-      val resultFuture = applicationAssessmentService.removeFromApplicationAssessmentSlot(ApplicationId)
+      val resultFuture = applicationAssessmentService.removeFromAssessmentCentreSlot(ApplicationId)
       resultFuture.futureValue mustBe (())
-      verify(auditServiceMock).logEventNoRequest("ApplicationAssessmentDeleted", auditDetails)
-      verify(auditServiceMock).logEventNoRequest("ApplicationDeallocated", auditDetails)
+      verify(auditServiceMock).logEventNoRequest("AssessmentCentreAllocationStatusReset", auditDetails)
+      verify(auditServiceMock).logEventNoRequest("AssessmentCentreAllocationDeleted", auditDetails)
       verify(onlineTestRepositoryMock).removeCandidateAllocationStatus(eqTo(ApplicationId))
 
     }
     "return a not found response when an application id does not exist" in new ApplicationAssessmentServiceFixture {
-      val result = applicationAssessmentService.removeFromApplicationAssessmentSlot(NotFoundApplicationId)
+      val result = applicationAssessmentService.removeFromAssessmentCentreSlot(NotFoundApplicationId)
       result.failed.futureValue mustBe a[NotFoundException]
     }
   }
@@ -229,8 +229,8 @@ class ApplicationAssessmentServiceSpec extends PlaySpec with MockitoSugar with S
     val contactDetails = ContactDetails(false, Address("address1"), Some("postCode1"), None, "email@mailinator.com", Some("11111111"))
     when(cdRepositoryMock.find("userId1")).thenReturn(Future.successful(contactDetails))
 
-    val applicationAssessmentService = new ApplicationAssessmentService {
-      val appAssessRepository = applicationAssessmentRepositoryMock
+    val applicationAssessmentService = new AssessmentCentreService {
+      val assessmentCentreAllocationRepo: AssessmentCentreAllocationRepository = applicationAssessmentRepositoryMock
       val otRepository = onlineTestRepositoryMock
       val auditService = auditServiceMock
       val emailClient = emailClientMock

@@ -31,7 +31,7 @@ class ApplicationAssessmentRepositorySpec extends MongoRepositorySpec {
 
   "Application Assessment repository" should {
     "create indexes for the repository" in {
-      val repo = repositories.applicationAssessmentRepository
+      val repo = repositories.assessmentCentreAllocationRepository
 
       val indexes = indexesWithFields(repo)
       indexes must contain (List("_id"))

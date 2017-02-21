@@ -41,7 +41,7 @@ import play.api.test.Helpers._
 import repositories.AssessmentCentreLocation._
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
 import repositories.{ AssessmentCentreLocation, _ }
-import services.applicationassessment.ApplicationAssessmentService
+import services.applicationassessment.AssessmentCentreService
 import testkit.MockitoSugar
 
 import scala.concurrent.Future
@@ -497,7 +497,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     val mockPersonalDetailsRepository = mock[PersonalDetailsRepository]
     val mockContactDetailsRepository = mock[ContactDetailsRepository]
     val mockEmailClient = mock[EmailClient]
-    val mockApplicationAssessmentService = mock[ApplicationAssessmentService]
+    val mockApplicationAssessmentService = mock[AssessmentCentreService]
 
     val controller =  new AssessmentScheduleController {
       override val aaRepository = mockApplicationAssessmentRepository
@@ -877,7 +877,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     }
 
     def applicationAssessmentRepositoryThatCanDelete = {
-      when(mockApplicationAssessmentService.removeFromApplicationAssessmentSlot(any())).thenReturn(
+      when(mockApplicationAssessmentService.removeFromAssessmentCentreSlot(any())).thenReturn(
         Future.successful(())
       )
       when(mockApplicationRepository.findProgress(any())).thenReturn(
@@ -888,11 +888,11 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
       when(mockApplicationRepository.findProgress(any())).thenReturn(
         Future.successful(ProgressResponse("", assessmentScores = AssessmentScores(accepted = true)))
       )
-      when(mockApplicationAssessmentService.removeFromApplicationAssessmentSlot(any())).thenReturn(Future.successful(()))
+      when(mockApplicationAssessmentService.removeFromAssessmentCentreSlot(any())).thenReturn(Future.successful(()))
     }
 
     def applicationAssessmentRepositoryThatCannotDelete = {
-      when(mockApplicationAssessmentService.removeFromApplicationAssessmentSlot(any())).thenReturn(
+      when(mockApplicationAssessmentService.removeFromAssessmentCentreSlot(any())).thenReturn(
         Future.failed(new NotFoundException("Non existent app"))
       )
       when(mockApplicationRepository.findProgress(any())).thenReturn(

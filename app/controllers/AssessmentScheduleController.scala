@@ -39,7 +39,7 @@ import repositories.AssessmentCentreLocation.assessmentCentreVenueFormat
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
 import services.AuditService
-import services.applicationassessment.ApplicationAssessmentService
+import services.applicationassessment.AssessmentCentreService
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -47,7 +47,7 @@ import scala.concurrent.Future
 import scala.util.Try
 
 object AssessmentScheduleController extends AssessmentScheduleController {
-  val aaRepository = applicationAssessmentRepository
+  val aaRepository = assessmentCentreAllocationRepository
   val acRepository = AssessmentCentreLocationYamlRepository
   val aRepository = applicationRepository
   val otRepository = onlineTestRepository
@@ -55,7 +55,7 @@ object AssessmentScheduleController extends AssessmentScheduleController {
   val pdRepository: PersonalDetailsRepository = personalDetailsRepository
   val cdRepository: ContactDetailsRepository = contactDetailsRepository
   val emailClient = CSREmailClient
-  val aaService = ApplicationAssessmentService
+  val aaService = AssessmentCentreService
 }
 
 trait AssessmentScheduleController extends BaseController {
@@ -67,7 +67,7 @@ trait AssessmentScheduleController extends BaseController {
   val pdRepository: PersonalDetailsRepository
   val cdRepository: ContactDetailsRepository
   val emailClient: EmailClient
-  val aaService: ApplicationAssessmentService
+  val aaService: AssessmentCentreService
 
   private def calculateUsedCapacity(assessments: Option[List[AssessmentCentreAllocation]], sessionCapacity: Int): UsedCapacity = {
     assessments.map { sessionSlots =>
@@ -237,8 +237,8 @@ trait AssessmentScheduleController extends BaseController {
   }
 
   private def generatePaddedVenueDaySessionCandidateList(
-                                                          assessmentsInSession: Map[String, List[(Commands.AssessmentCentreAllocation, Commands.Candidate)]],
-                                                          capacities: Future[AssessmentCentreVenueCapacityDate]
+    assessmentsInSession: Map[String, List[(Commands.AssessmentCentreAllocation, Commands.Candidate)]],
+    capacities: Future[AssessmentCentreVenueCapacityDate]
   ) = {
 
     val capacityMap = Map[String, Future[Int]](
@@ -371,7 +371,7 @@ trait AssessmentScheduleController extends BaseController {
         case ProgressStatuses.AssessmentScoresAcceptedProgress =>
           Future.successful(Conflict(""))
         case _ =>
-          aaService.removeFromApplicationAssessmentSlot(applicationId).map { _ =>
+          aaService.removeFromAssessmentCentreSlot(applicationId).map { _ =>
             Ok("")
           }.recover {
             case e: NotFoundException => NotFound(s"Could not find application assessment for application $applicationId")

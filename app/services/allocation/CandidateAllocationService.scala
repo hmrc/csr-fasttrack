@@ -30,7 +30,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 
 object CandidateAllocationService extends CandidateAllocationService {
   val caRepository = candidateAllocationMongoRepository
-  val aaRepository = applicationAssessmentRepository
+  val aaRepository = assessmentCentreAllocationRepository
   val cdRepository = contactDetailsRepository
   val emailClient = CSREmailClient
   val auditService = AuditService

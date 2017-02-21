@@ -30,7 +30,7 @@ import org.scalatestplus.play.PlaySpec
 import repositories.ContactDetailsRepository
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
-import services.applicationassessment.ApplicationAssessmentService
+import services.applicationassessment.AssessmentCentreService
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -43,21 +43,21 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       val result = applicationService.withdraw(ApplicationId, withdrawApplicationRequest)
       result.futureValue mustBe (())
 
-      verify(appAssessServiceMock).deleteApplicationAssessment(eqTo(ApplicationId))
+      verify(appAssessServiceMock).deleteAssessmentCentreAllocation(eqTo(ApplicationId))
       verify(auditServiceMock).logEventNoRequest("ApplicationWithdrawn", withdrawAuditDetails)
     }
   }
 
   "withdraw an application" should {
     "work when there is a not found exception deleting application assessment and log audit event" in new ApplicationServiceFixture {
-      when(appAssessServiceMock.removeFromApplicationAssessmentSlot(eqTo(ApplicationId))).thenReturn(
+      when(appAssessServiceMock.removeFromAssessmentCentreSlot(eqTo(ApplicationId))).thenReturn(
         Future.failed(new NotFoundException(s"No application assessments were found with applicationId $ApplicationId"))
       )
 
       val result = applicationService.withdraw(ApplicationId, withdrawApplicationRequest)
       result.futureValue mustBe (())
 
-      verify(appAssessServiceMock).deleteApplicationAssessment(eqTo(ApplicationId))
+      verify(appAssessServiceMock).deleteAssessmentCentreAllocation(eqTo(ApplicationId))
       verify(auditServiceMock).logEventNoRequest("ApplicationWithdrawn", withdrawAuditDetails)
     }
   }
@@ -109,14 +109,14 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
     val withdrawApplicationRequest = WithdrawApplicationRequest("reason", Some("other reason"), "Candidate")
 
     val appRepositoryMock = mock[GeneralApplicationRepository]
-    val appAssessServiceMock = mock[ApplicationAssessmentService]
+    val appAssessServiceMock = mock[AssessmentCentreService]
     val auditServiceMock = mock[AuditService]
     val contactDetailsRepositoryMock = mock[ContactDetailsRepository]
     val personalDetailsRepositoryMock = mock[PersonalDetailsRepository]
 
     when(appRepositoryMock.withdraw(eqTo(ApplicationId), eqTo(withdrawApplicationRequest))).thenReturn(Future.successful(()))
-    when(appAssessServiceMock.removeFromApplicationAssessmentSlot(eqTo(ApplicationId))).thenReturn(Future.successful(()))
-    when(appAssessServiceMock.deleteApplicationAssessment(eqTo(ApplicationId))).thenReturn(Future.successful(()))
+    when(appAssessServiceMock.removeFromAssessmentCentreSlot(eqTo(ApplicationId))).thenReturn(Future.successful(()))
+    when(appAssessServiceMock.deleteAssessmentCentreAllocation(eqTo(ApplicationId))).thenReturn(Future.successful(()))
 
     val applicationService = new ApplicationService {
       val appRepository = appRepositoryMock

@@ -54,7 +54,7 @@ package object repositories {
   lazy val testReportRepository = new TestReportMongoRepository()
   lazy val passMarkSettingsRepository = new PassMarkSettingsMongoRepository()
   lazy val assessmentCentrePassMarkSettingsRepository = new AssessmentCentrePassMarkSettingsMongoRepository()
-  lazy val applicationAssessmentRepository = new AssessmentCentreAllocationMongoRepository()
+  lazy val assessmentCentreAllocationRepository = new AssessmentCentreAllocationMongoRepository()
   lazy val candidateAllocationMongoRepository = new CandidateAllocationMongoRepository(DateTimeFactory)
   lazy val diagnosticReportRepository = new DiagnosticReportingMongoRepository
   lazy val applicationAssessmentScoresRepository = new ApplicationAssessmentScoresMongoRepository(DateTimeFactory)
@@ -77,9 +77,9 @@ package object repositories {
 
       assessmentCentrePassMarkSettingsRepository.collection.indexesManager.create(Index(Seq(("info.createDate", Ascending)), unique = true)),
 
-      applicationAssessmentRepository.collection.indexesManager.create(Index(Seq(("venue", Ascending), ("date", Ascending),
+      assessmentCentreAllocationRepository.collection.indexesManager.create(Index(Seq(("venue", Ascending), ("date", Ascending),
         ("session", Ascending), ("slot", Ascending)), unique = true)),
-      applicationAssessmentRepository.collection.indexesManager.create(Index(Seq(("applicationId", Ascending)), unique = true)),
+      assessmentCentreAllocationRepository.collection.indexesManager.create(Index(Seq(("applicationId", Ascending)), unique = true)),
 
       applicationAssessmentScoresRepository.collection.indexesManager.create(Index(Seq(("applicationId", Ascending)), unique = true))
     ))

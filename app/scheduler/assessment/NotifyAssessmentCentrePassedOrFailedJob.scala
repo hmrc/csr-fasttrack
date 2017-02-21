@@ -21,16 +21,16 @@ import java.util.concurrent.{ ArrayBlockingQueue, ThreadPoolExecutor, TimeUnit }
 import config.ScheduledJobConfig
 import scheduler.clustering.SingleInstanceScheduledJob
 import scheduler.onlinetesting.BasicJobConfig
-import services.applicationassessment.ApplicationAssessmentService
+import services.applicationassessment.AssessmentCentreService
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 object NotifyAssessmentCentrePassedOrFailedJob extends NotifyAssessmentCentrePassedOrFailedJob {
-  val applicationAssessmentService: ApplicationAssessmentService = ApplicationAssessmentService
+  val applicationAssessmentService: AssessmentCentreService = AssessmentCentreService
 }
 
 trait NotifyAssessmentCentrePassedOrFailedJob extends SingleInstanceScheduledJob with NotifyAssessmentCentrePassedOrFailedJobConfig {
-  val applicationAssessmentService: ApplicationAssessmentService
+  val applicationAssessmentService: AssessmentCentreService
 
   override implicit val ec = ExecutionContext.fromExecutor(new ThreadPoolExecutor(2, 2, 180, TimeUnit.SECONDS, new ArrayBlockingQueue(4)))
 

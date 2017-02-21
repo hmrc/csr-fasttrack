@@ -34,9 +34,9 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-object ApplicationAssessmentService extends ApplicationAssessmentService {
+object AssessmentCentreService extends AssessmentCentreService {
 
-  val appAssessRepository = applicationAssessmentRepository
+  val assessmentCentreAllocationRepo = assessmentCentreAllocationRepository
   val otRepository = onlineTestRepository
   val aRepository = applicationRepository
   val aasRepository = applicationAssessmentScoresRepository
@@ -50,13 +50,13 @@ object ApplicationAssessmentService extends ApplicationAssessmentService {
   val passmarkRulesEngine = AssessmentCentrePassmarkRulesEngine
 }
 
-trait ApplicationAssessmentService extends ApplicationStatusCalculator {
+trait AssessmentCentreService extends ApplicationStatusCalculator {
 
   implicit def headerCarrier = new HeaderCarrier()
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-  val appAssessRepository: AssessmentCentreAllocationRepository
+  val assessmentCentreAllocationRepo: AssessmentCentreAllocationRepository
   val otRepository: OnlineTestRepository
   val aRepository: GeneralApplicationRepository
   val aasRepository: ApplicationAssessmentScoresRepository
@@ -69,22 +69,17 @@ trait ApplicationAssessmentService extends ApplicationStatusCalculator {
   val passmarkService: AssessmentCentrePassMarkSettingsService
   val passmarkRulesEngine: AssessmentCentrePassmarkRulesEngine
 
-  def removeFromApplicationAssessmentSlot(applicationId: String): Future[Unit] = {
-
-    appAssessRepository.delete(applicationId).flatMap { _ =>
-
-      auditService.logEventNoRequest("ApplicationAssessmentDeleted", Map( "applicationId" -> applicationId ))
-
+  def removeFromAssessmentCentreSlot(applicationId: String): Future[Unit] = {
+    deleteAssessmentCentreAllocation(applicationId).flatMap { _ =>
       otRepository.removeCandidateAllocationStatus(applicationId).map { _ =>
-        auditService.logEventNoRequest("ApplicationDeallocated", Map( "applicationId" -> applicationId ))
+        auditService.logEventNoRequest("AssessmentCentreAllocationStatusReset", Map( "applicationId" -> applicationId ))
       }
     }
   }
 
-  def deleteApplicationAssessment(applicationId: String): Future[Unit] = {
-
-    appAssessRepository.delete(applicationId).map { _ =>
-      auditService.logEventNoRequest("ApplicationAssessmentDeleted", Map( "applicationId" -> applicationId ))
+  def deleteAssessmentCentreAllocation(applicationId: String): Future[Unit] = {
+    assessmentCentreAllocationRepo.delete(applicationId).map { _ =>
+      auditService.logEventNoRequest("AssessmentCentreAllocationDeleted", Map( "applicationId" -> applicationId ))
     }
   }
 
