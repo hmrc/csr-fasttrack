@@ -16,12 +16,11 @@
 
 package controllers.report
 
-import model.Commands.Implicits._
-import model.ReportExchangeObjects.{ PassMarkReport, PassMarkReportQuestionnaireData, PassMarkReportTestResults, TestResult }
-import model.ReportExchangeObjects.Implicits._
-import model.UniqueIdentifier
+import model.Adjustments
+import model.ReportExchangeObjects.{ PassMarkReportQuestionnaireData, PassMarkReportTestResults, TestResult }
 import model.exchange.ApplicationForCandidateProgressReportItemExamples
-import org.mockito.Matchers.{ eq => eqTo, _ }
+import model.report.PassMarkReportItem
+import org.mockito.Matchers._
 import org.mockito.Mockito._
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
@@ -33,54 +32,35 @@ import scala.util.Random
 class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingControllerSpec {
   "Pass mark modelling report" should {
     "return nothing if no applications exist" in new PassMarkReportTestFixture {
-      when(reportingRepoMock.candidateProgressReportNotWithdrawn(any())).thenReturnAsync(Nil)
+      when(reportingRepoMock.passMarkReport(any())).thenReturnAsync(Nil)
+      when(contactDetailsRepoMock.findAll).thenReturnAsync(Nil)
+      when(locationSchemeServiceMock.getAllSchemeLocations).thenReturnAsync(Nil)
       when(questionnaireRepoMock.passMarkReport).thenReturnAsync(Map.empty)
       when(testReportRepoMock.getOnlineTestReports).thenReturnAsync(Map.empty)
+      when(mediaRepositoryMock.findAll).thenReturnAsync(Map.empty)
 
       val response = controller.createOnlineTestPassMarkModellingReport(frameworkId)(request).run
-      val result = contentAsJson(response).as[List[PassMarkReport]]
+      val result = contentAsJson(response).as[List[PassMarkReportItem]]
 
       status(response) mustBe OK
       result mustBe empty
     }
 
-    "return nothing if applications exist, but no questionnaires" in new PassMarkReportTestFixture {
-      when(reportingRepoMock.candidateProgressReportNotWithdrawn(any())).thenReturnAsync(reports)
+    "return populated report if applications and data exist" in new PassMarkReportTestFixture {
+      when(reportingRepoMock.passMarkReport(any())).thenReturnAsync(List(report2))
+      when(contactDetailsRepoMock.findAll).thenReturnAsync(Nil)
+      when(locationSchemeServiceMock.getAllSchemeLocations).thenReturnAsync(Nil)
       when(questionnaireRepoMock.passMarkReport).thenReturnAsync(Map.empty)
       when(testReportRepoMock.getOnlineTestReports).thenReturnAsync(Map.empty)
+      when(mediaRepositoryMock.findAll).thenReturnAsync(Map.empty)
+      when(reportingFormatterMock.getOnlineAdjustments(any[Option[Boolean]], any[Option[Adjustments]])).thenReturn(Some("Yes"))
+      when(reportingFormatterMock.getAssessmentCentreAdjustments(any[Option[Boolean]], any[Option[Adjustments]])).thenReturn(Some("Yes"))
 
       val response = controller.createOnlineTestPassMarkModellingReport(frameworkId)(request).run
-      val result = contentAsJson(response).as[List[PassMarkReport]]
+      val result = contentAsJson(response).as[List[PassMarkReportItem]]
 
       status(response) mustBe OK
-      result mustBe empty
-    }
-
-    "return nothing if applications and questionnaires exist, but no test results" in new PassMarkReportTestFixture {
-      when(reportingRepoMock.candidateProgressReportNotWithdrawn(any())).thenReturnAsync(reports)
-      when(questionnaireRepoMock.passMarkReport).thenReturnAsync(questionnaires)
-      when(testReportRepoMock.getOnlineTestReports).thenReturnAsync(Map.empty)
-
-      val response = controller.createOnlineTestPassMarkModellingReport(frameworkId)(request).run
-      val result = contentAsJson(response).as[List[PassMarkReport]]
-
-      status(response) mustBe OK
-      result mustBe empty
-    }
-
-    "return applications with questionnaire and test results" in new PassMarkReportTestFixture {
-      when(reportingRepoMock.candidateProgressReportNotWithdrawn(any())).thenReturnAsync(reports)
-      when(questionnaireRepoMock.passMarkReport).thenReturnAsync(questionnaires)
-      when(testReportRepoMock.getOnlineTestReports).thenReturnAsync(testResults)
-
-      val response = controller.createOnlineTestPassMarkModellingReport(frameworkId)(request).run
-      val result = contentAsJson(response).as[List[PassMarkReport]]
-
-      status(response) mustBe OK
-      result mustBe List(
-        PassMarkReport(report1, questionnaire1, testResults1),
-        PassMarkReport(report2, questionnaire2, testResults2)
-      )
+      result.size mustBe 1
     }
   }
 
@@ -113,5 +93,4 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
         FakeHeaders(), "").withHeaders("Content-Type" -> "application/json")
     }
   }
-
 }

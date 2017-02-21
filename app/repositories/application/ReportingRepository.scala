@@ -43,12 +43,10 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 /** This class should contain those repo methods involving application collection that are related
-   exclusively to reporting functionality
+    exclusively to reporting functionality
  */
 trait ReportingRepository {
   def applicationsForCandidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
-
-  def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
 
   def candidateProgressReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]]
 
@@ -66,6 +64,9 @@ trait ReportingRepository {
 
   // The progress report contains common data for diversity
   def diversityReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
+
+  // The progress report contains common data for pass mark
+  def passMarkReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
 }
 
 class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo: () => DB)
@@ -173,12 +174,6 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
 
     collection.find(query, projection).cursor[BSONDocument]().collect[List]().map(_.map(docToCandidate))
   }
-
-  override def candidateProgressReportNotWithdrawn(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] =
-    applicationsForCandidateProgressReport(BSONDocument("$and" -> BSONArray(
-      BSONDocument("frameworkId" -> frameworkId),
-      BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn))
-    )))
 
   override def candidateProgressReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]] =
     overallReportWithPersonalDetails(BSONDocument("$and" -> BSONArray(
@@ -687,5 +682,23 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
 
     reportQueryWithProjectionsBSON[ApplicationForCandidateProgressReport](query, projection)
   }
-}
 
+  def passMarkReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] = {
+    val query = BSONDocument(
+      "frameworkId" -> frameworkId,
+      "progress-status.online_test_completed" -> BSONDocument("$exists" -> true)
+    )
+
+    val projection = BSONDocument(
+      "applicationId" -> "1",
+      "userId" -> "1",
+      "progress-status" -> "1",
+      "personal-details.civilServant" -> "1",
+      "schemes" -> "1",
+      "scheme-locations" -> "1",
+      "assistance-details" -> "1"
+    )
+
+    reportQueryWithProjectionsBSON[ApplicationForCandidateProgressReport](query, projection)
+  }
+}
