@@ -35,7 +35,9 @@ case class AssessmentCentreLocation(locationName: String, venues: List[Assessmen
 
 case class AssessmentCentreVenue(venueName: String, venueDescription: String, capacityDates: List[AssessmentCentreVenueCapacityDate])
 
-case class AssessmentCentreVenueCapacityDate(date: LocalDate, amCapacity: Int, pmCapacity: Int)
+case class AssessmentCentreVenueCapacityDate(date: LocalDate, amCapacity: Int, pmCapacity: Int,
+                                             amMinViableAttendees: Int, amPreferredAttendeeMargin: Int,
+                                             pmMinViableAttendees: Int, pmPreferredAttendeeMargin: Int)
 
 object AssessmentCentreLocation {
   implicit val assessmentCentreCapacityDateFormat = Json.format[AssessmentCentreVenueCapacityDate]
@@ -44,7 +46,6 @@ object AssessmentCentreLocation {
 }
 
 trait AssessmentCentreLocationRepository {
-
   def locationsAndAssessmentCentreMapping: Future[Map[String, String]]
 
   def assessmentCentreCapacities: Future[List[AssessmentCentreLocation]]
@@ -109,7 +110,11 @@ trait AssessmentCentreLocationRepositoryImpl extends AssessmentCentreLocationRep
                 AssessmentCentreVenueCapacityDate(
                   LocalDate.parse(capacityBlock("date"), AssessmentCentreDateFormat),
                   capacityBlock("amCapacity").asInstanceOf[Int],
-                  capacityBlock("pmCapacity").asInstanceOf[Int]
+                  capacityBlock("pmCapacity").asInstanceOf[Int],
+                  capacityBlock("amMinViableAttendees").asInstanceOf[Int],
+                  capacityBlock("amPreferredAttendeeMargin").asInstanceOf[Int],
+                  capacityBlock("pmMinViableAttendees").asInstanceOf[Int],
+                  capacityBlock("pmPreferredAttendeeMargin").asInstanceOf[Int]
                 )
               }.toList)
           }.toList

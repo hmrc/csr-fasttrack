@@ -81,7 +81,7 @@ trait InProgressPersonalDetailsStatusGenerator extends ConstructiveGenerator {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       pd = getPersonalDetails(candidateInPreviousStatus)
       cd = getContactDetails(candidateInPreviousStatus)
-      _ <- pdRepository.update(candidateInPreviousStatus.applicationId.get, candidateInPreviousStatus.userId,
+      _ <- pdRepository.updatePersonalDetailsAndStatus(candidateInPreviousStatus.applicationId.get, candidateInPreviousStatus.userId,
         pd, List(model.ApplicationStatuses.Created), model.ApplicationStatuses.InProgress)
       _ <- cdRepository.update(candidateInPreviousStatus.userId, cd)
     } yield {

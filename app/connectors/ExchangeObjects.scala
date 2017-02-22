@@ -28,6 +28,8 @@ object ExchangeObjects {
   case class UserEmail(to: List[String], templateId: String, parameters: Map[String, String])
 
   case class Candidate(firstName: String, lastName: String, preferredName: Option[String], email: String, userId: String)
+  case class AuthProviderUserDetails(firstName: String, lastName: String, email: Option[String], preferredName: Option[String], role: Option[String],
+                  disabled: Option[Boolean])
 
   // Cubiks Gateway Requests
   case class RegisterApplicant(firstName: String, lastName: String, email: String)
@@ -51,8 +53,12 @@ object ExchangeObjects {
   case class FindByFirstNameRequest(roles: List[String], firstName: String)
   case class FindByLastNameRequest(roles: List[String], lastName: String)
   case class FindByFirstNameLastNameRequest(roles: List[String], firstName: String, lastName: String)
+  case class FindByUserIdRequest(userId: String)
+  case class UpdateDetailsRequest(firstName: String, lastName: String,
+    email: Option[String], preferredName: Option[String], role: Option[String], disabled: Option[Boolean])
 
   object Implicits {
+    implicit val authProviderUserDetailsFormat = Json.format[AuthProviderUserDetails]
     implicit val userEmailFormat = Json.format[UserEmail]
     implicit val candidateFormat = Json.format[Candidate]
     implicit val registrationFormat = Json.format[Registration]
@@ -70,5 +76,8 @@ object ExchangeObjects {
     implicit val findByFirstNameRequestFormat = Json.format[FindByFirstNameRequest]
     implicit val findByLastNameRequestFormat = Json.format[FindByLastNameRequest]
     implicit val findByFirstNameLastNameRequestFormat = Json.format[FindByFirstNameLastNameRequest]
+    implicit val findByUserIdRequestFormat = Json.format[FindByUserIdRequest]
+    implicit val updateDetailsRequestFormat = Json.format[UpdateDetailsRequest]
+
   }
 }

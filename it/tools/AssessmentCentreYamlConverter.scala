@@ -57,7 +57,10 @@ object AssessmentCentreYamlConverter extends App {
 
   lazy val stringToWrite = parsedYaml.flatMap { case (loc, venues) =>
 
-    val filterVenuesWithSlots: List[AssessmentVenue] => List[AssessmentVenue] = _.filter(_.capacityInfo.length == 3)
+    // Filter out venues with incomplete capacity/minattendee info
+    val filterVenuesWithSlots: List[AssessmentVenue] => List[AssessmentVenue] = _.filter {
+      item => item.capacityInfo.length == 7 && item.capacityInfo.forall(_.nonEmpty)
+    }
 
     val venuesStrList = venues.collect { case (venueDescription, venueDetails) if filterVenuesWithSlots(venueDetails).nonEmpty  =>
 
@@ -66,7 +69,11 @@ object AssessmentCentreYamlConverter extends App {
 
           s"""         - date: ${venueInfo.capacityInfo.head}
             |           amCapacity: ${venueInfo.capacityInfo(1)}
-            |           pmCapacity: ${venueInfo.capacityInfo(2)}""".stripMargin
+            |           amMinViableAttendees: ${venueInfo.capacityInfo(3)}
+            |           amPreferredAttendeeMargin: ${venueInfo.capacityInfo(4)}
+            |           pmCapacity: ${venueInfo.capacityInfo(2)}
+            |           pmMinViableAttendees: ${venueInfo.capacityInfo(5)}
+            |           pmPreferredAttendeeMargin: ${venueInfo.capacityInfo(6)}""".stripMargin
         }.mkString("\n")
 
         s"""  - ${venueDetails.head.venueName}:

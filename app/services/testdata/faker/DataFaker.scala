@@ -93,7 +93,6 @@ object DataFaker {
         }
 
         firstVenueWithSpace.map { entry =>
-          Logger.warn("=============== FVWS = " + entry)
           entry.get
         }
       }
