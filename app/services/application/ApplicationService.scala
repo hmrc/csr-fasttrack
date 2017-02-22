@@ -16,12 +16,15 @@
 
 package services.application
 
+import connectors.AuthProviderClient
+import connectors.ExchangeObjects.{ UpdateDetailsRequest, AuthProviderUserDetails }
 import model.Commands.{ CandidateEditableDetails, WithdrawApplicationRequest }
 import model.Exceptions.NotFoundException
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
 import services.applicationassessment.ApplicationAssessmentService
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -31,6 +34,7 @@ object ApplicationService extends ApplicationService {
   val auditService = AuditService
   val personalDetailsRepository = repositories.personalDetailsRepository
   val contactDetailsRepository = repositories.contactDetailsRepository
+  val authProviderClient = AuthProviderClient
 }
 
 trait ApplicationService {
@@ -41,6 +45,8 @@ trait ApplicationService {
   val auditService: AuditService
   val contactDetailsRepository: ContactDetailsRepository
   val personalDetailsRepository: PersonalDetailsRepository
+  val authProviderClient: AuthProviderClient
+  private val UserNotFoundError = Future.failed(new RuntimeException("User not found for the given userId"))
 
   def withdraw(applicationId: String, withdrawRequest: WithdrawApplicationRequest): Future[Unit] = {
     appRepository.withdraw(applicationId, withdrawRequest).flatMap { result =>
@@ -54,13 +60,21 @@ trait ApplicationService {
     }
   }
 
-  def editDetails(userId: String, applicationId: String, editRequest: CandidateEditableDetails): Future[Unit] = {
+  def editDetails(userId: String, applicationId: String, editRequest: CandidateEditableDetails)(implicit hc: HeaderCarrier): Future[Unit] = {
+
+    val userFut: Future[AuthProviderUserDetails] = authProviderClient.findByUserId(userId).flatMap {
+      case Some(u) => Future.successful(u)
+      case _ => UserNotFoundError
+    }
     val currentCdFut = contactDetailsRepository.find(userId)
     val currentPdFut = personalDetailsRepository.find(applicationId)
+
     for {
       currentCd <- currentCdFut
       currentPd <- currentPdFut
+      user <- userFut
       _ <- Future.sequence(
+            authProviderClient.update(userId, toUpdateDetailsRequest(editRequest, user)) ::
             personalDetailsRepository.update(applicationId, userId, currentPd.copy(
               firstName = editRequest.firstName,
               lastName = editRequest.lastName,
@@ -74,13 +88,18 @@ trait ApplicationService {
               country = editRequest.country,
               phone = editRequest.phone
             )) :: Nil
-      )
+          )
+
     } yield {
       auditService.logEventNoRequest(
         "ApplicationEdited",
         Map("applicationId" -> applicationId, "editRequest" -> editRequest.toString)
       )
     }
+  }
+
+  private def toUpdateDetailsRequest(editRequest: CandidateEditableDetails, user: AuthProviderUserDetails): UpdateDetailsRequest = {
+    UpdateDetailsRequest(editRequest.firstName, editRequest.lastName, user.email, Some(editRequest.preferredName), user.role, user.disabled)
   }
 
 }

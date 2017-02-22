@@ -21,7 +21,7 @@ import org.joda.time.LocalDate
 import play.api.libs.json.Json
 
 object AssessmentScheduleExchangeObjects {
-  case class UsedCapacity(usedCapacity: Int, hasUnconfirmedAttendees: Boolean)
+  case class UsedCapacity(usedCapacity: Int, confirmedAttendees: Int, minViableAttendees: Int, preferredAttendeeMargin: Int)
   case class UsedCapacityDate(date: LocalDate, amUsedCapacity: UsedCapacity, pmUsedCapacity: UsedCapacity)
   case class Venue(name: String, usedCapacityDates: List[UsedCapacityDate])
   case class Location(name: String, venues: List[Venue])

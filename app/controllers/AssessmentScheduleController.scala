@@ -69,11 +69,12 @@ trait AssessmentScheduleController extends BaseController {
   val emailClient: EmailClient
   val aaService: ApplicationAssessmentService
 
-  private def calculateUsedCapacity(assessments: Option[List[ApplicationAssessment]], sessionCapacity: Int): UsedCapacity = {
+  private def calculateUsedCapacity(assessments: Option[List[ApplicationAssessment]], sessionCapacity: Int,
+                                    minViableAttendees: Int, preferredAttendeeMargin: Int): UsedCapacity = {
     assessments.map { sessionSlots =>
-      UsedCapacity(sessionSlots.size, sessionSlots.exists(x => !x.confirmed))
+      UsedCapacity(sessionSlots.size, sessionSlots.count(x => x.confirmed), minViableAttendees, preferredAttendeeMargin)
     }.getOrElse(
-      UsedCapacity(0, hasUnconfirmedAttendees = false)
+      UsedCapacity(usedCapacity = 0, confirmedAttendees = 0, minViableAttendees, preferredAttendeeMargin)
     )
   }
 
@@ -94,8 +95,10 @@ trait AssessmentScheduleController extends BaseController {
                 venue.capacityDates.map(capacityDate =>
                   UsedCapacityDate(
                     capacityDate.date,
-                    calculateUsedCapacity(assessmentMap.get((venue.venueName, capacityDate.date, "AM")), capacityDate.amCapacity),
-                    calculateUsedCapacity(assessmentMap.get((venue.venueName, capacityDate.date, "PM")), capacityDate.pmCapacity)
+                    calculateUsedCapacity(assessmentMap.get((venue.venueName, capacityDate.date, "AM")),
+                      capacityDate.amCapacity, capacityDate.amMinViableAttendees, capacityDate.amPreferredAttendeeMargin),
+                    calculateUsedCapacity(assessmentMap.get((venue.venueName, capacityDate.date, "PM")),
+                      capacityDate.pmCapacity, capacityDate.pmMinViableAttendees, capacityDate.pmPreferredAttendeeMargin)
                   ))
               ))
           ))
