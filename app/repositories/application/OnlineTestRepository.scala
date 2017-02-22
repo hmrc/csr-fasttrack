@@ -567,11 +567,11 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
         "applicationStatus" -> ApplicationStatuses.AwaitingAllocationNotified,
         s"progress-status.${ProgressStatuses.AwaitingAllocationProgress}" -> true,
         s"progress-status-dates.${ProgressStatuses.AwaitingAllocationProgress}" -> LocalDate.now()
-    ))
+      )
+    )
 
     val validator = singleUpdateValidator(applicationId, "resetting assessment centre allocation status",
-      UnexpectedException("failed to reset assessment centre allocation status")
-    )
+      UnexpectedException("failed to reset assessment centre allocation status"))
 
     collection.update(query, update, upsert = false) map validator
   }

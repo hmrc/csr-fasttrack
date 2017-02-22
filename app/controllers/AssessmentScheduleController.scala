@@ -70,7 +70,7 @@ trait AssessmentScheduleController extends BaseController {
   val aaService: AssessmentCentreService
 
   private def calculateUsedCapacity(assessments: Option[List[AssessmentCentreAllocation]], sessionCapacity: Int,
-                                    minViableAttendees: Int, preferredAttendeeMargin: Int): UsedCapacity = {
+    minViableAttendees: Int, preferredAttendeeMargin: Int): UsedCapacity = {
     assessments.map { sessionSlots =>
       UsedCapacity(sessionSlots.size, sessionSlots.count(x => x.confirmed), minViableAttendees, preferredAttendeeMargin)
     }.getOrElse(
@@ -127,7 +127,8 @@ trait AssessmentScheduleController extends BaseController {
     }
   }
 
-  private def joinApplicationsAndApplicationAssessments(assessmentsFut: Future[List[AssessmentCentreAllocation]],
+  private def joinApplicationsAndApplicationAssessments(
+    assessmentsFut: Future[List[AssessmentCentreAllocation]],
     candidatesFut: Future[List[Commands.Candidate]]
   ) = {
     for {

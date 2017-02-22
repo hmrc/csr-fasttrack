@@ -40,8 +40,8 @@ trait AssessmentCentreAllocationRepository {
 }
 
 class AssessmentCentreAllocationMongoRepository()(implicit mongo: () => DB)
-  extends ReactiveRepository[AssessmentCentreAllocation, BSONObjectID](CollectionNames.APPLICATION_ASSESSMENT, mongo,
-    Commands.Implicits.applicationAssessmentFormat, ReactiveMongoFormats.objectIdFormats) with AssessmentCentreAllocationRepository {
+    extends ReactiveRepository[AssessmentCentreAllocation, BSONObjectID](CollectionNames.APPLICATION_ASSESSMENT, mongo,
+      Commands.Implicits.applicationAssessmentFormat, ReactiveMongoFormats.objectIdFormats) with AssessmentCentreAllocationRepository {
 
   def findOne(applicationId: String): Future[AssessmentCentreAllocation] = {
     val query = BSONDocument(
@@ -131,7 +131,7 @@ class AssessmentCentreAllocationMongoRepository()(implicit mongo: () => DB)
 
   def confirmAllocation(applicationId: String): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
-    val confirmedBSON = BSONDocument("$set" -> BSONDocument( "confirmed" -> true ))
+    val confirmedBSON = BSONDocument("$set" -> BSONDocument("confirmed" -> true))
     collection.update(query, confirmedBSON, upsert = false) map { _ => () }
   }
 
