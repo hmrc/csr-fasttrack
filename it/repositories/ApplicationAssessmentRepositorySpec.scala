@@ -27,11 +27,11 @@ class ApplicationAssessmentRepositorySpec extends MongoRepositorySpec {
   import ImplicitBSONHandlers._
 
   val collectionName = CollectionNames.APPLICATION_ASSESSMENT
-  def repository = new ApplicationAssessmentMongoRepository()
+  def repository = new AssessmentCentreAllocationMongoRepository()
 
   "Application Assessment repository" should {
     "create indexes for the repository" in {
-      val repo = repositories.applicationAssessmentRepository
+      val repo = repositories.assessmentCentreAllocationRepository
 
       val indexes = indexesWithFields(repo)
       indexes must contain (List("_id"))
@@ -48,7 +48,7 @@ class ApplicationAssessmentRepositorySpec extends MongoRepositorySpec {
       val date = LocalDate.parse("2015-04-01")
       createApplicationAssessment(appId, venue, date, session, slot, confirmed = false)
 
-      val result = repository.applicationAssessments.futureValue
+      val result = repository.findAll.futureValue
 
       result.size mustBe 1
       val appAssessment = result.head
@@ -68,7 +68,7 @@ class ApplicationAssessmentRepositorySpec extends MongoRepositorySpec {
 
       createApplicationAssessment(appId, venue, date, session, slot, confirmed = false)
 
-      val result = repository.applicationAssessments(venue, date).futureValue
+      val result = repository.findAllForDate(venue, date).futureValue
 
       result.size mustBe 1
       val appAssessment = result.head
@@ -88,7 +88,7 @@ class ApplicationAssessmentRepositorySpec extends MongoRepositorySpec {
 
       createApplicationAssessment(appId, venue, date, session, slot, confirmed = false)
 
-      val result = repository.applicationAssessment(appId).futureValue
+      val result = repository.find(appId).futureValue
 
       result.isDefined mustBe true
       val appAssessment = result.get
@@ -101,7 +101,7 @@ class ApplicationAssessmentRepositorySpec extends MongoRepositorySpec {
 
     "return a None when no application assessment has been inserted and looked up by applicationId" in {
       val appId = "appId-5"
-      repository.applicationAssessment(appId).futureValue mustBe None
+      repository.find(appId).futureValue mustBe None
     }
 
     "delete an application assessment when one exists" in {

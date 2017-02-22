@@ -17,20 +17,20 @@
 package services.application
 
 import connectors.AuthProviderClient
-import connectors.ExchangeObjects.{ UpdateDetailsRequest, AuthProviderUserDetails }
+import connectors.ExchangeObjects.{ AuthProviderUserDetails, UpdateDetailsRequest }
 import model.Commands.{ CandidateEditableDetails, WithdrawApplicationRequest }
 import model.Exceptions.NotFoundException
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
-import services.applicationassessment.ApplicationAssessmentService
+import services.applicationassessment.AssessmentCentreService
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 object ApplicationService extends ApplicationService {
   val appRepository = applicationRepository
-  val appAssessService = ApplicationAssessmentService
+  val appAssessService = AssessmentCentreService
   val auditService = AuditService
   val personalDetailsRepository = repositories.personalDetailsRepository
   val contactDetailsRepository = repositories.contactDetailsRepository
@@ -41,7 +41,7 @@ trait ApplicationService {
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val appRepository: GeneralApplicationRepository
-  val appAssessService: ApplicationAssessmentService
+  val appAssessService: AssessmentCentreService
   val auditService: AuditService
   val contactDetailsRepository: ContactDetailsRepository
   val personalDetailsRepository: PersonalDetailsRepository
@@ -54,8 +54,8 @@ trait ApplicationService {
         "ApplicationWithdrawn",
         Map("applicationId" -> applicationId, "withdrawRequest" -> withdrawRequest.toString)
       )
-      appAssessService.deleteApplicationAssessment(applicationId).recover {
-        case ex: NotFoundException => {}
+      appAssessService.deleteAssessmentCentreAllocation(applicationId).recover {
+        case _: NotFoundException => ()
       }
     }
   }

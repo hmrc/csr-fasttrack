@@ -21,11 +21,13 @@ import connectors.{ CSREmailClient, EmailClient }
 import model.ApplicationStatuses
 import model.ApplicationStatuses.BSONEnumHandler
 import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
+import model.CandidateScoresCommands.{ ApplicationScores, CandidateScoresAndFeedback, RecordCandidateScores }
 import model.EvaluationResults._
 import model.Exceptions.IncorrectStatusInApplicationException
 import model.PersistedObjects.ApplicationForNotification
 import play.api.Logger
-import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
+import play.api.mvc.RequestHeader
+import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
 import repositories._
 import services.AuditService
 import services.evaluation.AssessmentCentrePassmarkRulesEngine
@@ -34,9 +36,10 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-object ApplicationAssessmentService extends ApplicationAssessmentService {
+object AssessmentCentreService extends AssessmentCentreService {
 
-  val appAssessRepository = applicationAssessmentRepository
+  val assessmentCentreAllocationRepo = assessmentCentreAllocationRepository
+  val personalDetailsRepo = personalDetailsRepository
   val otRepository = onlineTestRepository
   val aRepository = applicationRepository
   val aasRepository = applicationAssessmentScoresRepository
@@ -50,13 +53,12 @@ object ApplicationAssessmentService extends ApplicationAssessmentService {
   val passmarkRulesEngine = AssessmentCentrePassmarkRulesEngine
 }
 
-trait ApplicationAssessmentService extends ApplicationStatusCalculator {
-
-  implicit def headerCarrier = new HeaderCarrier()
+trait AssessmentCentreService extends ApplicationStatusCalculator {
 
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
-  val appAssessRepository: ApplicationAssessmentRepository
+  val assessmentCentreAllocationRepo: AssessmentCentreAllocationRepository
+  val personalDetailsRepo: PersonalDetailsRepository
   val otRepository: OnlineTestRepository
   val aRepository: GeneralApplicationRepository
   val aasRepository: ApplicationAssessmentScoresRepository
@@ -69,22 +71,51 @@ trait ApplicationAssessmentService extends ApplicationStatusCalculator {
   val passmarkService: AssessmentCentrePassMarkSettingsService
   val passmarkRulesEngine: AssessmentCentrePassmarkRulesEngine
 
-  def removeFromApplicationAssessmentSlot(applicationId: String): Future[Unit] = {
+  def saveScoresAndFeedback(applicationId: String, scoresAndFeedback: CandidateScoresAndFeedback)
+    (implicit hc:HeaderCarrier, rh: RequestHeader): Future[Unit] = {
+    scoresAndFeedback.attendancy match {
+      case Some(attendancy) =>
+        val newStatus = if (attendancy) ApplicationStatuses.AssessmentScoresEntered else ApplicationStatuses.FailedToAttend
+        for {
+          _ <- aasRepository.save(scoresAndFeedback)
+          _ <- aRepository.updateStatus(applicationId, newStatus)
+        } yield {
+          auditService.logEvent("ApplicationScoresAndFeedbackSaved", Map("applicationId" -> applicationId))
+          auditService.logEvent(s"ApplicationStatusSetTo$newStatus", Map("applicationId" -> applicationId))
+        }
+      case _ => Future { throw new IllegalStateException("Attendance must be confirmed to save scores and feedback") }
+    }
+  }
 
-    appAssessRepository.delete(applicationId).flatMap { _ =>
+  def getCandidateScores(applicationId: String): Future[ApplicationScores] = {
+    val assessment = assessmentCentreAllocationRepo.findOne(applicationId)
+    val candidate = personalDetailsRepo.find(applicationId)
+    val applicationScores = aasRepository.tryFind(applicationId)
 
-      auditService.logEventNoRequest("ApplicationAssessmentDeleted", Map("applicationId" -> applicationId))
+    for {
+      a <- assessment
+      c <- candidate
+      as <- applicationScores
+    } yield {
+      ApplicationScores(RecordCandidateScores(c.firstName, c.lastName, a.venue, a.date), as)
+    }
+  }
 
+  def acceptScoresAndFeedback(applicationId: String): Future[Unit] = {
+    aRepository.updateStatus(applicationId, ApplicationStatuses.AssessmentScoresAccepted)
+  }
+
+  def removeFromAssessmentCentreSlot(applicationId: String): Future[Unit] = {
+    deleteAssessmentCentreAllocation(applicationId).flatMap { _ =>
       otRepository.removeCandidateAllocationStatus(applicationId).map { _ =>
-        auditService.logEventNoRequest("ApplicationDeallocated", Map("applicationId" -> applicationId))
+        auditService.logEventNoRequest("AssessmentCentreAllocationStatusReset", Map( "applicationId" -> applicationId ))
       }
     }
   }
 
-  def deleteApplicationAssessment(applicationId: String): Future[Unit] = {
-
-    appAssessRepository.delete(applicationId).map { _ =>
-      auditService.logEventNoRequest("ApplicationAssessmentDeleted", Map("applicationId" -> applicationId))
+  def deleteAssessmentCentreAllocation(applicationId: String): Future[Unit] = {
+    assessmentCentreAllocationRepo.delete(applicationId).map { _ =>
+      auditService.logEventNoRequest("AssessmentCentreAllocationDeleted", Map( "applicationId" -> applicationId ))
     }
   }
 
@@ -131,7 +162,7 @@ trait ApplicationAssessmentService extends ApplicationStatusCalculator {
     }
   }
 
-  def processNextAssessmentCentrePassedOrFailedApplication: Future[Unit] = {
+  def processNextAssessmentCentrePassedOrFailedApplication(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
     aRepository.nextAssessmentCentrePassedOrFailedApplication().flatMap {
       case Some(application) =>
         Logger.debug(s"processAssessmentCentrePassedOrFailedApplication() with application id [${application.applicationId}] " +
@@ -156,7 +187,8 @@ trait ApplicationAssessmentService extends ApplicationStatusCalculator {
     auditService.logEventNoRequest(event, Map("applicationId" -> appId, "applicationStatus" -> newStatus))
   }
 
-  private[applicationassessment] def emailCandidate(application: ApplicationForNotification, emailAddress: String): Future[Unit] = {
+  private[applicationassessment] def emailCandidate(application: ApplicationForNotification, emailAddress: String)
+    (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
 
     application.applicationStatus match {
       case ApplicationStatuses.AssessmentCentrePassed =>

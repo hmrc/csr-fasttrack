@@ -24,11 +24,7 @@ import model.EvaluationResults._
 import model.PersistedObjects.{ OnlineTestPassmarkEvaluation, PreferencesWithQualification }
 import model.{ LocationPreference, Preferences }
 import org.mockito.Mockito._
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.{ OneAppPerSuite, PlaySpec }
-import play.test.WithApplication
-import services.applicationassessment.ApplicationAssessmentService
+import services.applicationassessment.AssessmentCentreService
 import testkit.{ ShortTimeout, UnitWithAppSpec }
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -36,7 +32,7 @@ import scala.concurrent.{ ExecutionContext, Future }
 class EvaluateAssessmentScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
   implicit val ec: ExecutionContext = ExecutionContext.global
 
-  val applicationAssessmentServiceMock = mock[ApplicationAssessmentService]
+  val applicationAssessmentServiceMock = mock[AssessmentCentreService]
   val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = false, None, None)
 
   object TestableEvaluateAssessmentScoreJob extends EvaluateAssessmentScoreJob {
