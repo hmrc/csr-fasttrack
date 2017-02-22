@@ -84,8 +84,8 @@ trait MicroService {
     // .settings(excludeFilter in ScalariformKeys.format := ((excludeFilter in ScalariformKeys.format).value ||
       //  "Firstnames.scala" ||
      //  "Lastnames.scala"))
-    .settings(compileScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).toTask("").value,
-    (compile in Compile) <<= (compile in Compile) dependsOn compileScalastyle)
+    // .settings(compileScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).toTask("").value,
+    // (compile in Compile) <<= (compile in Compile) dependsOn compileScalastyle)
     .settings(
       unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest)(base => Seq(
         base / "it", base / "test/model", base / "test/testkit"
