@@ -33,20 +33,20 @@ trait CandidateScoresController extends BaseController {
   def assessmentCentreService: AssessmentCentreService
 
   def getCandidateScores(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
-    assessmentCentreService.getCandidateScores(applicationId) map (  scores =>  Ok(Json.toJson(scores)))
+    assessmentCentreService.getCandidateScores(applicationId).map(scores =>  Ok(Json.toJson(scores)))
   }
 
   def createCandidateScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[CandidateScoresAndFeedback] { candidateScoresAndFeedback =>
-      assessmentCentreService.saveScoresAndFeedback(applicationId, candidateScoresAndFeedback) map { _ =>
+      assessmentCentreService.saveScoresAndFeedback(applicationId, candidateScoresAndFeedback).map { _ =>
         Created
-      } recover {
+      }.recover {
         case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
       }
     }
   }
 
   def acceptCandidateScoresAndFeedback(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
-    assessmentCentreService.acceptScoresAndFeedback(applicationId) map ( _ => Ok )
+    assessmentCentreService.acceptScoresAndFeedback(applicationId).map( _ => Ok )
   }
 }
