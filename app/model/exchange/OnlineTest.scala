@@ -20,15 +20,15 @@ import org.joda.time.DateTime
 import play.api.libs.json.Json
 
 case class OnlineTest(
-  cubiksUserId: Int,
-  inviteDate: DateTime,
-  expireDate: DateTime,
-  onlineTestLink: String,
-  token: String,
-  isOnlineTestEnabled: Boolean = false,
-  pdfReportAvailable: Boolean = false,
-  startedDateTime: Option[DateTime] = None,
-  completedDateTime: Option[DateTime] = None
+    cubiksUserId: Int,
+    inviteDate: DateTime,
+    expireDate: DateTime,
+    onlineTestLink: String,
+    token: String,
+    isOnlineTestEnabled: Boolean = false,
+    pdfReportAvailable: Boolean = false,
+    startedDateTime: Option[DateTime] = None,
+    completedDateTime: Option[DateTime] = None
 ) {
   def isStarted: Boolean = startedDateTime.isDefined
   def isCompleted: Boolean = completedDateTime.isDefined

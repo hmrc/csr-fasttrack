@@ -39,7 +39,6 @@ trait RegisteredStatusGenerator extends BaseGenerator {
   val pdRepository: PersonalDetailsRepository
   val qRepository: QuestionnaireRepository
 
-
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
 
     val firstName = generatorConfig.personalData.firstName
@@ -54,9 +53,8 @@ trait RegisteredStatusGenerator extends BaseGenerator {
     }
   }
 
-  def createUser( generationId: Int, email: String, firstName: String, lastName: String, preferredName: Option[String],
-    role: AuthProviderClient.UserRole)
-    (implicit hc: HeaderCarrier) = {
+  def createUser(generationId: Int, email: String, firstName: String, lastName: String, preferredName: Option[String],
+    role: AuthProviderClient.UserRole)(implicit hc: HeaderCarrier) = {
     for {
       user <- authProviderClient.addUser(email, "Service01", firstName, lastName, role)
       token <- authProviderClient.getToken(email)

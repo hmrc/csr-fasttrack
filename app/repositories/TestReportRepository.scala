@@ -41,8 +41,8 @@ trait TestReportRepository {
 }
 
 class TestReportMongoRepository(implicit mongo: () => DB)
-  extends ReactiveRepository[CandidateTestReport, BSONObjectID](CollectionNames.ONLINE_TEST_REPORT, mongo,
-    candidateTestReportFormats, ReactiveMongoFormats.objectIdFormats) with TestReportRepository {
+    extends ReactiveRepository[CandidateTestReport, BSONObjectID](CollectionNames.ONLINE_TEST_REPORT, mongo,
+      candidateTestReportFormats, ReactiveMongoFormats.objectIdFormats) with TestReportRepository {
 
   def saveOnlineTestReport(report: CandidateTestReport): Future[Unit] = {
     val query = BSONDocument("applicationId" -> report.applicationId)

@@ -33,7 +33,7 @@ import scala.util.Random
 
 class AssessmentResultsReportingControllerSpec extends BaseReportingControllerSpec {
   // TODO fix this when we get to this report
-/*
+  /*
   "Assessment results report" should {
     "return results report" in new AssessmentResultsReportTestFixture {
       when(reportingRepoMock.applicationsWithAssessmentScoresAccepted(any())).thenReturnAsync(appPreferences)
@@ -89,7 +89,7 @@ class AssessmentResultsReportingControllerSpec extends BaseReportingControllerSp
   }
 */
   trait AssessmentResultsReportTestFixture extends TestFixture {
-    val appId =  UniqueIdentifier.randomUniqueIdentifier
+    val appId = UniqueIdentifier.randomUniqueIdentifier
     val userID = UniqueIdentifier.randomUniqueIdentifier
 
     lazy val applicationPreference1 = newAppPreferences

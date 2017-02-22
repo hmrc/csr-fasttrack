@@ -146,7 +146,8 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
         .thenReturn(Future.successful(()))
 
       applicationAssessmentService.evaluateAssessmentCandidate(
-        OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation, scores), config).futureValue
+        OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation, scores), config
+      ).futureValue
 
       verify(aRepositoryMock).saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AssessmentCentrePassed)
       verify(auditServiceMock).logEventNoRequest(
@@ -179,8 +180,10 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
         verify(aRepositoryMock).updateStatus("appId1", ApplicationStatuses.AssessmentCentrePassedNotified)
         val auditDetails = Map("userId" -> "userId1", "email" -> "email@mailinator.com")
         verify(auditServiceMock).logEventNoRequest(eqTo("AssessmentCentrePassedEmailed"), eqTo(auditDetails))
-        val auditDetailsNewStatus = Map("applicationId" -> "appId1",
-          "applicationStatus" -> ApplicationStatuses.AssessmentCentrePassedNotified.name)
+        val auditDetailsNewStatus = Map(
+          "applicationId" -> "appId1",
+          "applicationStatus" -> ApplicationStatuses.AssessmentCentrePassedNotified.name
+        )
         verify(auditServiceMock).logEventNoRequest("ApplicationAssessmentPassedNotified", auditDetailsNewStatus)
       }
 
@@ -201,7 +204,8 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
         verify(aRepositoryMock).updateStatus("appId1", ApplicationStatuses.AssessmentCentreFailedNotified)
         val auditDetails = Map("userId" -> "userId1", "email" -> "email@mailinator.com")
         verify(auditServiceMock).logEventNoRequest(eqTo("AssessmentCentreFailedEmailed"), eqTo(auditDetails))
-        val auditDetailsNewStatus = Map("applicationId" -> "appId1",
+        val auditDetailsNewStatus = Map(
+          "applicationId" -> "appId1",
           "applicationStatus" -> ApplicationStatuses.AssessmentCentreFailedNotified.name
         )
         verify(auditServiceMock).logEventNoRequest("ApplicationAssessmentFailedNotified", auditDetailsNewStatus)

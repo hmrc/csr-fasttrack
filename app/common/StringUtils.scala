@@ -21,7 +21,7 @@ import scala.language.implicitConversions
 object StringUtils {
 
   def splitCamelCase(text: String)(implicit delim: String = " ") =
-    "[A-Z\\d]".r.replaceAllIn(text, {m =>
+    "[A-Z\\d]".r.replaceAllIn(text, { m =>
       delim + m.group(0).toLowerCase()
     }).trim
 

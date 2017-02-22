@@ -56,8 +56,10 @@ class OnlineTestExtensionServiceSpec extends PlaySpec with ScalaFutures with Moc
       service.extendExpiryTime(onlineTestApp, fourExtraDays).futureValue mustBe (())
 
       verify(otRepository).updateExpiryTime(userId, nowBeyondExpiry.plusDays(fourExtraDays))
-      verify(appRepository).removeProgressStatuses(applicationId,
-        List(ProgressStatuses.OnlineTestFirstExpiryNotification, ProgressStatuses.OnlineTestSecondExpiryNotification))
+      verify(appRepository).removeProgressStatuses(
+        applicationId,
+        List(ProgressStatuses.OnlineTestFirstExpiryNotification, ProgressStatuses.OnlineTestSecondExpiryNotification)
+      )
 
     }
   }

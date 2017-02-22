@@ -20,33 +20,38 @@ import model.ReportExchangeObjects.CandidateProgressReportItem
 import model.{ ProgressStatuses, Scheme }
 
 object CandidateProgressReportItemExamples {
-  val PersonalDetailsCompleted = CandidateProgressReportItem(Some(ApplicationIdExamples.appId1),
+  val PersonalDetailsCompleted = CandidateProgressReportItem(
+    Some(ApplicationIdExamples.appId1),
     Some(ProgressStatuses.PersonalDetailsCompleted), List.empty, List.empty,
     None, None, None, None, Some(false), None
 
   )
-  val SchemePreferencesCompleted = CandidateProgressReportItem(Some(ApplicationIdExamples.appId2),
+  val SchemePreferencesCompleted = CandidateProgressReportItem(
+    Some(ApplicationIdExamples.appId2),
     Some(ProgressStatuses.SchemesPreferencesCompleted), List(Scheme.Finance, Scheme.DigitalAndTechnology),
     List(LocationSchemesExamples.LocationSchemes1.locationName, LocationSchemesExamples.LocationSchemes2.locationName),
     None, None, None, None, None, None
   )
-  val AssistanceDetailsCompleted = CandidateProgressReportItem(Some(ApplicationIdExamples.appId3),
+  val AssistanceDetailsCompleted = CandidateProgressReportItem(
+    Some(ApplicationIdExamples.appId3),
     Some(ProgressStatuses.AssistanceDetailsCompleted), List(Scheme.Commercial, Scheme.DigitalAndTechnology),
     List(LocationSchemesExamples.LocationSchemes2.locationName, LocationSchemesExamples.LocationSchemes3.locationName),
     Some("Yes"), Some(false), Some("Yes"), Some("Yes"), Some(false), None
   )
-  val OccupationQuestionsCompleted = CandidateProgressReportItem(Some(ApplicationIdExamples.appId4),
+  val OccupationQuestionsCompleted = CandidateProgressReportItem(
+    Some(ApplicationIdExamples.appId4),
     Some(ProgressStatuses.OccupationQuestionsCompleted), List(Scheme.Business, Scheme.Finance),
     List(LocationSchemesExamples.LocationSchemes1.locationName, LocationSchemesExamples.LocationSchemes3.locationName),
     Some("Yes"), Some(false), Some("Yes"), Some("Yes"), Some(false), None
   )
-  val ReviewCompleted = CandidateProgressReportItem(Some(ApplicationIdExamples.appId5),
+  val ReviewCompleted = CandidateProgressReportItem(
+    Some(ApplicationIdExamples.appId5),
     Some(ProgressStatuses.ReviewCompleted), List(Scheme.Business, Scheme.ProjectDelivery),
     List(LocationSchemesExamples.LocationSchemes1.locationName, LocationSchemesExamples.LocationSchemes4.locationName),
     Some("Yes"), Some(false), Some("Yes"), Some("Yes"), Some(false), None
   )
   val Candidates = List(PersonalDetailsCompleted, SchemePreferencesCompleted, AssistanceDetailsCompleted,
     OccupationQuestionsCompleted, ReviewCompleted)
-  val CandidatesWithoutFsac = Candidates.map ( _.copy(fsacIndicator = None))
+  val CandidatesWithoutFsac = Candidates.map(_.copy(fsacIndicator = None))
   val CandidatesWithoutLocationNames = Candidates.map(_.copy(locations = List.empty))
 }

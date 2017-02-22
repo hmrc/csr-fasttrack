@@ -16,7 +16,6 @@
 
 package model
 
-
 object ProgressStatuses extends Enum {
 
   type ProgressStatus = Value

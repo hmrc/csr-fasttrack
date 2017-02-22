@@ -33,9 +33,9 @@ trait OnlineTestExtensionService {
 }
 
 class OnlineTestExtensionServiceImpl(
-  otRepository: OnlineTestRepository,
-  appRepository: GeneralApplicationRepository,
-  dateTime: DateTimeFactory
+    otRepository: OnlineTestRepository,
+    appRepository: GeneralApplicationRepository,
+    dateTime: DateTimeFactory
 ) extends OnlineTestExtensionService {
 
   override def extendExpiryTime(application: OnlineTestApplication, extraDays: Int): Future[Unit] = {

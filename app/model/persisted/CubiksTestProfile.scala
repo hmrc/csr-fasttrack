@@ -23,18 +23,18 @@ import reactivemongo.bson.{ BSONDocument, BSONHandler, Macros }
 import repositories.BSONDateTimeHandler
 
 case class CubiksTestProfile(
-  cubiksUserId: Int,
-  participantScheduleId: Int,
-  invitationDate: DateTime,
-  expirationDate: DateTime,
-  onlineTestUrl: String,
-  token: String,
-  isOnlineTestEnabled: Boolean = true,
-  startedDateTime: Option[DateTime] = None,
-  completedDateTime: Option[DateTime] = None,
-  xmlReportSaved: Boolean = false,
-  pdfReportSaved: Boolean = false,
-  completed: Option[List[Int]] = None
+    cubiksUserId: Int,
+    participantScheduleId: Int,
+    invitationDate: DateTime,
+    expirationDate: DateTime,
+    onlineTestUrl: String,
+    token: String,
+    isOnlineTestEnabled: Boolean = true,
+    startedDateTime: Option[DateTime] = None,
+    completedDateTime: Option[DateTime] = None,
+    xmlReportSaved: Boolean = false,
+    pdfReportSaved: Boolean = false,
+    completed: Option[List[Int]] = None
 ) {
 
   // There are two ways to determine if the test profile is completed

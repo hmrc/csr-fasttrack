@@ -45,20 +45,22 @@ trait LocationSchemeController extends BaseController {
     }
   }
 
-  def getAvailableSchemes : Action[AnyContent] = Action { implicit request =>
-      Ok(Json.toJson(locationSchemeService.getAvailableSchemes))
+  def getAvailableSchemes: Action[AnyContent] = Action { implicit request =>
+    Ok(Json.toJson(locationSchemeService.getAvailableSchemes))
   }
 
-  def getEligibleSchemeLocations(applicationId: String,
-                                 latitude: Option[Double], longitude: Option[Double]): Action[AnyContent] = Action.async { implicit request =>
+  def getEligibleSchemeLocations(
+    applicationId: String,
+    latitude: Option[Double], longitude: Option[Double]
+  ): Action[AnyContent] = Action.async { implicit request =>
     locationSchemeService.getEligibleSchemeLocations(applicationId, latitude, longitude).map(r => Ok(Json.toJson(r)))
   }
 
   def getSchemeLocations(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
     locationSchemeService.getSchemeLocations(applicationId).map {
-        locations => Ok(Json.toJson(locations))
+      locations => Ok(Json.toJson(locations))
     }.recover {
-        case ex: LocationPreferencesNotFound => NotFound("Locations not found")
+      case ex: LocationPreferencesNotFound => NotFound("Locations not found")
     }
   }
 

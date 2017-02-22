@@ -99,14 +99,14 @@ class SubmitApplicationControllerSpec extends PlaySpec with Results with OneAppP
 
     val address = Address("line1", Some("line2"), Some("line3"), Some("line4"))
 
-    when(mockAdService.find(any[String], any[String])).thenReturn(Future.successful(AssistanceDetails(hasDisability = No,
+    when(mockAdService.find(any[String], any[String])).thenReturn(Future.successful(AssistanceDetails(
+      hasDisability = No,
       hasDisabilityDescription = None, guaranteedInterview = None, needsSupportForOnlineAssessment = false,
       needsSupportForOnlineAssessmentDescription = None, needsSupportAtVenue = false, needsSupportAtVenueDescription = None
     )))
 
     when(mockCdRepo.find(any[String])).thenReturn(Future.successful(ContactDetails(false, address, Some("QQ1 1QQ"): Option[PostCode],
-      None, "test@test.com", phone = None
-    )))
+      None, "test@test.com", phone = None)))
 
     when(mockAppRepo.getSchemes(any[String])).thenReturn(Future.successful(
       List(Scheme.Business)

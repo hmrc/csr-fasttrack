@@ -52,13 +52,12 @@ object EvaluationResults {
       def writes(result: Result) = JsString(result.toString)
     }
 
-
   }
 
   case class CompetencyAverageResult(leadingAndCommunicatingAverage: Double, collaboratingAndPartneringAverage: Double,
-    deliveringAtPaceAverage: Double, makingEffectiveDecisionsAverage: Double,
-    changingAndImprovingAverage: Double, buildingCapabilityForAllAverage: Double,
-    motivationFitAverage: Double, overallScore: Double) {
+      deliveringAtPaceAverage: Double, makingEffectiveDecisionsAverage: Double,
+      changingAndImprovingAverage: Double, buildingCapabilityForAllAverage: Double,
+      motivationFitAverage: Double, overallScore: Double) {
 
     def scoresWithWeightOne = List(
       leadingAndCommunicatingAverage,
@@ -80,12 +79,12 @@ object EvaluationResults {
   )
 
   case class SchemePreferences(location1Scheme1: String, location1Scheme2: Option[String],
-                               location2Scheme1: Option[String], location2Scheme2: Option[String])
+    location2Scheme1: Option[String], location2Scheme2: Option[String])
 
   /**
-    * Final evaluation after taking into account: Online Tests and Assessment Centre results
-    */
+   * Final evaluation after taking into account: Online Tests and Assessment Centre results
+   */
   case class FinalEvaluationResult(location1Scheme1: Option[Result], location1Scheme2: Option[Result],
-                                   location2Scheme1: Option[Result], location2Scheme2: Option[Result],
-                                   alternativeScheme: Option[Result], schemesEvaluation: Option[List[PerSchemeEvaluation]])
+    location2Scheme1: Option[Result], location2Scheme2: Option[Result],
+    alternativeScheme: Option[Result], schemesEvaluation: Option[List[PerSchemeEvaluation]])
 }

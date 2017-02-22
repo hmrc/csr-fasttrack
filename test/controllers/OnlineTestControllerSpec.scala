@@ -134,7 +134,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     "successfully reset the online test status" in new TestFixture {
       val appId = "appId"
       val testApplication = onlineTestApplication.copy(applicationId = "appId", applicationStatus = ApplicationStatuses.OnlineTestStarted)
-      when(mockOnlineTestRepository.getOnlineTestApplication(any[String])).thenReturn( Future.successful(Some(testApplication)))
+      when(mockOnlineTestRepository.getOnlineTestApplication(any[String])).thenReturn(Future.successful(Some(testApplication)))
       when(mockOnlineTestService.registerAndInviteApplicant(testApplication)).thenReturn(Future.successful(unit))
 
       val result = TestOnlineTestController.resetOnlineTests(appId)(createResetOnlineTestRequest(appId)).run
@@ -169,7 +169,8 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
   "Get PDF Report" must {
     "return a valid report if one exists for Awaiting Allocation Notified" in new TestFixture {
       when(generalApplicationRepositoryMock.findProgress(any[String])).thenReturn(Future.successful(
-        ProgressResponse("").copy(onlineTest = OnlineTestProgressResponse(awaitingAllocationNotified = true))))
+        ProgressResponse("").copy(onlineTest = OnlineTestProgressResponse(awaitingAllocationNotified = true))
+      ))
       val result = TestOnlineTestController.getPDFReport(hasPDFReportApplicationId)(FakeRequest())
 
       status(result) mustBe OK
@@ -181,7 +182,8 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
 
     "return a valid report if one exists for Online Test Faild Notified" in new TestFixture {
       when(generalApplicationRepositoryMock.findProgress(any[String])).thenReturn(Future.successful(
-        ProgressResponse("").copy(onlineTest = OnlineTestProgressResponse(failedNotified = true))))
+        ProgressResponse("").copy(onlineTest = OnlineTestProgressResponse(failedNotified = true))
+      ))
       val result = TestOnlineTestController.getPDFReport(hasPDFReportApplicationId)(FakeRequest())
 
       status(result) mustBe OK
@@ -221,7 +223,7 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     val onlineTestApplication = OnlineTestApplication("appId", ApplicationStatuses.Submitted, "",
       guaranteedInterview = false, needsAdjustments = false, "", None)
     val onlineTest = OnlineTest(123, date, date.plusDays(4), "http://www.google.co.uk", "123@test.com", isOnlineTestEnabled = true,
-    pdfReportAvailable = false)
+      pdfReportAvailable = false)
 
     when(onlineTestExtensionServiceMock.extendExpiryTime(any(), any())).thenReturnAsync()
     when(onlineTestPDFReportRepoMock.hasReport(any())).thenReturn(Future.successful(true))

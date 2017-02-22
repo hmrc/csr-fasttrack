@@ -18,7 +18,7 @@ package services.evaluation
 
 import model.EvaluationResults._
 import model.PersistedObjects.OnlineTestPassmarkEvaluation
-import org.scalatest.{MustMatchers, PropSpec}
+import org.scalatest.{ MustMatchers, PropSpec }
 import model.Schemes._
 
 class FinalResultEvaluatorSpec extends PropSpec with MustMatchers {
@@ -72,14 +72,16 @@ class FinalResultEvaluatorSpec extends PropSpec with MustMatchers {
     val schemePreferences = SchemePreferences(Business, Some(Commercial), Some(DigitalAndTechnology), Some(Finance))
 
     val onlineTestResult = OnlineTestPassmarkEvaluation(Green, Some(Amber), Some(Red), Some(Green), Some(Green))
-    val assessmentCentreResult = AssessmentRuleCategoryResult(passedMinimumCompetencyLevel = Some(true),
+    val assessmentCentreResult = AssessmentRuleCategoryResult(
+      passedMinimumCompetencyLevel = Some(true),
       Some(Green), Some(Green), Some(Green), Some(Amber), Some(Red), None, schemesEvaluation = Some(List(
         PerSchemeEvaluation(Business, Green),
         PerSchemeEvaluation(Commercial, Green),
         PerSchemeEvaluation(DigitalAndTechnology, Green),
         PerSchemeEvaluation(Finance, Red),
         PerSchemeEvaluation(ProjectDelivery, Red)
-      )))
+      ))
+    )
 
     val result = evaluator.mergeResults(onlineTestResult, assessmentCentreResult, schemePreferences)
 
@@ -97,14 +99,16 @@ class FinalResultEvaluatorSpec extends PropSpec with MustMatchers {
     val schemePreferences = SchemePreferences(Commercial, None, None, None)
 
     val onlineTestResult = OnlineTestPassmarkEvaluation(Green, None, None, None, alternativeScheme = Some(Green))
-    val assessmentCentreResult = AssessmentRuleCategoryResult(passedMinimumCompetencyLevel = Some(true),
+    val assessmentCentreResult = AssessmentRuleCategoryResult(
+      passedMinimumCompetencyLevel = Some(true),
       Some(Amber), None, None, None, alternativeScheme = Some(Red), None, schemesEvaluation = Some(List(
         PerSchemeEvaluation(Business, Green),
         PerSchemeEvaluation(Commercial, Amber),
         PerSchemeEvaluation(DigitalAndTechnology, Green),
         PerSchemeEvaluation(Finance, Red),
         PerSchemeEvaluation(ProjectDelivery, Red)
-      )))
+      ))
+    )
 
     val result = evaluator.mergeResults(onlineTestResult, assessmentCentreResult, schemePreferences)
 
@@ -151,6 +155,5 @@ object FinalResultEvaluatorSpec {
   val GreenOnlineTestResult = OnlineTestPassmarkEvaluation(Green, Some(Green), Some(Green), Some(Green), Some(Green))
 
   val AllSchemePreferences = SchemePreferences(Business, Some(Commercial), Some(DigitalAndTechnology), Some(Finance))
-
 
 }

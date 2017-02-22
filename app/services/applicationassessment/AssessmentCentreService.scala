@@ -145,15 +145,19 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
     }
   }
 
-  def evaluateAssessmentCandidate(onlineTestWithAssessmentCentreScores: OnlineTestEvaluationAndAssessmentCentreScores,
-                                  config: AssessmentEvaluationMinimumCompetencyLevel): Future[Unit] = {
+  def evaluateAssessmentCandidate(
+    onlineTestWithAssessmentCentreScores: OnlineTestEvaluationAndAssessmentCentreScores,
+    config: AssessmentEvaluationMinimumCompetencyLevel
+  ): Future[Unit] = {
     val onlineTestEvaluation = onlineTestWithAssessmentCentreScores.onlineTestEvaluation
     val assessmentScores = onlineTestWithAssessmentCentreScores.assessmentScores
     val assessmentEvaluation = passmarkRulesEngine.evaluate(onlineTestEvaluation, assessmentScores, config)
     val applicationStatus = determineStatus(assessmentEvaluation)
 
-    aRepository.saveAssessmentScoreEvaluation(assessmentScores.scores.applicationId,
-      assessmentScores.passmark.info.get.version, assessmentEvaluation, applicationStatus).map { _ =>
+    aRepository.saveAssessmentScoreEvaluation(
+      assessmentScores.scores.applicationId,
+      assessmentScores.passmark.info.get.version, assessmentEvaluation, applicationStatus
+    ).map { _ =>
       auditNewStatus(assessmentScores.scores.applicationId, applicationStatus)
     }
   }
@@ -177,11 +181,10 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
       case ApplicationStatuses.AssessmentCentrePassedNotified => "ApplicationAssessmentPassedNotified"
       case ApplicationStatuses.AssessmentCentreFailedNotified => "ApplicationAssessmentFailedNotified"
       case ApplicationStatuses.AssessmentCentreFailed | ApplicationStatuses.AssessmentCentrePassed |
-           ApplicationStatuses.AwaitingAssessmentCentreReevaluation => "ApplicationAssessmentEvaluated"
+        ApplicationStatuses.AwaitingAssessmentCentreReevaluation => "ApplicationAssessmentEvaluated"
     }
     Logger.info(s"$event for $appId. The new status: $newStatus")
-    auditService.logEventNoRequest( event, Map("applicationId" -> appId, "applicationStatus" -> newStatus)
-    )
+    auditService.logEventNoRequest(event, Map("applicationId" -> appId, "applicationStatus" -> newStatus))
   }
 
   private[applicationassessment] def emailCandidate(application: ApplicationForNotification, emailAddress: String)

@@ -102,10 +102,15 @@ class OnlineTestExpiryServiceSpec extends PlaySpec with ScalaFutures with Mockit
         eqTo(FirstReminder.template),
         eqTo(emailAddress),
         eqTo(testForNotification.preferredName),
-        eqTo(testForNotification.expiryDate))(any())
-      verify(audit).logEventNoRequest(FirstReminder.event,
-        Map("userId" -> userId,
-          "email" -> emailAddress))
+        eqTo(testForNotification.expiryDate)
+      )(any())
+      verify(audit).logEventNoRequest(
+        FirstReminder.event,
+        Map(
+          "userId" -> userId,
+          "email" -> emailAddress
+        )
+      )
 
       verifyNoMoreInteractions(otRepository, cdRepository, emailClient, audit)
     }

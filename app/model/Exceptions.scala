@@ -17,6 +17,7 @@
 package model
 
 // scalastyle:off number.of.methods
+// scalastyle:off number.of.types
 object Exceptions {
   sealed class ConnectorException(message: String) extends Exception(message)
 

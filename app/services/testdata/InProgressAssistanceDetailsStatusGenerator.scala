@@ -41,8 +41,10 @@ trait InProgressAssistanceDetailsStatusGenerator extends ConstructiveGenerator {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       appId = candidateInPreviousStatus.applicationId.get
       _ <- adRepository.update(appId, candidateInPreviousStatus.userId, assistanceDetails)
-      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get,
-        ProgressStatuses.AssistanceDetailsCompletedProgress)
+      _ <- appRepository.updateQuestionnaireStatus(
+        candidateInPreviousStatus.applicationId.get,
+        ProgressStatuses.AssistanceDetailsCompletedProgress
+      )
     } yield {
       candidateInPreviousStatus.copy(
         applicationStatus = ApplicationStatuses.InProgress,

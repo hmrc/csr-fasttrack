@@ -35,9 +35,9 @@ trait FrameworkPreferenceRepository {
 }
 
 class FrameworkPreferenceMongoRepository(implicit mongo: () => DB)
-  extends ReactiveRepository[Preferences, BSONObjectID](
-    CollectionNames.APPLICATION, mongo, Preferences.jsonFormat, ReactiveMongoFormats.objectIdFormats
-  ) with FrameworkPreferenceRepository {
+    extends ReactiveRepository[Preferences, BSONObjectID](
+      CollectionNames.APPLICATION, mongo, Preferences.jsonFormat, ReactiveMongoFormats.objectIdFormats
+    ) with FrameworkPreferenceRepository {
 
   def savePreferences(applicationId: String, preferences: Preferences): Future[Unit] = {
     require(preferences.isValid, "Preferences must be valid when saving to repository")

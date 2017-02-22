@@ -38,8 +38,10 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
         Future.successful(Nil)
       )
 
-      val actual = searchForApplicantService.findByCriteria(SearchCandidate(firstOrPreferredName = Some("Leia"),
-        lastName = None, dateOfBirth = None, postCode = None), MaxResults).futureValue
+      val actual = searchForApplicantService.findByCriteria(SearchCandidate(
+        firstOrPreferredName = Some("Leia"),
+        lastName = None, dateOfBirth = None, postCode = None
+      ), MaxResults).futureValue
 
       actual mustBe List(expected)
     }
@@ -49,45 +51,50 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
         Future.successful(Nil)
       )
 
-      val actual = searchForApplicantService.findByCriteria(SearchCandidate(firstOrPreferredName = None,
-        lastName = Some("Amadala"), dateOfBirth = None, postCode = None), MaxResults).futureValue
+      val actual = searchForApplicantService.findByCriteria(SearchCandidate(
+        firstOrPreferredName = None,
+        lastName = Some("Amadala"), dateOfBirth = None, postCode = None
+      ), MaxResults).futureValue
 
       actual mustBe List(expected)
     }
 
     "search by first name and last name" in new TestFixture {
-      when(authProviderClientMock.findByFirstNameAndLastName(any[String], any[String], any[List[String]])
-      (any[HeaderCarrier])).thenReturn(
+      when(authProviderClientMock.findByFirstNameAndLastName(any[String], any[String], any[List[String]])(any[HeaderCarrier])).thenReturn(
         Future.successful(Nil)
       )
 
-      val actual = searchForApplicantService.findByCriteria(SearchCandidate(firstOrPreferredName = Some("Leia"),
-        lastName = Some("Amadala"), dateOfBirth = None, postCode = None), MaxResults).futureValue
+      val actual = searchForApplicantService.findByCriteria(SearchCandidate(
+        firstOrPreferredName = Some("Leia"),
+        lastName = Some("Amadala"), dateOfBirth = None, postCode = None
+      ), MaxResults).futureValue
 
       actual mustBe List(expected)
     }
 
     "search by date of birth only" in new TestFixture {
       when(appRepositoryMock.findByCriteria(any[Option[String]], any[Option[String]],
-        any[Option[LocalDate]], any[List[String]])
-      ).thenReturn(Future.successful(List(Candidate("123", None, None, Some("Leia"), Some("Amadala"), Some("Amadala"),
+        any[Option[LocalDate]], any[List[String]])).thenReturn(Future.successful(List(Candidate("123", None, None, Some("Leia"), Some("Amadala"), Some("Amadala"),
         Some(new LocalDate("1990-11-25")), None, None))))
 
-      val actual = searchForApplicantService.findByCriteria(SearchCandidate(firstOrPreferredName = None,
-        lastName = None, dateOfBirth = Some(new LocalDate("1990-11-25")), postCode = None), MaxResults).futureValue
+      val actual = searchForApplicantService.findByCriteria(SearchCandidate(
+        firstOrPreferredName = None,
+        lastName = None, dateOfBirth = Some(new LocalDate("1990-11-25")), postCode = None
+      ), MaxResults).futureValue
 
       val expectedWithDateOfBirth = expected.copy(dateOfBirth = Some(new LocalDate("1990-11-25")))
       actual mustBe List(expectedWithDateOfBirth)
     }
 
     "filter by post code" in new TestFixture {
-      when(authProviderClientMock.findByFirstNameAndLastName(any[String], any[String], any[List[String]])
-      (any[HeaderCarrier])).thenReturn(
+      when(authProviderClientMock.findByFirstNameAndLastName(any[String], any[String], any[List[String]])(any[HeaderCarrier])).thenReturn(
         Future.successful(Nil)
       )
 
-      val actual = searchForApplicantService.findByCriteria(SearchCandidate(firstOrPreferredName = Some("Leia"),
-        lastName = Some("Amadala"), dateOfBirth = None, postCode = Some("QQ1 1QQ")), MaxResults).futureValue
+      val actual = searchForApplicantService.findByCriteria(SearchCandidate(
+        firstOrPreferredName = Some("Leia"),
+        lastName = Some("Amadala"), dateOfBirth = None, postCode = Some("QQ1 1QQ")
+      ), MaxResults).futureValue
 
       actual mustBe List(expected)
     }
@@ -100,11 +107,12 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
 
       val authProviderCandidate = connectors.ExchangeObjects.Candidate("Leia", "Amadala", None, "email@test.com", "userId")
       val authProviderCandidates = List(authProviderCandidate, authProviderCandidate, authProviderCandidate)
-      when(authProviderClientMock.findByFirstNameAndLastName(any[String], any[String], any[List[String]])
-      (any[HeaderCarrier])).thenReturn(Future.successful(authProviderCandidates))
+      when(authProviderClientMock.findByFirstNameAndLastName(any[String], any[String], any[List[String]])(any[HeaderCarrier])).thenReturn(Future.successful(authProviderCandidates))
 
-      val actual = searchForApplicantService.findByCriteria(SearchCandidate(firstOrPreferredName = Some("Leia"),
-        lastName = Some("Amadala"), dateOfBirth = None, postCode = None), MaxResults).futureValue
+      val actual = searchForApplicantService.findByCriteria(SearchCandidate(
+        firstOrPreferredName = Some("Leia"),
+        lastName = Some("Amadala"), dateOfBirth = None, postCode = None
+      ), MaxResults).futureValue
 
       actual.size mustBe authProviderCandidates.size
     }
@@ -154,7 +162,6 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
     )
 
     when(appRepositoryMock.findByCriteria(any[Option[String]], any[Option[String]],
-      any[Option[LocalDate]], any[List[String]])
-    ).thenReturn(Future.successful(List(Candidate("123", None, None, Some("Leia"), Some("Amadala"), Some("Amadala"), None, None, None))))
+      any[Option[LocalDate]], any[List[String]])).thenReturn(Future.successful(List(Candidate("123", None, None, Some("Leia"), Some("Amadala"), Some("Amadala"), None, None, None))))
   }
 }

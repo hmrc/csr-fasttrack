@@ -51,7 +51,6 @@ trait DiagnosticReportController extends BaseController {
       assessmentScores <- assessmentScoresRepo.tryFind(applicationId)
     } yield {
 
-
       val testResultsJson = testResults.map { tr =>
         val results = Json.toJson(tr)
         Json.obj("online-test-results" -> results)
@@ -68,8 +67,6 @@ trait DiagnosticReportController extends BaseController {
       case _ => NotFound
     }
   }
-
-
 
   def getAllApplications = Action { implicit request =>
     Ok.chunked(drRepository.findAll())
