@@ -28,7 +28,7 @@ import connectors.{ CSREmailClient, EmailClient }
 import model.ApplicationStatuses._
 import model.AssessmentScheduleCommands.ApplicationForAssessmentAllocationResult
 import model.AssessmentScheduleCommands.Implicits.ApplicationForAssessmentAllocationResultFormats
-import model.Commands.ApplicationAssessment
+import model.Commands.AssessmentCentreAllocation
 import model.Commands.Implicits.applicationAssessmentFormat
 import model.Exceptions.NotFoundException
 import model.{ ApplicationStatusOrder, Commands, ProgressStatuses }
@@ -37,9 +37,9 @@ import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent, Result }
 import repositories.AssessmentCentreLocation.assessmentCentreVenueFormat
 import repositories._
-import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
+import repositories.application._
 import services.AuditService
-import services.applicationassessment.ApplicationAssessmentService
+import services.applicationassessment.AssessmentCentreService
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -47,29 +47,29 @@ import scala.concurrent.Future
 import scala.util.Try
 
 object AssessmentScheduleController extends AssessmentScheduleController {
-  val aaRepository = applicationAssessmentRepository
-  val acRepository = AssessmentCentreYamlRepository
-  val aRepository = applicationRepository
-  val otRepository = onlineTestRepository
+  val aaRepository: AssessmentCentreAllocationMongoRepository = assessmentCentreAllocationRepository
+  val acRepository = AssessmentCentreLocationYamlRepository
+  val aRepository: GeneralApplicationMongoRepository = applicationRepository
+  val otRepository: OnlineTestMongoRepository = onlineTestRepository
   val auditService = AuditService
   val pdRepository: PersonalDetailsRepository = personalDetailsRepository
   val cdRepository: ContactDetailsRepository = contactDetailsRepository
   val emailClient = CSREmailClient
-  val aaService = ApplicationAssessmentService
+  val aaService = AssessmentCentreService
 }
 
 trait AssessmentScheduleController extends BaseController {
-  val aaRepository: ApplicationAssessmentRepository
-  val acRepository: AssessmentCentreRepository
+  val aaRepository: AssessmentCentreAllocationRepository
+  val acRepository: AssessmentCentreLocationRepository
   val aRepository: GeneralApplicationRepository
   val otRepository: OnlineTestRepository
   val auditService: AuditService
   val pdRepository: PersonalDetailsRepository
   val cdRepository: ContactDetailsRepository
   val emailClient: EmailClient
-  val aaService: ApplicationAssessmentService
+  val aaService: AssessmentCentreService
 
-  private def calculateUsedCapacity(assessments: Option[List[ApplicationAssessment]], sessionCapacity: Int,
+  private def calculateUsedCapacity(assessments: Option[List[AssessmentCentreAllocation]], sessionCapacity: Int,
                                     minViableAttendees: Int, preferredAttendeeMargin: Int): UsedCapacity = {
     assessments.map { sessionSlots =>
       UsedCapacity(sessionSlots.size, sessionSlots.count(x => x.confirmed), minViableAttendees, preferredAttendeeMargin)
@@ -78,8 +78,8 @@ trait AssessmentScheduleController extends BaseController {
     )
   }
 
-  def getAssessmentSchedule = Action.async { implicit request =>
-    val assessments = aaRepository.applicationAssessments.map(_.groupBy(x => (x.venue, x.date, x.session)))
+  def getAssessmentSchedule: Action[AnyContent] = Action.async { implicit request =>
+    val assessments = aaRepository.findAll.map(_.groupBy(x => (x.venue, x.date, x.session)))
 
     for {
       assessmentMap <- assessments
@@ -107,7 +107,7 @@ trait AssessmentScheduleController extends BaseController {
     }
   }
 
-  def getAssessmentCentreCapacities(venue: String) = Action.async { implicit request =>
+  def getAssessmentCentreCapacities(venue: String): Action[AnyContent] = Action.async { implicit request =>
     val venueDecoded = URLDecoder.decode(venue, "UTF-8")
     val today = LocalDate.now()
 
@@ -123,8 +123,7 @@ trait AssessmentScheduleController extends BaseController {
     }
   }
 
-  private def joinApplicationsAndApplicationAssessments(
-    assessmentsFut: Future[List[ApplicationAssessment]],
+  private def joinApplicationsAndApplicationAssessments(assessmentsFut: Future[List[AssessmentCentreAllocation]],
     candidatesFut: Future[List[Commands.Candidate]]
   ) = {
     for {
@@ -148,7 +147,7 @@ trait AssessmentScheduleController extends BaseController {
 
   def getAllocationsForVenue(venue: String): Action[AnyContent] = Action.async { implicit request =>
     val venueDecoded = URLDecoder.decode(venue, "UTF-8")
-    val assessments = aaRepository.applicationAssessmentsForVenue(venueDecoded).map(_.groupBy(x => x.session))
+    val assessments = aaRepository.findAllForVenue(venueDecoded).map(_.groupBy(x => x.session))
 
     for {
       assessmentMap <- assessments
@@ -168,7 +167,7 @@ trait AssessmentScheduleController extends BaseController {
   }
 
   def allocate(): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    def allocateCandidate(allocation: ApplicationAssessment): Future[Unit] = {
+    def allocateCandidate(allocation: AssessmentCentreAllocation): Future[Unit] = {
       if (allocation.confirmed) {
         otRepository.saveCandidateAllocationStatus(allocation.applicationId, AllocationConfirmed, None)
       } else {
@@ -185,7 +184,7 @@ trait AssessmentScheduleController extends BaseController {
       }
     }
 
-    withJsonBody[List[ApplicationAssessment]] { apps =>
+    withJsonBody[List[AssessmentCentreAllocation]] { apps =>
       val errorListFuture = aaRepository.create(apps)
 
       val result = errorListFuture.flatMap { errorList =>
@@ -206,13 +205,13 @@ trait AssessmentScheduleController extends BaseController {
     }
   }
 
-  def allocationStatus(applicationId: String) = Action.async { implicit request =>
+  def allocationStatus(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
     import connectors.ExchangeObjects.Implicits._
 
     acRepository.assessmentCentreCapacities.flatMap { assessmentCentres =>
 
       for {
-        assessmentF <- aaRepository.applicationAssessment(applicationId)
+        assessmentF <- aaRepository.find(applicationId)
         expiryDate <- aRepository.allocationExpireDateByApplicationId(applicationId)
       } yield {
         assessmentF match {
@@ -229,7 +228,7 @@ trait AssessmentScheduleController extends BaseController {
 
   }
 
-  def confirmAllocation(applicationId: String) = Action.async { implicit request =>
+  def confirmAllocation(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
 
     aaRepository.confirmAllocation(applicationId).flatMap { _ =>
       aRepository.updateStatus(applicationId, AllocationConfirmed).map { _ =>
@@ -240,7 +239,7 @@ trait AssessmentScheduleController extends BaseController {
   }
 
   private def generatePaddedVenueDaySessionCandidateList(
-    assessmentsInSession: Map[String, List[(Commands.ApplicationAssessment, Commands.Candidate)]],
+    assessmentsInSession: Map[String, List[(Commands.AssessmentCentreAllocation, Commands.Candidate)]],
     capacities: Future[AssessmentCentreVenueCapacityDate]
   ) = {
 
@@ -280,7 +279,7 @@ trait AssessmentScheduleController extends BaseController {
 
     val capacities = acRepository.assessmentCentreCapacityDate(venue, date)
 
-    val assessmentsForVenueDate = aaRepository.applicationAssessments(venue, date)
+    val assessmentsForVenueDate = aaRepository.findAllForDate(venue, date)
 
     val applicationRecordsForAllAssessments = assessmentsForVenueDate.map(_.map(_.applicationId)).flatMap(aRepository.find)
 
@@ -362,7 +361,7 @@ trait AssessmentScheduleController extends BaseController {
   }
 
   def getApplicationAssessment(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
-    aaRepository.applicationAssessment(applicationId).map {
+    aaRepository.find(applicationId).map {
       case Some(assessment) => Ok(Json.toJson(assessment))
       case _ => NotFound("No application assessment could be found")
     }
@@ -374,17 +373,17 @@ trait AssessmentScheduleController extends BaseController {
         case ProgressStatuses.AssessmentScoresAcceptedProgress =>
           Future.successful(Conflict(""))
         case _ =>
-          aaService.removeFromApplicationAssessmentSlot(applicationId).map { _ =>
+          aaService.removeFromAssessmentCentreSlot(applicationId).map { _ =>
             Ok("")
           }.recover {
-            case e: NotFoundException => NotFound(s"Could not find application assessment for application $applicationId")
+            case _: NotFoundException => NotFound(s"Could not find application assessment for application $applicationId")
           }
       }
     }
 
   }
 
-  def locationToAssessmentCentreLocation(locationName: String) = Action.async { implicit request =>
+  def locationToAssessmentCentreLocation(locationName: String): Action[AnyContent] = Action.async { implicit request =>
     acRepository.assessmentCentreCapacities.map { assessmentCentres =>
       assessmentCentres.find(_.locationName == locationName).map { location =>
         Ok(Json.toJson(LocationName(location.locationName)))
@@ -392,7 +391,7 @@ trait AssessmentScheduleController extends BaseController {
     }
   }
 
-  def assessmentCentres = Action.async { implicit request =>
+  def assessmentCentres: Action[AnyContent] = Action.async { implicit request =>
     acRepository.assessmentCentreCapacities.map { m =>
       Ok(Json.toJson(m.flatMap(_.venues.map(_.venueName))))
     }

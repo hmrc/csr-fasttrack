@@ -18,13 +18,9 @@ package services.testdata
 
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.ApplicationStatuses
-import model.AssessmentEvaluationCommands.AssessmentPassmarkPreferencesAndScores
 import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.GeneralApplicationRepository
-import scheduler.assessment.EvaluateAssessmentScoreJob
-import services.applicationassessment.ApplicationAssessmentService
-import services.passmarksettings.AssessmentCentrePassMarkSettingsService
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global

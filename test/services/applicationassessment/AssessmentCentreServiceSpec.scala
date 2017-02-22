@@ -25,7 +25,7 @@ import model.EvaluationResults._
 import model.Exceptions.{ IncorrectStatusInApplicationException, NotFoundException }
 import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
 import model.PersistedObjects.{ ApplicationForNotification, ContactDetails, OnlineTestPassmarkEvaluation, PreferencesWithQualification }
-import model.{ ApplicationStatuses, EvaluationResults, LocationPreference, Preferences }
+import model._
 import org.joda.time.DateTime
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
@@ -33,7 +33,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatest.time.{ Seconds, Span }
 import org.scalatestplus.play.PlaySpec
-import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
+import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
 import repositories.{ ApplicationAssessmentScoresRepository, _ }
 import services.AuditService
 import services.evaluation.AssessmentCentrePassmarkRulesEngine
@@ -42,83 +42,76 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class ApplicationAssessmentServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
+class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
   implicit val ec: ExecutionContext = ExecutionContext.global
 
-  val applicationAssessmentRepositoryMock = mock[ApplicationAssessmentRepository]
-  val onlineTestRepositoryMock = mock[OnlineTestRepository]
-  val auditServiceMock = mock[AuditService]
-  val emailClientMock = mock[EmailClient]
-  val aRepositoryMock = mock[GeneralApplicationRepository]
-  val acpmsServiceMock = mock[AssessmentCentrePassMarkSettingsService]
-  val aasRepositoryMock = mock[ApplicationAssessmentScoresRepository]
-  val fpRepositoryMock = mock[FrameworkPreferenceRepository]
-  val cdRepositoryMock = mock[ContactDetailsRepository]
-  val passmarkRulesEngineMock = mock[AssessmentCentrePassmarkRulesEngine]
+
 
   val ApplicationId = "1111-1111"
   val NotFoundApplicationId = "Not-Found-Id"
 
   override implicit def patienceConfig = PatienceConfig(timeout = scaled(Span(5, Seconds)))
+  implicit val hc = HeaderCarrier()
+  implicit val rh = EmptyRequestHeader
 
-  val auditDetails = Map(
+  val AuditDetails = Map(
     "applicationId" -> ApplicationId
   )
 
-  "delete an Application Assessment" should {
-    when(applicationAssessmentRepositoryMock.delete(eqTo(ApplicationId))).thenReturn(Future.successful(()))
-    when(applicationAssessmentRepositoryMock.delete(eqTo(NotFoundApplicationId))).thenReturn(
-      Future.failed(new NotFoundException("No application assessments were found"))
-    )
+  "Save scores and feedback" must {
+    "save feedback and log an audit event for an attended candidate" in new ApplicationAssessmentServiceFixture {
+      when(aasRepositoryMock.save(any[CandidateScoresAndFeedback])).thenReturn(Future.successful(()))
+      when(aRepositoryMock.updateStatus(any[String], any[ApplicationStatuses.EnumVal])).thenReturn(Future.successful(()))
 
-    when(onlineTestRepositoryMock.removeCandidateAllocationStatus(eqTo(ApplicationId))).thenReturn(Future.successful(()))
+      val result = applicationAssessmentService.saveScoresAndFeedback(ApplicationId, CandidateScoresWithFeedback).futureValue
+      result mustBe ()
+      verify(auditServiceMock).logEvent("ApplicationScoresAndFeedbackSaved", AuditDetails)
+      verify(auditServiceMock).logEvent(s"ApplicationStatusSetTo${ApplicationStatuses.AssessmentScoresEntered}", AuditDetails)
+    }
 
+    "save feedback and log an audit event for a 'failed to attend' candidate" in new ApplicationAssessmentServiceFixture {
+      when(aasRepositoryMock.save(any[CandidateScoresAndFeedback])).thenReturn(Future.successful(()))
+      when(aRepositoryMock.updateStatus(any[String], any[ApplicationStatuses.EnumVal])).thenReturn(Future.successful(()))
+
+      val result = applicationAssessmentService.saveScoresAndFeedback(ApplicationId,
+        CandidateScoresWithFeedback.copy(attendancy = Some(false))
+      ).futureValue
+
+      result mustBe ()
+      verify(auditServiceMock).logEvent("ApplicationScoresAndFeedbackSaved", AuditDetails)
+      verify(auditServiceMock).logEvent(s"ApplicationStatusSetTo${ApplicationStatuses.FailedToAttend}", AuditDetails)
+    }
+
+    "throw an exception when trying to save scores without a confirmed attendance" in new ApplicationAssessmentServiceFixture {
+      val result = applicationAssessmentService.saveScoresAndFeedback(ApplicationId, CandidateScoresWithFeedback.copy(attendancy = None))
+        .failed.futureValue
+
+      result mustBe an[IllegalStateException]
+    }
+  }
+
+  "delete an Application Assessment" must {
     "return a deletion success response when an application id exists" in new ApplicationAssessmentServiceFixture {
-      val resultFuture = applicationAssessmentService.removeFromApplicationAssessmentSlot(ApplicationId)
+      val resultFuture = applicationAssessmentService.removeFromAssessmentCentreSlot(ApplicationId)
       resultFuture.futureValue mustBe (())
-      verify(auditServiceMock).logEventNoRequest("ApplicationAssessmentDeleted", auditDetails)
-      verify(auditServiceMock).logEventNoRequest("ApplicationDeallocated", auditDetails)
+      verify(auditServiceMock).logEventNoRequest("AssessmentCentreAllocationStatusReset", AuditDetails)
+      verify(auditServiceMock).logEventNoRequest("AssessmentCentreAllocationDeleted", AuditDetails)
       verify(onlineTestRepositoryMock).removeCandidateAllocationStatus(eqTo(ApplicationId))
 
     }
     "return a not found response when an application id does not exist" in new ApplicationAssessmentServiceFixture {
-      val result = applicationAssessmentService.removeFromApplicationAssessmentSlot(NotFoundApplicationId)
+      val result = applicationAssessmentService.removeFromAssessmentCentreSlot(NotFoundApplicationId)
       result.failed.futureValue mustBe a[NotFoundException]
     }
   }
 
-  "next Assessment Candidate and evaluate Assessment" should {
-    val Threshhold = PassMarkSchemeThreshold(10.0, 20.0)
-    val PassmarkSettings = AssessmentCentrePassMarkSettingsResponse(List(
-      AssessmentCentrePassMarkScheme("Business", Some(Threshhold)),
-      AssessmentCentrePassMarkScheme("Commercial", Some(Threshhold)),
-      AssessmentCentrePassMarkScheme("Digital and technology", Some(Threshhold)),
-      AssessmentCentrePassMarkScheme("Finance", Some(Threshhold)),
-      AssessmentCentrePassMarkScheme("Project delivery", Some(Threshhold))
-    ), Some(AssessmentCentrePassMarkInfo("1", DateTime.now, "user")))
-    val CandidateScoresWithFeedback = CandidateScoresAndFeedback("app1", Some(true), assessmentIncomplete = false,
-      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
-      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
-      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
-      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
-      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
-      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
-      CandidateScores(Some(4.0), Some(3.0), Some(2.0)))
-    val preferences = Preferences(
-      LocationPreference("London", "London", "Business", Some("IT")),
-      Some(LocationPreference("London", "Reading", "Logistics", None))
-    )
-    val preferencesWithQualifications = PreferencesWithQualification(preferences, aLevel = true, stemLevel = true)
-    when(acpmsServiceMock.getLatestVersion).thenReturn(Future.successful(PassmarkSettings))
-    when(aRepositoryMock.nextApplicationReadyForAssessmentScoreEvaluation(any[String])).thenReturn(Future.successful(Some("app1")))
-    when(aasRepositoryMock.tryFind("app1")).thenReturn(Future.successful(Some(CandidateScoresWithFeedback)))
-    when(fpRepositoryMock.tryGetPreferencesWithQualifications("app1")).thenReturn(Future.successful(Some(preferencesWithQualifications)))
+  "next Assessment Candidate and evaluate Assessment" must {
+
 
     "return an assessment candidate score with application Id" in new ApplicationAssessmentServiceFixture {
       val onlineTestEvaluation = OnlineTestPassmarkEvaluation(Green, None, None, None, None)
       when(onlineTestRepositoryMock.findPassmarkEvaluation("app1")).thenReturn(Future.successful(onlineTestEvaluation))
       val result = applicationAssessmentService.nextAssessmentCandidateReadyForEvaluation.futureValue
-      val preferencesWithQualifications = PreferencesWithQualification(preferences, aLevel = true, stemLevel = true)
 
       result must not be empty
       result.get.assessmentScores.scores.applicationId must be("app1")
@@ -163,7 +156,7 @@ class ApplicationAssessmentServiceSpec extends PlaySpec with MockitoSugar with S
     }
   }
 
-  "process assessment centre passed or failed application" should {
+  "process assessment centre passed or failed application" must {
     "return successful if there no applications with assessment centre passed or failed" in new ApplicationAssessmentServiceFixture {
       when(aRepositoryMock.nextAssessmentCentrePassedOrFailedApplication()).thenReturn(Future.successful(None))
       applicationAssessmentService.processNextAssessmentCentrePassedOrFailedApplication.futureValue must be(())
@@ -215,7 +208,7 @@ class ApplicationAssessmentServiceSpec extends PlaySpec with MockitoSugar with S
       }
   }
 
-  "email candidate" should {
+  "email candidate" must {
     "throw IncorrectStatusInApplicationException when we pass ONLINE_TEST_COMPLETED" in new ApplicationAssessmentServiceFixture {
       val application = ApplicationForNotification("appId1", "userId1", "preferredName1", ApplicationStatuses.OnlineTestCompleted)
       val result = applicationAssessmentService.emailCandidate(application, "email@mailinator.com")
@@ -224,13 +217,58 @@ class ApplicationAssessmentServiceSpec extends PlaySpec with MockitoSugar with S
   }
 
   trait ApplicationAssessmentServiceFixture {
-    implicit val hc = HeaderCarrier()
 
-    val contactDetails = ContactDetails(false, Address("address1"), Some("postCode1"), None, "email@mailinator.com", Some("11111111"))
+    val applicationAssessmentRepositoryMock = mock[AssessmentCentreAllocationRepository]
+    val onlineTestRepositoryMock = mock[OnlineTestRepository]
+    val auditServiceMock = mock[AuditService]
+    val emailClientMock = mock[EmailClient]
+    val aRepositoryMock = mock[GeneralApplicationRepository]
+    val acpmsServiceMock = mock[AssessmentCentrePassMarkSettingsService]
+    val aasRepositoryMock = mock[ApplicationAssessmentScoresRepository]
+    val fpRepositoryMock = mock[FrameworkPreferenceRepository]
+    val cdRepositoryMock = mock[ContactDetailsRepository]
+    val passmarkRulesEngineMock = mock[AssessmentCentrePassmarkRulesEngine]
+    val personalDetailsRepoMock = mock[PersonalDetailsRepository]
+
+    val contactDetails = ContactDetails(outsideUk = false, Address("address1"), Some("postCode1"), None, "email@mailinator.com",
+      Some("11111111"))
     when(cdRepositoryMock.find("userId1")).thenReturn(Future.successful(contactDetails))
 
-    val applicationAssessmentService = new ApplicationAssessmentService {
-      val appAssessRepository = applicationAssessmentRepositoryMock
+
+    val Threshhold = PassMarkSchemeThreshold(10.0, 20.0)
+    val PassmarkSettings = AssessmentCentrePassMarkSettingsResponse(List(
+      AssessmentCentrePassMarkScheme("Business", Some(Threshhold)),
+      AssessmentCentrePassMarkScheme("Commercial", Some(Threshhold)),
+      AssessmentCentrePassMarkScheme("Digital and technology", Some(Threshhold)),
+      AssessmentCentrePassMarkScheme("Finance", Some(Threshhold)),
+      AssessmentCentrePassMarkScheme("Project delivery", Some(Threshhold))
+    ), Some(AssessmentCentrePassMarkInfo("1", DateTime.now, "user")))
+    val CandidateScoresWithFeedback = CandidateScoresAndFeedback("app1", Some(true), assessmentIncomplete = false,
+      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
+      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
+      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
+      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
+      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
+      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
+      CandidateScores(Some(4.0), Some(3.0), Some(2.0)))
+    val preferences = Preferences(
+      LocationPreference("London", "London", "Business", Some("IT")),
+      Some(LocationPreference("London", "Reading", "Logistics", None))
+    )
+    val preferencesWithQualifications = PreferencesWithQualification(preferences, aLevel = true, stemLevel = true)
+    when(acpmsServiceMock.getLatestVersion).thenReturn(Future.successful(PassmarkSettings))
+    when(aRepositoryMock.nextApplicationReadyForAssessmentScoreEvaluation(any[String])).thenReturn(Future.successful(Some("app1")))
+    when(aasRepositoryMock.tryFind("app1")).thenReturn(Future.successful(Some(CandidateScoresWithFeedback)))
+    when(fpRepositoryMock.tryGetPreferencesWithQualifications("app1")).thenReturn(Future.successful(Some(preferencesWithQualifications)))
+
+    when(applicationAssessmentRepositoryMock.delete(eqTo(ApplicationId))).thenReturn(Future.successful(()))
+    when(applicationAssessmentRepositoryMock.delete(eqTo(NotFoundApplicationId))).thenReturn(
+      Future.failed(new NotFoundException("No application assessments were found"))
+    )
+
+    when(onlineTestRepositoryMock.removeCandidateAllocationStatus(eqTo(ApplicationId))).thenReturn(Future.successful(()))
+    val applicationAssessmentService = new AssessmentCentreService {
+      val assessmentCentreAllocationRepo: AssessmentCentreAllocationRepository = applicationAssessmentRepositoryMock
       val otRepository = onlineTestRepositoryMock
       val auditService = auditServiceMock
       val emailClient = emailClientMock
@@ -240,6 +278,7 @@ class ApplicationAssessmentServiceSpec extends PlaySpec with MockitoSugar with S
       val fpRepository: FrameworkPreferenceRepository = fpRepositoryMock
       val cdRepository = cdRepositoryMock
       val passmarkRulesEngine: AssessmentCentrePassmarkRulesEngine = passmarkRulesEngineMock
+      val personalDetailsRepo: PersonalDetailsRepository = personalDetailsRepoMock
     }
   }
 }

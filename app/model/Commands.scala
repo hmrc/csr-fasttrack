@@ -143,7 +143,7 @@ object Commands {
   case class Candidate(userId: String, applicationId: Option[String], email: Option[String], firstName: Option[String], lastName: Option[String],
                        preferredName: Option[String], dateOfBirth: Option[LocalDate], address: Option[Address], postCode: Option[PostCode])
 
-  case class ApplicationAssessment(applicationId: String, venue: String, date: LocalDate, session: String, slot: Int, confirmed: Boolean) {
+  case class AssessmentCentreAllocation(applicationId: String, venue: String, date: LocalDate, session: String, slot: Int, confirmed: Boolean) {
     val assessmentDateTime = {
       // TODO This should be configurable in the future, but hardcoding it in the fasttrack service is the lesser of the evils at the moment
       // FSET-471 was an emergency last minute fix
@@ -223,7 +223,7 @@ object Commands {
 
     import PassmarkPersistedObjects.Implicits._
 
-    implicit val applicationAssessmentFormat = Json.format[ApplicationAssessment]
+    implicit val applicationAssessmentFormat = Json.format[AssessmentCentreAllocation]
     implicit val phoneAndEmailFormat = Json.format[ContactDetails]
     implicit val assessmentCentrePassMarkSettingsResponseFormat = Json.format[AssessmentCentrePassMarkSettingsResponse]
 

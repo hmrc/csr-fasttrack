@@ -16,70 +16,37 @@
 
 package controllers
 
-import model.ApplicationStatuses
+import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.CandidateScoresCommands.Implicits._
-import model.CandidateScoresCommands.{ ApplicationScores, CandidateScoresAndFeedback, RecordCandidateScores }
-import play.api.libs.json.Json
-import play.api.mvc.Action
-import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
-import repositories.{ ApplicationAssessmentRepository, ApplicationAssessmentScoresRepository }
+import play.api.libs.json.{ JsValue, Json }
+import play.api.mvc.{ Action, AnyContent }
+import services.applicationassessment.AssessmentCentreService
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 object CandidateScoresController extends CandidateScoresController {
-
-  import repositories._
-
-  val aaRepository = applicationAssessmentRepository
-  val pRepository = personalDetailsRepository
-  val aasRepository = applicationAssessmentScoresRepository
-  val aRepository = applicationRepository
+  val assessmentCentreService = AssessmentCentreService
 }
 
 trait CandidateScoresController extends BaseController {
-  val aaRepository: ApplicationAssessmentRepository
-  val pRepository: PersonalDetailsRepository
-  val aasRepository: ApplicationAssessmentScoresRepository
-  val aRepository: GeneralApplicationRepository
+  def assessmentCentreService: AssessmentCentreService
 
-  def getCandidateScores(applicationId: String) = Action.async { implicit request =>
-    val assessment = aaRepository.find(applicationId)
-    val candidate = pRepository.find(applicationId)
-    val applicationScores = aasRepository.tryFind(applicationId)
-
-    for {
-      a <- assessment
-      c <- candidate
-      as <- applicationScores
-    } yield {
-      Ok(Json.toJson(ApplicationScores(RecordCandidateScores(c.firstName, c.lastName, a.venue, a.date), as)))
-    }
+  def getCandidateScores(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    assessmentCentreService.getCandidateScores(applicationId).map(scores =>  Ok(Json.toJson(scores)))
   }
 
-  def createCandidateScoresAndFeedback(applicationId: String) = Action.async(parse.json) { implicit request =>
+  def createCandidateScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[CandidateScoresAndFeedback] { candidateScoresAndFeedback =>
-      candidateScoresAndFeedback.attendancy match {
-        case Some(attendancy) =>
-          val newStatus = if (attendancy) ApplicationStatuses.AssessmentScoresEntered else ApplicationStatuses.FailedToAttend
-          for {
-            _ <- aasRepository.save(candidateScoresAndFeedback)
-            _ <- aRepository.updateStatus(applicationId, newStatus)
-          } yield {
-            Created
-          }
-        case _ =>
-          Future.successful {
-            BadRequest("attendancy is mandatory")
-          }
+      assessmentCentreService.saveScoresAndFeedback(applicationId, candidateScoresAndFeedback).map { _ =>
+        Created
+      }.recover {
+        case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
       }
     }
   }
 
-  def acceptCandidateScoresAndFeedback(applicationId: String) = Action.async { implicit request =>
-
-    aRepository.updateStatus(applicationId, ApplicationStatuses.AssessmentScoresAccepted).map(_ =>
-      Ok(""))
+  def acceptCandidateScoresAndFeedback(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    assessmentCentreService.acceptScoresAndFeedback(applicationId).map( _ => Ok )
   }
 }

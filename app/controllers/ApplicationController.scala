@@ -19,9 +19,9 @@ package controllers
 import connectors.AssessmentScheduleExchangeObjects.LocationName
 import model.ApplicationStatusOrder
 import model.Commands._
-import model.Exceptions.{ ApplicationNotFound, CannotUpdateReview }
+import model.Exceptions.{ApplicationNotFound, CannotUpdateReview}
 import play.api.libs.json.Json
-import play.api.mvc.{ Action, AnyContent }
+import play.api.mvc.{Action, AnyContent}
 import repositories._
 import repositories.application.GeneralApplicationRepository
 import services.AuditService
