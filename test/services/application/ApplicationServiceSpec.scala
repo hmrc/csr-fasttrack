@@ -122,6 +122,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
     val auditServiceMock = mock[AuditService]
     val contactDetailsRepositoryMock = mock[ContactDetailsRepository]
     val personalDetailsRepositoryMock = mock[PersonalDetailsRepository]
+    val authProviderClientMock = mock[AuthProviderClient]
 
     when(appRepositoryMock.withdraw(eqTo(ApplicationId), eqTo(withdrawApplicationRequest))).thenReturn(Future.successful(()))
     when(appAssessServiceMock.removeFromApplicationAssessmentSlot(eqTo(ApplicationId))).thenReturn(Future.successful(()))
@@ -133,6 +134,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       val auditService = auditServiceMock
       val contactDetailsRepository = contactDetailsRepositoryMock
       val personalDetailsRepository = personalDetailsRepositoryMock
+      val authProviderClient = authProviderClientMock
     }
 
     val currentAddress = Address("First Line", Some("line2"), None, None)
@@ -144,6 +146,15 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       preferredName = "Casablanca Clouter",
       dateOfBirth = LocalDate.parse("1916-07-22")
     )
+    val currentUser = AuthProviderUserDetails(
+      firstName = "Marcel",
+      lastName = "Cerdan",
+      email = Some("marcel.cerdan@email.con"),
+      preferredName = Some("Casablanca Clouter"),
+      role = Some("role"),
+      disabled = Some(false)
+    )
+
     val editedDetails = CandidateEditableDetails(
       firstName = "Salvador",
       lastName = "Sanchez",
@@ -161,6 +172,15 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       lastName = "Sanchez",
       preferredName = "Chava",
       dateOfBirth = LocalDate.parse("1959-01-26")
+    )
+
+    val expectedUpdateDetailsRequest = UpdateDetailsRequest(
+      editedDetails.firstName,
+      editedDetails.lastName,
+      currentUser.email,
+      Some(editedDetails.preferredName),
+      currentUser.role,
+      currentUser.disabled
     )
 
     val expectedContactDetails = ContactDetails(true, newAddress, None, Some("Mexico"), "mazurka@jjj.yyy", Some("2222909090"))
