@@ -18,7 +18,7 @@ package services.testdata
 
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.ApplicationStatuses
-import model.CandidateScoresCommands.{ CandidateScoreFeedback, CandidateScores, CandidateScoresAndFeedback }
+import model.CandidateScoresCommands.{ Feedback, _ }
 import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.GeneralApplicationRepository
@@ -41,7 +41,7 @@ trait AssessmentScoresEnteredStatusGenerator extends ConstructiveGenerator {
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
 
     def getScoresAndFeedback(applicationId: String): CandidateScoresAndFeedback = {
-      def randScore = Some(Random.randDouble(1,4))
+      def randScore = Some(Score(Random.randDouble(1,4), ""))
       // format: OFF
       CandidateScoresAndFeedback(applicationId, attendancy = Some(true), assessmentIncomplete = false,
         leadingAndCommunicating     = CandidateScores(randScore, randScore, randScore),
@@ -51,7 +51,9 @@ trait AssessmentScoresEnteredStatusGenerator extends ConstructiveGenerator {
         changingAndImproving        = CandidateScores(randScore, randScore, randScore),
         buildingCapabilityForAll    = CandidateScores(randScore, randScore, randScore),
         motivationFit               = CandidateScores(randScore, randScore, randScore),
-        feedback = CandidateScoreFeedback(Some("Good interview"), Some("Group exercise excellent"), Some("Written exercise good")))
+        feedback = CandidateScoreFeedback(Some(Feedback("Good interview", "")),
+          Some(Feedback("Group exercise excellent", "")),
+          Some(Feedback("Written exercise good", ""))))
       // format: ON
     }
 

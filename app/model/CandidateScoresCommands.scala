@@ -23,21 +23,25 @@ object CandidateScoresCommands {
 
   case class RecordCandidateScores(firstName: String, lastName: String, venueName: String, date: LocalDate)
 
+  case class Score(value: Double, updatedBy: String)
+
+  case class Feedback(value: String, updatedBy: String)
+
   case class CandidateScores(
-    interview: Option[Double] = None,
-    groupExercise: Option[Double] = None,
-    writtenExercise: Option[Double] = None
+    interview: Option[Score] = None,
+    groupExercise: Option[Score] = None,
+    writtenExercise: Option[Score] = None
   ) {
-    def sum = (BigDecimal(interview.getOrElse(0.0)) + BigDecimal(groupExercise.getOrElse(0.0)) +
-      BigDecimal(writtenExercise.getOrElse(0.0))).toDouble
+    def sum = (BigDecimal(interview.map(_.value).getOrElse(0.0)) + BigDecimal(groupExercise.map(_.value).getOrElse(0.0)) +
+      BigDecimal(writtenExercise.map(_.value).getOrElse(0.0))).toDouble
 
     def length = List(interview, groupExercise, writtenExercise).flatten.length
   }
 
   case class CandidateScoreFeedback(
-    interviewFeedback: Option[String] = None,
-    groupExerciseFeedback: Option[String] = None,
-    writtenExerciseFeedback: Option[String] = None
+    interviewFeedback: Option[Feedback] = None,
+    groupExerciseFeedback: Option[Feedback] = None,
+    writtenExerciseFeedback: Option[Feedback] = None
   )
 
   case class CandidateScoresAndFeedback(
@@ -61,6 +65,8 @@ object CandidateScoresCommands {
 
   object Implicits {
     implicit val RecordCandidateScoresFormats: Format[RecordCandidateScores] = Json.format[RecordCandidateScores]
+    implicit val scoresFormat = Json.format[Score]
+    implicit val feedbackFormat = Json.format[Feedback]
     implicit val CandidateScoresFormats: Format[CandidateScores] = Json.format[CandidateScores]
     implicit val CandidateScoreFeedbackFormats: Format[CandidateScoreFeedback] = Json.format[CandidateScoreFeedback]
     implicit val CandidateScoresAndFeedbackFormats: Format[CandidateScoresAndFeedback] = Json.format[CandidateScoresAndFeedback]
