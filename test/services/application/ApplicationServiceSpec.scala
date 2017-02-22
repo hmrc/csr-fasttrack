@@ -71,7 +71,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       when(authProviderClientMock.findByUserId(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Some(currentUser)))
       when(authProviderClientMock.update(any[String], any[UpdateDetailsRequest])(any[HeaderCarrier])).thenReturn(Future.successful(()))
       when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturn(Future.successful(()))
-      when(personalDetailsRepositoryMock.updatePersonalDetailsOnly(any[String], any[String], any[PersonalDetails]))
+      when(personalDetailsRepositoryMock.update(any[String], any[String], any[PersonalDetails]))
         .thenReturn(Future.successful(()))
 
       val result = applicationService.editDetails(userId, ApplicationId, editedDetails)
@@ -82,7 +82,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       verify(authProviderClientMock).findByUserId(eqTo(userId))(any[HeaderCarrier])
 
       verify(authProviderClientMock).update(eqTo(userId), eqTo(expectedUpdateDetailsRequest))(any[HeaderCarrier])
-      verify(personalDetailsRepositoryMock).updatePersonalDetailsOnly(eqTo(ApplicationId), eqTo(userId), eqTo(expectedPersonalDetails))
+      verify(personalDetailsRepositoryMock).update(eqTo(ApplicationId), eqTo(userId), eqTo(expectedPersonalDetails))
       verify(contactDetailsRepositoryMock).update(eqTo(userId), eqTo(expectedContactDetails))
       verify(auditServiceMock).logEventNoRequest("ApplicationEdited", editAuditDetails)
       verifyNoMoreInteractions(personalDetailsRepositoryMock, contactDetailsRepositoryMock, authProviderClientMock, auditServiceMock)
@@ -94,7 +94,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       when(authProviderClientMock.findByUserId(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Some(currentUser)))
       when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturn(Future.successful(()))
       when(authProviderClientMock.update(any[String], any[UpdateDetailsRequest])(any[HeaderCarrier])).thenReturn(Future.successful(()))
-      when(personalDetailsRepositoryMock.updatePersonalDetailsOnly(any[String], any[String], any[PersonalDetails]))
+      when(personalDetailsRepositoryMock.update(any[String], any[String], any[PersonalDetails]))
         .thenReturn(Future.successful(()))
 
       val result = applicationService.editDetails(userId, ApplicationId, editedDetails).failed.futureValue

@@ -75,7 +75,7 @@ trait ApplicationService {
       user <- userFut
       _ <- Future.sequence(
             authProviderClient.update(userId, toUpdateDetailsRequest(editRequest, user)) ::
-            personalDetailsRepository.updatePersonalDetailsOnly(applicationId, userId, currentPd.copy(
+            personalDetailsRepository.update(applicationId, userId, currentPd.copy(
               firstName = editRequest.firstName,
               lastName = editRequest.lastName,
               preferredName = editRequest.preferredName,
