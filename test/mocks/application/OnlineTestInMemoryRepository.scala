@@ -42,14 +42,13 @@ object OnlineTestInMemoryRepository extends OnlineTestInMemoryRepository
  */
 class OnlineTestInMemoryRepository extends OnlineTestRepository {
   case class RuleCategoryResult(location1Scheme1: Result, location1Scheme2: Option[Result],
-                                location2Scheme1: Option[Result], location2Scheme2: Option[Result], alternativeScheme: Option[Result])
+    location2Scheme1: Option[Result], location2Scheme2: Option[Result], alternativeScheme: Option[Result])
 
   val inMemoryRepo = new mutable.HashMap[String, RuleCategoryResult]
 
   def nextApplicationReadyForOnlineTesting: Future[Option[OnlineTestApplication]] =
     Future.successful(Some(OnlineTestApplication("appId", ApplicationStatuses.Submitted, "userId", guaranteedInterview = false,
-     needsAdjustments = false, "Test Preferred Name", None
-    )))
+      needsAdjustments = false, "Test Preferred Name", None)))
 
   def getCubiksTestProfile(userId: String): Future[CubiksTestProfile] = Future.successful {
     val date = DateTime.now
@@ -104,11 +103,11 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
   def removeOnlineTestEvaluationAndReports(applicationId: String): Future[Unit] = ???
 
   def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, version: String,
-                                                      evaluationResult: List[SchemeEvaluationResult]): Future[Unit] = ???
+    evaluationResult: List[SchemeEvaluationResult]): Future[Unit] = ???
 
   def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = ???
 
-  def addReminderNotificationStatus(userId: String,notificationStatus: String): scala.concurrent.Future[Unit] = ???
+  def addReminderNotificationStatus(userId: String, notificationStatus: String): scala.concurrent.Future[Unit] = ???
 
   def nextTestForReminder(reminder: model.ReminderNotice): scala.concurrent.Future[Option[model.persisted.NotificationExpiringOnlineTest]] = ???
 

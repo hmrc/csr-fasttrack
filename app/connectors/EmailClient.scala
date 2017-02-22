@@ -38,13 +38,13 @@ trait CSREmailClient extends EmailClient {
     sendEmail(to, "csr_app_submit_confirmation", Map("name" -> name))
 
   override def sendAdjustmentsConfirmation(to: String, name: String, onlineTestsAdjustments: String,
-                                           assessmentCenterAdjustments: String)(implicit hc: HeaderCarrier) =
+    assessmentCenterAdjustments: String)(implicit hc: HeaderCarrier) =
     sendEmail(to, "fset_fasttrack_adjustments_confirmation",
       Map("name" -> name, "onlineTestsAdjustments" -> onlineTestsAdjustments,
         "assessmentCenterAdjustments" -> assessmentCenterAdjustments))
 
   override def sendAdjustmentsUpdateConfirmation(to: String, name: String, onlineTestsAdjustments: String,
-                                                 assessmentCenterAdjustments: String)(implicit hc: HeaderCarrier) =
+    assessmentCenterAdjustments: String)(implicit hc: HeaderCarrier) =
     sendEmail(to, "fset_fasttrack_adjustments_changed",
       Map("name" -> name, "onlineTestsAdjustments" -> onlineTestsAdjustments,
         "assessmentCenterAdjustments" -> assessmentCenterAdjustments))
@@ -111,8 +111,8 @@ trait CSREmailClient extends EmailClient {
     )
   }
 
-  override def sendExpiringReminder(template: String, to: String, name: String, expiryDate: DateTime)
-                                   (implicit hc: HeaderCarrier): Future[Unit] = {
+  override def sendExpiringReminder(template: String, to: String, name: String,
+    expiryDate: DateTime)(implicit hc: HeaderCarrier): Future[Unit] = {
     sendEmail(
       to,
       template,
@@ -127,9 +127,9 @@ trait CSREmailClient extends EmailClient {
 trait EmailClient extends WSHttp {
   def sendApplicationSubmittedConfirmation(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit]
   def sendAdjustmentsConfirmation(to: String, name: String, onlineTestsAdjustments: String,
-                                  assessmentCenterAdjustments: String)(implicit hc: HeaderCarrier): Future[Unit]
+    assessmentCenterAdjustments: String)(implicit hc: HeaderCarrier): Future[Unit]
   def sendAdjustmentsUpdateConfirmation(to: String, name: String, onlineTestsAdjustments: String,
-                                  assessmentCenterAdjustments: String)(implicit hc: HeaderCarrier): Future[Unit]
+    assessmentCenterAdjustments: String)(implicit hc: HeaderCarrier): Future[Unit]
   def sendOnlineTestInvitation(to: String, name: String, expireDateTime: DateTime)(implicit hc: HeaderCarrier): Future[Unit]
   def sendOnlineTestExpired(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit]
   def sendOnlineTestResultReady(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit]

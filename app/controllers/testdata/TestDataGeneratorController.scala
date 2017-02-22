@@ -71,7 +71,7 @@ trait TestDataGeneratorController extends BaseController {
       schemesData = Some(SchemesDataRequest(Some(List(Scheme.Business, Scheme.Commercial, Scheme.Finance,
         Scheme.DigitalAndTechnology, Scheme.ProjectDelivery)))),
       schemeLocationsData = Some(SchemeLocationsDataRequest(Some(List("2648579", "2646914", "2651513", "2654142", "2655603", "2657613")))),
-        assistanceDetailsData = Some(AssistanceDetailsDataRequest(
+      assistanceDetailsData = Some(AssistanceDetailsDataRequest(
         hasDisability = Some("false"),
         hasDisabilityDescription = Some(Random.hasDisabilityDescription),
         setGis = Some(false),
@@ -126,15 +126,17 @@ trait TestDataGeneratorController extends BaseController {
   //scalastyle:off parameter.number
   //scalastyle:off method.length
   @deprecated("Use 'createCandidatesInStatusPOST' version instead", "30/12/2016")
-  def createCandidatesInStatus(status: String,
-                               numberToGenerate: Int,
-                               emailPrefix: String,
-                               setGis: Boolean,
-                               region: Option[String],
-                               loc1scheme1EvaluationResult: Option[String],
-                               loc1scheme2EvaluationResult: Option[String],
-                               previousStatus: Option[String] = None,
-                               confirmedAllocation: Boolean) = Action.async { implicit request =>
+  def createCandidatesInStatus(
+    status: String,
+    numberToGenerate: Int,
+    emailPrefix: String,
+    setGis: Boolean,
+    region: Option[String],
+    loc1scheme1EvaluationResult: Option[String],
+    loc1scheme2EvaluationResult: Option[String],
+    previousStatus: Option[String] = None,
+    confirmedAllocation: Boolean
+  ) = Action.async { implicit request =>
 
     val hasDisability: Option[String] = if (setGis) { Some("Yes") } else { None }
 
@@ -175,16 +177,15 @@ trait TestDataGeneratorController extends BaseController {
     }
   }
 
-  private def createCandidateInStatus(status: String, config: (Int) => GeneratorConfig, numberToGenerate: Int)
-                                     (implicit hc: HeaderCarrier) = {
+  private def createCandidateInStatus(status: String, config: (Int) => GeneratorConfig, numberToGenerate: Int)(implicit hc: HeaderCarrier) = {
     try {
       TestDataGeneratorService.createCandidatesInSpecificStatus(
         numberToGenerate,
         _ => StatusGeneratorFactory.getGenerator(status),
         config
       ).map { candidates =>
-        Ok(Json.toJson(candidates))
-      }
+          Ok(Json.toJson(candidates))
+        }
     } catch {
       case _: EmailTakenException => Future.successful(Conflict(JsObject(List(("message",
         JsString("Email has been already taken. Try with another one by changing the emailPrefix parameter"))))))

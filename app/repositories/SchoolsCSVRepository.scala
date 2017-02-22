@@ -40,8 +40,10 @@ class SchoolsCSVRepository extends SchoolsRepository with CsvHelper {
       val headers = rawData.head
       val values = rawData.tail
       val schools = values map { columns =>
-        require(headers.length == columns.length,
-          s"Number of columns must be equal to number of headers. Incorrect line: ${columns.mkString("|")}")
+        require(
+          headers.length == columns.length,
+          s"Number of columns must be equal to number of headers. Incorrect line: ${columns.mkString("|")}"
+        )
 
         def tryGet(col: Int) = if (columns(col).isEmpty) None else Some(columns(col))
 

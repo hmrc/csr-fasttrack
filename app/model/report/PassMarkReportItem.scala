@@ -22,29 +22,31 @@ import model.UniqueIdentifier
 import play.api.libs.json.Json
 import model.ReportExchangeObjects.Implicits.passMarkReportTestResultsFormats // Do not remove this. It is needed despite what IntelliJ thinks
 
-case class PassMarkReportItem(applicationId: UniqueIdentifier,
-                               progress: Option[String],
-                               schemes: List[Scheme],
-                               locations: List[String],
-                               gender: String,
-                               sexualOrientation: String,
-                               ethnicity: String,
-                               disability: Option[String],
-                               gis: Option[Boolean],
-                               onlineAdjustments: Option[String],
-                               assessmentCentreAdjustments: Option[String],
-                               civilServant: Option[Boolean],
-                               socialEconomicScore: String,
-                               hearAboutUs: String,
-                               allocatedAssessmentCentre: Option[String],
-                               testResults: PassMarkReportTestResults
-                              )
+case class PassMarkReportItem(
+  applicationId: UniqueIdentifier,
+  progress: Option[String],
+  schemes: List[Scheme],
+  locations: List[String],
+  gender: String,
+  sexualOrientation: String,
+  ethnicity: String,
+  disability: Option[String],
+  gis: Option[Boolean],
+  onlineAdjustments: Option[String],
+  assessmentCentreAdjustments: Option[String],
+  civilServant: Option[Boolean],
+  socialEconomicScore: String,
+  hearAboutUs: String,
+  allocatedAssessmentCentre: Option[String],
+  testResults: PassMarkReportTestResults
+)
 
 case object PassMarkReportItem {
   def apply(application: ApplicationForCandidateProgressReport, diversityAnswers: DiversityReportDiversityAnswers,
-            ses: String, hearAboutUs: String, allocatedAssessmentCentre: Option[String],
-            testResults: PassMarkReportTestResults): PassMarkReportItem = {
-    PassMarkReportItem(applicationId = application.applicationId.get,
+    ses: String, hearAboutUs: String, allocatedAssessmentCentre: Option[String],
+    testResults: PassMarkReportTestResults): PassMarkReportItem = {
+    PassMarkReportItem(
+      applicationId = application.applicationId.get,
       progress = application.progress,
       schemes = application.schemes,
       locations = application.locationIds,

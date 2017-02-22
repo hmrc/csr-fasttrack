@@ -70,7 +70,7 @@ trait AssessmentScheduleController extends BaseController {
   val aaService: ApplicationAssessmentService
 
   private def calculateUsedCapacity(assessments: Option[List[ApplicationAssessment]], sessionCapacity: Int,
-                                    minViableAttendees: Int, preferredAttendeeMargin: Int): UsedCapacity = {
+    minViableAttendees: Int, preferredAttendeeMargin: Int): UsedCapacity = {
     assessments.map { sessionSlots =>
       UsedCapacity(sessionSlots.size, sessionSlots.count(x => x.confirmed), minViableAttendees, preferredAttendeeMargin)
     }.getOrElse(
@@ -95,10 +95,14 @@ trait AssessmentScheduleController extends BaseController {
                 venue.capacityDates.map(capacityDate =>
                   UsedCapacityDate(
                     capacityDate.date,
-                    calculateUsedCapacity(assessmentMap.get((venue.venueName, capacityDate.date, "AM")),
-                      capacityDate.amCapacity, capacityDate.amMinViableAttendees, capacityDate.amPreferredAttendeeMargin),
-                    calculateUsedCapacity(assessmentMap.get((venue.venueName, capacityDate.date, "PM")),
-                      capacityDate.pmCapacity, capacityDate.pmMinViableAttendees, capacityDate.pmPreferredAttendeeMargin)
+                    calculateUsedCapacity(
+                      assessmentMap.get((venue.venueName, capacityDate.date, "AM")),
+                      capacityDate.amCapacity, capacityDate.amMinViableAttendees, capacityDate.amPreferredAttendeeMargin
+                    ),
+                    calculateUsedCapacity(
+                      assessmentMap.get((venue.venueName, capacityDate.date, "PM")),
+                      capacityDate.pmCapacity, capacityDate.pmMinViableAttendees, capacityDate.pmPreferredAttendeeMargin
+                    )
                   ))
               ))
           ))
@@ -140,10 +144,10 @@ trait AssessmentScheduleController extends BaseController {
   }
 
   def getApplicationForAssessmentAllocation(assessmentCenterLocation: String, start: Int, end: Int): Action[AnyContent] = Action.async {
-  implicit request =>
-    aRepository.findApplicationsForAssessmentAllocation(List(assessmentCenterLocation), start, end) map { apps =>
-      Ok(Json.toJson(apps))
-    }
+    implicit request =>
+      aRepository.findApplicationsForAssessmentAllocation(List(assessmentCenterLocation), start, end) map { apps =>
+        Ok(Json.toJson(apps))
+      }
   }
 
   def getAllocationsForVenue(venue: String): Action[AnyContent] = Action.async { implicit request =>

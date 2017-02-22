@@ -37,7 +37,8 @@ class ReportingFormatterSpec extends BaseServiceSpec {
       val result = ReportingFormatter.getOnlineAdjustments(
         onlineAdjustments = Some(true),
         adjustments = Some(Adjustments(typeOfAdjustments = None, adjustmentsConfirmed = Some(true),
-          onlineTests = Some(AdjustmentDetail(extraTimeNeeded = Some(30))))))
+          onlineTests = Some(AdjustmentDetail(extraTimeNeeded = Some(30)))))
+      )
       result mustBe (Some("Verbal extra time needed: 30%"))
     }
 
@@ -45,30 +46,33 @@ class ReportingFormatterSpec extends BaseServiceSpec {
       val result = ReportingFormatter.getOnlineAdjustments(
         onlineAdjustments = Some(true),
         adjustments = Some(Adjustments(typeOfAdjustments = None, adjustmentsConfirmed = Some(true),
-          onlineTests = Some(AdjustmentDetail(extraTimeNeededNumerical = Some(45))))))
+          onlineTests = Some(AdjustmentDetail(extraTimeNeededNumerical = Some(45)))))
+      )
       result mustBe (Some("Numerical extra time needed: 45%"))
     }
-
 
     "return other adjustments when needs online adjustments and other adjustments have been requested" in {
       val result = ReportingFormatter.getOnlineAdjustments(
         onlineAdjustments = Some(true),
         adjustments = Some(Adjustments(typeOfAdjustments = None, adjustmentsConfirmed = Some(true),
-          onlineTests = Some(AdjustmentDetail(otherInfo = Some("other adjustments"))))))
+          onlineTests = Some(AdjustmentDetail(otherInfo = Some("other adjustments")))))
+      )
       result mustBe (Some("other adjustments"))
     }
 
     "return Verbal extra time, numerical extra time needed and other adjustments strings when needs online adjustments " +
       "and extra time for numerical and verbal and other adjustments for online test have been requested" in {
-      val result = ReportingFormatter.getOnlineAdjustments(
-        onlineAdjustments = Some(true),
-        adjustments = Some(Adjustments(typeOfAdjustments = None, adjustmentsConfirmed = Some(true),
-          onlineTests = Some(AdjustmentDetail(
-            extraTimeNeeded = Some(30),
-            extraTimeNeededNumerical = Some(45),
-            otherInfo = Some("other adjustments"))))))
-      result mustBe (Some("Verbal extra time needed: 30%, Numerical extra time needed: 45%, other adjustments"))
-    }
+        val result = ReportingFormatter.getOnlineAdjustments(
+          onlineAdjustments = Some(true),
+          adjustments = Some(Adjustments(typeOfAdjustments = None, adjustmentsConfirmed = Some(true),
+            onlineTests = Some(AdjustmentDetail(
+              extraTimeNeeded = Some(30),
+              extraTimeNeededNumerical = Some(45),
+              otherInfo = Some("other adjustments")
+            ))))
+        )
+        result mustBe (Some("Verbal extra time needed: 30%, Numerical extra time needed: 45%, other adjustments"))
+      }
   }
 
   "getAssessmentCentreAdjustments" should {
@@ -88,7 +92,8 @@ class ReportingFormatterSpec extends BaseServiceSpec {
       val result = ReportingFormatter.getAssessmentCentreAdjustments(
         assessmentCentreAdjustments = Some(true),
         adjustments = Some(Adjustments(typeOfAdjustments = None, adjustmentsConfirmed = Some(true),
-          assessmentCenter = Some(AdjustmentDetail(extraTimeNeeded = Some(38))))))
+          assessmentCenter = Some(AdjustmentDetail(extraTimeNeeded = Some(38)))))
+      )
       result mustBe (Some("Extra time needed: 38%"))
     }
 
@@ -96,18 +101,20 @@ class ReportingFormatterSpec extends BaseServiceSpec {
       val result = ReportingFormatter.getAssessmentCentreAdjustments(
         assessmentCentreAdjustments = Some(true),
         adjustments = Some(Adjustments(typeOfAdjustments = None, adjustmentsConfirmed = Some(true),
-          assessmentCenter = Some(AdjustmentDetail(otherInfo = Some("other adjustments"))))))
+          assessmentCenter = Some(AdjustmentDetail(otherInfo = Some("other adjustments")))))
+      )
       result mustBe (Some("other adjustments"))
     }
 
     "return extra time and other adjustments strings when needs assessment centre adjustments " +
       "and extra time and other adjustments have been requested" in {
-      val result = ReportingFormatter.getAssessmentCentreAdjustments(
-        assessmentCentreAdjustments = Some(true),
-        adjustments = Some(Adjustments(typeOfAdjustments = None, adjustmentsConfirmed = Some(true),
-          assessmentCenter = Some(AdjustmentDetail(extraTimeNeeded = Some(27), otherInfo = Some("other adjustments"))))))
-      result mustBe (Some("Extra time needed: 27%, other adjustments"))
-    }
+        val result = ReportingFormatter.getAssessmentCentreAdjustments(
+          assessmentCentreAdjustments = Some(true),
+          adjustments = Some(Adjustments(typeOfAdjustments = None, adjustmentsConfirmed = Some(true),
+            assessmentCenter = Some(AdjustmentDetail(extraTimeNeeded = Some(27), otherInfo = Some("other adjustments")))))
+        )
+        result mustBe (Some("Extra time needed: 27%, other adjustments"))
+      }
 
     "return type of adjustments when there are type of adjustments" in {
       val allTypeOfAdjustments = List("onlineTestsTimeExtension", "onlineTestsOther", "assessmentCenterTimeExtension",
@@ -115,7 +122,8 @@ class ReportingFormatterSpec extends BaseServiceSpec {
         "assessmentCenterOther")
       val result = ReportingFormatter.getAssessmentCentreAdjustments(
         assessmentCentreAdjustments = Some(true),
-        adjustments = Some(Adjustments(typeOfAdjustments = Some(allTypeOfAdjustments), adjustmentsConfirmed = Some(true))))
+        adjustments = Some(Adjustments(typeOfAdjustments = Some(allTypeOfAdjustments), adjustmentsConfirmed = Some(true)))
+      )
       result mustBe (Some("coloured paper, braille test paper, room alone, rest breaks, reader/assistant, stand up and move around"))
     }
 
@@ -125,8 +133,11 @@ class ReportingFormatterSpec extends BaseServiceSpec {
         "assessmentCenterOther")
       val result = ReportingFormatter.getAssessmentCentreAdjustments(
         assessmentCentreAdjustments = Some(true),
-        adjustments = Some(Adjustments(typeOfAdjustments = Some(allTypeOfAdjustments),
-          adjustmentsConfirmed = Some(true), assessmentCenter = Some(AdjustmentDetail(extraTimeNeeded = Some(15))))))
+        adjustments = Some(Adjustments(
+          typeOfAdjustments = Some(allTypeOfAdjustments),
+          adjustmentsConfirmed = Some(true), assessmentCenter = Some(AdjustmentDetail(extraTimeNeeded = Some(15)))
+        ))
+      )
       result mustBe (Some("Extra time needed: 15%, coloured paper, rest breaks, reader/assistant, stand up and move around"))
     }
   }

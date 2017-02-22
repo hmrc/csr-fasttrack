@@ -39,8 +39,8 @@ trait PassMarkSettingsRepository {
 }
 
 class PassMarkSettingsMongoRepository(implicit mongo: () => DB)
-  extends ReactiveRepository[Settings, BSONObjectID](CollectionNames.PASS_MARK_SETTINGS, mongo,
-    PassMarkExchangeObjects.Implicits.passMarkSettingsFormat, ReactiveMongoFormats.objectIdFormats) with PassMarkSettingsRepository {
+    extends ReactiveRepository[Settings, BSONObjectID](CollectionNames.PASS_MARK_SETTINGS, mongo,
+      PassMarkExchangeObjects.Implicits.passMarkSettingsFormat, ReactiveMongoFormats.objectIdFormats) with PassMarkSettingsRepository {
 
   override def create(settings: Settings, schemes: List[model.Scheme.Scheme]): Future[PassMarkSettingsCreateResponse] = {
     collection.insert(settings) flatMap { _ =>

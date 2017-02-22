@@ -43,12 +43,14 @@ trait AdjustmentsManagementService {
   val emailClient: EmailClient
   val auditService: AuditService
 
-  def confirmAdjustment(applicationId: String, adjustments: Adjustments, actionTriggeredBy: String)
-                       (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
-    def auditEvents(candidate: Candidate,
-                            contactDetails: ContactDetails,
-                            prevAdjustments: Option[Adjustments],
-                            adjustments: Adjustments): Future[Unit] = {
+  def confirmAdjustment(applicationId: String, adjustments: Adjustments,
+    actionTriggeredBy: String)(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
+    def auditEvents(
+      candidate: Candidate,
+      contactDetails: ContactDetails,
+      prevAdjustments: Option[Adjustments],
+      adjustments: Adjustments
+    ): Future[Unit] = {
 
       val hasPreviousAdjustments = prevAdjustments.flatMap(_.adjustmentsConfirmed).contains(true)
       val adjustmentsRejected = adjustments.typeOfAdjustments.forall(_.isEmpty)
@@ -93,8 +95,10 @@ trait AdjustmentsManagementService {
     appRepository.findAdjustments(applicationId)
   }
 
-  def updateAdjustmentsComment(applicationId: String, adjustmentsComment: AdjustmentsComment)
-                              (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
+  def updateAdjustmentsComment(
+    applicationId: String,
+    adjustmentsComment: AdjustmentsComment
+  )(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
     appRepository.updateAdjustmentsComment(applicationId, adjustmentsComment).map { _ =>
       auditService.logEvent("AdjustmentsCommentUpdated")
     }
@@ -112,26 +116,29 @@ trait AdjustmentsManagementService {
 
   private def onlineTestsAdjustmentsString(header: String, onlineTestsAdjustments: Option[AdjustmentDetail]): String = {
     def mkString(ad: Option[AdjustmentDetail]): Option[String] =
-      ad.map(e => List(e.extraTimeNeeded.map( tn => s"$tn% extra time (Verbal)"),
-        e.extraTimeNeededNumerical.map( tn => s"$tn% extra time (Numerical)"),
-        e.otherInfo).flatten.mkString(", "))
+      ad.map(e => List(
+        e.extraTimeNeeded.map(tn => s"$tn% extra time (Verbal)"),
+        e.extraTimeNeededNumerical.map(tn => s"$tn% extra time (Numerical)"),
+        e.otherInfo
+      ).flatten.mkString(", "))
     toEmailString(header, onlineTestsAdjustments, mkString)
   }
-
 
   private def assessmentCenterAdjustmentsString(header: String, adjustments: Adjustments): String = {
 
     def assessmentCenterAdjustments() = adjustments.typeOfAdjustments.map(_.filter(_.contains(" ")).mkString(", "))
 
     def mkString(ad: Option[AdjustmentDetail]): Option[String] =
-      ad.map(e => List(e.extraTimeNeeded.map( tn => s"$tn% extra time"),
+      ad.map(e => List(
+        e.extraTimeNeeded.map(tn => s"$tn% extra time"),
         assessmentCenterAdjustments().filter(_.trim.nonEmpty),
-        e.otherInfo).flatten.mkString(", "))
+        e.otherInfo
+      ).flatten.mkString(", "))
     toEmailString(header, adjustments.assessmentCenter, mkString)
   }
 
   private def toEmailString(header: String, adjustmentDetail: Option[AdjustmentDetail],
-                            mkString: (Option[AdjustmentDetail]) => Option[String]): String = {
+    mkString: (Option[AdjustmentDetail]) => Option[String]): String = {
     mkString(adjustmentDetail) match {
       case Some(txt) if !txt.isEmpty => s"$header $txt"
       case _ => ""

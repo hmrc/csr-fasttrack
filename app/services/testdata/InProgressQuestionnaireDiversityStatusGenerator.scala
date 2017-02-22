@@ -47,8 +47,10 @@ trait InProgressQuestionnaireDiversityStatusGenerator extends ConstructiveGenera
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       _ <- qRepository.addQuestions(candidateInPreviousStatus.applicationId.get, getDiversityQuestionnaireQuestions)
-      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get,
-        ProgressStatuses.DiversityQuestionsCompletedProgress)
+      _ <- appRepository.updateQuestionnaireStatus(
+        candidateInPreviousStatus.applicationId.get,
+        ProgressStatuses.DiversityQuestionsCompletedProgress
+      )
     } yield {
       candidateInPreviousStatus
     }

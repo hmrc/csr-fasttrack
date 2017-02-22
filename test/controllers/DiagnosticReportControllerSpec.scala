@@ -37,15 +37,12 @@ class DiagnosticReportControllerSpec extends UnitWithAppSpec {
     "return all non-sensitive information about the user application" in new TestFixture {
       val expectedApplication = Json.obj("applicationId" -> "app1", "userId" -> "user1", "frameworkId" -> "FastTrack-2017",
         "online-test-results" -> Json.obj("applicationId" -> "app1", "reportType" -> "XML",
-          "competency" -> Json.obj("status" -> "complete", "norm" -> "norm", "tScore" -> 1, "percentile" -> 22, "raw" -> 5, "sten" -> 55)
-        ),
+          "competency" -> Json.obj("status" -> "complete", "norm" -> "norm", "tScore" -> 1, "percentile" -> 22, "raw" -> 5, "sten" -> 55)),
         "assessment-centre-results" -> Json.obj("applicationId" -> "app1", "attendancy" -> true, "assessmentIncomplete" -> false,
           "leadingAndCommunicating" -> Json.obj("interview" -> 1), "collaboratingAndPartnering" -> Json.obj("interview" -> 1),
           "deliveringAtPace" -> Json.obj("interview" -> 1), "makingEffectiveDecisions" -> Json.obj("interview" -> 1),
           "changingAndImproving" -> Json.obj("interview" -> 1), "buildingCapabilityForAll" -> Json.obj("interview" -> 1),
-          "motivationFit" -> Json.obj("interview" -> 1), "feedback" -> Json.obj("interviewFeedback" -> "blah")
-        )
-      )
+          "motivationFit" -> Json.obj("interview" -> 1), "feedback" -> Json.obj("interviewFeedback" -> "blah")))
 
       val testResult = TestResult("complete", "norm", Some(1.0), Some(22.0), Some(5.0), Some(55.0))
       val candidateScore = CandidateScores(Some(1.0))
@@ -59,8 +56,7 @@ class DiagnosticReportControllerSpec extends UnitWithAppSpec {
         Some(CandidateScoresAndFeedback("app1", attendancy = Some(true), assessmentIncomplete = false, leadingAndCommunicating = candidateScore,
           collaboratingAndPartnering = candidateScore, deliveringAtPace = candidateScore, makingEffectiveDecisions = candidateScore,
           changingAndImproving = candidateScore, buildingCapabilityForAll = candidateScore, motivationFit = candidateScore,
-          feedback = candidateScoreFeedback
-        ))
+          feedback = candidateScoreFeedback))
       ))
 
       val result = TestableDiagnosticReportingController.getApplicationByApplicationId("app1")(createOnlineTestRequest(

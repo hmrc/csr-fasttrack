@@ -38,21 +38,23 @@ object ReportExchangeObjects {
     assessmentCentreLocation: String
   )
 
-  case class CandidateProgressReportItem(applicationId: Option[UniqueIdentifier],
-                                           progress: Option[String],
-                                           schemes: List[Scheme],
-                                           locations: List[String],
-                                           disability: Option[String],
-                                           gis: Option[Boolean],
-                                           onlineAdjustments: Option[String],
-                                           assessmentCentreAdjustments: Option[String],
-                                           civilServant: Option[Boolean],
-                                           fsacIndicator: Option[String]
-                                         )
+  case class CandidateProgressReportItem(
+    applicationId: Option[UniqueIdentifier],
+    progress: Option[String],
+    schemes: List[Scheme],
+    locations: List[String],
+    disability: Option[String],
+    gis: Option[Boolean],
+    onlineAdjustments: Option[String],
+    assessmentCentreAdjustments: Option[String],
+    civilServant: Option[Boolean],
+    fsacIndicator: Option[String]
+  )
 
   case object CandidateProgressReportItem {
     def apply(application: ApplicationForCandidateProgressReport): CandidateProgressReportItem = {
-      CandidateProgressReportItem(applicationId = application.applicationId,
+      CandidateProgressReportItem(
+        applicationId = application.applicationId,
         progress = application.progress,
         schemes = application.schemes,
         locations = application.locationIds,
@@ -61,25 +63,27 @@ object ReportExchangeObjects {
         onlineAdjustments = application.onlineAdjustments.map(fromBooleanToYesNo(_)),
         assessmentCentreAdjustments = application.assessmentCentreAdjustments.map(fromBooleanToYesNo(_)),
         civilServant = application.civilServant,
-        None)
+        None
+      )
     }
   }
 
   case class DiversityReportDiversityAnswers(gender: String, sexualOrientation: String, ethnicity: String)
 
-  case class ApplicationForCandidateProgressReport(applicationId: Option[UniqueIdentifier],
-                                                    userId: UniqueIdentifier,
-                                                    progress: Option[String],
-                                                    schemes: List[Scheme],
-                                                    locationIds: List[String],
-                                                    hasDisability: Option[String],
-                                                    gis: Option[Boolean],
-                                                    onlineAdjustments: Option[Boolean],
-                                                    assessmentCentreAdjustments: Option[Boolean],
-                                                    adjustments: Option[Adjustments],
-                                                    civilServant: Option[Boolean],
-                                                    assessmentCentreIndicator: Option[AssessmentCentreIndicator]
-                                                  )
+  case class ApplicationForCandidateProgressReport(
+    applicationId: Option[UniqueIdentifier],
+    userId: UniqueIdentifier,
+    progress: Option[String],
+    schemes: List[Scheme],
+    locationIds: List[String],
+    hasDisability: Option[String],
+    gis: Option[Boolean],
+    onlineAdjustments: Option[Boolean],
+    assessmentCentreAdjustments: Option[Boolean],
+    adjustments: Option[Adjustments],
+    civilServant: Option[Boolean],
+    assessmentCentreIndicator: Option[AssessmentCentreIndicator]
+  )
 
   case class ReportWithPersonalDetails(
     applicationId: UniqueIdentifier,
@@ -105,9 +109,11 @@ object ReportExchangeObjects {
     cubiksUserId: Option[Int]
   )
 
-  case class PassMarkReportWithPersonalData(application: ReportWithPersonalDetails,
-                                            testResults: PassMarkReportTestResults,
-                                            contactDetails: ContactDetails)
+  case class PassMarkReportWithPersonalData(
+    application: ReportWithPersonalDetails,
+    testResults: PassMarkReportTestResults,
+    contactDetails: ContactDetails
+  )
 
   // TODO: delete this class once we rebuild the assessment results report
   case class PassMarkReportQuestionnaireData(
@@ -121,10 +127,12 @@ object ReportExchangeObjects {
     socioEconomicScore: String
   )
 
-  case class PassMarkReportTestResults(competency: Option[TestResult],
-                                        numerical: Option[TestResult],
-                                        verbal: Option[TestResult],
-                                        situational: Option[TestResult])
+  case class PassMarkReportTestResults(
+    competency: Option[TestResult],
+    numerical: Option[TestResult],
+    verbal: Option[TestResult],
+    situational: Option[TestResult]
+  )
 
   case class OnlineTestPassmarkEvaluationSchemes(
     location1Scheme1: Option[String] = None,
@@ -134,9 +142,10 @@ object ReportExchangeObjects {
     alternativeScheme: Option[String] = None
   )
 
-  case class ApplicationPreferences(userId: UniqueIdentifier,
-                                    applicationId: UniqueIdentifier,
-                                    location1: Option[String],
+  case class ApplicationPreferences(
+    userId: UniqueIdentifier,
+    applicationId: UniqueIdentifier,
+    location1: Option[String],
     location1Scheme1: Option[String],
     location1Scheme2: Option[String],
     location2: Option[String],
@@ -149,7 +158,8 @@ object ReportExchangeObjects {
     needsAdjustment: Option[String],
     aLevel: Option[String],
     stemLevel: Option[String],
-    onlineTestPassmarkEvaluations: OnlineTestPassmarkEvaluationSchemes)
+    onlineTestPassmarkEvaluations: OnlineTestPassmarkEvaluationSchemes
+  )
 
   case class AssessmentResultsReport(
     appPreferences: ApplicationPreferences,
@@ -179,33 +189,36 @@ object ReportExchangeObjects {
     finance: Option[String]
   )
 
-  case class ApplicationPreferencesWithTestResults(userId: UniqueIdentifier,
-                                                   applicationId: UniqueIdentifier,
-                                                   location1: Option[String],
-                                                   location1Scheme1: Option[String],
-                                                   location1Scheme2: Option[String],
-                                                   location2: Option[String],
-                                                   location2Scheme1: Option[String],
-                                                   location2Scheme2: Option[String],
-                                                   alternativeLocation: Option[String],
-                                                   alternativeScheme: Option[String],
-                                                   personalDetails: PersonalInfo,
-                                                   scores: CandidateScoresSummary,
-                                                   passmarks: SchemeEvaluation)
+  case class ApplicationPreferencesWithTestResults(
+    userId: UniqueIdentifier,
+    applicationId: UniqueIdentifier,
+    location1: Option[String],
+    location1Scheme1: Option[String],
+    location1Scheme2: Option[String],
+    location2: Option[String],
+    location2Scheme1: Option[String],
+    location2Scheme2: Option[String],
+    alternativeLocation: Option[String],
+    alternativeScheme: Option[String],
+    personalDetails: PersonalInfo,
+    scores: CandidateScoresSummary,
+    passmarks: SchemeEvaluation
+  )
 
   case class ApplicationPreferencesWithTestResultsAndContactDetails(
     application: ApplicationPreferencesWithTestResults,
     contactDetails: ContactDetails
   )
 
-  case class CandidateAwaitingAllocation(userId: String,
-                                          firstName: String,
-                                          lastName: String,
-                                          preferredName: String,
-                                          dateOfBirth: LocalDate,
-                                          adjustments: Option[String],
-                                          assessmentCentreLocation: String
-                                        )
+  case class CandidateAwaitingAllocation(
+    userId: String,
+    firstName: String,
+    lastName: String,
+    preferredName: String,
+    dateOfBirth: LocalDate,
+    adjustments: Option[String],
+    assessmentCentreLocation: String
+  )
 
   case class TestResult(tScore: Option[Double], percentile: Option[Double], raw: Option[Double], sten: Option[Double])
 

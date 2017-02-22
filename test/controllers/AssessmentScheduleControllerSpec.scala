@@ -47,7 +47,7 @@ import testkit.MockitoSugar
 import scala.concurrent.Future
 
 class AssessmentScheduleControllerSpec extends PlaySpec with Results
-  with MockitoSugar with ScalaFutures {
+    with MockitoSugar with ScalaFutures {
   val mockAssessmentCentreRepository = mock[AssessmentCentreRepository]
 
   "Get Assessment Schedule" should {
@@ -507,7 +507,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     val mockEmailClient = mock[EmailClient]
     val mockApplicationAssessmentService = mock[ApplicationAssessmentService]
 
-    val controller =  new AssessmentScheduleController {
+    val controller = new AssessmentScheduleController {
       override val aaRepository = mockApplicationAssessmentRepository
       override val acRepository = mockAssessmentCentreRepository
       override val aRepository = mockApplicationRepository

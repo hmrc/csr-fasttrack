@@ -43,5 +43,4 @@ class EligibleSchemeSelectorSpec extends PlaySpec with TableDrivenPropertyChecks
     }
   }
 
-
 }

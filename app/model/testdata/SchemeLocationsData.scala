@@ -22,7 +22,7 @@ case class SchemeLocationsData(schemeLocations: List[String] = List("2643743", "
 
 case object SchemeLocationsData {
   def apply(schemeLocationsDataRequest: model.exchange.testdata.SchemeLocationsDataRequest, generatorId: Int): SchemeLocationsData = {
-    schemeLocationsDataRequest.schemeLocations.map{ schemeLocations =>
+    schemeLocationsDataRequest.schemeLocations.map { schemeLocations =>
       SchemeLocationsData(schemeLocations)
     }.getOrElse {
       SchemeLocationsData(Random.schemeLocations)

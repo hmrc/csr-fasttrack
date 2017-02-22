@@ -41,8 +41,8 @@ trait LocationSchemeService {
   val pdRepository: PersonalDetailsRepository
   val auditService: AuditService
 
-  def getEligibleSchemeLocations(applicationId: String, latitudeOpt: Option[Double] = None, longitudeOpt: Option[Double] = None)
-  : Future[List[GeoLocationSchemeResult]] = {
+  def getEligibleSchemeLocations(applicationId: String, latitudeOpt: Option[Double] = None,
+    longitudeOpt: Option[Double] = None): Future[List[GeoLocationSchemeResult]] = {
 
     for {
       schemeChoices <- getSchemes(applicationId)
@@ -50,13 +50,13 @@ trait LocationSchemeService {
     } yield {
 
       val selectedLocations = locationsWithSchemes.collect {
-        case LocationSchemes(locationId, locationName, geocodes, availableSchemes)
-          if schemeChoices.map(_.id).intersect(availableSchemes).nonEmpty =>
+        case LocationSchemes(locationId, locationName,
+          geocodes, availableSchemes) if schemeChoices.map(_.id).intersect(availableSchemes).nonEmpty =>
           val distance = for {
             latitude <- latitudeOpt
             longitude <- longitudeOpt
           } yield {
-            geocodes.map{ gc => DistanceCalculator.calcMilesBetween(latitude, longitude, gc.lat, gc.lng) }.min
+            geocodes.map { gc => DistanceCalculator.calcMilesBetween(latitude, longitude, gc.lat, gc.lng) }.min
           }
 
           GeoLocationSchemeResult(locationId, locationName, distance, schemeChoices.filter(scheme => availableSchemes.contains(scheme.id)))
@@ -66,14 +66,14 @@ trait LocationSchemeService {
   }
 
   def getEligibleSchemes(applicationId: String): Future[List[SchemeInfo]] = {
-      for {
-        personalDetails <- pdRepository.find(applicationId)
-        schemes = locationSchemeRepository.schemeInfoList
-      } yield {
-        schemes.filterNot(s =>
-          (s.requiresALevel && !(personalDetails.aLevel || personalDetails.stemLevel)) ||
+    for {
+      personalDetails <- pdRepository.find(applicationId)
+      schemes = locationSchemeRepository.schemeInfoList
+    } yield {
+      schemes.filterNot(s =>
+        (s.requiresALevel && !(personalDetails.aLevel || personalDetails.stemLevel)) ||
           (s.requiresALevelInStem && !personalDetails.stemLevel))
-      }
+    }
   }
 
   def getSchemeLocations(applicationId: String): Future[List[LocationSchemes]] = {

@@ -32,5 +32,5 @@ trait PassMarkSettingsService {
   val pmsRepository: PassMarkSettingsRepository
 
   def tryGetLatestVersion(): Future[Option[Settings]] =
-      pmsRepository.tryGetLatestVersion()
+    pmsRepository.tryGetLatestVersion()
 }

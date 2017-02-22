@@ -56,7 +56,7 @@ object DataFaker {
       randOne(range)
     }
 
-    def randNumber = randOne(List(1,2,3,4,5,6,7,8,9))
+    def randNumber = randOne(List(1, 2, 3, 4, 5, 6, 7, 8, 9))
 
     def randList[T](options: List[T], size: Int, cannotBe: List[T] = Nil): List[T] = {
       if (size > 0) {
@@ -133,11 +133,13 @@ object DataFaker {
     }
 
     def gender = randOne(List("Male", "Female", "Other", "I don't know/prefer not to say"))
-    def sexualOrientation = randOne(List("Heterosexual/straight",
+    def sexualOrientation = randOne(List(
+      "Heterosexual/straight",
       "Gay/lesbian",
       "Bisexual",
       "Other",
-      "I don't know/prefer not to say"))
+      "I don't know/prefer not to say"
+    ))
     def ethnicGroup = randOne(List(
       "English/Welsh/Scottish/Northern Irish/British",
       "Irish",
@@ -167,7 +169,8 @@ object DataFaker {
       "Employee",
       "Self-employed with employees",
       "Self-employed/freelancer without employees",
-      "I don't know/prefer not to say"))
+      "I don't know/prefer not to say"
+    ))
 
     def sizeOfPlaceOfWork = randOne(List("Small (1 - 24 employees)", "Large (over 24 employees)", "I don't know/prefer not to say"))
 
@@ -225,12 +228,14 @@ object DataFaker {
     def onlineAdjustmentsDescription: String = randOne(List(
       "I am too sensitive to the light from screens",
       "I am allergic to electronic-magnetic waves",
-      "I am a convicted cracker who was asked by the court to be away from computers for 5 years"))
+      "I am a convicted cracker who was asked by the court to be away from computers for 5 years"
+    ))
 
     def assessmentCentreAdjustmentDescription: String = randOne(List(
       "I am very weak, I need constant support",
       "I need a comfortable chair because of my back problem",
-      "I need to take a rest every 10 minutes"))
+      "I need to take a rest every 10 minutes"
+    ))
     def postCode: String = {
       s"${Random.upperLetter}${Random.upperLetter}1 2${Random.upperLetter}${Random.upperLetter}"
     }

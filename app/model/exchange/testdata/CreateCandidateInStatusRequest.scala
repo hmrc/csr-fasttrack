@@ -19,18 +19,20 @@ package model.exchange.testdata
 import model.Scheme.Scheme
 import play.api.libs.json.Json
 
-case class CreateCandidateInStatusRequest(statusData: StatusDataRequest = new StatusDataRequest,
-                                          personalData: Option[PersonalDataRequest],
-                                          assistanceDetailsData: Option[AssistanceDetailsDataRequest],
-                                          schemesData: Option[SchemesDataRequest],
-                                          schemeLocationsData: Option[SchemeLocationsDataRequest],
-                                          isCivilServant: Option[Boolean],
-                                          hasDegree: Option[Boolean],
-                                          region: Option[String],
-                                          loc1scheme1EvaluationResult: Option[String],
-                                          loc1scheme2EvaluationResult: Option[String],
-                                          confirmedAllocation: Option[Boolean],
-                                          onlineTestScores: Option[OnlineTestScoresRequest])
+case class CreateCandidateInStatusRequest(
+  statusData: StatusDataRequest = new StatusDataRequest,
+  personalData: Option[PersonalDataRequest],
+  assistanceDetailsData: Option[AssistanceDetailsDataRequest],
+  schemesData: Option[SchemesDataRequest],
+  schemeLocationsData: Option[SchemeLocationsDataRequest],
+  isCivilServant: Option[Boolean],
+  hasDegree: Option[Boolean],
+  region: Option[String],
+  loc1scheme1EvaluationResult: Option[String],
+  loc1scheme2EvaluationResult: Option[String],
+  confirmedAllocation: Option[Boolean],
+  onlineTestScores: Option[OnlineTestScoresRequest]
+)
 
 object CreateCandidateInStatusRequest {
   implicit val createCandidateInStatusRequestFormat = Json.format[CreateCandidateInStatusRequest]

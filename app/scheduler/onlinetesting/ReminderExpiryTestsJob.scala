@@ -29,7 +29,6 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-
 object FirstReminderExpiryTestsJob extends ReminderExpiryTestsJob {
   override val conf = config.MicroserviceAppConfig.firstReminderOnlineTestJobConfig
   val configPrefix = "scheduling.online-testing.first-reminder-expiry-tests-job."

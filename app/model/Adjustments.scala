@@ -51,4 +51,3 @@ object Adjustments {
   implicit val adjustmentsMacro = Macros.handler[Adjustments]
 }
 
-

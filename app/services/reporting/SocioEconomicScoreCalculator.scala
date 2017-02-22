@@ -28,7 +28,7 @@ trait SocioEconomicScoreCalculator {
     "Traditional professional" -> 8
   )
 
-  private  val socioEconomicScoreMatrix: Array[Array[Int]] = Array(
+  private val socioEconomicScoreMatrix: Array[Array[Int]] = Array(
     Array(1, 1, 1, 1, 1, 1, 1),
     Array(1, 3, 3, 1, 1, 1, 2),
     Array(1, 3, 3, 1, 1, 1, 1),

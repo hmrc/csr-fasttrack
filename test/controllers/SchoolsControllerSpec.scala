@@ -40,16 +40,18 @@ class SchoolsControllerSpec extends UnitWithAppSpec {
     }
 
     "return matching schools if schools are found" in new TestFixture {
-      val schools = List(School(typeId = "IRN",
-                        id = "id1",
-                        name = "Abbey Christian Brothers Grammar School",
-                        address1 = Some("77a Ashgrove Road"),
-                        address2 = None,
-                        address3 = None,
-                        address4 = None,
-                        postCode = Some("BT34 2QN"),
-                        phaseOfEducation = Some("Grammar"),
-                        typeOfEstablishment = Some("Voluntary")))
+      val schools = List(School(
+        typeId = "IRN",
+        id = "id1",
+        name = "Abbey Christian Brothers Grammar School",
+        address1 = Some("77a Ashgrove Road"),
+        address2 = None,
+        address3 = None,
+        address4 = None,
+        postCode = Some("BT34 2QN"),
+        phaseOfEducation = Some("Grammar"),
+        typeOfEstablishment = Some("Voluntary")
+      ))
 
       when(mockSchoolsService.getSchools(any[String])).thenReturn(Future.successful(schools))
 

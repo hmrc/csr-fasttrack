@@ -37,7 +37,8 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
       :: Nil,
     version = "testVersion",
     createDate = new DateTime(),
-    createdByUser = "testUser")
+    createdByUser = "testUser"
+  )
   //scalastyle:on
 
   "Pass mark rules engine for candidate with only one scheme" should {
@@ -228,7 +229,8 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
         :: Nil,
       version = "testVersion",
       createDate = new DateTime(),
-      createdByUser = "testUser")
+      createdByUser = "testUser"
+    )
     //scalastyle:on
     val schemes = List(Business)
     val scoresWithPassmark = CandidateEvaluationData(PassmarkSettings, schemes, FullTestReport, ApplicationStatuses.OnlineTestCompleted)

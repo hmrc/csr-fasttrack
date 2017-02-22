@@ -42,8 +42,9 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-/** This class should contain those repo methods involving application collection that are related
-    exclusively to reporting functionality
+/**
+ * This class should contain those repo methods involving application collection that are related
+ * exclusively to reporting functionality
  */
 trait ReportingRepository {
   def applicationsForCandidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
@@ -70,10 +71,10 @@ trait ReportingRepository {
 }
 
 class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo: () => DB)
-   extends ReactiveRepository[CreateApplicationRequest, BSONObjectID](CollectionNames.APPLICATION, mongo,
-        Commands.Implicits.createApplicationRequestFormats, ReactiveMongoFormats.objectIdFormats)
-     with ReportingRepository with RandomSelection with CommonBSONDocuments with ReportingRepoBSONReader
-     with ReactiveRepositoryHelpers {
+    extends ReactiveRepository[CreateApplicationRequest, BSONObjectID](CollectionNames.APPLICATION, mongo,
+      Commands.Implicits.createApplicationRequestFormats, ReactiveMongoFormats.objectIdFormats)
+    with ReportingRepository with RandomSelection with CommonBSONDocuments with ReportingRepoBSONReader
+    with ReactiveRepositoryHelpers {
 
   def docToCandidate(doc: BSONDocument): Candidate = {
     val userId = doc.getAs[String]("userId").getOrElse("")
@@ -129,7 +130,8 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
           allocationUnconfirmed = getProgress(ProgressStatuses.AllocationUnconfirmedProgress)
         ),
         failedToAttend = getProgress(ProgressStatuses.FailedToAttendProgress),
-        assessmentScores = AssessmentScores(getProgress(ProgressStatuses.AssessmentScoresEnteredProgress),
+        assessmentScores = AssessmentScores(
+          getProgress(ProgressStatuses.AssessmentScoresEnteredProgress),
           getProgress(ProgressStatuses.AssessmentScoresAcceptedProgress)
         ),
         assessmentCentre = AssessmentCentre(
@@ -144,11 +146,12 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
   }
   // scalastyle:on method.length
 
-
-  def findByCriteria(firstOrPreferredNameOpt: Option[String],
-                     lastNameOpt: Option[String],
-                     dateOfBirthOpt: Option[LocalDate],
-                     filterToUserIds: List[String]): Future[List[Candidate]] = {
+  def findByCriteria(
+    firstOrPreferredNameOpt: Option[String],
+    lastNameOpt: Option[String],
+    dateOfBirthOpt: Option[LocalDate],
+    filterToUserIds: List[String]
+  ): Future[List[Candidate]] = {
 
     def matchIfSomeCaseInsensitive(value: Option[String]) = value.map(v => BSONRegex("^" + Pattern.quote(v) + "$", "i"))
 
@@ -473,10 +476,8 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
             BSONDocument("assistance-details.needsSupportAtVenue" -> true),
             BSONDocument("assistance-details.guaranteedInterview" -> true),
             BSONDocument("assistance-details.adjustmentsConfirmed" -> true)
-          )
-        )
-      )
-    )
+          ))
+      ))
 
     val projection = BSONDocument(
       "userId" -> "1",
@@ -526,7 +527,8 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
           assistanceDetails,
           adjustments,
           adjustmentsComment,
-          assessmentCentreIndicator)
+          assessmentCentreIndicator
+        )
       }
     }
   }
@@ -621,19 +623,19 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     timeZoneService.localize(utcMillis).toString("yyyy-MM-dd HH:mm:ss")
 
   private def reportQueryWithProjections[A](
-                                             query: BSONDocument,
-                                             prj: BSONDocument,
-                                             upTo: Int = Int.MaxValue,
-                                             stopOnError: Boolean = true
-                                           )(implicit reader: Format[A]): Future[List[A]] =
+    query: BSONDocument,
+    prj: BSONDocument,
+    upTo: Int = Int.MaxValue,
+    stopOnError: Boolean = true
+  )(implicit reader: Format[A]): Future[List[A]] =
     collection.find(query).projection(prj).cursor[A](ReadPreference.nearest).collect[List](upTo, stopOnError)
 
   private def reportQueryWithProjectionsBSON[A](
-                                                 query: BSONDocument,
-                                                 prj: BSONDocument,
-                                                 upTo: Int = Int.MaxValue,
-                                                 stopOnError: Boolean = true
-                                               )(implicit reader: BSONDocumentReader[A]): Future[List[A]] =
+    query: BSONDocument,
+    prj: BSONDocument,
+    upTo: Int = Int.MaxValue,
+    stopOnError: Boolean = true
+  )(implicit reader: BSONDocumentReader[A]): Future[List[A]] =
     bsonCollection.find(query).projection(prj)
       .cursor[A](ReadPreference.nearest)
       .collect[List](Int.MaxValue, stopOnError = true)

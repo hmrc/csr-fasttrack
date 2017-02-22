@@ -40,7 +40,8 @@ trait TestDataGeneratorService {
       _ <- MongoDbConnection.mongoConnector.db().drop()
       _ <- repositories.initIndexes
       _ <- AuthProviderClient.removeAllUsers()
-      _ <- RegisteredStatusGenerator.createUser(generationId = 1,
+      _ <- RegisteredStatusGenerator.createUser(
+        generationId = 1,
         firstName = "Service", lastName = "Manager", email = "test_service_manager_1@mailinator.com",
         preferredName = None, role = AuthProviderClient.TechnicalAdminRole
       )
@@ -50,7 +51,7 @@ trait TestDataGeneratorService {
   }
 
   def createAdminUsers(numberToGenerate: Int, emailPrefix: Option[String],
-                       role: UserRole)(implicit hc: HeaderCarrier): Future[List[DataGenerationResponse]] = {
+    role: UserRole)(implicit hc: HeaderCarrier): Future[List[DataGenerationResponse]] = {
     Future.successful {
       val parNumbers = (1 to numberToGenerate).par
       parNumbers.tasksupport = new ForkJoinTaskSupport(
@@ -69,10 +70,11 @@ trait TestDataGeneratorService {
     }
   }
 
-  def createCandidatesInSpecificStatus(numberToGenerate: Int,
-                                       generatorForStatus: (GeneratorConfig) => BaseGenerator,
-                                       configGenerator: (Int) => GeneratorConfig
-                                      )(implicit hc: HeaderCarrier): Future[List[DataGenerationResponse]] = {
+  def createCandidatesInSpecificStatus(
+    numberToGenerate: Int,
+    generatorForStatus: (GeneratorConfig) => BaseGenerator,
+    configGenerator: (Int) => GeneratorConfig
+  )(implicit hc: HeaderCarrier): Future[List[DataGenerationResponse]] = {
     Future.successful {
 
       val parNumbers = (1 to numberToGenerate).par

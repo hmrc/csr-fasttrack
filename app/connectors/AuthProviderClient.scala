@@ -120,18 +120,19 @@ trait AuthProviderClient {
     }
   }
 
-  def findByFirstNameAndLastName(firstName: String, lastName: String, roles: List[String])
-                                (implicit hc: HeaderCarrier): Future[List[Candidate]] = {
-    WSHttp.POST(s"$url/service/$ServiceName/findByFirstNameLastName",
+  def findByFirstNameAndLastName(firstName: String, lastName: String,
+    roles: List[String])(implicit hc: HeaderCarrier): Future[List[Candidate]] = {
+    WSHttp.POST(
+      s"$url/service/$ServiceName/findByFirstNameLastName",
       FindByFirstNameLastNameRequest(roles, firstName, lastName)
     ).map { response =>
-      response.json.as[List[Candidate]]
-    }.recover {
-      case Upstream4xxResponse(_, REQUEST_ENTITY_TOO_LARGE, _, _) =>
-        throw new TooManyResultsException(s"Too many results were returned, narrow your search parameters")
-      case errorResponse =>
-        throw new ConnectorException(s"Bad response received when getting token for user: $errorResponse")
-    }
+        response.json.as[List[Candidate]]
+      }.recover {
+        case Upstream4xxResponse(_, REQUEST_ENTITY_TOO_LARGE, _, _) =>
+          throw new TooManyResultsException(s"Too many results were returned, narrow your search parameters")
+        case errorResponse =>
+          throw new ConnectorException(s"Bad response received when getting token for user: $errorResponse")
+      }
   }
 
   def findByUserId(userId: String)(implicit hc: HeaderCarrier): Future[Option[AuthProviderUserDetails]] = {
@@ -147,10 +148,10 @@ trait AuthProviderClient {
 
   def update(userId: String, request: UpdateDetailsRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
     WSHttp.PUT(s"$url/service/$ServiceName/details/$userId", request).map(_ => (): Unit)
-    .recover {
-      case errorResponse =>
-        throw new CannotUpdateDocumentException(s"Cannot update user details: $errorResponse")
-    }
+      .recover {
+        case errorResponse =>
+          throw new CannotUpdateDocumentException(s"Cannot update user details: $errorResponse")
+      }
   }
 
 }

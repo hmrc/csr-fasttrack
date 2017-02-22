@@ -74,21 +74,21 @@ trait ApplicationService {
       currentPd <- currentPdFut
       user <- userFut
       _ <- Future.sequence(
-            authProviderClient.update(userId, toUpdateDetailsRequest(editRequest, user)) ::
-            personalDetailsRepository.update(applicationId, userId, currentPd.copy(
-              firstName = editRequest.firstName,
-              lastName = editRequest.lastName,
-              preferredName = editRequest.preferredName,
-              dateOfBirth = editRequest.dateOfBirth
-            )) ::
-            contactDetailsRepository.update(userId, currentCd.copy(
-              outsideUk = editRequest.outsideUk.getOrElse(editRequest.country.isDefined),
-              address = editRequest.address,
-              postCode = editRequest.postCode,
-              country = editRequest.country,
-              phone = editRequest.phone
-            )) :: Nil
-          )
+        authProviderClient.update(userId, toUpdateDetailsRequest(editRequest, user)) ::
+          personalDetailsRepository.update(applicationId, userId, currentPd.copy(
+            firstName = editRequest.firstName,
+            lastName = editRequest.lastName,
+            preferredName = editRequest.preferredName,
+            dateOfBirth = editRequest.dateOfBirth
+          )) ::
+          contactDetailsRepository.update(userId, currentCd.copy(
+            outsideUk = editRequest.outsideUk.getOrElse(editRequest.country.isDefined),
+            address = editRequest.address,
+            postCode = editRequest.postCode,
+            country = editRequest.country,
+            phone = editRequest.phone
+          )) :: Nil
+      )
 
     } yield {
       auditService.logEventNoRequest(

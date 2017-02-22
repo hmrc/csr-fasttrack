@@ -72,7 +72,6 @@ class SuccessfulCandidatesReportingControllerSpec extends BaseReportingControlle
     }
   }
 
-
   trait SuccessfulCandidatesReportTestFixture extends TestFixture {
     val appId = UniqueIdentifier.randomUniqueIdentifier
     val userId = UniqueIdentifier.randomUniqueIdentifier

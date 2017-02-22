@@ -21,15 +21,15 @@ import play.api.libs.json.Json
 import reactivemongo.bson.Macros
 
 case class PersonalDetails(
-                            firstName: String,
-                            lastName: String,
-                            preferredName: String,
-                            dateOfBirth: LocalDate,
-                            aLevel: Boolean = false,
-                            stemLevel: Boolean = false,
-                            civilServant: Boolean = false,
-                            department: Option[String] = None
-                          ) {
+    firstName: String,
+    lastName: String,
+    preferredName: String,
+    dateOfBirth: LocalDate,
+    aLevel: Boolean = false,
+    stemLevel: Boolean = false,
+    civilServant: Boolean = false,
+    department: Option[String] = None
+) {
   require((civilServant && department.isDefined) || (!civilServant && department.isEmpty), "Civil Servants must have a department")
 }
 

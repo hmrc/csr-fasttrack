@@ -22,15 +22,15 @@ import org.joda.time.format.DateTimeFormat
 import services.testdata.faker.DataFaker.Random
 
 case class PersonalData(
-                         emailPrefix: String = s"tesf${Random.number() - 1}",
-                         firstName: String = Random.getFirstname(1),
-                         lastName: String = Random.getLastname(1),
-                         preferredName: Option[String] = None,
-                         dob: LocalDate = new LocalDate(1981, 5, 21),
-                         outsideUk: Boolean = false,
-                         postCode: Option[String] = None,
-                         country: Option[String] = None
-                       ) {
+    emailPrefix: String = s"tesf${Random.number() - 1}",
+    firstName: String = Random.getFirstname(1),
+    lastName: String = Random.getLastname(1),
+    preferredName: Option[String] = None,
+    dob: LocalDate = new LocalDate(1981, 5, 21),
+    outsideUk: Boolean = false,
+    postCode: Option[String] = None,
+    country: Option[String] = None
+) {
 
   def getPreferredName: String = preferredName.getOrElse(s"Pref$firstName")
 

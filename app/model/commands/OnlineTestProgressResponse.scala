@@ -19,18 +19,18 @@ package model.commands
 import play.api.libs.json.Json
 
 case class OnlineTestProgressResponse(
-                                       invited: Boolean = false,
-                                       started: Boolean = false,
-                                       completed: Boolean = false,
-                                       expired: Boolean = false,
-                                       awaitingReevaluation: Boolean = false,
-                                       failed: Boolean = false,
-                                       failedNotified: Boolean = false,
-                                       awaitingAllocation: Boolean = false,
-                                       awaitingAllocationNotified: Boolean = false,
-                                       allocationConfirmed: Boolean = false,
-                                       allocationUnconfirmed: Boolean = false
-                                     )
+  invited: Boolean = false,
+  started: Boolean = false,
+  completed: Boolean = false,
+  expired: Boolean = false,
+  awaitingReevaluation: Boolean = false,
+  failed: Boolean = false,
+  failedNotified: Boolean = false,
+  awaitingAllocation: Boolean = false,
+  awaitingAllocationNotified: Boolean = false,
+  allocationConfirmed: Boolean = false,
+  allocationUnconfirmed: Boolean = false
+)
 
 object OnlineTestProgressResponse {
   implicit val onlineTestProgressResponseFormat = Json.format[OnlineTestProgressResponse]

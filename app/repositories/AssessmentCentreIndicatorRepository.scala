@@ -28,7 +28,7 @@ object AssessmentCentreIndicatorCSVRepository extends AssessmentCentreIndicatorR
 
   import play.api.Play.current
 
-  override private[repositories] val assessmentCentreIndicators: Map[String, AssessmentCentreIndicator] =  {
+  override private[repositories] val assessmentCentreIndicators: Map[String, AssessmentCentreIndicator] = {
 
     val input = managed(Play.application.resourceAsStream(CsvFileName).get)
     input.acquireAndGet { inputStream =>
@@ -37,8 +37,10 @@ object AssessmentCentreIndicatorCSVRepository extends AssessmentCentreIndicatorR
       val values = rawData.tail
 
       def toMap(m: Map[String, AssessmentCentreIndicator], line: Array[String]): Map[String, AssessmentCentreIndicator] = {
-        require(headers.length == line.length,
-          s"Number of columns must be equal to number of headers. Incorrect line: ${line.mkString("|")}")
+        require(
+          headers.length == line.length,
+          s"Number of columns must be equal to number of headers. Incorrect line: ${line.mkString("|")}"
+        )
         m + ((line(0), AssessmentCentreIndicator(line(1), line(2))))
       }
 
@@ -47,8 +49,8 @@ object AssessmentCentreIndicatorCSVRepository extends AssessmentCentreIndicatorR
   }
 
   override def calculateIndicator(postcode: Option[String]): AssessmentCentreIndicator = postcode match {
-      case None => DefaultIndicator
-      case aPostcode => getIndicator(aPostcode)
+    case None => DefaultIndicator
+    case aPostcode => getIndicator(aPostcode)
   }
 
   private def getIndicator(postcode: Option[String]): AssessmentCentreIndicator = {

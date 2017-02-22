@@ -63,7 +63,7 @@ trait GeneralApplicationRepository {
   def findCandidateByUserId(userId: String): Future[Option[Candidate]]
 
   def findByCriteria(firstOrPreferredName: Option[String], lastName: Option[String], dateOfBirth: Option[LocalDate],
-                     userIds: List[String] = List.empty): Future[List[Candidate]]
+    userIds: List[String] = List.empty): Future[List[Candidate]]
 
   def findApplicationIdsByLocation(location: String): Future[List[String]]
 
@@ -122,9 +122,9 @@ trait GeneralApplicationRepository {
 // scalastyle:off number.of.methods
 // scalastyle:off file.size.limit
 class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implicit mongo: () => DB)
-  extends ReactiveRepository[CreateApplicationRequest, BSONObjectID](CollectionNames.APPLICATION, mongo,
-    Commands.Implicits.createApplicationRequestFormats,
-    ReactiveMongoFormats.objectIdFormats) with GeneralApplicationRepository with RandomSelection with ReactiveRepositoryHelpers {
+    extends ReactiveRepository[CreateApplicationRequest, BSONObjectID](CollectionNames.APPLICATION, mongo,
+      Commands.Implicits.createApplicationRequestFormats,
+      ReactiveMongoFormats.objectIdFormats) with GeneralApplicationRepository with RandomSelection with ReactiveRepositoryHelpers {
 
   override def create(userId: String, frameworkId: String): Future[ApplicationResponse] = {
     val applicationId = UUID.randomUUID().toString
@@ -203,7 +203,8 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
           allocationUnconfirmed = getProgress(ProgressStatuses.AllocationUnconfirmedProgress)
         ),
         failedToAttend = getProgress(ProgressStatuses.FailedToAttendProgress),
-        assessmentScores = AssessmentScores(getProgress(ProgressStatuses.AssessmentScoresEnteredProgress),
+        assessmentScores = AssessmentScores(
+          getProgress(ProgressStatuses.AssessmentScoresEnteredProgress),
           getProgress(ProgressStatuses.AssessmentScoresAcceptedProgress)
         ),
         assessmentCentre = AssessmentCentre(
@@ -301,10 +302,12 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     collection.find(query).one[BSONDocument].map(_.map(docToCandidate))
   }
 
-  def findByCriteria(firstOrPreferredNameOpt: Option[String],
-                     lastNameOpt: Option[String],
-                     dateOfBirthOpt: Option[LocalDate],
-                     filterToUserIds: List[String]): Future[List[Candidate]] = {
+  def findByCriteria(
+    firstOrPreferredNameOpt: Option[String],
+    lastNameOpt: Option[String],
+    dateOfBirthOpt: Option[LocalDate],
+    filterToUserIds: List[String]
+  ): Future[List[Candidate]] = {
 
     def matchIfSomeCaseInsensitive(value: Option[String]) = value.map(v => BSONRegex("^" + Pattern.quote(v) + "$", "i"))
 
@@ -354,7 +357,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   }
 
   override def findApplicationsForAssessmentAllocation(locations: List[String], start: Int,
-                                                       end: Int): Future[ApplicationForAssessmentAllocationResult] = {
+    end: Int): Future[ApplicationForAssessmentAllocationResult] = {
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingAllocationNotified),
       BSONDocument("assessment-centre-indicator.assessmentCentre" -> BSONDocument("$in" -> locations))
@@ -383,8 +386,8 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
               bsonDocToApplicationsForAssessmentAllocation(doc)
             }
           }.flatMap { result =>
-          Future.successful(ApplicationForAssessmentAllocationResult(result, count))
-        }
+            Future.successful(ApplicationForAssessmentAllocationResult(result, count))
+          }
       }
     }
   }
@@ -486,9 +489,11 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       "assistance-details.adjustmentsComment" -> ""
     ))
 
-    val validator = singleUpdateValidator(applicationId,
+    val validator = singleUpdateValidator(
+      applicationId,
       actionDesc = "remove adjustments comment",
-      notFound = CannotRemoveAdjustmentsComment(applicationId))
+      notFound = CannotRemoveAdjustmentsComment(applicationId)
+    )
 
     collection.update(query, removeBSON) map validator
   }
@@ -500,9 +505,11 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       "assistance-details.adjustmentsComment" -> adjustmentsComment.comment
     ))
 
-    val validator = singleUpdateValidator(applicationId,
+    val validator = singleUpdateValidator(
+      applicationId,
       actionDesc = "save adjustments comment",
-      notFound = CannotUpdateAdjustmentsComment(applicationId))
+      notFound = CannotUpdateAdjustmentsComment(applicationId)
+    )
 
     collection.update(query, updateBSON) map validator
   }
@@ -589,8 +596,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   }
 
   def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResult,
-    newApplicationStatus: ApplicationStatuses.EnumVal
-  ): Future[Unit] = {
+    newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId),
       BSONDocument(
@@ -632,7 +638,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     }
   }
 
-  override def findAssessmentCentreIndicator(appId: String): Future[Option[AssessmentCentreIndicator]] ={
+  override def findAssessmentCentreIndicator(appId: String): Future[Option[AssessmentCentreIndicator]] = {
     val query = BSONDocument("applicationId" -> appId)
     val projection = BSONDocument(
       "_id" -> false,
@@ -645,11 +651,11 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     }
   }
 
-  override def updateAssessmentCentreIndicator(appId: String, indicator: AssessmentCentreIndicator): Future[Unit] ={
+  override def updateAssessmentCentreIndicator(appId: String, indicator: AssessmentCentreIndicator): Future[Unit] = {
     val query = BSONDocument("applicationId" -> appId)
     val update = BSONDocument("$set" -> BSONDocument(
-      "assessment-centre-indicator" -> indicator)
-    )
+      "assessment-centre-indicator" -> indicator
+    ))
 
     collection.update(query, update, upsert = false) map { _ => () }
   }
