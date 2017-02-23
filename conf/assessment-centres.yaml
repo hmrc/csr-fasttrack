@@ -56,11 +56,11 @@ Newcastle:
       capacities:
          - date: 08/04/2017
            amCapacity: 36
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
          - date: 22/04/2017
            amCapacity: 36
            amMinViableAttendees: 20
@@ -70,32 +70,32 @@ Newcastle:
            pmPreferredAttendeeMargin: 8
          - date: 06/05/2017
            amCapacity: 36
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
          - date: 13/05/2017
            amCapacity: 36
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
          - date: 20/05/2017
            amCapacity: 36
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
          - date: 27/05/2017
            amCapacity: 36
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
 
 Manchester:
   - Manchester (Trinity Bridge House):
@@ -160,50 +160,50 @@ London:
       capacities:
          - date: 08/04/2017
            amCapacity: 36
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
          - date: 22/04/2017
            amCapacity: 36
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
          - date: 29/04/2017
            amCapacity: 36
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
          - date: 06/05/2017
            amCapacity: 36
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
          - date: 13/05/2017
            amCapacity: 36
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
          - date: 20/05/2017
            amCapacity: 36
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
          - date: 27/05/2017
            amCapacity: 36
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
