@@ -31,8 +31,9 @@ class AuthProviderClientSpec extends UnitSpec with ShortTimeout {
         "tech-admin" -> TechnicalAdminRole
       )
 
-      validStrings.foreach { case (validString, expectedRole) =>
-        AuthProviderClient.getRole(validString) mustBe expectedRole
+      validStrings.foreach {
+        case (validString, expectedRole) =>
+          AuthProviderClient.getRole(validString) mustBe expectedRole
       }
     }
 

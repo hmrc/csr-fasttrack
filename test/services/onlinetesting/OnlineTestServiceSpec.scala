@@ -154,7 +154,6 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
   val MinimumAssessmentTime = 6
   val MaximumAssessmentTime = 12
 
-
   "get online test" must {
     "throw an exception if the user does not exist" in new OnlineTest {
       doThrow(classOf[NotFoundException]).when(otRepositoryMock).getCubiksTestProfile("nonexistent-userid")
@@ -162,7 +161,6 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
         onlineTestService.getOnlineTest("nonexistent-userid")
       }
     }
-
 
     "return a valid set of aggregated online test data if the user id is valid" in new OnlineTest {
       when(otRepositoryMock.getCubiksTestProfile("valid-userid")).thenReturn(Future.successful(
@@ -331,15 +329,17 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
       val result = onlineTestService.getTimeAdjustments(applicationForOnlineTestingWithTimeAdjustments)
       result.isEmpty mustBe false
       result.size mustBe 2
-      inside (result.head) { case TimeAdjustments(assessmentId, sectionId, absoluteTime) =>
-        assessmentId mustBe VerbalAndNumericalAssessmentId
-        sectionId mustBe VerbalSectionId
-        absoluteTime mustBe 7
+      inside(result.head) {
+        case TimeAdjustments(assessmentId, sectionId, absoluteTime) =>
+          assessmentId mustBe VerbalAndNumericalAssessmentId
+          sectionId mustBe VerbalSectionId
+          absoluteTime mustBe 7
       }
-      inside (result(1)) { case TimeAdjustments(assessmentId, sectionId, absoluteTime) =>
-        assessmentId mustBe VerbalAndNumericalAssessmentId
-        sectionId mustBe NumericalSectionId
-        absoluteTime mustBe 7
+      inside(result(1)) {
+        case TimeAdjustments(assessmentId, sectionId, absoluteTime) =>
+          assessmentId mustBe VerbalAndNumericalAssessmentId
+          sectionId mustBe NumericalSectionId
+          absoluteTime mustBe 7
       }
     }
   }
@@ -402,8 +402,8 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
 
     "not update the test if it is already started" in new OnlineTest {
       when(otRepositoryMock.getCubiksTestProfile(any[Int])).thenReturn(Future.successful(
-        onlineTestProfile.copy(startedDateTime = Some(DateTime.now)))
-      )
+        onlineTestProfile.copy(startedDateTime = Some(DateTime.now))
+      ))
 
       onlineTestService.startOnlineTest(123).futureValue
 

@@ -45,8 +45,8 @@ trait TestDataContactDetailsRepository {
 }
 
 class TestDataContactDetailsMongoRepository(implicit mongo: () => DB)
-  extends ReactiveRepository[ContactDetails, BSONObjectID](CollectionNames.CONTACT_DETAILS, mongo,
-    PersistedObjects.Implicits.contactDetailsFormats, ReactiveMongoFormats.objectIdFormats) with TestDataContactDetailsRepository {
+    extends ReactiveRepository[ContactDetails, BSONObjectID](CollectionNames.CONTACT_DETAILS, mongo,
+      PersistedObjects.Implicits.contactDetailsFormats, ReactiveMongoFormats.objectIdFormats) with TestDataContactDetailsRepository {
   import Utils.chooseOne
 
   val postcodes = Seq("AB1 3CD", "BC1 2DE", "CD28 7EF", "DE23 8FG")
@@ -60,7 +60,8 @@ class TestDataContactDetailsMongoRepository(implicit mongo: () => DB)
   private def createSingleContactDetail(id: Int): Future[Unit] = {
 
     val contactDetails = ContactDetails(
-      false, Address("1st High Street"), Some(chooseOne(postcodes)), None, s"test_$id@test.com", Some("123456789"))
+      false, Address("1st High Street"), Some(chooseOne(postcodes)), None, s"test_$id@test.com", Some("123456789")
+    )
     val contactDetailsBson = BSONDocument("$set" -> BSONDocument(
       "contact-details" -> contactDetails
     ))
@@ -70,13 +71,12 @@ class TestDataContactDetailsMongoRepository(implicit mongo: () => DB)
 }
 
 class TestDataMongoRepository(implicit mongo: () => DB)
-  extends ReactiveRepository[ContactDetails, BSONObjectID](CollectionNames.APPLICATION, mongo,
-    PersistedObjects.Implicits.contactDetailsFormats, ReactiveMongoFormats.objectIdFormats) with TestDataRepository {
+    extends ReactiveRepository[ContactDetails, BSONObjectID](CollectionNames.APPLICATION, mongo,
+      PersistedObjects.Implicits.contactDetailsFormats, ReactiveMongoFormats.objectIdFormats) with TestDataRepository {
   import Utils.chooseOne
 
   val applicationStatuses = Seq(ApplicationStatuses.Created, ApplicationStatuses.InProgress, ApplicationStatuses.Submitted,
-    ApplicationStatuses.Withdrawn
-  )
+    ApplicationStatuses.Withdrawn)
 
   val firstNames = Seq("John", "Chris", "James", "Paul")
   val lastNames = Seq("Clerk", "Smith", "Gulliver", "Swift")
@@ -86,8 +86,7 @@ class TestDataMongoRepository(implicit mongo: () => DB)
   val locationsAndRegions = Seq("Bath" -> "London", "Blackburn" -> "London", "Bournemouth" -> "London", "Brighton" -> "London",
     "Bromley" -> "London", "Bristol" -> "London", "Northern Ireland" -> "London", "Cambridge" -> "London", "Motherwell" -> "Newcastle",
     "Newcastle upon Tyne" -> "Newcastle", "Nottingham" -> "Newcastle", "Outer Hebrides" -> "Newcastle", "Paisley" -> "Newcastle",
-    "Perth" -> "Newcastle", "Peterborough" -> "Newcastle", "Sheffield" -> "Newcastle", "St Albans" -> "Newcastle"
-  )
+    "Perth" -> "Newcastle", "Peterborough" -> "Newcastle", "Sheffield" -> "Newcastle", "St Albans" -> "Newcastle")
 
   val dateOfBirth = Seq(LocalDate.parse("1980-12-12"), LocalDate.parse("1981-12-12"),
     LocalDate.parse("1982-12-12"), LocalDate.parse("1983-12-12"), LocalDate.parse("1984-12-12"), LocalDate.parse("1985-12-12"),
@@ -106,12 +105,12 @@ class TestDataMongoRepository(implicit mongo: () => DB)
   }
 
   private def createProgress(
-                              personalDetails: Option[BSONDocument],
-                              frameworks: Option[BSONDocument],
-                              assistance: Option[BSONDocument],
-                              isSubmitted: Option[Boolean],
-                              isWithdrawn: Option[Boolean]
-                            ) = {
+    personalDetails: Option[BSONDocument],
+    frameworks: Option[BSONDocument],
+    assistance: Option[BSONDocument],
+    isSubmitted: Option[Boolean],
+    isWithdrawn: Option[Boolean]
+  ) = {
     var progress = BSONDocument()
 
     progress = personalDetails.map(_ => progress ++ (ProgressStatuses.PersonalDetailsCompletedProgress.name -> true)).getOrElse(progress)
@@ -221,9 +220,8 @@ class TestDataMongoRepository(implicit mongo: () => DB)
 
   //scalastyle:off method.length
   def createApplicationWithAllFields(userId: String, appId: String, frameworkId: String,
-                                     appStatus: ApplicationStatuses.EnumVal = ApplicationStatuses.InProgress,
-                                     progressStatusBSON: BSONDocument = buildProgressStatusBSON()
-                                    ) = {
+    appStatus: ApplicationStatuses.EnumVal = ApplicationStatuses.InProgress,
+    progressStatusBSON: BSONDocument = buildProgressStatusBSON()) = {
     val application = BSONDocument(
       "applicationId" -> appId,
       "userId" -> userId,
@@ -261,7 +259,8 @@ class TestDataMongoRepository(implicit mongo: () => DB)
         "onlineTests" -> BSONDocument(
           "otherInfo" -> "other adjustments",
           "extraTimeNeededNumerical" -> 60,
-          "extraTimeNeeded" -> 25),
+          "extraTimeNeeded" -> 25
+        ),
         "assessmentCenter" -> BSONDocument(
           "otherInfo" -> "Other assessment centre adjustment",
           "extraTimeNeeded" -> 30
@@ -274,9 +273,8 @@ class TestDataMongoRepository(implicit mongo: () => DB)
   }
   //scalastyle:on method.length
 
-  private def buildProgressStatusBSON(statusesAndDates: Map[ProgressStatuses.EnumVal, DateTime] =
-                                      Map((ProgressStatuses.AssistanceDetailsCompleted, DateTime.now))
-                                     ): BSONDocument = {
+  //scalastyle:off line.size.limit
+  private def buildProgressStatusBSON(statusesAndDates: Map[ProgressStatuses.EnumVal, DateTime] = Map((ProgressStatuses.AssistanceDetailsCompleted, DateTime.now))): BSONDocument = {
     val dates = statusesAndDates.foldLeft(BSONDocument()) { (doc, map) =>
       doc ++ BSONDocument(s"${map._1}" -> map._2)
     }
@@ -290,6 +288,7 @@ class TestDataMongoRepository(implicit mongo: () => DB)
       "progress-status-timestamp" -> dates
     )
   }
+  //scalastyle:on
 
   def createMinimumApplication(userId: String, appId: String, frameworkId: String) = {
     collection.insert(BSONDocument(

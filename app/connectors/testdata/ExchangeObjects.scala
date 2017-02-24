@@ -27,22 +27,22 @@ import repositories.SchemeInfo
 object ExchangeObjects {
 
   case class DataGenerationResponse(
-                                     generationId: Int,
-                                     userId: String,
-                                     applicationId: Option[String],
-                                     applicationStatus: ApplicationStatuses.EnumVal,
-                                     email: String,
-                                     firstName: String,
-                                     lastName: String,
-                                     onlineTestProfile: Option[OnlineTestProfileResponse] = None,
-                                     applicationAssessment: Option[AssessmentCentreAllocation] = None,
-                                     preferences: Option[Preferences] = None,
-                                     contactDetails: Option[ContactDetails] = None,
-                                     personalDetails: Option[PersonalDetails] = None,
-                                     assistanceDetails: Option[AssistanceDetails] = None,
-                                     schemes: Option[List[SchemeInfo]] = None,
-                                     schemeLocations: Option[List[String]] = None,
-                                     assessmentCentreIndicator: Option[AssessmentCentreIndicator] = None
+    generationId: Int,
+    userId: String,
+    applicationId: Option[String],
+    applicationStatus: ApplicationStatuses.EnumVal,
+    email: String,
+    firstName: String,
+    lastName: String,
+    onlineTestProfile: Option[OnlineTestProfileResponse] = None,
+    applicationAssessment: Option[AssessmentCentreAllocation] = None,
+    preferences: Option[Preferences] = None,
+    contactDetails: Option[ContactDetails] = None,
+    personalDetails: Option[PersonalDetails] = None,
+    assistanceDetails: Option[AssistanceDetails] = None,
+    schemes: Option[List[SchemeInfo]] = None,
+    schemeLocations: Option[List[String]] = None,
+    assessmentCentreIndicator: Option[AssessmentCentreIndicator] = None
   )
 
   case class OnlineTestProfileResponse(cubiksUserId: Int, token: String, onlineTestUrl: String)

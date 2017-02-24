@@ -18,14 +18,15 @@ package model.exchange.testdata
 
 import play.api.libs.json._
 
-case class AssistanceDetailsDataRequest(hasDisability: Option[String] = None,
-                                        hasDisabilityDescription: Option[String] = None,
-                                        setGis: Option[Boolean] = None,
-                                        onlineAdjustments: Option[Boolean] = None,
-                                        onlineAdjustmentsDescription: Option[String] = None,
-                                        assessmentCentreAdjustments: Option[Boolean] = None,
-                                        assessmentCentreAdjustmentsDescription: Option[String] = None
-                                   )
+case class AssistanceDetailsDataRequest(
+  hasDisability: Option[String] = None,
+  hasDisabilityDescription: Option[String] = None,
+  setGis: Option[Boolean] = None,
+  onlineAdjustments: Option[Boolean] = None,
+  onlineAdjustmentsDescription: Option[String] = None,
+  assessmentCentreAdjustments: Option[Boolean] = None,
+  assessmentCentreAdjustmentsDescription: Option[String] = None
+)
 
 object AssistanceDetailsDataRequest {
   implicit val assistanceDetailsRequestFormat = Json.format[AssistanceDetailsDataRequest]

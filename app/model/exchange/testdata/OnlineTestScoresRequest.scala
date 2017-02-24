@@ -18,10 +18,12 @@ package model.exchange.testdata
 
 import play.api.libs.json.Json
 
-case class OnlineTestScoresRequest(numerical: Option[String] = None,
-                            verbal: Option[String] = None,
-                            situational: Option[String] = None,
-                            competency: Option[String] = None)
+case class OnlineTestScoresRequest(
+  numerical: Option[String] = None,
+  verbal: Option[String] = None,
+  situational: Option[String] = None,
+  competency: Option[String] = None
+)
 
 object OnlineTestScoresRequest {
   implicit def onlineTestScoresFormat = Json.format[OnlineTestScoresRequest]

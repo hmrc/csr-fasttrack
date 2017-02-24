@@ -75,17 +75,17 @@ trait MicroService {
     .settings(inConfig(IntegrationTest)(Defaults.testSettings ++ AutomateHeaderPlugin.automateFor(IntegrationTest)): _*)
     .settings(inConfig(IntegrationTest)(Defaults.itSettings))
     // Disable Scalastyle & Scalariform temporarily, as it is currently intermittently failing when building
-//    .settings(scalariformSettings: _*)
-//    .settings(ScalariformKeys.preferences := ScalariformKeys.preferences.value
+    // .settings(scalariformSettings: _*)
+    //.settings(ScalariformKeys.preferences := ScalariformKeys.preferences.value
 //      .setPreference(FormatXml, false)
-//      .setPreference(DoubleIndentClassDeclaration, false)
-//      .setPreference(DanglingCloseParenthesis, Preserve))
-//     // Exclude the test data generation files as they cause stackoverflows in Scalariform due to their size
-//     .settings(excludeFilter in ScalariformKeys.format := ((excludeFilter in ScalariformKeys.format).value ||
-//        "Firstnames.scala" ||
-//       "Lastnames.scala"))
-//    .settings(compileScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).toTask("").value,
-//      (compile in Compile) <<= (compile in Compile) dependsOn compileScalastyle)
+  //    .setPreference(DoubleIndentClassDeclaration, false)
+    //  .setPreference(DanglingCloseParenthesis, Preserve))
+     // Exclude the test data generation files as they cause stackoverflows in Scalariform due to their size
+    // .settings(excludeFilter in ScalariformKeys.format := ((excludeFilter in ScalariformKeys.format).value ||
+      //  "Firstnames.scala" ||
+     //  "Lastnames.scala"))
+    // .settings(compileScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).toTask("").value,
+    // (compile in Compile) <<= (compile in Compile) dependsOn compileScalastyle)
     .settings(
       unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest)(base => Seq(
         base / "it", base / "test/model", base / "test/testkit"

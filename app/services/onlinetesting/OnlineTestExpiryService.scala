@@ -37,11 +37,11 @@ trait OnlineTestExpiryService {
 }
 
 class OnlineTestExpiryServiceImpl(
-  otRepository: OnlineTestRepository,
-  cdRepository: ContactDetailsRepository,
-  emailClient: EmailClient,
-  auditService: AuditService,
-  newHeaderCarrier: => HeaderCarrier
+    otRepository: OnlineTestRepository,
+    cdRepository: ContactDetailsRepository,
+    emailClient: EmailClient,
+    auditService: AuditService,
+    newHeaderCarrier: => HeaderCarrier
 )(implicit executor: ExecutionContext) extends OnlineTestExpiryService {
 
   private final val ExpiredStatus = ApplicationStatuses.OnlineTestExpired

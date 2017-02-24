@@ -17,11 +17,11 @@
 package model
 
 /**
-  * @param event the event description for the audit log
-  * @param template email templete to be used for the notification
-  * @param notificationStatus progress status to be added upon notification
-  * @param hoursBeforeReminder when the reminder should be sent (in hours before the test expiry date)
-  */
+ * @param event the event description for the audit log
+ * @param template email templete to be used for the notification
+ * @param notificationStatus progress status to be added upon notification
+ * @param hoursBeforeReminder when the reminder should be sent (in hours before the test expiry date)
+ */
 sealed case class ReminderNotice(event: String, template: String, notificationStatus: String, hoursBeforeReminder: Int)
 
 object FirstReminder extends ReminderNotice(

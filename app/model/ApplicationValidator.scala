@@ -16,7 +16,6 @@
 
 package model
 
-
 import model.persisted.PersonalDetails
 import model.exchange.AssistanceDetails
 // scalastyle:off cyclomatic.complexity
@@ -35,7 +34,7 @@ case class ApplicationValidator(gd: PersonalDetails, ad: AssistanceDetails) {
       true
     }
 
-    val validDisability = isValid(ad.hasDisability=="Yes") _
+    val validDisability = isValid(ad.hasDisability == "Yes") _
     val validOnlineAdjustments = isValid(ad.needsSupportForOnlineAssessment) _
     val validVenueAdjustments = isValid(ad.needsSupportAtVenue) _
 
@@ -48,7 +47,6 @@ case class ApplicationValidator(gd: PersonalDetails, ad: AssistanceDetails) {
       case Some(x) => x.nonEmpty
       case _ => false
     }
-
 
     def hasVenueAdjustmentDescription(ad: AssistanceDetails): Boolean = ad.needsSupportAtVenueDescription match {
       case Some(x) => x.nonEmpty

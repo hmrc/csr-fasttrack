@@ -23,18 +23,22 @@ import model.PersistedObjects.OnlineTestPassmarkEvaluation
 
 trait AssessmentCentrePassmarkRulesEngine {
 
-  def evaluate(onlineTestEvaluation: OnlineTestPassmarkEvaluation,
-               candidateScore: AssessmentPassmarkPreferencesAndScores,
-               config: AssessmentEvaluationMinimumCompetencyLevel): AssessmentRuleCategoryResult
+  def evaluate(
+    onlineTestEvaluation: OnlineTestPassmarkEvaluation,
+    candidateScore: AssessmentPassmarkPreferencesAndScores,
+    config: AssessmentEvaluationMinimumCompetencyLevel
+  ): AssessmentRuleCategoryResult
 
 }
 
 object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRulesEngine with AssessmentScoreCalculator
-  with AssessmentCentreAllSchemesEvaluator with FinalResultEvaluator with EligibleSchemeSelector {
+    with AssessmentCentreAllSchemesEvaluator with FinalResultEvaluator with EligibleSchemeSelector {
 
-  def evaluate(onlineTestEvaluation: OnlineTestPassmarkEvaluation,
-               candidateScores: AssessmentPassmarkPreferencesAndScores,
-               config: AssessmentEvaluationMinimumCompetencyLevel): AssessmentRuleCategoryResult = {
+  def evaluate(
+    onlineTestEvaluation: OnlineTestPassmarkEvaluation,
+    candidateScores: AssessmentPassmarkPreferencesAndScores,
+    config: AssessmentEvaluationMinimumCompetencyLevel
+  ): AssessmentRuleCategoryResult = {
     val competencyAverage = countAverage(candidateScores.scores)
     val passedMinimumCompetencyLevelOpt = passMinimumCompetencyLevel(competencyAverage, config)
 
@@ -60,8 +64,10 @@ object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRules
     }
   }
 
-  private def evaluateAssessmentPassmark(competencyAverage: CompetencyAverageResult,
-             candidateScores: AssessmentPassmarkPreferencesAndScores): (AssessmentRuleCategoryResult, SchemePreferences) = {
+  private def evaluateAssessmentPassmark(
+    competencyAverage: CompetencyAverageResult,
+    candidateScores: AssessmentPassmarkPreferencesAndScores
+  ): (AssessmentRuleCategoryResult, SchemePreferences) = {
     val qualification = candidateScores.preferencesWithQualification
     val eligibleSchemesForQualification = eligibleSchemes(aLevel = qualification.aLevel, stemLevel = qualification.stemLevel)
 
@@ -93,8 +99,10 @@ object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRules
       location2Scheme2Result, alternativeSchemeResult, Some(competencyAverage), Some(schemesEvaluation)), schemePreferences)
   }
 
-  private def passMinimumCompetencyLevel(competencyAverage: CompetencyAverageResult,
-                                         config: AssessmentEvaluationMinimumCompetencyLevel): Option[Boolean] = {
+  private def passMinimumCompetencyLevel(
+    competencyAverage: CompetencyAverageResult,
+    config: AssessmentEvaluationMinimumCompetencyLevel
+  ): Option[Boolean] = {
     if (config.enabled) {
       val minCompetencyLevelScore = config.minimumCompetencyLevelScore
         .getOrElse(throw new IllegalStateException("Competency level not set"))

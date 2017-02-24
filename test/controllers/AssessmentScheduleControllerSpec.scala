@@ -507,7 +507,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     val mockEmailClient = mock[EmailClient]
     val mockApplicationAssessmentService = mock[AssessmentCentreService]
 
-    val controller =  new AssessmentScheduleController {
+    val controller = new AssessmentScheduleController {
       override val aaRepository = mockApplicationAssessmentRepository
       override val acRepository = mockAssessmentCentreRepository
       override val aRepository = mockApplicationRepository

@@ -23,7 +23,7 @@ import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkScheme, PassMark
 trait AssessmentCentreAllSchemesEvaluator {
 
   def evaluateSchemes(passmark: AssessmentCentrePassMarkSettingsResponse, overallScore: Double,
-                      eligibleSchemes: List[String]): List[PerSchemeEvaluation] = {
+    eligibleSchemes: List[String]): List[PerSchemeEvaluation] = {
     passmark.schemes.map { scheme =>
       val result = if (eligibleSchemes.contains(scheme.schemeName)) evaluateScore(scheme, passmark, overallScore) else Red
       PerSchemeEvaluation(scheme.schemeName, result)
@@ -31,7 +31,7 @@ trait AssessmentCentreAllSchemesEvaluator {
   }
 
   private def evaluateScore(scheme: AssessmentCentrePassMarkScheme, passmark: AssessmentCentrePassMarkSettingsResponse,
-                            overallScore: Double): Result = {
+    overallScore: Double): Result = {
     val passmarkSetting = scheme.overallPassMarks
       .getOrElse(throw new IllegalStateException(s"Scheme threshold for ${scheme.schemeName} is not set in Passmark settings"))
 

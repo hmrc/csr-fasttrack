@@ -28,16 +28,16 @@ import scala.concurrent.Future
 
 case class LocationSchemes(id: String, locationName: String, geocodes: List[Geocode], schemes: List[Scheme])
 
-case class Geocode(lat:Double, lng:Double)
+case class Geocode(lat: Double, lng: Double)
 
 object LocationSchemes {
   implicit val geocodeReader: Reads[Geocode] = Json.reads[Geocode]
   implicit val locationSchemesReader: Reads[LocationSchemes] = (
     (__ \ "id").read[String] and
     (__ \ "name").read[String] and
-      (__ \ "geocodes").read[List[Geocode]] and
-      (__ \ "schemes").read[List[Scheme]]
-    ) (LocationSchemes.apply _)
+    (__ \ "geocodes").read[List[Geocode]] and
+    (__ \ "schemes").read[List[Scheme]]
+  )(LocationSchemes.apply _)
 
   implicit val geocodesWriter = Json.writes[Geocode]
   implicit val locationSchemesWriter = Json.writes[LocationSchemes]
@@ -60,10 +60,10 @@ object FileLocationSchemeRepository extends LocationSchemeRepository
 
 trait LocationSchemeRepository {
 
-  private lazy val cachedLocationSchemes =  {
+  private lazy val cachedLocationSchemes = {
     // TODO: File needs updating with correct scheme and location data
     val input = managed(Play.application.resourceAsStream("locations-schemes.json"))
-    val loaded = input.acquireAndGet(r => {Json.parse(r).as[Locations]})
+    val loaded = input.acquireAndGet(r => { Json.parse(r).as[Locations] })
     Future.successful(loaded.locations)
   }
 

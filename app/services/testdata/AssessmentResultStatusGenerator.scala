@@ -55,8 +55,7 @@ object AwaitingAssessmentCentreReevalationStatusGenerator extends AssessmentResu
         overallScore = Random.randDouble(10.5, 17.5)
       )), Some(schemeNames.map { schemeName =>
         PerSchemeEvaluation(schemeName, randResult)
-      })
-    )
+      }))
 }
 
 object AssessmentCentreFailedStatusGenerator extends AssessmentResultStatusGenerator {
@@ -71,19 +70,18 @@ object AssessmentCentreFailedStatusGenerator extends AssessmentResultStatusGener
   override val status = ApplicationStatuses.AssessmentCentreFailed
   override def getAssessmentRuleCategoryResult =
     AssessmentRuleCategoryResult(Some(true), Some(Red), Some(Red), Some(Red), Some(Red),
-    Some(Red), Some(CompetencyAverageResult(
-      leadingAndCommunicatingAverage = randScore,
-      collaboratingAndPartneringAverage = randScore,
-      deliveringAtPaceAverage = randScore,
-      makingEffectiveDecisionsAverage = randScore,
-      changingAndImprovingAverage = randScore,
-      buildingCapabilityForAllAverage = randScore,
-      motivationFitAverage = randScore,
-      overallScore = Random.randDouble(3.5, 10.5)
-    )), Some(schemeNames.map { schemeName =>
+      Some(Red), Some(CompetencyAverageResult(
+        leadingAndCommunicatingAverage = randScore,
+        collaboratingAndPartneringAverage = randScore,
+        deliveringAtPaceAverage = randScore,
+        makingEffectiveDecisionsAverage = randScore,
+        changingAndImprovingAverage = randScore,
+        buildingCapabilityForAllAverage = randScore,
+        motivationFitAverage = randScore,
+        overallScore = Random.randDouble(3.5, 10.5)
+      )), Some(schemeNames.map { schemeName =>
         PerSchemeEvaluation(schemeName, randResult)
-      })
-    )
+      }))
 }
 
 object AssessmentCentrePassedStatusGenerator extends AssessmentResultStatusGenerator {
@@ -110,8 +108,7 @@ object AssessmentCentrePassedStatusGenerator extends AssessmentResultStatusGener
         overallScore = Random.randDouble(21.0, 28.0)
       )), Some(schemeNames.map { schemeName =>
         PerSchemeEvaluation(schemeName, randResult)
-      })
-    )
+      }))
 }
 
 trait AssessmentResultStatusGenerator extends ConstructiveGenerator {

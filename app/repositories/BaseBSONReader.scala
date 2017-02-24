@@ -73,7 +73,8 @@ trait BaseBSONReader {
           allocationUnconfirmed = getProgress(ProgressStatuses.AllocationUnconfirmedProgress)
         ),
         failedToAttend = getProgress(ProgressStatuses.FailedToAttendProgress),
-        assessmentScores = AssessmentScores(getProgress(ProgressStatuses.AssessmentScoresEnteredProgress),
+        assessmentScores = AssessmentScores(
+          getProgress(ProgressStatuses.AssessmentScoresEnteredProgress),
           getProgress(ProgressStatuses.AssessmentScoresAcceptedProgress)
         ),
         assessmentCentre = AssessmentCentre(

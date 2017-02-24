@@ -50,8 +50,8 @@ trait PersonalDetailsRepository {
 }
 
 class PersonalDetailsMongoRepository(implicit mongo: () => DB)
-  extends ReactiveRepository[PersonalDetails, BSONObjectID](CollectionNames.APPLICATION, mongo,
-    PersonalDetails.persistedPersonalDetailsFormats, ReactiveMongoFormats.objectIdFormats)
+    extends ReactiveRepository[PersonalDetails, BSONObjectID](CollectionNames.APPLICATION, mongo,
+      PersonalDetails.persistedPersonalDetailsFormats, ReactiveMongoFormats.objectIdFormats)
     with PersonalDetailsRepository with ReactiveRepositoryHelpers {
 
   override def updatePersonalDetailsAndStatus(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
@@ -72,9 +72,8 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
   }
 
   def updatePersonalDetailsAndStatus(applicationId: String, userId: String, personalDetails: PersonalDetails,
-             requiredApplicationStatuses: Seq[ApplicationStatuses.EnumVal],
-             newApplicationStatus: ApplicationStatuses.EnumVal
-            ): Future[Unit] = {
+    requiredApplicationStatuses: Seq[ApplicationStatuses.EnumVal],
+    newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
 
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId, "userId" -> userId),
@@ -87,8 +86,7 @@ class PersonalDetailsMongoRepository(implicit mongo: () => DB)
         s"progress-status-timestamp.${ProgressStatuses.PersonalDetailsCompletedProgress}" -> DateTime.now(),
         "personal-details" -> personalDetails,
         "applicationStatus" -> newApplicationStatus
-      )
-    )
+      ))
 
     val validator = singleUpdateValidator(applicationId, actionDesc = "updating personal details",
       PersonalDetailsNotFound(applicationId))

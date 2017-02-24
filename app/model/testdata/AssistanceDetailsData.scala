@@ -22,14 +22,14 @@ import services.testdata.faker.DataFaker.Random
 // only makes sense if hasDisability is "Yes" and there is no way to find out if hasDisability is "Yes" if we randomly
 // generate it.
 case class AssistanceDetailsData(
-                                  hasDisability: String = "Yes",
-                                  hasDisabilityDescription: Option[String] = Some("I have one arm shorter"),
-                                  setGis: Option[Boolean] = Some(true),
-                                  onlineAdjustments: Boolean = true,
-                                  onlineAdjustmentsDescription: Option[String] = Some("I think 50% more time"),
-                                  assessmentCentreAdjustments: Boolean = true,
-                                  assessmentCentreAdjustmentsDescription: Option[String] = Some("I need coloured paper")
-                                ) {
+    hasDisability: String = "Yes",
+    hasDisabilityDescription: Option[String] = Some("I have one arm shorter"),
+    setGis: Option[Boolean] = Some(true),
+    onlineAdjustments: Boolean = true,
+    onlineAdjustmentsDescription: Option[String] = Some("I think 50% more time"),
+    assessmentCentreAdjustments: Boolean = true,
+    assessmentCentreAdjustmentsDescription: Option[String] = Some("I need coloured paper")
+) {
   def getAssistanceDetails(): model.exchange.AssistanceDetails = {
     model.exchange.AssistanceDetails(hasDisability, hasDisabilityDescription, setGis, onlineAdjustments,
       onlineAdjustmentsDescription, assessmentCentreAdjustments, assessmentCentreAdjustmentsDescription)

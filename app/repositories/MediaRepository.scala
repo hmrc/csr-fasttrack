@@ -35,8 +35,8 @@ trait MediaRepository {
 }
 
 class MediaMongoRepository(implicit mongo: () => DB)
-  extends ReactiveRepository[AddMedia, BSONObjectID](CollectionNames.MEDIA, mongo,
-    Commands.Implicits.mediaFormats, ReactiveMongoFormats.objectIdFormats) with MediaRepository {
+    extends ReactiveRepository[AddMedia, BSONObjectID](CollectionNames.MEDIA, mongo,
+      Commands.Implicits.mediaFormats, ReactiveMongoFormats.objectIdFormats) with MediaRepository {
 
   override def create(addMedia: AddMedia): Future[Unit] = insert(addMedia).map { _ => ()
   } recover {

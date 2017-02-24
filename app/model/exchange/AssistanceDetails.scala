@@ -21,14 +21,15 @@ import reactivemongo.bson.Macros
 
 import scala.language.implicitConversions
 
-case class AssistanceDetails(hasDisability: String,
-                             hasDisabilityDescription: Option[String],
-                             guaranteedInterview: Option[Boolean],
-                             needsSupportForOnlineAssessment: Boolean,
-                             needsSupportForOnlineAssessmentDescription: Option[String],
-                             needsSupportAtVenue: Boolean,
-                             needsSupportAtVenueDescription: Option[String]
-                             ) {
+case class AssistanceDetails(
+  hasDisability: String,
+    hasDisabilityDescription: Option[String],
+    guaranteedInterview: Option[Boolean],
+    needsSupportForOnlineAssessment: Boolean,
+    needsSupportForOnlineAssessmentDescription: Option[String],
+    needsSupportAtVenue: Boolean,
+    needsSupportAtVenueDescription: Option[String]
+) {
   def isGis = guaranteedInterview.getOrElse(false)
 }
 

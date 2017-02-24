@@ -22,7 +22,7 @@ import model.Scheme.Scheme
 import model.exchange.testdata.OnlineTestScoresRequest
 
 case class OnlineTestScores(numericalTScore: Option[Double], verbalTScore: Option[Double], situationalTScore: Option[Double],
-                            competencyTScore: Option[Double])
+  competencyTScore: Option[Double])
 
 object OnlineTestScores {
   def apply(onlineTestScoresRequest: OnlineTestScoresRequest): OnlineTestScores = {
@@ -36,19 +36,19 @@ object OnlineTestScores {
 }
 
 case class GeneratorConfig(
-                            personalData: PersonalData = PersonalData(),
-                            assistanceDetails: AssistanceDetailsData = AssistanceDetailsData(),
-                            schemesData: SchemesData = SchemesData(),
-                            schemeLocationsData: SchemeLocationsData = SchemeLocationsData(),
-                              setGis: Boolean = false,
-                              cubiksUrl: String,
-                              region: Option[String] = None,
-                              loc1scheme1Passmark: Option[Result] = None,
-                              loc1scheme2Passmark: Option[Result] = None,
-                              previousStatus: Option[String] = None,
-                              confirmedAllocation: Boolean = true,
-                              testScores: Option[OnlineTestScores] = None
-  )
+  personalData: PersonalData = PersonalData(),
+  assistanceDetails: AssistanceDetailsData = AssistanceDetailsData(),
+  schemesData: SchemesData = SchemesData(),
+  schemeLocationsData: SchemeLocationsData = SchemeLocationsData(),
+  setGis: Boolean = false,
+  cubiksUrl: String,
+  region: Option[String] = None,
+  loc1scheme1Passmark: Option[Result] = None,
+  loc1scheme2Passmark: Option[Result] = None,
+  previousStatus: Option[String] = None,
+  confirmedAllocation: Boolean = true,
+  testScores: Option[OnlineTestScores] = None
+)
 
 object GeneratorConfig {
   def apply(cubiksUrlFromConfig: String, request: model.exchange.testdata.CreateCandidateInStatusRequest)(generatorId: Int): GeneratorConfig = {

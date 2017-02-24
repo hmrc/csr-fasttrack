@@ -30,7 +30,6 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-
 class AdjustmentManagementServiceSpec extends BaseServiceSpec {
 
   "confirm adjustments" should {
@@ -44,8 +43,7 @@ class AdjustmentManagementServiceSpec extends BaseServiceSpec {
 
     "send adjustments changed email" in new TestFixture {
       val auditEvent = s"Candidate $userId AdjustmentsUpdated by $actionTriggeredBy"
-      when(appRepository.findAdjustments(eqTo(appId))
-      ).thenReturn(Future.successful(Some(onlineTestsAdjustments.copy(adjustmentsConfirmed = Some(true)))))
+      when(appRepository.findAdjustments(eqTo(appId))).thenReturn(Future.successful(Some(onlineTestsAdjustments.copy(adjustmentsConfirmed = Some(true)))))
       when(appRepository.confirmAdjustments(eqTo(appId), eqTo(onlineTestsAdjustments))).thenReturn(emptyFuture)
       confirmAdjustment(appId, onlineTestsAdjustments, actionTriggeredBy).futureValue
       verify(emailClient).sendAdjustmentsUpdateConfirmation(eqTo(email), eqTo(preferredName), any[String], any[String])(any[HeaderCarrier])
@@ -88,16 +86,20 @@ class AdjustmentManagementServiceSpec extends BaseServiceSpec {
     val candidate = Candidate(userId, Some(appId), Some(email), Some(firstName), Some(lastName), Some(preferredName), None, None, None)
     val contactDetails = ContactDetails(false, Address("line1"), Some("TW11ER"), None, email, None)
 
-    val onlineTestsAdjustments = Adjustments(typeOfAdjustments = Some(List("timeExtension")),
-      onlineTests = Some(AdjustmentDetail(extraTimeNeeded = Some(9), extraTimeNeededNumerical = Some(12))))
+    val onlineTestsAdjustments = Adjustments(
+      typeOfAdjustments = Some(List("timeExtension")),
+      onlineTests = Some(AdjustmentDetail(extraTimeNeeded = Some(9), extraTimeNeededNumerical = Some(12)))
+    )
 
     when(appRepository.find(eqTo(appId))).thenReturn(Future.successful(Some(candidate)))
     when(appRepository.findAdjustments(eqTo(appId))).thenReturn(Future.successful(None))
     doNothing().when(auditService).logEvent(any[String])(eqTo(hc), eqTo(rh))
     when(emailClient.sendAdjustmentsConfirmation(eqTo(email), eqTo(preferredName), any[String], any[String])(
-      eqTo(hc))).thenReturn(emptyFuture)
+      eqTo(hc)
+    )).thenReturn(emptyFuture)
     when(emailClient.sendAdjustmentsUpdateConfirmation(eqTo(email), eqTo(preferredName), any[String], any[String])(
-      eqTo(hc))).thenReturn(emptyFuture)
+      eqTo(hc)
+    )).thenReturn(emptyFuture)
     when(cdRepository.find(eqTo(userId))).thenReturn(Future.successful(contactDetails))
 
   }

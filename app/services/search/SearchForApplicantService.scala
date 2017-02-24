@@ -41,8 +41,10 @@ trait SearchForApplicantService {
   val cdRepository: ContactDetailsRepository
   val authProviderClient: AuthProviderClient
 
-  def findByCriteria(searchCandidate: SearchCandidate, maxResults: Int)
-                    (implicit hc: HeaderCarrier): Future[List[Candidate]] = searchCandidate match {
+  def findByCriteria(
+    searchCandidate: SearchCandidate,
+    maxResults: Int
+  )(implicit hc: HeaderCarrier): Future[List[Candidate]] = searchCandidate match {
     case SearchCandidate(None, None, None, Some(postCode)) =>
       searchByPostCode(postCode)
     case SearchCandidate(firstOrPreferredName, lastName, dateOfBirth, postCode) =>
@@ -61,8 +63,7 @@ trait SearchForApplicantService {
     }.map(_.flatten)
 
   private def search(firstOrPreferredName: Option[String], lastName: Option[String],
-                     dateOfBirth: Option[LocalDate], postCode: Option[PostCode], maxResults: Int)
-                    (implicit hc: HeaderCarrier) = {
+    dateOfBirth: Option[LocalDate], postCode: Option[PostCode], maxResults: Int)(implicit hc: HeaderCarrier) = {
     def joinCandidatesWithApplicationsIfInTheLimit(candidates: List[Candidate]) = {
       if (candidates.size > maxResults) {
         Future.successful(candidates)
@@ -75,12 +76,13 @@ trait SearchForApplicantService {
     authProviderResults flatMap joinCandidatesWithApplicationsIfInTheLimit
   }
 
-  private def searchByAllNamesOrDobAndFilterPostCode(authProviderResults: List[Candidate],
-                                                     firstOrPreferredNameOpt: Option[String],
-                                                     lastNameOpt: Option[String],
-                                                     dateOfBirthOpt: Option[LocalDate],
-                                                     postCodeOpt: Option[String])
-                                                    (implicit hc: HeaderCarrier): Future[List[Candidate]] =
+  private def searchByAllNamesOrDobAndFilterPostCode(
+    authProviderResults: List[Candidate],
+    firstOrPreferredNameOpt: Option[String],
+    lastNameOpt: Option[String],
+    dateOfBirthOpt: Option[LocalDate],
+    postCodeOpt: Option[String]
+  )(implicit hc: HeaderCarrier): Future[List[Candidate]] =
     for {
       contactDetailsFromPostcode <- postCodeOpt.map(cdRepository.findByPostCode).getOrElse(Future.successful(List.empty))
       candidates <- appRepository.findByCriteria(firstOrPreferredNameOpt, lastNameOpt, dateOfBirthOpt, contactDetailsFromPostcode.map(_.userId))
@@ -101,9 +103,10 @@ trait SearchForApplicantService {
       }.getOrElse(candidate)
     }
 
-  private def searchAuthProviderByFirstAndLastName(firstNameOpt: Option[String],
-                                                   lastNameOpt: Option[String])
-                                                  (implicit hc: HeaderCarrier): Future[List[Candidate]] =
+  private def searchAuthProviderByFirstAndLastName(
+    firstNameOpt: Option[String],
+    lastNameOpt: Option[String]
+  )(implicit hc: HeaderCarrier): Future[List[Candidate]] =
     (firstNameOpt, lastNameOpt) match {
       case (Some(firstName), Some(lastName)) => searchByFirstNameAndLastName(firstName, lastName)
       case (Some(firstName), None) => searchByFirstName(firstName)
@@ -111,32 +114,28 @@ trait SearchForApplicantService {
       case (None, None) => Future.successful(List.empty)
     }
 
-  private def searchByFirstNameAndLastName(firstName: String, lastName: String)
-                                          (implicit hc: HeaderCarrier): Future[List[Candidate]] =
+  private def searchByFirstNameAndLastName(firstName: String, lastName: String)(implicit hc: HeaderCarrier): Future[List[Candidate]] =
     for {
       results <- authProviderClient.findByFirstNameAndLastName(firstName, lastName, List("candidate"))
     } yield {
-      results.map( exchangeCandidate =>
-        convertCandidate(exchangeCandidate)
-      )
+      results.map(exchangeCandidate =>
+        convertCandidate(exchangeCandidate))
     }
 
   private def searchByFirstName(firstName: String)(implicit hc: HeaderCarrier): Future[List[Candidate]] =
     for {
       results <- authProviderClient.findByFirstName(firstName, List("candidate"))
     } yield {
-      results.map( exchangeCandidate =>
-        convertCandidate(exchangeCandidate)
-      )
+      results.map(exchangeCandidate =>
+        convertCandidate(exchangeCandidate))
     }
 
   private def searchByLastName(lastName: String)(implicit hc: HeaderCarrier): Future[List[Candidate]] =
     for {
       results <- authProviderClient.findByLastName(lastName, List("candidate"))
     } yield {
-      results.map( exchangeCandidate =>
-        convertCandidate(exchangeCandidate)
-      )
+      results.map(exchangeCandidate =>
+        convertCandidate(exchangeCandidate))
     }
 
   private def convertCandidate(exchangeCandidate: connectors.ExchangeObjects.Candidate): Candidate =

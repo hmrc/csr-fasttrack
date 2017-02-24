@@ -40,7 +40,7 @@ case class SchemesData(schemes: List[Scheme] = List(Scheme.Commercial, Scheme.Bu
 
 case object SchemesData {
   def apply(schemesDataRequest: model.exchange.testdata.SchemesDataRequest, generatorId: Int): SchemesData = {
-    schemesDataRequest.schemes.map{ schemes =>
+    schemesDataRequest.schemes.map { schemes =>
       SchemesData(schemes)
     }.getOrElse {
       SchemesData(Random.schemes)

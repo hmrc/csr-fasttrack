@@ -41,7 +41,8 @@ class EvaluateCandidateScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
     "evaluate the score successfully for ONLINE_TEST_COMPLETED" in new TestFixture {
       val onlineTestCompletedCandidateScore = CandidateEvaluationData(
         Settings(List(), "version", DateTime.now(), "user"), Nil, CandidateTestReport("appId", "type"),
-        ApplicationStatuses.OnlineTestCompleted)
+        ApplicationStatuses.OnlineTestCompleted
+      )
       when(passmarkServiceMock.nextCandidateReadyForEvaluation).thenReturn(Future.successful(Some(onlineTestCompletedCandidateScore)))
       when(passmarkServiceMock.evaluate(onlineTestCompletedCandidateScore)).thenReturn(Future.successful(()))
       evaluateCandidateScoreJob.tryExecute().futureValue

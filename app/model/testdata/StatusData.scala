@@ -16,13 +16,16 @@
 
 package model.testdata
 
-case class StatusData(applicationStatus: String,
-                      previousApplicationStatus: Option[String] = None,
-                      progressStatus: Option[String] = None)
+case class StatusData(
+  applicationStatus: String,
+  previousApplicationStatus: Option[String] = None,
+  progressStatus: Option[String] = None
+)
 
 object StatusData {
   def apply(o: model.exchange.testdata.StatusDataRequest): StatusData = {
-    StatusData(applicationStatus = o.applicationStatus,
+    StatusData(
+      applicationStatus = o.applicationStatus,
       previousApplicationStatus = o.previousApplicationStatus,
       progressStatus = o.progressStatus
     )

@@ -38,8 +38,10 @@ trait OnlineTestCompletedWithXMLReportStatusGenerator extends ConstructiveGenera
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      _ <- trRepository.saveOnlineTestReport(generateCandidateTestReport(candidateInPreviousStatus.applicationId.get,
-        generatorConfig.setGis, generatorConfig.testScores))
+      _ <- trRepository.saveOnlineTestReport(generateCandidateTestReport(
+        candidateInPreviousStatus.applicationId.get,
+        generatorConfig.setGis, generatorConfig.testScores
+      ))
       _ <- otRepository.updateXMLReportSaved(candidateInPreviousStatus.applicationId.get)
     } yield {
       candidateInPreviousStatus
@@ -47,7 +49,7 @@ trait OnlineTestCompletedWithXMLReportStatusGenerator extends ConstructiveGenera
   }
 
   private def generateCandidateTestReport(applicationId: String, setGis: Boolean, testScores: Option[OnlineTestScores]) = {
-    def scoreOrDefault(score: Option[Double]) = score.fold(Some(25.0)){ s => Some(s) }
+    def scoreOrDefault(score: Option[Double]) = score.fold(Some(25.0)) { s => Some(s) }
 
     val verbalTestResult = TestResult("Completed", "Demonstration norm (for software testing purposes only)",
       scoreOrDefault(testScores.flatMap(s => s.verbalTScore)), Some(1.0), Some(7.0), None)

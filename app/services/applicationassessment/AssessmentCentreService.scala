@@ -71,8 +71,10 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
   val passmarkService: AssessmentCentrePassMarkSettingsService
   val passmarkRulesEngine: AssessmentCentrePassmarkRulesEngine
 
-  def saveScoresAndFeedback(applicationId: String, scoresAndFeedback: CandidateScoresAndFeedback)
-    (implicit hc:HeaderCarrier, rh: RequestHeader): Future[Unit] = {
+  def saveScoresAndFeedback(
+    applicationId: String,
+    scoresAndFeedback: CandidateScoresAndFeedback
+  )(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
     scoresAndFeedback.attendancy match {
       case Some(attendancy) =>
         val newStatus = if (attendancy) ApplicationStatuses.AssessmentScoresEntered else ApplicationStatuses.FailedToAttend
@@ -108,14 +110,14 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
   def removeFromAssessmentCentreSlot(applicationId: String): Future[Unit] = {
     deleteAssessmentCentreAllocation(applicationId).flatMap { _ =>
       otRepository.removeCandidateAllocationStatus(applicationId).map { _ =>
-        auditService.logEventNoRequest("AssessmentCentreAllocationStatusReset", Map( "applicationId" -> applicationId ))
+        auditService.logEventNoRequest("AssessmentCentreAllocationStatusReset", Map("applicationId" -> applicationId))
       }
     }
   }
 
   def deleteAssessmentCentreAllocation(applicationId: String): Future[Unit] = {
     assessmentCentreAllocationRepo.delete(applicationId).map { _ =>
-      auditService.logEventNoRequest("AssessmentCentreAllocationDeleted", Map( "applicationId" -> applicationId ))
+      auditService.logEventNoRequest("AssessmentCentreAllocationDeleted", Map("applicationId" -> applicationId))
     }
   }
 
@@ -145,15 +147,19 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
     }
   }
 
-  def evaluateAssessmentCandidate(onlineTestWithAssessmentCentreScores: OnlineTestEvaluationAndAssessmentCentreScores,
-                                  config: AssessmentEvaluationMinimumCompetencyLevel): Future[Unit] = {
+  def evaluateAssessmentCandidate(
+    onlineTestWithAssessmentCentreScores: OnlineTestEvaluationAndAssessmentCentreScores,
+    config: AssessmentEvaluationMinimumCompetencyLevel
+  ): Future[Unit] = {
     val onlineTestEvaluation = onlineTestWithAssessmentCentreScores.onlineTestEvaluation
     val assessmentScores = onlineTestWithAssessmentCentreScores.assessmentScores
     val assessmentEvaluation = passmarkRulesEngine.evaluate(onlineTestEvaluation, assessmentScores, config)
     val applicationStatus = determineStatus(assessmentEvaluation)
 
-    aRepository.saveAssessmentScoreEvaluation(assessmentScores.scores.applicationId,
-      assessmentScores.passmark.info.get.version, assessmentEvaluation, applicationStatus).map { _ =>
+    aRepository.saveAssessmentScoreEvaluation(
+      assessmentScores.scores.applicationId,
+      assessmentScores.passmark.info.get.version, assessmentEvaluation, applicationStatus
+    ).map { _ =>
       auditNewStatus(assessmentScores.scores.applicationId, applicationStatus)
     }
   }
@@ -177,15 +183,16 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
       case ApplicationStatuses.AssessmentCentrePassedNotified => "ApplicationAssessmentPassedNotified"
       case ApplicationStatuses.AssessmentCentreFailedNotified => "ApplicationAssessmentFailedNotified"
       case ApplicationStatuses.AssessmentCentreFailed | ApplicationStatuses.AssessmentCentrePassed |
-           ApplicationStatuses.AwaitingAssessmentCentreReevaluation => "ApplicationAssessmentEvaluated"
+        ApplicationStatuses.AwaitingAssessmentCentreReevaluation => "ApplicationAssessmentEvaluated"
     }
     Logger.info(s"$event for $appId. The new status: $newStatus")
-    auditService.logEventNoRequest( event, Map("applicationId" -> appId, "applicationStatus" -> newStatus)
-    )
+    auditService.logEventNoRequest(event, Map("applicationId" -> appId, "applicationStatus" -> newStatus))
   }
 
-  private[applicationassessment] def emailCandidate(application: ApplicationForNotification, emailAddress: String)
-    (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
+  private[applicationassessment] def emailCandidate(
+    application: ApplicationForNotification,
+    emailAddress: String
+  )(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
 
     application.applicationStatus match {
       case ApplicationStatuses.AssessmentCentrePassed =>

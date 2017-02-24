@@ -73,7 +73,8 @@ class LocationSchemeServiceSpec extends UnitSpec {
         List(
           LocationSchemesExamples.LocationSchemes1, LocationSchemesExamples.LocationSchemes2,
           LocationSchemesExamples.LocationSchemes3, LocationSchemesExamples.LocationSchemes4
-        )))
+        )
+      ))
 
     when(locationSchemeRepoMock.schemeInfoList).thenReturn(
       List(SchemeInfoExamples.NoALevelsScheme, SchemeInfoExamples.ALevelsScheme, SchemeInfoExamples.ALevelsStemScheme)

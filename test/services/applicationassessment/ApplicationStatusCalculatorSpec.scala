@@ -78,7 +78,6 @@ class ApplicationStatusCalculatorSpec extends PlaySpec with TableDrivenPropertyC
   // format: ON
   // scalastyle: ON
 
-
   "Final (with online test result) assessment centre" should {
     "Set application status to Failed when candidate failed min competency level" in {
       forAll(FailedMinCompetencyLevel) { (evaluation: AssessmentRuleCategoryResult, expectedApplicaitonStatus: ApplicationStatuses.EnumVal) =>
@@ -105,19 +104,23 @@ class ApplicationStatusCalculatorSpec extends PlaySpec with TableDrivenPropertyC
     }
   }
 
-  private def r(passedMinimumCompetencyLevel: Option[Boolean] = None,
-                location1Scheme1: Option[Result] = None,
-                location1Scheme2: Option[Result] = None,
-                location2Scheme1: Option[Result] = None,
-                location2Scheme2: Option[Result] = None,
-                alternativeScheme: Option[Result] = None) =
+  private def r(
+    passedMinimumCompetencyLevel: Option[Boolean] = None,
+    location1Scheme1: Option[Result] = None,
+    location1Scheme2: Option[Result] = None,
+    location2Scheme1: Option[Result] = None,
+    location2Scheme2: Option[Result] = None,
+    alternativeScheme: Option[Result] = None
+  ) =
     AssessmentRuleCategoryResult(passedMinimumCompetencyLevel, location1Scheme1, location1Scheme2,
       location2Scheme1, location2Scheme2, alternativeScheme, None, None)
 
-  private def result(location1Scheme1: Option[Result] = None,
-                location1Scheme2: Option[Result] = None,
-                location2Scheme1: Option[Result] = None,
-                location2Scheme2: Option[Result] = None,
-                alternativeScheme: Option[Result] = None) =
+  private def result(
+    location1Scheme1: Option[Result] = None,
+    location1Scheme2: Option[Result] = None,
+    location2Scheme1: Option[Result] = None,
+    location2Scheme2: Option[Result] = None,
+    alternativeScheme: Option[Result] = None
+  ) =
     r(None, location1Scheme1, location1Scheme2, location2Scheme1, location2Scheme2, alternativeScheme)
 }
