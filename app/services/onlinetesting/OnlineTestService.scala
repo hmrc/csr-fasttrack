@@ -126,11 +126,6 @@ trait OnlineTestService {
     )
   }
 
-  // TODO LT: Remove
-  def nextApplicationReadyForReportRetrieving: Future[Option[OnlineTestApplicationWithCubiksUser]] = {
-    otRepository.nextApplicationReadyForReportRetriving
-  }
-
   def tryToDownloadOnlineTestResult(cubiksUserId: Int, testResultReady: CubiksTestResultReady): Future[Unit] = testResultReady.reportId match {
     case Some(reportId) =>
       downloadAndValidateXmlReport(cubiksUserId, reportId)
@@ -163,58 +158,14 @@ trait OnlineTestService {
             saveOnlineTestReport(appId, candidateTestReport)
           } else {
             Logger.warn(s"Ignoring invalid/partial online test report with id=$reportId for cubiks user id=$cubiksUserId")
-            Future.successful()
+            Future.successful(())
           }
         case appStatus =>
           Logger.warn(s"Ignoring online test report callback for application status=$appStatus" +
             s"for cubiks user id=$cubiksUserId")
-          Future.successful()
+          Future.successful(())
       }
     }).flatMap(identity)
-  }
-
-  // TODO LT: Remove
-  def retrieveTestResult2(application: OnlineTestApplicationWithCubiksUser, waitSecs: Option[Int]): Future[Unit] = {
-    val request = OnlineTestApplicationForReportRetrieving(application.cubiksUserId, gatewayConfig.reportConfig.localeCode,
-      gatewayConfig.reportConfig.xmlReportId, norms)
-
-    cubiksGatewayClient.getReport(request) flatMap { reportAvailability =>
-      val reportId = reportAvailability.reportId
-      Logger.debug(s"ReportId retrieved from Cubiks: $reportId. Already available: ${reportAvailability.available}")
-
-      // The 5 seconds delay here is because the Cubiks does not generate
-      // reports till they are requested - Lazy generation.
-      // After the getReportIdMRA we need to wait a few seconds to download the xml report
-      akka.pattern.after(waitSecs.getOrElse(5) seconds, Akka.system.scheduler) {
-        Logger.debug(s"Delayed downloading XML report from Cubiks")
-
-        adRepository.find(application.applicationId).flatMap { assistanceDetails =>
-          val gis = assistanceDetails.guaranteedInterview.getOrElse(false)
-          Logger.debug(s"Retrieved GIS for user ${application.userId}: application ${application.userId}: GIS: $gis")
-          cubiksGatewayClient.downloadXmlReport(reportId) flatMap { results: Map[String, TestResult] =>
-            val cr = toCandidateTestReport(application.applicationId, results)
-            if (gatewayConfig.reportConfig.suppressValidation || cr.isValid(gis)) {
-
-              trRepository.saveOnlineTestReport(cr).flatMap { _ =>
-                otRepository.updateXMLReportSaved(application.applicationId) map { _ =>
-                  Logger.info(s"Report has been saved for applicationId: ${application.applicationId}")
-                  audit("OnlineTestXmlReportSaved", application.userId)
-                }
-              }
-            } else {
-              val cubiksUserId = application.cubiksUserId
-              val applicationId = application.applicationId
-
-              val msg = s"Cubiks report $reportId does not have a valid report for " +
-                s"Cubiks User ID:$cubiksUserId and Application ID:$applicationId"
-
-              Logger.error(msg)
-              throw new IllegalStateException(msg)
-            }
-          }
-        }
-      }
-    }
   }
 
   def startOnlineTest(cubiksUserId: Int): Future[Unit] = {
