@@ -78,6 +78,8 @@ trait OnlineTestRepository {
   def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
     applicationStatus: ApplicationStatuses.EnumVal): Future[Unit]
 
+  def findAllPassMarkEvaluations: Future[Map[String, List[SchemeEvaluationResult]]]
+
   def removeCandidateAllocationStatus(applicationId: String): Future[Unit]
 
   def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal,
@@ -599,8 +601,24 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     }
   }
 
+  def findAllPassMarkEvaluations: Future[Map[String, List[SchemeEvaluationResult]]] = {
+    val query = BSONDocument()
+    val projection = BSONDocument(
+      "applicationId" -> 1,
+      "passmarkEvaluation" -> 1
+    )
+    collection.find(query, projection).cursor[BSONDocument]().collect[List]().map {
+      _.map { doc: BSONDocument =>
+        val appId = doc.getAs[String]("applicationId").get
+        val passMarkEvaluationResults = doc.getAs[BSONDocument]("passmarkEvaluation") flatMap { root =>
+          root.getAs[List[SchemeEvaluationResult]]("result")
+        }
+        appId -> passMarkEvaluationResults.getOrElse(Nil)
+      }.toMap
+    }
+  }
+
   private def checkUpdateWriteResult(writeResult: UpdateWriteResult): Unit = {
     writeResult.errmsg.map(msg => throw UnexpectedException(s"Database update failed: $msg"))
   }
 }
-// scalastyle:on

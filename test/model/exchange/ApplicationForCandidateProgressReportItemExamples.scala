@@ -56,4 +56,18 @@ object ApplicationForCandidateProgressReportItemExamples {
 
   val Applications = List(PersonalDetailsCompleted, SchemePreferencesCompleted, AssistanceDetailsCompleted,
     OccupationQuestionsCompleted, ReviewCompleted)
+  val AssessmentScoresCompleted = ApplicationForCandidateProgressReport(
+    applicationId = Some(UniqueIdentifier("3dee295c-6154-42b7-8353-472ae94ec980")),
+    userId = UniqueIdentifier("e0b28a6e-9092-4aa2-a19e-c6a8cb13d349"),
+    progress = Some(ProgressStatuses.AssessmentScoresAcceptedProgress),
+    schemes = List(Scheme.Business,Scheme.ProjectDelivery),
+    locationIds = List(LocationSchemesExamples.LocationSchemes1.id, LocationSchemesExamples.LocationSchemes2.id),
+    hasDisability = Some("Yes"),
+    gis = Some(false),
+    onlineAdjustments = Some(true),
+    assessmentCentreAdjustments = Some(true),
+    adjustments = None,
+    civilServant = Some(false),
+    assessmentCentreIndicator = None
+  )
 }

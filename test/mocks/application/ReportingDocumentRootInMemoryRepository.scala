@@ -81,8 +81,6 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
 
   override def candidateProgressReportNotWithdrawnWithPersonalDetails(frameworkId: String): Future[List[ReportWithPersonalDetails]] = ???
 
-  override def applicationsWithAssessmentScoresAccepted(frameworkId: String): Future[List[ApplicationPreferences]] = ???
-
   override def allApplicationAndUserIds(frameworkId: String): Future[List[ApplicationUserIdReport]] = ???
 
   override def applicationsPassedInAssessmentCentre(frameworkId: String): Future[List[ApplicationPreferencesWithTestResults]] = ???

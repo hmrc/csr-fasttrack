@@ -18,17 +18,19 @@ package controllers
 
 import akka.stream.scaladsl.Source
 import connectors.{ AuthProviderClient, ExchangeObjects }
+import model.CandidateScoresCommands.{ CandidateScoreFeedback, CandidateScores, CandidateScoresAndFeedback }
 import model.Commands.{ CsvExtract, _ }
 import model.PersistedObjects.ContactDetailsWithId
 import model.ReportExchangeObjects.Implicits._
 import model.ReportExchangeObjects.{ Implicits => _, _ }
+import model.persisted.SchemeEvaluationResult
 import model.report.{ PassMarkReportItem, DiversityReportItem }
 import model.{ ApplicationStatusOrder, ProgressStatuses, UniqueIdentifier }
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
 import play.api.libs.streams.Streams
 import play.api.mvc.{ Action, AnyContent, Request, Result }
-import repositories.application.{ PreviousYearCandidatesDetailsRepository, ReportingRepository }
+import repositories.application.{ OnlineTestRepository, PreviousYearCandidatesDetailsRepository, ReportingRepository }
 import repositories.{ QuestionnaireRepository, _ }
 import services.locationschemes.LocationSchemeService
 import services.reporting.{ ReportingFormatter, SocioEconomicScoreCalculator }
@@ -51,6 +53,7 @@ object ReportingController extends ReportingController {
   val locationSchemeRepository = FileLocationSchemeRepository
   val mediaRepository = repositories.mediaRepository
   val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
+  val onlineTestRepository = repositories.onlineTestRepository
 }
 
 trait ReportingController extends BaseController {
@@ -70,6 +73,7 @@ trait ReportingController extends BaseController {
   val locationSchemeRepository: LocationSchemeRepository
   val mediaRepository: MediaRepository
   val socioEconomicScoreCalculator: SocioEconomicScoreCalculator
+  val onlineTestRepository: OnlineTestRepository
 
   def createDiversityReport(frameworkId: String) = Action.async { implicit request =>
     val applicationsFut = reportingRepository.diversityReport(frameworkId)
@@ -141,6 +145,9 @@ trait ReportingController extends BaseController {
     val allLocationsFut = locationSchemeService.getAllSchemeLocations
     val allQuestionsFut = questionnaireRepository.passMarkReport
     val allTestResultsFut = testReportRepository.getOnlineTestReports
+    val allMediaFut = mediaRepository.findAll
+    val allScoresFut = assessmentScoresRepository.allScores
+    val allPassMarkEvaluationsFut = onlineTestRepository.findAllPassMarkEvaluations
     // Process the futures
     val reportFut: Future[List[PassMarkReportItem]] = for {
       applications <- applicationsFut
@@ -148,18 +155,37 @@ trait ReportingController extends BaseController {
       allLocations <- allLocationsFut
       allDiversityQuestions <- allQuestionsFut
       allTestScores <- allTestResultsFut
-      allMedia <- mediaRepository.findAll
-      report <- buildPassMarkReportRows(applications, allContactDetails, allLocations, allDiversityQuestions, allMedia, allTestScores)
+      allMedia <- allMediaFut
+      allScores <- allScoresFut
+      allPassMarkEvaluations <- allPassMarkEvaluationsFut
+      report <- buildPassMarkReportRows(applications, allContactDetails, allLocations, allDiversityQuestions, allMedia,
+        allTestScores, allScores, allPassMarkEvaluations)
     } yield report
     reportFut.map { report => Ok(Json.toJson(report)) }
   }
+
+  val assessmentScoresEmpty = CandidateScoresAndFeedback(
+    applicationId = "",
+    attendancy = None,
+    assessmentIncomplete = false,
+    leadingAndCommunicating = CandidateScores(),
+    collaboratingAndPartnering = CandidateScores(),
+    deliveringAtPace =CandidateScores(),
+    makingEffectiveDecisions = CandidateScores(),
+    changingAndImproving = CandidateScores(),
+    buildingCapabilityForAll = CandidateScores(),
+    motivationFit = CandidateScores(),
+    feedback = CandidateScoreFeedback()
+  )
 
   private def buildPassMarkReportRows(applications: List[ApplicationForCandidateProgressReport],
                                       allContactDetails: Map[String, ContactDetailsWithId],
                                       allLocations: List[LocationSchemes],
                                       allDiversityQuestions: Map[String, Map[String, String]],
                                       allMedia: Map[UniqueIdentifier, String],
-                                      allTestResults: Map[String, PassMarkReportTestResults]): Future[List[PassMarkReportItem]] = {
+                                      allTestResults: Map[String, PassMarkReportTestResults],
+                                      allAssessmentScores: Map[String, CandidateScoresAndFeedback],
+                                      allPassMarkEvaluations: Map[String, List[SchemeEvaluationResult]]): Future[List[PassMarkReportItem]] = {
     val passMarkResultsEmpty = PassMarkReportTestResults(competency = None, numerical = None, verbal = None, situational = None)
     Future{
       applications.map { application =>
@@ -178,8 +204,16 @@ trait ReportingController extends BaseController {
           val allocatedAssessmentCentre = allContactDetails.get(application.userId.toString()).map { contactDetails =>
             assessmentCentreIndicatorRepository.calculateIndicator(contactDetails.postCode).assessmentCentre
           }
-          val testResults = allTestResults.getOrElse(appId.toString(), passMarkResultsEmpty)
-          PassMarkReportItem(application, diversityAnswers, ses, hearAboutUs, allocatedAssessmentCentre, testResults)
+          val onlineTestResults = allTestResults.getOrElse(appId.toString(), passMarkResultsEmpty)
+          val assessmentScores = allAssessmentScores.getOrElse(appId.toString(), assessmentScoresEmpty)
+
+          val schemeOnlineTestResults = application.schemes.map { scheme =>
+            val schemeEvaluationResultList: List[SchemeEvaluationResult] = allPassMarkEvaluations.getOrElse(appId.toString(), Nil)
+            val maybeSchemeEvaluationResult: Option[SchemeEvaluationResult] = schemeEvaluationResultList.find(_.scheme == scheme)
+            maybeSchemeEvaluationResult.fold("") {_.result.toString}
+          }
+          PassMarkReportItem(application, diversityAnswers, ses, hearAboutUs, allocatedAssessmentCentre, onlineTestResults,
+            schemeOnlineTestResults, assessmentScores, List())
             .copy(
               locations = locationNames,
               onlineAdjustments = onlineAdjustmentsVal,
@@ -243,34 +277,6 @@ trait ReportingController extends BaseController {
     reports.map { list =>
       Ok(Json.toJson(list))
     }
-  }
-
-  def createAssessmentResultsReport(frameworkId: String) = Action.async { implicit request =>
-/*
-    val applications = reportingRepository.applicationsWithAssessmentScoresAccepted(frameworkId)
-    val allQuestions = questionnaireRepository.passMarkReport
-    val allScores = assessmentScoresRepository.allScores
-
-    val reports = for {
-      apps <- applications
-      quests <- allQuestions
-      scores <- allScores
-    } yield {
-      for {
-        app <- apps
-        quest <- quests.get(app.applicationId.toString)
-        appscore <- scores.get(app.applicationId.toString)
-      } yield {
-        AssessmentResultsReport(app, quest, appscore)
-      }
-    }
-
-    reports.map { list =>
-      Ok(Json.toJson(list))
-    }
-*/
-    // TODO fix this when we rebuild this report
-    ???
   }
 
   def createCandidateProgressReport(frameworkId: String) = Action.async { implicit request =>
