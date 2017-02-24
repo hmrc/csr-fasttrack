@@ -26,13 +26,14 @@ object RetrieveResultsJob extends RetrieveResultsJob {
   val onlineTestingService: OnlineTestService = OnlineTestService
 }
 
+// TODO LT: Remove
 trait RetrieveResultsJob extends SingleInstanceScheduledJob with RetrieveResultsJobConfig {
   val onlineTestingService: OnlineTestService
 
   def tryExecute()(implicit ec: ExecutionContext): Future[Unit] = {
     onlineTestingService.nextApplicationReadyForReportRetrieving.flatMap { reportOpt =>
       reportOpt.map { appWithUser =>
-        onlineTestingService.retrieveTestResult(appWithUser, conf.waitSecs)
+        onlineTestingService.retrieveTestResult2(appWithUser, conf.waitSecs)
       }.getOrElse(Future.successful(()))
     }
   }

@@ -16,8 +16,9 @@
 
 package controllers
 
-import model.Exceptions.{ AssistanceDetailsNotFound, CannotUpdateCubiksTest, NotFoundException }
+import model.Exceptions.{ ApplicationNotFound, AssistanceDetailsNotFound, CannotUpdateCubiksTest, NotFoundException }
 import model.{ ApplicationStatuses, Commands }
+import model.exchange.CubiksTestResultReady
 import play.api.Logger
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc._
@@ -30,6 +31,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 case class OnlineTestStatus(status: ApplicationStatuses.EnumVal)
+
 
 case class OnlineTestExtension(extraDays: Int)
 
@@ -111,6 +113,16 @@ trait OnlineTestController extends BaseController {
         NotFound
       case e: NotFoundException =>
         Logger.warn(s"Online Test for cubiksUserId=$cubiksUserId cannot be updated. Not found: ${e.getMessage}")
+        NotFound
+    }
+  }
+
+  def tryToDownloadOnlineTestReport(cubiksUserId: Int): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    withJsonBody[CubiksTestResultReady] { cubiksTestResultReady =>
+      onlineTestingService.tryToDownloadOnlineTestResult(cubiksUserId, cubiksTestResultReady).map(_ => Ok)
+    } recover {
+      case _: ApplicationNotFound =>
+        Logger.warn(s"Assistance details for cubiksUserId=$cubiksUserId cannot be found in complete Online Test")
         NotFound
     }
   }

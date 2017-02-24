@@ -68,8 +68,6 @@ trait CubiksGatewayClient {
     http.GET(s"$url/csr-cubiks-gateway/report-xml/$reportId").map { response =>
       if (response.status == OK) {
         response.json.as[Map[String, TestResult]]
-      } else if (response.status == NOT_FOUND) {
-        Map.empty
       } else {
         throw new ConnectorException(s"There was a general problem connecting to Cubiks Gateway. HTTP response was $response")
       }

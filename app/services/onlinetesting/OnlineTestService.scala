@@ -21,16 +21,18 @@ import config.CubiksGatewayConfig
 import connectors.ExchangeObjects._
 import connectors.{ CSREmailClient, CubiksGatewayClient, EmailClient }
 import factories.{ DateTimeFactory, UUIDFactory }
+import model.ApplicationStatuses
 import model.OnlineTestCommands._
 import model.PersistedObjects.CandidateTestReport
 import model.exchange.OnlineTest
-import model.persisted.CubiksTestProfile
+import model.persisted.{ ApplicationAssistanceDetails, CubiksTestProfile }
 import org.joda.time.DateTime
 import play.api.Logger
 import play.libs.Akka
 import repositories._
 import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository, OnlineTestRepository }
 import uk.gov.hmrc.play.http.HeaderCarrier
+import model.exchange.CubiksTestResultReady
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
@@ -124,11 +126,55 @@ trait OnlineTestService {
     )
   }
 
+  // TODO LT: Remove
   def nextApplicationReadyForReportRetrieving: Future[Option[OnlineTestApplicationWithCubiksUser]] = {
     otRepository.nextApplicationReadyForReportRetriving
   }
 
-  def retrieveTestResult(application: OnlineTestApplicationWithCubiksUser, waitSecs: Option[Int]): Future[Unit] = {
+  def tryToDownloadOnlineTestResult(cubiksUserId: Int, testResultReady: CubiksTestResultReady): Future[Unit] = testResultReady.reportId match {
+    case Some(reportId) =>
+      downloadAndValidateXmlReport(cubiksUserId, reportId)
+    case _ =>
+      Logger.warn(s"Cannot download online test report without report Id for cubiks user id=$cubiksUserId")
+      Future.successful(())
+  }
+
+  private def downloadAndValidateXmlReport(cubiksUserId: Int, reportId: Int): Future[Unit] = {
+    def saveOnlineTestReport(appId: String, candidateTestReport: CandidateTestReport) = {
+      for {
+        _ <- trRepository.saveOnlineTestReport(candidateTestReport)
+        _ <- otRepository.updateXMLReportSaved(appId)
+      } yield {
+        Logger.info(s"Report has been saved for applicationId: $appId")
+        auditApp("OnlineTestXmlReportSaved", appId)
+      }
+    }
+
+    (for {
+      app <- adRepository.findApplication(cubiksUserId)
+      testResultMap <- cubiksGatewayClient.downloadXmlReport(reportId)
+    } yield {
+      app.applicationStatus match {
+        case ApplicationStatuses.OnlineTestCompleted =>
+          val appId = app.applicationId
+          val isGis = app.assistanceDetails.isGis
+          val candidateTestReport = toCandidateTestReport(appId, testResultMap)
+          if (candidateTestReport.isValid(isGis)) {
+            saveOnlineTestReport(appId, candidateTestReport)
+          } else {
+            Logger.warn(s"Ignoring invalid/partial online test report with id=$reportId for cubiks user id=$cubiksUserId")
+            Future.successful()
+          }
+        case appStatus =>
+          Logger.warn(s"Ignoring online test report callback for application status=$appStatus" +
+            s"for cubiks user id=$cubiksUserId")
+          Future.successful()
+      }
+    }).flatMap(identity)
+  }
+
+  // TODO LT: Remove
+  def retrieveTestResult2(application: OnlineTestApplicationWithCubiksUser, waitSecs: Option[Int]): Future[Unit] = {
     val request = OnlineTestApplicationForReportRetrieving(application.cubiksUserId, gatewayConfig.reportConfig.localeCode,
       gatewayConfig.reportConfig.xmlReportId, norms)
 
@@ -228,6 +274,15 @@ trait OnlineTestService {
     auditService.logEventNoRequest(
       event,
       Map("userId" -> userId) ++ emailAddress.map("email" -> _).toMap
+    )
+  }
+
+  private def auditApp(event: String, appId: String, emailAddress: Option[String] = None): Unit = {
+    Logger.info(s"$event for the application $appId")
+
+    auditService.logEventNoRequest(
+      event,
+      Map("applicationId" -> appId)
     )
   }
 
