@@ -609,7 +609,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       "passmarkEvaluation" -> 1
     )
     collection.find(query, projection).cursor[BSONDocument]().collect[List]().map {
-      _.map { doc: BSONDocument =>
+      _.map { doc  =>
         val appId = doc.getAs[String]("applicationId").get
         val passMarkEvaluationResults = doc.getAs[BSONDocument]("passmarkEvaluation") flatMap { root =>
           root.getAs[List[SchemeEvaluationResult]]("result")
