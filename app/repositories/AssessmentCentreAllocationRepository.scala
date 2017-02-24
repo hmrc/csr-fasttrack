@@ -17,7 +17,7 @@
 package repositories
 
 import model.Commands
-import model.Commands.ApplicationAssessment
+import model.Commands.AssessmentCentreAllocation
 import model.Exceptions.{ NotFoundException, TooManyEntries }
 import org.joda.time.LocalDate
 import reactivemongo.api.DB
@@ -28,33 +28,33 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait ApplicationAssessmentRepository {
-  def find(applicationId: String): Future[ApplicationAssessment]
-  def applicationAssessment(applicationId: String): Future[Option[ApplicationAssessment]]
-  def applicationAssessments: Future[List[ApplicationAssessment]]
-  def applicationAssessmentsForVenue(venue: String): Future[List[ApplicationAssessment]]
-  def create(applications: List[ApplicationAssessment]): Future[Seq[ApplicationAssessment]]
-  def applicationAssessments(venue: String, date: LocalDate): Future[List[ApplicationAssessment]]
+trait AssessmentCentreAllocationRepository {
+  def find(applicationId: String): Future[Option[AssessmentCentreAllocation]]
+  def findOne(applicationId: String): Future[AssessmentCentreAllocation]
+  def findAll: Future[List[AssessmentCentreAllocation]]
+  def findAllForDate(venue: String, date: LocalDate): Future[List[AssessmentCentreAllocation]]
+  def findAllForVenue(venue: String): Future[List[AssessmentCentreAllocation]]
+  def create(applications: List[AssessmentCentreAllocation]): Future[Seq[AssessmentCentreAllocation]]
   def confirmAllocation(applicationId: String): Future[Unit]
   def delete(applicationId: String): Future[Unit]
 }
 
-class ApplicationAssessmentMongoRepository()(implicit mongo: () => DB)
-  extends ReactiveRepository[ApplicationAssessment, BSONObjectID](CollectionNames.APPLICATION_ASSESSMENT, mongo,
-    Commands.Implicits.applicationAssessmentFormat, ReactiveMongoFormats.objectIdFormats) with ApplicationAssessmentRepository {
+class AssessmentCentreAllocationMongoRepository()(implicit mongo: () => DB)
+    extends ReactiveRepository[AssessmentCentreAllocation, BSONObjectID](CollectionNames.APPLICATION_ASSESSMENT, mongo,
+      Commands.Implicits.applicationAssessmentFormat, ReactiveMongoFormats.objectIdFormats) with AssessmentCentreAllocationRepository {
 
-  def find(applicationId: String): Future[ApplicationAssessment] = {
+  def findOne(applicationId: String): Future[AssessmentCentreAllocation] = {
     val query = BSONDocument(
       "applicationId" -> applicationId
     )
 
     collection.find(query).one[BSONDocument] map {
       case Some(applicationAssessment) => parseApplicationAssessment(applicationAssessment)
-      case _ => throw new NotFoundException(s"Application assessment not found for id $applicationId")
+      case _ => throw new NotFoundException(s"Assessment allocation not found for id $applicationId")
     }
   }
 
-  def applicationAssessment(applicationId: String): Future[Option[ApplicationAssessment]] = {
+  def find(applicationId: String): Future[Option[AssessmentCentreAllocation]] = {
     val query = BSONDocument(
       "applicationId" -> applicationId
     )
@@ -65,13 +65,13 @@ class ApplicationAssessmentMongoRepository()(implicit mongo: () => DB)
     }
   }
 
-  def applicationAssessments: Future[List[ApplicationAssessment]] = {
+  def findAll: Future[List[AssessmentCentreAllocation]] = {
     val query = BSONDocument()
 
     getApplicationAssessments(query)
   }
 
-  def applicationAssessments(venue: String, date: LocalDate): Future[List[ApplicationAssessment]] = {
+  def findAllForDate(venue: String, date: LocalDate): Future[List[AssessmentCentreAllocation]] = {
     val query = BSONDocument(
       "venue" -> venue,
       "date" -> date
@@ -87,9 +87,9 @@ class ApplicationAssessmentMongoRepository()(implicit mongo: () => DB)
 
     collection.remove(query, firstMatchOnly = false).map { writeResult =>
       if (writeResult.n == 0) {
-        throw new NotFoundException(s"No application assessments were found with applicationId $applicationId")
+        throw new NotFoundException(s"No assessment allocation was found with applicationId $applicationId")
       } else if (writeResult.n > 1) {
-        throw new TooManyEntries(s"Deletion successful, but too many application assessments matched for applicationId $applicationId.")
+        throw TooManyEntries(s"Deletion successful, but too many assessment allocations matched for applicationId $applicationId.")
       } else {
         ()
       }
@@ -102,7 +102,7 @@ class ApplicationAssessmentMongoRepository()(implicit mongo: () => DB)
     }
   }
 
-  def applicationAssessmentsForVenue(venue: String): Future[List[ApplicationAssessment]] = {
+  def findAllForVenue(venue: String): Future[List[AssessmentCentreAllocation]] = {
     val query = BSONDocument("venue" -> venue)
 
     collection.find(query).cursor[BSONDocument]().collect[List]().map {
@@ -110,7 +110,7 @@ class ApplicationAssessmentMongoRepository()(implicit mongo: () => DB)
     }
   }
 
-  def create(applications: List[ApplicationAssessment]): Future[Seq[ApplicationAssessment]] = {
+  def create(applications: List[AssessmentCentreAllocation]): Future[Seq[AssessmentCentreAllocation]] = {
     val applicationsBSON = applications.map { app =>
       BSONDocument(
         "applicationId" -> app.applicationId,
@@ -124,27 +124,19 @@ class ApplicationAssessmentMongoRepository()(implicit mongo: () => DB)
 
     val bulkDocs = applicationsBSON.map(implicitly[collection.ImplicitlyDocumentProducer](_))
 
-    val errors = collection.bulkInsert(ordered = false)(bulkDocs: _*) map {
+    collection.bulkInsert(ordered = false)(bulkDocs: _*) map {
       result => result.writeErrors.map(r => applications(r.index))
     }
-
-    errors
   }
 
   def confirmAllocation(applicationId: String): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
-    val confirmedBSON = BSONDocument("$set" ->
-      BSONDocument(
-        "confirmed" -> true
-      ))
-
-    collection.update(query, confirmedBSON, upsert = false) map {
-      case _ => ()
-    }
+    val confirmedBSON = BSONDocument("$set" -> BSONDocument("confirmed" -> true))
+    collection.update(query, confirmedBSON, upsert = false) map { _ => () }
   }
 
-  private def parseApplicationAssessment(item: BSONDocument): ApplicationAssessment = {
-    ApplicationAssessment(
+  private def parseApplicationAssessment(item: BSONDocument): AssessmentCentreAllocation = {
+    AssessmentCentreAllocation(
       item.getAs[String]("applicationId").get,
       item.getAs[String]("venue").get,
       item.getAs[LocalDate]("date").get,

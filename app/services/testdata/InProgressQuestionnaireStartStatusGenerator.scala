@@ -38,8 +38,10 @@ trait InProgressQuestionnaireStartStatusGenerator extends ConstructiveGenerator 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get,
-        ProgressStatuses.StartDiversityQuestionnaireProgress)
+      _ <- appRepository.updateQuestionnaireStatus(
+        candidateInPreviousStatus.applicationId.get,
+        ProgressStatuses.StartDiversityQuestionnaireProgress
+      )
     } yield {
       candidateInPreviousStatus
     }

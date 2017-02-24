@@ -35,12 +35,13 @@ trait SendOnlineTestResultService {
   def notifyCandidateAboutOnlineTestResult(failedTest: ApplicationForNotification): Future[Unit]
 }
 
-class SendOnlineTestResultServiceImpl(otRepository: OnlineTestRepository,
-                                      cdRepository: ContactDetailsRepository,
-                                      emailClient: EmailClient,
-                                      auditService: AuditService,
-                                      newHeaderCarrier: => HeaderCarrier
-                                     )(implicit executor: ExecutionContext) extends SendOnlineTestResultService {
+class SendOnlineTestResultServiceImpl(
+  otRepository: OnlineTestRepository,
+    cdRepository: ContactDetailsRepository,
+    emailClient: EmailClient,
+    auditService: AuditService,
+    newHeaderCarrier: => HeaderCarrier
+)(implicit executor: ExecutionContext) extends SendOnlineTestResultService {
 
   private implicit def headerCarrier = newHeaderCarrier
 
@@ -72,7 +73,8 @@ class SendOnlineTestResultServiceImpl(otRepository: OnlineTestRepository,
       app.userId,
       currentStatuses = List(
         ApplicationStatuses.OnlineTestFailed,
-        ApplicationStatuses.AwaitingAllocation),
+        ApplicationStatuses.AwaitingAllocation
+      ),
       newStatus
     )
 
@@ -83,7 +85,8 @@ class SendOnlineTestResultServiceImpl(otRepository: OnlineTestRepository,
 
   private def logAuditEvent(event: AuditEvent, userId: String, email: Option[String] = None) = {
     Logger.info(s"$event for user $userId")
-    auditService.logEventNoRequest(event.toString,
+    auditService.logEventNoRequest(
+      event.toString,
       Map("userId" -> userId) ++ email.map(e => Map("email" -> e)).getOrElse(Map.empty)
     )
   }

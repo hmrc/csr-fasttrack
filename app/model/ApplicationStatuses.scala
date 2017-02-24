@@ -16,7 +16,6 @@
 
 package model
 
-
 object ApplicationStatuses extends Enum {
 
   sealed case class EnumVal(name: String) extends Value

@@ -37,8 +37,8 @@ import play.api.libs.json._
 import reactivemongo.bson.{ BSONDocument, BSONString }
 import reactivemongo.json.ImplicitBSONHandlers
 import repositories._
-import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
-import services.applicationassessment.ApplicationAssessmentService
+import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
+import services.applicationassessment.AssessmentCentreService
 import services.evaluation.AssessmentCentrePassmarkRulesEngine
 import services.passmarksettings.AssessmentCentrePassMarkSettingsService
 import testkit.MongoRepositorySpec
@@ -51,17 +51,18 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
   import ApplicationAssessmentServiceSpec._
   import ImplicitBSONHandlers._
 
-  lazy val service = new ApplicationAssessmentService {
-    val appAssessRepository: ApplicationAssessmentRepository = mock[ApplicationAssessmentRepository]
+  lazy val service = new AssessmentCentreService {
+    val assessmentCentreAllocationRepo: AssessmentCentreAllocationRepository = mock[AssessmentCentreAllocationRepository]
     val aasRepository: ApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
     val fpRepository: FrameworkPreferenceRepository = mock[FrameworkPreferenceRepository]
     val otRepository: OnlineTestRepository = mock[OnlineTestRepository]
     val aRepository: GeneralApplicationRepository = applicationRepository
     val cdRepository: ContactDetailsRepository = mock[ContactDetailsRepository]
     val passmarkService: AssessmentCentrePassMarkSettingsService = mock[AssessmentCentrePassMarkSettingsService]
-    val passmarkRulesEngine: AssessmentCentrePassmarkRulesEngine = ApplicationAssessmentService.passmarkRulesEngine
+    val passmarkRulesEngine: AssessmentCentrePassmarkRulesEngine = AssessmentCentreService.passmarkRulesEngine
     val auditService: AuditService = mock[AuditService]
     val emailClient: CSREmailClient = mock[CSREmailClient]
+    val personalDetailsRepo: PersonalDetailsRepository = mock[PersonalDetailsRepository]
   }
 
   val collectionName = CollectionNames.APPLICATION

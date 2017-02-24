@@ -2,101 +2,208 @@ Newcastle:
   - Newcastle (FSAC):
       description: FSAC
       capacities:
-         - date: 4/4/2017
+         - date: 04/04/2017
            amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
            pmCapacity: 18
-         - date: 5/4/2017
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
+         - date: 05/04/2017
            amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
            pmCapacity: 18
-         - date: 10/4/2017
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
+         - date: 10/04/2017
            amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
            pmCapacity: 18
-         - date: 18/4/2017
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
+         - date: 18/04/2017
            amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
            pmCapacity: 18
-         - date: 21/4/2017
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
+         - date: 21/04/2017
            amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
            pmCapacity: 18
-         - date: 28/4/2017
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
+         - date: 28/04/2017
            amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
            pmCapacity: 18
-         - date: 3/5/2017
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
+         - date: 03/05/2017
            amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
            pmCapacity: 18
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
   - Newcastle (Longbenton):
       description: Longbenton
       capacities:
-         - date: 8/4/2017
+         - date: 08/04/2017
            amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-         - date: 22/4/2017
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 22/04/2017
            amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-         - date: 6/5/2017
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 06/05/2017
            amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-         - date: 13/5/2017
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 13/05/2017
            amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-         - date: 20/5/2017
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 20/05/2017
            amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-         - date: 27/5/2017
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 27/05/2017
            amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-         
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+
 Manchester:
   - Manchester (Trinity Bridge House):
       description: Trinity Bridge House
       capacities:
-         - date: 3/4/2017
+         - date: 03/04/2017
            amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
            pmCapacity: 18
-         - date: 4/4/2017
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
+         - date: 04/04/2017
            amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
            pmCapacity: 18
-         - date: 21/4/2017
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
+         - date: 21/04/2017
            amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
            pmCapacity: 18
-         - date: 28/4/2017
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
+         - date: 28/04/2017
            amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
            pmCapacity: 18
-         - date: 3/5/2017
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
+         - date: 03/05/2017
            amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
            pmCapacity: 18
-         
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
+
 London:
   - London (Euston Tower):
       description: Euston Tower
       capacities:
-         - date: 3/5/2017
+         - date: 03/05/2017
            amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
            pmCapacity: 18
-         - date: 5/5/2017
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
+         - date: 05/05/2017
            amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
            pmCapacity: 18
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
   - London (FSAC):
       description: FSAC
       capacities:
-         - date: 8/4/2017
+         - date: 08/04/2017
            amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-         - date: 22/4/2017
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 22/04/2017
            amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-         - date: 29/4/2017
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 29/04/2017
            amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-         - date: 6/5/2017
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 06/05/2017
            amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-         - date: 13/5/2017
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 13/05/2017
            amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-         - date: 20/5/2017
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 20/05/2017
            amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-         - date: 27/5/2017
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 27/05/2017
            amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
            pmCapacity: 36
-         
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8

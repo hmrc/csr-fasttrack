@@ -41,14 +41,14 @@ import play.api.test.Helpers._
 import repositories.AssessmentCentreLocation._
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
 import repositories.{ AssessmentCentreLocation, _ }
-import services.applicationassessment.ApplicationAssessmentService
+import services.applicationassessment.AssessmentCentreService
 import testkit.MockitoSugar
 
 import scala.concurrent.Future
 
 class AssessmentScheduleControllerSpec extends PlaySpec with Results
   with MockitoSugar with ScalaFutures {
-  val mockAssessmentCentreRepository = mock[AssessmentCentreRepository]
+  val mockAssessmentCentreRepository = mock[AssessmentCentreLocationRepository]
 
   "Get Assessment Schedule" should {
     "return a valid schedule" in new TestFixture {
@@ -59,46 +59,54 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
 
       val expectedJson =
         s"""
-           | {
-           |    "locations": [
-           |        {
-           |            "name": "Narnia",
-           |            "venues": [
-           |                {
-           |                    "name": "Test Venue 1",
-           |                    "usedCapacityDates": [
-           |                        {
-           |                            "amUsedCapacity": {
-           |                                "hasUnconfirmedAttendees": true,
-           |                                "usedCapacity": 2
-           |                            },
-           |                            "date": "2015-04-25",
-           |                            "pmUsedCapacity": {
-           |                                "hasUnconfirmedAttendees": true,
-           |                                "usedCapacity": 1
-           |                            }
-           |                        }
-           |                    ]
-           |                },
-           |                {
-           |                    "name": "Test Venue 2",
-           |                    "usedCapacityDates": [
-           |                        {
-           |                            "amUsedCapacity": {
-           |                                "hasUnconfirmedAttendees": false,
-           |                                "usedCapacity": 0
-           |                            },
-           |                            "date": "2015-04-27",
-           |                            "pmUsedCapacity": {
-           |                                "hasUnconfirmedAttendees": false,
-           |                                "usedCapacity": 0
-           |                            }
-           |                        }
-           |                    ]
-           |                }
-           |            ]
-           |        }
-           |    ]
+        {
+           |   "locations":[
+           |      {
+           |         "name":"Narnia",
+           |         "venues":[
+           |            {
+           |               "name":"Test Venue 1",
+           |               "usedCapacityDates":[
+           |                  {
+           |                     "date":"2015-04-25",
+           |                     "amUsedCapacity":{
+           |                        "usedCapacity":2,
+           |                        "confirmedAttendees":0,
+           |                        "minViableAttendees":10,
+           |                        "preferredAttendeeMargin":4
+           |                     },
+           |                     "pmUsedCapacity":{
+           |                        "usedCapacity":1,
+           |                        "confirmedAttendees":0,
+           |                        "minViableAttendees":10,
+           |                        "preferredAttendeeMargin":4
+           |                     }
+           |                  }
+           |               ]
+           |            },
+           |            {
+           |               "name":"Test Venue 2",
+           |               "usedCapacityDates":[
+           |                  {
+           |                     "date":"2015-04-27",
+           |                     "amUsedCapacity":{
+           |                        "usedCapacity":0,
+           |                        "confirmedAttendees":0,
+           |                        "minViableAttendees":10,
+           |                        "preferredAttendeeMargin":4
+           |                     },
+           |                     "pmUsedCapacity":{
+           |                        "usedCapacity":0,
+           |                        "confirmedAttendees":0,
+           |                        "minViableAttendees":10,
+           |                        "preferredAttendeeMargin":4
+           |                     }
+           |                  }
+           |               ]
+           |            }
+           |         ]
+           |      }
+           |   ]
            |}
          """.stripMargin
 
@@ -434,11 +442,11 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     "do not return past dates" in new TestFixture {
       val locations = List(AssessmentCentreLocation("London", List(AssessmentCentreVenue("London venue", "",
         List(
-          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(1), 1, 1),
-          AssessmentCentreVenueCapacityDate(LocalDate.now, 2, 2),
-          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(1), 3, 3),
-          AssessmentCentreVenueCapacityDate(LocalDate.now.plusDays(1), 4, 4),
-          AssessmentCentreVenueCapacityDate(LocalDate.now.plusDays(2), 5, 5)
+          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(1), 1, 1, 10, 4, 10, 4),
+          AssessmentCentreVenueCapacityDate(LocalDate.now, 2, 2, 10, 4, 10, 4),
+          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(1), 3, 3, 10, 4, 10, 4),
+          AssessmentCentreVenueCapacityDate(LocalDate.now.plusDays(1), 4, 4, 10, 4, 10, 4),
+          AssessmentCentreVenueCapacityDate(LocalDate.now.plusDays(2), 5, 5, 10, 4, 10, 4)
         )))))
       when(mockAssessmentCentreRepository.assessmentCentreCapacities).thenReturn(Future.successful(locations))
 
@@ -452,9 +460,9 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     "return empty list of slots if all dates are in the past" in new TestFixture {
       val locations = List(AssessmentCentreLocation("London", List(AssessmentCentreVenue("London venue", "",
         List(
-          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(1), 1, 1),
-          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(2), 2, 2),
-          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(3), 2, 2)
+          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(1), 1, 1, 10, 4, 10, 4),
+          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(2), 2, 2, 10, 4, 10, 4),
+          AssessmentCentreVenueCapacityDate(LocalDate.now.minusDays(3), 2, 2, 10, 4, 10, 4)
         )))))
       when(mockAssessmentCentreRepository.assessmentCentreCapacities).thenReturn(Future.successful(locations))
 
@@ -491,15 +499,15 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
 
   trait TestFixture extends TestFixtureBase {
 
-    val mockApplicationAssessmentRepository = mock[ApplicationAssessmentRepository]
+    val mockApplicationAssessmentRepository = mock[AssessmentCentreAllocationRepository]
     val mockApplicationRepository = mock[GeneralApplicationRepository]
     val mockOnlineTestRepository = mock[OnlineTestRepository]
     val mockPersonalDetailsRepository = mock[PersonalDetailsRepository]
     val mockContactDetailsRepository = mock[ContactDetailsRepository]
     val mockEmailClient = mock[EmailClient]
-    val mockApplicationAssessmentService = mock[ApplicationAssessmentService]
+    val mockApplicationAssessmentService = mock[AssessmentCentreService]
 
-    val controller =  new AssessmentScheduleController {
+    val controller = new AssessmentScheduleController {
       override val aaRepository = mockApplicationAssessmentRepository
       override val acRepository = mockAssessmentCentreRepository
       override val aRepository = mockApplicationRepository
@@ -582,10 +590,10 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     // scalastyle:off
     def applicationAssessmentRepoWithSomeAssessments = {
 
-      when(mockApplicationAssessmentRepository.applicationAssessment(any())).thenReturn(Future.successful(None))
+      when(mockApplicationAssessmentRepository.find(any())).thenReturn(Future.successful(None))
 
-      when(mockApplicationAssessmentRepository.applicationAssessment(eqTo("1"))).thenReturn(Future.successful(
-        Some(ApplicationAssessment(
+      when(mockApplicationAssessmentRepository.find(eqTo("1"))).thenReturn(Future.successful(
+        Some(AssessmentCentreAllocation(
           "1",
           "Test Venue 1",
           DateTime.parse("2015-04-25").toLocalDate,
@@ -595,8 +603,8 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         ))
       ))
 
-      when(mockApplicationAssessmentRepository.applicationAssessment(eqTo("2"))).thenReturn(Future.successful(
-        Some(ApplicationAssessment(
+      when(mockApplicationAssessmentRepository.find(eqTo("2"))).thenReturn(Future.successful(
+        Some(AssessmentCentreAllocation(
           "2",
           "Test Venue 2",
           DateTime.parse("2015-04-25").toLocalDate,
@@ -606,9 +614,9 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         ))
       ))
 
-      when(mockApplicationAssessmentRepository.applicationAssessments).thenReturn(Future.successful(
+      when(mockApplicationAssessmentRepository.findAll).thenReturn(Future.successful(
         List(
-          ApplicationAssessment(
+          AssessmentCentreAllocation(
             "1",
             "Test Venue 1",
             DateTime.parse("2015-04-25").toLocalDate,
@@ -616,7 +624,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
             1,
             confirmed = false
           ),
-          ApplicationAssessment(
+          AssessmentCentreAllocation(
             "2",
             "Test Venue 1",
             DateTime.parse("2015-04-25").toLocalDate,
@@ -624,7 +632,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
             2,
             confirmed = false
           ),
-          ApplicationAssessment(
+          AssessmentCentreAllocation(
             "2",
             "Test Venue 1",
             DateTime.parse("2015-04-25").toLocalDate,
@@ -650,7 +658,11 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
                   AssessmentCentreVenueCapacityDate(
                     DateTime.parse("2015-04-25").toLocalDate,
                     2,
-                    3
+                    3,
+                    10,
+                    4,
+                    10,
+                    4
                   )
                 )
               ),
@@ -661,7 +673,11 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
                   AssessmentCentreVenueCapacityDate(
                     DateTime.parse("2015-04-27").toLocalDate,
                     1,
-                    6
+                    6,
+                    10,
+                    4,
+                    10,
+                    4
                   )
                 )
               )
@@ -711,7 +727,11 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         AssessmentCentreVenueCapacityDate(
           LocalDate.parse("2015-04-25"),
           2,
-          3
+          3,
+          10,
+          4,
+          10,
+          4
         )
       ))
     }
@@ -802,9 +822,9 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     }
 
     def applicationAssessmentRepoWithOneVenueDateCandidate = {
-      when(mockApplicationAssessmentRepository.applicationAssessments(any(), any())).thenReturn(Future.successful(
+      when(mockApplicationAssessmentRepository.findAllForDate(any(), any())).thenReturn(Future.successful(
         List(
-          ApplicationAssessment(
+          AssessmentCentreAllocation(
             "appid-1",
             "Test Venue 1",
             LocalDate.parse("2015-04-25"),
@@ -817,9 +837,9 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     }
 
     def applicationAssessmentRepoWithOneVenueOneDateOneCandidateInPMOneInAMSession = {
-      when(mockApplicationAssessmentRepository.applicationAssessments(any(), any())).thenReturn(Future.successful(
+      when(mockApplicationAssessmentRepository.findAllForDate(any(), any())).thenReturn(Future.successful(
         List(
-          ApplicationAssessment(
+          AssessmentCentreAllocation(
             "appid-1",
             "Test Venue 1",
             LocalDate.parse("2015-04-25"),
@@ -827,7 +847,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
             1,
             confirmed = true
           ),
-          ApplicationAssessment(
+          AssessmentCentreAllocation(
             "appid-2",
             "Test Venue 1",
             LocalDate.parse("2015-04-25"),
@@ -844,7 +864,11 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         AssessmentCentreVenueCapacityDate(
           LocalDate.parse("2015-04-25"),
           3,
-          6
+          6,
+          10,
+          4,
+          10,
+          4
         )
       ))
 
@@ -854,7 +878,9 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
           venues = List(AssessmentCentreVenue(
             venueName = "London FTAC",
             venueDescription = "London centre",
-            capacityDates = List(AssessmentCentreVenueCapacityDate(date = LocalDate.now, amCapacity = 18, pmCapacity = 18))
+            capacityDates = List(
+              AssessmentCentreVenueCapacityDate(date = LocalDate.now, amCapacity = 18, pmCapacity = 18, 10, 4, 10, 4)
+            )
           ))
         )
       )))
@@ -871,13 +897,13 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     }
 
     def applicationAssessmentRepoWithNoVenueDateCandidates = {
-      when(mockApplicationAssessmentRepository.applicationAssessments(any(), any())).thenReturn(Future.successful(
+      when(mockApplicationAssessmentRepository.findAllForDate(any(), any())).thenReturn(Future.successful(
         List()
       ))
     }
 
     def applicationAssessmentRepositoryThatCanDelete = {
-      when(mockApplicationAssessmentService.removeFromApplicationAssessmentSlot(any())).thenReturn(
+      when(mockApplicationAssessmentService.removeFromAssessmentCentreSlot(any())).thenReturn(
         Future.successful(())
       )
       when(mockApplicationRepository.findProgress(any())).thenReturn(
@@ -888,11 +914,11 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
       when(mockApplicationRepository.findProgress(any())).thenReturn(
         Future.successful(ProgressResponse("", assessmentScores = AssessmentScores(accepted = true)))
       )
-      when(mockApplicationAssessmentService.removeFromApplicationAssessmentSlot(any())).thenReturn(Future.successful(()))
+      when(mockApplicationAssessmentService.removeFromAssessmentCentreSlot(any())).thenReturn(Future.successful(()))
     }
 
     def applicationAssessmentRepositoryThatCannotDelete = {
-      when(mockApplicationAssessmentService.removeFromApplicationAssessmentSlot(any())).thenReturn(
+      when(mockApplicationAssessmentService.removeFromAssessmentCentreSlot(any())).thenReturn(
         Future.failed(new NotFoundException("Non existent app"))
       )
       when(mockApplicationRepository.findProgress(any())).thenReturn(

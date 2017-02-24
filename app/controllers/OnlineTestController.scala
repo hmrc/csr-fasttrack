@@ -86,12 +86,12 @@ trait OnlineTestController extends BaseController {
     onlineTestingService.startOnlineTest(cubiksUserId).map { _ =>
       Ok
     } recover {
-        case _: CannotUpdateCubiksTest =>
-          Logger.warn(s"Online Test for cubiksUserId=$cubiksUserId cannot be updated")
-          NotFound
-        case _: NotFoundException =>
-          Logger.warn(s"cubiksUserId=$cubiksUserId not found for Start Online Test")
-          NotFound
+      case _: CannotUpdateCubiksTest =>
+        Logger.warn(s"Online Test for cubiksUserId=$cubiksUserId cannot be updated")
+        NotFound
+      case _: NotFoundException =>
+        Logger.warn(s"cubiksUserId=$cubiksUserId not found for Start Online Test")
+        NotFound
     }
   }
 

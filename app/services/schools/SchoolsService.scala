@@ -21,13 +21,13 @@ import repositories._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object SchoolsService extends SchoolsService{
+object SchoolsService extends SchoolsService {
   val schoolsRepo = schoolsRepository
 }
 
 trait SchoolsService {
   val MaxNumberOfSchools = 16
-  val schoolsRepo : SchoolsRepository
+  val schoolsRepo: SchoolsRepository
 
   def getSchools(term: String) = {
     schoolsRepo.schools.map(_.filter(s => sanitize(s.name).contains(sanitize(term))).take(MaxNumberOfSchools))
@@ -35,7 +35,7 @@ trait SchoolsService {
 
   private def sanitize(str: String) = {
     str.replaceAll("""([\p{Punct}])*""", "")
-      .replaceAll("""\s*""","")
+      .replaceAll("""\s*""", "")
       .toLowerCase()
   }
 }

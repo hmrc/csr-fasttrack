@@ -16,11 +16,11 @@
 
 package controllers
 
-import connectors.{CSREmailClient, EmailClient}
+import connectors.{ CSREmailClient, EmailClient }
 import model.ApplicationValidator
 import play.api.mvc.Action
 import repositories._
-import repositories.application.{GeneralApplicationRepository, PersonalDetailsRepository}
+import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
 import services.assistancedetails.AssistanceDetailsService
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -50,27 +50,27 @@ trait SubmitApplicationController extends BaseController {
   def submitApplication(userId: String, applicationId: String) = Action.async { implicit request =>
 
     val result = for {
-        personalDetails <- pdRepository.find(applicationId)
-        assistanceDetails <- adService.find(applicationId, userId)
-        contactDetails <- cdRepository.find(userId)
-        schemePreferences <- appRepository.getSchemes(applicationId)
-        schemeLocationPreferences <- appRepository.getSchemeLocations(applicationId)
-      } yield {
+      personalDetails <- pdRepository.find(applicationId)
+      assistanceDetails <- adService.find(applicationId, userId)
+      contactDetails <- cdRepository.find(userId)
+      schemePreferences <- appRepository.getSchemes(applicationId)
+      schemeLocationPreferences <- appRepository.getSchemeLocations(applicationId)
+    } yield {
 
-        if (ApplicationValidator(personalDetails, assistanceDetails).validate) {
-          appRepository.submit(applicationId).flatMap { _ =>
-            val assessmentCentreIndicator = assessmentCentreIndicatorRepo.calculateIndicator(contactDetails.postCode)
-            auditService.logEvent("ApplicationSubmitted")
-            appRepository.updateAssessmentCentreIndicator(applicationId, assessmentCentreIndicator).flatMap { _ =>
-              auditService.logEvent("AssessmentCentreIndicatorSet")
-              emailClient.sendApplicationSubmittedConfirmation(contactDetails.email, personalDetails.preferredName).map { _ =>
-                Ok
-              }
+      if (ApplicationValidator(personalDetails, assistanceDetails).validate) {
+        appRepository.submit(applicationId).flatMap { _ =>
+          val assessmentCentreIndicator = assessmentCentreIndicatorRepo.calculateIndicator(contactDetails.postCode)
+          auditService.logEvent("ApplicationSubmitted")
+          appRepository.updateAssessmentCentreIndicator(applicationId, assessmentCentreIndicator).flatMap { _ =>
+            auditService.logEvent("AssessmentCentreIndicatorSet")
+            emailClient.sendApplicationSubmittedConfirmation(contactDetails.email, personalDetails.preferredName).map { _ =>
+              Ok
             }
           }
-        } else {
-          Future.successful(BadRequest)
         }
+      } else {
+        Future.successful(BadRequest)
+      }
     }
 
     result flatMap identity

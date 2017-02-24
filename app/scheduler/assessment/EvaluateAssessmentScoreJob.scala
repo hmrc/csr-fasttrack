@@ -19,16 +19,16 @@ package scheduler.assessment
 import config.ScheduledJobConfig
 import scheduler.clustering.SingleInstanceScheduledJob
 import scheduler.onlinetesting.BasicJobConfig
-import services.applicationassessment.ApplicationAssessmentService
+import services.applicationassessment.AssessmentCentreService
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 object EvaluateAssessmentScoreJob extends EvaluateAssessmentScoreJob {
-  val applicationAssessmentService: ApplicationAssessmentService = ApplicationAssessmentService
+  val applicationAssessmentService: AssessmentCentreService = AssessmentCentreService
 }
 
 trait EvaluateAssessmentScoreJob extends SingleInstanceScheduledJob with EvaluateAssessmentScoreJobConfig {
-  val applicationAssessmentService: ApplicationAssessmentService
+  val applicationAssessmentService: AssessmentCentreService
 
   def tryExecute()(implicit ec: ExecutionContext): Future[Unit] = {
     applicationAssessmentService.nextAssessmentCandidateReadyForEvaluation.flatMap { candidateResultsOpt =>

@@ -23,9 +23,11 @@ import play.api.Logger
 trait FinalResultEvaluator {
   case class OnlineTestAndAssessmentResultPairNotFound(msg: String) extends Exception(msg)
 
-  def mergeResults(onlineTestResult: OnlineTestPassmarkEvaluation,
-                   assessmentCentreResult: AssessmentRuleCategoryResult,
-                   schemePreferences: SchemePreferences): FinalEvaluationResult = {
+  def mergeResults(
+    onlineTestResult: OnlineTestPassmarkEvaluation,
+    assessmentCentreResult: AssessmentRuleCategoryResult,
+    schemePreferences: SchemePreferences
+  ): FinalEvaluationResult = {
     val location1Scheme1Result = determineResult(onlineTestResult.location1Scheme1, assessmentCentreResult.location1Scheme1)
     val location1Scheme2Result = determineResult(onlineTestResult.location1Scheme2, assessmentCentreResult.location1Scheme2)
     val location2Scheme1Result = determineResult(onlineTestResult.location2Scheme1, assessmentCentreResult.location2Scheme1)
@@ -37,9 +39,10 @@ trait FinalResultEvaluator {
       (schemePreferences.location1Scheme2, location1Scheme2Result),
       (schemePreferences.location2Scheme1, location2Scheme1Result),
       (schemePreferences.location2Scheme2, location2Scheme2Result)
-    ).collect { case (Some(scheme), Some(result)) =>
-      (scheme, result)
-    }.toMap
+    ).collect {
+        case (Some(scheme), Some(result)) =>
+          (scheme, result)
+      }.toMap
 
     val finalSchemesEvaluation = assessmentCentreResult.schemesEvaluation.map { assessmentSchemeEvaluations =>
       assessmentSchemeEvaluations.map { evaluation =>

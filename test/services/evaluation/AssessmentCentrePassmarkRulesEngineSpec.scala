@@ -51,9 +51,11 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
     alternatives = Some(Alternatives(location = true, framework = true))
   )
   val CandidatePreferencesWithQualification = PreferencesWithQualification(CandidatePreferences, aLevel = true, stemLevel = true)
-  val CandidateOnlineTestEvaluation = OnlineTestPassmarkEvaluation(location1Scheme1 = Green,
+  val CandidateOnlineTestEvaluation = OnlineTestPassmarkEvaluation(
+    location1Scheme1 = Green,
     location1Scheme2 = Some(Red), location2Scheme1 = Some(Amber), location2Scheme2 = Some(Green),
-    alternativeScheme = Some(Green))
+    alternativeScheme = Some(Green)
+  )
 
   val rulesEngine = AssessmentCentrePassmarkRulesEngine
 
@@ -66,9 +68,11 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
 
       val result = rulesEngine.evaluate(CandidateOnlineTestEvaluation, candidateScore, config)
 
-      result must be(AssessmentRuleCategoryResult(passedMinimumCompetencyLevel = Some(false),
+      result must be(AssessmentRuleCategoryResult(
+        passedMinimumCompetencyLevel = Some(false),
         location1Scheme1 = None, location1Scheme2 = None, location2Scheme1 = None, location2Scheme2 = None,
-        alternativeScheme = None, competencyAverageResult = None, schemesEvaluation = None))
+        alternativeScheme = None, competencyAverageResult = None, schemesEvaluation = None
+      ))
     }
 
     "evalute to passedMinimumCompetencyLevel=true and evaluate preferred locations" in {
@@ -80,10 +84,10 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
 
       result.passedMinimumCompetencyLevel mustBe Some(true)
       result.location1Scheme1 mustBe Some(Amber) // because online test = Green and assessment centre = Amber
-      result.location1Scheme2 mustBe Some(Red)   // because online test = Red
+      result.location1Scheme2 mustBe Some(Red) // because online test = Red
       result.location2Scheme1 mustBe Some(Amber) // because online test = Amber
       result.location2Scheme2 mustBe Some(Amber) // because online test = Green and assessment centre = Amber
-      result.alternativeScheme mustBe Some(Red)  // because online test = Green and assessment centre = Red
+      result.alternativeScheme mustBe Some(Red) // because online test = Green and assessment centre = Red
 
       val expectedCompetencyAverage = CompetencyAverageResult(2.9333333333333336, 2.5, 3.5, 3.5, 4.0, 4.0, 6.0, 26.433333333333334)
       result.competencyAverageResult mustBe Some(expectedCompetencyAverage)

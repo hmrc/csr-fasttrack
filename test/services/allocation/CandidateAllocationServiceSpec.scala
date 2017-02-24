@@ -17,7 +17,7 @@
 package services.allocation
 
 import connectors.EmailClient
-import model.Commands.{ Address, ApplicationAssessment }
+import model.Commands.{ Address, AssessmentCentreAllocation }
 import model.PersistedObjects.{ AllocatedCandidate, ContactDetails, PersonalDetailsWithUserId }
 import org.joda.time.{ DateTime, LocalDate }
 import org.mockito.Matchers.{ eq => eqTo, _ }
@@ -27,7 +27,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatest.time.{ Seconds, Span }
 import org.scalatestplus.play.PlaySpec
 import repositories.application.CandidateAllocationRepository
-import repositories.{ ApplicationAssessmentRepository, ContactDetailsRepository }
+import repositories.{ AssessmentCentreAllocationRepository, ContactDetailsRepository }
 import services.AuditService
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -36,12 +36,12 @@ import scala.concurrent.Future
 class CandidateAllocationServiceSpec extends PlaySpec with ScalaFutures with MockitoSugar {
 
   val candidate = AllocatedCandidate(PersonalDetailsWithUserId("Alice", "userId"), "app1", LocalDate.now().plusDays(3))
-  val applicationAssessment = ApplicationAssessment("app1", "London 1", LocalDate.now().plusDays(3), "AM", 1, false)
+  val applicationAssessment = AssessmentCentreAllocation("app1", "London 1", LocalDate.now().plusDays(3), "AM", 1, false)
   val candidateContact = ContactDetails(false, Address("Aldwych road"), Some("AB CDE"), None, "alice@test.com", None)
 
   val caRepositoryMock = mock[CandidateAllocationRepository]
   val cdRepositoryMock = mock[ContactDetailsRepository]
-  val aaRepositoryMock = mock[ApplicationAssessmentRepository]
+  val aaRepositoryMock = mock[AssessmentCentreAllocationRepository]
   val emailClientMock = mock[EmailClient]
   val auditServiceMock = mock[AuditService]
 
@@ -83,7 +83,7 @@ class CandidateAllocationServiceSpec extends PlaySpec with ScalaFutures with Moc
   "A reminder email" should {
     "be sent to the next candidate and the candidate should be marked as contacted" in {
       when(cdRepositoryMock.find(candidate.candidateDetails.userId)).thenReturn(Future.successful(candidateContact))
-      when(aaRepositoryMock.find(candidate.applicationId)).thenReturn(Future.successful(applicationAssessment))
+      when(aaRepositoryMock.findOne(candidate.applicationId)).thenReturn(Future.successful(applicationAssessment))
       when(emailClientMock.sendReminderToConfirmAttendance(
         candidateContact.email,
         candidate.candidateDetails.preferredName,

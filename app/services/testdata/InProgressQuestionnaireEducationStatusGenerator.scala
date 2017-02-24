@@ -43,8 +43,10 @@ trait InProgressQuestionnaireEducationStatusGenerator extends ConstructiveGenera
       val didYouLiveInUkBetween14and18Answer = Random.yesNo
       def getWhatWasYourHomePostCodeWhenYouWere14 = {
         if (didYouLiveInUkBetween14and18Answer == "Yes") {
-          Some(PersistedQuestion("What was your home postcode when you were 14?",
-            PersistedAnswer(Some(Random.homePostcode), None, None)))
+          Some(PersistedQuestion(
+            "What was your home postcode when you were 14?",
+            PersistedAnswer(Some(Random.homePostcode), None, None)
+          ))
         } else {
           None
         }
@@ -52,8 +54,10 @@ trait InProgressQuestionnaireEducationStatusGenerator extends ConstructiveGenera
 
       def getSchoolName14to16Answer = {
         if (didYouLiveInUkBetween14and18Answer == "Yes") {
-          Some(PersistedQuestion("Aged 14 to 16 what was the name of your school?",
-            PersistedAnswer(Some(Random.age14to16School), None, None)))
+          Some(PersistedQuestion(
+            "Aged 14 to 16 what was the name of your school?",
+            PersistedAnswer(Some(Random.age14to16School), None, None)
+          ))
         } else {
           None
         }
@@ -61,8 +65,10 @@ trait InProgressQuestionnaireEducationStatusGenerator extends ConstructiveGenera
 
       def getSchoolName16to18Answer = {
         if (didYouLiveInUkBetween14and18Answer == "Yes") {
-          Some(PersistedQuestion("Aged 16 to 18 what was the name of your school?",
-            PersistedAnswer(Some(Random.age16to18School), None, None)))
+          Some(PersistedQuestion(
+            "Aged 16 to 18 what was the name of your school?",
+            PersistedAnswer(Some(Random.age16to18School), None, None)
+          ))
         } else {
           None
         }
@@ -70,8 +76,10 @@ trait InProgressQuestionnaireEducationStatusGenerator extends ConstructiveGenera
 
       def getFreeSchoolMealsAnswer = {
         if (didYouLiveInUkBetween14and18Answer == "Yes") {
-          Some(PersistedQuestion("Were you at any time eligible for free school meals?",
-            PersistedAnswer(Some(Random.yesNoPreferNotToSay), None, None)))
+          Some(PersistedQuestion(
+            "Were you at any time eligible for free school meals?",
+            PersistedAnswer(Some(Random.yesNoPreferNotToSay), None, None)
+          ))
         } else {
           None
         }
@@ -79,8 +87,8 @@ trait InProgressQuestionnaireEducationStatusGenerator extends ConstructiveGenera
 
       List(
         Some(PersistedQuestion("Did you live in the UK between the ages of 14 and 18?", PersistedAnswer(
-          Some(didYouLiveInUkBetween14and18Answer), None, None))
-        ),
+          Some(didYouLiveInUkBetween14and18Answer), None, None
+        ))),
         getWhatWasYourHomePostCodeWhenYouWere14,
         getSchoolName14to16Answer,
         getSchoolName16to18Answer,
@@ -91,8 +99,10 @@ trait InProgressQuestionnaireEducationStatusGenerator extends ConstructiveGenera
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       _ <- qRepository.addQuestions(candidateInPreviousStatus.applicationId.get, getEducationQuestionnaireQuestions)
-      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get,
-        ProgressStatuses.EducationQuestionsCompletedProgress)
+      _ <- appRepository.updateQuestionnaireStatus(
+        candidateInPreviousStatus.applicationId.get,
+        ProgressStatuses.EducationQuestionsCompletedProgress
+      )
     } yield {
       candidateInPreviousStatus
     }

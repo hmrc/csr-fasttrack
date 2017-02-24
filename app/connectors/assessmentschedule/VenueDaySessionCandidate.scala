@@ -19,8 +19,7 @@ package connectors.assessmentschedule
 import play.api.libs.json.Json
 
 case class VenueDaySessionCandidate(userId: String, applicationId: String, firstName: String,
-                                    lastName: String, confirmed: Boolean)
-
+  lastName: String, confirmed: Boolean)
 
 object VenueDaySessionCandidate {
   implicit val venueDaySessionCandidateFormat = Json.format[VenueDaySessionCandidate]

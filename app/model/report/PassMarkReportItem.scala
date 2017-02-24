@@ -24,26 +24,27 @@ import play.api.libs.json.Json
 import model.ReportExchangeObjects.Implicits.passMarkReportTestResultsFormats // Do not remove this. It is needed despite what IntelliJ thinks
 import model.CandidateScoresCommands.Implicits.CandidateScoresAndFeedbackFormats // Do not remove this. It is needed despite what IntelliJ thinks
 
-case class PassMarkReportItem(applicationId: UniqueIdentifier,
-                              progress: Option[String],
-                              schemes: List[Scheme],
-                              locations: List[String],
-                              gender: String,
-                              sexualOrientation: String,
-                              ethnicity: String,
-                              disability: Option[String],
-                              gis: Option[Boolean],
-                              onlineAdjustments: Option[String],
-                              assessmentCentreAdjustments: Option[String],
-                              civilServant: Option[Boolean],
-                              socialEconomicScore: String,
-                              hearAboutUs: String,
-                              allocatedAssessmentCentre: Option[String],
-                              testResults: PassMarkReportTestResults,
-                              schemeOnlineTestResults: List[String],
-                              candidateScores: CandidateScoresAndFeedback,
-                              schemeAssessmentCentreTestResults: List[String]
-                              )
+case class PassMarkReportItem(
+  applicationId: UniqueIdentifier,
+  progress: Option[String],
+  schemes: List[Scheme],
+  locations: List[String],
+  gender: String,
+  sexualOrientation: String,
+  ethnicity: String,
+  disability: Option[String],
+  gis: Option[Boolean],
+  onlineAdjustments: Option[String],
+  assessmentCentreAdjustments: Option[String],
+  civilServant: Option[Boolean],
+  socialEconomicScore: String,
+  hearAboutUs: String,
+  allocatedAssessmentCentre: Option[String],
+  testResults: PassMarkReportTestResults,
+  schemeOnlineTestResults: List[String],
+  candidateScores: CandidateScoresAndFeedback,
+  schemeAssessmentCentreTestResults: List[String]
+)
 
 case object PassMarkReportItem {
   //scalastyle:off parameter.number
@@ -52,7 +53,8 @@ case object PassMarkReportItem {
             schemeOnlineTestResults: List[String], assessmentResults: CandidateScoresAndFeedback,
             schemeAssessmentCentreTestResults: List[String]): PassMarkReportItem = {
     //scalastyle:on
-    PassMarkReportItem(applicationId = application.applicationId.get,
+    PassMarkReportItem(
+      applicationId = application.applicationId.get,
       progress = application.progress,
       schemes = application.schemes,
       locations = application.locationIds,

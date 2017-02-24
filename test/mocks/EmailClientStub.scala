@@ -48,12 +48,9 @@ object EmailClientStub extends EmailClient {
 
   override def sendAssessmentCentreFailed(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit] = Future.successful(Unit)
 
-  override def sendAdjustmentsConfirmation(to: String, name: String, onlineTestsAdjustments: String, assessmentCenterAdjustments: String)
-                                          (implicit hc: HeaderCarrier): Future[Unit] = Future.successful(Unit)
+  override def sendAdjustmentsConfirmation(to: String, name: String, onlineTestsAdjustments: String, assessmentCenterAdjustments: String)(implicit hc: HeaderCarrier): Future[Unit] = Future.successful(Unit)
 
-  override def sendAdjustmentsUpdateConfirmation(to: String, name: String, onlineTestsAdjustments: String, assessmentCenterAdjustments: String)
-                                                (implicit hc: HeaderCarrier): Future[Unit] = Future.successful(Unit)
-  override def sendExpiringReminder(template: String, to: String, name: String, expiryDate: DateTime)
-                                   (implicit hc: HeaderCarrier): Future[Unit] = Future.successful(Unit)
+  override def sendAdjustmentsUpdateConfirmation(to: String, name: String, onlineTestsAdjustments: String, assessmentCenterAdjustments: String)(implicit hc: HeaderCarrier): Future[Unit] = Future.successful(Unit)
+  override def sendExpiringReminder(template: String, to: String, name: String, expiryDate: DateTime)(implicit hc: HeaderCarrier): Future[Unit] = Future.successful(Unit)
 
 }

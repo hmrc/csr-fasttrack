@@ -55,27 +55,27 @@ class CandidateProgressReportingControllerSpec extends BaseReportingControllerSp
 
     "return report without fsac indicator if there are applications, location schemes" +
       " but no contact details" in new CandidateProgressReportTestFixture {
-      when(contactDetailsRepoMock.findAll).thenReturnAsync(List.empty)
+        when(contactDetailsRepoMock.findAll).thenReturnAsync(List.empty)
 
-      val response = controller.createCandidateProgressReport(frameworkId)(request).run
-      val result = contentAsJson(response).as[List[CandidateProgressReportItem]]
+        val response = controller.createCandidateProgressReport(frameworkId)(request).run
+        val result = contentAsJson(response).as[List[CandidateProgressReportItem]]
 
-      status(response) mustBe OK
+        status(response) mustBe OK
 
-      result mustBe CandidateProgressReportItemExamples.CandidatesWithoutFsac
-    }
+        result mustBe CandidateProgressReportItemExamples.CandidatesWithoutFsac
+      }
 
     "return report without location name if there are applications, contact details" +
       " but no location schemes" in new CandidateProgressReportTestFixture {
-      when(locationSchemeServiceMock.getAllSchemeLocations).thenReturnAsync(List.empty)
+        when(locationSchemeServiceMock.getAllSchemeLocations).thenReturnAsync(List.empty)
 
-      val response = controller.createCandidateProgressReport(frameworkId)(request).run
-      val result = contentAsJson(response).as[List[CandidateProgressReportItem]]
+        val response = controller.createCandidateProgressReport(frameworkId)(request).run
+        val result = contentAsJson(response).as[List[CandidateProgressReportItem]]
 
-      status(response) mustBe OK
+        status(response) mustBe OK
 
-      result mustBe CandidateProgressReportItemExamples.CandidatesWithoutLocationNames
-    }
+        result mustBe CandidateProgressReportItemExamples.CandidatesWithoutLocationNames
+      }
   }
 
   trait CandidateProgressReportTestFixture extends TestFixture {

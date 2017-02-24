@@ -45,8 +45,8 @@ object QuestionnaireRepository {
 }
 
 class QuestionnaireMongoRepository(socioEconomicCalculator: SocioEconomicScoreCalculator)(implicit mongo: () => DB)
-  extends ReactiveRepository[PersistedAnswer, BSONObjectID](CollectionNames.QUESTIONNAIRE, mongo,
-    PersistedObjects.Implicits.answerFormats, ReactiveMongoFormats.objectIdFormats) with QuestionnaireRepository {
+    extends ReactiveRepository[PersistedAnswer, BSONObjectID](CollectionNames.QUESTIONNAIRE, mongo,
+      PersistedObjects.Implicits.answerFormats, ReactiveMongoFormats.objectIdFormats) with QuestionnaireRepository {
 
   override def addQuestions(applicationId: String, questions: List[PersistedQuestion]): Future[Unit] = {
 

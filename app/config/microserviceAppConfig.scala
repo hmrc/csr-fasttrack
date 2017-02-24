@@ -51,10 +51,10 @@ case class WaitingScheduledJobConfig(
 ) extends ScheduledJobConfigurable
 
 case class CubiksGatewayConfig(url: String, scheduleIds: CubiksGatewaysScheduleIds,
-  verbalAndNumericalAssessment: CubiksGatewayVerbalAndNumericalAssessment,
-  competenceAssessment: CubiksGatewayStandardAssessment,
-  situationalAssessment: CubiksGatewayStandardAssessment,
-  reportConfig: ReportConfig, candidateAppUrl: String, emailDomain: String) {
+    verbalAndNumericalAssessment: CubiksGatewayVerbalAndNumericalAssessment,
+    competenceAssessment: CubiksGatewayStandardAssessment,
+    situationalAssessment: CubiksGatewayStandardAssessment,
+    reportConfig: ReportConfig, candidateAppUrl: String, emailDomain: String) {
 
   val nonGisAssessmentIds: List[Int] = List(
     verbalAndNumericalAssessment.assessmentId,
@@ -94,7 +94,7 @@ case class AssessmentCentresLocationsConfig(yamlFilePath: String)
 case class AssessmentCentresConfig(yamlFilePath: String)
 
 case class AssessmentEvaluationMinimumCompetencyLevel(enabled: Boolean, minimumCompetencyLevelScore: Option[Double],
-  motivationalFitMinimumCompetencyLevelScore: Option[Double]) {
+    motivationalFitMinimumCompetencyLevelScore: Option[Double]) {
   require(!enabled || (minimumCompetencyLevelScore.isDefined && motivationalFitMinimumCompetencyLevelScore.isDefined))
 }
 

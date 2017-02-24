@@ -30,24 +30,24 @@ object PersistedObjects {
   case class PersonalDetailsWithUserId(preferredName: String, userId: String)
 
   case class ContactDetails(
-    outsideUk: Boolean,
-    address: Address,
-    postCode: Option[PostCode],
-    country: Option[String],
-    email: String,
-    phone: Option[PhoneNumber]
+      outsideUk: Boolean,
+      address: Address,
+      postCode: Option[PostCode],
+      country: Option[String],
+      email: String,
+      phone: Option[PhoneNumber]
   ) {
     require(outsideUk && country.isDefined || !outsideUk && postCode.isDefined, "Either post code or country is mandatory")
   }
 
   case class ContactDetailsWithId(
-    userId: String,
-    outsideUk: Boolean,
-    address: Address,
-    postCode: Option[PostCode],
-    country: Option[String],
-    email: String,
-    phone: Option[PhoneNumber]
+      userId: String,
+      outsideUk: Boolean,
+      address: Address,
+      postCode: Option[PostCode],
+      country: Option[String],
+      email: String,
+      phone: Option[PhoneNumber]
   ) {
     require(outsideUk && country.isDefined || !outsideUk && postCode.isDefined, "Either post code or country is mandatory")
   }
@@ -73,8 +73,8 @@ object PersistedObjects {
   case class UserIdAndPhoneNumber(userId: String, phoneNumber: Option[PhoneNumber])
 
   case class CandidateTestReport(applicationId: String, reportType: String,
-    competency: Option[TestResult] = None, numerical: Option[TestResult] = None,
-    verbal: Option[TestResult] = None, situational: Option[TestResult] = None) {
+      competency: Option[TestResult] = None, numerical: Option[TestResult] = None,
+      verbal: Option[TestResult] = None, situational: Option[TestResult] = None) {
 
     def isValid(gis: Boolean) = {
       val competencyValid = competency.exists(testIsValid(tScore = true))
@@ -103,12 +103,13 @@ object PersistedObjects {
     questionnaireStatuses: Option[List[ApplicationProgressStatus]]
   )
 
-  case class OnlineTestPassmarkEvaluation(location1Scheme1: Result,
-                                          location1Scheme2: Option[Result], location2Scheme1: Option[Result],
-                                          location2Scheme2: Option[Result], alternativeScheme: Option[Result])
+  case class OnlineTestPassmarkEvaluation(
+    location1Scheme1: Result,
+    location1Scheme2: Option[Result], location2Scheme1: Option[Result],
+    location2Scheme2: Option[Result], alternativeScheme: Option[Result]
+  )
 
   case class PreferencesWithQualification(preferences: Preferences, aLevel: Boolean, stemLevel: Boolean)
-
 
   object Implicits {
     implicit val applicationStatusFormats = Json.format[ApplicationStatus]

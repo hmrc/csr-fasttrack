@@ -41,7 +41,7 @@ trait AssessmentScoresEnteredStatusGenerator extends ConstructiveGenerator {
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
 
     def getScoresAndFeedback(applicationId: String): CandidateScoresAndFeedback = {
-      def randScore = Some(Random.randDouble(1,4))
+      def randScore = Some(Random.randDouble(1, 4))
       // format: OFF
       CandidateScoresAndFeedback(applicationId, attendancy = Some(true), assessmentIncomplete = false,
         leadingAndCommunicating     = CandidateScores(randScore, randScore, randScore),

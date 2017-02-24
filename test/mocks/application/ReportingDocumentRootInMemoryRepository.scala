@@ -30,8 +30,8 @@ import scala.concurrent.Future
 object ReportingDocumentRootInMemoryRepository extends ReportingDocumentRootInMemoryRepository
 
 /**
-  * @deprecated Please use Mockito
-  */
+ * @deprecated Please use Mockito
+ */
 class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
 
   val inMemoryRepo = new mutable.HashMap[String, ApplicationResponse]
@@ -45,8 +45,7 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
     Future.successful(app1 :: app2 :: Nil)
   }
 
-  override def applicationsForCandidateProgressReport(frameworkId: String):
-  Future[List[ApplicationForCandidateProgressReport]] = Future.successful(List(
+  override def applicationsForCandidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] = Future.successful(List(
     ApplicationForCandidateProgressReport(Some(UniqueIdentifier.randomUniqueIdentifier), UniqueIdentifier.randomUniqueIdentifier,
       Some("SUBMITTED"), List.empty, List.empty, None, None, None, None, None, None, None),
     ApplicationForCandidateProgressReport(Some(UniqueIdentifier.randomUniqueIdentifier), UniqueIdentifier.randomUniqueIdentifier,
@@ -60,13 +59,13 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
       List(
         AdjustmentReportItem("1", Some("123"), Some("John"), Some("Smith"), Some("Spiderman"),
           None, None, Some("SUBMITTED"), Some(AssistanceDetails("Yes", None, Some(true), true, Some("more time"), true, Some("big chair"))),
-          Some(Adjustments(None,None,None,None)), Some(AdjustmentsComment("comment")), Some(AssessmentCentreIndicator("Sutton", "London"))),
+          Some(Adjustments(None, None, None, None)), Some(AdjustmentsComment("comment")), Some(AssessmentCentreIndicator("Sutton", "London"))),
         AdjustmentReportItem("2", Some("123"), Some("Mary"), Some("Smith"), Some("Spiderwoman"),
           None, None, Some("SUBMITTED"), Some(AssistanceDetails("Yes", None, Some(true), true, Some("more time"), true, Some("big chair"))),
-          Some(Adjustments(None,None,None,None)), Some(AdjustmentsComment("comment")), Some(AssessmentCentreIndicator("Sutton", "London"))),
+          Some(Adjustments(None, None, None, None)), Some(AdjustmentsComment("comment")), Some(AssessmentCentreIndicator("Sutton", "London"))),
         AdjustmentReportItem("3", Some("123"), Some("Peter"), Some("Smith"), Some("Spiderchild"),
           None, None, Some("SUBMITTED"), Some(AssistanceDetails("Yes", None, Some(true), true, Some("more time"), true, Some("big chair"))),
-          Some(Adjustments(None,None,None,None)), Some(AdjustmentsComment("comment")),Some(AssessmentCentreIndicator("Sutton", "London")))
+          Some(Adjustments(None, None, None, None)), Some(AdjustmentsComment("comment")), Some(AssessmentCentreIndicator("Sutton", "London")))
       )
     )
 

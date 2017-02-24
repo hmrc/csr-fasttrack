@@ -48,20 +48,20 @@ object Commands {
   type PhoneNumber = String
 
   case class UpdateGeneralDetails(
-    firstName: String,
-    lastName: String,
-    preferredName: String,
-    email: String,
-    dateOfBirth: LocalDate,
-    outsideUk: Boolean,
-    address: Address,
-    postCode: Option[PostCode],
-    country: Option[String],
-    phone: Option[PhoneNumber],
-    aLevel: Boolean,
-    stemLevel: Boolean,
-    civilServant: Boolean,
-    department: Option[String]
+      firstName: String,
+      lastName: String,
+      preferredName: String,
+      email: String,
+      dateOfBirth: LocalDate,
+      outsideUk: Boolean,
+      address: Address,
+      postCode: Option[PostCode],
+      country: Option[String],
+      phone: Option[PhoneNumber],
+      aLevel: Boolean,
+      stemLevel: Boolean,
+      civilServant: Boolean,
+      department: Option[String]
   ) {
     require(outsideUk && country.isDefined || !outsideUk && postCode.isDefined, "Either post code or country is mandatory")
   }
@@ -115,9 +115,9 @@ object Commands {
   type IsNonSubmitted = Boolean
 
   case class PreferencesWithContactDetails(firstName: Option[String], lastName: Option[String], preferredName: Option[String],
-                                           email: Option[String], telephone: Option[String], location1: Option[String], location1Scheme1: Option[String],
-                                           location1Scheme2: Option[String], location2: Option[String], location2Scheme1: Option[String],
-                                           location2Scheme2: Option[String], progress: Option[String], timeApplicationCreated: Option[String])
+    email: Option[String], telephone: Option[String], location1: Option[String], location1Scheme1: Option[String],
+    location1Scheme2: Option[String], location2: Option[String], location2Scheme1: Option[String],
+    location2Scheme2: Option[String], progress: Option[String], timeApplicationCreated: Option[String])
 
   case class ApplicationResponse(
     applicationId: String,
@@ -138,12 +138,12 @@ object Commands {
   case class ReviewRequest(flag: Boolean)
 
   case class SearchCandidate(firstOrPreferredName: Option[String], lastName: Option[String],
-                             dateOfBirth: Option[LocalDate], postCode: Option[PostCode])
+    dateOfBirth: Option[LocalDate], postCode: Option[PostCode])
 
   case class Candidate(userId: String, applicationId: Option[String], email: Option[String], firstName: Option[String], lastName: Option[String],
-                       preferredName: Option[String], dateOfBirth: Option[LocalDate], address: Option[Address], postCode: Option[PostCode])
+    preferredName: Option[String], dateOfBirth: Option[LocalDate], address: Option[Address], postCode: Option[PostCode])
 
-  case class ApplicationAssessment(applicationId: String, venue: String, date: LocalDate, session: String, slot: Int, confirmed: Boolean) {
+  case class AssessmentCentreAllocation(applicationId: String, venue: String, date: LocalDate, session: String, slot: Int, confirmed: Boolean) {
     val assessmentDateTime = {
       // TODO This should be configurable in the future, but hardcoding it in the fasttrack service is the lesser of the evils at the moment
       // FSET-471 was an emergency last minute fix
@@ -223,7 +223,7 @@ object Commands {
 
     import PassmarkPersistedObjects.Implicits._
 
-    implicit val applicationAssessmentFormat = Json.format[ApplicationAssessment]
+    implicit val applicationAssessmentFormat = Json.format[AssessmentCentreAllocation]
     implicit val phoneAndEmailFormat = Json.format[ContactDetails]
     implicit val assessmentCentrePassMarkSettingsResponseFormat = Json.format[AssessmentCentrePassMarkSettingsResponse]
 

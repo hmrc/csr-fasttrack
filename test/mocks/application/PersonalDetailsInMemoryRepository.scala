@@ -41,15 +41,14 @@ object PersonalDetailsInMemoryRepository extends PersonalDetailsRepository with 
       department = None
     )
 
-  override def update(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
+  override def updatePersonalDetailsAndStatus(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
     super.update(applicationId, userId, pd)
   }
 
-  override def update(appId: String, userId: String, personalDetails: PersonalDetails,
-    requiredStatuses: Seq[ApplicationStatuses.EnumVal], newApplicationStatus: ApplicationStatuses.EnumVal
-  ): Future[Unit] = Future.successful(())
+  override def updatePersonalDetailsAndStatus(appId: String, userId: String, personalDetails: PersonalDetails,
+    requiredStatuses: Seq[ApplicationStatuses.EnumVal], newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = Future.successful(())
 
-  override def updatePersonalDetailsOnly(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
+  override def update(applicationId: String, userId: String, pd: PersonalDetails): Future[Unit] = {
     Future.successful(())
   }
 

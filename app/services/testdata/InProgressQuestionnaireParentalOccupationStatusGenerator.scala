@@ -43,18 +43,24 @@ trait InProgressQuestionnaireParentalOccupationStatusGenerator extends Construct
 
       def getParentsOccupationDetail(parentsOccupation: String): Option[PersistedQuestion] = {
         if (parentsOccupation == "Employed") {
-          Some(PersistedQuestion("When you were 14, what kind of work did your highest-earning parent or guardian do?",
-            PersistedAnswer(Some(Random.parentsOccupationDetails), None, None)))
+          Some(PersistedQuestion(
+            "When you were 14, what kind of work did your highest-earning parent or guardian do?",
+            PersistedAnswer(Some(Random.parentsOccupationDetails), None, None)
+          ))
         } else {
-          Some(PersistedQuestion("When you were 14, what kind of work did your highest-earning parent or guardian do?",
-            PersistedAnswer(Some(parentsOccupation), None, None)))
+          Some(PersistedQuestion(
+            "When you were 14, what kind of work did your highest-earning parent or guardian do?",
+            PersistedAnswer(Some(parentsOccupation), None, None)
+          ))
         }
       }
 
       def getEmployeedOrSelfEmployeed(parentsOccupation: String): Option[PersistedQuestion] = {
         if (parentsOccupation == "Employed") {
-          Some(PersistedQuestion("Did they work as an employee or were they self employed?",
-            PersistedAnswer(Some(Random.employeeOrSelf), None, None)))
+          Some(PersistedQuestion(
+            "Did they work as an employee or were they self employed?",
+            PersistedAnswer(Some(Random.employeeOrSelf), None, None)
+          ))
         } else {
           None
         }
@@ -62,8 +68,10 @@ trait InProgressQuestionnaireParentalOccupationStatusGenerator extends Construct
 
       def getSizeParentsEmployeer(parentsOccupation: String): Option[PersistedQuestion] = {
         if (parentsOccupation == "Employed") {
-          Some(PersistedQuestion("Which size would best describe their place of work?",
-            PersistedAnswer(Some(Random.sizeParentsEmployeer), None, None)))
+          Some(PersistedQuestion(
+            "Which size would best describe their place of work?",
+            PersistedAnswer(Some(Random.sizeParentsEmployeer), None, None)
+          ))
         } else {
           None
         }
@@ -71,17 +79,20 @@ trait InProgressQuestionnaireParentalOccupationStatusGenerator extends Construct
 
       def getSuperviseEmployees(parentsOccupation: String): Option[PersistedQuestion] = {
         if (parentsOccupation == "Employed") {
-          Some(PersistedQuestion("Did they supervise employees?",
-            PersistedAnswer(Some(Random.yesNoPreferNotToSay), None, None)))
+          Some(PersistedQuestion(
+            "Did they supervise employees?",
+            PersistedAnswer(Some(Random.yesNoPreferNotToSay), None, None)
+          ))
         } else {
           None
         }
       }
 
       List(
-        Some(PersistedQuestion("Do you have a parent or guardian that has completed a university degree course or equivalent?",
-          PersistedAnswer(Some(Random.yesNoPreferNotToSay), None, None))
-        ),
+        Some(PersistedQuestion(
+          "Do you have a parent or guardian that has completed a university degree course or equivalent?",
+          PersistedAnswer(Some(Random.yesNoPreferNotToSay), None, None)
+        )),
         getParentsOccupationDetail(parentsOccupation),
         getEmployeedOrSelfEmployeed(parentsOccupation),
         getSizeParentsEmployeer(parentsOccupation),
@@ -92,8 +103,10 @@ trait InProgressQuestionnaireParentalOccupationStatusGenerator extends Construct
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       _ <- qRepository.addQuestions(candidateInPreviousStatus.applicationId.get, getParentalOccupationQuestionnaireQuestions)
-      _ <- appRepository.updateQuestionnaireStatus(candidateInPreviousStatus.applicationId.get,
-        ProgressStatuses.OccupationQuestionsCompletedProgress)
+      _ <- appRepository.updateQuestionnaireStatus(
+        candidateInPreviousStatus.applicationId.get,
+        ProgressStatuses.OccupationQuestionsCompletedProgress
+      )
     } yield {
       candidateInPreviousStatus
     }

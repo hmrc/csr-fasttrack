@@ -45,8 +45,8 @@ trait ContactDetailsRepository {
 }
 
 class ContactDetailsMongoRepository(implicit mongo: () => DB)
-  extends ReactiveRepository[ContactDetails, BSONObjectID](CollectionNames.CONTACT_DETAILS, mongo,
-    PersistedObjects.Implicits.contactDetailsFormats, ReactiveMongoFormats.objectIdFormats) with ContactDetailsRepository {
+    extends ReactiveRepository[ContactDetails, BSONObjectID](CollectionNames.CONTACT_DETAILS, mongo,
+      PersistedObjects.Implicits.contactDetailsFormats, ReactiveMongoFormats.objectIdFormats) with ContactDetailsRepository {
 
   import ContactDetailsMongoRepository._
 

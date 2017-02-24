@@ -22,28 +22,24 @@ import model.{ ProgressStatuses, Scheme, UniqueIdentifier }
 object ApplicationForCandidateProgressReportItemExamples {
   val PersonalDetailsCompleted = ApplicationForCandidateProgressReport(Some(ApplicationIdExamples.appId1), UserIdExamples.userId1,
     Some(ProgressStatuses.PersonalDetailsCompleted), List.empty, List.empty,
-    None, None, None, None, None, Some(false), None
-  )
+    None, None, None, None, None, Some(false), None)
   val SchemePreferencesCompleted = ApplicationForCandidateProgressReport(Some(ApplicationIdExamples.appId2), UserIdExamples.userId2,
     Some(ProgressStatuses.SchemesPreferencesCompleted), List(Scheme.Finance, Scheme.DigitalAndTechnology),
     List(LocationSchemesExamples.LocationSchemes1.id, LocationSchemesExamples.LocationSchemes2.id),
-    None, None, None, None, None, None, None
-  )
+    None, None, None, None, None, None, None)
   val AssistanceDetailsCompleted = ApplicationForCandidateProgressReport(Some(ApplicationIdExamples.appId3), UserIdExamples.userId3,
     Some(ProgressStatuses.AssistanceDetailsCompleted), List(Scheme.Commercial, Scheme.DigitalAndTechnology),
     List(LocationSchemesExamples.LocationSchemes2.id, LocationSchemesExamples.LocationSchemes3.id),
-    Some("Yes"), Some(false), Some(true), Some(true), None, Some(false), None
-  )
+    Some("Yes"), Some(false), Some(true), Some(true), None, Some(false), None)
   val OccupationQuestionsCompleted = ApplicationForCandidateProgressReport(Some(ApplicationIdExamples.appId4), UserIdExamples.userId4,
     Some(ProgressStatuses.OccupationQuestionsCompleted), List(Scheme.Business, Scheme.Finance),
     List(LocationSchemesExamples.LocationSchemes1.id, LocationSchemesExamples.LocationSchemes3.id),
-    Some("Yes"), Some(false), Some(true), Some(true), None, Some(false), None
-  )
+    Some("Yes"), Some(false), Some(true), Some(true), None, Some(false), None)
   val ReviewCompleted = ApplicationForCandidateProgressReport(
     applicationId = Some(ApplicationIdExamples.appId5),
     userId = UserIdExamples.userId5,
     progress = Some(ProgressStatuses.ReviewCompleted),
-    schemes = List(Scheme.Business,Scheme.ProjectDelivery),
+    schemes = List(Scheme.Business, Scheme.ProjectDelivery),
     locationIds = List(LocationSchemesExamples.LocationSchemes1.id, LocationSchemesExamples.LocationSchemes4.id),
     hasDisability = Some("Yes"),
     gis = Some(false),

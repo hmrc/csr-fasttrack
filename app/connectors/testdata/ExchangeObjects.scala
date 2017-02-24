@@ -16,7 +16,7 @@
 
 package connectors.testdata
 
-import model.Commands.ApplicationAssessment
+import model.Commands.AssessmentCentreAllocation
 import model.PersistedObjects.ContactDetails
 import model.exchange.AssistanceDetails
 import model.{ ApplicationStatuses, AssessmentCentreIndicator, Preferences }
@@ -35,7 +35,7 @@ object ExchangeObjects {
     firstName: String,
     lastName: String,
     onlineTestProfile: Option[OnlineTestProfileResponse] = None,
-    applicationAssessment: Option[ApplicationAssessment] = None,
+    applicationAssessment: Option[AssessmentCentreAllocation] = None,
     preferences: Option[Preferences] = None,
     contactDetails: Option[ContactDetails] = None,
     personalDetails: Option[PersonalDetails] = None,

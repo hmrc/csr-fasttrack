@@ -16,31 +16,37 @@
 
 package services.application
 
+import connectors.AuthProviderClient
+import connectors.ExchangeObjects.{ AuthProviderUserDetails, UpdateDetailsRequest }
 import model.Commands.{ CandidateEditableDetails, WithdrawApplicationRequest }
 import model.Exceptions.NotFoundException
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
-import services.applicationassessment.ApplicationAssessmentService
+import services.applicationassessment.AssessmentCentreService
+import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
 
 object ApplicationService extends ApplicationService {
   val appRepository = applicationRepository
-  val appAssessService = ApplicationAssessmentService
+  val appAssessService = AssessmentCentreService
   val auditService = AuditService
   val personalDetailsRepository = repositories.personalDetailsRepository
   val contactDetailsRepository = repositories.contactDetailsRepository
+  val authProviderClient = AuthProviderClient
 }
 
 trait ApplicationService {
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val appRepository: GeneralApplicationRepository
-  val appAssessService: ApplicationAssessmentService
+  val appAssessService: AssessmentCentreService
   val auditService: AuditService
   val contactDetailsRepository: ContactDetailsRepository
   val personalDetailsRepository: PersonalDetailsRepository
+  val authProviderClient: AuthProviderClient
+  private val UserNotFoundError = Future.failed(new RuntimeException("User not found for the given userId"))
 
   def withdraw(applicationId: String, withdrawRequest: WithdrawApplicationRequest): Future[Unit] = {
     appRepository.withdraw(applicationId, withdrawRequest).flatMap { result =>
@@ -48,39 +54,52 @@ trait ApplicationService {
         "ApplicationWithdrawn",
         Map("applicationId" -> applicationId, "withdrawRequest" -> withdrawRequest.toString)
       )
-      appAssessService.deleteApplicationAssessment(applicationId).recover {
-        case ex: NotFoundException => {}
+      appAssessService.deleteAssessmentCentreAllocation(applicationId).recover {
+        case _: NotFoundException => ()
       }
     }
   }
 
-  def editDetails(userId: String, applicationId: String, editRequest: CandidateEditableDetails): Future[Unit] = {
+  def editDetails(userId: String, applicationId: String, editRequest: CandidateEditableDetails)(implicit hc: HeaderCarrier): Future[Unit] = {
+
+    val userFut: Future[AuthProviderUserDetails] = authProviderClient.findByUserId(userId).flatMap {
+      case Some(u) => Future.successful(u)
+      case _ => UserNotFoundError
+    }
     val currentCdFut = contactDetailsRepository.find(userId)
     val currentPdFut = personalDetailsRepository.find(applicationId)
+
     for {
       currentCd <- currentCdFut
       currentPd <- currentPdFut
+      user <- userFut
       _ <- Future.sequence(
-            personalDetailsRepository.updatePersonalDetailsOnly(applicationId, userId, currentPd.copy(
-              firstName = editRequest.firstName,
-              lastName = editRequest.lastName,
-              preferredName = editRequest.preferredName,
-              dateOfBirth = editRequest.dateOfBirth
-            )) ::
-            contactDetailsRepository.update(userId, currentCd.copy(
-              outsideUk = editRequest.outsideUk.getOrElse(editRequest.country.isDefined),
-              address = editRequest.address,
-              postCode = editRequest.postCode,
-              country = editRequest.country,
-              phone = editRequest.phone
-            )) :: Nil
+        authProviderClient.update(userId, toUpdateDetailsRequest(editRequest, user)) ::
+          personalDetailsRepository.update(applicationId, userId, currentPd.copy(
+            firstName = editRequest.firstName,
+            lastName = editRequest.lastName,
+            preferredName = editRequest.preferredName,
+            dateOfBirth = editRequest.dateOfBirth
+          )) ::
+          contactDetailsRepository.update(userId, currentCd.copy(
+            outsideUk = editRequest.outsideUk.getOrElse(editRequest.country.isDefined),
+            address = editRequest.address,
+            postCode = editRequest.postCode,
+            country = editRequest.country,
+            phone = editRequest.phone
+          )) :: Nil
       )
+
     } yield {
       auditService.logEventNoRequest(
         "ApplicationEdited",
         Map("applicationId" -> applicationId, "editRequest" -> editRequest.toString)
       )
     }
+  }
+
+  private def toUpdateDetailsRequest(editRequest: CandidateEditableDetails, user: AuthProviderUserDetails): UpdateDetailsRequest = {
+    UpdateDetailsRequest(editRequest.firstName, editRequest.lastName, user.email, Some(editRequest.preferredName), user.role, user.disabled)
   }
 
 }

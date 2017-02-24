@@ -81,7 +81,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   override def review(applicationId: String): Future[Unit] = Future.successful(Unit)
 
   override def findByCriteria(firstOrPreferredName: Option[String], lastName: Option[String],
-                              dateOfBirth: Option[LocalDate], userIds: List[String]): Future[List[Candidate]] =
+    dateOfBirth: Option[LocalDate], userIds: List[String]): Future[List[Candidate]] =
     Future.successful(List.empty[Candidate])
 
   override def findCandidateByUserId(userId: String): Future[Option[Candidate]] = Future.successful(None)
@@ -121,7 +121,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
 
   def findAssessmentCentreIndicator(appId: String): scala.concurrent.Future[Option[model.AssessmentCentreIndicator]] = ???
 
-  def updateAssessmentCentreIndicator(applicationId: String,indicator: model.AssessmentCentreIndicator): scala.concurrent.Future[Unit] = ???
+  def updateAssessmentCentreIndicator(applicationId: String, indicator: model.AssessmentCentreIndicator): scala.concurrent.Future[Unit] = ???
 
   override def find(applicationId: String): Future[Option[Candidate]] = ???
 

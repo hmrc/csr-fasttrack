@@ -57,7 +57,7 @@ class ApplicationStatusOrderSpec extends PlaySpec {
   "a reviewed application" should {
     "return reviewed" in {
       val customProgress = progress.copy(withdrawn = false, submitted = false,
-      questionnaire = QuestionnaireProgressResponse())
+        questionnaire = QuestionnaireProgressResponse())
       ApplicationStatusOrder.getStatus(customProgress) must be(ProgressStatuses.ReviewCompletedProgress)
     }
   }
@@ -101,9 +101,10 @@ class ApplicationStatusOrderSpec extends PlaySpec {
 object ApplicationStatusOrderSpec {
 
   val progress = ProgressResponse("1", personalDetails = true, hasSchemeLocations = true, hasSchemes = true,
-    assistanceDetails = true, review = true, QuestionnaireProgressResponse(diversityStarted = true,
-      diversityCompleted = true, educationCompleted = true, occupationCompleted = true), submitted = true, withdrawn = true
-  )
+    assistanceDetails = true, review = true, QuestionnaireProgressResponse(
+    diversityStarted = true,
+    diversityCompleted = true, educationCompleted = true, occupationCompleted = true
+  ), submitted = true, withdrawn = true)
 
   val emptyProgress = ProgressResponse("1")
 
@@ -111,6 +112,5 @@ object ApplicationStatusOrderSpec {
     review = true,
     QuestionnaireProgressResponse(diversityStarted = true, diversityCompleted = true, educationCompleted = true, occupationCompleted = true),
     submitted = true, withdrawn = true,
-    OnlineTestProgressResponse(invited = true, started = true, completed = true, allocationConfirmed = true)
-  )
+    OnlineTestProgressResponse(invited = true, started = true, completed = true, allocationConfirmed = true))
 }

@@ -59,7 +59,7 @@ trait OnlineTestRepository {
   def updateStatus(userId: String, status: ApplicationStatuses.EnumVal): Future[Unit]
 
   def updateStatus(userId: String, currentStatuses: List[ApplicationStatuses.EnumVal],
-                   newStatus: ApplicationStatuses.EnumVal): Future[Unit]
+    newStatus: ApplicationStatuses.EnumVal): Future[Unit]
 
   def updateExpiryTime(userId: String, expirationDate: DateTime): Future[Unit]
 
@@ -98,9 +98,9 @@ trait OnlineTestRepository {
 
 // scalastyle:off number.of.methods
 class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
-  extends ReactiveRepository[CubiksTestProfile, BSONObjectID](CollectionNames.APPLICATION, mongo,
-    model.persisted.CubiksTestProfile.format, ReactiveMongoFormats.objectIdFormats)
-     with OnlineTestRepository with RandomSelection with ReactiveRepositoryHelpers {
+    extends ReactiveRepository[CubiksTestProfile, BSONObjectID](CollectionNames.APPLICATION, mongo,
+      model.persisted.CubiksTestProfile.format, ReactiveMongoFormats.objectIdFormats)
+    with OnlineTestRepository with RandomSelection with ReactiveRepositoryHelpers {
 
   val dateTimeFactory: DateTimeFactory = DateTimeFactory
 
@@ -175,7 +175,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   override def updateStatus(userId: String, currentStatuses: List[ApplicationStatuses.EnumVal],
-                            newStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
+    newStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
     val query = BSONDocument(
       "userId" -> userId,
       "applicationStatus" -> BSONDocument("$in" -> currentStatuses)
@@ -217,8 +217,9 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   override def updateExpiryTime(userId: String, expirationDate: DateTime): Future[Unit] = {
     import model.ApplicationStatuses.BSONEnumHandler
 
-    val query= BSONDocument("userId" -> userId,
-      "applicationStatus" ->  BSONDocument("$in" -> List(ApplicationStatuses.OnlineTestInvited, ApplicationStatuses.OnlineTestStarted))
+    val query = BSONDocument(
+      "userId" -> userId,
+      "applicationStatus" -> BSONDocument("$in" -> List(ApplicationStatuses.OnlineTestInvited, ApplicationStatuses.OnlineTestStarted))
     )
 
     val update = BSONDocument("$set" -> BSONDocument(
@@ -243,7 +244,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   override def completeOnlineTest(cubiksUserId: Int, assessmentId: Int, isGis: Boolean): Future[Unit] = {
-    val query  = BSONDocument(
+    val query = BSONDocument(
       "online-tests.cubiksUserId" -> cubiksUserId,
       "applicationStatus" -> ApplicationStatuses.OnlineTestStarted
     )
@@ -267,7 +268,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   private def completeAllAssessments(cubiksUserId: Int): Future[Unit] = {
-    val query  = BSONDocument(
+    val query = BSONDocument(
       "online-tests.cubiksUserId" -> cubiksUserId,
       "applicationStatus" -> ApplicationStatuses.OnlineTestStarted
     )
@@ -381,7 +382,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
         BSONDocument("applicationStatus" -> ApplicationStatuses.OnlineTestStarted)
       )),
       BSONDocument("online-tests.expirationDate" ->
-        BSONDocument( "$lte" -> dateTimeFactory.nowLocalTimeZone.plusHours(reminder.hoursBeforeReminder)) // Serialises to UTC.
+        BSONDocument("$lte" -> dateTimeFactory.nowLocalTimeZone.plusHours(reminder.hoursBeforeReminder)) // Serialises to UTC.
       ),
       BSONDocument(s"progress-status.${reminder.notificationStatus}" -> BSONDocument("$ne" -> true))
     ))
@@ -464,13 +465,16 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
       BSONDocument(
         "applicationStatus" -> ApplicationStatuses.OnlineTestCompleted,
         "online-tests.xmlReportSaved" -> true,
-        "passmarkEvaluation.passmarkVersion" -> BSONDocument("$exists" -> false)),
+        "passmarkEvaluation.passmarkVersion" -> BSONDocument("$exists" -> false)
+      ),
       BSONDocument(
         "applicationStatus" -> ApplicationStatuses.AwaitingOnlineTestReevaluation,
-        "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)),
+        "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)
+      ),
       BSONDocument(
         "applicationStatus" -> ApplicationStatuses.AssessmentScoresAccepted,
-        "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion))
+        "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)
+      )
 
     ))
 
@@ -485,7 +489,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
-                        applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
+    applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
 
     val progressStatus = applicationStatus match {
@@ -513,8 +517,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal,
-    expireDate: Option[LocalDate]
-  ): Future[Unit] = {
+    expireDate: Option[LocalDate]): Future[Unit] = {
     import ApplicationStatuses._
 
     val query = BSONDocument("applicationId" -> applicationId)
@@ -554,27 +557,25 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
 
   def removeCandidateAllocationStatus(applicationId: String): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
-
-    val deAllocationSet = BSONDocument("$set" -> {
-      BSONDocument(
-        "applicationStatus" -> ApplicationStatuses.AwaitingAllocationNotified,
-        s"progress-status.${ProgressStatuses.AwaitingAllocationProgress}" -> true,
-        s"progress-status-dates.${ProgressStatuses.AwaitingAllocationProgress}" -> LocalDate.now()
-      )
-    })
-
-    val deAllocationUnset = BSONDocument("$unset" -> {
-      BSONDocument(
+    val update = BSONDocument(
+      "$unset" -> BSONDocument(
         s"progress-status.${ProgressStatuses.AllocationConfirmedProgress}" -> "",
         s"progress-status.${ProgressStatuses.AllocationUnconfirmedProgress}" -> "",
         s"progress-status-dates.${ProgressStatuses.AllocationConfirmedProgress}" -> "",
         s"progress-status-dates.${ProgressStatuses.AllocationUnconfirmedProgress}" -> "",
         "allocation-expire-date" -> ""
+      ),
+      "$set" -> BSONDocument(
+        "applicationStatus" -> ApplicationStatuses.AwaitingAllocationNotified,
+        s"progress-status.${ProgressStatuses.AwaitingAllocationProgress}" -> true,
+        s"progress-status-dates.${ProgressStatuses.AwaitingAllocationProgress}" -> LocalDate.now()
       )
-    })
+    )
 
-    collection.update(query, deAllocationSet, upsert = false).map(checkUpdateWriteResult).flatMap(_ =>
-      collection.update(query, deAllocationUnset, upsert = false).map(checkUpdateWriteResult))
+    val validator = singleUpdateValidator(applicationId, "resetting assessment centre allocation status",
+      UnexpectedException("failed to reset assessment centre allocation status"))
+
+    collection.update(query, update, upsert = false) map validator
   }
 
   def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = {

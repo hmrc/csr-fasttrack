@@ -26,9 +26,11 @@ trait ReportingFormatter {
       case Some(false) => Some("No")
       case Some(true) =>
         adjustments.flatMap(_.onlineTests.map { onlineTests =>
-          List(onlineTests.extraTimeNeeded.map(value => s"Verbal extra time needed: $value%"),
+          List(
+            onlineTests.extraTimeNeeded.map(value => s"Verbal extra time needed: $value%"),
             onlineTests.extraTimeNeededNumerical.map(value => s"Numerical extra time needed: $value%"),
-            onlineTests.otherInfo.map(value => s"$value")).flatten.mkString(", ")
+            onlineTests.otherInfo.map(value => s"$value")
+          ).flatten.mkString(", ")
         }).orElse(Some("Yes"))
       case None => None
     }
@@ -38,10 +40,12 @@ trait ReportingFormatter {
     assessmentCentreAdjustments match {
       case Some(false) => Some("No")
       case Some(true) =>
-        adjustments.map( adjustmentsVal => {
+        adjustments.map(adjustmentsVal => {
           val specificAdjustments = adjustmentsVal.assessmentCenter.map { assessmentCenter =>
-            List(assessmentCenter.extraTimeNeeded.map(value => s"Extra time needed: $value%"),
-              assessmentCenter.otherInfo.map(value => s"$value"))
+            List(
+              assessmentCenter.extraTimeNeeded.map(value => s"Extra time needed: $value%"),
+              assessmentCenter.otherInfo.map(value => s"$value")
+            )
           }.getOrElse(List.empty)
           val typeOfAdjustments: List[Option[String]] = {
             val adjustmentsExcluded = List("onlineTestsTimeExtension", "onlineTestsOther", "assessmentCenterTimeExtension",

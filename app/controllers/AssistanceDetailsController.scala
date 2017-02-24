@@ -16,7 +16,7 @@
 
 package controllers
 
-import model.Exceptions.{AssistanceDetailsNotFound, CannotUpdateAssistanceDetails}
+import model.Exceptions.{ AssistanceDetailsNotFound, CannotUpdateAssistanceDetails }
 import model.exchange.AssistanceDetails
 import play.api.libs.json.Json
 import play.api.mvc.Action

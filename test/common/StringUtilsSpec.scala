@@ -18,7 +18,6 @@ package common
 
 import testkit.UnitSpec
 
-
 class StringUtilsSpec extends UnitSpec {
 
   "Split camel case" should {

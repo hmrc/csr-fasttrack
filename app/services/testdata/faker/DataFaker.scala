@@ -56,7 +56,7 @@ object DataFaker {
       randOne(range)
     }
 
-    def randNumber = randOne(List(1,2,3,4,5,6,7,8,9))
+    def randNumber = randOne(List(1, 2, 3, 4, 5, 6, 7, 8, 9))
 
     def randList[T](options: List[T], size: Int, cannotBe: List[T] = Nil): List[T] = {
       if (size > 0) {
@@ -80,7 +80,7 @@ object DataFaker {
     def passmark: Result = randOne(List(EvaluationResults.Green, EvaluationResults.Amber, EvaluationResults.Red))
 
     def availableAssessmentVenueAndDate: Future[AvailableAssessmentSlot] = {
-      AssessmentCentreYamlRepository.assessmentCentreCapacities.flatMap { assessmentCentreLocations =>
+      AssessmentCentreLocationYamlRepository.assessmentCentreCapacities.flatMap { assessmentCentreLocations =>
 
         val randomisedVenues = util.Random.shuffle(assessmentCentreLocations.flatMap(_.venues))
 
@@ -93,14 +93,13 @@ object DataFaker {
         }
 
         firstVenueWithSpace.map { entry =>
-          Logger.warn("=============== FVWS = " + entry)
           entry.get
         }
       }
     }
 
     private def venueHasFreeSlots(venue: AssessmentCentreVenue): Future[Option[AvailableAssessmentSlot]] = {
-      applicationAssessmentRepository.applicationAssessmentsForVenue(venue.venueName).map { assessments =>
+      assessmentCentreAllocationRepository.findAllForVenue(venue.venueName).map { assessments =>
         val takenSlotsByDateAndSession = assessments.groupBy(slot => slot.date -> slot.session).map {
           case (date, numOfAssessments) => (date, numOfAssessments.length)
         }
@@ -120,25 +119,27 @@ object DataFaker {
     }
 
     def region: Future[String] = {
-      AssessmentCentreYamlRepository.locationsAndAssessmentCentreMapping.map { locationsToAssessmentCentres =>
+      AssessmentCentreLocationYamlRepository.locationsAndAssessmentCentreMapping.map { locationsToAssessmentCentres =>
         val locationToRegion = locationsToAssessmentCentres.values.filterNot(_.startsWith("TestAssessment"))
         randOne(locationToRegion.toList)
       }
     }
 
     def location(region: String, cannotBe: List[String] = Nil): Future[String] = {
-      AssessmentCentreYamlRepository.locationsAndAssessmentCentreMapping.map { locationsToAssessmentCentres =>
+      AssessmentCentreLocationYamlRepository.locationsAndAssessmentCentreMapping.map { locationsToAssessmentCentres =>
         val locationsInRegion = locationsToAssessmentCentres.filter(_._2 == region).keys.toList
         randOne(locationsInRegion, cannotBe)
       }
     }
 
     def gender = randOne(List("Male", "Female", "Other", "I don't know/prefer not to say"))
-    def sexualOrientation = randOne(List("Heterosexual/straight",
+    def sexualOrientation = randOne(List(
+      "Heterosexual/straight",
       "Gay/lesbian",
       "Bisexual",
       "Other",
-      "I don't know/prefer not to say"))
+      "I don't know/prefer not to say"
+    ))
     def ethnicGroup = randOne(List(
       "English/Welsh/Scottish/Northern Irish/British",
       "Irish",
@@ -168,7 +169,8 @@ object DataFaker {
       "Employee",
       "Self-employed with employees",
       "Self-employed/freelancer without employees",
-      "I don't know/prefer not to say"))
+      "I don't know/prefer not to say"
+    ))
 
     def sizeOfPlaceOfWork = randOne(List("Small (1 - 24 employees)", "Large (over 24 employees)", "I don't know/prefer not to say"))
 
@@ -226,12 +228,14 @@ object DataFaker {
     def onlineAdjustmentsDescription: String = randOne(List(
       "I am too sensitive to the light from screens",
       "I am allergic to electronic-magnetic waves",
-      "I am a convicted cracker who was asked by the court to be away from computers for 5 years"))
+      "I am a convicted cracker who was asked by the court to be away from computers for 5 years"
+    ))
 
     def assessmentCentreAdjustmentDescription: String = randOne(List(
       "I am very weak, I need constant support",
       "I need a comfortable chair because of my back problem",
-      "I need to take a rest every 10 minutes"))
+      "I need to take a rest every 10 minutes"
+    ))
     def postCode: String = {
       s"${Random.upperLetter}${Random.upperLetter}1 2${Random.upperLetter}${Random.upperLetter}"
     }

@@ -28,27 +28,28 @@ import repositories.{ BaseBSONReader, CommonBSONDocuments }
 
 trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
   implicit val toApplicationForCandidateProgressReport = bsonReader {
-    (doc: BSONDocument) => {
-      val applicationId = doc.getAs[String]("applicationId").getOrElse("")
-      val userId = doc.getAs[String]("userId").getOrElse("")
-      val progress: ProgressResponse = toProgressResponse(applicationId).read(doc)
-      val schemes = doc.getAs[List[Scheme]]("schemes").getOrElse(List.empty)
-      val schemeLocations = doc.getAs[List[String]]("scheme-locations").getOrElse(List.empty)
+    (doc: BSONDocument) =>
+      {
+        val applicationId = doc.getAs[String]("applicationId").getOrElse("")
+        val userId = doc.getAs[String]("userId").getOrElse("")
+        val progress: ProgressResponse = toProgressResponse(applicationId).read(doc)
+        val schemes = doc.getAs[List[Scheme]]("schemes").getOrElse(List.empty)
+        val schemeLocations = doc.getAs[List[String]]("scheme-locations").getOrElse(List.empty)
 
-      val assistanceDetails = doc.getAs[AssistanceDetails]("assistance-details")
-      val adjustments = doc.getAs[Adjustments]("assistance-details")
+        val assistanceDetails = doc.getAs[AssistanceDetails]("assistance-details")
+        val adjustments = doc.getAs[Adjustments]("assistance-details")
 
-      val pdDoc = doc.getAs[BSONDocument]("personal-details")
-      val civilServant = pdDoc.flatMap(_.getAs[Boolean]("civilServant"))
+        val pdDoc = doc.getAs[BSONDocument]("personal-details")
+        val civilServant = pdDoc.flatMap(_.getAs[Boolean]("civilServant"))
 
-      val assessmentCentreIndicator = doc.getAs[AssessmentCentreIndicator]("assessment-centre-indicator")
+        val assessmentCentreIndicator = doc.getAs[AssessmentCentreIndicator]("assessment-centre-indicator")
 
-      ApplicationForCandidateProgressReport(
-        Some(UniqueIdentifier(applicationId)), UniqueIdentifier(userId), Some(getStatus(progress)), schemes, schemeLocations,
-        assistanceDetails.map(_.hasDisability), assistanceDetails.flatMap(_.guaranteedInterview),
-        assistanceDetails.map(_.needsSupportForOnlineAssessment), assistanceDetails.map(_.needsSupportAtVenue),
-        adjustments, civilServant, assessmentCentreIndicator
-      )
-    }
+        ApplicationForCandidateProgressReport(
+          Some(UniqueIdentifier(applicationId)), UniqueIdentifier(userId), Some(getStatus(progress)), schemes, schemeLocations,
+          assistanceDetails.map(_.hasDisability), assistanceDetails.flatMap(_.guaranteedInterview),
+          assistanceDetails.map(_.needsSupportForOnlineAssessment), assistanceDetails.map(_.needsSupportAtVenue),
+          adjustments, civilServant, assessmentCentreIndicator
+        )
+      }
   }
 }

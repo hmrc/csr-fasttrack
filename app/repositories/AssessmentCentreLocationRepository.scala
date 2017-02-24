@@ -35,7 +35,9 @@ case class AssessmentCentreLocation(locationName: String, venues: List[Assessmen
 
 case class AssessmentCentreVenue(venueName: String, venueDescription: String, capacityDates: List[AssessmentCentreVenueCapacityDate])
 
-case class AssessmentCentreVenueCapacityDate(date: LocalDate, amCapacity: Int, pmCapacity: Int)
+case class AssessmentCentreVenueCapacityDate(date: LocalDate, amCapacity: Int, pmCapacity: Int,
+  amMinViableAttendees: Int, amPreferredAttendeeMargin: Int,
+  pmMinViableAttendees: Int, pmPreferredAttendeeMargin: Int)
 
 object AssessmentCentreLocation {
   implicit val assessmentCentreCapacityDateFormat = Json.format[AssessmentCentreVenueCapacityDate]
@@ -43,8 +45,7 @@ object AssessmentCentreLocation {
   implicit val assessmentCentreLocationFormat = Json.format[AssessmentCentreLocation]
 }
 
-trait AssessmentCentreRepository {
-
+trait AssessmentCentreLocationRepository {
   def locationsAndAssessmentCentreMapping: Future[Map[String, String]]
 
   def assessmentCentreCapacities: Future[List[AssessmentCentreLocation]]
@@ -52,7 +53,7 @@ trait AssessmentCentreRepository {
   def assessmentCentreCapacityDate(venue: String, date: LocalDate): Future[AssessmentCentreVenueCapacityDate]
 }
 
-trait AssessmentCentreRepositoryImpl extends AssessmentCentreRepository {
+trait AssessmentCentreLocationRepositoryImpl extends AssessmentCentreLocationRepository {
 
   import play.api.Play.current
 
@@ -109,7 +110,11 @@ trait AssessmentCentreRepositoryImpl extends AssessmentCentreRepository {
                 AssessmentCentreVenueCapacityDate(
                   LocalDate.parse(capacityBlock("date"), AssessmentCentreDateFormat),
                   capacityBlock("amCapacity").asInstanceOf[Int],
-                  capacityBlock("pmCapacity").asInstanceOf[Int]
+                  capacityBlock("pmCapacity").asInstanceOf[Int],
+                  capacityBlock("amMinViableAttendees").asInstanceOf[Int],
+                  capacityBlock("amPreferredAttendeeMargin").asInstanceOf[Int],
+                  capacityBlock("pmMinViableAttendees").asInstanceOf[Int],
+                  capacityBlock("pmPreferredAttendeeMargin").asInstanceOf[Int]
                 )
               }.toList)
           }.toList
@@ -119,7 +124,7 @@ trait AssessmentCentreRepositoryImpl extends AssessmentCentreRepository {
   }
 }
 
-object AssessmentCentreYamlRepository extends AssessmentCentreRepositoryImpl {
+object AssessmentCentreLocationYamlRepository extends AssessmentCentreLocationRepositoryImpl {
   import config.MicroserviceAppConfig.{ assessmentCentresConfig, assessmentCentresLocationsConfig }
 
   override val assessmentCentresConfigPath = assessmentCentresConfig.yamlFilePath
