@@ -39,7 +39,7 @@ trait AwaitingOnlineTestReevaluationStatusGenerator extends ConstructiveGenerato
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       _ <- otRepository.savePassMarkScore(candidateInPreviousStatus.applicationId.get, "version2", evaluationResult,
-        ApplicationStatuses.AwaitingOnlineTestReevaluation)
+        Some(ApplicationStatuses.AwaitingOnlineTestReevaluation))
     } yield {
       candidateInPreviousStatus.copy(applicationStatus = ApplicationStatuses.AwaitingOnlineTestReevaluation)
     }

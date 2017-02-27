@@ -76,7 +76,7 @@ trait OnlineTestRepository {
   def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]]
 
   def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
-    applicationStatus: ApplicationStatuses.EnumVal): Future[Unit]
+    applicationStatus: Option[ApplicationStatuses.EnumVal]): Future[Unit]
 
   def findAllPassMarkEvaluations: Future[Map[String, List[SchemeEvaluationResult]]]
 
@@ -489,26 +489,37 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
-    applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
+                        newApplicationStatus: Option[ApplicationStatuses.EnumVal]): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
 
-    val progressStatus = applicationStatus match {
-      case ApplicationStatuses.AwaitingOnlineTestReevaluation => ProgressStatuses.AwaitingOnlineTestReevaluationProgress
-      case ApplicationStatuses.OnlineTestFailed => ProgressStatuses.OnlineTestFailedProgress
-      case ApplicationStatuses.AwaitingAllocation => ProgressStatuses.AwaitingAllocationProgress
+    val updateQuery = newApplicationStatus match {
+      case Some(status) =>
+        val progressStatus = status match {
+          case ApplicationStatuses.AwaitingOnlineTestReevaluation => ProgressStatuses.AwaitingOnlineTestReevaluationProgress
+          case ApplicationStatuses.OnlineTestFailed => ProgressStatuses.OnlineTestFailedProgress
+          case ApplicationStatuses.AwaitingAllocation => ProgressStatuses.AwaitingAllocationProgress
+        }
+
+        BSONDocument("$set" ->
+          BSONDocument(
+            "passmarkEvaluation" -> BSONDocument(
+              "passmarkVersion" -> version,
+              "result" -> evaluationResult
+            ),
+            "applicationStatus" -> status,
+            s"progress-status.$progressStatus" -> true
+          ))
+      case None =>
+        BSONDocument("$set" ->
+          BSONDocument(
+            "passmarkEvaluation" -> BSONDocument(
+              "passmarkVersion" -> version,
+              "result" -> evaluationResult
+            )
+          ))
     }
 
-    val passMarkEvaluation = BSONDocument("$set" ->
-      BSONDocument(
-        "passmarkEvaluation" -> BSONDocument(
-          "passmarkVersion" -> version,
-          "result" -> evaluationResult
-        ),
-        "applicationStatus" -> applicationStatus,
-        s"progress-status.$progressStatus" -> true
-      ))
-
-    collection.update(query, passMarkEvaluation, upsert = false).map(checkUpdateWriteResult)
+    collection.update(query, updateQuery, upsert = false).map(checkUpdateWriteResult)
   }
 
   private def schemeToBSON(scheme: (String, Option[Result])) = scheme._2 match {

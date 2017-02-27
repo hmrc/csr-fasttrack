@@ -62,7 +62,7 @@ trait EvaluateOnlineTestService extends ApplicationStatusCalculator {
 
   def evaluate(score: CandidateEvaluationData): Future[Unit] = {
     val evaluatedSchemes = passMarkRulesEngine.evaluate(score)
-    val applicationStatus = determineStatus(evaluatedSchemes.map(_.result), score.applicationStatus)
+    val applicationStatus = determineNewStatus(evaluatedSchemes.map(_.result), score.applicationStatus)
 
     onlineTestRepository.savePassMarkScore(
       score.scores.applicationId,
