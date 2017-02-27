@@ -122,10 +122,5 @@ class AssessmentResultsReportingControllerSpec extends BaseReportingControllerSp
       buildingCapabilityForAll = CandidateScores(someDouble, someDouble, someDouble),
       motivationFit = CandidateScores(someDouble, someDouble, someDouble),
       feedback = CandidateScoreFeedback(someRnd("feedback"), someRnd("feedback"), someRnd("feedback")))
-
-    def request = {
-      FakeRequest(Helpers.GET, controllers.routes.ReportingController.createAssessmentResultsReport(frameworkId).url, FakeHeaders(), "")
-        .withHeaders("Content-Type" -> "application/json")
-    }
   }
 }

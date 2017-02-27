@@ -16,11 +16,13 @@
 
 package model.report
 
+import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.ReportExchangeObjects.{ PassMarkReportTestResults, ApplicationForCandidateProgressReport, DiversityReportDiversityAnswers }
 import model.Scheme.Scheme
 import model.UniqueIdentifier
 import play.api.libs.json.Json
-import model.ReportExchangeObjects.Implicits.passMarkReportTestResultsFormats // Do not remove this. It is needed despite what IntelliJ thinks
+import model.ReportExchangeObjects.Implicits.passMarkReportTestResultsFormats
+import model.CandidateScoresCommands.Implicits.CandidateScoresAndFeedbackFormats
 
 case class PassMarkReportItem(
   applicationId: UniqueIdentifier,
@@ -38,13 +40,19 @@ case class PassMarkReportItem(
   socialEconomicScore: String,
   hearAboutUs: String,
   allocatedAssessmentCentre: Option[String],
-  testResults: PassMarkReportTestResults
+  testResults: PassMarkReportTestResults,
+  schemeOnlineTestResults: List[String],
+  candidateScores: CandidateScoresAndFeedback,
+  schemeAssessmentCentreTestResults: List[String]
 )
 
 case object PassMarkReportItem {
+  //scalastyle:off parameter.number
   def apply(application: ApplicationForCandidateProgressReport, diversityAnswers: DiversityReportDiversityAnswers,
-    ses: String, hearAboutUs: String, allocatedAssessmentCentre: Option[String],
-    testResults: PassMarkReportTestResults): PassMarkReportItem = {
+            socialEconomicScore: String, hearAboutUs: String, allocatedAssessmentCentre: Option[String], testResults: PassMarkReportTestResults,
+            schemeOnlineTestResults: List[String], assessmentResults: CandidateScoresAndFeedback,
+            schemeAssessmentCentreTestResults: List[String]): PassMarkReportItem = {
+    //scalastyle:on
     PassMarkReportItem(
       applicationId = application.applicationId.get,
       progress = application.progress,
@@ -58,10 +66,13 @@ case object PassMarkReportItem {
       onlineAdjustments = application.onlineAdjustments.map(fromBooleanToYesNo(_)),
       assessmentCentreAdjustments = application.assessmentCentreAdjustments.map(fromBooleanToYesNo(_)),
       civilServant = application.civilServant,
-      socialEconomicScore = ses,
+      socialEconomicScore = socialEconomicScore,
       hearAboutUs = hearAboutUs,
       allocatedAssessmentCentre = allocatedAssessmentCentre,
-      testResults = testResults
+      testResults = testResults,
+      schemeOnlineTestResults = schemeOnlineTestResults,
+      candidateScores = assessmentResults,
+      schemeAssessmentCentreTestResults = schemeAssessmentCentreTestResults
     )
   }
   val fromBooleanToYesNo: Boolean => String = (b: Boolean) => if (b) "Yes" else "No"

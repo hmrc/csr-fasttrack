@@ -19,13 +19,11 @@ package repositories.application
 import java.util.regex.Pattern
 
 import common.Constants.{ No, Yes }
-import common.StringUtils._
 import model.{ ApplicationStatuses, _ }
 import model.ApplicationStatusOrder.{ getStatus, _ }
 import model.Commands._
 import model.EvaluationResults._
 import model.ReportExchangeObjects._
-import model.Scheme.Scheme
 import model._
 import model.commands.OnlineTestProgressResponse
 import model.exchange.AssistanceDetails
@@ -58,8 +56,6 @@ trait ReportingRepository {
   def applicationsReport(frameworkId: String): Future[List[(String, IsNonSubmitted, PreferencesWithContactDetails)]]
 
   def allApplicationAndUserIds(frameworkId: String): Future[List[ApplicationUserIdReport]]
-
-  def applicationsWithAssessmentScoresAccepted(frameworkId: String): Future[List[ApplicationPreferences]]
 
   def applicationsPassedInAssessmentCentre(frameworkId: String): Future[List[ApplicationPreferencesWithTestResults]]
 
@@ -201,93 +197,6 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
 
     reportQueryWithProjectionsBSON[ApplicationForCandidateProgressReport](query, projection)
   }
-
-  override def applicationsWithAssessmentScoresAccepted(frameworkId: String): Future[List[ApplicationPreferences]] =
-    applicationPreferences(BSONDocument("$and" -> BSONArray(
-      BSONDocument("frameworkId" -> frameworkId),
-      BSONDocument(s"progress-status.${ProgressStatuses.AssessmentScoresAcceptedProgress}" -> true),
-      BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn))
-    )))
-
-  // scalastyle:off method.length
-  private def applicationPreferences(query: BSONDocument): Future[List[ApplicationPreferences]] = {
-    val projection = BSONDocument(
-      "userId" -> "1",
-      "framework-preferences.alternatives.location" -> "1",
-      "framework-preferences.alternatives.framework" -> "1",
-      "framework-preferences.firstLocation.location" -> "1",
-      "framework-preferences.secondLocation.location" -> "1",
-      "framework-preferences.firstLocation.firstFramework" -> "1",
-      "framework-preferences.secondLocation.firstFramework" -> "1",
-      "framework-preferences.firstLocation.secondFramework" -> "1",
-      "framework-preferences.secondLocation.secondFramework" -> "1",
-      "assistance-details.hasDisability" -> "1",
-      "assistance-details.needsSupportForOnlineAssessment" -> 1,
-      "assistance-details.needsSupportAtVenue" -> 1,
-      "assistance-details.guaranteedInterview" -> "1",
-      "personal-details.aLevel" -> "1",
-      "personal-details.stemLevel" -> "1",
-      "passmarkEvaluation" -> "2",
-      "applicationId" -> "1"
-    )
-
-    reportQueryWithProjections[BSONDocument](query, projection).map { list =>
-      list.map { document =>
-        val userId = document.getAs[String]("userId").getOrElse("")
-
-        val fr = document.getAs[BSONDocument]("framework-preferences")
-
-        val fr1 = fr.flatMap(_.getAs[BSONDocument]("firstLocation"))
-        val fr1FirstLocation = fr1.flatMap(_.getAs[String]("location"))
-        val fr1FirstFramework = fr1.flatMap(_.getAs[String]("firstFramework"))
-        val fr1SecondFramework = fr1.flatMap(_.getAs[String]("secondFramework"))
-
-        val fr2 = fr.flatMap(_.getAs[BSONDocument]("secondLocation"))
-        val fr2FirstLocation = fr2.flatMap(_.getAs[String]("location"))
-        val fr2FirstFramework = fr2.flatMap(_.getAs[String]("firstFramework"))
-        val fr2SecondFramework = fr2.flatMap(_.getAs[String]("secondFramework"))
-
-        val frAlternatives = fr.flatMap(_.getAs[BSONDocument]("alternatives"))
-        val location = frAlternatives.flatMap(_.getAs[Boolean]("location").map(booleanTranslator))
-        val framework = frAlternatives.flatMap(_.getAs[Boolean]("framework").map(booleanTranslator))
-
-        val ad = document.getAs[BSONDocument]("assistance-details")
-        val hasDisability = ad.flatMap(_.getAs[String]("hasDisability"))
-        val needsSupportForOnlineAssessment = ad.flatMap(_.getAs[Boolean]("needsSupportForOnlineAssessment"))
-        val needsSupportAtVenue = ad.flatMap(_.getAs[Boolean]("needsSupportAtVenue"))
-        // TODO: Revisit this and check if we want to return both fields. If we want to keep one decide what to do if both values are None
-        val needsAdjustment: Option[String] = (needsSupportForOnlineAssessment, needsSupportAtVenue) match {
-          case (None, None) => None
-          case (Some(true), _) => Some("Yes")
-          case (_, Some(true)) => Some("Yes")
-          case _ => Some("No")
-        }
-        val guaranteedInterview = ad.flatMap(_.getAs[Boolean]("guaranteedInterview")).map { gis => if (gis) "Yes" else "No" }
-
-        val pd = document.getAs[BSONDocument]("personal-details")
-        val aLevel = pd.flatMap(_.getAs[Boolean]("aLevel").map(booleanTranslator))
-        val stemLevel = pd.flatMap(_.getAs[Boolean]("stemLevel").map(booleanTranslator))
-
-        val applicationId = document.getAs[String]("applicationId").getOrElse("")
-
-        val pe = document.getAs[BSONDocument]("passmarkEvaluation")
-
-        val otLocation1Scheme1PassmarkEvaluation = pe.flatMap(_.getAs[String]("location1Scheme1").map(Result(_).toPassmark))
-        val otLocation1Scheme2PassmarkEvaluation = pe.flatMap(_.getAs[String]("location1Scheme2").map(Result(_).toPassmark))
-        val otLocation2Scheme1PassmarkEvaluation = pe.flatMap(_.getAs[String]("location2Scheme1").map(Result(_).toPassmark))
-        val otLocation2Scheme2PassmarkEvaluation = pe.flatMap(_.getAs[String]("location2Scheme2").map(Result(_).toPassmark))
-        val otAlternativeSchemePassmarkEvaluation = pe.flatMap(_.getAs[String]("alternativeScheme").map(Result(_).toPassmark))
-
-        ApplicationPreferences(UniqueIdentifier(userId), UniqueIdentifier(applicationId), fr1FirstLocation,
-          fr1FirstFramework, fr1SecondFramework, fr2FirstLocation, fr2FirstFramework, fr2SecondFramework, location,
-          framework, hasDisability, guaranteedInterview, needsAdjustment, aLevel, stemLevel,
-          OnlineTestPassmarkEvaluationSchemes(otLocation1Scheme1PassmarkEvaluation, otLocation1Scheme2PassmarkEvaluation,
-            otLocation2Scheme1PassmarkEvaluation, otLocation2Scheme2PassmarkEvaluation, otAlternativeSchemePassmarkEvaluation))
-      }
-    }
-  }
-
-  // scalstyle:on method.length
 
   override def applicationsPassedInAssessmentCentre(frameworkId: String): Future[List[ApplicationPreferencesWithTestResults]] =
     applicationPreferencesWithTestResults(BSONDocument("$and" -> BSONArray(

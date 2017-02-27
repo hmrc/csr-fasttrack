@@ -95,20 +95,6 @@ class QuestionnaireMongoRepository(socioEconomicCalculator: SocioEconomicScoreCa
     diversityReport
   }
 
-  // TODO tidy this up after the assessment results report is built
-  /*
-  override def passMarkReport: Future[Map[String, PassMarkReportQuestionnaireData]] = {
-    // We need to ensure that the candidates have completed the last page of the questionnaire
-    // however, only the first question on the employment page is mandatory, as if the answer is
-    // unemployed, they don't need to answer other questions
-    val firstEmploymentQuestion = "Do you have a parent or guardian that has completed a university degree course or equivalent?"
-    val firstEmploymentQuestion = "Did they supervise employees?"
-    val query = BSONDocument(s"questions.$firstEmploymentQuestion" -> BSONDocument("$exists" -> BSONBoolean(true)))
-    val queryResult = collection.find(query).cursor[BSONDocument](ReadPreference.nearest).collect[List]()
-    queryResult.map(_.map(docToReport).toMap)
-  }
-*/
-
   def find(applicationId: String): Future[List[PersistedQuestion]] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val projection = BSONDocument("questions" -> 1, "_id" -> 0)

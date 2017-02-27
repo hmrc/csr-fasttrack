@@ -16,14 +16,21 @@
 
 package controllers.report
 
-import model.Adjustments
+import model.Commands._
+import model.EvaluationResults.Result
+import model.PersistedObjects.ContactDetailsWithId
+import model.Scheme._
+import model.persisted.SchemeEvaluationResult
+import model.{ AssessmentCentreIndicator, UniqueIdentifier, Adjustments }
+import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, CandidateScoreFeedback, CandidateScores }
 import model.ReportExchangeObjects.{ PassMarkReportQuestionnaireData, PassMarkReportTestResults, TestResult }
-import model.exchange.ApplicationForCandidateProgressReportItemExamples
+import model.exchange.{ LocationSchemesExamples, ApplicationForCandidateProgressReportItemExamples }
 import model.report.PassMarkReportItem
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
+import repositories.QuestionnaireRepository
 import testkit.MockitoImplicits.OngoingStubbingExtension
 
 import scala.language.postfixOps
@@ -38,6 +45,8 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
       when(questionnaireRepoMock.passMarkReport).thenReturnAsync(Map.empty)
       when(testReportRepoMock.getOnlineTestReports).thenReturnAsync(Map.empty)
       when(mediaRepositoryMock.findAll).thenReturnAsync(Map.empty)
+      when(assessmentScoresRepoMock.allScores).thenReturnAsync(Map.empty)
+      when(onlineTestRepositoryMock.findAllPassMarkEvaluations).thenReturnAsync(Map.empty)
 
       val response = controller.createOnlineTestPassMarkModellingReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[PassMarkReportItem]]
@@ -46,15 +55,17 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
       result mustBe empty
     }
 
-    "return populated report if applications and data exist" in new PassMarkReportTestFixture {
+    "return populated report if applications and some data exist" in new PassMarkReportTestFixture {
       when(reportingRepoMock.passMarkReport(any())).thenReturnAsync(List(report2))
       when(contactDetailsRepoMock.findAll).thenReturnAsync(Nil)
       when(locationSchemeServiceMock.getAllSchemeLocations).thenReturnAsync(Nil)
       when(questionnaireRepoMock.passMarkReport).thenReturnAsync(Map.empty)
       when(testReportRepoMock.getOnlineTestReports).thenReturnAsync(Map.empty)
       when(mediaRepositoryMock.findAll).thenReturnAsync(Map.empty)
+      when(assessmentScoresRepoMock.allScores).thenReturnAsync(Map.empty)
       when(reportingFormatterMock.getOnlineAdjustments(any[Option[Boolean]], any[Option[Adjustments]])).thenReturn(Some("Yes"))
       when(reportingFormatterMock.getAssessmentCentreAdjustments(any[Option[Boolean]], any[Option[Adjustments]])).thenReturn(Some("Yes"))
+      when(onlineTestRepositoryMock.findAllPassMarkEvaluations).thenReturnAsync(Map.empty)
 
       val response = controller.createOnlineTestPassMarkModellingReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[PassMarkReportItem]]
@@ -62,11 +73,92 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
       status(response) mustBe OK
       result.size mustBe 1
     }
+
+    "return populated report if applications and all data exist" in new PassMarkReportTestFixture {
+      val appId = "3dee295c-6154-42b7-8353-472ae94ec980"
+      val userId = UniqueIdentifier("e0b28a6e-9092-4aa2-a19e-c6a8cb13d349")
+      when(reportingRepoMock.passMarkReport(any())).thenReturnAsync(List(report3))
+
+      val contactDetails = List(ContactDetailsWithId(
+        userId = userId.toString(), outsideUk = false, address = Address(line1 = "line1"), postCode = Some("AB111BB"),
+        country = None, email = "joe@bloggs.com", phone = Some("07720809809")
+      ))
+      when(contactDetailsRepoMock.findAll).thenReturnAsync(contactDetails)
+      when(locationSchemeServiceMock.getAllSchemeLocations).thenReturnAsync(List(LocationSchemesExamples.LocationSchemes1))
+      val diversityQuestions = Map(appId -> Map(
+        QuestionnaireRepository.genderQuestionText -> "Male",
+        QuestionnaireRepository.sexualOrientationQuestionText -> "Gay",
+        QuestionnaireRepository.ethnicityQuestionText -> "Irish"
+      ))
+      when(questionnaireRepoMock.passMarkReport).thenReturnAsync(diversityQuestions)
+      val passMarkTestResults = PassMarkReportTestResults(
+        competency = Some(TestResult(tScore = Some(1.01), percentile = Some(2.02), raw = Some(3.03), sten = Some(4.04))),
+        numerical = Some(TestResult(tScore = Some(1.01), percentile = Some(2.02), raw = Some(3.03), sten = Some(4.04))),
+        verbal = Some(TestResult(tScore = Some(1.01), percentile = Some(2.02), raw = Some(3.03), sten = Some(4.04))),
+        situational = Some(TestResult(tScore = Some(1.01), percentile = Some(2.02), raw = Some(3.03), sten = Some(4.04)))
+      )
+
+      val onlineTestReports = Map(appId -> passMarkTestResults)
+      when(testReportRepoMock.getOnlineTestReports).thenReturnAsync(onlineTestReports)
+      when(mediaRepositoryMock.findAll).thenReturnAsync(Map(userId -> "Google"))
+      when(assessmentScoresRepoMock.allScores).thenReturnAsync(Map.empty)
+      when(reportingFormatterMock.getOnlineAdjustments(any[Option[Boolean]], any[Option[Adjustments]])).thenReturn(Some("Yes"))
+      when(reportingFormatterMock.getAssessmentCentreAdjustments(any[Option[Boolean]], any[Option[Adjustments]])).thenReturn(Some("Yes"))
+      // Schemes results deliberately in different order to the preferred schemes list
+      val passMarkEvaluations = Map(appId -> List(
+        SchemeEvaluationResult(scheme = model.Scheme.ProjectDelivery, result = model.EvaluationResults.Amber),
+        SchemeEvaluationResult(scheme = model.Scheme.Business, result = model.EvaluationResults.Green)
+      ))
+      when(onlineTestRepositoryMock.findAllPassMarkEvaluations).thenReturnAsync(passMarkEvaluations)
+
+      when(assessmentCentreIndicatorRepoMock.calculateIndicator(any[Option[String]]))
+        .thenReturn(AssessmentCentreIndicator(area = "South", assessmentCentre = "London AC"))
+
+      val response = controller.createOnlineTestPassMarkModellingReport(frameworkId)(request).run
+      val result = contentAsJson(response).as[List[PassMarkReportItem]]
+
+      status(response) mustBe OK
+      result.size mustBe 1
+      val passMarkReportItem = result.head
+      passMarkReportItem.progress mustBe Some("assessment_scores_accepted")
+      passMarkReportItem.schemes mustBe List(model.Scheme.Business, model.Scheme.ProjectDelivery)
+      passMarkReportItem.locations mustBe List("testLocation1")
+      passMarkReportItem.gender mustBe "Male"
+      passMarkReportItem.sexualOrientation mustBe "Gay"
+      passMarkReportItem.ethnicity mustBe "Irish"
+      passMarkReportItem.disability mustBe Some("Yes")
+      passMarkReportItem.gis mustBe Some(false)
+      passMarkReportItem.onlineAdjustments mustBe Some("Yes")
+      passMarkReportItem.assessmentCentreAdjustments mustBe Some("Yes")
+      passMarkReportItem.civilServant mustBe Some(false)
+      passMarkReportItem.socialEconomicScore mustBe "N/A"
+      passMarkReportItem.hearAboutUs mustBe "Google"
+      passMarkReportItem.allocatedAssessmentCentre mustBe Some("London AC")
+      passMarkReportItem.testResults mustBe passMarkTestResults
+      passMarkReportItem.schemeOnlineTestResults mustBe List("Green", "Amber")
+
+      val expectedCandidateScoresAndFeedback = CandidateScoresAndFeedback(
+        applicationId = "",
+        attendancy = None,
+        assessmentIncomplete = false,
+        leadingAndCommunicating = CandidateScores(None, None, None),
+        collaboratingAndPartnering = CandidateScores(None, None, None),
+        deliveringAtPace = CandidateScores(None, None, None),
+        makingEffectiveDecisions = CandidateScores(None, None, None),
+        changingAndImproving = CandidateScores(None, None, None),
+        buildingCapabilityForAll = CandidateScores(None, None, None),
+        motivationFit = CandidateScores(None, None, None),
+        feedback = CandidateScoreFeedback(None, None, None)
+      )
+      passMarkReportItem.candidateScores mustBe expectedCandidateScoresAndFeedback
+      passMarkReportItem.schemeAssessmentCentreTestResults mustBe List.empty
+    }
   }
 
   trait PassMarkReportTestFixture extends TestFixture {
     lazy val report1 = ApplicationForCandidateProgressReportItemExamples.PersonalDetailsCompleted
     lazy val report2 = ApplicationForCandidateProgressReportItemExamples.ReviewCompleted
+    lazy val report3 = ApplicationForCandidateProgressReportItemExamples.AssessmentScoresCompleted
     lazy val reports = List(report1, report2)
 
     lazy val questionnaire1 = newQuestionnaire

@@ -116,7 +116,7 @@ class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory 
   }
 
   "Pass mark report" must {
-    "return a report with one application when there is only one application with all fields populated" in {
+    "return a report with one application when there is only one withdrawn application with all fields populated" in {
       val userId = UniqueIdentifier.randomUniqueIdentifier
       val appId = UniqueIdentifier.randomUniqueIdentifier
 
@@ -132,16 +132,25 @@ class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory 
             "education_questions_completed" -> true,
             "occupation_questions_completed" -> true
           ),
-          "online_test_completed" -> true
+          "review_completed" -> true,
+          "submitted" -> true,
+          "online_test_invited" -> true,
+          "online_test_startd" -> true,
+          "online_test_completed" -> true,
+          "awaiting_allocation" -> true,
+          "allocation_unconfirmed" -> true,
+          "assessment_scores_entered" -> true,
+          "assessment_scores_accepted" -> true
         )
       )
 
       testDataRepo.createApplicationWithAllFields(userId.toString(), appId.toString(), frameworkId,
+        appStatus = ApplicationStatuses.Withdrawn,
         progressStatusBSON = progressStatusDocument).futureValue
 
       val result = repository.passMarkReport(frameworkId).futureValue
       result must not be empty
-      val expected = expectedApplicationForCandidateProgressReport(appId, userId, Some("online_test_completed"))
+      val expected = expectedApplicationForCandidateProgressReport(appId, userId, Some("assessment_scores_accepted"))
       result.head mustBe expected
     }
   }

@@ -18,17 +18,19 @@ package controllers
 
 import akka.stream.scaladsl.Source
 import connectors.{ AuthProviderClient, ExchangeObjects }
+import model.CandidateScoresCommands.{ CandidateScoreFeedback, CandidateScores, CandidateScoresAndFeedback }
 import model.Commands.{ CsvExtract, _ }
 import model.PersistedObjects.ContactDetailsWithId
 import model.ReportExchangeObjects.Implicits._
 import model.ReportExchangeObjects.{ Implicits => _, _ }
+import model.persisted.SchemeEvaluationResult
 import model.report.{ PassMarkReportItem, DiversityReportItem }
 import model.{ ApplicationStatusOrder, ProgressStatuses, UniqueIdentifier }
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
 import play.api.libs.streams.Streams
 import play.api.mvc.{ Action, AnyContent, Request, Result }
-import repositories.application.{ PreviousYearCandidatesDetailsRepository, ReportingRepository }
+import repositories.application.{ OnlineTestRepository, PreviousYearCandidatesDetailsRepository, ReportingRepository }
 import repositories.{ QuestionnaireRepository, _ }
 import services.locationschemes.LocationSchemeService
 import services.reporting.{ ReportingFormatter, SocioEconomicScoreCalculator }
@@ -51,6 +53,7 @@ object ReportingController extends ReportingController {
   val locationSchemeRepository = FileLocationSchemeRepository
   val mediaRepository = repositories.mediaRepository
   val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
+  val onlineTestRepository = repositories.onlineTestRepository
 }
 
 trait ReportingController extends BaseController {
@@ -70,6 +73,7 @@ trait ReportingController extends BaseController {
   val locationSchemeRepository: LocationSchemeRepository
   val mediaRepository: MediaRepository
   val socioEconomicScoreCalculator: SocioEconomicScoreCalculator
+  val onlineTestRepository: OnlineTestRepository
 
   def createDiversityReport(frameworkId: String) = Action.async { implicit request =>
     val applicationsFut = reportingRepository.diversityReport(frameworkId)
@@ -82,8 +86,9 @@ trait ReportingController extends BaseController {
       allLocations <- allLocationsFut
       allDiversityQuestions <- allQuestionsFut
       allMedia <- mediaRepository.findAll
-      report <- buildDiversityReportRows(applications, allContactDetails, allLocations, allDiversityQuestions, allMedia)
-    } yield report
+    } yield {
+      buildDiversityReportRows(applications, allContactDetails, allLocations, allDiversityQuestions, allMedia)
+    }
     reportFut.map { report => Ok(Json.toJson(report)) }
   }
 
@@ -117,8 +122,7 @@ trait ReportingController extends BaseController {
     allLocations: List[LocationSchemes],
     allDiversityQuestions: Map[String, Map[String, String]],
     allMedia: Map[UniqueIdentifier, String]
-  ): Future[List[DiversityReportItem]] = {
-    Future {
+  ): List[DiversityReportItem] = {
       applications.map { application =>
         val diversityReportItem = application.applicationId.map { appId =>
           val diversityAnswers = extractDiversityAnswers(appId, allDiversityQuestions)
@@ -142,7 +146,6 @@ trait ReportingController extends BaseController {
         diversityReportItem.getOrElse(throw new IllegalStateException(s"Application Id does not exist in diversity report generation " +
           s"for the user Id = ${application.userId}"))
       }
-    }
   }
 
   def createOnlineTestPassMarkModellingReport(frameworkId: String) = Action.async { implicit request =>
@@ -152,6 +155,9 @@ trait ReportingController extends BaseController {
     val allLocationsFut = locationSchemeService.getAllSchemeLocations
     val allQuestionsFut = questionnaireRepository.passMarkReport
     val allTestResultsFut = testReportRepository.getOnlineTestReports
+    val allMediaFut = mediaRepository.findAll
+    val allScoresFut = assessmentScoresRepository.allScores
+    val allPassMarkEvaluationsFut = onlineTestRepository.findAllPassMarkEvaluations
     // Process the futures
     val reportFut: Future[List[PassMarkReportItem]] = for {
       applications <- applicationsFut
@@ -159,50 +165,75 @@ trait ReportingController extends BaseController {
       allLocations <- allLocationsFut
       allDiversityQuestions <- allQuestionsFut
       allTestScores <- allTestResultsFut
-      allMedia <- mediaRepository.findAll
-      report <- buildPassMarkReportRows(applications, allContactDetails, allLocations, allDiversityQuestions, allMedia, allTestScores)
-    } yield report
+      allMedia <- allMediaFut
+      allScores <- allScoresFut
+      allPassMarkEvaluations <- allPassMarkEvaluationsFut
+    } yield {
+      buildPassMarkReportRows(applications, allContactDetails, allLocations, allDiversityQuestions, allMedia,
+        allTestScores, allScores, allPassMarkEvaluations)
+    }
     reportFut.map { report => Ok(Json.toJson(report)) }
   }
 
-  private def buildPassMarkReportRows(
-    applications: List[ApplicationForCandidateProgressReport],
-    allContactDetails: Map[String, ContactDetailsWithId],
-    allLocations: List[LocationSchemes],
-    allDiversityQuestions: Map[String, Map[String, String]],
-    allMedia: Map[UniqueIdentifier, String],
-    allTestResults: Map[String, PassMarkReportTestResults]
-  ): Future[List[PassMarkReportItem]] = {
+  val assessmentScoresEmpty = CandidateScoresAndFeedback(
+    applicationId = "",
+    attendancy = None,
+    assessmentIncomplete = false,
+    leadingAndCommunicating = CandidateScores(),
+    collaboratingAndPartnering = CandidateScores(),
+    deliveringAtPace =CandidateScores(),
+    makingEffectiveDecisions = CandidateScores(),
+    changingAndImproving = CandidateScores(),
+    buildingCapabilityForAll = CandidateScores(),
+    motivationFit = CandidateScores(),
+    feedback = CandidateScoreFeedback()
+  )
+
+  private def buildPassMarkReportRows(applications: List[ApplicationForCandidateProgressReport],
+                                      allContactDetails: Map[String, ContactDetailsWithId],
+                                      allLocations: List[LocationSchemes],
+                                      allDiversityQuestions: Map[String, Map[String, String]],
+                                      allMedia: Map[UniqueIdentifier, String],
+                                      allTestResults: Map[String, PassMarkReportTestResults],
+                                      allAssessmentScores: Map[String, CandidateScoresAndFeedback],
+                                      allPassMarkEvaluations: Map[String, List[SchemeEvaluationResult]]): List[PassMarkReportItem] = {
+
     val passMarkResultsEmpty = PassMarkReportTestResults(competency = None, numerical = None, verbal = None, situational = None)
-    Future {
-      applications.map { application =>
-        val passMarkReportItem = application.applicationId.map { appId =>
-          val diversityAnswers = extractDiversityAnswers(appId, allDiversityQuestions)
-          val locationIds = application.locationIds
-          val onlineAdjustmentsVal = reportingFormatter.getOnlineAdjustments(application.onlineAdjustments, application.adjustments)
-          val assessmentCentreAdjustmentsVal = reportingFormatter.getAssessmentCentreAdjustments(
-            application.assessmentCentreAdjustments,
-            application.adjustments
-          )
-          val locationNames = locationIds.flatMap(locationId => allLocations.find(_.id == locationId).map { _.locationName })
-          val ses = allDiversityQuestions.get(appId.toString()).map {
-            questions => socioEconomicScoreCalculator.calculate(questions)
-          }.getOrElse("N/A")
-          val hearAboutUs = allMedia.getOrElse(application.userId, "")
-          val allocatedAssessmentCentre = allContactDetails.get(application.userId.toString()).map { contactDetails =>
-            assessmentCentreIndicatorRepository.calculateIndicator(contactDetails.postCode).assessmentCentre
-          }
-          val testResults = allTestResults.getOrElse(appId.toString(), passMarkResultsEmpty)
-          PassMarkReportItem(application, diversityAnswers, ses, hearAboutUs, allocatedAssessmentCentre, testResults)
-            .copy(
-              locations = locationNames,
-              onlineAdjustments = onlineAdjustmentsVal,
-              assessmentCentreAdjustments = assessmentCentreAdjustmentsVal
-            )
+    applications.map { application =>
+      val passMarkReportItem = application.applicationId.map { appId =>
+        val diversityAnswers = extractDiversityAnswers(appId, allDiversityQuestions)
+        val locationIds = application.locationIds
+        val onlineAdjustmentsVal = reportingFormatter.getOnlineAdjustments(application.onlineAdjustments, application.adjustments)
+        val assessmentCentreAdjustmentsVal = reportingFormatter.getAssessmentCentreAdjustments(
+          application.assessmentCentreAdjustments,
+          application.adjustments
+        )
+        val locationNames = locationIds.flatMap(locationId => allLocations.find(_.id == locationId).map { _.locationName })
+        val ses = allDiversityQuestions.get(appId.toString()).map {
+          questions => socioEconomicScoreCalculator.calculate(questions)
+        }.getOrElse("N/A")
+        val hearAboutUs = allMedia.getOrElse(application.userId, "")
+        val allocatedAssessmentCentre = allContactDetails.get(application.userId.toString()).map { contactDetails =>
+          assessmentCentreIndicatorRepository.calculateIndicator(contactDetails.postCode).assessmentCentre
         }
-        passMarkReportItem.getOrElse(throw new IllegalStateException(s"Application Id does not exist in pass mark report generation " +
-          s"for the user Id = ${application.userId}"))
+        val onlineTestResults = allTestResults.getOrElse(appId.toString(), passMarkResultsEmpty)
+        val assessmentScores = allAssessmentScores.getOrElse(appId.toString(), assessmentScoresEmpty)
+
+        val schemeOnlineTestResults = application.schemes.map { scheme =>
+          val schemeEvaluationResultList: List[SchemeEvaluationResult] = allPassMarkEvaluations.getOrElse(appId.toString(), Nil)
+          val maybeSchemeEvaluationResult: Option[SchemeEvaluationResult] = schemeEvaluationResultList.find(_.scheme == scheme)
+          maybeSchemeEvaluationResult.fold("") {_.result.toString}
+        }
+        PassMarkReportItem(application, diversityAnswers, ses, hearAboutUs, allocatedAssessmentCentre, onlineTestResults,
+          schemeOnlineTestResults, assessmentScores, List())
+          .copy(
+            locations = locationNames,
+            onlineAdjustments = onlineAdjustmentsVal,
+            assessmentCentreAdjustments = assessmentCentreAdjustmentsVal
+          )
       }
+      passMarkReportItem.getOrElse(throw new IllegalStateException(s"Application Id does not exist in pass mark report generation " +
+        s"for the user Id = ${application.userId}"))
     }
   }
 
@@ -259,34 +290,6 @@ trait ReportingController extends BaseController {
     }
   }
 
-  def createAssessmentResultsReport(frameworkId: String) = Action.async { implicit request =>
-    /*
-    val applications = reportingRepository.applicationsWithAssessmentScoresAccepted(frameworkId)
-    val allQuestions = questionnaireRepository.passMarkReport
-    val allScores = assessmentScoresRepository.allScores
-
-    val reports = for {
-      apps <- applications
-      quests <- allQuestions
-      scores <- allScores
-    } yield {
-      for {
-        app <- apps
-        quest <- quests.get(app.applicationId.toString)
-        appscore <- scores.get(app.applicationId.toString)
-      } yield {
-        AssessmentResultsReport(app, quest, appscore)
-      }
-    }
-
-    reports.map { list =>
-      Ok(Json.toJson(list))
-    }
-*/
-    // TODO fix this when we rebuild this report
-    ???
-  }
-
   def createCandidateProgressReport(frameworkId: String) = Action.async { implicit request =>
     val usersFut = authProviderClient.candidatesReport
     val applicationsFut = reportingRepository.applicationsForCandidateProgressReport(frameworkId)
@@ -297,8 +300,9 @@ trait ReportingController extends BaseController {
       applications <- applicationsFut
       allContactDetails <- allContactDetailsFut
       allLocations <- allLocationsFut
-      report <- buildCandidateProgressReports(users, applications, allContactDetails, allLocations)
-    } yield report
+    } yield {
+      buildCandidateProgressReports(users, applications, allContactDetails, allLocations)
+    }
     reportFut.map { report => Ok(Json.toJson(report)) }
   }
 
@@ -307,35 +311,33 @@ trait ReportingController extends BaseController {
     applications: List[ApplicationForCandidateProgressReport],
     allContactDetails: Map[String, ContactDetailsWithId],
     allLocations: List[LocationSchemes]
-  ): Future[List[CandidateProgressReportItem]] = {
-    Future {
-      val applicationsMap = applications.map(application => application.userId -> application).toMap
-      users.map { user =>
-        {
-          val reportItem = applicationsMap.get(UniqueIdentifier(user.userId)).map { application =>
-            {
-              val fsacIndicatorVal = allContactDetails.get(user.userId.toString()).flatMap { contactDetails =>
-                application.assessmentCentreIndicator.map(_.assessmentCentre)
-              }
-              val locationIds = application.locationIds
-              val onlineAdjustmentsVal = reportingFormatter.getOnlineAdjustments(application.onlineAdjustments, application.adjustments)
-              val assessmentCentreAdjustmentsVal = reportingFormatter.getAssessmentCentreAdjustments(
-                application.assessmentCentreAdjustments,
-                application.adjustments
-              )
-              val locationNames = locationIds.flatMap(locationId => allLocations.find(_.id == locationId).map {
-                _.locationName
-              })
-              CandidateProgressReportItem(application).copy(fsacIndicator = fsacIndicatorVal, locations = locationNames,
-                onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
+  ): List[CandidateProgressReportItem] = {
+    val applicationsMap = applications.map(application => application.userId -> application).toMap
+    users.map { user =>
+      {
+        val reportItem = applicationsMap.get(UniqueIdentifier(user.userId)).map { application =>
+          {
+            val fsacIndicatorVal = allContactDetails.get(user.userId.toString()).flatMap { contactDetails =>
+              application.assessmentCentreIndicator.map(_.assessmentCentre)
             }
+            val locationIds = application.locationIds
+            val onlineAdjustmentsVal = reportingFormatter.getOnlineAdjustments(application.onlineAdjustments, application.adjustments)
+            val assessmentCentreAdjustmentsVal = reportingFormatter.getAssessmentCentreAdjustments(
+              application.assessmentCentreAdjustments,
+              application.adjustments
+            )
+            val locationNames = locationIds.flatMap(locationId => allLocations.find(_.id == locationId).map {
+              _.locationName
+            })
+            CandidateProgressReportItem(application).copy(fsacIndicator = fsacIndicatorVal, locations = locationNames,
+              onlineAdjustments = onlineAdjustmentsVal, assessmentCentreAdjustments = assessmentCentreAdjustmentsVal)
           }
-          val defaultReportItem = CandidateProgressReportItem(ApplicationForCandidateProgressReport(
-            None,
-            UniqueIdentifier(user.userId), Some(ProgressStatuses.Registered), List.empty, List.empty, None, None, None, None, None, None, None
-          ))
-          reportItem.getOrElse(defaultReportItem)
         }
+        val defaultReportItem = CandidateProgressReportItem(ApplicationForCandidateProgressReport(
+          None,
+          UniqueIdentifier(user.userId), Some(ProgressStatuses.Registered), List.empty, List.empty, None, None, None, None, None, None, None
+        ))
+        reportItem.getOrElse(defaultReportItem)
       }
     }
   }

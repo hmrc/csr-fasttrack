@@ -51,7 +51,6 @@ object EvaluationResults {
 
       def writes(result: Result) = JsString(result.toString)
     }
-
   }
 
   case class CompetencyAverageResult(leadingAndCommunicatingAverage: Double, collaboratingAndPartneringAverage: Double,
@@ -66,7 +65,6 @@ object EvaluationResults {
     )
 
     def scoresWithWeightTwo = List(motivationFitAverage)
-
   }
 
   case class PerSchemeEvaluation(schemeName: String, result: Result)

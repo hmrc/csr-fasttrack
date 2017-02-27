@@ -27,12 +27,11 @@ import play.api.libs.json.JsArray
 import play.api.libs.json.{ JsArray, JsValue }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
+import repositories.application.{ OnlineTestRepository, GeneralApplicationRepository, ReportingRepository }
 import repositories.{ ApplicationAssessmentScoresRepository, ContactDetailsRepository, LocationSchemeRepository, MediaRepository, QuestionnaireRepository, TestReportRepository }
 import services.reporting.SocioEconomicScoreCalculator
 
 import repositories.ApplicationAssessmentScoresRepository
-import repositories.application.ReportingRepository
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -50,9 +49,12 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val contactDetailsRepository = new ContactDetailsInMemoryRepository {
           override def findAll: Future[List[ContactDetailsWithId]] =
             Future.successful(List(
-              ContactDetailsWithId("1", false, Address("First Line", None, None, None), Some("HP18 9DN"), None, "joe@bloggs.com", None),
-              ContactDetailsWithId("2", false, Address("First Line", None, None, None), Some("HP18 9DN"), None, "joe@bloggs.com", None),
-              ContactDetailsWithId("3", false, Address("First Line", None, None, None), Some("HP18 9DN"), None, "joe@bloggs.com", None)
+              ContactDetailsWithId("1", outsideUk = false, Address("First Line", None, None, None), Some("HP18 9DN"),
+                None, "joe@bloggs.com", None),
+              ContactDetailsWithId("2", outsideUk = false, Address("First Line", None, None, None), Some("HP18 9DN"),
+                None, "joe@bloggs.com", None),
+              ContactDetailsWithId("3", outsideUk = false, Address("First Line", None, None, None), Some("HP18 9DN"),
+                None, "joe@bloggs.com", None)
             ))
         }
         override val questionnaireRepository = QuestionnaireInMemoryRepository
@@ -62,6 +64,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val locationSchemeRepository = mock[LocationSchemeRepository]
         override val mediaRepository = mock[MediaRepository]
         override val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
+        override val onlineTestRepository = mock[OnlineTestRepository]
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
@@ -89,6 +92,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val locationSchemeRepository = mock[LocationSchemeRepository]
         override val mediaRepository = mock[MediaRepository]
         override val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
+        override val onlineTestRepository = mock[OnlineTestRepository]
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
@@ -121,6 +125,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val locationSchemeRepository = mock[LocationSchemeRepository]
         override val mediaRepository = mock[MediaRepository]
         override val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
+        override val onlineTestRepository = mock[OnlineTestRepository]
       }
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
