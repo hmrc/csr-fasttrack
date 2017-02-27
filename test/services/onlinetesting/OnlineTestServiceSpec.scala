@@ -503,7 +503,7 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
 
     val cubiksId = 123
     val requestReportId = 456
-    val reportId = 789
+    val reportId = 1
     val appId = "789"
   }
 }
