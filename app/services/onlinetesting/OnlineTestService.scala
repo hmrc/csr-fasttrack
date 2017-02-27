@@ -126,15 +126,25 @@ trait OnlineTestService {
     )
   }
 
-  def tryToDownloadOnlineTestResult(cubiksUserId: Int, testResultReady: CubiksTestResultReady): Future[Unit] = testResultReady.reportId match {
-    case Some(reportId) =>
-      downloadAndValidateXmlReport(cubiksUserId, reportId)
-    case _ =>
-      Logger.warn(s"Cannot download online test report without report Id for cubiks user id=$cubiksUserId")
-      Future.successful(())
+  def tryToDownloadOnlineTestResult(cubiksUserId: Int, testResultReady: CubiksTestResultReady): Future[Unit] = {
+    (testResultReady.reportId, testResultReady.requestReportId) match {
+      case (Some(reportId), Some(requestReportId)) if reportId == gatewayConfig.reportConfig.xmlReportId =>
+        downloadAndValidateXmlReport(cubiksUserId, requestReportId)
+      case (_, None) =>
+        Logger.warn(s"Cannot download online test report without request report Id for cubiks user id=$cubiksUserId")
+        Future.successful(())
+      case (None, _) =>
+        Logger.warn(s"Cannot download online test report without report Id for cubiks user id=$cubiksUserId")
+        Future.successful(())
+      case _ =>
+        Logger.debug(s"Ignoring the callback with non-xml report id: ${testResultReady.reportId}")
+        Future.successful(())
+    }
   }
 
   private def downloadAndValidateXmlReport(cubiksUserId: Int, reportId: Int): Future[Unit] = {
+    import ApplicationStatuses._
+
     def saveOnlineTestReport(appId: String, candidateTestReport: CandidateTestReport) = {
       for {
         _ <- trRepository.saveOnlineTestReport(candidateTestReport)
@@ -150,7 +160,7 @@ trait OnlineTestService {
       testResultMap <- cubiksGatewayClient.downloadXmlReport(reportId)
     } yield {
       app.applicationStatus match {
-        case ApplicationStatuses.OnlineTestCompleted =>
+        case OnlineTestInvited | OnlineTestStarted | OnlineTestCompleted =>
           val appId = app.applicationId
           val isGis = app.assistanceDetails.isGis
           val candidateTestReport = toCandidateTestReport(appId, testResultMap)
@@ -162,7 +172,7 @@ trait OnlineTestService {
           }
         case appStatus =>
           Logger.warn(s"Ignoring online test report callback for application status=$appStatus" +
-            s"for cubiks user id=$cubiksUserId")
+            s" for cubiks user id=$cubiksUserId")
           Future.successful(())
       }
     }).flatMap(identity)

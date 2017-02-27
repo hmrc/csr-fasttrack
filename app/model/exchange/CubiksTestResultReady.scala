@@ -19,6 +19,7 @@ package model.exchange
 import play.api.libs.json.Json
 
 case class CubiksTestResultReady(reportId: Option[Int],
+                                 requestReportId: Option[Int],
                                  reportStatus: String,
                                  reportLinkURL: Option[String])
 

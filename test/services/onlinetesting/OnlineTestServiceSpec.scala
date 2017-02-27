@@ -427,7 +427,7 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
     val assistanceDetails = AssistanceDetailsExamples.OnlyDisabilityNoGisNoAdjustments
 
     "save the report and update the report saved flag when the report is correctly downloaded" in new OnlineTest {
-      val testResultReady = CubiksTestResultReady(Some(reportId), "Ready", None)
+      val testResultReady = CubiksTestResultReady(Some(reportId), Some(requestReportId), "Ready", None)
       val app = ApplicationAssistanceDetails(appId, ApplicationStatuses.OnlineTestCompleted, assistanceDetails)
       when(adRepositoryMock.findApplication(cubiksId)).thenReturn(Future.successful(app))
       when(cubiksGatewayClientMock.downloadXmlReport(any[Int])(any[HeaderCarrier])).thenReturn(Future.successful(map))
@@ -440,7 +440,7 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
     }
 
     "do not save the report if the report is not valid" in new OnlineTest {
-      val testResultReady = CubiksTestResultReady(Some(reportId), "Ready", None)
+      val testResultReady = CubiksTestResultReady(Some(reportId), Some(requestReportId), "Ready", None)
       val app = ApplicationAssistanceDetails(appId, ApplicationStatuses.OnlineTestCompleted, assistanceDetails)
       when(adRepositoryMock.findApplication(cubiksId)).thenReturn(Future.successful(app))
       val incorrectReport = map - "Logiks Verbal and Numerical (Intermediate) - Verbal"
@@ -454,7 +454,7 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
     }
 
     "do not save the report if the application status is not ONLINE_TEST_COMPLETED" in new OnlineTest {
-      val testResultReady = CubiksTestResultReady(Some(reportId), "Ready", None)
+      val testResultReady = CubiksTestResultReady(Some(reportId), Some(requestReportId), "Ready", None)
       val app = ApplicationAssistanceDetails(appId, ApplicationStatuses.OnlineTestExpired, assistanceDetails)
       when(adRepositoryMock.findApplication(cubiksId)).thenReturn(Future.successful(app))
       when(cubiksGatewayClientMock.downloadXmlReport(any[Int])(any[HeaderCarrier])).thenReturn(Future.successful(map))
@@ -502,7 +502,8 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
     }
 
     val cubiksId = 123
-    val reportId = 456
+    val requestReportId = 456
+    val reportId = 789
     val appId = "789"
   }
 }
