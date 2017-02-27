@@ -128,8 +128,13 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
           case Some(appId) =>
             for {
               scoresOpt <- aasRepository.tryFind(appId)
+              // TODO IS: remove this
+              // scalastyle:off
+              _ = println(s"**** scoresOpt = $scoresOpt")
               prefsWithQualificationsOpt <- fpRepository.tryGetPreferencesWithQualifications(appId)
+              _ = println(s"**** prefsWithQualificationsOpt = $prefsWithQualificationsOpt")
               otEvaluation <- otRepository.findPassmarkEvaluation(appId)
+              _ = println(s"**** otEvaluation = $otEvaluation")
             } yield {
               for {
                 scores <- scoresOpt

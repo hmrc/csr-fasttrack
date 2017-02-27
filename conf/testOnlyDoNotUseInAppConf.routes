@@ -20,3 +20,4 @@ POST        /candidate-application/test-data-generator/create-candidates        
 GET         /candidate-application/test-data-generator/example                          controllers.testdata.TestDataGeneratorController.requestExample
 GET         /candidate-application/evaluate-candidate                                   controllers.testdata.TestJobsController.evaluateCandidate
 GET         /candidate-application/send-online-test-result                              controllers.testdata.TestJobsController.sendOnlineTestResult
+GET         /candidate-application/evaluate-assessment                                  controllers.testdata.TestJobsController.evaluateAssessmentScore
