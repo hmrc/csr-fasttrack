@@ -42,7 +42,7 @@ trait AwaitingAllocationStatusGenerator extends ConstructiveGenerator {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       _ <- otRepository.savePassMarkScore(candidateInPreviousStatus.applicationId.get, UUID.randomUUID().toString,
-        evaluationResult, ApplicationStatuses.AwaitingAllocation)
+        evaluationResult, Some(ApplicationStatuses.AwaitingAllocation))
     } yield {
       candidateInPreviousStatus.copy(applicationStatus = ApplicationStatuses.AwaitingAllocation)
     }

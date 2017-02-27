@@ -25,17 +25,17 @@ trait ApplicationStatusCalculator {
   private val Passed = AwaitingAllocation
   private val CanTransition = List(OnlineTestCompleted, AwaitingOnlineTestReevaluation)
 
-  def determineStatus(result: List[Result], currentApplicationStatus: EnumVal): EnumVal = {
+  def determineNewStatus(result: List[Result], currentApplicationStatus: EnumVal): Option[EnumVal] = {
     require(result.nonEmpty, "Cannot determine status from an empty list")
 
     if (!CanTransition.contains(currentApplicationStatus)) {
-      currentApplicationStatus
+      None
     } else if (result.contains(Green)) {
-      Passed
+      Some(Passed)
     } else if (result.contains(Amber)) {
-      Held
+      Some(Held)
     } else {
-      Failed
+      Some(Failed)
     }
   }
 }
