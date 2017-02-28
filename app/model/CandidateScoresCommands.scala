@@ -16,6 +16,7 @@
 
 package model
 
+import model.AssessmentExercise.AssessmentExercise
 import org.joda.time.LocalDate
 import play.api.libs.json.{ Format, Json }
 
@@ -23,46 +24,39 @@ object CandidateScoresCommands {
 
   case class RecordCandidateScores(firstName: String, lastName: String, venueName: String, date: LocalDate)
 
-  case class CandidateScores(
-      interview: Option[Double] = None,
-      groupExercise: Option[Double] = None,
-      writtenExercise: Option[Double] = None
-  ) {
-    def sum = (BigDecimal(interview.getOrElse(0.0)) + BigDecimal(groupExercise.getOrElse(0.0)) +
-      BigDecimal(writtenExercise.getOrElse(0.0))).toDouble
-
-    def length = List(interview, groupExercise, writtenExercise).flatten.length
-  }
-
-  case class CandidateScoreFeedback(
-    interviewFeedback: Option[String] = None,
-    groupExerciseFeedback: Option[String] = None,
-    writtenExerciseFeedback: Option[String] = None
-  )
-
   case class CandidateScoresAndFeedback(
       applicationId: String,
+      interview: Option[ScoresAndFeedback] = None,
+      groupExercise: Option[ScoresAndFeedback] = None,
+      writtenExercise: Option[ScoresAndFeedback] = None
+  )
+
+  case class ExerciseScoresAndFeedback(
+    applicationId: String,
+    exercise: AssessmentExercise,
+    scoresAndFeedback: ScoresAndFeedback
+  )
+
+  case class ScoresAndFeedback(
       attendancy: Option[Boolean],
       assessmentIncomplete: Boolean,
-      leadingAndCommunicating: CandidateScores = CandidateScores(),
-      collaboratingAndPartnering: CandidateScores = CandidateScores(),
-      deliveringAtPace: CandidateScores = CandidateScores(),
-      makingEffectiveDecisions: CandidateScores = CandidateScores(),
-      changingAndImproving: CandidateScores = CandidateScores(),
-      buildingCapabilityForAll: CandidateScores = CandidateScores(),
-      motivationFit: CandidateScores = CandidateScores(),
-      feedback: CandidateScoreFeedback = CandidateScoreFeedback()
-  ) {
-    def allScoresWithWeightOne = List(leadingAndCommunicating, collaboratingAndPartnering, deliveringAtPace,
-      makingEffectiveDecisions, changingAndImproving, buildingCapabilityForAll)
-  }
+      leadingAndCommunicating: Option[Double] = None,
+      collaboratingAndPartnering: Option[Double] = None,
+      deliveringAtPace: Option[Double] = None,
+      makingEffectiveDecisions: Option[Double] = None,
+      changingAndImproving: Option[Double] = None,
+      buildingCapabilityForAll: Option[Double] = None,
+      motivationFit: Option[Double] = None,
+      feedback: Option[String] = None,
+      updatedBy: String
+  )
 
   case class ApplicationScores(candidate: RecordCandidateScores, scoresAndFeedback: Option[CandidateScoresAndFeedback])
 
   object Implicits {
     implicit val RecordCandidateScoresFormats: Format[RecordCandidateScores] = Json.format[RecordCandidateScores]
-    implicit val CandidateScoresFormats: Format[CandidateScores] = Json.format[CandidateScores]
-    implicit val CandidateScoreFeedbackFormats: Format[CandidateScoreFeedback] = Json.format[CandidateScoreFeedback]
+    implicit val scoresAndFeedbackFormats: Format[ScoresAndFeedback] = Json.format[ScoresAndFeedback]
+    implicit val exerciseScoresAndFeedbackFormats: Format[ExerciseScoresAndFeedback] = Json.format[ExerciseScoresAndFeedback]
     implicit val CandidateScoresAndFeedbackFormats: Format[CandidateScoresAndFeedback] = Json.format[CandidateScoresAndFeedback]
     implicit val ApplicationScoresFormats: Format[ApplicationScores] = Json.format[ApplicationScores]
   }

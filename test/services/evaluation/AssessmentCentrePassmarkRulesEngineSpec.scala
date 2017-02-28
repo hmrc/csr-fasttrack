@@ -18,7 +18,7 @@ package services.evaluation
 
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import model.AssessmentEvaluationCommands.AssessmentPassmarkPreferencesAndScores
-import model.CandidateScoresCommands.{ CandidateScores, CandidateScoresAndFeedback }
+import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ScoresAndFeedback }
 import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.EvaluationResults.{ Amber, Red, _ }
 import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
@@ -37,14 +37,50 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
     AssessmentCentrePassMarkScheme(Finance, Some(PassMarkSchemeThreshold(12.0, 19.0))),
     AssessmentCentrePassMarkScheme(ProjectDelivery, Some(PassMarkSchemeThreshold(23.0, 30.0)))
   ), Some(AssessmentCentrePassMarkInfo("1", DateTime.now, "user")))
-  val CandidateScoresWithFeedback = CandidateScoresAndFeedback("app1", Some(true), assessmentIncomplete = false,
-    CandidateScores(Some(2.1), Some(3.4), Some(3.3)),
-    CandidateScores(None, Some(2.0), Some(3.0)),
-    CandidateScores(Some(4.0), None, Some(3.0)),
-    CandidateScores(None, Some(3.0), Some(4.0)),
-    CandidateScores(Some(4.0), None, Some(4.0)),
-    CandidateScores(Some(4.0), Some(4.0), None),
-    CandidateScores(Some(2.0), Some(4.0), None))
+  val CandidateScoresWithFeedback = CandidateScoresAndFeedback("app1",
+    interview = Some(
+      ScoresAndFeedback(
+      Some(true),
+      assessmentIncomplete = false,
+      Some(2.1),
+      None,
+      Some(4.0),
+      None,
+      Some(4.0),
+      Some(4.0),
+      Some(2.0),
+      Some("feedback"),
+      "xyz"
+    )),
+    groupExercise = Some(
+      ScoresAndFeedback(
+        Some(true),
+        assessmentIncomplete = false,
+        Some(3.4),
+        Some(2.0),
+        None,
+        Some(3.0),
+        None,
+        Some(4.0),
+        Some(4.0),
+        Some("feedback"),
+        "xyz"
+      )),
+    writtenExercise = Some(
+      ScoresAndFeedback(
+        Some(true),
+        assessmentIncomplete = false,
+        Some(3.3),
+        Some(3.0),
+        Some(3.0),
+        Some(4.0),
+        Some(4.0),
+        None,
+        None,
+        Some("feedback"),
+        "xyz"
+      ))
+    )
   val CandidatePreferences = Preferences(
     LocationPreference("London", "London", Business, Some(Commercial)),
     Some(LocationPreference("London", "Reading", Finance, Some(ProjectDelivery))),
@@ -63,7 +99,11 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
     "evalute to passedMinimumCompetencyLevel=false when minimum competency level is enabled and not met" in {
       val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = true, minimumCompetencyLevelScore = Some(2.0),
         motivationalFitMinimumCompetencyLevelScore = Some(4.0))
-      val scores = CandidateScoresWithFeedback.copy(collaboratingAndPartnering = CandidateScores(None, Some(1.0), Some(2.0)))
+      val scores = CandidateScoresWithFeedback.copy(
+        interview = CandidateScoresWithFeedback.interview.map(_.copy(collaboratingAndPartnering = None)),
+        groupExercise = CandidateScoresWithFeedback.groupExercise.map(_.copy(collaboratingAndPartnering = Some(1.0))),
+        writtenExercise = CandidateScoresWithFeedback.writtenExercise.map(_.copy(collaboratingAndPartnering = Some(2.0)))
+      )
       val candidateScore = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, CandidatePreferencesWithQualification, scores)
 
       val result = rulesEngine.evaluate(CandidateOnlineTestEvaluation, candidateScore, config)

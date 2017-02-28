@@ -16,7 +16,7 @@
 
 import factories.DateTimeFactory
 import model.AdjustmentDetail
-import model.CandidateScoresCommands.{ CandidateScoreFeedback, CandidateScores, CandidateScoresAndFeedback }
+import model.CandidateScoresCommands._
 import model.Commands._
 import model.EvaluationResults._
 import model.FlagCandidatePersistedObject.FlagCandidate
@@ -140,8 +140,8 @@ package object repositories {
   implicit val cdHandler: BSONHandler[BSONDocument, ContactDetails] = Macros.handler[ContactDetails]
   implicit val addressHandler: BSONHandler[BSONDocument, Address] = Macros.handler[Address]
   implicit val answerHandler: BSONHandler[BSONDocument, PersistedAnswer] = Macros.handler[PersistedAnswer]
-  implicit val candidateScoresHandler: BSONHandler[BSONDocument, CandidateScores] = Macros.handler[CandidateScores]
-  implicit val candidateScoreFeedback: BSONHandler[BSONDocument, CandidateScoreFeedback] = Macros.handler[CandidateScoreFeedback]
+  implicit val scoresAndFeedbackHandler: BSONHandler[BSONDocument, ScoresAndFeedback] = Macros.handler[ScoresAndFeedback]
+  implicit val exerciseScoresAndFeedbackHandler: BSONHandler[BSONDocument, ExerciseScoresAndFeedback] = Macros.handler[ExerciseScoresAndFeedback]
   implicit val candidateScoresAndFeedback: BSONHandler[BSONDocument, CandidateScoresAndFeedback] = Macros.handler[CandidateScoresAndFeedback]
   implicit val passMarkSchemeThresholdHandler: BSONHandler[BSONDocument, PassMarkSchemeThreshold] =
     Macros.handler[PassMarkSchemeThreshold]

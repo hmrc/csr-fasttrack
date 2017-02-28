@@ -16,7 +16,7 @@
 
 package controllers
 
-import model.CandidateScoresCommands.CandidateScoresAndFeedback
+import model.CandidateScoresCommands.ExerciseScoresAndFeedback
 import model.CandidateScoresCommands.Implicits._
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent }
@@ -36,9 +36,9 @@ trait CandidateScoresController extends BaseController {
     assessmentCentreService.getCandidateScores(applicationId).map(scores => Ok(Json.toJson(scores)))
   }
 
-  def createCandidateScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
-    withJsonBody[CandidateScoresAndFeedback] { candidateScoresAndFeedback =>
-      assessmentCentreService.saveScoresAndFeedback(applicationId, candidateScoresAndFeedback).map { _ =>
+  def createExerciseScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    withJsonBody[ExerciseScoresAndFeedback] { exerciseScoresAndFeedback =>
+      assessmentCentreService.saveScoresAndFeedback(applicationId, exerciseScoresAndFeedback).map { _ =>
         Created
       }.recover {
         case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")

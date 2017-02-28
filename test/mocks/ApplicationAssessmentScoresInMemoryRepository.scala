@@ -16,7 +16,7 @@
 
 package mocks
 
-import model.CandidateScoresCommands.CandidateScoresAndFeedback
+import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScoresAndFeedback }
 import repositories.ApplicationAssessmentScoresRepository
 
 import scala.concurrent.Future
@@ -29,7 +29,7 @@ class ApplicationAssessmentScoresInMemoryRepository extends ApplicationAssessmen
 
   def tryFind(applicationId: String): Future[Option[CandidateScoresAndFeedback]] = ???
 
-  def save(candidateScoresAndFeedbck: CandidateScoresAndFeedback): Future[Unit] = ???
+  def save(candidateScoresAndFeedbck: ExerciseScoresAndFeedback): Future[Unit] = ???
 
   def nextCandidateScoresReadyForEvaluation: Future[Option[CandidateScoresAndFeedback]] = ???
 }

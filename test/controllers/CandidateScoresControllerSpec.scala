@@ -16,9 +16,9 @@
 
 package controllers
 
-import model.CandidateScoresCommands.{ CandidateScores, CandidateScoresAndFeedback }
+import model.CandidateScoresCommands.{ ExerciseScoresAndFeedback, ScoresAndFeedback }
 import model.CandidateScoresCommands.Implicits._
-import model.EmptyRequestHeader
+import model.{ AssessmentExercise, EmptyRequestHeader }
 import org.mockito.Mockito._
 import play.api.libs.json.Json
 import play.api.test.Helpers._
@@ -36,30 +36,39 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
   implicit val hc = HeaderCarrier()
   implicit val rh = EmptyRequestHeader
 
-  val CandidateScoresWithFeedback = CandidateScoresAndFeedback("app1", Some(true), assessmentIncomplete = false,
-    CandidateScores(Some(4.0), Some(3.0), Some(2.0)), CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
-    CandidateScores(Some(4.0), Some(3.0), Some(2.0)), CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
-    CandidateScores(Some(4.0), Some(3.0), Some(2.0)), CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
-    CandidateScores(Some(4.0), Some(3.0), Some(2.0)))
+  val exerciseScoresAndFeedback = ExerciseScoresAndFeedback("app1", AssessmentExercise.Interview,
+    ScoresAndFeedback(
+      attendancy = Some(true),
+      assessmentIncomplete = false,
+      Some(4.0),
+      Some(4.0),
+      Some(4.0),
+      Some(4.0),
+      Some(4.0),
+      Some(4.0),
+      Some(4.0),
+      Some("xyz"),
+      "xyz"
+    ))
 
   "Save Candidate Scores" should {
     "save candidate scores & feedback and update application status" in new TestFixture {
-      when(mockAssessmentCentreService.saveScoresAndFeedback(any[String], any[CandidateScoresAndFeedback])
+      when(mockAssessmentCentreService.saveScoresAndFeedback(any[String], any[ExerciseScoresAndFeedback])
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
 
-      val result = TestCandidateScoresController.createCandidateScoresAndFeedback("app1")(
-        createSaveCandidateScoresAndFeedback("app1", Json.toJson(CandidateScoresWithFeedback).toString())
+      val result = TestCandidateScoresController.createExerciseScoresAndFeedback("app1")(
+        createSaveCandidateScoresAndFeedback("app1", Json.toJson(exerciseScoresAndFeedback).toString())
       )
 
       status(result) must be(CREATED)
     }
 
     "return Bad Request when attendancy is not set" in new TestFixture {
-      when(mockAssessmentCentreService.saveScoresAndFeedback(any[String], any[CandidateScoresAndFeedback])
+      when(mockAssessmentCentreService.saveScoresAndFeedback(any[String], any[ExerciseScoresAndFeedback])
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(new IllegalStateException("blah")))
 
-      val result = TestCandidateScoresController.createCandidateScoresAndFeedback("app1")(
-        createSaveCandidateScoresAndFeedback("app1", Json.toJson(CandidateScoresWithFeedback).toString())
+      val result = TestCandidateScoresController.createExerciseScoresAndFeedback("app1")(
+        createSaveCandidateScoresAndFeedback("app1", Json.toJson(exerciseScoresAndFeedback).toString())
       )
 
       status(result) must be(BAD_REQUEST)
@@ -77,7 +86,7 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
       val json = Json.parse(jsonString)
       FakeRequest(
         Helpers.POST,
-        controllers.routes.CandidateScoresController.createCandidateScoresAndFeedback(applicationId).url, FakeHeaders(), json
+        controllers.routes.CandidateScoresController.createExerciseScoresAndFeedback(applicationId).url, FakeHeaders(), json
       )
         .withHeaders("Content-Type" -> "application/json")
     }

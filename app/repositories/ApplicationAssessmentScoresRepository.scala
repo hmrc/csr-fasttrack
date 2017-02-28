@@ -33,7 +33,7 @@ trait ApplicationAssessmentScoresRepository {
 
   def tryFind(applicationId: String): Future[Option[CandidateScoresAndFeedback]]
 
-  def save(candidateScoresAndFeedbck: CandidateScoresAndFeedback): Future[Unit]
+  def save(exerciseScoresAndFeedback: ExerciseScoresAndFeedback): Future[Unit]
 }
 
 class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
@@ -58,27 +58,18 @@ class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(impl
     }
   }
 
-  def save(candidateScoresAndFeedbck: CandidateScoresAndFeedback): Future[Unit] = {
-    val applicationId = candidateScoresAndFeedbck.applicationId
+  def save(exerciseScoresAndFeedback: ExerciseScoresAndFeedback): Future[Unit] = {
+    val applicationId = exerciseScoresAndFeedback.applicationId
     val query = BSONDocument("applicationId" -> applicationId)
 
     val candidateScoresAndFeedbackBSON = BSONDocument(
-      "applicationId" -> candidateScoresAndFeedbck.applicationId,
-      "attendancy" -> candidateScoresAndFeedbck.attendancy,
-      "assessmentIncomplete" -> candidateScoresAndFeedbck.assessmentIncomplete,
-      "leadingAndCommunicating" -> candidateScoresAndFeedbck.leadingAndCommunicating,
-      "collaboratingAndPartnering" -> candidateScoresAndFeedbck.collaboratingAndPartnering,
-      "deliveringAtPace" -> candidateScoresAndFeedbck.deliveringAtPace,
-      "makingEffectiveDecisions" -> candidateScoresAndFeedbck.makingEffectiveDecisions,
-      "changingAndImproving" -> candidateScoresAndFeedbck.changingAndImproving,
-      "buildingCapabilityForAll" -> candidateScoresAndFeedbck.buildingCapabilityForAll,
-      "motivationFit" -> candidateScoresAndFeedbck.motivationFit,
-      "feedback" -> candidateScoresAndFeedbck.feedback
+      "applicationId" -> exerciseScoresAndFeedback.applicationId,
+      s"${exerciseScoresAndFeedback.exercise}" -> exerciseScoresAndFeedback.scoresAndFeedback
     )
 
     collection.update(query, candidateScoresAndFeedbackBSON, upsert = true) map {
       case r if r.n > 1 =>
-        throw new UnexpectedException("save application scores somehow updated more than one " +
+        throw UnexpectedException("save application scores somehow updated more than one " +
           s"record for applicationId:$applicationId")
       case _ =>
     }

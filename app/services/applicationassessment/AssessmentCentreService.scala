@@ -21,7 +21,7 @@ import connectors.{ CSREmailClient, EmailClient }
 import model.ApplicationStatuses
 import model.ApplicationStatuses.BSONEnumHandler
 import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
-import model.CandidateScoresCommands.{ ApplicationScores, CandidateScoresAndFeedback, RecordCandidateScores }
+import model.CandidateScoresCommands.{ ApplicationScores, ExerciseScoresAndFeedback, RecordCandidateScores }
 import model.EvaluationResults._
 import model.Exceptions.IncorrectStatusInApplicationException
 import model.PersistedObjects.ApplicationForNotification
@@ -73,13 +73,13 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
 
   def saveScoresAndFeedback(
     applicationId: String,
-    scoresAndFeedback: CandidateScoresAndFeedback
+    exerciseScoresAndFeedback: ExerciseScoresAndFeedback
   )(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
-    scoresAndFeedback.attendancy match {
+    exerciseScoresAndFeedback.scoresAndFeedback.attendancy match {
       case Some(attendancy) =>
         val newStatus = if (attendancy) ApplicationStatuses.AssessmentScoresEntered else ApplicationStatuses.FailedToAttend
         for {
-          _ <- aasRepository.save(scoresAndFeedback)
+          _ <- aasRepository.save(exerciseScoresAndFeedback)
           _ <- aRepository.updateStatus(applicationId, newStatus)
         } yield {
           auditService.logEvent("ApplicationScoresAndFeedbackSaved", Map("applicationId" -> applicationId))

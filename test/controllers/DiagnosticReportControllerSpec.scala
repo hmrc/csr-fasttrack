@@ -17,12 +17,12 @@
 package controllers
 
 import config.TestFixtureBase
-import model.CandidateScoresCommands.{ CandidateScoreFeedback, CandidateScores, CandidateScoresAndFeedback }
+import model.CandidateScoresCommands._
 import model.Exceptions.ApplicationNotFound
 import model.OnlineTestCommands.TestResult
 import model.PersistedObjects.CandidateTestReport
 import org.mockito.Mockito._
-import play.api.libs.json.{ JsArray, JsObject, JsValue, Json }
+import play.api.libs.json.{ JsValue, Json }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.{ ApplicationAssessmentScoresRepository, TestReportRepository }
@@ -38,25 +38,25 @@ class DiagnosticReportControllerSpec extends UnitWithAppSpec {
       val expectedApplication = Json.obj("applicationId" -> "app1", "userId" -> "user1", "frameworkId" -> "FastTrack-2017",
         "online-test-results" -> Json.obj("applicationId" -> "app1", "reportType" -> "XML",
           "competency" -> Json.obj("status" -> "complete", "norm" -> "norm", "tScore" -> 1, "percentile" -> 22, "raw" -> 5, "sten" -> 55)),
-        "assessment-centre-results" -> Json.obj("applicationId" -> "app1", "attendancy" -> true, "assessmentIncomplete" -> false,
-          "leadingAndCommunicating" -> Json.obj("interview" -> 1), "collaboratingAndPartnering" -> Json.obj("interview" -> 1),
-          "deliveringAtPace" -> Json.obj("interview" -> 1), "makingEffectiveDecisions" -> Json.obj("interview" -> 1),
-          "changingAndImproving" -> Json.obj("interview" -> 1), "buildingCapabilityForAll" -> Json.obj("interview" -> 1),
-          "motivationFit" -> Json.obj("interview" -> 1), "feedback" -> Json.obj("interviewFeedback" -> "blah")))
+        "assessment-centre-results" -> Json.obj("applicationId" -> "app1", "interview" -> Json.obj("attendancy" -> true,
+        "assessmentIncomplete" -> false, "leadingAndCommunicating" -> 1, "collaboratingAndPartnering" -> 1, "deliveringAtPace" -> 1,
+        "makingEffectiveDecisions" -> 1,"changingAndImproving" -> 1, "buildingCapabilityForAll" -> 1,
+        "motivationFit" -> 1,"feedback" -> "blah", "updatedBy" -> "xyz")))
 
       val testResult = TestResult("complete", "norm", Some(1.0), Some(22.0), Some(5.0), Some(55.0))
-      val candidateScore = CandidateScores(Some(1.0))
-      val candidateScoreFeedback = CandidateScoreFeedback(Some("blah"))
+      val candidateScore = Some(1.0)
+      val candidateScoreFeedback = Some("blah")
 
       when(mockDiagnosticReportRepository.findByApplicationId("app1")).thenReturn(Future.successful(expectedApplication))
       when(mockTestResultRepo.getReportByApplicationId("app1")).thenReturn(Future.successful(
         Some(CandidateTestReport("app1", "XML", Some(testResult), None, None, None))
       ))
       when(mockAssessmentResultRepo.tryFind("app1")).thenReturn(Future.successful(
-        Some(CandidateScoresAndFeedback("app1", attendancy = Some(true), assessmentIncomplete = false, leadingAndCommunicating = candidateScore,
+        Some(CandidateScoresAndFeedback("app1", interview = Some(ScoresAndFeedback(attendancy = Some(true),
+          assessmentIncomplete = false, leadingAndCommunicating = candidateScore,
           collaboratingAndPartnering = candidateScore, deliveringAtPace = candidateScore, makingEffectiveDecisions = candidateScore,
           changingAndImproving = candidateScore, buildingCapabilityForAll = candidateScore, motivationFit = candidateScore,
-          feedback = candidateScoreFeedback))
+          feedback = candidateScoreFeedback, updatedBy = "xyz"))))
       ))
 
       val result = TestableDiagnosticReportingController.getApplicationByApplicationId("app1")(createOnlineTestRequest(
