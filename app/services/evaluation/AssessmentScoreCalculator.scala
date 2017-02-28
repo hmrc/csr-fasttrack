@@ -56,11 +56,11 @@ trait AssessmentScoreCalculator {
       writtenScores.flatMap(_.buildingCapabilityForAll)
     ):_*)
 
-    val motivationFit = average(Seq(
+    val motivationFit = Seq(
       interviewScores.flatMap(_.motivationFit),
       groupScores.flatMap(_.motivationFit),
       writtenScores.flatMap(_.motivationFit)
-    ):_*)
+    ).flatten.map(BigDecimal(_)).sum.toDouble
 
     val overallScores = List(leadingAndCommunicating, collaboratingAndPartnering,
       deliveringAtPace, makingEffectiveDecisions, changingAndImproving,
@@ -70,8 +70,5 @@ trait AssessmentScoreCalculator {
       changingAndImproving, buildingCapabilityForAll, motivationFit, overallScores)
   }
 
-  private def average(scores: Option[Double]*) = scores.flatten.sum / scores.flatten.length
-
-  private def countOverallScore(scores: CompetencyAverageResult): Double =
-    (scores.scoresWithWeightOne.map(BigDecimal(_)).sum + scores.scoresWithWeightTwo.map(BigDecimal(_)).sum).toDouble
+  private def average(scores: Option[Double]*) = scores.flatten.map(BigDecimal(_)).sum.toDouble / scores.flatten.length
 }
