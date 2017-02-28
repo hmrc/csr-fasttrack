@@ -62,10 +62,10 @@ class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(impl
     val applicationId = exerciseScoresAndFeedback.applicationId
     val query = BSONDocument("applicationId" -> applicationId)
 
-    val candidateScoresAndFeedbackBSON = BSONDocument(
+    val candidateScoresAndFeedbackBSON = BSONDocument("$set" -> BSONDocument(
       "applicationId" -> exerciseScoresAndFeedback.applicationId,
       s"${exerciseScoresAndFeedback.exercise}" -> exerciseScoresAndFeedback.scoresAndFeedback
-    )
+    ))
 
     collection.update(query, candidateScoresAndFeedbackBSON, upsert = true) map {
       case r if r.n > 1 =>

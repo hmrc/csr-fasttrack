@@ -97,6 +97,8 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
 
       repository.save(exerciseScoresAndFeedback).futureValue
       repository.save(exerciseScoresAndFeedback2).futureValue
+      repository.save(exerciseScoresAndFeedback2.copy(exercise = AssessmentExercise.groupExercise)).futureValue
+      repository.save(exerciseScoresAndFeedback2.copy(exercise = AssessmentExercise.writtenExercise)).futureValue
 
       val result = repository.allScores.futureValue
 
@@ -104,7 +106,9 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
       result must contain ("app1" -> CandidateScoresAndFeedback(applicationId = "app1",
         interview = Some(exerciseScoresAndFeedback.scoresAndFeedback)))
       result must contain ("app2" -> CandidateScoresAndFeedback(applicationId = "app2",
-        interview = Some(exerciseScoresAndFeedback2.scoresAndFeedback)))
+        interview = Some(exerciseScoresAndFeedback2.scoresAndFeedback),
+        groupExercise = Some(exerciseScoresAndFeedback2.scoresAndFeedback),
+        writtenExercise = Some(exerciseScoresAndFeedback2.scoresAndFeedback)))
     }
   }
 }
