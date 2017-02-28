@@ -22,7 +22,7 @@ import reactivemongo.bson.{ BSON, BSONHandler, BSONString }
 object AssessmentExercise extends Enumeration {
   type AssessmentExercise = Value
 
-  val Interview, Group, Written = Value
+  val interview, groupExercise, writtenExercise = Value
 
   implicit val assessmentExerciseFormat = new Format[AssessmentExercise] {
     def reads(json: JsValue) = JsSuccess(AssessmentExercise.withName(json.as[String]))

@@ -18,7 +18,7 @@ package repositories
 
 import factories.DateTimeFactory
 import model.AssessmentExercise
-import model.CandidateScoresCommands.{ ExerciseScoresAndFeedback, ScoresAndFeedback }
+import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScoresAndFeedback, ScoresAndFeedback }
 import testkit.MongoRepositorySpec
 
 class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
@@ -37,7 +37,7 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
       indexes.size mustBe 2
     }
 
-    val exerciseScoresAndFeedback = ExerciseScoresAndFeedback("app1", AssessmentExercise.Interview,
+    val exerciseScoresAndFeedback = ExerciseScoresAndFeedback("app1", AssessmentExercise.interview,
       ScoresAndFeedback(
         attendancy = Some(true),
         assessmentIncomplete = false,
@@ -53,14 +53,16 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
       ))
 
     "create a new application scores and feedback document" in {
-      val result = repository.save(exerciseScoresAndFeedback).futureValue
-      repository.tryFind("app1").futureValue mustBe Some(exerciseScoresAndFeedback)
+      repository.save(exerciseScoresAndFeedback).futureValue
+      repository.tryFind("app1").futureValue mustBe Some(CandidateScoresAndFeedback(applicationId = "app1",
+        interview = Some(exerciseScoresAndFeedback.scoresAndFeedback)))
     }
 
     "return already stored application scores" in {
       repository.save(exerciseScoresAndFeedback).futureValue
       val result = repository.tryFind("app1").futureValue
-      result mustBe Some(exerciseScoresAndFeedback)
+      result mustBe Some(CandidateScoresAndFeedback(applicationId = "app1",
+        interview = Some(exerciseScoresAndFeedback.scoresAndFeedback)))
     }
 
     "return no application score if it does not exist" in {
@@ -73,11 +75,12 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
       val updatedApplicationScores = exerciseScoresAndFeedback.copy(scoresAndFeedback =
         exerciseScoresAndFeedback.scoresAndFeedback.copy(attendancy = Some(false)))
       val result = repository.save(updatedApplicationScores).futureValue
-      repository.tryFind("app1").futureValue mustBe Some(updatedApplicationScores)
+      repository.tryFind("app1").futureValue mustBe Some(CandidateScoresAndFeedback(applicationId = "app1",
+        interview = Some(updatedApplicationScores.scoresAndFeedback)))
     }
 
     "retrieve all application scores and feedback documents" in {
-      val exerciseScoresAndFeedback2 = ExerciseScoresAndFeedback("app2", AssessmentExercise.Interview,
+      val exerciseScoresAndFeedback2 = ExerciseScoresAndFeedback("app2", AssessmentExercise.interview,
         ScoresAndFeedback(
           attendancy = Some(true),
           assessmentIncomplete = false,
@@ -98,8 +101,10 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
       val result = repository.allScores.futureValue
 
       result must have size 2
-      result must contain ("app1" -> exerciseScoresAndFeedback)
-      result must contain ("app2" -> exerciseScoresAndFeedback2)
+      result must contain ("app1" -> CandidateScoresAndFeedback(applicationId = "app1",
+        interview = Some(exerciseScoresAndFeedback.scoresAndFeedback)))
+      result must contain ("app2" -> CandidateScoresAndFeedback(applicationId = "app2",
+        interview = Some(exerciseScoresAndFeedback2.scoresAndFeedback)))
     }
   }
 }

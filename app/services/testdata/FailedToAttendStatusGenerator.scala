@@ -42,7 +42,7 @@ trait FailedToAttendStatusGenerator extends ConstructiveGenerator {
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      _ <- aasRepository.save(ExerciseScoresAndFeedback(candidateInPreviousStatus.applicationId.get, AssessmentExercise.Interview,
+      _ <- aasRepository.save(ExerciseScoresAndFeedback(candidateInPreviousStatus.applicationId.get, AssessmentExercise.interview,
         ScoresAndFeedback(attendancy = Some(false), assessmentIncomplete = true, updatedBy = "xyz")))
       _ <- aRepository.updateStatus(candidateInPreviousStatus.applicationId.get, ApplicationStatuses.FailedToAttend)
     } yield {

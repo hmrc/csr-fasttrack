@@ -249,7 +249,7 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
       AssessmentCentrePassMarkScheme("Finance", Some(Threshhold)),
       AssessmentCentrePassMarkScheme("Project delivery", Some(Threshhold))
     ), Some(AssessmentCentrePassMarkInfo("1", DateTime.now, "user")))
-    val exerciseScoresAndFeedback = ExerciseScoresAndFeedback("app1", AssessmentExercise.Interview,
+    val exerciseScoresAndFeedback = ExerciseScoresAndFeedback("app1", AssessmentExercise.interview,
       ScoresAndFeedback(
         attendancy = Some(true),
         assessmentIncomplete = false,

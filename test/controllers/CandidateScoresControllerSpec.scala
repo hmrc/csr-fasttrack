@@ -36,7 +36,7 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
   implicit val hc = HeaderCarrier()
   implicit val rh = EmptyRequestHeader
 
-  val exerciseScoresAndFeedback = ExerciseScoresAndFeedback("app1", AssessmentExercise.Interview,
+  val exerciseScoresAndFeedback = ExerciseScoresAndFeedback("app1", AssessmentExercise.interview,
     ScoresAndFeedback(
       attendancy = Some(true),
       assessmentIncomplete = false,
