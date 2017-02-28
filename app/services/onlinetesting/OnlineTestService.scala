@@ -21,16 +21,18 @@ import config.CubiksGatewayConfig
 import connectors.ExchangeObjects._
 import connectors.{ CSREmailClient, CubiksGatewayClient, EmailClient }
 import factories.{ DateTimeFactory, UUIDFactory }
+import model.ApplicationStatuses
 import model.OnlineTestCommands._
 import model.PersistedObjects.CandidateTestReport
 import model.exchange.OnlineTest
-import model.persisted.CubiksTestProfile
+import model.persisted.{ ApplicationAssistanceDetails, CubiksTestProfile }
 import org.joda.time.DateTime
 import play.api.Logger
 import play.libs.Akka
 import repositories._
 import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository, OnlineTestRepository }
 import uk.gov.hmrc.play.http.HeaderCarrier
+import model.exchange.CubiksTestResultReady
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
@@ -124,51 +126,56 @@ trait OnlineTestService {
     )
   }
 
-  def nextApplicationReadyForReportRetrieving: Future[Option[OnlineTestApplicationWithCubiksUser]] = {
-    otRepository.nextApplicationReadyForReportRetriving
+  def tryToDownloadOnlineTestResult(cubiksUserId: Int, testResultReady: CubiksTestResultReady): Future[Unit] = {
+    (testResultReady.reportId, testResultReady.requestReportId) match {
+      case (Some(reportId), Some(requestReportId)) if reportId == gatewayConfig.reportConfig.xmlReportId =>
+        downloadAndValidateXmlReport(cubiksUserId, requestReportId)
+      case (_, None) =>
+        Logger.warn(s"Cannot download online test report without request report Id for cubiks user id=$cubiksUserId")
+        Future.successful(())
+      case (None, _) =>
+        Logger.warn(s"Cannot download online test report without report Id for cubiks user id=$cubiksUserId")
+        Future.successful(())
+      case _ =>
+        Logger.debug(s"Ignoring the callback with non-xml report id: ${testResultReady.reportId}")
+        Future.successful(())
+    }
   }
 
-  def retrieveTestResult(application: OnlineTestApplicationWithCubiksUser, waitSecs: Option[Int]): Future[Unit] = {
-    val request = OnlineTestApplicationForReportRetrieving(application.cubiksUserId, gatewayConfig.reportConfig.localeCode,
-      gatewayConfig.reportConfig.xmlReportId, norms)
+  private def downloadAndValidateXmlReport(cubiksUserId: Int, reportId: Int): Future[Unit] = {
+    import ApplicationStatuses._
 
-    cubiksGatewayClient.getReport(request) flatMap { reportAvailability =>
-      val reportId = reportAvailability.reportId
-      Logger.debug(s"ReportId retrieved from Cubiks: $reportId. Already available: ${reportAvailability.available}")
-
-      // The 5 seconds delay here is because the Cubiks does not generate
-      // reports till they are requested - Lazy generation.
-      // After the getReportIdMRA we need to wait a few seconds to download the xml report
-      akka.pattern.after(waitSecs.getOrElse(5) seconds, Akka.system.scheduler) {
-        Logger.debug(s"Delayed downloading XML report from Cubiks")
-
-        adRepository.find(application.applicationId).flatMap { assistanceDetails =>
-          val gis = assistanceDetails.guaranteedInterview.getOrElse(false)
-          Logger.debug(s"Retrieved GIS for user ${application.userId}: application ${application.userId}: GIS: $gis")
-          cubiksGatewayClient.downloadXmlReport(reportId) flatMap { results: Map[String, TestResult] =>
-            val cr = toCandidateTestReport(application.applicationId, results)
-            if (gatewayConfig.reportConfig.suppressValidation || cr.isValid(gis)) {
-
-              trRepository.saveOnlineTestReport(cr).flatMap { _ =>
-                otRepository.updateXMLReportSaved(application.applicationId) map { _ =>
-                  Logger.info(s"Report has been saved for applicationId: ${application.applicationId}")
-                  audit("OnlineTestXmlReportSaved", application.userId)
-                }
-              }
-            } else {
-              val cubiksUserId = application.cubiksUserId
-              val applicationId = application.applicationId
-
-              val msg = s"Cubiks report $reportId does not have a valid report for " +
-                s"Cubiks User ID:$cubiksUserId and Application ID:$applicationId"
-
-              Logger.error(msg)
-              throw new IllegalStateException(msg)
-            }
-          }
-        }
+    def saveOnlineTestReport(appId: String, candidateTestReport: CandidateTestReport) = {
+      for {
+        _ <- trRepository.saveOnlineTestReport(candidateTestReport)
+        _ <- otRepository.updateXMLReportSaved(appId)
+      } yield {
+        Logger.info(s"Report has been saved for applicationId: $appId")
+        auditApp("OnlineTestXmlReportSaved", appId)
       }
     }
+
+    (for {
+      app <- adRepository.findApplication(cubiksUserId)
+      testResultMap <- cubiksGatewayClient.downloadXmlReport(reportId)
+    } yield {
+      app.applicationStatus match {
+        case OnlineTestInvited | OnlineTestStarted | OnlineTestCompleted =>
+          val appId = app.applicationId
+          val isGis = app.assistanceDetails.isGis
+          val candidateTestReport = toCandidateTestReport(appId, testResultMap)
+          if (candidateTestReport.isValid(isGis)) {
+            saveOnlineTestReport(appId, candidateTestReport)
+          } else {
+            Logger.warn(s"Ignoring invalid/partial online test report with id=$reportId for cubiks user id=$cubiksUserId")
+            Future.successful(())
+          }
+        case appStatus =>
+          Logger.warn(s"Ignoring online test report callback for application status=$appStatus" +
+            s" for cubiks user id=$cubiksUserId")
+          Future.successful(())
+      }
+    }).flatMap(identity)
   }
 
   def startOnlineTest(cubiksUserId: Int): Future[Unit] = {
@@ -228,6 +235,15 @@ trait OnlineTestService {
     auditService.logEventNoRequest(
       event,
       Map("userId" -> userId) ++ emailAddress.map("email" -> _).toMap
+    )
+  }
+
+  private def auditApp(event: String, appId: String, emailAddress: Option[String] = None): Unit = {
+    Logger.info(s"$event for the application $appId")
+
+    auditService.logEventNoRequest(
+      event,
+      Map("applicationId" -> appId)
     )
   }
 

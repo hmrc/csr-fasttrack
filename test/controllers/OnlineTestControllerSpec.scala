@@ -21,11 +21,11 @@ import connectors.ExchangeObjects._
 import connectors.{ CubiksGatewayClient, EmailClient }
 import model.ApplicationStatuses
 import model.Commands.{ Address, ProgressResponse }
-import model.Exceptions.CannotUpdateCubiksTest
+import model.Exceptions.{ ApplicationNotFound, CannotUpdateCubiksTest, ConnectorException }
 import model.OnlineTestCommands.OnlineTestApplication
 import model.PersistedObjects.ContactDetails
 import model.commands.OnlineTestProgressResponse
-import model.exchange.OnlineTest
+import model.exchange.{ CubiksTestResultReady, OnlineTest }
 import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
 import org.mockito.Matchers.{ any, eq => eqTo }
@@ -200,6 +200,29 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
     }
   }
 
+  "Try To Download Online Test Report" must {
+    val cubiksId = 1
+    val request = s"""
+                  |{
+                  |   "reportId": $cubiksId,
+                  |   "reportStatus": "Ready"
+                  |}""".stripMargin
+
+    "return a report" in new TestFixture {
+      when(mockOnlineTestService.tryToDownloadOnlineTestResult(any[Int], any[CubiksTestResultReady])).thenReturn(Future.successful(unit))
+
+      val result = TestOnlineTestController.tryToDownloadOnlineTestReport(1)(createTryToDownloadOnlineTestReportRequest(cubiksId, request))
+      status(result) mustBe OK
+    }
+
+    "return Not Found when an application cannot be found" in new TestFixture {
+      when(mockOnlineTestService.tryToDownloadOnlineTestResult(any[Int], any[CubiksTestResultReady]))
+        .thenReturn(Future.failed(ApplicationNotFound("id")))
+      val result = TestOnlineTestController.tryToDownloadOnlineTestReport(1)(createTryToDownloadOnlineTestReportRequest(cubiksId, request))
+      status(result) mustBe NOT_FOUND
+    }
+  }
+
   trait TestFixture extends TestFixtureBase {
 
     implicit val hc = HeaderCarrier()
@@ -284,6 +307,11 @@ class OnlineTestControllerSpec extends UnitWithAppSpec {
       val json = Json.parse(s"""{"extraDays":$extraDays}""")
       FakeRequest(Helpers.POST, controllers.routes.OnlineTestController.extendOnlineTests(appId).url, FakeHeaders(), json)
         .withHeaders("Content-Type" -> "application/json")
+    }
+
+    def createTryToDownloadOnlineTestReportRequest(cubiksUserId: Int, jsonString: String) = {
+      val json = Json.parse(jsonString)
+      FakeRequest(Helpers.PUT, controllers.routes.OnlineTestController.tryToDownloadOnlineTestReport(cubiksUserId).url, FakeHeaders(), json)
     }
   }
 }

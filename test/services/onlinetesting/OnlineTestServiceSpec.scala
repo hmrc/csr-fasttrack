@@ -21,14 +21,14 @@ import connectors.ExchangeObjects._
 import connectors.{ CSREmailClient, CubiksGatewayClient }
 import factories.{ DateTimeFactory, UUIDFactory }
 import model.ApplicationStatuses._
-import model.Commands
+import model.{ AdjustmentDetail, ApplicationStatuses, Commands }
 import factories.{ DateTimeFactory, UUIDFactory }
-import model.{ AdjustmentDetail, Commands }
 import model.Commands._
 import model.Exceptions.{ ConnectorException, NotFoundException }
-import model.OnlineTestCommands._
-import model.PersistedObjects.ContactDetails
-import model.persisted.CubiksTestProfile
+import model.OnlineTestCommands.{ TestResult, _ }
+import model.PersistedObjects.{ CandidateTestReport, ContactDetails }
+import model.exchange.{ AssistanceDetails, AssistanceDetailsExamples, CubiksTestResultReady }
+import model.persisted.{ ApplicationAssistanceDetails, CubiksTestProfile }
 import org.joda.time.DateTime
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
@@ -412,6 +412,60 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
     }
   }
 
+  "try to download online test result" must {
+    val competency = TestResult("Ready", "Norm", Some(30.0), None, None, None)
+    val situational = TestResult("Ready", "Norm", Some(35.0), Some(10.0), Some(10.0), Some(10.0))
+    val numerical = TestResult("Ready", "Norm", Some(25.0), Some(10.0), Some(10.0), None)
+    val verbal = TestResult("Ready", "Norm", Some(20.0), Some(10.0), Some(10.0), None)
+
+    val map = Map(
+      "Logiks Verbal and Numerical (Intermediate) - Verbal" -> verbal,
+      "Logiks Verbal and Numerical (Intermediate) - Numerical" -> numerical,
+      "Cubiks Factors" -> competency,
+      "Civil Service Fast Track Apprentice SJQ" -> situational
+    )
+    val assistanceDetails = AssistanceDetailsExamples.OnlyDisabilityNoGisNoAdjustments
+
+    "save the report and update the report saved flag when the report is correctly downloaded" in new OnlineTest {
+      val testResultReady = CubiksTestResultReady(Some(reportId), Some(requestReportId), "Ready", None)
+      val app = ApplicationAssistanceDetails(appId, ApplicationStatuses.OnlineTestCompleted, assistanceDetails)
+      when(adRepositoryMock.findApplication(cubiksId)).thenReturn(Future.successful(app))
+      when(cubiksGatewayClientMock.downloadXmlReport(any[Int])(any[HeaderCarrier])).thenReturn(Future.successful(map))
+
+      onlineTestService.tryToDownloadOnlineTestResult(cubiksId, testResultReady).futureValue
+
+      verify(trRepositoryMock).saveOnlineTestReport(CandidateTestReport(appId, "XML", Some(competency),
+        Some(numerical), Some(verbal), Some(situational)))
+      verify(otRepositoryMock).updateXMLReportSaved(appId)
+    }
+
+    "do not save the report if the report is not valid" in new OnlineTest {
+      val testResultReady = CubiksTestResultReady(Some(reportId), Some(requestReportId), "Ready", None)
+      val app = ApplicationAssistanceDetails(appId, ApplicationStatuses.OnlineTestCompleted, assistanceDetails)
+      when(adRepositoryMock.findApplication(cubiksId)).thenReturn(Future.successful(app))
+      val incorrectReport = map - "Logiks Verbal and Numerical (Intermediate) - Verbal"
+
+      when(cubiksGatewayClientMock.downloadXmlReport(any[Int])(any[HeaderCarrier])).thenReturn(Future.successful(incorrectReport))
+
+      onlineTestService.tryToDownloadOnlineTestResult(cubiksId, testResultReady).futureValue
+
+      verifyZeroInteractions(trRepositoryMock)
+      verifyZeroInteractions(otRepositoryMock)
+    }
+
+    "do not save the report if the application status is not ONLINE_TEST_COMPLETED" in new OnlineTest {
+      val testResultReady = CubiksTestResultReady(Some(reportId), Some(requestReportId), "Ready", None)
+      val app = ApplicationAssistanceDetails(appId, ApplicationStatuses.OnlineTestExpired, assistanceDetails)
+      when(adRepositoryMock.findApplication(cubiksId)).thenReturn(Future.successful(app))
+      when(cubiksGatewayClientMock.downloadXmlReport(any[Int])(any[HeaderCarrier])).thenReturn(Future.successful(map))
+
+      onlineTestService.tryToDownloadOnlineTestResult(cubiksId, testResultReady).futureValue
+
+      verifyZeroInteractions(trRepositoryMock)
+      verifyZeroInteractions(otRepositoryMock)
+    }
+  }
+
   trait OnlineTest {
     implicit val hc = HeaderCarrier()
 
@@ -429,6 +483,8 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
 
     when(tokenFactoryMock.generateUUID()).thenReturn(Token)
     when(onlineTestInvitationDateFactoryMock.nowLocalTimeZone).thenReturn(InvitationDate)
+    when(trRepositoryMock.saveOnlineTestReport(any[CandidateTestReport])).thenReturn(Future.successful(()))
+    when(otRepositoryMock.updateXMLReportSaved(any[String])).thenReturn(Future.successful(()))
 
     val onlineTestService = new OnlineTestService {
       val appRepository = appRepositoryMock
@@ -444,5 +500,10 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
       val onlineTestInvitationDateFactory = onlineTestInvitationDateFactoryMock
       val gatewayConfig = testGatewayConfig
     }
+
+    val cubiksId = 123
+    val requestReportId = 456
+    val reportId = 1
+    val appId = "789"
   }
 }

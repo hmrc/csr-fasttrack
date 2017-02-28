@@ -16,8 +16,9 @@
 
 package repositories.application
 
-import model.Exceptions.{ AssistanceDetailsNotFound, CannotUpdateAssistanceDetails }
+import model.Exceptions.{ ApplicationNotFound, AssistanceDetailsNotFound, CannotUpdateAssistanceDetails }
 import model.exchange.AssistanceDetails
+import model.persisted.ApplicationAssistanceDetails
 import model.{ ApplicationStatuses, ProgressStatuses }
 import reactivemongo.api.DB
 import reactivemongo.bson.{ BSONDocument, _ }
@@ -34,6 +35,8 @@ trait AssistanceDetailsRepository {
   def find(applicationId: String): Future[AssistanceDetails]
 
   def find(cubiksUserId: Int): Future[AssistanceDetails]
+
+  def findApplication(cubiksUserId: Int): Future[ApplicationAssistanceDetails]
 }
 
 class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
@@ -78,6 +81,28 @@ class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
         document.getAs[AssistanceDetails](AssistanceDetailsCollection).get
 
       case _ => throw AssistanceDetailsNotFound(s"cubiksUserId=$cubiksUserId")
+    }
+  }
+
+  override def findApplication(cubiksUserId: Int): Future[ApplicationAssistanceDetails] = {
+    val query = BSONDocument("online-tests.cubiksUserId" -> cubiksUserId)
+    val projection = BSONDocument(
+      "applicationId" -> 1,
+      "applicationStatus" -> 1,
+      AssistanceDetailsCollection -> 1,
+      "_id" -> 0
+    )
+    collection.find(query, projection).one[BSONDocument].map {
+      case Some(document) =>
+        (for {
+          appId <- document.getAs[String]("applicationId")
+          appStatus <- document.getAs[ApplicationStatuses.EnumVal]("applicationStatus")
+          appDetails <- document.getAs[AssistanceDetails](AssistanceDetailsCollection)
+        } yield {
+          ApplicationAssistanceDetails(appId, appStatus, appDetails)
+        }).getOrElse(throw new IllegalStateException("ApplicationAssistanceDetails cannot be retrieved from the database"))
+      case None =>
+        throw ApplicationNotFound(s"cubiksUserId=$cubiksUserId")
     }
   }
 }
