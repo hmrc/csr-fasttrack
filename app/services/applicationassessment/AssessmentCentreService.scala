@@ -71,21 +71,18 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
   val passmarkService: AssessmentCentrePassMarkSettingsService
   val passmarkRulesEngine: AssessmentCentrePassmarkRulesEngine
 
-  def saveScoresAndFeedback(
-    applicationId: String,
-    exerciseScoresAndFeedback: ExerciseScoresAndFeedback
-  )(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
-    exerciseScoresAndFeedback.scoresAndFeedback.attended match {
-      case Some(attendancy) =>
-        val newStatus = if (attendancy) ApplicationStatuses.AssessmentScoresEntered else ApplicationStatuses.FailedToAttend
-        for {
-          _ <- aasRepository.save(exerciseScoresAndFeedback)
-          _ <- aRepository.updateStatus(applicationId, newStatus)
-        } yield {
-          auditService.logEvent("ApplicationScoresAndFeedbackSaved", Map("applicationId" -> applicationId))
-          auditService.logEvent(s"ApplicationStatusSetTo$newStatus", Map("applicationId" -> applicationId))
-        }
-      case _ => Future { throw new IllegalStateException("Attendance must be confirmed to save scores and feedback") }
+  def saveScoresAndFeedback(applicationId: String, exerciseScoresAndFeedback: ExerciseScoresAndFeedback)
+                           (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
+    val newStatus = exerciseScoresAndFeedback.scoresAndFeedback.attended match {
+      case true => ApplicationStatuses.AssessmentScoresEntered
+      case false => ApplicationStatuses.FailedToAttend
+    }
+    for {
+      _ <- aasRepository.save(exerciseScoresAndFeedback)
+      _ <- aRepository.updateStatus(applicationId, newStatus)
+    } yield {
+      auditService.logEvent("ApplicationScoresAndFeedbackSaved", Map("applicationId" -> applicationId))
+      auditService.logEvent(s"ApplicationStatusSetTo$newStatus", Map("applicationId" -> applicationId))
     }
   }
 

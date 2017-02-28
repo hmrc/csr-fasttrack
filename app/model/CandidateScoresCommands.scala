@@ -38,7 +38,7 @@ object CandidateScoresCommands {
   )
 
   case class ScoresAndFeedback(
-                                attended: Option[Boolean],
+                                attended: Boolean,
                                 assessmentIncomplete: Boolean,
                                 leadingAndCommunicating: Option[Double] = None,
                                 collaboratingAndPartnering: Option[Double] = None,

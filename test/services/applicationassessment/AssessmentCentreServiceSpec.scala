@@ -74,27 +74,19 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
       when(aRepositoryMock.updateStatus(any[String], any[ApplicationStatuses.EnumVal])).thenReturn(Future.successful(()))
 
       val result = applicationAssessmentService.saveScoresAndFeedback(ApplicationId,
-        exerciseScoresAndFeedback.copy(scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback.copy(attended = Some(false)))
+        exerciseScoresAndFeedback.copy(scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback.copy(attended = false))
       ).futureValue
 
       result mustBe ()
       verify(auditServiceMock).logEvent("ApplicationScoresAndFeedbackSaved", AuditDetails)
       verify(auditServiceMock).logEvent(s"ApplicationStatusSetTo${ApplicationStatuses.FailedToAttend}", AuditDetails)
     }
-
-    "throw an exception when trying to save scores without a confirmed attendance" in new ApplicationAssessmentServiceFixture {
-      val result = applicationAssessmentService.saveScoresAndFeedback(ApplicationId,
-        exerciseScoresAndFeedback.copy(scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback.copy(attended = None)))
-        .failed.futureValue
-
-      result mustBe an[IllegalStateException]
-    }
   }
 
   "delete an Application Assessment" must {
     "return a deletion success response when an application id exists" in new ApplicationAssessmentServiceFixture {
       val resultFuture = applicationAssessmentService.removeFromAssessmentCentreSlot(ApplicationId)
-      resultFuture.futureValue mustBe (())
+      resultFuture.futureValue mustBe ()
       verify(auditServiceMock).logEventNoRequest("AssessmentCentreAllocationStatusReset", AuditDetails)
       verify(auditServiceMock).logEventNoRequest("AssessmentCentreAllocationDeleted", AuditDetails)
       verify(onlineTestRepositoryMock).removeCandidateAllocationStatus(eqTo(ApplicationId))
@@ -251,7 +243,7 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
     ), Some(AssessmentCentrePassMarkInfo("1", DateTime.now, "user")))
     val exerciseScoresAndFeedback = ExerciseScoresAndFeedback("app1", AssessmentExercise.interview,
       ScoresAndFeedback(
-        attended = Some(true),
+        attended = true,
         assessmentIncomplete = false,
         Some(4.0),
         Some(4.0),

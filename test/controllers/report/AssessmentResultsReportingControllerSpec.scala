@@ -112,7 +112,7 @@ class AssessmentResultsReportingControllerSpec extends BaseReportingControllerSp
       PassMarkReportQuestionnaireData(someRnd("Gender"), someRnd("Orientation"), someRnd("Ethnicity"),
         someRnd("EmploymentStatus"), someRnd("Occupation"), someRnd("(Self)Employed"), someRnd("CompanySize"), rnd("SES"))
 
-    def newScores = CandidateScoresAndFeedback("app1", interview = Some(ScoresAndFeedback(attended = Some(true),
+    def newScores = CandidateScoresAndFeedback("app1", interview = Some(ScoresAndFeedback(attended = true,
       assessmentIncomplete = false, leadingAndCommunicating = someDouble,
       collaboratingAndPartnering = someDouble, deliveringAtPace = someDouble, makingEffectiveDecisions = someDouble,
       changingAndImproving = someDouble, buildingCapabilityForAll = someDouble, motivationFit = someDouble,

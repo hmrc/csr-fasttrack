@@ -44,7 +44,7 @@ trait AssessmentScoresEnteredStatusGenerator extends ConstructiveGenerator {
     def getScoresAndFeedback(applicationId: String, assessmentExercise: AssessmentExercise): ExerciseScoresAndFeedback = {
       def randScore = Some(Random.randDouble(1, 4))
       ExerciseScoresAndFeedback(applicationId, assessmentExercise, ScoresAndFeedback(
-        attended = Some(true),
+        attended = true,
         assessmentIncomplete = false,
         leadingAndCommunicating     = randScore,
         collaboratingAndPartnering  = randScore,

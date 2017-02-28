@@ -39,7 +39,7 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
 
     val exerciseScoresAndFeedback = ExerciseScoresAndFeedback("app1", AssessmentExercise.interview,
       ScoresAndFeedback(
-        attended = Some(true),
+        attended = true,
         assessmentIncomplete = false,
         Some(4.0),
         Some(4.0),
@@ -73,7 +73,7 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
     "update already saved application scores and feedback document" in {
       repository.save(exerciseScoresAndFeedback).futureValue
       val updatedApplicationScores = exerciseScoresAndFeedback.copy(scoresAndFeedback =
-        exerciseScoresAndFeedback.scoresAndFeedback.copy(attended = Some(false)))
+        exerciseScoresAndFeedback.scoresAndFeedback.copy(attended = false))
       val result = repository.save(updatedApplicationScores).futureValue
       repository.tryFind("app1").futureValue mustBe Some(CandidateScoresAndFeedback(applicationId = "app1",
         interview = Some(updatedApplicationScores.scoresAndFeedback)))
@@ -82,7 +82,7 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
     "retrieve all application scores and feedback documents" in {
       val exerciseScoresAndFeedback2 = ExerciseScoresAndFeedback("app2", AssessmentExercise.interview,
         ScoresAndFeedback(
-          attended = Some(true),
+          attended = true,
           assessmentIncomplete = false,
           Some(1.0),
           Some(1.0),

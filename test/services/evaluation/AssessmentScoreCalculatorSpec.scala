@@ -30,7 +30,7 @@ class AssessmentScoreCalculatorSpec extends PlaySpec with MustMatchers {
       val Scores = CandidateScoresAndFeedback("appId",
         interview = Some(
           ScoresAndFeedback(
-            None,
+            false,
             assessmentIncomplete = false,
             Some(4),
             Some(3.25),
@@ -44,7 +44,7 @@ class AssessmentScoreCalculatorSpec extends PlaySpec with MustMatchers {
           )),
         groupExercise = Some(
           ScoresAndFeedback(
-            None,
+            false,
             assessmentIncomplete = false,
             Some(4),
             None,
@@ -58,7 +58,7 @@ class AssessmentScoreCalculatorSpec extends PlaySpec with MustMatchers {
           )),
         writtenExercise = Some(
           ScoresAndFeedback(
-            None,
+            false,
             assessmentIncomplete = false,
             Some(4),
             Some(3.98),

@@ -38,7 +38,7 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
 
   val exerciseScoresAndFeedback = ExerciseScoresAndFeedback("app1", AssessmentExercise.interview,
     ScoresAndFeedback(
-      attended = Some(true),
+      attended = true,
       assessmentIncomplete = false,
       Some(4.0),
       Some(4.0),

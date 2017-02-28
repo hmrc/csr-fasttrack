@@ -40,7 +40,7 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
   val CandidateScoresWithFeedback = CandidateScoresAndFeedback("app1",
     interview = Some(
       ScoresAndFeedback(
-      Some(true),
+      attended = true,
       assessmentIncomplete = false,
       Some(2.1),
       None,
@@ -54,7 +54,7 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
     )),
     groupExercise = Some(
       ScoresAndFeedback(
-        Some(true),
+        attended= true,
         assessmentIncomplete = false,
         Some(3.4),
         Some(2.0),
@@ -68,7 +68,7 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
       )),
     writtenExercise = Some(
       ScoresAndFeedback(
-        Some(true),
+        attended = true,
         assessmentIncomplete = false,
         Some(3.3),
         Some(3.0),

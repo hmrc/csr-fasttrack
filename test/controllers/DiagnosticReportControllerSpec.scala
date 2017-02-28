@@ -52,7 +52,7 @@ class DiagnosticReportControllerSpec extends UnitWithAppSpec {
         Some(CandidateTestReport("app1", "XML", Some(testResult), None, None, None))
       ))
       when(mockAssessmentResultRepo.tryFind("app1")).thenReturn(Future.successful(
-        Some(CandidateScoresAndFeedback("app1", interview = Some(ScoresAndFeedback(attended = Some(true),
+        Some(CandidateScoresAndFeedback("app1", interview = Some(ScoresAndFeedback(attended = true,
           assessmentIncomplete = false, leadingAndCommunicating = candidateScore,
           collaboratingAndPartnering = candidateScore, deliveringAtPace = candidateScore, makingEffectiveDecisions = candidateScore,
           changingAndImproving = candidateScore, buildingCapabilityForAll = candidateScore, motivationFit = candidateScore,
