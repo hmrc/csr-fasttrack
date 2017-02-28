@@ -75,7 +75,7 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
     applicationId: String,
     exerciseScoresAndFeedback: ExerciseScoresAndFeedback
   )(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
-    exerciseScoresAndFeedback.scoresAndFeedback.attendancy match {
+    exerciseScoresAndFeedback.scoresAndFeedback.attended match {
       case Some(attendancy) =>
         val newStatus = if (attendancy) ApplicationStatuses.AssessmentScoresEntered else ApplicationStatuses.FailedToAttend
         for {

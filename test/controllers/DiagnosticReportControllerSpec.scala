@@ -38,7 +38,7 @@ class DiagnosticReportControllerSpec extends UnitWithAppSpec {
       val expectedApplication = Json.obj("applicationId" -> "app1", "userId" -> "user1", "frameworkId" -> "FastTrack-2017",
         "online-test-results" -> Json.obj("applicationId" -> "app1", "reportType" -> "XML",
           "competency" -> Json.obj("status" -> "complete", "norm" -> "norm", "tScore" -> 1, "percentile" -> 22, "raw" -> 5, "sten" -> 55)),
-        "assessment-centre-results" -> Json.obj("applicationId" -> "app1", "interview" -> Json.obj("attendancy" -> true,
+        "assessment-centre-results" -> Json.obj("applicationId" -> "app1", "interview" -> Json.obj("attended" -> true,
         "assessmentIncomplete" -> false, "leadingAndCommunicating" -> 1, "collaboratingAndPartnering" -> 1, "deliveringAtPace" -> 1,
         "makingEffectiveDecisions" -> 1,"changingAndImproving" -> 1, "buildingCapabilityForAll" -> 1,
         "motivationFit" -> 1,"feedback" -> "blah", "updatedBy" -> "xyz")))
@@ -52,7 +52,7 @@ class DiagnosticReportControllerSpec extends UnitWithAppSpec {
         Some(CandidateTestReport("app1", "XML", Some(testResult), None, None, None))
       ))
       when(mockAssessmentResultRepo.tryFind("app1")).thenReturn(Future.successful(
-        Some(CandidateScoresAndFeedback("app1", interview = Some(ScoresAndFeedback(attendancy = Some(true),
+        Some(CandidateScoresAndFeedback("app1", interview = Some(ScoresAndFeedback(attended = Some(true),
           assessmentIncomplete = false, leadingAndCommunicating = candidateScore,
           collaboratingAndPartnering = candidateScore, deliveringAtPace = candidateScore, makingEffectiveDecisions = candidateScore,
           changingAndImproving = candidateScore, buildingCapabilityForAll = candidateScore, motivationFit = candidateScore,

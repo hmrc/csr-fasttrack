@@ -38,17 +38,17 @@ object CandidateScoresCommands {
   )
 
   case class ScoresAndFeedback(
-      attendancy: Option[Boolean],
-      assessmentIncomplete: Boolean,
-      leadingAndCommunicating: Option[Double] = None,
-      collaboratingAndPartnering: Option[Double] = None,
-      deliveringAtPace: Option[Double] = None,
-      makingEffectiveDecisions: Option[Double] = None,
-      changingAndImproving: Option[Double] = None,
-      buildingCapabilityForAll: Option[Double] = None,
-      motivationFit: Option[Double] = None,
-      feedback: Option[String] = None,
-      updatedBy: String
+                                attended: Option[Boolean],
+                                assessmentIncomplete: Boolean,
+                                leadingAndCommunicating: Option[Double] = None,
+                                collaboratingAndPartnering: Option[Double] = None,
+                                deliveringAtPace: Option[Double] = None,
+                                makingEffectiveDecisions: Option[Double] = None,
+                                changingAndImproving: Option[Double] = None,
+                                buildingCapabilityForAll: Option[Double] = None,
+                                motivationFit: Option[Double] = None,
+                                feedback: Option[String] = None,
+                                updatedBy: String
   )
 
   case class ApplicationScores(candidate: RecordCandidateScores, scoresAndFeedback: Option[CandidateScoresAndFeedback])
