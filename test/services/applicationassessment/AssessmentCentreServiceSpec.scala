@@ -60,7 +60,7 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
 
   "Save scores and feedback" must {
     "save feedback and log an audit event for an attended candidate" in new ApplicationAssessmentServiceFixture {
-      when(aasRepositoryMock.save(any[ExerciseScoresAndFeedback])).thenReturn(Future.successful(()))
+      when(aasRepositoryMock.save(any[ExerciseScoresAndFeedback], any[Option[String]])).thenReturn(Future.successful(()))
       when(aRepositoryMock.updateStatus(any[String], any[ApplicationStatuses.EnumVal])).thenReturn(Future.successful(()))
 
       val result = applicationAssessmentService.saveScoresAndFeedback(ApplicationId, exerciseScoresAndFeedback).futureValue
@@ -70,7 +70,7 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
     }
 
     "save feedback and log an audit event for a 'failed to attend' candidate" in new ApplicationAssessmentServiceFixture {
-      when(aasRepositoryMock.save(any[ExerciseScoresAndFeedback])).thenReturn(Future.successful(()))
+      when(aasRepositoryMock.save(any[ExerciseScoresAndFeedback], any[Option[String]])).thenReturn(Future.successful(()))
       when(aRepositoryMock.updateStatus(any[String], any[ApplicationStatuses.EnumVal])).thenReturn(Future.successful(()))
 
       val result = applicationAssessmentService.saveScoresAndFeedback(ApplicationId,
@@ -86,7 +86,7 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
   "delete an Application Assessment" must {
     "return a deletion success response when an application id exists" in new ApplicationAssessmentServiceFixture {
       val resultFuture = applicationAssessmentService.removeFromAssessmentCentreSlot(ApplicationId)
-      resultFuture.futureValue mustBe ()
+      resultFuture.futureValue mustBe (())
       verify(auditServiceMock).logEventNoRequest("AssessmentCentreAllocationStatusReset", AuditDetails)
       verify(auditServiceMock).logEventNoRequest("AssessmentCentreAllocationDeleted", AuditDetails)
       verify(onlineTestRepositoryMock).removeCandidateAllocationStatus(eqTo(ApplicationId))

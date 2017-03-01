@@ -16,6 +16,7 @@
 
 package mocks
 
+import factories.UUIDFactory
 import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScoresAndFeedback }
 import repositories.ApplicationAssessmentScoresRepository
 
@@ -29,7 +30,8 @@ class ApplicationAssessmentScoresInMemoryRepository extends ApplicationAssessmen
 
   def tryFind(applicationId: String): Future[Option[CandidateScoresAndFeedback]] = ???
 
-  def save(candidateScoresAndFeedbck: ExerciseScoresAndFeedback): Future[Unit] = ???
+  def save(candidateScoresAndFeedbck: ExerciseScoresAndFeedback,
+           newVersion: Option[String] = Some(UUIDFactory.generateUUID())): Future[Unit] = ???
 
   def nextCandidateScoresReadyForEvaluation: Future[Option[CandidateScoresAndFeedback]] = ???
 }

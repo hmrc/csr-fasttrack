@@ -48,7 +48,8 @@ object CandidateScoresCommands {
                                 buildingCapabilityForAll: Option[Double] = None,
                                 motivationFit: Option[Double] = None,
                                 feedback: Option[String] = None,
-                                updatedBy: String
+                                updatedBy: String,
+                                version: Option[String] = None
   )
 
   case class ApplicationScores(candidate: RecordCandidateScores, scoresAndFeedback: Option[CandidateScoresAndFeedback])

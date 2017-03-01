@@ -16,12 +16,11 @@
 
 package repositories
 
-import factories.DateTimeFactory
-import model.CandidateScoresCommands
+import factories.{ DateTimeFactory, UUIDFactory }
+import model.{ CandidateScoresCommands, UniqueIdentifier }
 import model.CandidateScoresCommands._
-import model.Exceptions.UnexpectedException
 import reactivemongo.api.{ DB, ReadPreference }
-import reactivemongo.bson.{ BSONDocument, BSONObjectID, _ }
+import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID, _ }
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -33,13 +32,14 @@ trait ApplicationAssessmentScoresRepository {
 
   def tryFind(applicationId: String): Future[Option[CandidateScoresAndFeedback]]
 
-  def save(exerciseScoresAndFeedback: ExerciseScoresAndFeedback): Future[Unit]
+  def save(exerciseScoresAndFeedback: ExerciseScoresAndFeedback,
+           newVersion: Option[String] = Some(UUIDFactory.generateUUID())): Future[Unit]
 }
 
 class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
     extends ReactiveRepository[CandidateScoresAndFeedback, BSONObjectID](CollectionNames.APPLICATION_ASSESSMENT_SCORES, mongo,
       CandidateScoresCommands.Implicits.CandidateScoresAndFeedbackFormats, ReactiveMongoFormats.objectIdFormats)
-    with ApplicationAssessmentScoresRepository {
+    with ApplicationAssessmentScoresRepository with ReactiveRepositoryHelpers {
 
   def tryFind(applicationId: String): Future[Option[CandidateScoresAndFeedback]] = {
     val query = BSONDocument("applicationId" -> applicationId)
@@ -58,20 +58,26 @@ class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(impl
     }
   }
 
-  def save(exerciseScoresAndFeedback: ExerciseScoresAndFeedback): Future[Unit] = {
+  def save(exerciseScoresAndFeedback: ExerciseScoresAndFeedback,
+           newVersion: Option[String] = Some(UUIDFactory.generateUUID())): Future[Unit] = {
     val applicationId = exerciseScoresAndFeedback.applicationId
-    val query = BSONDocument("applicationId" -> applicationId)
+    val query = BSONDocument("$and" -> BSONArray(
+      BSONDocument("applicationId" -> applicationId),
+      BSONDocument("$or" -> BSONArray(BSONDocument(
+          "version" -> BSONDocument("$exists" -> BSONBoolean(false)),
+          "version" -> exerciseScoresAndFeedback.scoresAndFeedback.version)
+      ))
+    ))
+
+    val scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback
 
     val candidateScoresAndFeedbackBSON = BSONDocument("$set" -> BSONDocument(
       "applicationId" -> exerciseScoresAndFeedback.applicationId,
-      s"${exerciseScoresAndFeedback.exercise}" -> exerciseScoresAndFeedback.scoresAndFeedback
+      s"${exerciseScoresAndFeedback.exercise}" -> scoresAndFeedback.copy(version = newVersion)
     ))
 
-    collection.update(query, candidateScoresAndFeedbackBSON, upsert = true) map {
-      case r if r.n > 1 =>
-        throw UnexpectedException("save application scores somehow updated more than one " +
-          s"record for applicationId:$applicationId")
-      case _ =>
-    }
+    val validator = singleUpdateValidator(applicationId, "Application with correct version not found")
+
+    collection.update(query, candidateScoresAndFeedbackBSON, upsert = true) map validator
   }
 }

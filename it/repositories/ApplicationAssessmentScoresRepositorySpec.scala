@@ -53,13 +53,13 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
       ))
 
     "create a new application scores and feedback document" in {
-      repository.save(exerciseScoresAndFeedback).futureValue
+      repository.save(exerciseScoresAndFeedback, None).futureValue
       repository.tryFind("app1").futureValue mustBe Some(CandidateScoresAndFeedback(applicationId = "app1",
         interview = Some(exerciseScoresAndFeedback.scoresAndFeedback)))
     }
 
     "return already stored application scores" in {
-      repository.save(exerciseScoresAndFeedback).futureValue
+      repository.save(exerciseScoresAndFeedback, None).futureValue
       val result = repository.tryFind("app1").futureValue
       result mustBe Some(CandidateScoresAndFeedback(applicationId = "app1",
         interview = Some(exerciseScoresAndFeedback.scoresAndFeedback)))
@@ -71,10 +71,10 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
     }
 
     "update already saved application scores and feedback document" in {
-      repository.save(exerciseScoresAndFeedback).futureValue
+      repository.save(exerciseScoresAndFeedback, None).futureValue
       val updatedApplicationScores = exerciseScoresAndFeedback.copy(scoresAndFeedback =
         exerciseScoresAndFeedback.scoresAndFeedback.copy(attended = false))
-      val result = repository.save(updatedApplicationScores).futureValue
+      val result = repository.save(updatedApplicationScores, None).futureValue
       repository.tryFind("app1").futureValue mustBe Some(CandidateScoresAndFeedback(applicationId = "app1",
         interview = Some(updatedApplicationScores.scoresAndFeedback)))
     }
@@ -95,10 +95,10 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
           "xyz"
         ))
 
-      repository.save(exerciseScoresAndFeedback).futureValue
-      repository.save(exerciseScoresAndFeedback2).futureValue
-      repository.save(exerciseScoresAndFeedback2.copy(exercise = AssessmentExercise.groupExercise)).futureValue
-      repository.save(exerciseScoresAndFeedback2.copy(exercise = AssessmentExercise.writtenExercise)).futureValue
+      repository.save(exerciseScoresAndFeedback, None).futureValue
+      repository.save(exerciseScoresAndFeedback2, None).futureValue
+      repository.save(exerciseScoresAndFeedback2.copy(exercise = AssessmentExercise.groupExercise), None).futureValue
+      repository.save(exerciseScoresAndFeedback2.copy(exercise = AssessmentExercise.writtenExercise), None).futureValue
 
       val result = repository.allScores.futureValue
 
