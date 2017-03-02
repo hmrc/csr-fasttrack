@@ -64,20 +64,26 @@ class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(impl
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId),
       BSONDocument("$or" -> BSONArray(BSONDocument(
-          "version" -> BSONDocument("$exists" -> BSONBoolean(false)),
-          "version" -> exerciseScoresAndFeedback.scoresAndFeedback.version)
+        s"${exerciseScoresAndFeedback.exercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"${exerciseScoresAndFeedback.exercise}.version" -> exerciseScoresAndFeedback.scoresAndFeedback.version)
       ))
     ))
 
     val scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback
+    val applicationScoresBSON = exerciseScoresAndFeedback.scoresAndFeedback.version match {
+      case Some(_) => BSONDocument(
+        s"${exerciseScoresAndFeedback.exercise}" -> scoresAndFeedback.copy(version = newVersion)
+      )
+      case _ => BSONDocument(
+        "applicationId" -> exerciseScoresAndFeedback.applicationId,
+        s"${exerciseScoresAndFeedback.exercise}" -> scoresAndFeedback.copy(version = newVersion)
+      )
+    }
 
-    val candidateScoresAndFeedbackBSON = BSONDocument("$set" -> BSONDocument(
-      "applicationId" -> exerciseScoresAndFeedback.applicationId,
-      s"${exerciseScoresAndFeedback.exercise}" -> scoresAndFeedback.copy(version = newVersion)
-    ))
+    val candidateScoresAndFeedbackBSON = BSONDocument("$set" -> applicationScoresBSON)
 
     val validator = singleUpdateValidator(applicationId, "Application with correct version not found")
 
-    collection.update(query, candidateScoresAndFeedbackBSON, upsert = true) map validator
+    collection.update(query, candidateScoresAndFeedbackBSON, upsert = exerciseScoresAndFeedback.scoresAndFeedback.version.isEmpty) map validator
   }
 }
