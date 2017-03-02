@@ -73,11 +73,11 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
   val DebugTestOnlyPathPattern: Option[String] = None // Some("5_2_oneLocationMclDisabledIncomplete/")
 
   // TODO IAN: Please fix the tests once you tackle assessment centre evaluation
-/*  "Assessment Centre Passmark Service" should {
-    "for each test in the path evaluate scores" in {
+  "Assessment Centre Passmark Service" should {
+    "for each test in the path evaluate scores" ignore {
       loadSuites foreach executeSuite
     }
-  }*/
+  }
 
   def loadSuites = {
     val suites = new File(TestPath).listFiles filterNot (_.getName.startsWith(".")) sortBy(_.getName)
