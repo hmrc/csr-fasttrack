@@ -17,10 +17,10 @@
 package controllers.report
 
 import controllers.ReportingController
-import model.CandidateScoresCommands.{ CandidateScoreFeedback, CandidateScores, CandidateScoresAndFeedback }
+import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ScoresAndFeedback }
 import model.Commands.Implicits._
 import model.ReportExchangeObjects.Implicits._
-import model.ReportExchangeObjects.{ ApplicationPreferences, AssessmentResultsReport, OnlineTestPassmarkEvaluationSchemes, PassMarkReportQuestionnaireData }
+import model.ReportExchangeObjects.{ ApplicationPreferences, OnlineTestPassmarkEvaluationSchemes, PassMarkReportQuestionnaireData }
 import model.UniqueIdentifier
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
@@ -112,15 +112,10 @@ class AssessmentResultsReportingControllerSpec extends BaseReportingControllerSp
       PassMarkReportQuestionnaireData(someRnd("Gender"), someRnd("Orientation"), someRnd("Ethnicity"),
         someRnd("EmploymentStatus"), someRnd("Occupation"), someRnd("(Self)Employed"), someRnd("CompanySize"), rnd("SES"))
 
-    def newScores = CandidateScoresAndFeedback(applicationId = appId.toString(), attendancy = maybe(true),
-      assessmentIncomplete = false,
-      leadingAndCommunicating = CandidateScores(someDouble, someDouble, someDouble),
-      collaboratingAndPartnering = CandidateScores(someDouble, someDouble, someDouble),
-      deliveringAtPace = CandidateScores(someDouble, someDouble, someDouble),
-      makingEffectiveDecisions = CandidateScores(someDouble, someDouble, someDouble),
-      changingAndImproving = CandidateScores(someDouble, someDouble, someDouble),
-      buildingCapabilityForAll = CandidateScores(someDouble, someDouble, someDouble),
-      motivationFit = CandidateScores(someDouble, someDouble, someDouble),
-      feedback = CandidateScoreFeedback(someRnd("feedback"), someRnd("feedback"), someRnd("feedback")))
+    def newScores = CandidateScoresAndFeedback("app1", interview = Some(ScoresAndFeedback(attended = true,
+      assessmentIncomplete = false, leadingAndCommunicating = someDouble,
+      collaboratingAndPartnering = someDouble, deliveringAtPace = someDouble, makingEffectiveDecisions = someDouble,
+      changingAndImproving = someDouble, buildingCapabilityForAll = someDouble, motivationFit = someDouble,
+      feedback = Some("feedback"), updatedBy = "xyz")))
   }
 }

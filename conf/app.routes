@@ -88,7 +88,7 @@ POST        /online-test/extend/:appId                                   control
 GET         /online-test/pdf-report/:applicationId                       controllers.OnlineTestController.getPDFReport(applicationId: String)
 
 GET         /test-scores/application/:applicationId                      controllers.CandidateScoresController.getCandidateScores(applicationId: String)
-PUT         /test-scores/application/:applicationId                      controllers.CandidateScoresController.createCandidateScoresAndFeedback(applicationId: String)
+PUT         /test-scores/application/:applicationId                      controllers.CandidateScoresController.createExerciseScoresAndFeedback(applicationId: String)
 PUT         /test-scores/accept/application/:applicationId               controllers.CandidateScoresController.acceptCandidateScoresAndFeedback(applicationId: String)
 
 GET         /application/:applicationId/issue                            controllers.FlagCandidateController.find(applicationId: String)
