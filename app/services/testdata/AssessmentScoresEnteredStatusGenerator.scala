@@ -17,6 +17,7 @@
 package services.testdata
 
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
+import factories.UUIDFactory
 import model.{ ApplicationStatuses, AssessmentExercise }
 import model.AssessmentExercise._
 import model.CandidateScoresCommands._
@@ -54,7 +55,7 @@ trait AssessmentScoresEnteredStatusGenerator extends ConstructiveGenerator {
         buildingCapabilityForAll    = randScore,
         motivationFit               = randScore,
         feedback = Some("Good interview"),
-        updatedBy = "xyz")
+        updatedBy = UUIDFactory.generateUUID())
       )
     }
 

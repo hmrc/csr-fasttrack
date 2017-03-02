@@ -17,13 +17,12 @@
 package services.testdata
 
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
+import factories.UUIDFactory
 import model.{ ApplicationStatuses, AssessmentExercise }
 import model.CandidateScoresCommands.{ ExerciseScoresAndFeedback, ScoresAndFeedback }
-import model.Commands.AssessmentCentreAllocation
 import model.testdata.GeneratorConfig
 import repositories._
-import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
-import services.testdata.faker.DataFaker.Random
+import repositories.application.GeneralApplicationRepository
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -43,7 +42,7 @@ trait FailedToAttendStatusGenerator extends ConstructiveGenerator {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       _ <- aasRepository.save(ExerciseScoresAndFeedback(candidateInPreviousStatus.applicationId.get, AssessmentExercise.interview,
-        ScoresAndFeedback(attended = false, assessmentIncomplete = true, updatedBy = "xyz")))
+        ScoresAndFeedback(attended = false, assessmentIncomplete = true, updatedBy = UUIDFactory.generateUUID())))
       _ <- aRepository.updateStatus(candidateInPreviousStatus.applicationId.get, ApplicationStatuses.FailedToAttend)
     } yield {
       candidateInPreviousStatus.copy(applicationStatus = ApplicationStatuses.FailedToAttend)
