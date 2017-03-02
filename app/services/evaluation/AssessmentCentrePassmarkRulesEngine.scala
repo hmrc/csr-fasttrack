@@ -74,17 +74,17 @@ object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRules
     val overallScore = competencyAverage.overallScore
     val passmark = candidateScores.passmark
     val schemesEvaluation = evaluateSchemes(passmark, overallScore, eligibleSchemesForQualification)
-    val schemesEvaluationMap = schemesEvaluation.map { x => x.schemeName -> x.result }.toMap
+    val schemesEvaluationMap = schemesEvaluation.map { x => x.scheme -> x.result }.toMap
 
     val preferences = candidateScores.preferencesWithQualification.preferences
     val location1Scheme1 = preferences.firstLocation.firstFramework
     val location1Scheme2 = preferences.firstLocation.secondFramework
     val location2Scheme1 = preferences.secondLocation.map(s => s.firstFramework)
     val location2Scheme2 = preferences.secondLocation.flatMap(s => s.secondFramework)
-    val location1Scheme1Result = Some(schemesEvaluationMap(location1Scheme1))
-    val location1Scheme2Result = location1Scheme2 map schemesEvaluationMap
-    val location2Scheme1Result = location2Scheme1 map schemesEvaluationMap
-    val location2Scheme2Result = location2Scheme2 map schemesEvaluationMap
+    val location1Scheme1Result = Some(schemesEvaluationMap(model.Scheme.withName(location1Scheme1)))
+    val location1Scheme2Result = location1Scheme2.map(loc => model.Scheme.withName(loc)) map schemesEvaluationMap
+    val location2Scheme1Result = location2Scheme1.map(loc => model.Scheme.withName(loc)) map schemesEvaluationMap
+    val location2Scheme2Result = location2Scheme2.map(loc => model.Scheme.withName(loc)) map schemesEvaluationMap
 
     val alternativeSchemeResult: Option[Result] = preferences.alternatives.map(_.framework).collect {
       case true =>

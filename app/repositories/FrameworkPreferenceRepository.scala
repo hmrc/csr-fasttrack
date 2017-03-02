@@ -27,10 +27,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 trait FrameworkPreferenceRepository {
-  def savePreferences(applicationId: String, preferences: Preferences): Future[Unit]
-
-  def tryGetPreferences(applicationId: String): Future[Option[Preferences]]
-
   def tryGetPreferencesWithQualifications(applicationId: String): Future[Option[PreferencesWithQualification]]
 }
 
@@ -38,28 +34,6 @@ class FrameworkPreferenceMongoRepository(implicit mongo: () => DB)
     extends ReactiveRepository[Preferences, BSONObjectID](
       CollectionNames.APPLICATION, mongo, Preferences.jsonFormat, ReactiveMongoFormats.objectIdFormats
     ) with FrameworkPreferenceRepository {
-
-  def savePreferences(applicationId: String, preferences: Preferences): Future[Unit] = {
-    require(preferences.isValid, "Preferences must be valid when saving to repository")
-
-    val query = BSONDocument("applicationId" -> applicationId)
-    val preferencesBSON = BSONDocument("$set" -> BSONDocument(
-      "applicationStatus" -> ApplicationStatuses.InProgress,
-      "progress-status.frameworks-location" -> preferences.alternatives.isDefined,
-      "framework-preferences" -> preferences
-    ))
-    collection.update(query, preferencesBSON, upsert = false) map {
-      case _ => ()
-    }
-  }
-
-  def tryGetPreferences(applicationId: String): Future[Option[Preferences]] = {
-    val query = BSONDocument("applicationId" -> applicationId)
-    val projection = BSONDocument("framework-preferences" -> 1, "_id" -> 0)
-    collection.find(query, projection).one[BSONDocument].map { rootDocument =>
-      rootDocument.flatMap(_.getAs[Preferences]("framework-preferences"))
-    }
-  }
 
   def tryGetPreferencesWithQualifications(applicationId: String): Future[Option[PreferencesWithQualification]] = {
     val query = BSONDocument("applicationId" -> applicationId)

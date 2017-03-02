@@ -32,8 +32,4 @@ object FrameworkInMemoryRepository extends FrameworkRepository {
       ))
     ))
   ))
-
-  override def getFrameworkNames: Future[List[String]] = Future.successful(List(
-    "Land"
-  ))
 }

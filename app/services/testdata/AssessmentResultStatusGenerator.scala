@@ -19,6 +19,7 @@ package services.testdata
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.ApplicationStatuses
 import model.EvaluationResults._
+import model.persisted.SchemeEvaluationResult
 import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.GeneralApplicationRepository
@@ -34,7 +35,7 @@ import scala.concurrent.{ Await, Future }
 object AwaitingAssessmentCentreReevalationStatusGenerator extends AssessmentResultStatusGenerator {
   override val previousStatusGenerator = AssessmentScoresAcceptedStatusGenerator
   override val aRepository = applicationRepository
-  override val fwRepository = frameworkRepository
+  override val locationSchemeRepository = repositories.fileLocationSchemeRepository
 
   private def randScore = Random.randDouble(1.5, 2.5)
 
@@ -53,15 +54,15 @@ object AwaitingAssessmentCentreReevalationStatusGenerator extends AssessmentResu
         buildingCapabilityForAllAverage = randScore,
         motivationFitAverage = randScore,
         overallScore = Random.randDouble(10.5, 17.5)
-      )), Some(schemeNames.map { schemeName =>
-        PerSchemeEvaluation(schemeName, randResult)
+      )), Some(schemes.map { schemeName =>
+        SchemeEvaluationResult(schemeName, randResult)
       }))
 }
 
 object AssessmentCentreFailedStatusGenerator extends AssessmentResultStatusGenerator {
   override val previousStatusGenerator = AssessmentScoresAcceptedStatusGenerator
   override val aRepository = applicationRepository
-  override val fwRepository = frameworkRepository
+  override val locationSchemeRepository = repositories.fileLocationSchemeRepository
 
   private def randScore = Random.randDouble(0.5, 1.5)
 
@@ -79,15 +80,15 @@ object AssessmentCentreFailedStatusGenerator extends AssessmentResultStatusGener
         buildingCapabilityForAllAverage = randScore,
         motivationFitAverage = randScore,
         overallScore = Random.randDouble(3.5, 10.5)
-      )), Some(schemeNames.map { schemeName =>
-        PerSchemeEvaluation(schemeName, randResult)
+      )), Some(schemes.map { schemeName =>
+        SchemeEvaluationResult(schemeName, randResult)
       }))
 }
 
 object AssessmentCentrePassedStatusGenerator extends AssessmentResultStatusGenerator {
   override val previousStatusGenerator = AssessmentScoresAcceptedStatusGenerator
   override val aRepository = applicationRepository
-  override val fwRepository = frameworkRepository
+  override val locationSchemeRepository = repositories.fileLocationSchemeRepository
 
   private def randScore = Random.randDouble(3.0, 4.0)
 
@@ -106,19 +107,19 @@ object AssessmentCentrePassedStatusGenerator extends AssessmentResultStatusGener
         buildingCapabilityForAllAverage = randScore,
         motivationFitAverage = randScore,
         overallScore = Random.randDouble(21.0, 28.0)
-      )), Some(schemeNames.map { schemeName =>
-        PerSchemeEvaluation(schemeName, randResult)
+      )), Some(schemes.map { scheme =>
+        SchemeEvaluationResult(scheme, randResult)
       }))
 }
 
 trait AssessmentResultStatusGenerator extends ConstructiveGenerator {
   val aRepository: GeneralApplicationRepository
-  val fwRepository: FrameworkYamlRepository
+  val locationSchemeRepository: LocationSchemeRepository
 
   val status: ApplicationStatuses.EnumVal
   def getAssessmentRuleCategoryResult: AssessmentRuleCategoryResult
 
-  lazy val schemeNames = Await.result(fwRepository.getFrameworkNames, 5 seconds)
+  lazy val schemes = fileLocationSchemeRepository.schemeInfoList.map(_.id)
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
     for {

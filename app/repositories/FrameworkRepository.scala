@@ -29,20 +29,9 @@ import scala.collection.JavaConverters._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
+// TODO This class is obsolete. Remove in a separate PR
 trait FrameworkRepository {
-  def getFrameworkNames: Future[List[String]]
   def getFrameworksByRegion: Future[List[Region]]
-  def getFrameworksByRegionFilteredByQualification(criteriaMet: CandidateHighestQualification): Future[List[Region]] =
-    getFrameworksByRegion.map { regions =>
-      regions.map { region =>
-        Region(region.name, region.locations.map { location =>
-          Location(
-            location.name,
-            frameworks = location.frameworks.filter(_.criteria.value <= criteriaMet.value)
-          )
-        }.filter(_.frameworks.nonEmpty))
-      }.filter(_.locations.nonEmpty)
-    }
 }
 
 object FrameworkRepository {
@@ -87,10 +76,6 @@ class FrameworkYamlRepository extends FrameworkRepository {
     val sortedCollatedRegions = sortRegions(collatedRegions)
     sortedCollatedRegions
   })
-
-  override def getFrameworkNames: Future[List[String]] = Future.successful(
-    frameworks.map(_.name).toList
-  )
 
   override def getFrameworksByRegion: Future[List[Region]] =
     frameworksByRegionCached

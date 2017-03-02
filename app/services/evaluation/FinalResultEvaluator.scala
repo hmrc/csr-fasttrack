@@ -46,7 +46,7 @@ trait FinalResultEvaluator {
 
     val finalSchemesEvaluation = assessmentCentreResult.schemesEvaluation.map { assessmentSchemeEvaluations =>
       assessmentSchemeEvaluations.map { evaluation =>
-        evaluation.copy(result = preferredSchemeToResultMap.getOrElse(evaluation.schemeName, evaluation.result))
+        evaluation.copy(result = preferredSchemeToResultMap.getOrElse(evaluation.scheme.toString, evaluation.result))
       }
     }
 

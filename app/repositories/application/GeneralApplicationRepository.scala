@@ -31,6 +31,7 @@ import model.Scheme.Scheme
 import model._
 import model.commands.{ ApplicationStatusDetails, OnlineTestProgressResponse }
 import model.exchange.AssistanceDetails
+import model.persisted.SchemeEvaluationResult
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{ DateTime, LocalDate }
 import play.api.libs.json.{ Format, JsNumber, JsObject }
@@ -724,9 +725,9 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     case _ => BSONDocument.empty
   }
 
-  private def perSchemeToBSON(name: String, result: Option[List[PerSchemeEvaluation]]): BSONDocument = result match {
+  private def perSchemeToBSON(name: String, result: Option[List[SchemeEvaluationResult]]): BSONDocument = result match {
     case Some(m) =>
-      val schemes = m.map(x => BSONDocument(x.schemeName -> x.result.toString))
+      val schemes = m.map(x => BSONDocument(x.scheme.toString -> x.result.toString))
       val schemesDoc = schemes.foldRight(BSONDocument.empty)((acc, doc) => acc.add(doc))
       BSONDocument(name -> schemesDoc)
     case _ => BSONDocument.empty

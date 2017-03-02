@@ -23,7 +23,7 @@ class PassMarkSettingsRepositorySpec extends MongoRepositorySpec {
 
   "Pass-mark-settings collection" should {
     "create indexes for the repository" in {
-      val repo = repositories.passMarkSettingsRepository
+      val repo = repositories.onlineTestPassMarkSettingsRepository
 
       val indexes = indexesWithFields(repo)
       indexes must contain (List("_id"))
