@@ -95,7 +95,7 @@ trait GeneralApplicationRepository {
 
   def nextAssessmentCentrePassedOrFailedApplication(): Future[Option[ApplicationForNotification]]
 
-  def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResult,
+  def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResultNEW,
     newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit]
 
   def getSchemeLocations(applicationId: String): Future[List[String]]
@@ -571,8 +571,8 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
           ),
           BSONDocument(
             "$and" -> BSONArray(
-              BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingAssessmentCentreReevaluation),
-              BSONDocument("assessment-centre-passmark-evaluation.passmarkVersion" -> BSONDocument("$ne" -> currentPassmarkVersion))
+              BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingAssessmentCentreReevaluation)//, //TODO IS: revert this temp change
+//              BSONDocument("assessment-centre-passmark-evaluation.passmarkVersion" -> BSONDocument("$ne" -> currentPassmarkVersion))
             )
           )
         ))
@@ -595,7 +595,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     selectRandom(query).map(_.map(bsonDocToApplicationForNotification))
   }
 
-  def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResult,
+  def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResultNEW,
     newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId),
@@ -615,13 +615,14 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         s"progress-status-dates.$progressStatus" -> LocalDate.now(),
         "assessment-centre-passmark-evaluation" -> BSONDocument("passmarkVersion" -> passmarkVersion)
           .add(booleanToBSON("passedMinimumCompetencyLevel", evaluationResult.passedMinimumCompetencyLevel))
-          .add(resultToBSON("location1Scheme1", evaluationResult.location1Scheme1))
-          .add(resultToBSON("location1Scheme2", evaluationResult.location1Scheme2))
-          .add(resultToBSON("location2Scheme1", evaluationResult.location2Scheme1))
-          .add(resultToBSON("location2Scheme2", evaluationResult.location2Scheme2))
-          .add(resultToBSON("alternativeScheme", evaluationResult.alternativeScheme))
+//          .add(resultToBSON("location1Scheme1", evaluationResult.location1Scheme1))
+//          .add(resultToBSON("location1Scheme2", evaluationResult.location1Scheme2))
+//          .add(resultToBSON("location2Scheme1", evaluationResult.location2Scheme1))
+//          .add(resultToBSON("location2Scheme2", evaluationResult.location2Scheme2))
+//          .add(resultToBSON("alternativeScheme", evaluationResult.alternativeScheme))
           .add(averageToBSON("competency-average", evaluationResult.competencyAverageResult))
-          .add(perSchemeToBSON("schemes-evaluation", evaluationResult.schemesEvaluation))
+          .add(perSchemeToBSON("schemes-evaluation", Some(evaluationResult.schemesEvaluation))) // TODO IS: wrapped in Option here fix this!!
+          .add(perSchemeToBSON("overall-evaluation", Some(evaluationResult.overallEvaluation))) // TODO IS: wrapped in Option here fix this!!
       ))
 
     collection.update(query, passMarkEvaluation, upsert = false) map { _ => () }

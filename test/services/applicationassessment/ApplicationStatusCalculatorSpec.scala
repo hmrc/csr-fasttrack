@@ -79,6 +79,7 @@ class ApplicationStatusCalculatorSpec extends PlaySpec with TableDrivenPropertyC
   // scalastyle: ON
 
   "Final (with online test result) assessment centre" should {
+/*
     "Set application status to Failed when candidate failed min competency level" in {
       forAll(FailedMinCompetencyLevel) { (evaluation: AssessmentRuleCategoryResult, expectedApplicaitonStatus: ApplicationStatuses.EnumVal) =>
         calculator.determineStatus(evaluation) mustBe expectedApplicaitonStatus
@@ -102,6 +103,7 @@ class ApplicationStatusCalculatorSpec extends PlaySpec with TableDrivenPropertyC
         calculator.determineStatus(evaluation) mustBe expectedApplicaitonStatus
       }
     }
+*/
   }
 
   private def r(

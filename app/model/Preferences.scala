@@ -19,6 +19,7 @@ package model
 import play.api.libs.json.Json
 import reactivemongo.bson.Macros
 
+// TODO IS: delete this class
 case class Preferences(
     firstLocation: LocationPreference,
     secondLocation: Option[LocationPreference] = None,

@@ -22,22 +22,38 @@ import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkScheme, PassMark
 
 trait AssessmentCentreAllSchemesEvaluator {
 
-  def evaluateSchemes(passmark: AssessmentCentrePassMarkSettingsResponse, overallScore: Double,
-    eligibleSchemes: List[String]): List[PerSchemeEvaluation] = {
-    passmark.schemes.map { scheme =>
-      val result = if (eligibleSchemes.contains(scheme.schemeName)) evaluateScore(scheme, passmark, overallScore) else Red
-      PerSchemeEvaluation(scheme.schemeName, result)
+  def evaluateSchemes(applicationId: String,
+                      passmark: AssessmentCentrePassMarkSettingsResponse,
+                      overallScore: Double,
+                      eligibleSchemes: List[String]): List[PerSchemeEvaluation] = {
+//    passmark.schemes.map { scheme =>
+//      val result = if (eligibleSchemes.contains(scheme.schemeName)) evaluateScore(scheme, passmark, overallScore) else Red
+//      PerSchemeEvaluation(scheme.schemeName, result)
+//    }
+
+    eligibleSchemes.map { schemeName =>
+      val msg = s"Did not find assessment centre pass mark for scheme = $schemeName, applicationId = $applicationId"
+      val assessmentCentrePassMarkScheme = passmark.schemes.find { _.schemeName == schemeName }
+        .getOrElse(throw new IllegalStateException(msg))
+
+      //scalastyle:off
+      println(s"scheme = $schemeName")
+      val result = evaluateScore(assessmentCentrePassMarkScheme, passmark, overallScore)
+      PerSchemeEvaluation(schemeName, result)
     }
   }
 
-  private def evaluateScore(scheme: AssessmentCentrePassMarkScheme, passmark: AssessmentCentrePassMarkSettingsResponse,
-    overallScore: Double): Result = {
+  private def evaluateScore(scheme: AssessmentCentrePassMarkScheme,
+                            passmark: AssessmentCentrePassMarkSettingsResponse,
+                            overallScore: Double): Result = {
     val passmarkSetting = scheme.overallPassMarks
       .getOrElse(throw new IllegalStateException(s"Scheme threshold for ${scheme.schemeName} is not set in Passmark settings"))
 
     determineSchemeResult(overallScore, passmarkSetting)
   }
 
+  // TODO IS: LOOK
+  // TODO IS: this can be deleted
   def evaluateAlternativeSchemes(allSchemesEvaluation: Map[String, Result], alternativeSchemes: List[String]): Result = {
     val evaluatedAlternativeSchemes = allSchemesEvaluation.filter {
       case (schemeName, _) =>
@@ -54,13 +70,17 @@ trait AssessmentCentreAllSchemesEvaluator {
     }
   }
 
+  // Determines the result of each scheme based on the assessment centre pass marks
   private def determineSchemeResult(overallScore: Double, passmarkThreshold: PassMarkSchemeThreshold): Result = {
-    if (overallScore <= passmarkThreshold.failThreshold) {
+    val result = if (overallScore <= passmarkThreshold.failThreshold) {
       Red
     } else if (overallScore >= passmarkThreshold.passThreshold) {
       Green
     } else {
       Amber
     }
+    //scalastyle:off
+    println(s"AC result = $result, overallScore = $overallScore, fail = ${passmarkThreshold.failThreshold}, pass = ${passmarkThreshold.passThreshold}")
+    result
   }
 }

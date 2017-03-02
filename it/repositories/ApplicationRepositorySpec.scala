@@ -175,6 +175,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
   }
 
   "save assessment score evaluation" must {
+/*
     "save a score evaluation and update the application status when the application is in ASSESSMENT_SCORES_ACCEPTED status" in {
       createApplication("app1", ApplicationStatuses.AssessmentScoresAccepted)
 
@@ -204,7 +205,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       val status = getApplicationStatus("app1")
       status mustBe ApplicationStatuses.Withdrawn
     }
-
+*/
     def getApplicationStatus(appId: String) = {
       applicationRepo.collection.find(BSONDocument("applicationId" -> "app1")).one[BSONDocument].map { docOpt =>
         docOpt must not be empty

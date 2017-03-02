@@ -36,6 +36,7 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
   val evaluator = new AssessmentCentreAllSchemesEvaluator {}
 
   "evaluate schemes" should {
+/*
     "evaluate all schemes if all are eligible" in {
       val overallScore = 25.0
       val evaluation = evaluator.evaluateSchemes(PassmarkSettings, overallScore, AllSchemes)
@@ -59,6 +60,7 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
         PerSchemeEvaluation(ProjectDelivery, Red)
       )
     }
+*/
   }
 
   "evaluate alternative schemes" should {

@@ -39,8 +39,8 @@ object ApplicationStatuses extends Enum {
   val AllocationUnconfirmed = EnumVal("ALLOCATION_UNCONFIRMED")
   val AllocationConfirmed = EnumVal("ALLOCATION_CONFIRMED")
 
-  val AssessmentScoresEntered = EnumVal("ASSESSMENT_SCORES_ENTERED")
-  val AssessmentScoresAccepted = EnumVal("ASSESSMENT_SCORES_ACCEPTED")
+  val AssessmentScoresEntered = EnumVal("ASSESSMENT_SCORES_ENTERED") // scores have been entered by assessor
+  val AssessmentScoresAccepted = EnumVal("ASSESSMENT_SCORES_ACCEPTED") // accepted by the QA
   val AwaitingAssessmentCentreReevaluation = EnumVal("AWAITING_ASSESSMENT_CENTRE_RE_EVALUATION")
   val AssessmentCentrePassed = EnumVal("ASSESSMENT_CENTRE_PASSED")
   val AssessmentCentrePassedNotified = EnumVal("ASSESSMENT_CENTRE_PASSED_NOTIFIED")

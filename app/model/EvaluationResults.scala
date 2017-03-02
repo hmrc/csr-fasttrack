@@ -16,6 +16,7 @@
 
 package model
 
+import model.persisted.SchemeEvaluationResult
 import play.api.libs.json.{ Format, JsString, JsSuccess, JsValue }
 import reactivemongo.bson.{ BSON, BSONHandler, BSONString }
 
@@ -69,6 +70,14 @@ object EvaluationResults {
 
   case class PerSchemeEvaluation(schemeName: String, result: Result)
 
+  // TODO IS: rename this class
+  case class AssessmentRuleCategoryResultNEW(passedMinimumCompetencyLevel: Option[Boolean],
+                                             competencyAverageResult: Option[CompetencyAverageResult],
+                                             schemesEvaluation: List[PerSchemeEvaluation],
+                                             overallEvaluation: List[PerSchemeEvaluation] // TODO IS: change the type to SchemeEvaluationResult
+                                         )
+
+  // TODO IS: the new version of this class is above
   case class AssessmentRuleCategoryResult(
     passedMinimumCompetencyLevel: Option[Boolean],
     location1Scheme1: Option[Result], location1Scheme2: Option[Result],

@@ -16,6 +16,7 @@ class FrameworkPreferenceRepositorySpec extends MongoRepositorySpec {
 
   "Try get preferences with qualifications" should {
     val appId = "appId"
+/*
     "return preferences with qualifications" in {
       frameworkPreferenceRepo.collection.insert(BSONDocument(
         "applicationId" -> appId,
@@ -54,7 +55,7 @@ class FrameworkPreferenceRepositorySpec extends MongoRepositorySpec {
         ), aLevel = true, stemLevel = false)
       )
     }
-
+*/
     "return none when there is no framework-preferences" in {
       frameworkPreferenceRepo.collection.insert(BSONDocument(
         "applicationId" -> appId,

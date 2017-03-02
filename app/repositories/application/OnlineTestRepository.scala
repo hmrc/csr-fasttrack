@@ -85,7 +85,7 @@ trait OnlineTestRepository {
   def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal,
     expireDate: Option[LocalDate]): Future[Unit]
 
-  def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation]
+  def findPassmarkEvaluation(appId: String): Future[List[SchemeEvaluationResult]]
 
   def nextTestForReminder(reminder: ReminderNotice): Future[Option[NotificationExpiringOnlineTest]]
 
@@ -588,8 +588,9 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
 
     collection.update(query, update, upsert = false) map validator
   }
-
-  def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = {
+  // TODO IS: delete this
+/*
+  def findPassmarkEvaluation2(appId: String): Future[OnlineTestPassmarkEvaluation] = {
     val query = BSONDocument("applicationId" -> appId)
     val projection = BSONDocument("passmarkEvaluation" -> 1)
 
@@ -609,6 +610,18 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
           otLocation2Scheme2Result,
           otAlternativeResult
         )
+      case _ => throw OnlineTestPassmarkEvaluationNotFound(appId)
+    }
+  }
+*/
+  def findPassmarkEvaluation(appId: String): Future[List[SchemeEvaluationResult]] = {
+    val query = BSONDocument("applicationId" -> appId)
+    val projection = BSONDocument("passmarkEvaluation" -> 1)
+
+    collection.find(query, projection).one[BSONDocument] map {
+      case Some(doc) if doc.getAs[BSONDocument]("passmarkEvaluation").isDefined =>
+        val root = doc.getAs[BSONDocument]("passmarkEvaluation").get
+        root.getAs[List[SchemeEvaluationResult]]("result").getOrElse(Nil)
       case _ => throw OnlineTestPassmarkEvaluationNotFound(appId)
     }
   }

@@ -103,13 +103,16 @@ object PersistedObjects {
     questionnaireStatuses: Option[List[ApplicationProgressStatus]]
   )
 
+  // TODO IS: delete this
   case class OnlineTestPassmarkEvaluation(
     location1Scheme1: Result,
     location1Scheme2: Option[Result], location2Scheme1: Option[Result],
     location2Scheme2: Option[Result], alternativeScheme: Option[Result]
   )
 
-  case class PreferencesWithQualification(preferences: Preferences, aLevel: Boolean, stemLevel: Boolean)
+//  case class PreferencesWithQualification(preferences: Preferences, aLevel: Boolean, stemLevel: Boolean)
+// TODO IS: we no longer need the qualifications
+  case class PreferencesWithQualification(schemes: List[Scheme.Scheme], aLevel: Boolean, stemLevel: Boolean)
 
   object Implicits {
     implicit val applicationStatusFormats = Json.format[ApplicationStatus]

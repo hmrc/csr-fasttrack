@@ -38,7 +38,25 @@ trait ApplicationStatusCalculator {
       case Some(Amber) => ApplicationStatuses.AwaitingAssessmentCentreReevaluation
       case _ => ApplicationStatuses.AssessmentCentreFailed
     }
-
   }
 
+  // TODO IS: work to do here - we need more testing!!!
+  def determineStatusNEW(result: AssessmentRuleCategoryResultNEW): ApplicationStatuses.EnumVal = result.passedMinimumCompetencyLevel match {
+    case Some(false) =>
+      // minimum competency check failed so reflect in the application status
+      ApplicationStatuses.AssessmentCentreFailed
+    case _ =>
+      val allResultsOrderedByPreferences = result.schemesEvaluation
+      calculateStatus(allResultsOrderedByPreferences)
+  }
+
+  private def calculateStatus(allResultsInPreferenceOrder: List[PerSchemeEvaluation]): ApplicationStatuses.EnumVal = {
+    if (allResultsInPreferenceOrder.count(_.result == Red) == allResultsInPreferenceOrder.size) {
+      ApplicationStatuses.AssessmentCentreFailed
+    } else if (allResultsInPreferenceOrder.count(r => r.result == Red || r.result == Green) == allResultsInPreferenceOrder.size) {
+      ApplicationStatuses.AssessmentCentrePassed
+    } else {
+      ApplicationStatuses.AwaitingAssessmentCentreReevaluation
+    }
+  }
 }

@@ -22,6 +22,7 @@ import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.EvaluationResults._
 import model.PersistedObjects.{ OnlineTestPassmarkEvaluation, PreferencesWithQualification }
+import model.persisted.SchemeEvaluationResult
 import model.{ LocationPreference, Preferences }
 import org.mockito.Mockito._
 import services.applicationassessment.AssessmentCentreService
@@ -42,13 +43,10 @@ class EvaluateAssessmentScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
 
   "application assessment service" should {
     "find a candidate and evaluate the score successfully" in {
-      val onlineTestEvaluation = OnlineTestPassmarkEvaluation(Green, None, None, None, None)
+      val onlineTestEvaluation = List(SchemeEvaluationResult(model.Scheme.Business, Green))
       val assessmentEvaluation = AssessmentPassmarkPreferencesAndScores(
         AssessmentCentrePassMarkSettingsResponse(List(), None),
-        PreferencesWithQualification(
-          Preferences(LocationPreference("region", "location", "firstFramework", None)),
-          aLevel = true, stemLevel = true
-        ),
+        PreferencesWithQualification(List(model.Scheme.Business), aLevel = true, stemLevel = true),
         CandidateScoresAndFeedback("appId", None, assessmentIncomplete = false)
       )
       val evaluation = OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation, assessmentEvaluation)
@@ -56,13 +54,13 @@ class EvaluateAssessmentScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
         Future.successful(Some(evaluation))
       )
 
-      when(applicationAssessmentServiceMock.evaluateAssessmentCandidate(evaluation, config)).thenReturn(
+      when(applicationAssessmentServiceMock.evaluateAssessmentCandidate2(evaluation, config)).thenReturn(
         Future.successful(())
       )
 
       TestableEvaluateAssessmentScoreJob.tryExecute().futureValue
 
-      verify(applicationAssessmentServiceMock).evaluateAssessmentCandidate(evaluation, config)
+      verify(applicationAssessmentServiceMock).evaluateAssessmentCandidate2(evaluation, config)
     }
   }
 }

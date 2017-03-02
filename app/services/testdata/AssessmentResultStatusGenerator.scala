@@ -121,6 +121,7 @@ trait AssessmentResultStatusGenerator extends ConstructiveGenerator {
   lazy val schemeNames = Await.result(fwRepository.getFrameworkNames, 5 seconds)
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
+    /*
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       appId = candidateInPreviousStatus.applicationId.get
@@ -128,6 +129,7 @@ trait AssessmentResultStatusGenerator extends ConstructiveGenerator {
         status)
     } yield {
       candidateInPreviousStatus.copy(applicationStatus = status)
-    }
+    }*/
+    ??? //TODO IS: fix me
   }
 }

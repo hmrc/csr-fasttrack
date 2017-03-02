@@ -16,7 +16,9 @@
 
 package repositories
 
+import model.Exceptions.SchemePreferencesNotFound
 import model.PersistedObjects.PreferencesWithQualification
+import model.Scheme._
 import model.{ ApplicationStatuses, Preferences }
 import reactivemongo.api.DB
 import reactivemongo.bson.{ BSONDocument, BSONObjectID, _ }
@@ -63,19 +65,22 @@ class FrameworkPreferenceMongoRepository(implicit mongo: () => DB)
 
   def tryGetPreferencesWithQualifications(applicationId: String): Future[Option[PreferencesWithQualification]] = {
     val query = BSONDocument("applicationId" -> applicationId)
-    val projection = BSONDocument("framework-preferences" -> 1, "personal-details" -> 1, "_id" -> 0)
+    val projection = BSONDocument("schemes" -> 1, "personal-details" -> 1, "_id" -> 0)
 
     collection.find(query, projection).one[BSONDocument].map {
-      case Some(document) if document.getAs[BSONDocument]("framework-preferences").isDefined
-        && document.getAs[BSONDocument]("personal-details").isDefined =>
-        val preferences = document.getAs[Preferences]("framework-preferences").get
-        val personalDetailsDoc = document.getAs[BSONDocument]("personal-details").get
-        val aLevel = personalDetailsDoc.getAs[Boolean]("aLevel").get
-        val stemLevel = personalDetailsDoc.getAs[Boolean]("stemLevel").get
+      case Some(document) if document.getAs[BSONDocument]("personal-details").isDefined =>
+        val root = document.getAs[BSONDocument]("personal-details").get
+        val aLevel = root.getAs[Boolean]("aLevel").get
+        val stemLevel = root.getAs[Boolean]("stemLevel").get
 
-        Some(PreferencesWithQualification(preferences, aLevel, stemLevel))
+        val schemes = if (document.getAs[List[Scheme]]("schemes").isDefined) {
+          document.getAs[List[Scheme]]("schemes").get
+        } else {
+          throw SchemePreferencesNotFound(applicationId)
+        }
+
+        Some(PreferencesWithQualification(schemes, aLevel, stemLevel))
       case _ => None
     }
   }
-
 }

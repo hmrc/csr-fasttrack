@@ -84,9 +84,10 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
   override def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = ???
 
   override def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
-    applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
-    inMemoryRepo += applicationId -> TestableResult(version, evaluationResult, applicationStatus)
-    Future.successful(())
+    applicationStatus: Option[ApplicationStatuses.EnumVal]): Future[Unit] = {
+//    inMemoryRepo += applicationId -> TestableResult(version, evaluationResult, applicationStatus)
+//    Future.successful(())
+    ???
   }
 
   override def nextApplicationReadyForSendingOnlineTestResult: Future[Option[ApplicationForNotification]] = Future.successful(None)
@@ -98,7 +99,7 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
 
   def removeOnlineTestEvaluationAndReports(applicationId: String): Future[Unit] = ???
 
-  def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = ???
+  def findPassmarkEvaluation(appId: String): Future[List[SchemeEvaluationResult]] = ???
 
   def nextTestForReminder(reminder: ReminderNotice): Future[Option[NotificationExpiringOnlineTest]] = ???
 

@@ -91,7 +91,7 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
   override def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = ???
 
   override def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
-    applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
+                        applicationStatus: Option[ApplicationStatuses.EnumVal]) = {
     Future.successful(())
   }
 
@@ -105,7 +105,7 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
   def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, version: String,
     evaluationResult: List[SchemeEvaluationResult]): Future[Unit] = ???
 
-  def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = ???
+  override def findPassmarkEvaluation(appId: String): Future[List[SchemeEvaluationResult]] = ???
 
   def addReminderNotificationStatus(userId: String, notificationStatus: String): scala.concurrent.Future[Unit] = ???
 

@@ -23,6 +23,7 @@ import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.EvaluationResults.{ Amber, Red, _ }
 import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
 import model.PersistedObjects.{ OnlineTestPassmarkEvaluation, PreferencesWithQualification }
+import model.persisted.SchemeEvaluationResult
 import model.{ Alternatives, LocationPreference, Preferences }
 import org.joda.time.DateTime
 import org.scalatest.MustMatchers
@@ -45,61 +46,50 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
     CandidateScores(Some(4.0), None, Some(4.0)),
     CandidateScores(Some(4.0), Some(4.0), None),
     CandidateScores(Some(2.0), Some(4.0), None))
-  val CandidatePreferences = Preferences(
-    LocationPreference("London", "London", Business, Some(Commercial)),
-    Some(LocationPreference("London", "Reading", Finance, Some(ProjectDelivery))),
-    alternatives = Some(Alternatives(location = true, framework = true))
-  )
-  val CandidatePreferencesWithQualification = PreferencesWithQualification(CandidatePreferences, aLevel = true, stemLevel = true)
-  val CandidateOnlineTestEvaluation = OnlineTestPassmarkEvaluation(
-    location1Scheme1 = Green,
-    location1Scheme2 = Some(Red), location2Scheme1 = Some(Amber), location2Scheme2 = Some(Green),
-    alternativeScheme = Some(Green)
+
+  val CandidateSchemes = List(model.Scheme.Business)
+  //TODO IS: don't think we need the qualifications any more
+  val CandidatePreferencesWithQualification = PreferencesWithQualification(CandidateSchemes, aLevel = true, stemLevel = true)
+
+  val CandidateOnlineTestEvaluation = List(
+    SchemeEvaluationResult(model.Scheme.Business, Green)
   )
 
   val rulesEngine = AssessmentCentrePassmarkRulesEngine
 
   "Assessment Centre Passmark Rules engine evaluation" should {
-    "evalute to passedMinimumCompetencyLevel=false when minimum competency level is enabled and not met" in {
+    "evaluate to passedMinimumCompetencyLevel=false when minimum competency level is enabled and not met" in {
       val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = true, minimumCompetencyLevelScore = Some(2.0),
         motivationalFitMinimumCompetencyLevelScore = Some(4.0))
       val scores = CandidateScoresWithFeedback.copy(collaboratingAndPartnering = CandidateScores(None, Some(1.0), Some(2.0)))
       val candidateScore = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, CandidatePreferencesWithQualification, scores)
 
-      val result = rulesEngine.evaluate(CandidateOnlineTestEvaluation, candidateScore, config)
+      val result = rulesEngine.evaluate2(CandidateOnlineTestEvaluation, candidateScore, config)
 
-      result must be(AssessmentRuleCategoryResult(
+      val expected = AssessmentRuleCategoryResultNEW(
         passedMinimumCompetencyLevel = Some(false),
-        location1Scheme1 = None, location1Scheme2 = None, location2Scheme1 = None, location2Scheme2 = None,
-        alternativeScheme = None, competencyAverageResult = None, schemesEvaluation = None
-      ))
+        competencyAverageResult = None, //Option[CompetencyAverageResult],
+        schemesEvaluation = List(PerSchemeEvaluation(Business, Red)),
+        overallEvaluation = List(PerSchemeEvaluation(Business, Red))
+      )
+
+      result mustBe expected
     }
 
-    "evalute to passedMinimumCompetencyLevel=true and evaluate preferred locations" in {
+    "evaluate to passedMinimumCompetencyLevel=true and evaluate the schemes" in {
       val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = true, Some(2.0), Some(4.0))
       val scores = CandidateScoresWithFeedback
       val assessmentPassmarkAndScores = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, CandidatePreferencesWithQualification, scores)
 
-      val result = rulesEngine.evaluate(CandidateOnlineTestEvaluation, assessmentPassmarkAndScores, config)
+      val result = rulesEngine.evaluate2(CandidateOnlineTestEvaluation, assessmentPassmarkAndScores, config)
 
       result.passedMinimumCompetencyLevel mustBe Some(true)
-      result.location1Scheme1 mustBe Some(Amber) // because online test = Green and assessment centre = Amber
-      result.location1Scheme2 mustBe Some(Red) // because online test = Red
-      result.location2Scheme1 mustBe Some(Amber) // because online test = Amber
-      result.location2Scheme2 mustBe Some(Amber) // because online test = Green and assessment centre = Amber
-      result.alternativeScheme mustBe Some(Red) // because online test = Green and assessment centre = Red
 
       val expectedCompetencyAverage = CompetencyAverageResult(2.9333333333333336, 2.5, 3.5, 3.5, 4.0, 4.0, 6.0, 26.433333333333334)
       result.competencyAverageResult mustBe Some(expectedCompetencyAverage)
 
-      val FinalSchemeEvaluation = List(
-        PerSchemeEvaluation(Business, Amber), // location1Scheme1
-        PerSchemeEvaluation(Commercial, Red), // location1Scheme2
-        PerSchemeEvaluation(DigitalAndTechnology, Red),
-        PerSchemeEvaluation(Finance, Amber), //location2Scheme1
-        PerSchemeEvaluation(ProjectDelivery, Amber) //location2Scheme2
-      )
-      result.schemesEvaluation mustBe Some(FinalSchemeEvaluation)
+      result.schemesEvaluation mustBe List(PerSchemeEvaluation(Business, Amber))
+      result.overallEvaluation mustBe List(PerSchemeEvaluation(Business, Amber))
     }
   }
 }

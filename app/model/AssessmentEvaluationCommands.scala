@@ -19,6 +19,7 @@ package model
 import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.PersistedObjects.{ OnlineTestPassmarkEvaluation, PreferencesWithQualification }
+import model.persisted.SchemeEvaluationResult
 import play.api.libs.json.Json
 
 object AssessmentEvaluationCommands {
@@ -30,7 +31,8 @@ object AssessmentEvaluationCommands {
   )
 
   case class OnlineTestEvaluationAndAssessmentCentreScores(
-    onlineTestEvaluation: OnlineTestPassmarkEvaluation,
+    onlineTestEvaluation: List[SchemeEvaluationResult],
+//    onlineTestEvaluation: OnlineTestPassmarkEvaluation,
     assessmentScores: AssessmentPassmarkPreferencesAndScores
   )
 
