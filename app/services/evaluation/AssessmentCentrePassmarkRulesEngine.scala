@@ -88,16 +88,9 @@ object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRules
         //scalastyle:off
         println("**** AssessmentCentrePassmarkRulesEngine - candidate passed minimum competency level check")
         val assessmentCentreEvaluation = evaluateAssessmentPassmark2(competencyAverage, candidateScores)
-
         println(s"**** AssessmentCentrePassmarkRulesEngine - schemesAssessmentEvaluation = $assessmentCentreEvaluation")
-        // from here
-//        val (assessmentCentreResultNoMinCompetency, schemePreferences) = evaluateAssessmentPassmark(competencyAverage, candidateScores)
-//        val assessmentCentreResult = assessmentCentreResultNoMinCompetency.copy(passedMinimumCompetencyLevel = passedMinimumCompetencyLevelCheckOpt)
 
-//        val aggregateEvaluation = mergeResults(onlineTestEvaluation, assessmentCentreResult, schemePreferences)
-        // to here
-
-        val finalResults = mergeResults2(onlineTestEvaluation, assessmentCentreEvaluation)
+        val finalResults = determineOverallResultForEachScheme(onlineTestEvaluation, assessmentCentreEvaluation)
         println(s"**** AssessmentCentrePassmarkRulesEngine - finalResults = $finalResults")
 
         AssessmentRuleCategoryResultNEW(

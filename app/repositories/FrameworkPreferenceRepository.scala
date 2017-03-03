@@ -68,16 +68,12 @@ class FrameworkPreferenceMongoRepository(implicit mongo: () => DB)
     val projection = BSONDocument("schemes" -> 1, "personal-details" -> 1, "_id" -> 0)
 
     collection.find(query, projection).one[BSONDocument].map {
-      case Some(document) if document.getAs[BSONDocument]("personal-details").isDefined =>
+      case Some(document) if document.getAs[BSONDocument]("personal-details").isDefined &&
+        document.getAs[List[Scheme]]("schemes").isDefined =>
         val root = document.getAs[BSONDocument]("personal-details").get
         val aLevel = root.getAs[Boolean]("aLevel").get
         val stemLevel = root.getAs[Boolean]("stemLevel").get
-
-        val schemes = if (document.getAs[List[Scheme]]("schemes").isDefined) {
-          document.getAs[List[Scheme]]("schemes").get
-        } else {
-          throw SchemePreferencesNotFound(applicationId)
-        }
+        val schemes = document.getAs[List[Scheme]]("schemes").get
 
         Some(PreferencesWithQualification(schemes, aLevel, stemLevel))
       case _ => None

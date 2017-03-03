@@ -89,7 +89,8 @@ trait FinalResultEvaluator {
   }
 
   // Determines the overall result for each scheme based on the online test result and the assessment centre result
-  def mergeResults2(onlineTestEvaluation: List[SchemeEvaluationResult], assessmentCentreEvaluation: List[PerSchemeEvaluation]) = {
+  def determineOverallResultForEachScheme(onlineTestEvaluation: List[SchemeEvaluationResult],
+                                          assessmentCentreEvaluation: List[PerSchemeEvaluation]): List[PerSchemeEvaluation] = {
     //scalastyle:off
     println("****")
     println(s"**** mergeResults2 onlineTestEvaluation = $onlineTestEvaluation")

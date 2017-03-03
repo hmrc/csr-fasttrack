@@ -22,13 +22,12 @@ import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ScoresAndFeed
 import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.EvaluationResults.{ Amber, Red, _ }
 import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
-import model.PersistedObjects.{ OnlineTestPassmarkEvaluation, PreferencesWithQualification }
+import model.PersistedObjects.PreferencesWithQualification
+import model.Schemes._
 import model.persisted.SchemeEvaluationResult
-import model.{ Alternatives, LocationPreference, Preferences }
 import org.joda.time.DateTime
 import org.scalatest.MustMatchers
 import org.scalatestplus.play.PlaySpec
-import model.Schemes._
 
 class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers {
   val PassmarkSettings = AssessmentCentrePassMarkSettingsResponse(List(
@@ -38,16 +37,7 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
     AssessmentCentrePassMarkScheme(Finance, Some(PassMarkSchemeThreshold(12.0, 19.0))),
     AssessmentCentrePassMarkScheme(ProjectDelivery, Some(PassMarkSchemeThreshold(23.0, 30.0)))
   ), Some(AssessmentCentrePassMarkInfo("1", DateTime.now, "user")))
-/* TODO IS: delete this
-  val CandidateScoresWithFeedback = CandidateScoresAndFeedback("app1", Some(true), assessmentIncomplete = false,
-    CandidateScores(Some(2.1), Some(3.4), Some(3.3)),
-    CandidateScores(None, Some(2.0), Some(3.0)),
-    CandidateScores(Some(4.0), None, Some(3.0)),
-    CandidateScores(None, Some(3.0), Some(4.0)),
-    CandidateScores(Some(4.0), None, Some(4.0)),
-    CandidateScores(Some(4.0), Some(4.0), None),
-    CandidateScores(Some(2.0), Some(4.0), None))
-*/
+
   val CandidateScoresWithFeedback = CandidateScoresAndFeedback("app1",
     interview = Some(
       ScoresAndFeedback(

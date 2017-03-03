@@ -64,6 +64,77 @@ Commercial:
     Yorkshire-humberside:
       - Bradford
       - Leeds / Sheffield
+TestSchemeSTEM:
+  Criteria: 3
+  Locations:
+    East:
+      - TestGCSE
+      - TestALevelD
+      - TestALevelCSTEM
+      - Bedford
+      - Milton Keynes
+      - Norwich
+      - Southend
+    East-midlands:
+      - Leicester
+      - Nottingham
+    London:
+      - TestGCSE2
+      - TestALevelD2
+      - TestALevelCSTEM2
+      - Hackney
+      - London
+      - Northwood
+    North-east:
+      - Darlington
+      - Jarrow South
+      - Newcastle
+      - Stockton
+      - Teeside
+      - Washington
+    North-west:
+      - Blackpool
+      - Bootle
+      - Liverpool
+      - Lytham St Annes
+      - Manchester
+      - Preston
+      - Salford
+      - Shipley
+    Scotland:
+      - Cumbernauld
+      - East Kilbride
+      - Edinburgh
+    South-east:
+      - Andover
+      - Aylesbury (Buckinghamshire)
+      - Chilton
+      - Kent (inc.Ramsgate)
+      - Oxford
+      - Reading
+      - Shrivenham
+      - Surrey
+      - Worthing
+    Wales:
+      - Cardiff
+      - Merthyr Tydfil
+      - Swansea
+    West-midlands:
+      - Birmingham
+      - Cosford
+      - Coventry
+      - Handsworth
+      - Lichfield
+      - Stratford
+      - Sutton Coldfield
+      - Telford
+      - Walsall
+      - Wolverhampton
+    Yorkshire-humberside:
+      - Bradford
+      - Leeds
+      - Sheffield
+      - York
 Digital and technology:
   Criteria: 3
   Locations:
