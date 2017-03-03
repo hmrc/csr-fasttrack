@@ -22,7 +22,7 @@ import model.PersistedObjects.ContactDetailsWithId
 import model.Scheme._
 import model.persisted.SchemeEvaluationResult
 import model.{ AssessmentCentreIndicator, UniqueIdentifier, Adjustments }
-import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, CandidateScoreFeedback, CandidateScores }
+import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.ReportExchangeObjects.{ PassMarkReportQuestionnaireData, PassMarkReportTestResults, TestResult }
 import model.exchange.{ LocationSchemesExamples, ApplicationForCandidateProgressReportItemExamples }
 import model.report.PassMarkReportItem
@@ -137,19 +137,8 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
       passMarkReportItem.testResults mustBe passMarkTestResults
       passMarkReportItem.schemeOnlineTestResults mustBe List("Green", "Amber")
 
-      val expectedCandidateScoresAndFeedback = CandidateScoresAndFeedback(
-        applicationId = "",
-        attendancy = None,
-        assessmentIncomplete = false,
-        leadingAndCommunicating = CandidateScores(None, None, None),
-        collaboratingAndPartnering = CandidateScores(None, None, None),
-        deliveringAtPace = CandidateScores(None, None, None),
-        makingEffectiveDecisions = CandidateScores(None, None, None),
-        changingAndImproving = CandidateScores(None, None, None),
-        buildingCapabilityForAll = CandidateScores(None, None, None),
-        motivationFit = CandidateScores(None, None, None),
-        feedback = CandidateScoreFeedback(None, None, None)
-      )
+      val expectedCandidateScoresAndFeedback = CandidateScoresAndFeedback("")
+
       passMarkReportItem.candidateScores mustBe expectedCandidateScoresAndFeedback
       passMarkReportItem.schemeAssessmentCentreTestResults mustBe List.empty
     }

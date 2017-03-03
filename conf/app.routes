@@ -81,13 +81,14 @@ GET         /online-test/candidate/:userId                               control
 POST        /online-test/candidate/:userId/status                        controllers.OnlineTestController.onlineTestStatusUpdate(userId: String)
 PUT         /online-test/:cubiksUserId/start                             controllers.OnlineTestController.startOnlineTest(cubiksUserId: Int)
 PUT         /online-test/:cubiksUserId/complete/:assessmentId            controllers.OnlineTestController.completeOnlineTest(cubiksUserId: Int, assessmentId: Int)
+PUT         /online-test/:cubiksUserId/results-ready                     controllers.OnlineTestController.tryToDownloadOnlineTestReport(cubiksUserId: Int)
 PUT         /online-test/by-token/:token/complete                        controllers.OnlineTestController.completeOnlineTestByToken(token: String)
 POST        /online-test/reset/:appId                                    controllers.OnlineTestController.resetOnlineTests(appId: String)
 POST        /online-test/extend/:appId                                   controllers.OnlineTestController.extendOnlineTests(appId: String)
 GET         /online-test/pdf-report/:applicationId                       controllers.OnlineTestController.getPDFReport(applicationId: String)
 
 GET         /test-scores/application/:applicationId                      controllers.CandidateScoresController.getCandidateScores(applicationId: String)
-PUT         /test-scores/application/:applicationId                      controllers.CandidateScoresController.createCandidateScoresAndFeedback(applicationId: String)
+PUT         /test-scores/application/:applicationId                      controllers.CandidateScoresController.createExerciseScoresAndFeedback(applicationId: String)
 PUT         /test-scores/accept/application/:applicationId               controllers.CandidateScoresController.acceptCandidateScoresAndFeedback(applicationId: String)
 
 GET         /application/:applicationId/issue                            controllers.FlagCandidateController.find(applicationId: String)

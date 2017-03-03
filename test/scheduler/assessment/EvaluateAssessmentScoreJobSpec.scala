@@ -47,7 +47,7 @@ class EvaluateAssessmentScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
       val assessmentEvaluation = AssessmentPassmarkPreferencesAndScores(
         AssessmentCentrePassMarkSettingsResponse(List(), None),
         PreferencesWithQualification(List(model.Scheme.Business), aLevel = true, stemLevel = true),
-        CandidateScoresAndFeedback("appId", None, assessmentIncomplete = false)
+        CandidateScoresAndFeedback("appId")
       )
       val evaluation = OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation, assessmentEvaluation)
       when(applicationAssessmentServiceMock.nextAssessmentCandidateReadyForEvaluation).thenReturn(

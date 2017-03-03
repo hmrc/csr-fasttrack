@@ -19,7 +19,7 @@ package services.applicationassessment
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import connectors.EmailClient
 import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
-import model.CandidateScoresCommands.{ CandidateScores, CandidateScoresAndFeedback }
+import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScoresAndFeedback, ScoresAndFeedback }
 import model.Commands._
 import model.EvaluationResults._
 import model.Exceptions.{ IncorrectStatusInApplicationException, NotFoundException }
@@ -62,33 +62,28 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
 
   "Save scores and feedback" must {
     "save feedback and log an audit event for an attended candidate" in new ApplicationAssessmentServiceFixture {
-      when(aasRepositoryMock.save(any[CandidateScoresAndFeedback])).thenReturn(Future.successful(()))
+      when(aasRepositoryMock.save(any[ExerciseScoresAndFeedback], any[Option[String]])).thenReturn(Future.successful(()))
       when(aRepositoryMock.updateStatus(any[String], any[ApplicationStatuses.EnumVal])).thenReturn(Future.successful(()))
 
-      val result = applicationAssessmentService.saveScoresAndFeedback(ApplicationId, CandidateScoresWithFeedback).futureValue
+      val result = applicationAssessmentService.saveScoresAndFeedback(ApplicationId, exerciseScoresAndFeedback).futureValue
       result mustBe unit
+
+
       verify(auditServiceMock).logEvent("ApplicationScoresAndFeedbackSaved", AuditDetails)
       verify(auditServiceMock).logEvent(s"ApplicationStatusSetTo${ApplicationStatuses.AssessmentScoresEntered}", AuditDetails)
     }
 
     "save feedback and log an audit event for a 'failed to attend' candidate" in new ApplicationAssessmentServiceFixture {
-      when(aasRepositoryMock.save(any[CandidateScoresAndFeedback])).thenReturn(Future.successful(()))
+      when(aasRepositoryMock.save(any[ExerciseScoresAndFeedback], any[Option[String]])).thenReturn(Future.successful(()))
       when(aRepositoryMock.updateStatus(any[String], any[ApplicationStatuses.EnumVal])).thenReturn(Future.successful(()))
 
       val result = applicationAssessmentService.saveScoresAndFeedback(ApplicationId,
-        CandidateScoresWithFeedback.copy(attendancy = Some(false))
+        exerciseScoresAndFeedback.copy(scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback.copy(attended = false))
       ).futureValue
 
       result mustBe unit
       verify(auditServiceMock).logEvent("ApplicationScoresAndFeedbackSaved", AuditDetails)
       verify(auditServiceMock).logEvent(s"ApplicationStatusSetTo${ApplicationStatuses.FailedToAttend}", AuditDetails)
-    }
-
-    "throw an exception when trying to save scores without a confirmed attendance" in new ApplicationAssessmentServiceFixture {
-      val result = applicationAssessmentService.saveScoresAndFeedback(ApplicationId, CandidateScoresWithFeedback.copy(attendancy = None))
-        .failed.futureValue
-
-      result mustBe an[IllegalStateException]
     }
   }
 
@@ -137,7 +132,9 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
     }
 
     "save failed evaluation result and emit and audit event" in new ApplicationAssessmentServiceFixture {
-      val scores = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, preferencesWithQualifications, CandidateScoresWithFeedback)
+      val scores = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, preferencesWithQualifications,
+        CandidateScoresAndFeedback("app1", interview = Some(exerciseScoresAndFeedback.scoresAndFeedback)))
+
       val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = false, None, None)
       val result = AssessmentRuleCategoryResultNEW(
         passedMinimumCompetencyLevel = None,
@@ -162,7 +159,8 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
     }
 
     "save passed evaluation result and emit and audit event" in new ApplicationAssessmentServiceFixture {
-      val scores = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, preferencesWithQualifications, CandidateScoresWithFeedback)
+      val scores = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, preferencesWithQualifications,
+        CandidateScoresAndFeedback("app1", interview = Some(exerciseScoresAndFeedback.scoresAndFeedback)))
       val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = false, None, None)
       val result = AssessmentRuleCategoryResultNEW(
         passedMinimumCompetencyLevel = None,
@@ -276,21 +274,27 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
       AssessmentCentrePassMarkScheme("Finance", Some(Threshold)),
       AssessmentCentrePassMarkScheme("ProjectDelivery", Some(Threshold))
     ), Some(AssessmentCentrePassMarkInfo("1", DateTime.now, "user")))
-    val CandidateScoresWithFeedback = CandidateScoresAndFeedback("app1", Some(true), assessmentIncomplete = false,
-      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
-      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
-      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
-      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
-      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
-      CandidateScores(Some(4.0), Some(3.0), Some(2.0)),
-      CandidateScores(Some(4.0), Some(3.0), Some(2.0)))
+    val exerciseScoresAndFeedback = ExerciseScoresAndFeedback("app1", AssessmentExercise.interview,
+      ScoresAndFeedback(
+        attended = true,
+        assessmentIncomplete = false,
+        Some(4.0),
+        Some(4.0),
+        Some(4.0),
+        Some(4.0),
+        Some(4.0),
+        Some(4.0),
+        Some(4.0),
+        Some("xyz"),
+        "xyz"
+      ))
     val schemes = List(Business)
 
+    val preferencesWithQualifications = PreferencesWithQualification(schemes, aLevel = true, stemLevel = true)
     when(acpmsServiceMock.getLatestVersion2).thenReturn(Future.successful(PassmarkSettings)) // TODO IS: remove the 2
     when(aRepositoryMock.nextApplicationReadyForAssessmentScoreEvaluation(any[String])).thenReturn(Future.successful(Some("app1")))
-    when(aasRepositoryMock.tryFind("app1")).thenReturn(Future.successful(Some(CandidateScoresWithFeedback)))
-
-    val preferencesWithQualifications = PreferencesWithQualification(schemes, aLevel = true, stemLevel = true)
+    when(aasRepositoryMock.tryFind("app1")).thenReturn(Future.successful(Some(CandidateScoresAndFeedback("app1",
+      interview = Some(exerciseScoresAndFeedback.scoresAndFeedback)))))
     when(fpRepositoryMock.tryGetPreferencesWithQualifications("app1")).thenReturn(Future.successful(Some(preferencesWithQualifications)))
 
     when(applicationAssessmentRepositoryMock.delete(eqTo(ApplicationId))).thenReturn(Future.successful(()))

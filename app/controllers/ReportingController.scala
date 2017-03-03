@@ -18,7 +18,7 @@ package controllers
 
 import akka.stream.scaladsl.Source
 import connectors.{ AuthProviderClient, ExchangeObjects }
-import model.CandidateScoresCommands.{ CandidateScoreFeedback, CandidateScores, CandidateScoresAndFeedback }
+import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.Commands.{ CsvExtract, _ }
 import model.PersistedObjects.ContactDetailsWithId
 import model.ReportExchangeObjects.Implicits._
@@ -176,17 +176,7 @@ trait ReportingController extends BaseController {
   }
 
   val assessmentScoresEmpty = CandidateScoresAndFeedback(
-    applicationId = "",
-    attendancy = None,
-    assessmentIncomplete = false,
-    leadingAndCommunicating = CandidateScores(),
-    collaboratingAndPartnering = CandidateScores(),
-    deliveringAtPace =CandidateScores(),
-    makingEffectiveDecisions = CandidateScores(),
-    changingAndImproving = CandidateScores(),
-    buildingCapabilityForAll = CandidateScores(),
-    motivationFit = CandidateScores(),
-    feedback = CandidateScoreFeedback()
+    applicationId = ""
   )
 
   private def buildPassMarkReportRows(applications: List[ApplicationForCandidateProgressReport],

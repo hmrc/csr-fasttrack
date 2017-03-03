@@ -16,7 +16,7 @@
 
 package services.evaluation
 
-import model.CandidateScoresCommands.{ CandidateScores, CandidateScoresAndFeedback }
+import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ScoresAndFeedback }
 import model.EvaluationResults.CompetencyAverageResult
 import org.scalatest.MustMatchers
 import org.scalatestplus.play.PlaySpec
@@ -27,17 +27,49 @@ class AssessmentScoreCalculatorSpec extends PlaySpec with MustMatchers {
 
   "Assessment Score Calculator" should {
     "count scores" in {
-      val Scores = CandidateScoresAndFeedback("appId", None, false,
-        CandidateScores(Some(4), Some(4), Some(4)), //12     4.00
-
-        CandidateScores(Some(3.25), None, Some(3.98)), //7.23   3.615
-        CandidateScores(Some(3.05), None, Some(2.98)), //6.03   3.015
-        CandidateScores(None, Some(3.12), Some(3.66)), //6.78   3.39
-        CandidateScores(Some(3.1), None, Some(3.09)), //6.19   3.095
-        CandidateScores(Some(3.98), Some(3.99), None), //7.97   3.985
-
-        CandidateScores(Some(2.99), Some(2.76), None) //5.75   5.75 (doubled)
-      //total: 26.85
+      val Scores = CandidateScoresAndFeedback("appId",
+        interview = Some(
+          ScoresAndFeedback(
+            false,
+            assessmentIncomplete = false,
+            Some(4),
+            Some(3.25),
+            Some(3.05),
+            None,
+            Some(3.1),
+            Some(3.98),
+            Some(2.99),
+            Some("feedback"),
+            "xyz"
+          )),
+        groupExercise = Some(
+          ScoresAndFeedback(
+            false,
+            assessmentIncomplete = false,
+            Some(4),
+            None,
+            None,
+            Some(3.12),
+            None,
+            Some(3.99),
+            Some(2.76),
+            Some("feedback"),
+            "xyz"
+          )),
+        writtenExercise = Some(
+          ScoresAndFeedback(
+            false,
+            assessmentIncomplete = false,
+            Some(4),
+            Some(3.98),
+            Some(2.98),
+            Some(3.66),
+            Some(3.09),
+            None,
+            None,
+            Some("feedback"),
+            "xyz"
+          ))
       )
 
       val result = calculator.countAverage(Scores)
