@@ -620,7 +620,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 //          .add(resultToBSON("location2Scheme1", evaluationResult.location2Scheme1))
 //          .add(resultToBSON("location2Scheme2", evaluationResult.location2Scheme2))
 //          .add(resultToBSON("alternativeScheme", evaluationResult.alternativeScheme))
-          .add(averageToBSON("competency-average", evaluationResult.competencyAverageResult))
+          .add(averageToBSON("competency-average", Some(evaluationResult.competencyAverageResult))) // TODO IS: wrapped in Option here fix this!!
           .add(perSchemeToBSON("schemes-evaluation", Some(evaluationResult.schemesEvaluation))) // TODO IS: wrapped in Option here fix this!!
           .add(perSchemeToBSON("overall-evaluation", Some(evaluationResult.overallEvaluation))) // TODO IS: wrapped in Option here fix this!!
       ))

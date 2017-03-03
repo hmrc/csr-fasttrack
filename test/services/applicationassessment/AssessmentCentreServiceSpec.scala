@@ -138,7 +138,7 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
       val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = false, None, None)
       val result = AssessmentRuleCategoryResultNEW(
         passedMinimumCompetencyLevel = None,
-        competencyAverageResult = None,
+        competencyAverageResult = competencyAverageResult,
         schemesEvaluation = Nil,
         overallEvaluation = Nil
       )
@@ -164,7 +164,7 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
       val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = false, None, None)
       val result = AssessmentRuleCategoryResultNEW(
         passedMinimumCompetencyLevel = None,
-        competencyAverageResult = None,
+        competencyAverageResult = competencyAverageResult,
         schemesEvaluation = List(PerSchemeEvaluation("Business", Green)), // TODO IS: this should be the enum
         overallEvaluation = Nil
       )
@@ -288,8 +288,17 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
         Some("xyz"),
         "xyz"
       ))
+    val competencyAverageResult = CompetencyAverageResult(
+      leadingAndCommunicatingAverage = 2.0d,
+      collaboratingAndPartneringAverage = 2.0d,
+      deliveringAtPaceAverage = 2.0d,
+      makingEffectiveDecisionsAverage = 2.0d,
+      changingAndImprovingAverage = 2.0d,
+      buildingCapabilityForAllAverage = 2.0d,
+      motivationFitAverage = 4.0d,
+      overallScore = 16.0d
+    )
     val schemes = List(Business)
-
     val preferencesWithQualifications = PreferencesWithQualification(schemes, aLevel = true, stemLevel = true)
     when(acpmsServiceMock.getLatestVersion2).thenReturn(Future.successful(PassmarkSettings)) // TODO IS: remove the 2
     when(aRepositoryMock.nextApplicationReadyForAssessmentScoreEvaluation(any[String])).thenReturn(Future.successful(Some("app1")))

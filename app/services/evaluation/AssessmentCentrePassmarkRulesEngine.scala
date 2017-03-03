@@ -83,7 +83,7 @@ object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRules
         val allSchemesHaveFailed = candidateScores.preferencesWithQualification.schemes.map { scheme =>
           PerSchemeEvaluation(schemeName = scheme.toString, result = Red)
         }
-        AssessmentRuleCategoryResultNEW(passedMinimumCompetencyLevelCheckOpt, competencyAverageResult = None, allSchemesHaveFailed, allSchemesHaveFailed)
+        AssessmentRuleCategoryResultNEW(passedMinimumCompetencyLevelCheckOpt, competencyAverage, allSchemesHaveFailed, allSchemesHaveFailed)
       case _ =>
         //scalastyle:off
         println("**** AssessmentCentrePassmarkRulesEngine - candidate passed minimum competency level check")
@@ -102,7 +102,7 @@ object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRules
 
         AssessmentRuleCategoryResultNEW(
           passedMinimumCompetencyLevelCheckOpt,
-          Some(competencyAverage),
+          competencyAverage,
           assessmentCentreEvaluation,
           finalResults
         )
@@ -207,13 +207,31 @@ object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRules
     if (config.enabled) {
       //scalastyle:off
       println("**** minimum competency level check is enabled now checking...")
+      println(s"**** competencyAverage = $competencyAverage")
+
       val minCompetencyLevelScore = config.minimumCompetencyLevelScore
         .getOrElse(throw new IllegalStateException("Competency level not set"))
       val minMotivationalFitScore = config.motivationalFitMinimumCompetencyLevelScore
         .getOrElse(throw new IllegalStateException("Motivational Fit competency level not set"))
 
-      Some(competencyAverage.scoresWithWeightOne.forall(_ >= minCompetencyLevelScore) &&
-        competencyAverage.scoresWithWeightTwo.forall(_ >= minMotivationalFitScore))
+
+      val weightOneChecks: Boolean = competencyAverage.scoresWithWeightOne.forall { avg =>
+        val result = avg >= minCompetencyLevelScore
+        println(s"**** weight one min competency $avg >= $minCompetencyLevelScore = $result")
+        result
+      }
+
+      val weightTwoChecks: Boolean = competencyAverage.scoresWithWeightTwo.forall { avg =>
+        val result = avg >= minMotivationalFitScore
+        println(s"**** weight two min competency $avg >= $minMotivationalFitScore = $result")
+        result
+      }
+
+      val result = Some(weightOneChecks && weightTwoChecks)
+      println(s"**** minimum competency level check result = $result")
+      result
+//      Some(competencyAverage.scoresWithWeightOne.forall(_ >= minCompetencyLevelScore) &&
+//        competencyAverage.scoresWithWeightTwo.forall(_ >= minMotivationalFitScore))
     } else {
       //scalastyle:off
       println("**** minimum competency level check is off")

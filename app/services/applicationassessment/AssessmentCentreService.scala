@@ -157,6 +157,7 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
     }
   }
 
+  // TODO IS: this is the old version that should be deleted
   def evaluateAssessmentCandidate(
     onlineTestWithAssessmentCentreScores: OnlineTestEvaluationAndAssessmentCentreScores,
     config: AssessmentEvaluationMinimumCompetencyLevel

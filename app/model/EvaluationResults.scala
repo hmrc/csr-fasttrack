@@ -72,7 +72,7 @@ object EvaluationResults {
 
   // TODO IS: rename this class
   case class AssessmentRuleCategoryResultNEW(passedMinimumCompetencyLevel: Option[Boolean],
-                                             competencyAverageResult: Option[CompetencyAverageResult],
+                                             competencyAverageResult: CompetencyAverageResult,
                                              schemesEvaluation: List[PerSchemeEvaluation],
                                              overallEvaluation: List[PerSchemeEvaluation] // TODO IS: change the type to SchemeEvaluationResult
                                          )

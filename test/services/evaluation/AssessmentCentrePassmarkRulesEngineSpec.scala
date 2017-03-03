@@ -106,6 +106,7 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
     "evaluate to passedMinimumCompetencyLevel=false when minimum competency level is enabled and not met" in {
       val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = true, minimumCompetencyLevelScore = Some(2.0),
         motivationalFitMinimumCompetencyLevelScore = Some(4.0))
+
       val scores = CandidateScoresWithFeedback.copy(
         interview = CandidateScoresWithFeedback.interview.map(_.copy(collaboratingAndPartnering = None)),
         groupExercise = CandidateScoresWithFeedback.groupExercise.map(_.copy(collaboratingAndPartnering = Some(1.0))),
@@ -114,20 +115,16 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
       val candidateScore = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, CandidatePreferencesWithQualification, scores)
 
       val result = rulesEngine.evaluate2(CandidateOnlineTestEvaluation, candidateScore, config)
+      result.passedMinimumCompetencyLevel mustBe Some(false)
+      result.schemesEvaluation mustBe List(PerSchemeEvaluation(Business, Red))
+      result.overallEvaluation mustBe List(PerSchemeEvaluation(Business, Red))
 
-      val expected = AssessmentRuleCategoryResultNEW(
-        passedMinimumCompetencyLevel = Some(false),
-        competencyAverageResult = None, //Option[CompetencyAverageResult],
-        schemesEvaluation = List(PerSchemeEvaluation(Business, Red)),
-        overallEvaluation = List(PerSchemeEvaluation(Business, Red))
-      )
-
-      result mustBe expected
     }
 
     "evaluate to passedMinimumCompetencyLevel=true and evaluate the schemes" in {
       val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = true, Some(2.0), Some(4.0))
       val scores = CandidateScoresWithFeedback
+
       val assessmentPassmarkAndScores = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, CandidatePreferencesWithQualification, scores)
 
       val result = rulesEngine.evaluate2(CandidateOnlineTestEvaluation, assessmentPassmarkAndScores, config)
@@ -135,7 +132,7 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
       result.passedMinimumCompetencyLevel mustBe Some(true)
 
       val expectedCompetencyAverage = CompetencyAverageResult(2.9333333333333336, 2.5, 3.5, 3.5, 4.0, 4.0, 6.0, 26.433333333333334)
-      result.competencyAverageResult mustBe Some(expectedCompetencyAverage)
+      result.competencyAverageResult mustBe expectedCompetencyAverage
 
       result.schemesEvaluation mustBe List(PerSchemeEvaluation(Business, Amber))
       result.overallEvaluation mustBe List(PerSchemeEvaluation(Business, Amber))
