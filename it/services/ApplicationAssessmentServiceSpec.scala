@@ -123,7 +123,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
     // TODO IS: revert temp change
     testCases.filter( file => {
       log(s"file = $file")
-      file.getName.endsWith("TODO.conf")
+      file.getName.endsWith("RUN.conf")
     })
       .foreach (executeTestCase(_, loadConfig, passmarkSettings))
   }
@@ -296,21 +296,6 @@ object ApplicationAssessmentServiceSpec {
                           overallEvaluation: Option[List[PerSchemeEvaluation]]
                          )
 
-  // TODO IS: this will not be needed
-/*
-  case class TestOnlineTestPassmarkEvaluation(location1Scheme1: String,
-                                              location1Scheme2: Option[String] = None, location2Scheme1: Option[String] = None,
-                                              location2Scheme2: Option[String] = None, alternativeScheme: Option[String] = None
-                                             ) {
-    def toOnlineTestPassmarkEvaluation: OnlineTestPassmarkEvaluation = OnlineTestPassmarkEvaluation(
-      Result(location1Scheme1),
-      location1Scheme2.map(Result(_)),
-      location2Scheme1.map(Result(_)),
-      location2Scheme2.map(Result(_)),
-      alternativeScheme.map(Result(_))
-    )
-  }
-*/
   val TestPath = "it/resources/applicationAssessmentServiceSpec"
   val PassmarkSettingsFile = "passmarkSettings.conf"
   val MCLSettingsFile = "mcl.conf"
