@@ -40,10 +40,8 @@ trait ApplicationStatusCalculator {
     }
   }
 
-  // TODO IS: work to do here - we need more testing!!!
   def determineStatusNEW(result: AssessmentRuleCategoryResultNEW): ApplicationStatuses.EnumVal = result.passedMinimumCompetencyLevel match {
     case Some(false) =>
-      // minimum competency check failed so reflect in the application status
       ApplicationStatuses.AssessmentCentreFailed
     case _ =>
       val allResultsOrderedByPreferences = result.schemesEvaluation

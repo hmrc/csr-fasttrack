@@ -19,9 +19,7 @@ package services
 import model.ApplicationStatuses
 import model.EvaluationResults.{ CompetencyAverageResult, PerSchemeEvaluation, Result }
 
-case class AssessmentScoreEvaluationTestExpectation(location1Scheme1: Option[String], location1Scheme2: Option[String],
-                                                    location2Scheme1: Option[String], location2Scheme2: Option[String],
-                                                    alternativeScheme: Option[String], applicationStatus: ApplicationStatuses.EnumVal,
+case class AssessmentScoreEvaluationTestExpectation(applicationStatus: ApplicationStatuses.EnumVal,
                                                     passmarkVersion: Option[String], passedMinimumCompetencyLevel: Option[Boolean],
                                                     leadingAndCommunicatingAverage: Option[Double],
                                                     collaboratingAndPartneringAverage: Option[Double],
@@ -31,14 +29,15 @@ case class AssessmentScoreEvaluationTestExpectation(location1Scheme1: Option[Str
                                                     buildingCapabilityForAllAverage: Option[Double],
                                                     motivationFitAverage: Option[Double],
                                                     overallScore: Option[Double],
-                                                    schemesEvaluation: Option[String]) {
+                                                    schemesEvaluation: Option[String],
+                                                    overallEvaluation: Option[String]) {
 
   def competencyAverage: Option[CompetencyAverageResult] = {
     val allResults = List(leadingAndCommunicatingAverage, collaboratingAndPartneringAverage,
       deliveringAtPaceAverage, makingEffectiveDecisionsAverage, changingAndImprovingAverage,
       buildingCapabilityForAllAverage, motivationFitAverage)
 
-    require(allResults.forall(_.isDefined) || allResults.forall(_.isEmpty), "all competecy or none of them must be defined")
+    require(allResults.forall(_.isDefined) || allResults.forall(_.isEmpty), "all competency or none of them must be defined")
 
     if (allResults.forall(_.isDefined)) {
       Some(CompetencyAverageResult(
@@ -55,7 +54,11 @@ case class AssessmentScoreEvaluationTestExpectation(location1Scheme1: Option[Str
     }
   }
 
-  def allSchemesEvaluationExpectations: Option[List[PerSchemeEvaluation]] = schemesEvaluation.map { s =>
+  def allSchemesEvaluationExpectations: Option[List[PerSchemeEvaluation]] = commonSchemeEvaluationExpectations(schemesEvaluation)
+
+  def overallSchemesEvaluationExpectations: Option[List[PerSchemeEvaluation]] = commonSchemeEvaluationExpectations(overallEvaluation)
+
+  private def commonSchemeEvaluationExpectations(schemesEvaluation: Option[String]) = schemesEvaluation.map { s =>
     s.split("\\|").map { schemeAndResult =>
       val Array(scheme, result) = schemeAndResult.split(":")
       PerSchemeEvaluation(scheme, Result(result))

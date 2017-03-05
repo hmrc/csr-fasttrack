@@ -30,7 +30,7 @@ import scala.collection.mutable
 import scala.concurrent.Future
 
 case class TestableResult(version: String, evaluatedSchemes: List[SchemeEvaluationResult],
-                          applicationStatus: ApplicationStatuses.EnumVal)
+                          applicationStatus: Option[ApplicationStatuses.EnumVal])
 
 /**
   * @deprecated Please use Mockito
@@ -83,12 +83,10 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
 
   override def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = ???
 
-  // TODO IS: fix this
   override def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
     applicationStatus: Option[ApplicationStatuses.EnumVal]): Future[Unit] = {
-//    inMemoryRepo += applicationId -> TestableResult(version, evaluationResult, applicationStatus)
-//    Future.successful(())
-    ???
+    inMemoryRepo += applicationId -> TestableResult(version, evaluationResult, applicationStatus)
+    Future.successful(())
   }
 
   override def nextApplicationReadyForSendingOnlineTestResult: Future[Option[ApplicationForNotification]] = Future.successful(None)
