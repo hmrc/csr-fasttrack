@@ -33,5 +33,5 @@ class ApplicationAssessmentScoresInMemoryRepository extends ApplicationAssessmen
   def save(candidateScoresAndFeedbck: ExerciseScoresAndFeedback,
            newVersion: Option[String] = Some(UUIDFactory.generateUUID())): Future[Unit] = ???
 
-  def nextCandidateScoresReadyForEvaluation: Future[Option[CandidateScoresAndFeedback]] = ???
+  def saveAll(scoresAndFeedback: CandidateScoresAndFeedback, newVersion: Option[String]): Future[Unit] = ???
 }

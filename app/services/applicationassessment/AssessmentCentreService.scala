@@ -18,11 +18,10 @@ package services.applicationassessment
 
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import connectors.{ CSREmailClient, EmailClient }
-import factories.UUIDFactory
 import model.ApplicationStatuses
 import model.ApplicationStatuses.BSONEnumHandler
 import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
-import model.CandidateScoresCommands.{ ApplicationScores, ExerciseScoresAndFeedback, RecordCandidateScores }
+import model.CandidateScoresCommands.{ ApplicationScores, CandidateScoresAndFeedback, ExerciseScoresAndFeedback, RecordCandidateScores }
 import model.EvaluationResults._
 import model.Exceptions.IncorrectStatusInApplicationException
 import model.PersistedObjects.ApplicationForNotification
@@ -74,15 +73,24 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
 
   def saveScoresAndFeedback(applicationId: String, exerciseScoresAndFeedback: ExerciseScoresAndFeedback)
                            (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
-    val newStatus = exerciseScoresAndFeedback.scoresAndFeedback.attended match {
-      case true => ApplicationStatuses.AssessmentScoresEntered
-      case false => ApplicationStatuses.FailedToAttend
-    }
+    val newStatus = ApplicationStatuses.AssessmentScoresEntered
     for {
       _ <- aasRepository.save(exerciseScoresAndFeedback)
       _ <- aRepository.updateStatus(applicationId, newStatus)
     } yield {
       auditService.logEvent("ApplicationScoresAndFeedbackSaved", Map("applicationId" -> applicationId))
+      auditService.logEvent(s"ApplicationStatusSetTo$newStatus", Map("applicationId" -> applicationId))
+    }
+  }
+
+  def acceptScoresAndFeedback(applicationId: String, scoresAndFeedback: CandidateScoresAndFeedback)
+                             (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
+    val newStatus = ApplicationStatuses.AssessmentScoresAccepted
+    for {
+      _ <- aasRepository.saveAll(scoresAndFeedback)
+      _ <- aRepository.updateStatus(applicationId, newStatus)
+    } yield {
+      auditService.logEvent("ApplicationScoresAndFeedbackAccepted", Map("applicationId" -> applicationId))
       auditService.logEvent(s"ApplicationStatusSetTo$newStatus", Map("applicationId" -> applicationId))
     }
   }
@@ -99,10 +107,6 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
     } yield {
       ApplicationScores(RecordCandidateScores(c.firstName, c.lastName, a.venue, a.date), as)
     }
-  }
-
-  def acceptScoresAndFeedback(applicationId: String): Future[Unit] = {
-    aRepository.updateStatus(applicationId, ApplicationStatuses.AssessmentScoresAccepted)
   }
 
   def removeFromAssessmentCentreSlot(applicationId: String): Future[Unit] = {

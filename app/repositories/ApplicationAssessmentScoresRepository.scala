@@ -17,7 +17,7 @@
 package repositories
 
 import factories.{ DateTimeFactory, UUIDFactory }
-import model.{ CandidateScoresCommands, UniqueIdentifier }
+import model.{ AssessmentExercise, CandidateScoresCommands, UniqueIdentifier }
 import model.CandidateScoresCommands._
 import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID, _ }
@@ -34,6 +34,9 @@ trait ApplicationAssessmentScoresRepository {
 
   def save(exerciseScoresAndFeedback: ExerciseScoresAndFeedback,
            newVersion: Option[String] = Some(UUIDFactory.generateUUID())): Future[Unit]
+
+  def saveAll(scoresAndFeedback: CandidateScoresAndFeedback,
+           newVersion: Option[String] = Some(UUIDFactory.generateUUID())): Future[Unit]
 }
 
 class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
@@ -44,7 +47,7 @@ class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(impl
   def tryFind(applicationId: String): Future[Option[CandidateScoresAndFeedback]] = {
     val query = BSONDocument("applicationId" -> applicationId)
 
-    collection.find(query).one[CandidateScoresAndFeedback]
+    collection.find(query).one[BSONDocument].map { _.map(candidateScoresAndFeedback.read) }
   }
 
   def allScores: Future[Map[String, CandidateScoresAndFeedback]] = {
@@ -86,4 +89,31 @@ class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(impl
 
     collection.update(query, candidateScoresAndFeedbackBSON, upsert = exerciseScoresAndFeedback.scoresAndFeedback.version.isEmpty) map validator
   }
+
+  def saveAll(scoresAndFeedback: CandidateScoresAndFeedback,
+              newVersion: Option[String] = Some(UUIDFactory.generateUUID())): Future[Unit] = {
+    val applicationId = scoresAndFeedback.applicationId
+    val query = BSONDocument("$and" -> BSONArray(
+      BSONDocument("applicationId" -> applicationId),
+      BSONDocument("$or" -> BSONArray(BSONDocument(
+        s"${AssessmentExercise.interview}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"${AssessmentExercise.interview}.version" -> scoresAndFeedback.interview.flatMap(_.version))
+      )),
+      BSONDocument("$or" -> BSONArray(BSONDocument(
+        s"${AssessmentExercise.groupExercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"${AssessmentExercise.groupExercise}.version" -> scoresAndFeedback.groupExercise.flatMap(_.version))
+      )),
+      BSONDocument("$or" -> BSONArray(BSONDocument(
+        s"${AssessmentExercise.writtenExercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"${AssessmentExercise.writtenExercise}.version" -> scoresAndFeedback.writtenExercise.flatMap(_.version))
+      ))
+    ))
+
+    val candidateScoresAndFeedbackBSON = BSONDocument("$set" -> scoresAndFeedback.setVersion(newVersion))
+
+    val validator = singleUpdateValidator(applicationId, "Application with correct version not found for 'Review scores'")
+
+    collection.update(query, candidateScoresAndFeedbackBSON, upsert = scoresAndFeedback.allVersionsEmpty) map validator
+  }
+
 }
