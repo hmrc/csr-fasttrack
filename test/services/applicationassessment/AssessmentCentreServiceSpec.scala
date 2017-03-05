@@ -79,7 +79,7 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
 
       result mustBe ()
       verify(auditServiceMock).logEvent("ApplicationScoresAndFeedbackSaved", AuditDetails)
-      verify(auditServiceMock).logEvent(s"ApplicationStatusSetTo${ApplicationStatuses.FailedToAttend}", AuditDetails)
+      verify(auditServiceMock).logEvent(s"ApplicationStatusSetTo${ApplicationStatuses.AssessmentScoresEntered}", AuditDetails)
     }
   }
 
