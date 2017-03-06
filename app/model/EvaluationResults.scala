@@ -16,6 +16,8 @@
 
 package model
 
+import model.Scheme.Scheme
+import model.persisted.SchemeEvaluationResult
 import play.api.libs.json.{ Format, JsString, JsSuccess, JsValue }
 import reactivemongo.bson.{ BSON, BSONHandler, BSONString }
 
@@ -67,13 +69,11 @@ object EvaluationResults {
     def scoresWithWeightTwo = List(motivationFitAverage)
   }
 
-  case class PerSchemeEvaluation(schemeName: String, result: Result)
-
   case class AssessmentRuleCategoryResult(
     passedMinimumCompetencyLevel: Option[Boolean],
     location1Scheme1: Option[Result], location1Scheme2: Option[Result],
     location2Scheme1: Option[Result], location2Scheme2: Option[Result], alternativeScheme: Option[Result],
-    competencyAverageResult: Option[CompetencyAverageResult], schemesEvaluation: Option[List[PerSchemeEvaluation]]
+    competencyAverageResult: Option[CompetencyAverageResult], schemesEvaluation: Option[List[SchemeEvaluationResult]]
   )
 
   case class SchemePreferences(location1Scheme1: String, location1Scheme2: Option[String],
@@ -84,5 +84,5 @@ object EvaluationResults {
    */
   case class FinalEvaluationResult(location1Scheme1: Option[Result], location1Scheme2: Option[Result],
     location2Scheme1: Option[Result], location2Scheme2: Option[Result],
-    alternativeScheme: Option[Result], schemesEvaluation: Option[List[PerSchemeEvaluation]])
+    alternativeScheme: Option[Result], schemesEvaluation: Option[List[SchemeEvaluationResult]])
 }

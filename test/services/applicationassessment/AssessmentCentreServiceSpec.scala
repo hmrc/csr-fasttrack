@@ -113,7 +113,7 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
     }
 
     "return none if there is no passmark settings set" in new ApplicationAssessmentServiceFixture {
-      val passmarkSchemesNotSet = PassmarkSettings.schemes.map(p => AssessmentCentrePassMarkScheme(p.schemeName))
+      val passmarkSchemesNotSet = PassmarkSettings.schemes.map(p => AssessmentCentrePassMarkScheme(p.scheme))
       when(acpmsServiceMock.getLatestVersion).thenReturn(Future.successful(PassmarkSettings.copy(schemes = passmarkSchemesNotSet)))
 
       val result = applicationAssessmentService.nextAssessmentCandidateReadyForEvaluation.futureValue
@@ -235,11 +235,11 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
 
     val Threshhold = PassMarkSchemeThreshold(10.0, 20.0)
     val PassmarkSettings = AssessmentCentrePassMarkSettingsResponse(List(
-      AssessmentCentrePassMarkScheme("Business", Some(Threshhold)),
-      AssessmentCentrePassMarkScheme("Commercial", Some(Threshhold)),
-      AssessmentCentrePassMarkScheme("Digital and technology", Some(Threshhold)),
-      AssessmentCentrePassMarkScheme("Finance", Some(Threshhold)),
-      AssessmentCentrePassMarkScheme("Project delivery", Some(Threshhold))
+      AssessmentCentrePassMarkScheme(Scheme.Business, Some(Threshhold)),
+      AssessmentCentrePassMarkScheme(Scheme.Commercial, Some(Threshhold)),
+      AssessmentCentrePassMarkScheme(Scheme.DigitalAndTechnology, Some(Threshhold)),
+      AssessmentCentrePassMarkScheme(Scheme.Finance, Some(Threshhold)),
+      AssessmentCentrePassMarkScheme(Scheme.ProjectDelivery, Some(Threshhold))
     ), Some(AssessmentCentrePassMarkInfo("1", DateTime.now, "user")))
     val exerciseScoresAndFeedback = ExerciseScoresAndFeedback("app1", AssessmentExercise.interview,
       ScoresAndFeedback(

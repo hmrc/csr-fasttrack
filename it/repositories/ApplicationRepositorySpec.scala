@@ -303,9 +303,9 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
         ),
         "schemes-evaluation" -> BSONDocument(
           "Commercial" -> scheme.commercial.get,
-          "Digital and technology" -> scheme.digitalAndTechnology.get,
+          "DigitalAndTechnology" -> scheme.digitalAndTechnology.get,
           "Business" -> scheme.business.get,
-          "Project delivery" -> scheme.projectDelivery.get,
+          "ProjectDelivery" -> scheme.projectDelivery.get,
           "Finance" -> scheme.finance.get
         )
       )

@@ -18,6 +18,7 @@ package repositories
 
 import model.PassmarkPersistedObjects
 import model.PassmarkPersistedObjects.AssessmentCentrePassMarkSettings
+import model.PassmarkPersistedObjects.Implicits._
 import play.api.libs.json.{ JsNumber, JsObject }
 import reactivemongo.api.DB
 import reactivemongo.bson.{ BSONDocument, BSONObjectID }

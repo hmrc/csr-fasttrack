@@ -31,7 +31,7 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories.{ FrameworkRepository, LocationSchemeRepository, PassMarkSettingsRepository, SchemeInfo }
+import repositories.{ FrameworkRepository, LocationSchemeRepository, OnlineTestPassMarkSettingsRepository, SchemeInfo }
 
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -39,7 +39,7 @@ import scala.language.postfixOps
 class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results with MockitoSugar {
   "Try and get latest settings" should {
     "Return a settings objects with schemes but no thresholds if there are no settings saved" in new TestFixture {
-      val passMarkSettingsRepositoryMockWithNoSettings = mock[PassMarkSettingsRepository]
+      val passMarkSettingsRepositoryMockWithNoSettings = mock[OnlineTestPassMarkSettingsRepository]
 
       when(passMarkSettingsRepositoryMockWithNoSettings.tryGetLatestVersion()).thenReturn(Future.successful(None))
 
@@ -64,7 +64,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
 
     "Return a complete settings object if there are saved settings" in new TestFixture {
 
-      val passMarkSettingsRepositoryMockWithSettings = mock[PassMarkSettingsRepository]
+      val passMarkSettingsRepositoryMockWithSettings = mock[OnlineTestPassMarkSettingsRepository]
 
       when(passMarkSettingsRepositoryMockWithSettings.tryGetLatestVersion()).thenReturn(Future.successful(
         Some(
@@ -93,11 +93,11 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
   }
 
   "Save new settings" should {
-    def isValid(value: Settings) = true
+    def isValid(value: OnlineTestPassmarkSettings) = true
 
     "Send a complete settings object to the repository with a version UUID appended" in new TestFixture {
 
-      val passMarkSettingsRepositoryWithExpectations = mock[PassMarkSettingsRepository]
+      val passMarkSettingsRepositoryWithExpectations = mock[OnlineTestPassMarkSettingsRepository]
 
       when(passMarkSettingsRepositoryWithExpectations.create(any(), any())).thenReturn(Future.successful(
         PassMarkSettingsCreateResponse(
@@ -146,7 +146,7 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
     val mockCreateDate = new DateTime(1459504800000L)
     val mockCreatedByUser = "TestUser"
 
-    val mockSettings = Settings(
+    val mockSettings = OnlineTestPassmarkSettings(
       schemes = mockSchemes,
       version = mockVersion,
       createDate = mockCreateDate,
@@ -157,9 +157,9 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
 
     when(mockUUIDFactory.generateUUID()).thenReturn("uuid-1")
 
-    def buildPMS(mockRepository: PassMarkSettingsRepository) = new OnlineTestPassMarkSettingsController {
-      val pmsRepository = mockRepository
-      val locSchemeRepository = mockLocationSchemeRepository
+    def buildPMS(mockRepository: OnlineTestPassMarkSettingsRepository) = new OnlineTestPassMarkSettingsController {
+      val onlineTestPassmarkRepository = mockRepository
+      val locationSchemeRepository = mockLocationSchemeRepository
       val auditService = mockAuditService
       val uuidFactory = mockUUIDFactory
     }

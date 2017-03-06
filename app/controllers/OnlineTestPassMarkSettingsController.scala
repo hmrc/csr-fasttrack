@@ -29,49 +29,22 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object OnlineTestPassMarkSettingsController extends OnlineTestPassMarkSettingsController {
-  val pmsRepository = passMarkSettingsRepository
-  val locSchemeRepository = FileLocationSchemeRepository
+  val onlineTestPassmarkRepository = onlineTestPassMarkSettingsRepository
+  val locationSchemeRepository = FileLocationSchemeRepository
   val auditService = AuditService
   val uuidFactory = UUIDFactory
 }
 
 trait OnlineTestPassMarkSettingsController extends BaseController {
-
-  val pmsRepository: PassMarkSettingsRepository
-  val locSchemeRepository: LocationSchemeRepository
+  val onlineTestPassmarkRepository: OnlineTestPassMarkSettingsRepository
+  val locationSchemeRepository: LocationSchemeRepository
   val auditService: AuditService
   val uuidFactory: UUIDFactory
 
-  def createPassMarkSettings: Action[JsValue] = Action.async(parse.json) { implicit request =>
-    withJsonBody[SettingsCreateRequest] { passMarkSettingsRequest =>
-      {
-        val newVersionUUID = uuidFactory.generateUUID()
-
-        val builtSettingsObject = Settings(
-          schemes = passMarkSettingsRequest.schemes,
-          version = newVersionUUID,
-          createDate = passMarkSettingsRequest.createDate,
-          createdByUser = passMarkSettingsRequest.createdByUser
-        )
-
-        for {
-          createResult <- pmsRepository.create(builtSettingsObject, locSchemeRepository.schemeInfoList.map(_.id))
-        } yield {
-          auditService.logEvent("PassMarkSettingsCreated", Map(
-            "Version" -> newVersionUUID,
-            "CreatedByUserId" -> passMarkSettingsRequest.createdByUser,
-            "StoredCreateDate" -> passMarkSettingsRequest.createDate.toString
-          ))
-          Ok(Json.toJson(createResult))
-        }
-      }
-    }
-  }
-
   def getLatestVersion: Action[AnyContent] = Action.async { implicit request =>
     for {
-      latestVersionOpt <- pmsRepository.tryGetLatestVersion()
-      schemes = locSchemeRepository.schemeInfoList.map(_.id)
+      latestVersionOpt <- onlineTestPassmarkRepository.tryGetLatestVersion()
+      schemes = locationSchemeRepository.schemeInfoList.map(_.id)
     } yield {
       latestVersionOpt.map(latestVersion => {
         val responseSchemes = latestVersion.schemes.map(scheme => SchemeResponse(scheme.schemeName, Some(scheme.schemeThresholds)))
@@ -92,4 +65,32 @@ trait OnlineTestPassMarkSettingsController extends BaseController {
       })
     }
   }
+
+  def createPassMarkSettings: Action[JsValue] = Action.async(parse.json) { implicit request =>
+    withJsonBody[SettingsCreateRequest] { passMarkSettingsRequest =>
+      {
+        val newVersionUUID = uuidFactory.generateUUID()
+
+        val builtSettingsObject = OnlineTestPassmarkSettings(
+          schemes = passMarkSettingsRequest.schemes,
+          version = newVersionUUID,
+          createDate = passMarkSettingsRequest.createDate,
+          createdByUser = passMarkSettingsRequest.createdByUser
+        )
+
+        for {
+          createResult <- onlineTestPassmarkRepository.create(builtSettingsObject, locationSchemeRepository.schemeInfoList.map(_.id))
+        } yield {
+          auditService.logEvent("PassMarkSettingsCreated", Map(
+            "Version" -> newVersionUUID,
+            "CreatedByUserId" -> passMarkSettingsRequest.createdByUser,
+            "StoredCreateDate" -> passMarkSettingsRequest.createDate.toString
+          ))
+          Ok(Json.toJson(createResult))
+        }
+      }
+    }
+  }
+
+
 }

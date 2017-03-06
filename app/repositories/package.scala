@@ -52,7 +52,7 @@ package object repositories {
   lazy val onlineTestRepository = new OnlineTestMongoRepository(DateTimeFactory)
   lazy val onlineTestPDFReportRepository = new OnlineTestPDFReportMongoRepository()
   lazy val testReportRepository = new TestReportMongoRepository()
-  lazy val passMarkSettingsRepository = new PassMarkSettingsMongoRepository()
+  lazy val onlineTestPassMarkSettingsRepository = new PassMarkSettingsMongoRepository()
   lazy val assessmentCentrePassMarkSettingsRepository = new AssessmentCentrePassMarkSettingsMongoRepository()
   lazy val assessmentCentreAllocationRepository = new AssessmentCentreAllocationMongoRepository()
   lazy val candidateAllocationMongoRepository = new CandidateAllocationMongoRepository(DateTimeFactory)
@@ -62,6 +62,7 @@ package object repositories {
   lazy val flagCandidateRepository = new FlagCandidateMongoRepository
   lazy val schoolsRepository = SchoolsCSVRepository
   lazy val prevYearCandidatesDetailsRepository = new PreviousYearCandidatesDetailsMongoRepository()
+  lazy val fileLocationSchemeRepository = FileLocationSchemeRepository
 
   def initIndexes = {
     Future.sequence(List(
@@ -73,7 +74,7 @@ package object repositories {
       onlineTestRepository.collection.indexesManager.create(Index(Seq(("online-tests.invitationDate", Ascending)), unique = false)),
 
       contactDetailsRepository.collection.indexesManager.create(Index(Seq(("userId", Ascending)), unique = true)),
-      passMarkSettingsRepository.collection.indexesManager.create(Index(Seq(("createDate", Ascending)), unique = true)),
+      onlineTestPassMarkSettingsRepository.collection.indexesManager.create(Index(Seq(("createDate", Ascending)), unique = true)),
 
       assessmentCentrePassMarkSettingsRepository.collection.indexesManager.create(Index(Seq(("info.createDate", Ascending)), unique = true)),
 

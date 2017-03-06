@@ -29,6 +29,7 @@ import model.Commands.Implicits._
 import model.EvaluationResults._
 import model.PersistedObjects.{ OnlineTestPassmarkEvaluation, PreferencesWithQualification }
 import model.ApplicationStatuses
+import model.persisted.SchemeEvaluationResult
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import org.scalatest.mock.MockitoSugar
@@ -71,8 +72,9 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
   // set this test framework to load only tests which contain the phrase in their path - useful in debugging
   val DebugTestOnlyPathPattern: Option[String] = None // Some("5_2_oneLocationMclDisabledIncomplete/")
 
+  // TODO IAN: Please fix the tests once you tackle assessment centre evaluation
   "Assessment Centre Passmark Service" should {
-    "for each test in the path evaluate scores" ignore  {
+    "for each test in the path evaluate scores" ignore {
       loadSuites foreach executeSuite
     }
   }
@@ -189,8 +191,8 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
     withClue(s"$Message alternativeScheme") {
       a.alternativeScheme mustBe expected.alternativeScheme
     }
-    val actualSchemes = a.schemesEvaluation.getOrElse(List()).map(x => (x.schemeName, x.result)).toMap
-    val expectedSchemes = expected.allSchemesEvaluationExpectations.getOrElse(List()).map(x => (x.schemeName, x.result)).toMap
+    val actualSchemes = a.schemesEvaluation.getOrElse(List()).map(x => (x.scheme, x.result)).toMap
+    val expectedSchemes = expected.allSchemesEvaluationExpectations.getOrElse(List()).map(x => (x.scheme, x.result)).toMap
 
     val allSchemes = actualSchemes.keys ++ expectedSchemes.keys
 
@@ -238,7 +240,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
 
       val schemesEvaluation = evaluationDoc.getAs[BSONDocument]("schemes-evaluation").map { doc =>
         doc.elements.collect {
-          case (name, BSONString(result)) => PerSchemeEvaluation(name, Result(result))
+          case (name, BSONString(result)) => SchemeEvaluationResult(model.Scheme.withName(name), Result(result))
         }.toList
       }.getOrElse(List())
       val schemesEvaluationOpt = if (schemesEvaluation.isEmpty) None else Some(schemesEvaluation)
@@ -263,7 +265,7 @@ object ApplicationAssessmentServiceSpec {
                           applicationStatus: ApplicationStatuses.EnumVal, location1Scheme1: Option[String],
                           location1Scheme2: Option[String], location2Scheme1: Option[String],
                           location2Scheme2: Option[String], alternativeScheme: Option[String],
-                          competencyAverageResult: Option[CompetencyAverageResult], schemesEvaluation: Option[List[PerSchemeEvaluation]])
+                          competencyAverageResult: Option[CompetencyAverageResult], schemesEvaluation: Option[List[SchemeEvaluationResult]])
 
   case class TestOnlineTestPassmarkEvaluation(location1Scheme1: String,
                                               location1Scheme2: Option[String] = None, location2Scheme1: Option[String] = None,

@@ -16,7 +16,7 @@
 
 package scheduler.onlinetesting
 
-import connectors.PassMarkExchangeObjects.Settings
+import connectors.PassMarkExchangeObjects.OnlineTestPassmarkSettings
 import model.ApplicationStatuses
 import model.OnlineTestCommands.CandidateEvaluationData
 import model.PersistedObjects.CandidateTestReport
@@ -40,7 +40,7 @@ class EvaluateCandidateScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
 
     "evaluate the score successfully for ONLINE_TEST_COMPLETED" in new TestFixture {
       val onlineTestCompletedCandidateScore = CandidateEvaluationData(
-        Settings(List(), "version", DateTime.now(), "user"), Nil, CandidateTestReport("appId", "type"),
+        OnlineTestPassmarkSettings(List(), "version", DateTime.now(), "user"), Nil, CandidateTestReport("appId", "type"),
         ApplicationStatuses.OnlineTestCompleted
       )
       when(passmarkServiceMock.nextCandidateReadyForEvaluation).thenReturn(Future.successful(Some(onlineTestCompletedCandidateScore)))

@@ -36,8 +36,8 @@ PUT         /schemes/:applicationId                                      control
 GET         /schemes/eligible/:applicationId                             controllers.LocationSchemeController.getEligibleSchemes(applicationId: String)
 DELETE      /schemes/remove/:applicationId                               controllers.LocationSchemeController.removeSchemes(applicationId: String)
 
-PUT         /pass-mark-settings/create                                   controllers.OnlineTestPassMarkSettingsController.createPassMarkSettings
 GET         /pass-mark-settings/getLatestVersion                         controllers.OnlineTestPassMarkSettingsController.getLatestVersion
+PUT         /pass-mark-settings/create                                   controllers.OnlineTestPassMarkSettingsController.createPassMarkSettings
 
 GET         /assessment-centre/pass-mark-settings                        controllers.AssessmentCentrePassMarkSettingsController.getLatestVersion
 PUT         /assessment-centre/pass-mark-settings                        controllers.AssessmentCentrePassMarkSettingsController.create

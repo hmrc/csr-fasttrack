@@ -16,7 +16,7 @@
 
 package services.evaluation
 
-import connectors.PassMarkExchangeObjects.{ Scheme, SchemeThreshold, SchemeThresholds, Settings }
+import connectors.PassMarkExchangeObjects.{ Scheme, SchemeThreshold, SchemeThresholds, OnlineTestPassmarkSettings }
 import fixture.TestReportFixture._
 import model.EvaluationResults._
 import model.OnlineTestCommands._
@@ -28,7 +28,7 @@ import org.scalatestplus.play.PlaySpec
 
 class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
   //scalastyle:off
-  val PassmarkSettings = Settings(
+  val PassmarkSettings = OnlineTestPassmarkSettings(
     Scheme(Business, SchemeThresholds(competency = t(1.0, 99.0), verbal = t(5.0, 94.0), numerical = t(10.0, 90.0), situational = t(30.0, 85.0)))
       :: Scheme(Commercial, SchemeThresholds(competency = t(15.0, 94.0), verbal = t(20.0, 90.0), numerical = t(25.0, 50.0), situational = t(29.0, 80.0)))
       :: Scheme(DigitalAndTechnology, SchemeThresholds(competency = t(30.0, 80.0), verbal = t(30.0, 80.0), numerical = t(30.0, 80.0), situational = t(29.0, 80.0)))
@@ -224,7 +224,7 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
 
   "Pass mark rules engine for pass mark equal to fail mark" should {
     //scalastyle:off
-    val PassmarkSettings = Settings(
+    val PassmarkSettings = OnlineTestPassmarkSettings(
       Scheme(Business, SchemeThresholds(competency = t(99.0, 99.0), verbal = t(94.0, 94.0), numerical = t(90.0, 90.0), situational = t(85.0, 85.0)))
         :: Nil,
       version = "testVersion",

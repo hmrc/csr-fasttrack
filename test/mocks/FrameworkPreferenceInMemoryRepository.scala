@@ -33,12 +33,6 @@ object FrameworkPreferenceInMemoryRepository extends FrameworkPreferenceReposito
       Some(Alternatives(location = true, framework = true))
     )
 
-  override def savePreferences(applicationId: String, preferences: Preferences): Future[Unit] =
-    update(applicationId, preferences)
-
-  override def tryGetPreferences(applicationId: String): Future[Option[Preferences]] =
-    Future.successful(inMemoryRepo.get(applicationId))
-
   override def notFound(applicationId: String): Preferences = throw new RuntimeException
 
   def tryGetPreferencesWithQualifications(applicationId: String): Future[Option[PreferencesWithQualification]] = ???

@@ -19,29 +19,30 @@ package services.evaluation
 import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.EvaluationResults._
 import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
+import model.persisted.SchemeEvaluationResult
 
 trait AssessmentCentreAllSchemesEvaluator {
 
   def evaluateSchemes(passmark: AssessmentCentrePassMarkSettingsResponse, overallScore: Double,
-    eligibleSchemes: List[String]): List[PerSchemeEvaluation] = {
+    eligibleSchemes: List[String]): List[SchemeEvaluationResult] = {
     passmark.schemes.map { scheme =>
-      val result = if (eligibleSchemes.contains(scheme.schemeName)) evaluateScore(scheme, passmark, overallScore) else Red
-      PerSchemeEvaluation(scheme.schemeName, result)
+      val result = if (eligibleSchemes.contains(scheme.scheme.toString)) evaluateScore(scheme, passmark, overallScore) else Red
+      SchemeEvaluationResult(scheme.scheme, result)
     }
   }
 
   private def evaluateScore(scheme: AssessmentCentrePassMarkScheme, passmark: AssessmentCentrePassMarkSettingsResponse,
     overallScore: Double): Result = {
     val passmarkSetting = scheme.overallPassMarks
-      .getOrElse(throw new IllegalStateException(s"Scheme threshold for ${scheme.schemeName} is not set in Passmark settings"))
+      .getOrElse(throw new IllegalStateException(s"Scheme threshold for ${scheme.scheme} is not set in Passmark settings"))
 
     determineSchemeResult(overallScore, passmarkSetting)
   }
 
-  def evaluateAlternativeSchemes(allSchemesEvaluation: Map[String, Result], alternativeSchemes: List[String]): Result = {
+  def evaluateAlternativeSchemes(allSchemesEvaluation: Map[model.Scheme.Scheme, Result], alternativeSchemes: List[String]): Result = {
     val evaluatedAlternativeSchemes = allSchemesEvaluation.filter {
-      case (schemeName, _) =>
-        alternativeSchemes.contains(schemeName)
+      case (scheme, _) =>
+        alternativeSchemes.contains(scheme.toString)
     }
 
     val evaluation = evaluatedAlternativeSchemes.values.toList
