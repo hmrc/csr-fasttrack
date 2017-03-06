@@ -50,10 +50,14 @@ trait ApplicationStatusCalculator {
 
   private def calculateStatus(allResultsInPreferenceOrder: List[PerSchemeEvaluation]): ApplicationStatuses.EnumVal = {
     if (allResultsInPreferenceOrder.count(_.result == Red) == allResultsInPreferenceOrder.size) {
+      //scalastyle:off
+      println(s"**** ApplicationStatusCalculator - all schemes are Red so setting status to ${ApplicationStatuses.AssessmentCentreFailed}")
       ApplicationStatuses.AssessmentCentreFailed
     } else if (allResultsInPreferenceOrder.count(r => r.result == Red || r.result == Green) == allResultsInPreferenceOrder.size) {
+      println(s"**** ApplicationStatusCalculator - all schemes are Red/Green so setting status to ${ApplicationStatuses.AssessmentCentrePassed}")
       ApplicationStatuses.AssessmentCentrePassed
     } else {
+      println(s"**** ApplicationStatusCalculator - schemes are not all Red/Green (some are Amber) so setting status to ${ApplicationStatuses.AwaitingAssessmentCentreReevaluation}")
       ApplicationStatuses.AwaitingAssessmentCentreReevaluation
     }
   }

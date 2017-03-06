@@ -123,7 +123,8 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
     // TODO IS: revert temp change
     testCases.filter( file => {
       log(s"file = $file")
-      file.getName.endsWith("RUN.conf")
+//      file.getName.endsWith("RUN.conf")
+      true
     })
       .foreach (executeTestCase(_, loadConfig, passmarkSettings))
   }
