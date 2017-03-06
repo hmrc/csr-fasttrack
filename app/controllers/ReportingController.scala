@@ -175,10 +175,6 @@ trait ReportingController extends BaseController {
     reportFut.map { report => Ok(Json.toJson(report)) }
   }
 
-  val assessmentScoresEmpty = CandidateScoresAndFeedback(
-    applicationId = ""
-  )
-
   private def buildPassMarkReportRows(applications: List[ApplicationForCandidateProgressReport],
                                       allContactDetails: Map[String, ContactDetailsWithId],
                                       allLocations: List[LocationSchemes],
@@ -207,7 +203,7 @@ trait ReportingController extends BaseController {
           assessmentCentreIndicatorRepository.calculateIndicator(contactDetails.postCode).assessmentCentre
         }
         val onlineTestResults = allTestResults.getOrElse(appId.toString(), passMarkResultsEmpty)
-        val assessmentScores = allAssessmentScores.getOrElse(appId.toString(), assessmentScoresEmpty)
+        val assessmentScores = allAssessmentScores.get(appId.toString())
 
         val schemeOnlineTestResults = application.schemes.map { scheme =>
           val schemeEvaluationResultList: List[SchemeEvaluationResult] = allPassMarkEvaluations.getOrElse(appId.toString(), Nil)
