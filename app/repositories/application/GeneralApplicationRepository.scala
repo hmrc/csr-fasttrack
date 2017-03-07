@@ -615,17 +615,18 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         s"progress-status-dates.$progressStatus" -> LocalDate.now(),
         "assessment-centre-passmark-evaluation" -> BSONDocument("passmarkVersion" -> passmarkVersion)
           .add(booleanToBSON("passedMinimumCompetencyLevel", evaluationResult.passedMinimumCompetencyLevel))
-//          .add(resultToBSON("location1Scheme1", evaluationResult.location1Scheme1))
-//          .add(resultToBSON("location1Scheme2", evaluationResult.location1Scheme2))
-//          .add(resultToBSON("location2Scheme1", evaluationResult.location2Scheme1))
-//          .add(resultToBSON("location2Scheme2", evaluationResult.location2Scheme2))
-//          .add(resultToBSON("alternativeScheme", evaluationResult.alternativeScheme))
-          .add(averageToBSON("competency-average", Some(evaluationResult.competencyAverageResult))) // TODO IS: wrapped in Option here fix this!!
-          .add(perSchemeToBSON("schemes-evaluation", Some(evaluationResult.schemesEvaluation))) // TODO IS: wrapped in Option here fix this!!
-          .add(perSchemeToBSON("overall-evaluation", Some(evaluationResult.overallEvaluation))) // TODO IS: wrapped in Option here fix this!!
+          .add(BSONDocument("competency-average" -> evaluationResult.competencyAverageResult))
+          .add(saveSchemes("schemes-evaluation", evaluationResult.schemesEvaluation))
+          .add(saveSchemes("overall-evaluation", evaluationResult.overallEvaluation))
       ))
 
     collection.update(query, passMarkEvaluation, upsert = false) map { _ => () }
+  }
+
+  private def saveSchemes(name: String, schemes: List[PerSchemeEvaluation]): BSONDocument = {
+    val mySchemes = schemes.map(x => BSONDocument(x.schemeName -> x.result.toString))
+    val schemesDoc = mySchemes.foldRight(BSONDocument.empty)((acc, doc) => acc.add(doc))
+    BSONDocument(name -> schemesDoc)
   }
 
   def getSchemeLocations(applicationId: String): Future[List[String]] = {
