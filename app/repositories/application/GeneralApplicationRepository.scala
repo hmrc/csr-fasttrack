@@ -95,8 +95,8 @@ trait GeneralApplicationRepository {
 
   def nextAssessmentCentrePassedOrFailedApplication(): Future[Option[ApplicationForNotification]]
 
-  def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResultNEW,
-    newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit]
+  def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResult,
+                                    newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit]
 
   def getSchemeLocations(applicationId: String): Future[List[String]]
 
@@ -595,8 +595,8 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     selectRandom(query).map(_.map(bsonDocToApplicationForNotification))
   }
 
-  def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResultNEW,
-    newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
+  def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResult,
+                                    newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId),
       BSONDocument(

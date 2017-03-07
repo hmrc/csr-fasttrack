@@ -43,19 +43,21 @@ object AwaitingAssessmentCentreReevalationStatusGenerator extends AssessmentResu
   override val status = ApplicationStatuses.AwaitingAssessmentCentreReevaluation
 
   override def getAssessmentRuleCategoryResult =
-    AssessmentRuleCategoryResult(Some(true), Some(Amber), Some(Amber), Some(Amber), Some(Amber),
-      Some(Amber), Some(CompetencyAverageResult(
-        leadingAndCommunicatingAverage = randScore,
-        collaboratingAndPartneringAverage = randScore,
-        deliveringAtPaceAverage = randScore,
-        makingEffectiveDecisionsAverage = randScore,
-        changingAndImprovingAverage = randScore,
-        buildingCapabilityForAllAverage = randScore,
-        motivationFitAverage = randScore,
-        overallScore = Random.randDouble(10.5, 17.5)
-      )), Some(schemeNames.map { schemeName =>
-        PerSchemeEvaluation(schemeName, randResult)
-      }))
+    AssessmentRuleCategoryResult(
+      passedMinimumCompetencyLevel = Some(true),
+      competencyAverageResult = CompetencyAverageResult(
+          leadingAndCommunicatingAverage = randScore,
+          collaboratingAndPartneringAverage = randScore,
+          deliveringAtPaceAverage = randScore,
+          makingEffectiveDecisionsAverage = randScore,
+          changingAndImprovingAverage = randScore,
+          buildingCapabilityForAllAverage = randScore,
+          motivationFitAverage = randScore,
+          overallScore = Random.randDouble(10.5, 17.5)
+      ),
+      schemesEvaluation = schemeNames.map { schemeName => PerSchemeEvaluation(schemeName, randResult)},
+      overallEvaluation = schemeNames.map { schemeName => PerSchemeEvaluation(schemeName, randResult)}
+    )
 }
 
 object AssessmentCentreFailedStatusGenerator extends AssessmentResultStatusGenerator {
@@ -69,8 +71,9 @@ object AssessmentCentreFailedStatusGenerator extends AssessmentResultStatusGener
 
   override val status = ApplicationStatuses.AssessmentCentreFailed
   override def getAssessmentRuleCategoryResult =
-    AssessmentRuleCategoryResult(Some(true), Some(Red), Some(Red), Some(Red), Some(Red),
-      Some(Red), Some(CompetencyAverageResult(
+    AssessmentRuleCategoryResult(
+      passedMinimumCompetencyLevel = Some(true),
+      competencyAverageResult = CompetencyAverageResult(
         leadingAndCommunicatingAverage = randScore,
         collaboratingAndPartneringAverage = randScore,
         deliveringAtPaceAverage = randScore,
@@ -79,9 +82,10 @@ object AssessmentCentreFailedStatusGenerator extends AssessmentResultStatusGener
         buildingCapabilityForAllAverage = randScore,
         motivationFitAverage = randScore,
         overallScore = Random.randDouble(3.5, 10.5)
-      )), Some(schemeNames.map { schemeName =>
-        PerSchemeEvaluation(schemeName, randResult)
-      }))
+      ),
+      schemesEvaluation = schemeNames.map { schemeName => PerSchemeEvaluation(schemeName, randResult)},
+      overallEvaluation = schemeNames.map { schemeName => PerSchemeEvaluation(schemeName, randResult)}
+  )
 }
 
 object AssessmentCentrePassedStatusGenerator extends AssessmentResultStatusGenerator {
@@ -95,9 +99,10 @@ object AssessmentCentrePassedStatusGenerator extends AssessmentResultStatusGener
 
   override val status = ApplicationStatuses.AssessmentCentrePassed
 
-  override def getAssessmentRuleCategoryResult: AssessmentRuleCategoryResult =
-    AssessmentRuleCategoryResult(Some(true), Some(Green), Some(Green), Some(Green), Some(Green),
-      Some(Green), Some(CompetencyAverageResult(
+  override def getAssessmentRuleCategoryResult =
+    AssessmentRuleCategoryResult(
+      passedMinimumCompetencyLevel = Some(true),
+      competencyAverageResult = CompetencyAverageResult(
         leadingAndCommunicatingAverage = randScore,
         collaboratingAndPartneringAverage = randScore,
         deliveringAtPaceAverage = randScore,
@@ -106,9 +111,10 @@ object AssessmentCentrePassedStatusGenerator extends AssessmentResultStatusGener
         buildingCapabilityForAllAverage = randScore,
         motivationFitAverage = randScore,
         overallScore = Random.randDouble(21.0, 28.0)
-      )), Some(schemeNames.map { schemeName =>
-        PerSchemeEvaluation(schemeName, randResult)
-      }))
+      ),
+      schemesEvaluation = schemeNames.map { schemeName => PerSchemeEvaluation(schemeName, randResult)},
+      overallEvaluation = schemeNames.map { schemeName => PerSchemeEvaluation(schemeName, randResult)}
+    )
 }
 
 trait AssessmentResultStatusGenerator extends ConstructiveGenerator {
@@ -121,7 +127,6 @@ trait AssessmentResultStatusGenerator extends ConstructiveGenerator {
   lazy val schemeNames = Await.result(fwRepository.getFrameworkNames, 5 seconds)
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
-    /*
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       appId = candidateInPreviousStatus.applicationId.get
@@ -129,7 +134,6 @@ trait AssessmentResultStatusGenerator extends ConstructiveGenerator {
         status)
     } yield {
       candidateInPreviousStatus.copy(applicationStatus = status)
-    }*/
-    ??? //TODO IS: fix me
+    }
   }
 }

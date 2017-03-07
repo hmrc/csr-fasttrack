@@ -16,13 +16,12 @@
 
 package repositories
 
+import model.ApplicationStatuses
 import model.ApplicationStatuses._
 import model.AssessmentScheduleCommands.ApplicationForAssessmentAllocationResult
-import model.ReportExchangeObjects._
-
-import model.{ ApplicationStatuses, EvaluationResults }
-import model.EvaluationResults.{ CompetencyAverageResult, AssessmentRuleCategoryResultNEW, AssessmentRuleCategoryResult }
+import model.EvaluationResults.{ AssessmentRuleCategoryResult, CompetencyAverageResult }
 import model.Exceptions.ApplicationNotFound
+import model.ReportExchangeObjects._
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
 import repositories.application.{ GeneralApplicationMongoRepository, TestDataMongoRepository }
@@ -189,7 +188,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     "save a score evaluation and update the application status when the application is in ASSESSMENT_SCORES_ACCEPTED status" in {
       createApplication("app1", ApplicationStatuses.AssessmentScoresAccepted)
 
-      val result = AssessmentRuleCategoryResultNEW(Some(true), competencyAverageResult, schemesEvaluation = Nil, overallEvaluation = Nil)
+      val result = AssessmentRuleCategoryResult(Some(true), competencyAverageResult, schemesEvaluation = Nil, overallEvaluation = Nil)
       applicationRepo.saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AwaitingAssessmentCentreReevaluation).futureValue
 
       val status = getApplicationStatus("app1")
@@ -199,7 +198,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     "save a score evaluation and update the application status when the application is in AWAITING_ASSESSMENT_CENTRE_RE_EVALUATION" in {
       createApplication("app1", ApplicationStatuses.AwaitingAssessmentCentreReevaluation)
 
-      val result = AssessmentRuleCategoryResultNEW(Some(true), competencyAverageResult, schemesEvaluation = Nil, overallEvaluation = Nil)
+      val result = AssessmentRuleCategoryResult(Some(true), competencyAverageResult, schemesEvaluation = Nil, overallEvaluation = Nil)
       applicationRepo.saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AssessmentScoresAccepted).futureValue
 
       val status = getApplicationStatus("app1")
@@ -209,7 +208,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
     "fail to save a score evaluation when candidate has been withdrawn" in {
       createApplication("app1", ApplicationStatuses.Withdrawn)
 
-      val result = AssessmentRuleCategoryResultNEW(Some(true), competencyAverageResult, schemesEvaluation = Nil, overallEvaluation = Nil)
+      val result = AssessmentRuleCategoryResult(Some(true), competencyAverageResult, schemesEvaluation = Nil, overallEvaluation = Nil)
       applicationRepo.saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AssessmentScoresAccepted).futureValue
 
       val status = getApplicationStatus("app1")

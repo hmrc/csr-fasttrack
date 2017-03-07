@@ -16,7 +16,6 @@
 
 package model
 
-import model.persisted.SchemeEvaluationResult
 import play.api.libs.json.{ Format, JsString, JsSuccess, JsValue }
 import reactivemongo.bson.{ BSON, BSONHandler, BSONString }
 
@@ -70,28 +69,9 @@ object EvaluationResults {
 
   case class PerSchemeEvaluation(schemeName: String, result: Result)
 
-  // TODO IS: rename this class
-  case class AssessmentRuleCategoryResultNEW(passedMinimumCompetencyLevel: Option[Boolean],
-                                             competencyAverageResult: CompetencyAverageResult,
-                                             schemesEvaluation: List[PerSchemeEvaluation],
-                                             overallEvaluation: List[PerSchemeEvaluation] // TODO IS: change the type to SchemeEvaluationResult
+  case class AssessmentRuleCategoryResult(passedMinimumCompetencyLevel: Option[Boolean],
+                                          competencyAverageResult: CompetencyAverageResult,
+                                          schemesEvaluation: List[PerSchemeEvaluation],// TODO IS: change the type to SchemeEvaluationResult
+                                          overallEvaluation: List[PerSchemeEvaluation] // TODO IS: change the type to SchemeEvaluationResult
                                          )
-
-  // TODO IS: the new version of this class is above
-  case class AssessmentRuleCategoryResult(
-    passedMinimumCompetencyLevel: Option[Boolean],
-    location1Scheme1: Option[Result], location1Scheme2: Option[Result],
-    location2Scheme1: Option[Result], location2Scheme2: Option[Result], alternativeScheme: Option[Result],
-    competencyAverageResult: Option[CompetencyAverageResult], schemesEvaluation: Option[List[PerSchemeEvaluation]]
-  )
-
-  case class SchemePreferences(location1Scheme1: String, location1Scheme2: Option[String],
-    location2Scheme1: Option[String], location2Scheme2: Option[String])
-
-  /**
-   * Final evaluation after taking into account: Online Tests and Assessment Centre results
-   */
-  case class FinalEvaluationResult(location1Scheme1: Option[Result], location1Scheme2: Option[Result],
-    location2Scheme1: Option[Result], location2Scheme2: Option[Result],
-    alternativeScheme: Option[Result], schemesEvaluation: Option[List[PerSchemeEvaluation]])
 }

@@ -104,7 +104,7 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
       )
       val candidateScore = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, CandidatePreferencesWithQualification, scores)
 
-      val result = rulesEngine.evaluate2(CandidateOnlineTestEvaluation, candidateScore, config)
+      val result = rulesEngine.evaluate(CandidateOnlineTestEvaluation, candidateScore, config)
       result.passedMinimumCompetencyLevel mustBe Some(false)
       result.schemesEvaluation mustBe List(PerSchemeEvaluation(Business, Red))
       result.overallEvaluation mustBe List(PerSchemeEvaluation(Business, Red))
@@ -117,7 +117,7 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
 
       val assessmentPassmarkAndScores = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, CandidatePreferencesWithQualification, scores)
 
-      val result = rulesEngine.evaluate2(CandidateOnlineTestEvaluation, assessmentPassmarkAndScores, config)
+      val result = rulesEngine.evaluate(CandidateOnlineTestEvaluation, assessmentPassmarkAndScores, config)
 
       result.passedMinimumCompetencyLevel mustBe Some(true)
 

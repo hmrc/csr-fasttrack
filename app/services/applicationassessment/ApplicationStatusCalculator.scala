@@ -21,28 +21,9 @@ import model.EvaluationResults._
 
 trait ApplicationStatusCalculator {
 
-  def determineStatus(result: AssessmentRuleCategoryResult): ApplicationStatuses.EnumVal = result.passedMinimumCompetencyLevel match {
-    case Some(false) =>
-      ApplicationStatuses.AssessmentCentreFailed
-    case _ =>
-      val allResultsOrderedByPreferences = List(result.location1Scheme1, result.location1Scheme2,
-        result.location2Scheme1, result.location2Scheme2, result.alternativeScheme).flatten
-      statusBasedOnFirstNonRedResult(allResultsOrderedByPreferences)
-  }
-
-  private def statusBasedOnFirstNonRedResult(allResultsInPreferenceOrder: List[Result]) = {
-    val amberOrGreenOnly = allResultsInPreferenceOrder filterNot (_ == Red)
-
-    amberOrGreenOnly.headOption match {
-      case Some(Green) => ApplicationStatuses.AssessmentCentrePassed
-      case Some(Amber) => ApplicationStatuses.AwaitingAssessmentCentreReevaluation
-      case _ => ApplicationStatuses.AssessmentCentreFailed
-    }
-  }
-
   // Determines the overall result for the candidate based on the overall evaluation results
   // if the candidate has passed the minimum competency check
-  def determineStatusNEW(result: AssessmentRuleCategoryResultNEW): ApplicationStatuses.EnumVal = result.passedMinimumCompetencyLevel match {
+  def determineStatus(result: AssessmentRuleCategoryResult): ApplicationStatuses.EnumVal = result.passedMinimumCompetencyLevel match {
     case Some(false) =>
       ApplicationStatuses.AssessmentCentreFailed
     case _ =>

@@ -150,7 +150,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
             candidateScores
           )
 
-          service.evaluateAssessmentCandidate2(onlineTestEvaluationWithAssessmentCentreScores, config).futureValue
+          service.evaluateAssessmentCandidate(onlineTestEvaluationWithAssessmentCentreScores, config).futureValue
 
           val actualResult = findApplicationFromDb(appId)
           val expectedResult = t.expected

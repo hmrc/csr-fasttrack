@@ -16,6 +16,7 @@
 
 package model
 
+// TODO IS: this object should be removed
 object Schemes {
   val Business = "Business"
   val Commercial = "Commercial"

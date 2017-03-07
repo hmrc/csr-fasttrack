@@ -128,22 +128,14 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
             println(s"**** <<<<<START>>>>> found candidate ready for assessment evaluation - appId = $appId")
             for {
               assessmentCentreScoresOpt <- aasRepository.tryFind(appId)
-              // TODO IS: remove this debug
-              // scalastyle:off
-//              _ = println(s"**** assessment centre scores = $assessmentCentreScoresOpt")
               preferredSchemesWithQualificationsOpt <- fpRepository.tryGetPreferencesWithQualifications(appId)
-//              _ = println(s"**** preferred schemes with qualifications = $preferredSchemesWithQualificationsOpt")
               onlineTestEvaluation <- otRepository.findPassmarkEvaluation(appId)
-//              _ = println(s"**** online test evaluation = $onlineTestEvaluation")
             } yield {
               for {
                 scores <- assessmentCentreScoresOpt
                 prefsWithQualifications <- preferredSchemesWithQualificationsOpt
               } yield {
                 val assessmentResult = AssessmentPassmarkPreferencesAndScores(passmark, prefsWithQualifications, scores)
-//                val deleteMe = OnlineTestPassmarkEvaluation(location1Scheme1 = model.EvaluationResults.Amber,
-//                  location1Scheme2 = None, location2Scheme1 = None, location2Scheme2 = None, alternativeScheme = None)
-
                 OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation, assessmentResult)
               }
             }
@@ -157,61 +149,26 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
     }
   }
 
-  // TODO IS: this is the old version that should be deleted
-  def evaluateAssessmentCandidate(
-    onlineTestWithAssessmentCentreScores: OnlineTestEvaluationAndAssessmentCentreScores,
-    config: AssessmentEvaluationMinimumCompetencyLevel
-  ): Future[Unit] = {
-//    val onlineTestEvaluationDELETEME = onlineTestWithAssessmentCentreScores.onlineTestEvaluation
-    val onlineTestEvaluation = onlineTestWithAssessmentCentreScores.onlineTestEvaluation
-    //scalastyle:off
-    println("**** <<<<<START EVALUATE CANDIDATE>>>>>")
-//    println(s"**** onlineTestEvaluation (DELETE ME) = $onlineTestEvaluationDELETEME")
-    println(s"**** onlineTestEvaluation = $onlineTestEvaluation")
-    val assessmentScores = onlineTestWithAssessmentCentreScores.assessmentScores
-    println(s"**** assessmentScores = $assessmentScores")
-//    val assessmentEvaluation = passmarkRulesEngine.evaluate(onlineTestEvaluationDELETEME, assessmentScores, config)
-
-    println(s"**** assessment eval2 started")
-    val assessmentEvaluation2 = passmarkRulesEngine.evaluate2(onlineTestEvaluation, assessmentScores, config)
-    println(s"**** assessment eval2 finished")
-
-
-//    println(s"**** assessmentEvaluation = $assessmentEvaluation")
-//    val applicationStatus = determineStatus(assessmentEvaluation)
-//    println(s"**** applicationStatus = $applicationStatus")
-
-//    aRepository.saveAssessmentScoreEvaluation(
-//      assessmentScores.scores.applicationId,
-//      assessmentScores.passmark.info.get.version, assessmentEvaluation2, applicationStatus
-//    ).map { _ =>
-//      auditNewStatus(assessmentScores.scores.applicationId, applicationStatus)
-//    }
-    ???
-  }
-
-  def evaluateAssessmentCandidate2(onlineTestWithAssessmentCentreScores: OnlineTestEvaluationAndAssessmentCentreScores,
-                                   config: AssessmentEvaluationMinimumCompetencyLevel
+  def evaluateAssessmentCandidate(onlineTestWithAssessmentCentreScores: OnlineTestEvaluationAndAssessmentCentreScores,
+                                  config: AssessmentEvaluationMinimumCompetencyLevel
                                   ): Future[Unit] = {
 
     val onlineTestEvaluation = onlineTestWithAssessmentCentreScores.onlineTestEvaluation
     //scalastyle:off
-    println("**** <<<<<START EVALUATE CANDIDATE V2>>>>>")
+    println("**** <<<<<START EVALUATE CANDIDATE>>>>>")
     println(s"**** onlineTestEvaluation = $onlineTestEvaluation")
     val assessmentScores = onlineTestWithAssessmentCentreScores.assessmentScores
     println(s"**** assessmentScores = $assessmentScores")
 
-    println(s"**** assessment eval2 started")
-    val assessmentEvaluation2 = passmarkRulesEngine.evaluate2(onlineTestEvaluation, assessmentScores, config)
-    println(s"**** assessment eval2 finished")
+    val assessmentEvaluation = passmarkRulesEngine.evaluate(onlineTestEvaluation, assessmentScores, config)
 
-    println(s"**** assessmentEvaluation = $assessmentEvaluation2")
-    val applicationStatus = determineStatusNEW(assessmentEvaluation2)
+    println(s"**** assessmentEvaluation = $assessmentEvaluation")
+    val applicationStatus = determineStatus(assessmentEvaluation)
     println(s"**** overall applicationStatus = $applicationStatus")
 
     aRepository.saveAssessmentScoreEvaluation(
       assessmentScores.scores.applicationId,
-      assessmentScores.passmark.info.get.version, assessmentEvaluation2, applicationStatus
+      assessmentScores.passmark.info.get.version, assessmentEvaluation, applicationStatus
     ).map { _ =>
       auditNewStatus(assessmentScores.scores.applicationId, applicationStatus)
     }

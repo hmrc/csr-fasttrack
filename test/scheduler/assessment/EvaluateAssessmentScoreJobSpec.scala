@@ -54,13 +54,13 @@ class EvaluateAssessmentScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
         Future.successful(Some(evaluation))
       )
 
-      when(applicationAssessmentServiceMock.evaluateAssessmentCandidate2(evaluation, config)).thenReturn(
+      when(applicationAssessmentServiceMock.evaluateAssessmentCandidate(evaluation, config)).thenReturn(
         Future.successful(())
       )
 
       TestableEvaluateAssessmentScoreJob.tryExecute().futureValue
 
-      verify(applicationAssessmentServiceMock).evaluateAssessmentCandidate2(evaluation, config)
+      verify(applicationAssessmentServiceMock).evaluateAssessmentCandidate(evaluation, config)
     }
   }
 }

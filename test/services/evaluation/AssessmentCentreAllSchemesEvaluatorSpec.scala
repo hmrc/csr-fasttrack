@@ -19,6 +19,7 @@ package services.evaluation
 import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.EvaluationResults.{ Green, PerSchemeEvaluation }
 import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
+import model.Schemes
 import org.scalatestplus.play.PlaySpec
 import model.Schemes._
 import model.EvaluationResults._
@@ -36,10 +37,9 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
   val evaluator = new AssessmentCentreAllSchemesEvaluator {}
 
   "evaluate schemes" should {
-/*
-    "evaluate all schemes if all are eligible" in {
+    "evaluate all schemes" in {
       val overallScore = 25.0
-      val evaluation = evaluator.evaluateSchemes(PassmarkSettings, overallScore, AllSchemes)
+      val evaluation = evaluator.evaluateSchemes("appId", PassmarkSettings, overallScore, AllSchemes)
       evaluation mustBe List(
         PerSchemeEvaluation(Business, Green),
         PerSchemeEvaluation(Commercial, Green),
@@ -49,64 +49,12 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
       )
     }
 
-    "evaluated ineligible schemes to Red and to evaluate the rest of them use passmark and overal scores" in {
+    "throw an exception if the pass mark is not found for a scheme" in {
+      val noPassmarkSettings = AssessmentCentrePassMarkSettingsResponse(Nil, Some(AssessmentCentrePassMarkInfo("1", DateTime.now, "user")))
       val overallScore = 25.0
-      val evaluation = evaluator.evaluateSchemes(PassmarkSettings, overallScore, DigitalAndTechnology :: Finance :: ProjectDelivery :: Nil)
-      evaluation mustBe List(
-        PerSchemeEvaluation(Business, Red),
-        PerSchemeEvaluation(Commercial, Red),
-        PerSchemeEvaluation(DigitalAndTechnology, Amber),
-        PerSchemeEvaluation(Finance, Red),
-        PerSchemeEvaluation(ProjectDelivery, Red)
-      )
-    }
-*/
-  }
-
-  "evaluate alternative schemes" should {
-    "return Green if at least one alternative schemes is Green (ignore Preferences)" in {
-      val allSchemesEvaluation = Map(
-        Business -> Red,
-        Commercial -> Red,
-        DigitalAndTechnology -> Amber, // alternative scheme
-        Finance -> Amber, // alternative scheme
-        ProjectDelivery -> Green // alternative scheme
-      )
-      val alternativeSchemes: List[String] = DigitalAndTechnology :: Finance :: ProjectDelivery :: Nil
-
-      val evaluation = evaluator.evaluateAlternativeSchemes(allSchemesEvaluation, alternativeSchemes)
-
-      evaluation mustBe Green
-    }
-
-    "return Amber if there is no Green, and at least one Amber in alternative schemes (ignore Preferences)" in {
-      val allSchemesEvaluation = Map(
-        Business -> Red,
-        Commercial -> Red,
-        DigitalAndTechnology -> Amber, // alternative scheme
-        Finance -> Red, // alternative scheme
-        ProjectDelivery -> Red // alternative scheme
-      )
-      val alternativeSchemes: List[String] = DigitalAndTechnology :: Finance :: ProjectDelivery :: Nil
-
-      val evaluation = evaluator.evaluateAlternativeSchemes(allSchemesEvaluation, alternativeSchemes)
-
-      evaluation mustBe Amber
-    }
-
-    "return Red if there is no Green and no Amber for alternative schemes (ignore Preferences)" in {
-      val allSchemesEvaluation = Map(
-        Business -> Green,
-        Commercial -> Amber,
-        DigitalAndTechnology -> Red, // alternative scheme
-        Finance -> Red, // alternative scheme
-        ProjectDelivery -> Red // alternative scheme
-      )
-      val alternativeSchemes: List[String] = DigitalAndTechnology :: Finance :: ProjectDelivery :: Nil
-
-      val evaluation = evaluator.evaluateAlternativeSchemes(allSchemesEvaluation, alternativeSchemes)
-
-      evaluation mustBe Red
+      intercept[IllegalStateException] {
+        evaluator.evaluateSchemes("appId", noPassmarkSettings, overallScore, List(Schemes.Business))
+      }
     }
   }
 }

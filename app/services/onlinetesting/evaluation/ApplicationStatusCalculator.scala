@@ -25,6 +25,7 @@ trait ApplicationStatusCalculator {
   private val Passed = AwaitingAllocation
   private val CanTransition = List(OnlineTestCompleted, AwaitingOnlineTestReevaluation)
 
+  // TODO LT: fix the integration tests for the change to not update online test eval when candidate is in assessment centre
   def determineNewStatus(result: List[Result], currentApplicationStatus: EnumVal): Option[EnumVal] = {
     require(result.nonEmpty, "Cannot determine status from an empty list")
 

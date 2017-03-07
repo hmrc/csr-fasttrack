@@ -136,18 +136,18 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
         CandidateScoresAndFeedback("app1", interview = Some(exerciseScoresAndFeedback.scoresAndFeedback)))
 
       val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = false, None, None)
-      val result = AssessmentRuleCategoryResultNEW(
+      val result = AssessmentRuleCategoryResult(
         passedMinimumCompetencyLevel = None,
         competencyAverageResult = competencyAverageResult,
         schemesEvaluation = Nil,
         overallEvaluation = Nil
       )
       val onlineTestEvaluation = List(SchemeEvaluationResult(Business, Green))
-      when(passmarkRulesEngineMock.evaluate2(onlineTestEvaluation, scores, config)).thenReturn(result)
+      when(passmarkRulesEngineMock.evaluate(onlineTestEvaluation, scores, config)).thenReturn(result)
       when(aRepositoryMock.saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AssessmentCentreFailed))
         .thenReturn(Future.successful(()))
 
-      applicationAssessmentService.evaluateAssessmentCandidate2(
+      applicationAssessmentService.evaluateAssessmentCandidate(
         OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation, scores), config
       ).futureValue
 
@@ -162,18 +162,18 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
       val scores = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, preferencesWithQualifications,
         CandidateScoresAndFeedback("app1", interview = Some(exerciseScoresAndFeedback.scoresAndFeedback)))
       val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = false, None, None)
-      val result = AssessmentRuleCategoryResultNEW(
+      val result = AssessmentRuleCategoryResult(
         passedMinimumCompetencyLevel = None,
         competencyAverageResult = competencyAverageResult,
         schemesEvaluation = List(PerSchemeEvaluation("Business", Green)), // TODO IS: this should be the enum
         overallEvaluation = List(PerSchemeEvaluation("Business", Green))
       )
       val onlineTestEvaluation = List(SchemeEvaluationResult(Business, Green))
-      when(passmarkRulesEngineMock.evaluate2(onlineTestEvaluation, scores, config)).thenReturn(result)
+      when(passmarkRulesEngineMock.evaluate(onlineTestEvaluation, scores, config)).thenReturn(result)
       when(aRepositoryMock.saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AssessmentCentrePassed))
         .thenReturn(Future.successful(()))
 
-      applicationAssessmentService.evaluateAssessmentCandidate2(
+      applicationAssessmentService.evaluateAssessmentCandidate(
         OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation, scores), config
       ).futureValue
 

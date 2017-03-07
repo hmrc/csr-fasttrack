@@ -25,13 +25,8 @@ trait AssessmentCentreAllSchemesEvaluator {
   def evaluateSchemes(applicationId: String,
                       passmark: AssessmentCentrePassMarkSettingsResponse,
                       overallScore: Double,
-                      eligibleSchemes: List[String]): List[PerSchemeEvaluation] = {
-//    passmark.schemes.map { scheme =>
-//      val result = if (eligibleSchemes.contains(scheme.schemeName)) evaluateScore(scheme, passmark, overallScore) else Red
-//      PerSchemeEvaluation(scheme.schemeName, result)
-//    }
-
-    eligibleSchemes.map { schemeName =>
+                      schemes: List[String]): List[PerSchemeEvaluation] = {
+    schemes.map { schemeName =>
       val msg = s"Did not find assessment centre pass mark for scheme = $schemeName, applicationId = $applicationId"
       val assessmentCentrePassMarkScheme = passmark.schemes.find { _.schemeName == schemeName }
         .getOrElse(throw new IllegalStateException(msg))
@@ -50,24 +45,6 @@ trait AssessmentCentreAllSchemesEvaluator {
       .getOrElse(throw new IllegalStateException(s"Scheme threshold for ${scheme.schemeName} is not set in Passmark settings"))
 
     determineSchemeResult(overallScore, passmarkSetting)
-  }
-
-  // TODO IS: LOOK
-  // TODO IS: this can be deleted
-  def evaluateAlternativeSchemes(allSchemesEvaluation: Map[String, Result], alternativeSchemes: List[String]): Result = {
-    val evaluatedAlternativeSchemes = allSchemesEvaluation.filter {
-      case (schemeName, _) =>
-        alternativeSchemes.contains(schemeName)
-    }
-
-    val evaluation = evaluatedAlternativeSchemes.values.toList
-    if (evaluation.contains(Green)) {
-      Green
-    } else if (evaluation.contains(Amber)) {
-      Amber
-    } else {
-      Red
-    }
   }
 
   // Determines the result of each scheme based on the assessment centre pass marks

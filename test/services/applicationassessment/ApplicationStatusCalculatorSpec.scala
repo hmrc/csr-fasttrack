@@ -61,24 +61,24 @@ class ApplicationStatusCalculatorSpec extends PlaySpec with TableDrivenPropertyC
 
   "Final (with online test result) assessment centre" should {
     "Set application status to Failed when candidate failed min competency level" in {
-      calculator.determineStatusNEW(candidateFailedMinCompetencyCheck) mustBe AssessmentCentreFailed
+      calculator.determineStatus(candidateFailedMinCompetencyCheck) mustBe AssessmentCentreFailed
     }
 
     "Set application status to Failed when candidate failed all schemes" in {
-      forAll(AllFailed) { (evaluation: AssessmentRuleCategoryResultNEW, expectedApplicationStatus: ApplicationStatuses.EnumVal) =>
-        calculator.determineStatusNEW(evaluation) mustBe expectedApplicationStatus
+      forAll(AllFailed) { (evaluation: AssessmentRuleCategoryResult, expectedApplicationStatus: ApplicationStatuses.EnumVal) =>
+        calculator.determineStatus(evaluation) mustBe expectedApplicationStatus
       }
     }
 
     "Set application status to Passed when all schemes are either passed or failed" in {
-      forAll(AllPassedOrFailed) { (evaluation: AssessmentRuleCategoryResultNEW, expectedApplicationStatus: ApplicationStatuses.EnumVal) =>
-        calculator.determineStatusNEW(evaluation) mustBe expectedApplicationStatus
+      forAll(AllPassedOrFailed) { (evaluation: AssessmentRuleCategoryResult, expectedApplicationStatus: ApplicationStatuses.EnumVal) =>
+        calculator.determineStatus(evaluation) mustBe expectedApplicationStatus
       }
     }
 
     "Set application status to Re-evaluate when at least one scheme is Amber" in {
-      forAll(AtLeastOneAmber) { (evaluation: AssessmentRuleCategoryResultNEW, expectedApplicationStatus: ApplicationStatuses.EnumVal) =>
-        calculator.determineStatusNEW(evaluation) mustBe expectedApplicationStatus
+      forAll(AtLeastOneAmber) { (evaluation: AssessmentRuleCategoryResult, expectedApplicationStatus: ApplicationStatuses.EnumVal) =>
+        calculator.determineStatus(evaluation) mustBe expectedApplicationStatus
       }
     }
   }
@@ -95,7 +95,7 @@ class ApplicationStatusCalculatorSpec extends PlaySpec with TableDrivenPropertyC
   )
 
   private def candidateFailedMinCompetencyCheck = {
-    AssessmentRuleCategoryResultNEW(passedMinimumCompetencyLevel = Some(false),
+    AssessmentRuleCategoryResult(passedMinimumCompetencyLevel = Some(false),
       competencyAverageResult = competencyAverageResult,
       schemesEvaluation = Nil,
       overallEvaluation = Nil
@@ -107,7 +107,7 @@ class ApplicationStatusCalculatorSpec extends PlaySpec with TableDrivenPropertyC
                      digitalAndTechnology: Result,
                      finance: Result,
                      projectDelivery: Result) = {
-    AssessmentRuleCategoryResultNEW(passedMinimumCompetencyLevel = Some(true),
+    AssessmentRuleCategoryResult(passedMinimumCompetencyLevel = Some(true),
       competencyAverageResult = competencyAverageResult,
       schemesEvaluation = Nil,
       overallEvaluation = List(
