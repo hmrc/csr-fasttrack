@@ -24,7 +24,7 @@ import model.Commands._
 import model.EvaluationResults._
 import model.Exceptions.{ IncorrectStatusInApplicationException, NotFoundException }
 import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
-import model.PersistedObjects.{ ApplicationForNotification, ContactDetails, OnlineTestPassmarkEvaluation, PreferencesWithQualification }
+import model.PersistedObjects.{ ApplicationForNotification, ContactDetails, PreferencesWithQualification }
 import model.Scheme._
 import model._
 import model.persisted.SchemeEvaluationResult

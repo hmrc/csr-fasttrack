@@ -22,7 +22,7 @@ import model.ApplicationStatuses.BSONEnumHandler
 import model.EvaluationResults._
 import model.Exceptions._
 import model.OnlineTestCommands._
-import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
+import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest }
 import model.persisted.{ CubiksTestProfile, NotificationExpiringOnlineTest, SchemeEvaluationResult }
 import model._
 import model.Adjustments._

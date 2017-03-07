@@ -21,9 +21,8 @@ import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScor
 import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.EvaluationResults._
-import model.PersistedObjects.{ OnlineTestPassmarkEvaluation, PreferencesWithQualification }
+import model.PersistedObjects.PreferencesWithQualification
 import model.persisted.SchemeEvaluationResult
-import model.{ LocationPreference, Preferences }
 import org.mockito.Mockito._
 import services.applicationassessment.AssessmentCentreService
 import testkit.{ ShortTimeout, UnitWithAppSpec }

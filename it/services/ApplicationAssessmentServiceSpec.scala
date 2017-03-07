@@ -27,9 +27,9 @@ import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.Commands.Implicits._
 import model.EvaluationResults._
-import model.PersistedObjects.{ OnlineTestPassmarkEvaluation, PreferencesWithQualification }
+import model.PersistedObjects.PreferencesWithQualification
 import model.persisted.SchemeEvaluationResult
-import model.{ Scheme, ApplicationStatuses }
+import model.{ ApplicationStatuses, Scheme }
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.ceedubs.ficus.readers.ValueReader
@@ -119,14 +119,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
 
     val passmarkSettings = loadPassmarkSettings
     val testCases = loadTestCases
-//    val config = loadConfig
-    // TODO IS: revert temp change
-    testCases.filter( file => {
-      log(s"file = $file")
-//      file.getName.endsWith("RUN.conf")
-      true
-    })
-      .foreach (executeTestCase(_, loadConfig, passmarkSettings))
+    testCases foreach (executeTestCase(_, loadConfig, passmarkSettings))
   }
 
   def executeTestCase(testCase: File, config: AssessmentEvaluationMinimumCompetencyLevel,
@@ -141,12 +134,10 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
         log(s"Loading test: $appId")
         if (DebugTestNameAppId.isEmpty || appId == DebugTestNameAppId.get) {
           createApplicationInDb(appId)
-//          val testOnlineTestEvaluation = t.onlineTestPassmarkEvaluation
           val candidateScores = AssessmentPassmarkPreferencesAndScores(passmark, t.candidate, t.scores)
           val schemeEvaluationResults = toSchemeEvaluationResult(t.onlineTestPassmarkEvaluation)
           val onlineTestEvaluationWithAssessmentCentreScores = OnlineTestEvaluationAndAssessmentCentreScores(
             schemeEvaluationResults,
-//            testOnlineTestEvaluation.toOnlineTestPassmarkEvaluation,
             candidateScores
           )
 
@@ -220,7 +211,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
   }
 
   def loadTests(testCase: File) = {
-    val tests = ConfigFactory.parseFile(new File(testCase.getAbsolutePath)).as[List[AssessmentServiceTestTODO]]("tests")
+    val tests = ConfigFactory.parseFile(new File(testCase.getAbsolutePath)).as[List[AssessmentServiceTest]]("tests")
     Logger.info(s"Found ${tests.length} tests")
     tests
   }
@@ -245,23 +236,8 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
       val passedMinimumCompetencyLevel = evaluationDoc.getAs[Boolean]("passedMinimumCompetencyLevel")
       val passmarkVersion = evaluationDoc.getAs[String]("passmarkVersion")
       val competencyAverage = evaluationDoc.getAs[CompetencyAverageResult]("competency-average")
-//      val schemesEvaluationDocsOpt = evaluationDoc.getAs[List[BSONDocument]]("schemes-evaluation")
-
-      val schemesEvaluation = evaluationDoc.getAs[BSONDocument]("schemes-evaluation").map { doc =>
-        doc.elements.collect {
-          case (name, BSONString(result)) => PerSchemeEvaluation(name, Result(result))
-        }.toList
-      }.getOrElse(List())
-
-      val schemesEvaluationOpt = if (schemesEvaluation.isEmpty) None else Some(schemesEvaluation)
-
-      val overallEvaluation = evaluationDoc.getAs[BSONDocument]("overall-evaluation").map { doc =>
-        doc.elements.collect {
-          case (name, BSONString(result)) => PerSchemeEvaluation(name, Result(result))
-        }.toList
-      }.getOrElse(List())
-
-      val overallEvaluationOpt = if (overallEvaluation.isEmpty) None else Some(overallEvaluation)
+      val schemesEvaluationOpt = getEvaluatedSchemes(evaluationDoc, "schemes-evaluation")
+      val overallEvaluationOpt = getEvaluatedSchemes(evaluationDoc, "overall-evaluation")
 
       ActualResult(passedMinimumCompetencyLevel, passmarkVersion, applicationStatus,
         competencyAverage, schemesEvaluationOpt, overallEvaluationOpt
@@ -269,10 +245,21 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
     }.futureValue
   }
 
+  private def getEvaluatedSchemes(evaluationDoc: BSONDocument, schemeTypeName: String): Option[List[PerSchemeEvaluation]] = {
+    val schemesEvaluation = evaluationDoc.getAs[BSONDocument](schemeTypeName).map { doc =>
+      doc.elements.collect {
+        case (name, BSONString(result)) => PerSchemeEvaluation(name, Result(result))
+      }.toList
+    }.getOrElse(List())
+
+    val schemesEvaluationOpt = if (schemesEvaluation.isEmpty) None else Some(schemesEvaluation)
+    schemesEvaluationOpt
+  }
+
   //scalastyle:off
   def log(s: String) = println(s)
 
-  def logTestData(data: AssessmentServiceTestTODO) = {
+  def logTestData(data: AssessmentServiceTest) = {
     log("**** Test data")
     log(s"candidate: PreferencesWithQualification = ${data.candidate}")
     log(s"scores: CandidateScoresAndFeedback = ${data.scores}")
@@ -284,14 +271,10 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
 
 object ApplicationAssessmentServiceSpec {
 
-  case class AssessmentServiceTestTODO(candidate: PreferencesWithQualification, scores: CandidateScoresAndFeedback,
+  case class AssessmentServiceTest(candidate: PreferencesWithQualification, scores: CandidateScoresAndFeedback,
                                    onlineTestPassmarkEvaluation: List[SchemeEvaluationTestResult],
                                    expected: AssessmentScoreEvaluationTestExpectation)
-/*
-  case class AssessmentServiceTest(candidate: PreferencesWithQualification, scores: CandidateScoresAndFeedback,
-                                   onlineTestPassmarkEvaluation: TestOnlineTestPassmarkEvaluation,
-                                   expected: AssessmentScoreEvaluationTestExpectation)
-*/
+
   case class ActualResult(passedMinimumCompetencyLevel: Option[Boolean],
                           passmarkVersion: Option[String],
                           applicationStatus: ApplicationStatuses.EnumVal,

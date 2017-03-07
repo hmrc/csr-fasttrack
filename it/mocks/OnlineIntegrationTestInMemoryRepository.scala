@@ -17,12 +17,10 @@
 package mocks
 
 import model.ApplicationStatuses.EnumVal
-import model.EvaluationResults._
-import model.{ ApplicationStatuses, ReminderNotice }
 import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser }
-import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
-import model.Scheme.Scheme
+import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest }
 import model.persisted.{ CubiksTestProfile, NotificationExpiringOnlineTest, SchemeEvaluationResult }
+import model.{ ApplicationStatuses, ReminderNotice }
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.OnlineTestRepository
 

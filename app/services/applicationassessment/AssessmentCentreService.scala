@@ -18,18 +18,15 @@ package services.applicationassessment
 
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import connectors.{ CSREmailClient, EmailClient }
-import factories.UUIDFactory
 import model.ApplicationStatuses
-import model.ApplicationStatuses.BSONEnumHandler
 import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import model.CandidateScoresCommands.{ ApplicationScores, ExerciseScoresAndFeedback, RecordCandidateScores }
-import model.EvaluationResults._
 import model.Exceptions.IncorrectStatusInApplicationException
-import model.PersistedObjects.{ OnlineTestPassmarkEvaluation, ApplicationForNotification }
+import model.PersistedObjects.ApplicationForNotification
 import play.api.Logger
 import play.api.mvc.RequestHeader
-import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
 import repositories._
+import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
 import services.AuditService
 import services.evaluation.AssessmentCentrePassmarkRulesEngine
 import services.passmarksettings.AssessmentCentrePassMarkSettingsService

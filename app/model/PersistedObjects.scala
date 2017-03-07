@@ -17,9 +17,8 @@
 package model
 
 import model.Commands.{ Address, PhoneNumber, PostCode }
-import model.EvaluationResults.Result
 import model.OnlineTestCommands.TestResult
-import org.joda.time.{ DateTime, LocalDate }
+import org.joda.time.LocalDate
 import play.api.libs.json._
 import reactivemongo.bson.Macros
 
@@ -103,15 +102,8 @@ object PersistedObjects {
     questionnaireStatuses: Option[List[ApplicationProgressStatus]]
   )
 
-  // TODO IS: delete this
-  case class OnlineTestPassmarkEvaluation(
-    location1Scheme1: Result,
-    location1Scheme2: Option[Result], location2Scheme1: Option[Result],
-    location2Scheme2: Option[Result], alternativeScheme: Option[Result]
-  )
-
 //  case class PreferencesWithQualification(preferences: Preferences, aLevel: Boolean, stemLevel: Boolean)
-// TODO IS: we no longer need the qualifications
+// TODO IS: i don't think we need the qualifications any more as the schemes are pre-filtered when the user selects them
   case class PreferencesWithQualification(schemes: List[Scheme.Scheme], aLevel: Boolean, stemLevel: Boolean)
 
   object Implicits {
@@ -133,6 +125,5 @@ object PersistedObjects {
 
     implicit val onlineTestPdfReportFormats = Json.format[OnlineTestPDFReport]
     implicit val preferencesWithQualificationFormats = Json.format[PreferencesWithQualification]
-
   }
 }

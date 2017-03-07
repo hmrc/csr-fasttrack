@@ -17,9 +17,7 @@
 package services.evaluation
 
 import model.EvaluationResults._
-import model.PersistedObjects.OnlineTestPassmarkEvaluation
 import model.persisted.SchemeEvaluationResult
-import play.api.Logger
 
 trait FinalResultEvaluator {
   case class OnlineTestAndAssessmentResultPairNotFound(msg: String) extends Exception(msg)

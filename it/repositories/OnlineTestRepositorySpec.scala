@@ -19,21 +19,20 @@ package repositories
 import java.util.UUID
 
 import factories.DateTimeFactory
-import model._
-import model.Adjustments._
 import model.ApplicationStatuses._
+import model.EvaluationResults._
 import model.Exceptions._
 import model.OnlineTestCommands.OnlineTestApplicationWithCubiksUser
-import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
+import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest }
+import model._
+import model.persisted.{ CubiksTestProfile, SchemeEvaluationResult }
 import org.joda.time.{ DateTime, DateTimeZone }
+import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{ BSONArray, BSONDocument }
 import reactivemongo.json.ImplicitBSONHandlers
 import repositories.application.{ GeneralApplicationMongoRepository, OnlineTestMongoRepository }
 import services.GBTimeZoneService
 import testkit.MongoRepositorySpec
-import model.EvaluationResults._
-import model.persisted.{ SchemeEvaluationResult, CubiksTestProfile }
-import reactivemongo.api.commands.WriteResult
 
 class OnlineTestRepositorySpec extends MongoRepositorySpec {
   import ImplicitBSONHandlers._
