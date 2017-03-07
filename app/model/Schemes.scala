@@ -16,7 +16,7 @@
 
 package model
 
-// TODO IS: this object should be removed
+// TODO IS: we may be able to remove this object after merging with scheme enum change
 object Schemes {
   val Business = "Business"
   val Commercial = "Commercial"
