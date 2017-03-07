@@ -109,14 +109,14 @@ class ApplicationStatusCalculatorSpec extends PlaySpec with TableDrivenPropertyC
                      projectDelivery: Result) = {
     AssessmentRuleCategoryResultNEW(passedMinimumCompetencyLevel = Some(true),
       competencyAverageResult = competencyAverageResult,
-      schemesEvaluation = List(
+      schemesEvaluation = Nil,
+      overallEvaluation = List(
         PerSchemeEvaluation("Business", business), // TODO IS: change to enum
         PerSchemeEvaluation("Commercial", commercial),
         PerSchemeEvaluation("DigitalAndTechnology", digitalAndTechnology),
         PerSchemeEvaluation("Finance", finance),
         PerSchemeEvaluation("ProjectDelivery", projectDelivery)
-      ),
-      overallEvaluation = Nil
+      )
     )
   }
 }

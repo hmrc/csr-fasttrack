@@ -93,28 +93,28 @@ trait FinalResultEvaluator {
                                           assessmentCentreEvaluation: List[PerSchemeEvaluation]): List[PerSchemeEvaluation] = {
     //scalastyle:off
     println("****")
-    println(s"**** mergeResults2 onlineTestEvaluation = $onlineTestEvaluation")
-    println(s"**** mergeResults2 assessmentCentreEvaluation = $assessmentCentreEvaluation")
+    println(s"**** determineOverallResultForEachScheme onlineTestEvaluation = $onlineTestEvaluation")
+    println(s"**** determineOverallResultForEachScheme assessmentCentreEvaluation = $assessmentCentreEvaluation")
     println("****")
     // List[(Scheme, Result)]
     val xx = onlineTestEvaluation.map { otEval: SchemeEvaluationResult =>
       val acEval: PerSchemeEvaluation = assessmentCentreEvaluation.filter(s => s.schemeName == otEval.scheme.toString).head // TODO IS: use enum!!
-      println(s"**** mergeResults2 otEval = $otEval, acEval = $acEval")
+      println(s"**** determineOverallResultForEachScheme otEval = $otEval, acEval = $acEval")
       (otEval.result, acEval.result) match {
         case (Red, _) =>
-          println(s"**** step1 Red -")
+          println(s"**** determineOverallResultForEachScheme step1 triggered - Red")
           otEval.scheme -> PerSchemeEvaluation(otEval.scheme.toString, Red)//Red
         case (_, Red) =>
-          println(s"**** step2 - Red")
+          println(s"**** determineOverallResultForEachScheme step2 triggered - Red")
           otEval.scheme -> PerSchemeEvaluation(otEval.scheme.toString, Red)//Red
         case (Green, Green) =>
-          println(s"**** step3 - Green")
+          println(s"**** determineOverallResultForEachScheme step3 triggered - Green")
           otEval.scheme -> PerSchemeEvaluation(otEval.scheme.toString, Green)//Green
         case (Amber, _) =>
-          println(s"**** step4 - Amber")
+          println(s"**** determineOverallResultForEachScheme step4 triggered - Amber")
           otEval.scheme -> PerSchemeEvaluation(otEval.scheme.toString, Amber)//Amber
         case (Green, Amber) =>
-          println(s"**** step5 - Amber")
+          println(s"**** determineOverallResultForEachScheme step5 triggered - Amber")
           otEval.scheme -> PerSchemeEvaluation(otEval.scheme.toString, Amber)//Amber
         case _ => // TODO IS: This should never be called so should we throw exception here?
           println(s"**** step default - Amber")

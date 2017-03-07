@@ -207,7 +207,7 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
 
     println(s"**** assessmentEvaluation = $assessmentEvaluation2")
     val applicationStatus = determineStatusNEW(assessmentEvaluation2)
-    println(s"**** applicationStatus = $applicationStatus")
+    println(s"**** overall applicationStatus = $applicationStatus")
 
     aRepository.saveAssessmentScoreEvaluation(
       assessmentScores.scores.applicationId,

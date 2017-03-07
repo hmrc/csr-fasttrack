@@ -40,20 +40,22 @@ trait ApplicationStatusCalculator {
     }
   }
 
+  // Determines the overall result for the candidate based on the overall evaluation results
+  // if the candidate has passed the minimum competency check
   def determineStatusNEW(result: AssessmentRuleCategoryResultNEW): ApplicationStatuses.EnumVal = result.passedMinimumCompetencyLevel match {
     case Some(false) =>
       ApplicationStatuses.AssessmentCentreFailed
     case _ =>
-      val allResultsOrderedByPreferences = result.schemesEvaluation
-      calculateStatus(allResultsOrderedByPreferences)
+      val assessmentCentreOverallResults = result.overallEvaluation
+      calculateStatus(assessmentCentreOverallResults)
   }
 
-  private def calculateStatus(allResultsInPreferenceOrder: List[PerSchemeEvaluation]): ApplicationStatuses.EnumVal = {
-    if (allResultsInPreferenceOrder.count(_.result == Red) == allResultsInPreferenceOrder.size) {
+  private def calculateStatus(assessmentCentreOverallResults: List[PerSchemeEvaluation]): ApplicationStatuses.EnumVal = {
+    if (assessmentCentreOverallResults.count(_.result == Red) == assessmentCentreOverallResults.size) {
       //scalastyle:off
       println(s"**** ApplicationStatusCalculator - all schemes are Red so setting status to ${ApplicationStatuses.AssessmentCentreFailed}")
       ApplicationStatuses.AssessmentCentreFailed
-    } else if (allResultsInPreferenceOrder.count(r => r.result == Red || r.result == Green) == allResultsInPreferenceOrder.size) {
+    } else if (assessmentCentreOverallResults.count(r => r.result == Red || r.result == Green) == assessmentCentreOverallResults.size) {
       println(s"**** ApplicationStatusCalculator - all schemes are Red/Green so setting status to ${ApplicationStatuses.AssessmentCentrePassed}")
       ApplicationStatuses.AssessmentCentrePassed
     } else {

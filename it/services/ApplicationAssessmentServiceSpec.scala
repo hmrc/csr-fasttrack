@@ -209,6 +209,9 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
 
     val allOverallSchemes = actualSchemes.keys ++ expectedSchemes.keys
 
+    log(s"**** actualOverallSchemes=$actualOverallSchemes")
+    log(s"**** expectedOverallSchemes=$expectedOverallSchemes")
+
     allOverallSchemes.foreach { s =>
       withClue(s"$Message overall scheme evaluation for scheme: " + s) {
         actualOverallSchemes(s) mustBe expectedOverallSchemes(s)
@@ -258,7 +261,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
         }.toList
       }.getOrElse(List())
 
-      val overallEvaluationOpt = if (overallEvaluation.isEmpty) None else Some(schemesEvaluation)
+      val overallEvaluationOpt = if (overallEvaluation.isEmpty) None else Some(overallEvaluation)
 
       ActualResult(passedMinimumCompetencyLevel, passmarkVersion, applicationStatus,
         competencyAverage, schemesEvaluationOpt, overallEvaluationOpt

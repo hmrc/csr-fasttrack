@@ -166,7 +166,7 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
         passedMinimumCompetencyLevel = None,
         competencyAverageResult = competencyAverageResult,
         schemesEvaluation = List(PerSchemeEvaluation("Business", Green)), // TODO IS: this should be the enum
-        overallEvaluation = Nil
+        overallEvaluation = List(PerSchemeEvaluation("Business", Green))
       )
       val onlineTestEvaluation = List(SchemeEvaluationResult(Business, Green))
       when(passmarkRulesEngineMock.evaluate2(onlineTestEvaluation, scores, config)).thenReturn(result)
