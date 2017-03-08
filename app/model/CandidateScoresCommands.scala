@@ -17,7 +17,7 @@
 package model
 
 import model.AssessmentExercise.AssessmentExercise
-import org.joda.time.LocalDate
+import org.joda.time.{ DateTime, LocalDate }
 import play.api.libs.json.{ Format, Json }
 
 object CandidateScoresCommands {
@@ -29,7 +29,25 @@ object CandidateScoresCommands {
       interview: Option[ScoresAndFeedback] = None,
       groupExercise: Option[ScoresAndFeedback] = None,
       writtenExercise: Option[ScoresAndFeedback] = None
-  )
+  ) {
+    def allVersionsEmpty = List(
+      interview.flatMap(_.version),
+      groupExercise.flatMap(_.version),
+      writtenExercise.flatMap(_.version)
+    ).forall(_.isEmpty)
+
+    def setVersion(newVersion: Option[String]): CandidateScoresAndFeedback = {
+      def updateVersion(sOpt: Option[ScoresAndFeedback]): Option[ScoresAndFeedback] = {
+        sOpt.map(_.copy(version = newVersion))
+      }
+
+      this.copy(
+        interview = updateVersion(interview),
+        groupExercise = updateVersion(groupExercise),
+        writtenExercise = updateVersion(writtenExercise)
+      )
+    }
+  }
 
   case class ExerciseScoresAndFeedback(
     applicationId: String,
@@ -37,20 +55,21 @@ object CandidateScoresCommands {
     scoresAndFeedback: ScoresAndFeedback
   )
 
-  case class ScoresAndFeedback(
-                                attended: Boolean,
-                                assessmentIncomplete: Boolean,
-                                leadingAndCommunicating: Option[Double] = None,
-                                collaboratingAndPartnering: Option[Double] = None,
-                                deliveringAtPace: Option[Double] = None,
-                                makingEffectiveDecisions: Option[Double] = None,
-                                changingAndImproving: Option[Double] = None,
-                                buildingCapabilityForAll: Option[Double] = None,
-                                motivationFit: Option[Double] = None,
-                                feedback: Option[String] = None,
-                                updatedBy: String,
-                                version: Option[String] = None
-  )
+  case class ScoresAndFeedback(attended: Boolean,
+                               assessmentIncomplete: Boolean,
+                               leadingAndCommunicating: Option[Double] = None,
+                               collaboratingAndPartnering: Option[Double] = None,
+                               deliveringAtPace: Option[Double] = None,
+                               makingEffectiveDecisions: Option[Double] = None,
+                               changingAndImproving: Option[Double] = None,
+                               buildingCapabilityForAll: Option[Double] = None,
+                               motivationFit: Option[Double] = None,
+                               feedback: Option[String] = None,
+                               updatedBy: String,
+                               savedDate: Option[DateTime] = None,
+                               submittedDate: Option[DateTime] = None,
+                               version: Option[String] = None
+                              )
 
   case class ApplicationScores(candidate: RecordCandidateScores, scoresAndFeedback: Option[CandidateScoresAndFeedback])
 

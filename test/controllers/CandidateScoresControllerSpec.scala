@@ -16,6 +16,7 @@
 
 package controllers
 
+import factories.DateTimeFactory
 import model.CandidateScoresCommands.{ ExerciseScoresAndFeedback, ScoresAndFeedback }
 import model.CandidateScoresCommands.Implicits._
 import model.{ AssessmentExercise, EmptyRequestHeader }
@@ -56,7 +57,7 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
       when(mockAssessmentCentreService.saveScoresAndFeedback(any[String], any[ExerciseScoresAndFeedback])
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
 
-      val result = TestCandidateScoresController.createExerciseScoresAndFeedback("app1")(
+      val result = TestCandidateScoresController.saveExerciseScoresAndFeedback("app1")(
         createSaveCandidateScoresAndFeedback("app1", Json.toJson(exerciseScoresAndFeedback).toString())
       )
 
@@ -67,7 +68,7 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
       when(mockAssessmentCentreService.saveScoresAndFeedback(any[String], any[ExerciseScoresAndFeedback])
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(new IllegalStateException("blah")))
 
-      val result = TestCandidateScoresController.createExerciseScoresAndFeedback("app1")(
+      val result = TestCandidateScoresController.saveExerciseScoresAndFeedback("app1")(
         createSaveCandidateScoresAndFeedback("app1", Json.toJson(exerciseScoresAndFeedback).toString())
       )
 
@@ -80,13 +81,15 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
 
     object TestCandidateScoresController extends CandidateScoresController {
       override def assessmentCentreService: AssessmentCentreService = mockAssessmentCentreService
+
+      val dateTimeFactory: DateTimeFactory = DateTimeFactory
     }
 
     def createSaveCandidateScoresAndFeedback(applicationId: String, jsonString: String) = {
       val json = Json.parse(jsonString)
       FakeRequest(
         Helpers.POST,
-        controllers.routes.CandidateScoresController.createExerciseScoresAndFeedback(applicationId).url, FakeHeaders(), json
+        controllers.routes.CandidateScoresController.saveExerciseScoresAndFeedback(applicationId).url, FakeHeaders(), json
       )
         .withHeaders("Content-Type" -> "application/json")
     }

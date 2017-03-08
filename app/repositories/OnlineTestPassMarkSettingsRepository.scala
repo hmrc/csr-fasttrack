@@ -16,13 +16,10 @@
 
 package repositories
 
-import java.util.UUID
-
 import connectors.PassMarkExchangeObjects
-import connectors.PassMarkExchangeObjects.{ Scheme, SchemeThreshold, SchemeThresholds, Settings }
+import connectors.PassMarkExchangeObjects.{ OnlineTestPassmarkSettings }
 import connectors.PassMarkExchangeObjects.Implicits._
 import model.Commands._
-import org.joda.time.DateTime
 import play.api.libs.json.{ JsNumber, JsObject }
 import reactivemongo.api.DB
 import reactivemongo.bson._
@@ -32,27 +29,26 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait PassMarkSettingsRepository {
-  def create(settings: Settings, schemes: List[model.Scheme.Scheme]): Future[PassMarkSettingsCreateResponse]
+trait OnlineTestPassMarkSettingsRepository {
+  def create(settings: OnlineTestPassmarkSettings, schemes: List[model.Scheme.Scheme]): Future[PassMarkSettingsCreateResponse]
 
-  def tryGetLatestVersion(): Future[Option[Settings]]
+  def tryGetLatestVersion(): Future[Option[OnlineTestPassmarkSettings]]
 }
 
 class PassMarkSettingsMongoRepository(implicit mongo: () => DB)
-    extends ReactiveRepository[Settings, BSONObjectID](CollectionNames.PASS_MARK_SETTINGS, mongo,
-      PassMarkExchangeObjects.Implicits.passMarkSettingsFormat, ReactiveMongoFormats.objectIdFormats) with PassMarkSettingsRepository {
+    extends ReactiveRepository[OnlineTestPassmarkSettings, BSONObjectID](CollectionNames.PASS_MARK_SETTINGS, mongo,
+      PassMarkExchangeObjects.Implicits.passMarkSettingsFormat, ReactiveMongoFormats.objectIdFormats) with OnlineTestPassMarkSettingsRepository {
 
-  override def create(settings: Settings, schemes: List[model.Scheme.Scheme]): Future[PassMarkSettingsCreateResponse] = {
+  override def tryGetLatestVersion(): Future[Option[OnlineTestPassmarkSettings]] = {
+    val query = BSONDocument()
+    val sort = new JsObject(Map("createDate" -> JsNumber(-1)))
+    collection.find(query).sort(sort).one[OnlineTestPassmarkSettings]
+  }
+
+  override def create(settings: OnlineTestPassmarkSettings, schemes: List[model.Scheme.Scheme]): Future[PassMarkSettingsCreateResponse] = {
     collection.insert(settings) flatMap { _ =>
       tryGetLatestVersion().map(createResponse =>
         PassMarkSettingsCreateResponse(createResponse.get.version, createResponse.get.createDate))
     }
-  }
-
-  override def tryGetLatestVersion(): Future[Option[Settings]] = {
-    val query = BSONDocument()
-    val sort = new JsObject(Map("createDate" -> JsNumber(-1)))
-
-    collection.find(query).sort(sort).one[Settings]
   }
 }

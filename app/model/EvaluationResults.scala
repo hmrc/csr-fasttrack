@@ -16,6 +16,8 @@
 
 package model
 
+import model.Scheme.Scheme
+import model.persisted.SchemeEvaluationResult
 import play.api.libs.json.{ Format, JsString, JsSuccess, JsValue }
 import reactivemongo.bson.{ BSON, BSONHandler, BSONString }
 

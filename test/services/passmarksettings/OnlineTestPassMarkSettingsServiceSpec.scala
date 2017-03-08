@@ -16,7 +16,7 @@
 
 package services.passmarksettings
 
-import connectors.PassMarkExchangeObjects.{ Scheme, SchemeThreshold, SchemeThresholds, Settings }
+import connectors.PassMarkExchangeObjects.{ Scheme, SchemeThreshold, SchemeThresholds, OnlineTestPassmarkSettings }
 import org.joda.time.DateTime
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
@@ -24,12 +24,12 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import repositories.{ FrameworkRepository, PassMarkSettingsRepository }
+import repositories.{ FrameworkRepository, OnlineTestPassMarkSettingsRepository }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-class PassMarkSettingsServiceSpec extends PlaySpec with BeforeAndAfterEach with MockitoSugar with ScalaFutures {
+class OnlineTestPassMarkSettingsServiceSpec extends PlaySpec with BeforeAndAfterEach with MockitoSugar with ScalaFutures {
   implicit val ec: ExecutionContext = ExecutionContext.global
 
   "try and getting the latest pass mark settings" should {
@@ -57,13 +57,13 @@ class PassMarkSettingsServiceSpec extends PlaySpec with BeforeAndAfterEach with 
     implicit val hc = HeaderCarrier()
 
     val fwRepositoryMock = mock[FrameworkRepository]
-    val pmsRepositoryMockNoSettings = mock[PassMarkSettingsRepository]
-    val pmsRepositoryMockWithSettings = mock[PassMarkSettingsRepository]
+    val pmsRepositoryMockNoSettings = mock[OnlineTestPassMarkSettingsRepository]
+    val pmsRepositoryMockWithSettings = mock[OnlineTestPassMarkSettingsRepository]
 
     when(pmsRepositoryMockNoSettings.tryGetLatestVersion()).thenReturn(Future.successful(None))
     when(pmsRepositoryMockWithSettings.tryGetLatestVersion()).thenReturn(Future.successful(
       Some(
-        Settings(
+        OnlineTestPassmarkSettings(
           List(
             Scheme(
               model.Scheme.Business,
@@ -82,13 +82,13 @@ class PassMarkSettingsServiceSpec extends PlaySpec with BeforeAndAfterEach with 
       )
     ))
 
-    val passMarkSettingsServiceNoSettings = new PassMarkSettingsService {
-      val pmsRepository: PassMarkSettingsRepository = pmsRepositoryMockNoSettings
+    val passMarkSettingsServiceNoSettings = new OnlineTestPassMarkSettingsService {
+      val onlineTestPassMarkSettingsRepository: OnlineTestPassMarkSettingsRepository = pmsRepositoryMockNoSettings
       val fwRepository: FrameworkRepository = fwRepositoryMock
     }
 
-    val passMarkSettingsServiceWithSettings = new PassMarkSettingsService {
-      val pmsRepository: PassMarkSettingsRepository = pmsRepositoryMockWithSettings
+    val passMarkSettingsServiceWithSettings = new OnlineTestPassMarkSettingsService {
+      val onlineTestPassMarkSettingsRepository: OnlineTestPassMarkSettingsRepository = pmsRepositoryMockWithSettings
       val fwRepository: FrameworkRepository = fwRepositoryMock
     }
   }

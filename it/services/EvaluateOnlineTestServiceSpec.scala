@@ -19,7 +19,7 @@ package services
 import java.io.File
 
 import com.typesafe.config.{ Config, ConfigFactory }
-import connectors.PassMarkExchangeObjects.Settings
+import connectors.PassMarkExchangeObjects.OnlineTestPassmarkSettings
 import mocks.OnlineIntegrationTestInMemoryRepository
 import model.EvaluationResults._
 import model.OnlineTestCommands.CandidateEvaluationData
@@ -33,9 +33,9 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.Logger
 import repositories.application.GeneralApplicationRepository
-import repositories.{ FrameworkPreferenceRepository, FrameworkRepository, PassMarkSettingsRepository, TestReportRepository }
+import repositories.{ FrameworkPreferenceRepository, FrameworkRepository, OnlineTestPassMarkSettingsRepository, TestReportRepository }
 import services.onlinetesting.EvaluateOnlineTestService
-import services.passmarksettings.PassMarkSettingsService
+import services.passmarksettings.OnlineTestPassMarkSettingsService
 import services.testmodel.{ OnlineTestPassmarkServiceTest, SchemeEvaluationTestResult }
 import testkit.IntegrationSpec
 
@@ -47,10 +47,9 @@ class EvaluateOnlineTestServiceSpec extends IntegrationSpec with MockitoSugar wi
     val testReportRepository = mock[TestReportRepository]
     val onlineTestRepository = OnlineIntegrationTestInMemoryRepository
     val passMarkRulesEngine = EvaluateOnlineTestService.passMarkRulesEngine
-    val pmsRepository: PassMarkSettingsRepository = mock[PassMarkSettingsRepository]
-    val passMarkSettingsService = new PassMarkSettingsService {
-      override val fwRepository = mock[FrameworkRepository]
-      override val pmsRepository = mock[PassMarkSettingsRepository]
+    val pmsRepository: OnlineTestPassMarkSettingsRepository = mock[OnlineTestPassMarkSettingsRepository]
+    val passMarkSettingsService = new OnlineTestPassMarkSettingsService {
+      override val onlineTestPassMarkSettingsRepository = mock[OnlineTestPassMarkSettingsRepository]
     }
     val applicationRepository = mock[GeneralApplicationRepository]
   }
@@ -78,7 +77,7 @@ class EvaluateOnlineTestServiceSpec extends IntegrationSpec with MockitoSugar wi
         val passmarkSettingsFile = new File(suiteName.getAbsolutePath + "/passmarkSettings.conf")
         require(passmarkSettingsFile.exists(), s"File does not exist: ${passmarkSettingsFile.getAbsolutePath}")
 
-        val passmarkSettings = ConfigFactory.parseFile(passmarkSettingsFile).as[Settings]("passmarkSettings")
+        val passmarkSettings = ConfigFactory.parseFile(passmarkSettingsFile).as[OnlineTestPassmarkSettings]("passmarkSettings")
         val testCases = new File(s"it/resources/onlineTestPassmarkServiceSpec/$suiteFileName/").listFiles
 
         // Test should fail in case the path is incorrect for the env and return 0 tests

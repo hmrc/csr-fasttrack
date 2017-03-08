@@ -16,21 +16,19 @@
 
 package services.passmarksettings
 
-import connectors.PassMarkExchangeObjects.Settings
+import connectors.PassMarkExchangeObjects.OnlineTestPassmarkSettings
 import repositories._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object PassMarkSettingsService extends PassMarkSettingsService {
-  val fwRepository = frameworkRepository
-  val pmsRepository = passMarkSettingsRepository
+object OnlineTestPassMarkSettingsService extends OnlineTestPassMarkSettingsService {
+  val onlineTestPassMarkSettingsRepository = repositories.onlineTestPassMarkSettingsRepository
 }
 
-trait PassMarkSettingsService {
-  val fwRepository: FrameworkRepository
-  val pmsRepository: PassMarkSettingsRepository
+trait OnlineTestPassMarkSettingsService {
+  val onlineTestPassMarkSettingsRepository: OnlineTestPassMarkSettingsRepository
 
-  def tryGetLatestVersion(): Future[Option[Settings]] =
-    pmsRepository.tryGetLatestVersion()
+  def tryGetLatestVersion(): Future[Option[OnlineTestPassmarkSettings]] =
+    onlineTestPassMarkSettingsRepository.tryGetLatestVersion()
 }

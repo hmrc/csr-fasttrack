@@ -17,7 +17,7 @@
 package model
 
 import connectors.ExchangeObjects.ReportNorm
-import connectors.PassMarkExchangeObjects.Settings
+import connectors.PassMarkExchangeObjects.OnlineTestPassmarkSettings
 import model.PersistedObjects.CandidateTestReport
 import model.Adjustments._
 import model.Scheme.Scheme
@@ -34,10 +34,10 @@ object OnlineTestCommands {
   case class OnlineTestReport(xml: Option[String])
 
   case class CandidateEvaluationData(
-    passmarkSettings: Settings,
-    schemes: List[Scheme],
-    scores: CandidateTestReport,
-    applicationStatus: ApplicationStatuses.EnumVal
+                                      passmarkSettings: OnlineTestPassmarkSettings,
+                                      schemes: List[Scheme],
+                                      scores: CandidateTestReport,
+                                      applicationStatus: ApplicationStatuses.EnumVal
   )
 
   case class TimeAdjustmentsOnlineTestApplication(verbalTimeAdjustmentPercentage: Int, numericalTimeAdjustmentPercentage: Int)

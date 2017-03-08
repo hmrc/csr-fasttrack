@@ -22,32 +22,39 @@ import model.PassmarkPersistedObjects.Implicits._
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import repositories._
+import services.AuditService
 import services.passmarksettings.AssessmentCentrePassMarkSettingsService
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object AssessmentCentrePassMarkSettingsController extends AssessmentCentrePassMarkSettingsController {
-  val acpmsRepository = assessmentCentrePassMarkSettingsRepository
-  val passmarkService = AssessmentCentrePassMarkSettingsService
+  val assessmentCentrePassMarkRepository = assessmentCentrePassMarkSettingsRepository
+  val assessmentCentrePassmarkService = AssessmentCentrePassMarkSettingsService
+  val auditService = AuditService
 }
 
 trait AssessmentCentrePassMarkSettingsController extends BaseController {
-  val acpmsRepository: AssessmentCentrePassMarkSettingsRepository
-  val passmarkService: AssessmentCentrePassMarkSettingsService
+  val assessmentCentrePassMarkRepository: AssessmentCentrePassMarkSettingsRepository
+  val assessmentCentrePassmarkService: AssessmentCentrePassMarkSettingsService
+  val auditService: AuditService
 
   def getLatestVersion = Action.async { implicit request =>
-    passmarkService.getLatestVersion.map { passmark =>
+    assessmentCentrePassmarkService.getLatestVersion.map { passmark =>
       Ok(Json.toJson(passmark))
     }
   }
 
   def create = Action.async(parse.json) { implicit request =>
     withJsonBody[AssessmentCentrePassMarkSettings] { settings =>
-      acpmsRepository.create(settings).map { _ =>
+      assessmentCentrePassMarkRepository.create(settings).map { _ =>
+        auditService.logEvent("AssessmentCentrePassMarkSettingsCreated", Map(
+          "Version" -> settings.info.version,
+          "CreatedByUserId" -> settings.info.createdByUser,
+          "StoredCreateDate" -> settings.info.createDate.toString
+        ))
         Created
       }
     }
   }
-
 }

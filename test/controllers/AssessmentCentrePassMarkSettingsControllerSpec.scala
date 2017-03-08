@@ -16,6 +16,8 @@
 
 package controllers
 
+import config.TestFixtureBase
+import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.PassmarkPersistedObjects.Implicits._
 import model.PassmarkPersistedObjects._
 import org.joda.time.DateTime
@@ -23,42 +25,38 @@ import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
-import play.api.test.Helpers._
+import play.api.test.Helpers.{ contentAsJson, _ }
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories._
 import services.passmarksettings.AssessmentCentrePassMarkSettingsService
-
+import model.Scheme
+import services.AuditService
+import org.mockito.Matchers.{ eq => eqTo, _ }
+import model.Commands.Implicits._
 import scala.concurrent.Future
 
 class AssessmentCentrePassMarkSettingsControllerSpec extends PlaySpec with MockitoSugar {
-  val mockAssessmentCentrePassMarkSettingsRepository = mock[AssessmentCentrePassMarkSettingsMongoRepository]
-  val mockPassmarkService = mock[AssessmentCentrePassMarkSettingsService]
-
-  object TestableAssessmentCentrePassMarkSettingsController extends AssessmentCentrePassMarkSettingsController {
-    val acpmsRepository = mockAssessmentCentrePassMarkSettingsRepository
-    val passmarkService = mockPassmarkService
-  }
-
-  val AllAssessmentCentrePassMarkSchemes = List(
-    AssessmentCentrePassMarkScheme("Business"),
-    AssessmentCentrePassMarkScheme("Commercial"),
-    AssessmentCentrePassMarkScheme("Digital and technology"),
-    AssessmentCentrePassMarkScheme("Finance"),
-    AssessmentCentrePassMarkScheme("Project delivery")
-  )
 
   "create a passmark settings" should {
-    "save the passmark settings in the db" in {
-      val settings = AssessmentCentrePassMarkSettings(
-        AllAssessmentCentrePassMarkSchemes.map(_.copy(overallPassMarks = Some(PassMarkSchemeThreshold(10.0, 20.0)))),
-        AssessmentCentrePassMarkInfo("version1", DateTime.now(), "userName")
-      )
-      when(mockAssessmentCentrePassMarkSettingsRepository.create(settings)).thenReturn(Future.successful(()))
+    "save the passmark settings in the db" in new TestFixture {
+      when(mockAssessmentCentrePassMarkSettingsRepository.create(Settings)).thenReturn(Future.successful(()))
 
-      val result = TestableAssessmentCentrePassMarkSettingsController.create()(createRequest(Json.toJson(settings).toString))
+      val result = TestableAssessmentCentrePassMarkSettingsController.create()(createRequest(Json.toJson(Settings).toString))
 
       status(result) must be(CREATED)
-      verify(mockAssessmentCentrePassMarkSettingsRepository).create(settings)
+      verify(mockAssessmentCentrePassMarkSettingsRepository).create(Settings)
+      verify(mockAuditService).logEvent(eqTo("AssessmentCentrePassMarkSettingsCreated"), eqTo(Map(
+        "Version" -> Version,
+        "CreatedByUserId" -> Username,
+        "StoredCreateDate" -> Now.toString)))(any(), any())
+    }
+  }
+
+  "get latest version" should {
+    "get latest version" in new TestFixture {
+      when(mockAssessmentCentrePassmarkSettingsService.getLatestVersion).thenReturn(Future.successful(SettingsResponse))
+      val result = TestableAssessmentCentrePassMarkSettingsController.getLatestVersion()(FakeRequest())
+      contentAsJson(result) must be(Json.toJson(SettingsResponse))
     }
   }
 
@@ -67,8 +65,39 @@ class AssessmentCentrePassMarkSettingsControllerSpec extends PlaySpec with Mocki
     FakeRequest(
       Helpers.POST,
       controllers.routes.AssessmentCentrePassMarkSettingsController.create.url, FakeHeaders(), json
-    )
-      .withHeaders("Content-Type" -> "application/json")
+    ).withHeaders("Content-Type" -> "application/json")
   }
 
+}
+
+trait TestFixture extends TestFixtureBase {
+  val mockAssessmentCentrePassMarkSettingsRepository = mock[AssessmentCentrePassMarkSettingsMongoRepository]
+  val mockAssessmentCentrePassmarkSettingsService = mock[AssessmentCentrePassMarkSettingsService]
+
+  val Version = "version1"
+  val Username = "userName"
+  val Now = DateTime.now()
+
+  object TestableAssessmentCentrePassMarkSettingsController extends AssessmentCentrePassMarkSettingsController {
+    val assessmentCentrePassMarkRepository = mockAssessmentCentrePassMarkSettingsRepository
+    val assessmentCentrePassmarkService = mockAssessmentCentrePassmarkSettingsService
+    val auditService = mockAuditService
+  }
+
+  val AllAssessmentCentrePassMarkSchemes = List(
+    AssessmentCentrePassMarkScheme(Scheme.Business),
+    AssessmentCentrePassMarkScheme(Scheme.Commercial),
+    AssessmentCentrePassMarkScheme(Scheme.DigitalAndTechnology),
+    AssessmentCentrePassMarkScheme(Scheme.Finance),
+    AssessmentCentrePassMarkScheme(Scheme.ProjectDelivery)
+  )
+
+  val Info = AssessmentCentrePassMarkInfo(Version, Now, Username)
+
+  val Settings = AssessmentCentrePassMarkSettings(
+    AllAssessmentCentrePassMarkSchemes.map(_.copy(overallPassMarks = Some(PassMarkSchemeThreshold(10.0, 20.0)))),
+    Info
+  )
+
+  val SettingsResponse = AssessmentCentrePassMarkSettingsResponse(AllAssessmentCentrePassMarkSchemes, Some(Info))
 }

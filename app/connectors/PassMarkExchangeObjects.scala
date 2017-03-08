@@ -36,7 +36,7 @@ object PassMarkExchangeObjects {
     createdByUser: String
   )
 
-  case class Settings(
+  case class OnlineTestPassmarkSettings(
     schemes: List[Scheme],
     version: String,
     createDate: DateTime,
@@ -63,8 +63,8 @@ object PassMarkExchangeObjects {
     implicit val passMarkSchemeThresholdsBSONHandler = Macros.handler[SchemeThresholds]
     implicit val passMarkSchemeFormat = Json.format[Scheme]
     implicit val passMarkSchemeBSONHandler = Macros.handler[Scheme]
-    implicit val passMarkSettingsFormat = Json.format[Settings]
-    implicit val passMarkSettingsBSONHandler = Macros.handler[Settings]
+    implicit val passMarkSettingsFormat = Json.format[OnlineTestPassmarkSettings]
+    implicit val passMarkSettingsBSONHandler = Macros.handler[OnlineTestPassmarkSettings]
 
     implicit val passMarkSettingsCreateRequestFormat = Json.format[SettingsCreateRequest]
 

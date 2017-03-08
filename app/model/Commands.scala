@@ -16,7 +16,7 @@
 
 package model
 
-import connectors.PassMarkExchangeObjects.Settings
+import connectors.PassMarkExchangeObjects.OnlineTestPassmarkSettings
 import controllers._
 import model.CandidateScoresCommands.Implicits._
 import model.Exceptions.{ NoResultsReturned, TooManyEntries }
@@ -38,7 +38,7 @@ object Commands {
 
   case class WithdrawApplicationRequest(reason: String, otherReason: Option[String], withdrawer: String)
 
-  case class PassMarkSettingsRequest(settings: Settings)
+  case class PassMarkSettingsRequest(settings: OnlineTestPassmarkSettings)
 
   case class ApplicationCreated(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal, userId: String)
 

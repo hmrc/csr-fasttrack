@@ -137,9 +137,7 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
       passMarkReportItem.testResults mustBe passMarkTestResults
       passMarkReportItem.schemeOnlineTestResults mustBe List("Green", "Amber")
 
-      val expectedCandidateScoresAndFeedback = CandidateScoresAndFeedback("")
-
-      passMarkReportItem.candidateScores mustBe expectedCandidateScoresAndFeedback
+      passMarkReportItem.candidateScores mustBe None
       passMarkReportItem.schemeAssessmentCentreTestResults mustBe List.empty
     }
   }

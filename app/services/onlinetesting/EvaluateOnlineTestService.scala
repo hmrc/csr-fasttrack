@@ -21,7 +21,7 @@ import repositories.TestReportRepository
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
 import services.evaluation._
 import services.onlinetesting.evaluation.ApplicationStatusCalculator
-import services.passmarksettings.PassMarkSettingsService
+import services.passmarksettings.OnlineTestPassMarkSettingsService
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -31,7 +31,7 @@ object EvaluateOnlineTestService extends EvaluateOnlineTestService {
   val onlineTestRepository = repositories.onlineTestRepository
   val applicationRepository = repositories.applicationRepository
   val passMarkRulesEngine = OnlineTestPassmarkRulesEngine
-  val passMarkSettingsService = PassMarkSettingsService
+  val passMarkSettingsService = OnlineTestPassMarkSettingsService
 }
 
 trait EvaluateOnlineTestService extends ApplicationStatusCalculator {
@@ -39,7 +39,7 @@ trait EvaluateOnlineTestService extends ApplicationStatusCalculator {
   val onlineTestRepository: OnlineTestRepository
   val applicationRepository: GeneralApplicationRepository
   val passMarkRulesEngine: OnlineTestPassmarkRulesEngine
-  val passMarkSettingsService: PassMarkSettingsService
+  val passMarkSettingsService: OnlineTestPassMarkSettingsService
 
   def nextCandidateReadyForEvaluation: Future[Option[CandidateEvaluationData]] = {
     passMarkSettingsService.tryGetLatestVersion().flatMap {

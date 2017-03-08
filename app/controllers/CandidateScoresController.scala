@@ -16,7 +16,8 @@
 
 package controllers
 
-import model.CandidateScoresCommands.ExerciseScoresAndFeedback
+import factories.DateTimeFactory
+import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScoresAndFeedback }
 import model.CandidateScoresCommands.Implicits._
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent }
@@ -27,18 +28,23 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object CandidateScoresController extends CandidateScoresController {
   val assessmentCentreService = AssessmentCentreService
+  val dateTimeFactory = DateTimeFactory
 }
 
 trait CandidateScoresController extends BaseController {
+  val dateTimeFactory: DateTimeFactory
+
   def assessmentCentreService: AssessmentCentreService
 
   def getCandidateScores(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
     assessmentCentreService.getCandidateScores(applicationId).map(scores => Ok(Json.toJson(scores)))
   }
 
-  def createExerciseScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+  def saveExerciseScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[ExerciseScoresAndFeedback] { exerciseScoresAndFeedback =>
-      assessmentCentreService.saveScoresAndFeedback(applicationId, exerciseScoresAndFeedback).map { _ =>
+      val scoresAndFeedbackWithDate = exerciseScoresAndFeedback.scoresAndFeedback.copy(savedDate = Some(dateTimeFactory.nowLocalTimeZone))
+      assessmentCentreService.saveScoresAndFeedback(applicationId,
+        exerciseScoresAndFeedback.copy(scoresAndFeedback = scoresAndFeedbackWithDate)).map { _ =>
         Created
       }.recover {
         case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
@@ -46,7 +52,25 @@ trait CandidateScoresController extends BaseController {
     }
   }
 
-  def acceptCandidateScoresAndFeedback(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
-    assessmentCentreService.acceptScoresAndFeedback(applicationId).map(_ => Ok)
+  def submitExerciseScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    withJsonBody[ExerciseScoresAndFeedback] { exerciseScoresAndFeedback =>
+      val scoresAndFeedbackWithDate = exerciseScoresAndFeedback.scoresAndFeedback.copy(submittedDate = Some(dateTimeFactory.nowLocalTimeZone))
+      assessmentCentreService.saveScoresAndFeedback(applicationId,
+        exerciseScoresAndFeedback.copy(scoresAndFeedback = scoresAndFeedbackWithDate)).map { _ =>
+      Created
+      }.recover {
+        case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
+      }
+    }
+  }
+
+  def acceptCandidateScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    withJsonBody[CandidateScoresAndFeedback] { scoresAndFeedback =>
+      assessmentCentreService.acceptScoresAndFeedback(applicationId, scoresAndFeedback).map { _ =>
+        Ok
+      }.recover {
+        case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
+      }
+    }
   }
 }

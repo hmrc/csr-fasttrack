@@ -42,7 +42,7 @@ case class PassMarkReportItem(
   allocatedAssessmentCentre: Option[String],
   testResults: PassMarkReportTestResults,
   schemeOnlineTestResults: List[String],
-  candidateScores: CandidateScoresAndFeedback,
+  candidateScores: Option[CandidateScoresAndFeedback],
   schemeAssessmentCentreTestResults: List[String]
 )
 
@@ -50,7 +50,7 @@ case object PassMarkReportItem {
   //scalastyle:off parameter.number
   def apply(application: ApplicationForCandidateProgressReport, diversityAnswers: DiversityReportDiversityAnswers,
             socialEconomicScore: String, hearAboutUs: String, allocatedAssessmentCentre: Option[String], testResults: PassMarkReportTestResults,
-            schemeOnlineTestResults: List[String], assessmentResults: CandidateScoresAndFeedback,
+            schemeOnlineTestResults: List[String], assessmentResults: Option[CandidateScoresAndFeedback],
             schemeAssessmentCentreTestResults: List[String]): PassMarkReportItem = {
     //scalastyle:on
     PassMarkReportItem(

@@ -81,7 +81,6 @@ class TestDataMongoRepository(implicit mongo: () => DB)
   val firstNames = Seq("John", "Chris", "James", "Paul")
   val lastNames = Seq("Clerk", "Smith", "Gulliver", "Swift")
   val preferredName = Seq("Superman", "Batman", "Spiderman", "Wolverine", "Hulk")
-  val frameworks = Seq("Digital and technology", "Finance", "Project delivery", "Commercial", "Business")
 
   val locationsAndRegions = Seq("Bath" -> "London", "Blackburn" -> "London", "Bournemouth" -> "London", "Brighton" -> "London",
     "Bromley" -> "London", "Bristol" -> "London", "Northern Ireland" -> "London", "Cambridge" -> "London", "Motherwell" -> "Newcastle",
