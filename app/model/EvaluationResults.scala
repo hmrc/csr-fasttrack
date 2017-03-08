@@ -69,11 +69,11 @@ object EvaluationResults {
     def scoresWithWeightTwo = List(motivationFitAverage)
   }
 
+  @deprecated("Use SchemeEvaluationResult")
   case class PerSchemeEvaluation(schemeName: String, result: Result)
 
   case class AssessmentRuleCategoryResult(passedMinimumCompetencyLevel: Option[Boolean],
                                           competencyAverageResult: CompetencyAverageResult,
-                                          schemesEvaluation: List[PerSchemeEvaluation],// TODO IS: change the type to SchemeEvaluationResult
-                                          overallEvaluation: List[PerSchemeEvaluation] // TODO IS: change the type to SchemeEvaluationResult
-                                         )
+                                          schemesEvaluation: List[SchemeEvaluationResult],
+                                          overallEvaluation: List[SchemeEvaluationResult])
 }

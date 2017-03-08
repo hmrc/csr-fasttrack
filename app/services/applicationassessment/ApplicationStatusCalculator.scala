@@ -18,6 +18,7 @@ package services.applicationassessment
 
 import model.ApplicationStatuses
 import model.EvaluationResults._
+import model.persisted.SchemeEvaluationResult
 
 trait ApplicationStatusCalculator {
 
@@ -31,7 +32,7 @@ trait ApplicationStatusCalculator {
       calculateStatus(assessmentCentreOverallResults)
   }
 
-  private def calculateStatus(assessmentCentreOverallResults: List[PerSchemeEvaluation]): ApplicationStatuses.EnumVal = {
+  private def calculateStatus(assessmentCentreOverallResults: List[SchemeEvaluationResult]): ApplicationStatuses.EnumVal = {
     if (assessmentCentreOverallResults.count(_.result == Red) == assessmentCentreOverallResults.size) {
       //scalastyle:off
       println(s"**** ApplicationStatusCalculator - all schemes are Red so setting status to ${ApplicationStatuses.AssessmentCentreFailed}")

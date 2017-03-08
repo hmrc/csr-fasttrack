@@ -37,17 +37,17 @@ class FinalResultEvaluatorSpec extends PropSpec with MustMatchers {
       SchemeEvaluationResult(Scheme.ProjectDelivery, Amber)
     )
     val assessmentCentreEvaluation = List(
-      PerSchemeEvaluation(Scheme.Business.toString, Green),
-      PerSchemeEvaluation(Scheme.Commercial.toString, Red),
-      PerSchemeEvaluation(Scheme.Finance.toString, Amber),
-      PerSchemeEvaluation(Scheme.ProjectDelivery.toString, Red)
+      SchemeEvaluationResult(Scheme.Business, Green),
+      SchemeEvaluationResult(Scheme.Commercial, Red),
+      SchemeEvaluationResult(Scheme.Finance, Amber),
+      SchemeEvaluationResult(Scheme.ProjectDelivery, Red)
     )
     val result = evaluator.determineOverallResultForEachScheme(onlineTestEvaluation, assessmentCentreEvaluation)
     result mustBe List(
-      PerSchemeEvaluation(Scheme.Business.toString, Red),
-      PerSchemeEvaluation(Scheme.Commercial.toString, Red),
-      PerSchemeEvaluation(Scheme.Finance.toString, Red),
-      PerSchemeEvaluation(Scheme.ProjectDelivery.toString, Red)
+      SchemeEvaluationResult(Scheme.Business, Red),
+      SchemeEvaluationResult(Scheme.Commercial, Red),
+      SchemeEvaluationResult(Scheme.Finance, Red),
+      SchemeEvaluationResult(Scheme.ProjectDelivery, Red)
     )
   }
 
@@ -56,11 +56,11 @@ class FinalResultEvaluatorSpec extends PropSpec with MustMatchers {
       SchemeEvaluationResult(Scheme.Business, Green)
     )
     val assessmentCentreEvaluation = List(
-      PerSchemeEvaluation(Scheme.Business.toString, Green)
+      SchemeEvaluationResult(Scheme.Business, Green)
     )
     val result = evaluator.determineOverallResultForEachScheme(onlineTestEvaluation, assessmentCentreEvaluation)
     result mustBe List(
-      PerSchemeEvaluation(Scheme.Business.toString, Green)
+      SchemeEvaluationResult(Scheme.Business, Green)
     )
   }
 
@@ -71,15 +71,15 @@ class FinalResultEvaluatorSpec extends PropSpec with MustMatchers {
       SchemeEvaluationResult(Scheme.Finance, Amber)
     )
     val assessmentCentreEvaluation = List(
-      PerSchemeEvaluation(Scheme.Business.toString, Green),
-      PerSchemeEvaluation(Scheme.Commercial.toString, Amber),
-      PerSchemeEvaluation(Scheme.Finance.toString, Red)
+      SchemeEvaluationResult(Scheme.Business, Green),
+      SchemeEvaluationResult(Scheme.Commercial, Amber),
+      SchemeEvaluationResult(Scheme.Finance, Red)
     )
     val result = evaluator.determineOverallResultForEachScheme(onlineTestEvaluation, assessmentCentreEvaluation)
     result mustBe List(
-      PerSchemeEvaluation(Scheme.Business.toString, Amber),
-      PerSchemeEvaluation(Scheme.Commercial.toString, Amber),
-      PerSchemeEvaluation(Scheme.Finance.toString, Red)
+      SchemeEvaluationResult(Scheme.Business, Amber),
+      SchemeEvaluationResult(Scheme.Commercial, Amber),
+      SchemeEvaluationResult(Scheme.Finance, Red)
     )
   }
 
@@ -88,11 +88,11 @@ class FinalResultEvaluatorSpec extends PropSpec with MustMatchers {
       SchemeEvaluationResult(Scheme.Business, Green)
     )
     val assessmentCentreEvaluation = List(
-      PerSchemeEvaluation(Scheme.Business.toString, Amber)
+      SchemeEvaluationResult(Scheme.Business, Amber)
     )
     val result = evaluator.determineOverallResultForEachScheme(onlineTestEvaluation, assessmentCentreEvaluation)
     result mustBe List(
-      PerSchemeEvaluation(Scheme.Business.toString, Amber)
+      SchemeEvaluationResult(Scheme.Business, Amber)
     )
   }
 }

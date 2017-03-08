@@ -44,7 +44,7 @@ object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRules
         println("**** AssessmentCentrePassmarkRulesEngine - candidate failed minimum competency level check - all schemes will be red")
 
         val allSchemesHaveFailed = candidateScores.preferencesWithQualification.schemes.map { scheme =>
-          PerSchemeEvaluation(schemeName = scheme.toString, result = Red)
+          SchemeEvaluationResult(scheme, Red)
         }
         AssessmentRuleCategoryResult(passedMinimumCompetencyLevelCheckOpt, competencyAverage, allSchemesHaveFailed, allSchemesHaveFailed)
       case _ =>
@@ -67,8 +67,8 @@ object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRules
 
   private def evaluateAssessmentPassmark(competencyAverage: CompetencyAverageResult,
                                           candidateScores: AssessmentPassmarkPreferencesAndScores
-                                         ): List[PerSchemeEvaluation] = {
-    val eligibleSchemesForQualification = candidateScores.preferencesWithQualification.schemes.map{ _.toString }
+                                         ): List[SchemeEvaluationResult] = {
+    val eligibleSchemesForQualification = candidateScores.preferencesWithQualification.schemes
 
     val overallScore = competencyAverage.overallScore
     val passmark = candidateScores.passmark

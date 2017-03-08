@@ -19,22 +19,25 @@ package services.evaluation
 import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.EvaluationResults._
 import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
+import model.Scheme.Scheme
+import model.persisted.SchemeEvaluationResult
 
 trait AssessmentCentreAllSchemesEvaluator {
 
   def evaluateSchemes(applicationId: String,
                       passmark: AssessmentCentrePassMarkSettingsResponse,
                       overallScore: Double,
-                      schemes: List[String]): List[PerSchemeEvaluation] = {
-    schemes.map { schemeName =>
-      val msg = s"Did not find assessment centre pass mark for scheme = $schemeName, applicationId = $applicationId"
-      val assessmentCentrePassMarkScheme = passmark.schemes.find { _.schemeName == schemeName }
+                      schemes: List[Scheme]): List[SchemeEvaluationResult] = {
+    schemes.map { scheme =>
+      val msg = s"Did not find assessment centre pass mark for scheme = $scheme, applicationId = $applicationId"
+      // TODO LT: Replace scheme string to enum
+      val assessmentCentrePassMarkScheme = passmark.schemes.find { _.schemeName == scheme }
         .getOrElse(throw new IllegalStateException(msg))
 
       //scalastyle:off
-      println(s"scheme = $schemeName")
+      println(s"scheme = $scheme")
       val result = evaluateScore(assessmentCentrePassMarkScheme, passmark, overallScore)
-      PerSchemeEvaluation(schemeName, result)
+      SchemeEvaluationResult(scheme, result)
     }
   }
 

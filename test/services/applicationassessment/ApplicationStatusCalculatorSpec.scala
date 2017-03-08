@@ -16,9 +16,10 @@
 
 package services.applicationassessment
 
-import model.ApplicationStatuses
+import model.{ ApplicationStatuses, Scheme }
 import model.ApplicationStatuses._
 import model.EvaluationResults._
+import model.persisted.SchemeEvaluationResult
 import org.scalatest.prop.TableDrivenPropertyChecks
 import org.scalatestplus.play.PlaySpec
 
@@ -111,11 +112,11 @@ class ApplicationStatusCalculatorSpec extends PlaySpec with TableDrivenPropertyC
       competencyAverageResult = competencyAverageResult,
       schemesEvaluation = Nil,
       overallEvaluation = List(
-        PerSchemeEvaluation("Business", business), // TODO IS: change to enum
-        PerSchemeEvaluation("Commercial", commercial),
-        PerSchemeEvaluation("DigitalAndTechnology", digitalAndTechnology),
-        PerSchemeEvaluation("Finance", finance),
-        PerSchemeEvaluation("ProjectDelivery", projectDelivery)
+        SchemeEvaluationResult(Scheme.Business, business),
+        SchemeEvaluationResult(Scheme.Commercial, commercial),
+        SchemeEvaluationResult(Scheme.DigitalAndTechnology, digitalAndTechnology),
+        SchemeEvaluationResult(Scheme.Finance, finance),
+        SchemeEvaluationResult(Scheme.ProjectDelivery, projectDelivery)
       )
     )
   }

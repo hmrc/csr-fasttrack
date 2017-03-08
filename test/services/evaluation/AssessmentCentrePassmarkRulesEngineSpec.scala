@@ -23,7 +23,7 @@ import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.EvaluationResults.{ Amber, Red, _ }
 import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
 import model.PersistedObjects.PreferencesWithQualification
-import model.Schemes._
+import model.Scheme._
 import model.persisted.SchemeEvaluationResult
 import org.joda.time.DateTime
 import org.scalatest.MustMatchers
@@ -106,8 +106,8 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
 
       val result = rulesEngine.evaluate(CandidateOnlineTestEvaluation, candidateScore, config)
       result.passedMinimumCompetencyLevel mustBe Some(false)
-      result.schemesEvaluation mustBe List(PerSchemeEvaluation(Business, Red))
-      result.overallEvaluation mustBe List(PerSchemeEvaluation(Business, Red))
+      result.schemesEvaluation mustBe List(SchemeEvaluationResult(Business, Red))
+      result.overallEvaluation mustBe List(SchemeEvaluationResult(Business, Red))
 
     }
 
@@ -124,8 +124,8 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
       val expectedCompetencyAverage = CompetencyAverageResult(2.9333333333333336, 2.5, 3.5, 3.5, 4.0, 4.0, 6.0, 26.433333333333334)
       result.competencyAverageResult mustBe expectedCompetencyAverage
 
-      result.schemesEvaluation mustBe List(PerSchemeEvaluation(Business, Amber))
-      result.overallEvaluation mustBe List(PerSchemeEvaluation(Business, Amber))
+      result.schemesEvaluation mustBe List(SchemeEvaluationResult(Business, Amber))
+      result.overallEvaluation mustBe List(SchemeEvaluationResult(Business, Amber))
     }
   }
 }

@@ -58,15 +58,12 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
     "applicationId" -> ApplicationId
   )
 
-  val unit = ()
-
   "Save scores and feedback" must {
     "save feedback and log an audit event for an attended candidate" in new ApplicationAssessmentServiceFixture {
       when(aasRepositoryMock.save(any[ExerciseScoresAndFeedback], any[Option[String]])).thenReturn(Future.successful(()))
       when(aRepositoryMock.updateStatus(any[String], any[ApplicationStatuses.EnumVal])).thenReturn(Future.successful(()))
 
-      val result = applicationAssessmentService.saveScoresAndFeedback(ApplicationId, exerciseScoresAndFeedback).futureValue
-      result mustBe unit
+      applicationAssessmentService.saveScoresAndFeedback(ApplicationId, exerciseScoresAndFeedback).futureValue
 
 
       verify(auditServiceMock).logEvent("ApplicationScoresAndFeedbackSaved", AuditDetails)
@@ -81,7 +78,6 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
         exerciseScoresAndFeedback.copy(scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback.copy(attended = false))
       ).futureValue
 
-      result mustBe unit
       verify(auditServiceMock).logEvent("ApplicationScoresAndFeedbackSaved", AuditDetails)
       verify(auditServiceMock).logEvent(s"ApplicationStatusSetTo${ApplicationStatuses.AssessmentScoresEntered}", AuditDetails)
     }
@@ -89,8 +85,7 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
 
   "delete an Application Assessment" must {
     "return a deletion success response when an application id exists" in new ApplicationAssessmentServiceFixture {
-      val resultFuture = applicationAssessmentService.removeFromAssessmentCentreSlot(ApplicationId)
-      resultFuture.futureValue mustBe unit
+      applicationAssessmentService.removeFromAssessmentCentreSlot(ApplicationId).futureValue
       verify(auditServiceMock).logEventNoRequest("AssessmentCentreAllocationStatusReset", AuditDetails)
       verify(auditServiceMock).logEventNoRequest("AssessmentCentreAllocationDeleted", AuditDetails)
       verify(onlineTestRepositoryMock).removeCandidateAllocationStatus(eqTo(ApplicationId))
@@ -102,7 +97,7 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
     }
   }
 
-  "next Assessment Candidate and evaluate Assessment" must {
+  "next Assessment Candidate" must {
     "return an assessment candidate score with application Id" in new ApplicationAssessmentServiceFixture {
       val onlineTestEvaluation = List(SchemeEvaluationResult(Business, Green))
       when(onlineTestRepositoryMock.findPassmarkEvaluation("app1")).thenReturn(Future.successful(onlineTestEvaluation))
@@ -115,8 +110,7 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
     }
 
     "return none if there is no passmark settings set" in new ApplicationAssessmentServiceFixture {
-      val passmarkSchemesNotSet = PassmarkSettings.schemes.map(p => AssessmentCentrePassMarkScheme(p.schemeName))
-      when(acpmsServiceMock.getLatestVersion2).thenReturn(Future.successful(PassmarkSettings.copy(schemes = passmarkSchemesNotSet)))
+      when(acpmsServiceMock.getLatestVersion2).thenReturn(Future.successful(NoPassmarkSettings))
 
       val result = applicationAssessmentService.nextAssessmentCandidateReadyForEvaluation.futureValue
 
@@ -130,7 +124,9 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
 
       result mustBe empty
     }
+  }
 
+  "evaluate assessment scores" must {
     "save failed evaluation result and emit and audit event" in new ApplicationAssessmentServiceFixture {
       val scores = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, preferencesWithQualifications,
         CandidateScoresAndFeedback("app1", interview = Some(exerciseScoresAndFeedback.scoresAndFeedback)))
@@ -165,8 +161,8 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
       val result = AssessmentRuleCategoryResult(
         passedMinimumCompetencyLevel = None,
         competencyAverageResult = competencyAverageResult,
-        schemesEvaluation = List(PerSchemeEvaluation("Business", Green)), // TODO IS: this should be the enum
-        overallEvaluation = List(PerSchemeEvaluation("Business", Green))
+        schemesEvaluation = List(SchemeEvaluationResult(Scheme.Business, Green)),
+        overallEvaluation = List(SchemeEvaluationResult(Scheme.Business, Green))
       )
       val onlineTestEvaluation = List(SchemeEvaluationResult(Business, Green))
       when(passmarkRulesEngineMock.evaluate(onlineTestEvaluation, scores, config)).thenReturn(result)
@@ -268,12 +264,15 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
 
     val Threshold = PassMarkSchemeThreshold(10.0, 20.0)
     val PassmarkSettings = AssessmentCentrePassMarkSettingsResponse(List(
-      AssessmentCentrePassMarkScheme("Business", Some(Threshold)), //TODO IS: use the enum here
-      AssessmentCentrePassMarkScheme("Commercial", Some(Threshold)),
-      AssessmentCentrePassMarkScheme("DigitalAndTechnology", Some(Threshold)),
-      AssessmentCentrePassMarkScheme("Finance", Some(Threshold)),
-      AssessmentCentrePassMarkScheme("ProjectDelivery", Some(Threshold))
+      AssessmentCentrePassMarkScheme(Scheme.Business, Some(Threshold)), //TODO IS: use the enum here
+      AssessmentCentrePassMarkScheme(Scheme.Commercial, Some(Threshold)),
+      AssessmentCentrePassMarkScheme(Scheme.DigitalAndTechnology, Some(Threshold)),
+      AssessmentCentrePassMarkScheme(Scheme.Finance, Some(Threshold)),
+      AssessmentCentrePassMarkScheme(Scheme.ProjectDelivery, Some(Threshold))
     ), Some(AssessmentCentrePassMarkInfo("1", DateTime.now, "user")))
+    val PassmarkSchemesNotSet = PassmarkSettings.schemes.map(p => AssessmentCentrePassMarkScheme(p.schemeName))
+    val NoPassmarkSettings = PassmarkSettings.copy(schemes = PassmarkSchemesNotSet)
+
     val exerciseScoresAndFeedback = ExerciseScoresAndFeedback("app1", AssessmentExercise.interview,
       ScoresAndFeedback(
         attended = true,

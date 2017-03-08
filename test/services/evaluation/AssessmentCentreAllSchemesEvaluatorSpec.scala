@@ -19,19 +19,20 @@ package services.evaluation
 import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.EvaluationResults.{ Green, PerSchemeEvaluation }
 import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
-import model.Schemes
+import model.{ Scheme, Schemes }
 import org.scalatestplus.play.PlaySpec
 import model.Schemes._
 import model.EvaluationResults._
+import model.persisted.SchemeEvaluationResult
 import org.joda.time.DateTime
 
 class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
   val PassmarkSettings = AssessmentCentrePassMarkSettingsResponse(List(
-    AssessmentCentrePassMarkScheme(Business, Some(PassMarkSchemeThreshold(10.0, 20.0))),
-    AssessmentCentrePassMarkScheme(Commercial, Some(PassMarkSchemeThreshold(15.0, 25.0))),
-    AssessmentCentrePassMarkScheme(DigitalAndTechnology, Some(PassMarkSchemeThreshold(20.0, 30.0))),
-    AssessmentCentrePassMarkScheme(Finance, Some(PassMarkSchemeThreshold(25.0, 30.0))),
-    AssessmentCentrePassMarkScheme(ProjectDelivery, Some(PassMarkSchemeThreshold(30.0, 40.0)))
+    AssessmentCentrePassMarkScheme(Scheme.Business, Some(PassMarkSchemeThreshold(10.0, 20.0))),
+    AssessmentCentrePassMarkScheme(Scheme.Commercial, Some(PassMarkSchemeThreshold(15.0, 25.0))),
+    AssessmentCentrePassMarkScheme(Scheme.DigitalAndTechnology, Some(PassMarkSchemeThreshold(20.0, 30.0))),
+    AssessmentCentrePassMarkScheme(Scheme.Finance, Some(PassMarkSchemeThreshold(25.0, 30.0))),
+    AssessmentCentrePassMarkScheme(Scheme.ProjectDelivery, Some(PassMarkSchemeThreshold(30.0, 40.0)))
   ), Some(AssessmentCentrePassMarkInfo("1", DateTime.now, "user")))
 
   val evaluator = new AssessmentCentreAllSchemesEvaluator {}
@@ -39,13 +40,13 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
   "evaluate schemes" should {
     "evaluate all schemes" in {
       val overallScore = 25.0
-      val evaluation = evaluator.evaluateSchemes("appId", PassmarkSettings, overallScore, AllSchemes)
+      val evaluation = evaluator.evaluateSchemes("appId", PassmarkSettings, overallScore, Scheme.AllSchemes)
       evaluation mustBe List(
-        PerSchemeEvaluation(Business, Green),
-        PerSchemeEvaluation(Commercial, Green),
-        PerSchemeEvaluation(DigitalAndTechnology, Amber),
-        PerSchemeEvaluation(Finance, Red),
-        PerSchemeEvaluation(ProjectDelivery, Red)
+        SchemeEvaluationResult(Scheme.Business, Green),
+        SchemeEvaluationResult(Scheme.Commercial, Green),
+        SchemeEvaluationResult(Scheme.DigitalAndTechnology, Amber),
+        SchemeEvaluationResult(Scheme.Finance, Red),
+        SchemeEvaluationResult(Scheme.ProjectDelivery, Red)
       )
     }
 
@@ -53,7 +54,7 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
       val noPassmarkSettings = AssessmentCentrePassMarkSettingsResponse(Nil, Some(AssessmentCentrePassMarkInfo("1", DateTime.now, "user")))
       val overallScore = 25.0
       intercept[IllegalStateException] {
-        evaluator.evaluateSchemes("appId", noPassmarkSettings, overallScore, List(Schemes.Business))
+        evaluator.evaluateSchemes("appId", noPassmarkSettings, overallScore, List(Scheme.Business))
       }
     }
   }

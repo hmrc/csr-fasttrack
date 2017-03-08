@@ -38,7 +38,7 @@ trait AssessmentCentrePassMarkSettingsService {
       schemes = locationSchemeRepository.schemeInfoList.map(_.id)
     } yield {
       latestVersionOpt.map(latestVersion => {
-        val responseSchemes = latestVersion.schemes.map(scheme => AssessmentCentrePassMarkScheme(scheme.scheme, scheme.overallPassMarks))
+        val responseSchemes = latestVersion.schemes.map(scheme => AssessmentCentrePassMarkScheme(scheme.schemeName, scheme.overallPassMarks))
         AssessmentCentrePassMarkSettingsResponse(
           schemes = responseSchemes,
           info = Some(latestVersion.info)
@@ -52,20 +52,23 @@ trait AssessmentCentrePassMarkSettingsService {
 
   // TODO IS: remove this once Miguel's changes are merged
   def getLatestVersion2: Future[AssessmentCentrePassMarkSettingsResponse] = {
-    for {
-      schemes <- fwRepository.getFrameworkNames
-      latestVersionOpt <- acpsRepository.tryGetLatestVersion
-    } yield {
-      val passmarkSetForSchemes = latestVersionOpt.map(_.schemes).getOrElse(List())
-      val passmarkSetForSchemesNames = passmarkSetForSchemes.map(_.schemeName)
+    // TODO LT: Fix me
 
-      val aa = schemes.diff(passmarkSetForSchemesNames)
+    //    for {
+//      schemes <- locationSchemeRepository.schemeInfoList
+//      latestVersionOpt <- assessmentCentrePassmarkSettingRepository.tryGetLatestVersion
+//    } yield {
+//      val passmarkSetForSchemes = latestVersionOpt.map(_.schemes).getOrElse(List())
+//      val passmarkSetForSchemesNames = passmarkSetForSchemes.map(_.scheme)
+
+//      val aa = schemes.diff(passmarkSetForSchemesNames)
 
 //      val allPassmarkSchemes = passmarkSetForSchemes ++ passmarkUnsetForSchemes
-      val allPassmarkSchemes = passmarkSetForSchemes
+//      val allPassmarkSchemes = passmarkSetForSchemes
 
-      val info = latestVersionOpt.map(_.info)
-      AssessmentCentrePassMarkSettingsResponse(allPassmarkSchemes, info)
-    }
+//      val info = latestVersionOpt.map(_.info)
+//      AssessmentCentrePassMarkSettingsResponse(allPassmarkSchemes, info)
+      Future.successful(AssessmentCentrePassMarkSettingsResponse(List(), None))
+//    }
   }
 }

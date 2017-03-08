@@ -624,8 +624,9 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     collection.update(query, passMarkEvaluation, upsert = false) map { _ => () }
   }
 
-  private def saveSchemes(name: String, schemes: List[PerSchemeEvaluation]): BSONDocument = {
-    val mySchemes = schemes.map(x => BSONDocument(x.schemeName -> x.result.toString))
+  private def saveSchemes(name: String, schemes: List[SchemeEvaluationResult]): BSONDocument = {
+    // TODO LT: drop toString
+    val mySchemes = schemes.map(x => BSONDocument(x.scheme.toString -> x.result))
     val schemesDoc = mySchemes.foldRight(BSONDocument.empty)((acc, doc) => acc.add(doc))
     BSONDocument(name -> schemesDoc)
   }

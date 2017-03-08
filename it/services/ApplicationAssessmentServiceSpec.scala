@@ -33,6 +33,7 @@ import model.{ ApplicationStatuses, Scheme }
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.ceedubs.ficus.readers.ValueReader
+import org.joda.time.DateTime
 import org.scalatest.mock.MockitoSugar
 import play.Logger
 import play.api.libs.json._
@@ -291,5 +292,11 @@ object ApplicationAssessmentServiceSpec {
   // Convert from a SchemeEvaluationTestResult to a SchemeEvaluationResult
   def toSchemeEvaluationResult(testResult: List[SchemeEvaluationTestResult]): List[SchemeEvaluationResult] = {
     testResult.map(t => SchemeEvaluationResult(Scheme.withName(t.scheme), Result(t.result)))
+  }
+
+  implicit val dateTimeReader: ValueReader[DateTime] = new ValueReader[DateTime] {
+    def read(config: Config, path: String): DateTime = config.getValue(path).valueType match {
+      case _ => DateTime.now()
+    }
   }
 }

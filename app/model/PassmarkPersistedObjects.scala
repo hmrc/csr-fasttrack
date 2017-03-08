@@ -28,7 +28,7 @@ object PassmarkPersistedObjects {
 
   case class AssessmentCentrePassMarkInfo(version: String, createDate: DateTime, createdByUser: String)
 
-  case class AssessmentCentrePassMarkScheme(scheme: model.Scheme.Scheme, overallPassMarks: Option[PassMarkSchemeThreshold] = None)
+  case class AssessmentCentrePassMarkScheme(schemeName: model.Scheme.Scheme, overallPassMarks: Option[PassMarkSchemeThreshold] = None)
 
   case class PassMarkSchemeThreshold(failThreshold: Double, passThreshold: Double)
 
