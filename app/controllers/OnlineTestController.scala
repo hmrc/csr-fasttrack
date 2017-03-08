@@ -73,7 +73,7 @@ trait OnlineTestController extends BaseController {
       Ok(Json.toJson(onlineTest))
     } recover {
       case e =>
-        Logger.warn(s"Cannot get online test for userId=$userId", e)
+        Logger.debug(s"Cannot find online test for userId=$userId", e)
         NotFound
     }
   }
