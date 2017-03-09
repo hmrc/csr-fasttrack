@@ -166,6 +166,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
            |{
            |    "amSession": [
            |            {
+           |                "slotNumber": 1,
            |                "applicationId": "appid-1",
            |                "confirmed": true,
            |                "firstName": "Bob",
@@ -255,6 +256,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
       val expectedJson =
         s"""
            |[{
+           |    "slotNumber": 1,
            |    "firstName": "Bob",
            |    "lastName": "Marley",
            |    "preferredName": "preferredName1",
@@ -285,6 +287,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
       val expectedJson =
         s"""
            |[{
+           |    "slotNumber": 1,
            |    "firstName": "Bob",
            |    "lastName": "Marley",
            |    "preferredName": "preferredName1",
@@ -296,6 +299,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
            |    "status": "Confirmed"
            |},
            |{
+           |    "slotNumber": 1,
            |    "firstName": "Michael",
            |    "lastName": "Jackson",
            |    "preferredName": "preferredName2",
@@ -341,6 +345,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         s"""
            |[
            |{
+           |    "slotNumber": 1,
            |    "firstName": "Michael",
            |    "lastName": "Jackson",
            |    "preferredName": "preferredName2",
