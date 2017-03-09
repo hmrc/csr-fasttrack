@@ -17,23 +17,26 @@
 package scheduler.assessment
 
 import config.AssessmentEvaluationMinimumCompetencyLevel
-import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import model.CandidateScoresCommands.CandidateScoresAndFeedback
-import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.EvaluationResults._
-import model.PersistedObjects.PreferencesWithQualification
-import model.persisted.SchemeEvaluationResult
+import model.persisted.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkSettings, SchemeEvaluationResult }
+import model.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
+import org.joda.time.DateTime
 import org.mockito.Mockito._
 import services.applicationassessment.AssessmentCentreService
 import testkit.{ ShortTimeout, UnitWithAppSpec }
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 class EvaluateAssessmentScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
-  implicit val ec: ExecutionContext = ExecutionContext.global
-
   val applicationAssessmentServiceMock = mock[AssessmentCentreService]
   val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = false, None, None)
+  val onlineTestEvaluation = List(SchemeEvaluationResult(model.Scheme.Business, Green))
+  val assessmentEvaluation = AssessmentPassmarkPreferencesAndScores(
+    AssessmentCentrePassMarkSettings(List(), AssessmentCentrePassMarkInfo("1", DateTime.now, "user")),
+    List(model.Scheme.Business), CandidateScoresAndFeedback("appId"))
+  val evaluation = OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation, assessmentEvaluation)
 
   object TestableEvaluateAssessmentScoreJob extends EvaluateAssessmentScoreJob {
     val applicationAssessmentService = applicationAssessmentServiceMock
@@ -42,13 +45,6 @@ class EvaluateAssessmentScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
 
   "application assessment service" should {
     "find a candidate and evaluate the score successfully" in {
-      val onlineTestEvaluation = List(SchemeEvaluationResult(model.Scheme.Business, Green))
-      val assessmentEvaluation = AssessmentPassmarkPreferencesAndScores(
-        AssessmentCentrePassMarkSettingsResponse(List(), None),
-        PreferencesWithQualification(List(model.Scheme.Business), aLevel = true, stemLevel = true),
-        CandidateScoresAndFeedback("appId")
-      )
-      val evaluation = OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation, assessmentEvaluation)
       when(applicationAssessmentServiceMock.nextAssessmentCandidateReadyForEvaluation).thenReturn(
         Future.successful(Some(evaluation))
       )

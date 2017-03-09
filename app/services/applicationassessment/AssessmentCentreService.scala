@@ -18,13 +18,11 @@ package services.applicationassessment
 
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import connectors.{ CSREmailClient, EmailClient }
-import model.ApplicationStatuses
-import model.AssessmentEvaluationCommands.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import model.CandidateScoresCommands.{ ApplicationScores, CandidateScoresAndFeedback, ExerciseScoresAndFeedback, RecordCandidateScores }
-import model.EvaluationResults._
-import model.CandidateScoresCommands.{ ApplicationScores, ExerciseScoresAndFeedback, RecordCandidateScores }
 import model.Exceptions.IncorrectStatusInApplicationException
 import model.PersistedObjects.ApplicationForNotification
+import model.persisted.AssessmentCentrePassMarkSettings
+import model.{ ApplicationStatuses, AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import play.api.Logger
 import play.api.mvc.RequestHeader
 import repositories._
@@ -43,7 +41,6 @@ object AssessmentCentreService extends AssessmentCentreService {
   val otRepository = onlineTestRepository
   val aRepository = applicationRepository
   val aasRepository = applicationAssessmentScoresRepository
-  val fpRepository = frameworkPreferenceRepository
   val cdRepository = contactDetailsRepository
 
   val emailClient = CSREmailClient
@@ -62,7 +59,6 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
   val otRepository: OnlineTestRepository
   val aRepository: GeneralApplicationRepository
   val aasRepository: ApplicationAssessmentScoresRepository
-  val fpRepository: FrameworkPreferenceRepository
   val cdRepository: ContactDetailsRepository
 
   val emailClient: EmailClient
@@ -124,55 +120,48 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
   }
 
   def nextAssessmentCandidateReadyForEvaluation: Future[Option[OnlineTestEvaluationAndAssessmentCentreScores]] = {
-      passmarkService.getLatestVersion2.flatMap {
-      case passmark if passmark.schemes.forall(_.overallPassMarks.isDefined) =>
-        aRepository.nextApplicationReadyForAssessmentScoreEvaluation(passmark.info.get.version).flatMap {
+    passmarkService.getLatestVersion.flatMap {
+      case Some(passmark) =>
+        aRepository.nextApplicationReadyForAssessmentScoreEvaluation(passmark.currentVersion).flatMap {
           case Some(appId) =>
-            // scalastyle:off
-            println(s"**** <<<<<START>>>>> found candidate ready for assessment evaluation - appId = $appId")
-            for {
-              assessmentCentreScoresOpt <- aasRepository.tryFind(appId)
-              preferredSchemesWithQualificationsOpt <- fpRepository.tryGetPreferencesWithQualifications(appId)
-              onlineTestEvaluation <- otRepository.findPassmarkEvaluation(appId)
-            } yield {
-              for {
-                scores <- assessmentCentreScoresOpt
-                prefsWithQualifications <- preferredSchemesWithQualificationsOpt
-              } yield {
-                val assessmentResult = AssessmentPassmarkPreferencesAndScores(passmark, prefsWithQualifications, scores)
-                OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation, assessmentResult)
-              }
-            }
+            tryToFindEvaluationData(appId, passmark)
           case None =>
-            println(s"**** no candidate found for assessment evaluation")
             Future.successful(None)
         }
-      case _ =>
-        Logger.warn("Passmark settings are not set for all schemes")
+      case None =>
         Future.successful(None)
     }
   }
 
+  private def tryToFindEvaluationData(appId: String, passmark: AssessmentCentrePassMarkSettings) = {
+    for {
+      assessmentCentreScoresOpt <- aasRepository.tryFind(appId)
+      chosenSchemes <- aRepository.getSchemes(appId)
+      onlineTestEvaluation <- otRepository.findPassmarkEvaluation(appId)
+    } yield {
+      assessmentCentreScoresOpt.map { scores =>
+        val assessmentResult = AssessmentPassmarkPreferencesAndScores(passmark, chosenSchemes, scores)
+        OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation, assessmentResult)
+      }
+    }
+  }
+
   def evaluateAssessmentCandidate(onlineTestWithAssessmentCentreScores: OnlineTestEvaluationAndAssessmentCentreScores,
-                                  config: AssessmentEvaluationMinimumCompetencyLevel
-                                  ): Future[Unit] = {
+                                  config: AssessmentEvaluationMinimumCompetencyLevel): Future[Unit] = {
 
     val onlineTestEvaluation = onlineTestWithAssessmentCentreScores.onlineTestEvaluation
-    //scalastyle:off
-    println("**** <<<<<START EVALUATE CANDIDATE>>>>>")
-    println(s"**** onlineTestEvaluation = $onlineTestEvaluation")
     val assessmentScores = onlineTestWithAssessmentCentreScores.assessmentScores
-    println(s"**** assessmentScores = $assessmentScores")
-
     val assessmentEvaluation = passmarkRulesEngine.evaluate(onlineTestEvaluation, assessmentScores, config)
-
-    println(s"**** assessmentEvaluation = $assessmentEvaluation")
     val applicationStatus = determineStatus(assessmentEvaluation)
-    println(s"**** overall applicationStatus = $applicationStatus")
+    Logger.debug(s"Start assessment evaluation, appId: " +
+      s"${onlineTestWithAssessmentCentreScores.assessmentScores.scores.applicationId}" +
+      s"\n Evaluation from Online Test: $onlineTestEvaluation" +
+      s"\n Assessment Scores: $assessmentScores" +
+      s"\n Evaluation for Assessment Centre: $assessmentEvaluation" +
+      s"\n Application Status evaluated to: $applicationStatus")
 
-    aRepository.saveAssessmentScoreEvaluation(
-      assessmentScores.scores.applicationId,
-      assessmentScores.passmark.info.get.version, assessmentEvaluation, applicationStatus
+    aRepository.saveAssessmentScoreEvaluation(assessmentScores.scores.applicationId,
+      assessmentScores.passmark.info.version, assessmentEvaluation, applicationStatus
     ).map { _ =>
       auditNewStatus(assessmentScores.scores.applicationId, applicationStatus)
     }
@@ -194,10 +183,9 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
 
   private def auditNewStatus(appId: String, newStatus: ApplicationStatuses.EnumVal): Unit = {
     val event = newStatus match {
-      case ApplicationStatuses.AssessmentCentrePassedNotified => "ApplicationAssessmentPassedNotified"
-      case ApplicationStatuses.AssessmentCentreFailedNotified => "ApplicationAssessmentFailedNotified"
       case ApplicationStatuses.AssessmentCentreFailed | ApplicationStatuses.AssessmentCentrePassed |
         ApplicationStatuses.AwaitingAssessmentCentreReevaluation => "ApplicationAssessmentEvaluated"
+      case _ => newStatus.name
     }
     Logger.info(s"$event for $appId. New application status = $newStatus")
     auditService.logEventNoRequest(event, Map("applicationId" -> appId, "applicationStatus" -> newStatus))

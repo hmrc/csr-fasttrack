@@ -16,9 +16,7 @@
 
 package controllers
 
-import model.Commands.Implicits.assessmentCentrePassMarkSettingsResponseFormat
-import model.PassmarkPersistedObjects.AssessmentCentrePassMarkSettings
-import model.PassmarkPersistedObjects.Implicits._
+import model.persisted.AssessmentCentrePassMarkSettings
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import repositories._

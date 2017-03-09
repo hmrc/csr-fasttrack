@@ -16,24 +16,20 @@
 
 package services.evaluation
 
-import model.Commands.AssessmentCentrePassMarkSettingsResponse
-import model.EvaluationResults.{ Green, PerSchemeEvaluation }
-import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
-import model.{ Scheme, Schemes }
-import org.scalatestplus.play.PlaySpec
-import model.Schemes._
 import model.EvaluationResults._
-import model.persisted.SchemeEvaluationResult
+import model.Scheme
+import model.persisted._
 import org.joda.time.DateTime
+import org.scalatestplus.play.PlaySpec
 
 class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
-  val PassmarkSettings = AssessmentCentrePassMarkSettingsResponse(List(
+  val PassmarkSettings = AssessmentCentrePassMarkSettings(List(
     AssessmentCentrePassMarkScheme(Scheme.Business, Some(PassMarkSchemeThreshold(10.0, 20.0))),
     AssessmentCentrePassMarkScheme(Scheme.Commercial, Some(PassMarkSchemeThreshold(15.0, 25.0))),
     AssessmentCentrePassMarkScheme(Scheme.DigitalAndTechnology, Some(PassMarkSchemeThreshold(20.0, 30.0))),
     AssessmentCentrePassMarkScheme(Scheme.Finance, Some(PassMarkSchemeThreshold(25.0, 30.0))),
     AssessmentCentrePassMarkScheme(Scheme.ProjectDelivery, Some(PassMarkSchemeThreshold(30.0, 40.0)))
-  ), Some(AssessmentCentrePassMarkInfo("1", DateTime.now, "user")))
+  ), AssessmentCentrePassMarkInfo("1", DateTime.now, "user"))
 
   val evaluator = new AssessmentCentreAllSchemesEvaluator {}
 
@@ -51,7 +47,7 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
     }
 
     "throw an exception if the pass mark is not found for a scheme" in {
-      val noPassmarkSettings = AssessmentCentrePassMarkSettingsResponse(Nil, Some(AssessmentCentrePassMarkInfo("1", DateTime.now, "user")))
+      val noPassmarkSettings = AssessmentCentrePassMarkSettings(Nil, AssessmentCentrePassMarkInfo("1", DateTime.now, "user"))
       val overallScore = 25.0
       intercept[IllegalStateException] {
         evaluator.evaluateSchemes("appId", noPassmarkSettings, overallScore, List(Scheme.Business))

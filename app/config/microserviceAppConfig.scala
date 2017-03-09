@@ -99,7 +99,7 @@ case class AssessmentEvaluationMinimumCompetencyLevel(enabled: Boolean, minimumC
 }
 
 object AssessmentEvaluationMinimumCompetencyLevel {
-  implicit val AssessmentEvaluationMinimumCompetencyLevelFormats = Json.format[AssessmentEvaluationMinimumCompetencyLevel]
+  implicit val assessmentEvaluationMinimumCompetencyLevelFormat = Json.format[AssessmentEvaluationMinimumCompetencyLevel]
 }
 
 object MicroserviceAppConfig extends ServicesConfig {

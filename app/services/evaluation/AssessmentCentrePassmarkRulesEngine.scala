@@ -17,7 +17,7 @@
 package services.evaluation
 
 import config.AssessmentEvaluationMinimumCompetencyLevel
-import model.AssessmentEvaluationCommands.AssessmentPassmarkPreferencesAndScores
+import model.AssessmentPassmarkPreferencesAndScores
 import model.EvaluationResults._
 import model.persisted.SchemeEvaluationResult
 
@@ -43,7 +43,7 @@ object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRules
         //scalastyle:off
         println("**** AssessmentCentrePassmarkRulesEngine - candidate failed minimum competency level check - all schemes will be red")
 
-        val allSchemesHaveFailed = candidateScores.preferencesWithQualification.schemes.map { scheme =>
+        val allSchemesHaveFailed = candidateScores.schemes.map { scheme =>
           SchemeEvaluationResult(scheme, Red)
         }
         AssessmentRuleCategoryResult(passedMinimumCompetencyLevelCheckOpt, competencyAverage, allSchemesHaveFailed, allSchemesHaveFailed)
@@ -68,7 +68,7 @@ object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRules
   private def evaluateAssessmentPassmark(competencyAverage: CompetencyAverageResult,
                                           candidateScores: AssessmentPassmarkPreferencesAndScores
                                          ): List[SchemeEvaluationResult] = {
-    val eligibleSchemesForQualification = candidateScores.preferencesWithQualification.schemes
+    val eligibleSchemesForQualification = candidateScores.schemes
 
     val overallScore = competencyAverage.overallScore
     val passmark = candidateScores.passmark

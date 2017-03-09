@@ -16,8 +16,9 @@
 
 package services
 
-import model.ApplicationStatuses
-import model.EvaluationResults.{ CompetencyAverageResult, PerSchemeEvaluation, Result }
+import model.{ ApplicationStatuses, Scheme }
+import model.EvaluationResults.{ CompetencyAverageResult, Result }
+import model.persisted.SchemeEvaluationResult
 
 case class AssessmentScoreEvaluationTestExpectation(applicationStatus: ApplicationStatuses.EnumVal,
                                                     passmarkVersion: Option[String], passedMinimumCompetencyLevel: Option[Boolean],
@@ -54,14 +55,14 @@ case class AssessmentScoreEvaluationTestExpectation(applicationStatus: Applicati
     }
   }
 
-  def allSchemesEvaluationExpectations: Option[List[PerSchemeEvaluation]] = commonSchemeEvaluationExpectations(schemesEvaluation)
+  def allSchemesEvaluationExpectations: Option[List[SchemeEvaluationResult]] = commonSchemeEvaluationExpectations(schemesEvaluation)
 
-  def overallSchemesEvaluationExpectations: Option[List[PerSchemeEvaluation]] = commonSchemeEvaluationExpectations(overallEvaluation)
+  def overallSchemesEvaluationExpectations: Option[List[SchemeEvaluationResult]] = commonSchemeEvaluationExpectations(overallEvaluation)
 
   private def commonSchemeEvaluationExpectations(schemesEvaluation: Option[String]) = schemesEvaluation.map { s =>
     s.split("\\|").map { schemeAndResult =>
       val Array(scheme, result) = schemeAndResult.split(":")
-      PerSchemeEvaluation(scheme, Result(result))
+      SchemeEvaluationResult(Scheme.withName(scheme), Result(result))
     }.toList
   }
 }

@@ -17,26 +17,23 @@
 package services.evaluation
 
 import config.AssessmentEvaluationMinimumCompetencyLevel
-import model.AssessmentEvaluationCommands.AssessmentPassmarkPreferencesAndScores
+import model.AssessmentPassmarkPreferencesAndScores
 import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ScoresAndFeedback }
-import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.EvaluationResults.{ Amber, Red, _ }
-import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
-import model.PersistedObjects.PreferencesWithQualification
 import model.Scheme._
-import model.persisted.SchemeEvaluationResult
+import model.persisted._
 import org.joda.time.DateTime
 import org.scalatest.MustMatchers
 import org.scalatestplus.play.PlaySpec
 
 class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers {
-  val PassmarkSettings = AssessmentCentrePassMarkSettingsResponse(List(
+  val PassmarkSettings = AssessmentCentrePassMarkSettings(List(
     AssessmentCentrePassMarkScheme(Business, Some(PassMarkSchemeThreshold(1.0, 32.0))),
     AssessmentCentrePassMarkScheme(Commercial, Some(PassMarkSchemeThreshold(5.0, 30.0))),
     AssessmentCentrePassMarkScheme(DigitalAndTechnology, Some(PassMarkSchemeThreshold(27.0, 30.0))),
     AssessmentCentrePassMarkScheme(Finance, Some(PassMarkSchemeThreshold(12.0, 19.0))),
     AssessmentCentrePassMarkScheme(ProjectDelivery, Some(PassMarkSchemeThreshold(23.0, 30.0)))
-  ), Some(AssessmentCentrePassMarkInfo("1", DateTime.now, "user")))
+  ), AssessmentCentrePassMarkInfo("1", DateTime.now, "user"))
 
   val CandidateScoresWithFeedback = CandidateScoresAndFeedback("app1",
     interview = Some(
@@ -83,8 +80,6 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
       ))
     )
     val CandidateSchemes = List(model.Scheme.Business)
-    //TODO IS: don't think we need the qualifications any more
-    val CandidatePreferencesWithQualification = PreferencesWithQualification(CandidateSchemes, aLevel = true, stemLevel = true)
 
     val CandidateOnlineTestEvaluation = List(
       SchemeEvaluationResult(model.Scheme.Business, Green)
@@ -102,7 +97,7 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
         groupExercise = CandidateScoresWithFeedback.groupExercise.map(_.copy(collaboratingAndPartnering = Some(1.0))),
         writtenExercise = CandidateScoresWithFeedback.writtenExercise.map(_.copy(collaboratingAndPartnering = Some(2.0)))
       )
-      val candidateScore = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, CandidatePreferencesWithQualification, scores)
+      val candidateScore = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, CandidateSchemes, scores)
 
       val result = rulesEngine.evaluate(CandidateOnlineTestEvaluation, candidateScore, config)
       result.passedMinimumCompetencyLevel mustBe Some(false)
@@ -115,7 +110,7 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
       val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = true, Some(2.0), Some(4.0))
       val scores = CandidateScoresWithFeedback
 
-      val assessmentPassmarkAndScores = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, CandidatePreferencesWithQualification, scores)
+      val assessmentPassmarkAndScores = AssessmentPassmarkPreferencesAndScores(PassmarkSettings, CandidateSchemes, scores)
 
       val result = rulesEngine.evaluate(CandidateOnlineTestEvaluation, assessmentPassmarkAndScores, config)
 

@@ -560,6 +560,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     collection.update(query, applicationStatusBSON, upsert = false) map { _ => () }
   }
 
+  // TODO LT change type to UUID
   def nextApplicationReadyForAssessmentScoreEvaluation(currentPassmarkVersion: String): Future[Option[String]] = {
     val query =
       BSONDocument("$or" ->

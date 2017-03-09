@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-package services.passmarksettings
+package model
 
+import model.CandidateScoresCommands.CandidateScoresAndFeedback
+import model.Scheme.Scheme
 import model.persisted.AssessmentCentrePassMarkSettings
-import repositories._
+import play.api.libs.json.Json
 
-import scala.concurrent.Future
+case class AssessmentPassmarkPreferencesAndScores(passmark: AssessmentCentrePassMarkSettings,
+                                                  schemes: List[Scheme],
+                                                  scores: CandidateScoresAndFeedback)
 
-object AssessmentCentrePassMarkSettingsService extends AssessmentCentrePassMarkSettingsService {
-  val assessmentCentrePassmarkSettingRepository = repositories.assessmentCentrePassMarkSettingsRepository
-}
-
-trait AssessmentCentrePassMarkSettingsService {
-  val assessmentCentrePassmarkSettingRepository: AssessmentCentrePassMarkSettingsRepository
-
-  def getLatestVersion: Future[Option[AssessmentCentrePassMarkSettings]] = {
-    assessmentCentrePassmarkSettingRepository.tryGetLatestVersion
-  }
+object AssessmentPassmarkPreferencesAndScores {
+  import model.CandidateScoresCommands.Implicits.CandidateScoresAndFeedbackFormats
+  implicit val assessmentPassmarkPreferencesAndScoresFormat = Json.format[AssessmentPassmarkPreferencesAndScores]
 }

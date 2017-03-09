@@ -16,16 +16,14 @@
 
 package services.evaluation
 
-import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.EvaluationResults._
-import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
 import model.Scheme.Scheme
-import model.persisted.SchemeEvaluationResult
+import model.persisted.{ AssessmentCentrePassMarkScheme, AssessmentCentrePassMarkSettings, PassMarkSchemeThreshold, SchemeEvaluationResult }
 
 trait AssessmentCentreAllSchemesEvaluator {
 
   def evaluateSchemes(applicationId: String,
-                      passmark: AssessmentCentrePassMarkSettingsResponse,
+                      passmark: AssessmentCentrePassMarkSettings,
                       overallScore: Double,
                       schemes: List[Scheme]): List[SchemeEvaluationResult] = {
     schemes.map { scheme =>
@@ -42,7 +40,7 @@ trait AssessmentCentreAllSchemesEvaluator {
   }
 
   private def evaluateScore(scheme: AssessmentCentrePassMarkScheme,
-                            passmark: AssessmentCentrePassMarkSettingsResponse,
+                            passmark: AssessmentCentrePassMarkSettings,
                             overallScore: Double): Result = {
     val passmarkSetting = scheme.overallPassMarks
       .getOrElse(throw new IllegalStateException(s"Scheme threshold for ${scheme.schemeName} is not set in Passmark settings"))

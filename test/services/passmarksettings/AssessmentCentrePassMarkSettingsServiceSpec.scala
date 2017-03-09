@@ -17,8 +17,6 @@
 package services.passmarksettings
 
 import config.TestFixtureBase
-import model.Commands.AssessmentCentrePassMarkSettingsResponse
-import model.PassmarkPersistedObjects._
 import org.joda.time.DateTime
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -29,6 +27,7 @@ import repositories.{ AssessmentCentrePassMarkSettingsMongoRepository, Framework
 import scala.concurrent.Future
 import model.Scheme
 import model.Scheme.{ Business, Commercial, DigitalAndTechnology, Finance, ProjectDelivery }
+import model.persisted.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, AssessmentCentrePassMarkSettings, PassMarkSchemeThreshold }
 
 class AssessmentCentrePassMarkSettingsServiceSpec extends PlaySpec with ScalaFutures with MockitoSugar {
 
@@ -36,13 +35,13 @@ class AssessmentCentrePassMarkSettingsServiceSpec extends PlaySpec with ScalaFut
     "return empty scores with Schemes when there is no passmark settings" in new TestFixture {
       when(mockAssessmentCentrePassMarkSettingsRepository.tryGetLatestVersion).thenReturn(Future.successful(None))
       val result = TestableAssessmentCentrePassMarkSettingsService.getLatestVersion.futureValue
-      result must be(AssessmentCentrePassMarkSettingsResponse(AllAssessmentCentrePassMarkSchemes, None))
+      result mustBe None
     }
 
     "return the latest version of passmark settings" in new TestFixture {
       when(mockAssessmentCentrePassMarkSettingsRepository.tryGetLatestVersion).thenReturn(Future.successful(Some(Settings)))
       val result = TestableAssessmentCentrePassMarkSettingsService.getLatestVersion.futureValue
-      result must be(AssessmentCentrePassMarkSettingsResponse(Settings.schemes, Some(Settings.info)))
+      result mustBe Some(AssessmentCentrePassMarkSettings(Settings.schemes, Settings.info))
     }
   }
 }
