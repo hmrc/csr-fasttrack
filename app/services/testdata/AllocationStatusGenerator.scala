@@ -51,7 +51,7 @@ trait AllocationStatusGenerator extends ConstructiveGenerator {
           availableAssessment.venue.venueName,
           availableAssessment.date,
           availableAssessment.session,
-          generationId,
+          availableAssessment.slotNumber, // Slot number is always 1
           confirmed = generatorConfig.confirmedAllocation
         )
       }

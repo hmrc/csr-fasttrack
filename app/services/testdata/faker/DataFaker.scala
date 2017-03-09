@@ -32,7 +32,7 @@ import model.Scheme.Scheme
 //scalastyle:off number.of.methods
 object DataFaker {
   object ExchangeObjects {
-    case class AvailableAssessmentSlot(venue: AssessmentCentreVenue, date: LocalDate, session: String)
+    case class AvailableAssessmentSlot(slotNumber: Int, venue: AssessmentCentreVenue, date: LocalDate, session: String)
   }
 
   object Random {
@@ -105,12 +105,12 @@ object DataFaker {
         }
         val assessmentsByDate = venue.capacityDates.map(_.date).toSet
         val availableDate = assessmentsByDate.toList.sortWith(_ isBefore _).flatMap { capacityDate =>
-          List("AM", "PM").flatMap { possibleSession =>
+          randList(List("AM", "PM"), 2).flatMap { possibleSession =>
             takenSlotsByDateAndSession.get(capacityDate -> possibleSession) match {
               // Date with no free slots
               //case Some(slots) if slots >= 18 => None
-              // Date with no assessments booked or Date with open slots (all dates have 6 slots per session)
-              case _ => Some(AvailableAssessmentSlot(venue, capacityDate, possibleSession))
+              // Date with no assessments booked or Date with open slots (all dates have 18 slots per session)
+              case slotsTaken => Some(AvailableAssessmentSlot(slotsTaken.getOrElse(0) + 1, venue, capacityDate, possibleSession))
             }
           }
         }

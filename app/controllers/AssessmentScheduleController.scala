@@ -257,6 +257,7 @@ trait AssessmentScheduleController extends BaseController {
       val sessionList = assessmentsInSession.getOrElse(sessionName, Nil).map {
         case (applicationAssessment, applicationCandidate) =>
           Some(VenueDaySessionCandidate(
+            applicationAssessment.slot,
             applicationCandidate.userId,
             applicationAssessment.applicationId,
             applicationCandidate.firstName.get,
@@ -332,7 +333,7 @@ trait AssessmentScheduleController extends BaseController {
 
         def toExchangeObjects(list: List[Option[VenueDaySessionCandidate]], session: String) = list.map(_.map { c =>
           (c.userId, c.applicationId,
-            ScheduledCandidateDetail(c.firstName, c.lastName, None, None, None, venue, session,
+            ScheduledCandidateDetail(c.slotNumber, c.firstName, c.lastName, None, None, None, venue, session,
               date, if (c.confirmed) "Confirmed" else "Unconfirmed"))
         })
 
