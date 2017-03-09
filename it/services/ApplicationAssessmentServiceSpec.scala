@@ -24,7 +24,7 @@ import connectors.CSREmailClient
 import model.ApplicationStatuses._
 import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.EvaluationResults._
-import model.PersistedObjects.PreferencesWithQualification
+import model.Scheme.Scheme
 import model.persisted.{ AssessmentCentrePassMarkSettings, SchemeEvaluationResult }
 import model.{ ApplicationStatuses, AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores, Scheme }
 import net.ceedubs.ficus.Ficus._
@@ -131,7 +131,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
         log(s"Loading test: $appId")
         if (DebugTestNameAppId.isEmpty || appId == DebugTestNameAppId.get) {
           createApplicationInDb(appId)
-          val candidateScores = AssessmentPassmarkPreferencesAndScores(passmark, t.candidate.schemes, t.scores)
+          val candidateScores = AssessmentPassmarkPreferencesAndScores(passmark, t.schemes, t.scores)
           val schemeEvaluationResults = toSchemeEvaluationResult(t.onlineTestPassmarkEvaluation)
           val onlineTestEvaluationWithAssessmentCentreScores = OnlineTestEvaluationAndAssessmentCentreScores(
             schemeEvaluationResults,
@@ -258,7 +258,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
 
   def logTestData(data: AssessmentServiceTest) = {
     log("**** Test data")
-    log(s"candidate: PreferencesWithQualification = ${data.candidate}")
+    log(s"candidate: PreferencesWithQualification = ${data.schemes}")
     log(s"scores: CandidateScoresAndFeedback = ${data.scores}")
     log(s"onlineTestPassmarkEvaluation: List[SchemeEvaluationTestResult] = ${data.onlineTestPassmarkEvaluation}")
     log(s"expected: AssessmentScoreEvaluationTestExpectation = ${data.expected}")
@@ -268,7 +268,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
 
 object ApplicationAssessmentServiceSpec {
 
-  case class AssessmentServiceTest(candidate: PreferencesWithQualification, scores: CandidateScoresAndFeedback,
+  case class AssessmentServiceTest(schemes: List[Scheme], scores: CandidateScoresAndFeedback,
                                    onlineTestPassmarkEvaluation: List[SchemeEvaluationTestResult],
                                    expected: AssessmentScoreEvaluationTestExpectation)
 

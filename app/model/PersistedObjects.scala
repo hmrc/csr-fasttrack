@@ -124,6 +124,5 @@ object PersistedObjects {
     implicit val applicationProgressStatusesFormats = Json.format[ApplicationProgressStatuses]
 
     implicit val onlineTestPdfReportFormats = Json.format[OnlineTestPDFReport]
-    implicit val preferencesWithQualificationFormats = Json.format[PreferencesWithQualification]
   }
 }
