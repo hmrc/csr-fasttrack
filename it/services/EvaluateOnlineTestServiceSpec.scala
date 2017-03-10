@@ -52,7 +52,7 @@ class EvaluateOnlineTestServiceSpec extends IntegrationSpec with MockitoSugar wi
   }
 
   "Evaluate Online Test Service" should {
-    "for each test in the path evaluate scores" ignore { //TODO IS: fix this with Lukasz
+    "for each test in the path evaluate scores" in {
       implicit object DateTimeValueReader extends ValueReader[DateTime] {
         override def read(config: Config, path: String): DateTime = {
           DateTime.parse(config.getString(path))
@@ -98,13 +98,16 @@ class EvaluateOnlineTestServiceSpec extends IntegrationSpec with MockitoSugar wi
             val actualResult = actual(appId)
 
             val testMessage = s"suite=$suiteFileName, test=$testCaseFileName, applicationId=$appId"
-            Logger.info(s"Processing $testMessage")
-// TODO IS: location1scheme1 is no longer valid
-//            withClue(testMessage + " location1Scheme1") {
-//              actualResult.evaluatedSchemes mustBe toSchemeEvaluationResult(expected.result)
-//            }
+            withClue(testMessage) {
+              actualResult.evaluatedSchemes mustBe toSchemeEvaluationResult(expected.result)
+            }
             withClue(testMessage + " applicationStatus") {
-              actualResult.applicationStatus mustBe Some(ApplicationStatuses.stringToEnum(expected.applicationStatus))
+              val expectedStatus = if (expected.applicationStatus == "None") {
+                None
+              } else {
+                Some(ApplicationStatuses.stringToEnum(expected.applicationStatus))
+              }
+              actualResult.applicationStatus mustBe expectedStatus
             }
             withClue(testMessage + " version") {
               actualResult.version mustBe passmarkSettings.version

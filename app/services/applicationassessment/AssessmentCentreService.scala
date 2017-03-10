@@ -151,8 +151,10 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
 
     val onlineTestEvaluation = onlineTestWithAssessmentCentreScores.onlineTestEvaluation
     val assessmentScores = onlineTestWithAssessmentCentreScores.assessmentScores
+
     val assessmentEvaluation = passmarkRulesEngine.evaluate(onlineTestEvaluation, assessmentScores, config)
     val applicationStatus = determineStatus(assessmentEvaluation)
+
     Logger.debug(s"Start assessment evaluation, appId: " +
       s"${onlineTestWithAssessmentCentreScores.assessmentScores.scores.applicationId}" +
       s"\n Evaluation from Online Test: $onlineTestEvaluation" +

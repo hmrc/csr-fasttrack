@@ -134,7 +134,7 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
         passedMinimumCompetencyLevel = None,
         competencyAverageResult = competencyAverageResult,
         schemesEvaluation = Nil,
-        overallEvaluation = Nil
+        overallEvaluation = List(SchemeEvaluationResult(Scheme.Business, Red))
       )
       val onlineTestEvaluation = List(SchemeEvaluationResult(Business, Green))
       when(passmarkRulesEngineMock.evaluate(onlineTestEvaluation, scores, config)).thenReturn(result)

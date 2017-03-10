@@ -19,30 +19,38 @@ package services.applicationassessment
 import model.ApplicationStatuses
 import model.EvaluationResults._
 import model.persisted.SchemeEvaluationResult
+import play.api.Logger
 
 trait ApplicationStatusCalculator {
 
-  // Determines the overall result for the candidate based on the overall evaluation results
-  // if the candidate has passed the minimum competency check
   def determineStatus(result: AssessmentRuleCategoryResult): ApplicationStatuses.EnumVal = result.passedMinimumCompetencyLevel match {
     case Some(false) =>
       ApplicationStatuses.AssessmentCentreFailed
     case _ =>
-      val assessmentCentreOverallResults = result.overallEvaluation
-      calculateStatus(assessmentCentreOverallResults)
+      calculateStatus(result.overallEvaluation)
   }
 
-  private def calculateStatus(assessmentCentreOverallResults: List[SchemeEvaluationResult]): ApplicationStatuses.EnumVal = {
-    if (assessmentCentreOverallResults.count(_.result == Red) == assessmentCentreOverallResults.size) {
-      //scalastyle:off
-      println(s"**** ApplicationStatusCalculator - all schemes are Red so setting status to ${ApplicationStatuses.AssessmentCentreFailed}")
-      ApplicationStatuses.AssessmentCentreFailed
-    } else if (assessmentCentreOverallResults.count(r => r.result == Red || r.result == Green) == assessmentCentreOverallResults.size) {
-      println(s"**** ApplicationStatusCalculator - all schemes are Red/Green so setting status to ${ApplicationStatuses.AssessmentCentrePassed}")
-      ApplicationStatuses.AssessmentCentrePassed
+  private def calculateStatus(assessmentCentreOverallResults: List[SchemeEvaluationResult]) = {
+    def finalStatus(results: List[Result]) = {
+      val allReds = results.forall(_ == Red)
+      val atLeastOneAmber = results.contains(Amber)
+
+      if (allReds) {
+        ApplicationStatuses.AssessmentCentreFailed
+      } else if (atLeastOneAmber) {
+        ApplicationStatuses.AwaitingAssessmentCentreReevaluation
+      } else {
+        ApplicationStatuses.AssessmentCentrePassed
+      }
+    }
+
+    if (assessmentCentreOverallResults.nonEmpty) {
+      val results = assessmentCentreOverallResults.map(_.result)
+      val status = finalStatus(results)
+      Logger.debug(s"Final status for assessment evaluation is $status")
+      status
     } else {
-      println(s"**** ApplicationStatusCalculator - schemes are not all Red/Green (some are Amber) so setting status to ${ApplicationStatuses.AwaitingAssessmentCentreReevaluation}")
-      ApplicationStatuses.AwaitingAssessmentCentreReevaluation
+      throw new IllegalArgumentException("Cannot determine final application status after assessment evaluation for an empty result list")
     }
   }
 }

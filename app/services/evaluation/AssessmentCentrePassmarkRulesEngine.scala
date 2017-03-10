@@ -20,6 +20,7 @@ import config.AssessmentEvaluationMinimumCompetencyLevel
 import model.AssessmentPassmarkPreferencesAndScores
 import model.EvaluationResults._
 import model.persisted.SchemeEvaluationResult
+import play.api.Logger
 
 trait AssessmentCentrePassmarkRulesEngine {
 
@@ -29,91 +30,46 @@ trait AssessmentCentrePassmarkRulesEngine {
 }
 
 object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRulesEngine with AssessmentScoreCalculator
-    with AssessmentCentreAllSchemesEvaluator with FinalResultEvaluator with EligibleSchemeSelector {
+    with AssessmentCentreAllSchemesEvaluator with FinalResultEvaluator {
 
   def evaluate(onlineTestEvaluation: List[SchemeEvaluationResult],
                candidateScores: AssessmentPassmarkPreferencesAndScores,
-               config: AssessmentEvaluationMinimumCompetencyLevel
-              ): AssessmentRuleCategoryResult = {
+               config: AssessmentEvaluationMinimumCompetencyLevel): AssessmentRuleCategoryResult = {
     val competencyAverage = countAverage(candidateScores.scores)
     val passedMinimumCompetencyLevelCheckOpt = passMinimumCompetencyLevel(competencyAverage, config)
 
     passedMinimumCompetencyLevelCheckOpt match {
       case Some(false) =>
-        //scalastyle:off
-        println("**** AssessmentCentrePassmarkRulesEngine - candidate failed minimum competency level check - all schemes will be red")
-
-        val allSchemesHaveFailed = candidateScores.schemes.map { scheme =>
-          SchemeEvaluationResult(scheme, Red)
-        }
-        AssessmentRuleCategoryResult(passedMinimumCompetencyLevelCheckOpt, competencyAverage, allSchemesHaveFailed, allSchemesHaveFailed)
+        val allSchemesRed = candidateScores.schemes.map(s => SchemeEvaluationResult(s, Red))
+        AssessmentRuleCategoryResult(passedMinimumCompetencyLevelCheckOpt, competencyAverage, allSchemesRed, allSchemesRed)
       case _ =>
-        //scalastyle:off
-        println("**** AssessmentCentrePassmarkRulesEngine - candidate passed minimum competency level check")
-        val assessmentCentreEvaluation = evaluateAssessmentPassmark(competencyAverage, candidateScores)
-        println(s"**** AssessmentCentrePassmarkRulesEngine - schemesAssessmentEvaluation = $assessmentCentreEvaluation")
+        val appId = candidateScores.scores.applicationId
+        val onlyAssessmentCentreEvaluation = evaluateSchemes(appId, candidateScores.passmark,
+          competencyAverage.overallScore, candidateScores.schemes)
 
-        val finalResults = determineOverallResultForEachScheme(onlineTestEvaluation, assessmentCentreEvaluation)
-        println(s"**** AssessmentCentrePassmarkRulesEngine - finalResults = $finalResults")
+        val overallEvaluation = combine(onlineTestEvaluation, onlyAssessmentCentreEvaluation)
 
         AssessmentRuleCategoryResult(
           passedMinimumCompetencyLevelCheckOpt,
           competencyAverage,
-          assessmentCentreEvaluation,
-          finalResults
+          onlyAssessmentCentreEvaluation,
+          overallEvaluation
         )
     }
   }
 
-  private def evaluateAssessmentPassmark(competencyAverage: CompetencyAverageResult,
-                                          candidateScores: AssessmentPassmarkPreferencesAndScores
-                                         ): List[SchemeEvaluationResult] = {
-    val eligibleSchemesForQualification = candidateScores.schemes
-
-    val overallScore = competencyAverage.overallScore
-    val passmark = candidateScores.passmark
-    val schemesEvaluation = evaluateSchemes(candidateScores.scores.applicationId, passmark, overallScore, eligibleSchemesForQualification)
-    //scalastyle:off
-    println(s"**** evaluateAssessmentPassmark - schemesEvaluation = $schemesEvaluation")
-    schemesEvaluation
-  }
-
-  private def passMinimumCompetencyLevel(
-    competencyAverage: CompetencyAverageResult,
-    config: AssessmentEvaluationMinimumCompetencyLevel
-  ): Option[Boolean] = {
-    if (config.enabled) {
-      //scalastyle:off
-      println("**** minimum competency level check is enabled now checking...")
-      println(s"**** competencyAverage = $competencyAverage")
-
-      val minCompetencyLevelScore = config.minimumCompetencyLevelScore
-        .getOrElse(throw new IllegalStateException("Competency level not set"))
-      val minMotivationalFitScore = config.motivationalFitMinimumCompetencyLevelScore
-        .getOrElse(throw new IllegalStateException("Motivational Fit competency level not set"))
-
-
-      val weightOneChecks: Boolean = competencyAverage.scoresWithWeightOne.forall { avg =>
-        val result = avg >= minCompetencyLevelScore
-        println(s"**** weight one min competency $avg >= $minCompetencyLevelScore = $result")
-        result
-      }
-
-      val weightTwoChecks: Boolean = competencyAverage.scoresWithWeightTwo.forall { avg =>
-        val result = avg >= minMotivationalFitScore
-        println(s"**** weight two min competency $avg >= $minMotivationalFitScore = $result")
-        result
-      }
-
-      val result = Some(weightOneChecks && weightTwoChecks)
-      println(s"**** minimum competency level check result = $result")
-      result
-//      Some(competencyAverage.scoresWithWeightOne.forall(_ >= minCompetencyLevelScore) &&
-//        competencyAverage.scoresWithWeightTwo.forall(_ >= minMotivationalFitScore))
-    } else {
-      //scalastyle:off
-      println("**** minimum competency level check is off")
-      None
+  private def passMinimumCompetencyLevel(competencyAverage: CompetencyAverageResult,
+                                         config: AssessmentEvaluationMinimumCompetencyLevel): Option[Boolean] = {
+    val result = for {
+      mclWeightOne <- config.minimumCompetencyLevelScore if config.enabled
+      mclWeightTwo <- config.motivationalFitMinimumCompetencyLevelScore
+    } yield {
+      val minCompetencyLevelWithWeightOnePassed = competencyAverage.scoresWithWeightOne.forall(_ >= mclWeightOne)
+      val minCompetencyLevelWithWeightTwoPassed = competencyAverage.scoresWithWeightTwo.forall(_ >= mclWeightTwo)
+      minCompetencyLevelWithWeightOnePassed && minCompetencyLevelWithWeightTwoPassed
     }
+
+    require(!config.enabled || result.nonEmpty, "Cannot check min competencv level for assessment")
+    result
   }
 }

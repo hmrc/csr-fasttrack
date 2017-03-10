@@ -102,10 +102,6 @@ object PersistedObjects {
     questionnaireStatuses: Option[List[ApplicationProgressStatus]]
   )
 
-//  case class PreferencesWithQualification(preferences: Preferences, aLevel: Boolean, stemLevel: Boolean)
-// TODO IS: i don't think we need the qualifications any more as the schemes are pre-filtered when the user selects them
-  case class PreferencesWithQualification(schemes: List[Scheme.Scheme], aLevel: Boolean, stemLevel: Boolean)
-
   object Implicits {
     implicit val applicationStatusFormats = Json.format[ApplicationStatus]
     implicit val addressFormats = Json.format[Address]

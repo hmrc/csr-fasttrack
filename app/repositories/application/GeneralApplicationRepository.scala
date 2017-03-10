@@ -560,7 +560,6 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     collection.update(query, applicationStatusBSON, upsert = false) map { _ => () }
   }
 
-  // TODO LT change type to UUID
   def nextApplicationReadyForAssessmentScoreEvaluation(currentPassmarkVersion: String): Future[Option[String]] = {
     val query =
       BSONDocument("$or" ->
@@ -626,9 +625,8 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   }
 
   private def saveSchemes(name: String, schemes: List[SchemeEvaluationResult]): BSONDocument = {
-    // TODO LT: drop toString
-    val mySchemes = schemes.map(x => BSONDocument(x.scheme.toString -> x.result))
-    val schemesDoc = mySchemes.foldRight(BSONDocument.empty)((acc, doc) => acc.add(doc))
+    val schemesList = schemes.map(x => BSONDocument(x.scheme.toString -> x.result))
+    val schemesDoc = schemesList.foldRight(BSONDocument.empty)((acc, doc) => acc.add(doc))
     BSONDocument(name -> schemesDoc)
   }
 

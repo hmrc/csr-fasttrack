@@ -19,7 +19,7 @@ package model
 import play.api.libs.json.Json
 import reactivemongo.bson.Macros
 
-// TODO IS: delete this class
+@deprecated("1st and 2nd locations do not exist any more. Do not use it")
 case class Preferences(
     firstLocation: LocationPreference,
     secondLocation: Option[LocationPreference] = None,

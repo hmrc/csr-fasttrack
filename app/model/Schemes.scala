@@ -16,7 +16,6 @@
 
 package model
 
-// TODO IS: we may be able to remove this object after merging with scheme enum change
 object Schemes {
   val Business = "Business"
   val Commercial = "Commercial"
@@ -24,16 +23,5 @@ object Schemes {
   val Finance = "Finance"
   val ProjectDelivery = "Project delivery"
 
-  case class Requirement(aLevel: Boolean, stemLevel: Boolean)
-
   val AllSchemes = Business :: Commercial :: DigitalAndTechnology :: Finance :: ProjectDelivery :: Nil
-
-  val AllSchemeRequirements = Map(
-    Business -> Requirement(aLevel = false, stemLevel = false),
-    Commercial -> Requirement(aLevel = false, stemLevel = false),
-    Finance -> Requirement(aLevel = false, stemLevel = false),
-    ProjectDelivery -> Requirement(aLevel = true, stemLevel = false),
-    DigitalAndTechnology -> Requirement(aLevel = false, stemLevel = true)
-  )
-
 }

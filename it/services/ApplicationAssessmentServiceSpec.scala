@@ -86,7 +86,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
   def loadSuites = {
     val suites = new File(TestPath).listFiles filterNot (_.getName.startsWith(".")) sortBy(_.getName)
     require(suites.nonEmpty)
-    log(s"**** suites = $suites")
+    Logger.info(s"**** suites = ${suites.mkString(",")}")
     suites
   }
 
@@ -121,14 +121,14 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
 
   def executeTestCase(testCase: File, config: AssessmentEvaluationMinimumCompetencyLevel,
                       passmark: AssessmentCentrePassMarkSettings) = {
-    log(s"File with tests: ${testCase.getAbsolutePath}")
+    Logger.info(s"File with tests: ${testCase.getAbsolutePath}")
 
     if (DebugTestOnlyPathPattern.isEmpty || testCase.getAbsolutePath.contains(DebugTestOnlyPathPattern.get)) {
       val tests = loadTests(testCase)
       tests foreach { t =>
         logTestData(t)
         val appId = t.scores.applicationId
-        log(s"Loading test: $appId")
+        Logger.info(s"Loading test: $appId")
         if (DebugTestNameAppId.isEmpty || appId == DebugTestNameAppId.get) {
           createApplicationInDb(appId)
           val candidateScores = AssessmentPassmarkPreferencesAndScores(passmark, t.schemes, t.scores)
@@ -144,12 +144,12 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
           val expectedResult = t.expected
           assert(testCase, appId, expectedResult, actualResult)
         } else {
-          log("--> Skipped test")
+          Logger.info("--> Skipped test")
         }
       }
-      log(s"Executed test cases: ${tests.size}")
+      Logger.info(s"Executed test cases: ${tests.size}")
     } else {
-      log("--> Skipped file")
+      Logger.info("--> Skipped file")
     }
   }
 
@@ -197,8 +197,8 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
 
     val allOverallSchemes = actualSchemes.keys ++ expectedSchemes.keys
 
-    log(s"**** actualOverallSchemes=$actualOverallSchemes")
-    log(s"**** expectedOverallSchemes=$expectedOverallSchemes")
+    Logger.info(s"**** actualOverallSchemes=$actualOverallSchemes")
+    Logger.info(s"**** expectedOverallSchemes=$expectedOverallSchemes")
 
     allOverallSchemes.foreach { s =>
       withClue(s"$Message overall scheme evaluation for scheme: " + s) {
@@ -253,17 +253,13 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
     schemesEvaluationOpt
   }
 
-  //scalastyle:off
-  def log(s: String) = println(s)
-
   def logTestData(data: AssessmentServiceTest) = {
-    log("**** Test data")
-    log(s"candidate: PreferencesWithQualification = ${data.schemes}")
-    log(s"scores: CandidateScoresAndFeedback = ${data.scores}")
-    log(s"onlineTestPassmarkEvaluation: List[SchemeEvaluationTestResult] = ${data.onlineTestPassmarkEvaluation}")
-    log(s"expected: AssessmentScoreEvaluationTestExpectation = ${data.expected}")
+    Logger.info("**** Test data")
+    Logger.info(s"candidate: PreferencesWithQualification = ${data.schemes}")
+    Logger.info(s"scores: CandidateScoresAndFeedback = ${data.scores}")
+    Logger.info(s"onlineTestPassmarkEvaluation: List[SchemeEvaluationTestResult] = ${data.onlineTestPassmarkEvaluation}")
+    Logger.info(s"expected: AssessmentScoreEvaluationTestExpectation = ${data.expected}")
   }
-  //scalastyle:on
 }
 
 object ApplicationAssessmentServiceSpec {
@@ -285,7 +281,6 @@ object ApplicationAssessmentServiceSpec {
   val MCLSettingsFile = "mcl.conf"
   val ConfigFiles = List(PassmarkSettingsFile, MCLSettingsFile)
 
-  // Convert from a SchemeEvaluationTestResult to a SchemeEvaluationResult
   def toSchemeEvaluationResult(testResult: List[SchemeEvaluationTestResult]): List[SchemeEvaluationResult] = {
     testResult.map(t => SchemeEvaluationResult(Scheme.withName(t.scheme), Result(t.result)))
   }

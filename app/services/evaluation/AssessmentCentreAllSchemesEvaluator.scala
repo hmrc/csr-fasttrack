@@ -27,13 +27,9 @@ trait AssessmentCentreAllSchemesEvaluator {
                       overallScore: Double,
                       schemes: List[Scheme]): List[SchemeEvaluationResult] = {
     schemes.map { scheme =>
-      val msg = s"Did not find assessment centre pass mark for scheme = $scheme, applicationId = $applicationId"
-      // TODO LT: Replace scheme string to enum
       val assessmentCentrePassMarkScheme = passmark.schemes.find { _.schemeName == scheme }
-        .getOrElse(throw new IllegalStateException(msg))
-
-      //scalastyle:off
-      println(s"scheme = $scheme")
+        .getOrElse(throw new IllegalStateException(s"Did not find assessment centre pass mark for scheme = $scheme, " +
+          s"applicationId = $applicationId"))
       val result = evaluateScore(assessmentCentrePassMarkScheme, passmark, overallScore)
       SchemeEvaluationResult(scheme, result)
     }
@@ -48,17 +44,13 @@ trait AssessmentCentreAllSchemesEvaluator {
     determineSchemeResult(overallScore, passmarkSetting)
   }
 
-  // Determines the result of each scheme based on the assessment centre pass marks
   private def determineSchemeResult(overallScore: Double, passmarkThreshold: PassMarkSchemeThreshold): Result = {
-    val result = if (overallScore <= passmarkThreshold.failThreshold) {
+    if (overallScore <= passmarkThreshold.failThreshold) {
       Red
     } else if (overallScore >= passmarkThreshold.passThreshold) {
       Green
     } else {
       Amber
     }
-    //scalastyle:off
-    println(s"AC result = $result, overallScore = $overallScore, fail = ${passmarkThreshold.failThreshold}, pass = ${passmarkThreshold.passThreshold}")
-    result
   }
 }
