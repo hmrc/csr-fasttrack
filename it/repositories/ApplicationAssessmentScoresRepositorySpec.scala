@@ -19,6 +19,7 @@ package repositories
 import factories.DateTimeFactory
 import model.AssessmentExercise
 import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScoresAndFeedback, ScoresAndFeedback }
+import org.joda.time.DateTime
 import testkit.MongoRepositorySpec
 
 class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
@@ -65,6 +66,41 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
         interview = Some(exerciseScoresAndFeedback.scoresAndFeedback)))
     }
 
+    "return non submitted application scores updated by assessor" in {
+      val assessorId = "assessor1"
+      val interviewExercise = exerciseScoresAndFeedback.copy(scoresAndFeedback =
+        exerciseScoresAndFeedback.scoresAndFeedback.copy(updatedBy = assessorId))
+      repository.save(interviewExercise, None).futureValue
+      val result = repository.findByAssessor(assessorId).futureValue
+      result.head mustBe CandidateScoresAndFeedback(applicationId = "app1",
+        interview = Some(interviewExercise.scoresAndFeedback))
+    }
+
+    "do not return application scores if all exercises are submitted by assessor" in {
+      val assessorId = "assessor1"
+      val interviewExercise = exerciseScoresAndFeedback.copy(scoresAndFeedback =
+        exerciseScoresAndFeedback.scoresAndFeedback.copy(updatedBy = assessorId,
+          submittedDate = Some(new DateTime())))
+      repository.save(interviewExercise, None).futureValue
+      val result = repository.findByAssessor(assessorId).futureValue
+      result mustBe Nil
+    }
+
+    "return application scores if at least one of the exercises are not submitted by assessor" in {
+      val assessorId = "assessor1"
+      val interviewExercise = exerciseScoresAndFeedback.copy(
+          scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback.copy(
+          updatedBy = assessorId,
+          submittedDate = Some(new DateTime())))
+      val groupExercise = exerciseScoresAndFeedback.copy(
+        exercise = AssessmentExercise.groupExercise,
+        scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback.copy(updatedBy = assessorId))
+      repository.save(interviewExercise, None).futureValue
+      repository.save(groupExercise, None).futureValue
+      val result = repository.findByAssessor(assessorId).futureValue
+      result.size mustBe 1
+    }
+
     "return no application score if it does not exist" in {
       val result = repository.tryFind("app1").futureValue
       result mustBe None
@@ -74,7 +110,7 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
       repository.save(exerciseScoresAndFeedback, None).futureValue
       val updatedApplicationScores = exerciseScoresAndFeedback.copy(scoresAndFeedback =
         exerciseScoresAndFeedback.scoresAndFeedback.copy(attended = false))
-      val result = repository.save(updatedApplicationScores, None).futureValue
+      repository.save(updatedApplicationScores, None).futureValue
       repository.tryFind("app1").futureValue mustBe Some(CandidateScoresAndFeedback(applicationId = "app1",
         interview = Some(updatedApplicationScores.scoresAndFeedback)))
     }
