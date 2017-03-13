@@ -22,6 +22,4 @@ object Schemes {
   val DigitalAndTechnology = "Digital and technology"
   val Finance = "Finance"
   val ProjectDelivery = "Project delivery"
-
-  val AllSchemes = Business :: Commercial :: DigitalAndTechnology :: Finance :: ProjectDelivery :: Nil
 }

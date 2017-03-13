@@ -69,7 +69,7 @@ object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRules
       minCompetencyLevelWithWeightOnePassed && minCompetencyLevelWithWeightTwoPassed
     }
 
-    require(!config.enabled || result.nonEmpty, "Cannot check min competencv level for assessment")
+    require(!config.enabled || result.nonEmpty, "Cannot check min competency level for assessment")
     result
   }
 }

@@ -53,5 +53,17 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
         evaluator.evaluateSchemes("appId", noPassmarkSettings, overallScore, List(Scheme.Business))
       }
     }
+
+    "Evaluate a candidate to Green if the pass threshold is equal to fail threshold and the overall scores" in {
+      val PassmarkSettings = AssessmentCentrePassMarkSettings(List(
+        AssessmentCentrePassMarkScheme(Scheme.Business, Some(PassMarkSchemeThreshold(20.0, 20.0)))
+      ), AssessmentCentrePassMarkInfo("1", DateTime.now, "user"))
+      val overallScore = 20.0
+      val evaluation = evaluator.evaluateSchemes("appId", PassmarkSettings, overallScore, List(Scheme.Business))
+
+      evaluation mustBe List(
+        SchemeEvaluationResult(Scheme.Business, Green)
+      )
+    }
   }
 }

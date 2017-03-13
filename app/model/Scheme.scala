@@ -25,7 +25,7 @@ object Scheme extends Enumeration {
   val Business, Commercial, DigitalAndTechnology, Finance, ProjectDelivery = Value
 
   val AllSchemes = List(Business, Commercial, DigitalAndTechnology, Finance, ProjectDelivery)
-  require(AllSchemes.toSet == values, "All schemes must return all possible schemes")
+  require(AllSchemes.toSet == values, "AllSchemes must contain all possible schemes")
 
   implicit val schemeFormat = new Format[Scheme] {
     def reads(json: JsValue) = JsSuccess(Scheme.withName(json.as[String]))

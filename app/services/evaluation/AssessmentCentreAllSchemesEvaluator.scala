@@ -45,12 +45,12 @@ trait AssessmentCentreAllSchemesEvaluator {
   }
 
   private def determineSchemeResult(overallScore: Double, passmarkThreshold: PassMarkSchemeThreshold): Result = {
-    if (overallScore <= passmarkThreshold.failThreshold) {
-      Red
-    } else if (overallScore >= passmarkThreshold.passThreshold) {
+    if (overallScore >= passmarkThreshold.passThreshold) {
       Green
-    } else {
+    } else if (overallScore > passmarkThreshold.failThreshold) {
       Amber
+    } else {
+      Red
     }
   }
 }
