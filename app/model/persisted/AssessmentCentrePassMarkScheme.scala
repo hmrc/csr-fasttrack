@@ -19,7 +19,7 @@ package model.persisted
 import play.api.libs.json.Json
 import reactivemongo.bson.Macros
 
-case class AssessmentCentrePassMarkScheme(schemeName: model.Scheme.Scheme,
+case class AssessmentCentrePassMarkScheme(scheme: model.Scheme.Scheme,
                                           overallPassMarks: Option[PassMarkSchemeThreshold] = None)
 
 object AssessmentCentrePassMarkScheme {

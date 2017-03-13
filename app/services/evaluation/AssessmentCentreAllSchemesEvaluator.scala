@@ -27,7 +27,7 @@ trait AssessmentCentreAllSchemesEvaluator {
                       overallScore: Double,
                       schemes: List[Scheme]): List[SchemeEvaluationResult] = {
     schemes.map { scheme =>
-      val assessmentCentrePassMarkScheme = passmark.schemes.find { _.schemeName == scheme }
+      val assessmentCentrePassMarkScheme = passmark.schemes.find { _.scheme == scheme }
         .getOrElse(throw new IllegalStateException(s"Did not find assessment centre pass mark for scheme = $scheme, " +
           s"applicationId = $applicationId"))
       val result = evaluateScore(assessmentCentrePassMarkScheme, passmark, overallScore)
@@ -39,7 +39,7 @@ trait AssessmentCentreAllSchemesEvaluator {
                             passmark: AssessmentCentrePassMarkSettings,
                             overallScore: Double): Result = {
     val passmarkSetting = scheme.overallPassMarks
-      .getOrElse(throw new IllegalStateException(s"Scheme threshold for ${scheme.schemeName} is not set in Passmark settings"))
+      .getOrElse(throw new IllegalStateException(s"Scheme threshold for ${scheme.scheme} is not set in Passmark settings"))
 
     determineSchemeResult(overallScore, passmarkSetting)
   }

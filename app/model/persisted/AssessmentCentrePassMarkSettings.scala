@@ -16,6 +16,7 @@
 
 package model.persisted
 
+import model.Scheme
 import play.api.libs.json.Json
 import reactivemongo.bson.Macros
 
@@ -25,9 +26,25 @@ case class AssessmentCentrePassMarkSettings(schemes: List[AssessmentCentrePassMa
   def isDefined = schemes.nonEmpty && schemes.forall(_.overallPassMarks.isDefined)
 
   def currentVersion = info.version
+
+  def toPassmarkResponse = AssessmentCentrePassMarkSettingsResponse(schemes, Some(info))
 }
 
 object AssessmentCentrePassMarkSettings {
   implicit val assessmentCentrePassMarkSettingsFormat = Json.format[AssessmentCentrePassMarkSettings]
   implicit val assessmentCentrePassMarkSettingsHandler = Macros.handler[AssessmentCentrePassMarkSettings]
+
+  val EmptyPassmarkResponse = AssessmentCentrePassMarkSettingsResponse(
+    Scheme.AllSchemes.map(s => AssessmentCentrePassMarkScheme(s)),
+    None
+  )
+
 }
+
+case class AssessmentCentrePassMarkSettingsResponse(schemes: List[AssessmentCentrePassMarkScheme],
+                                                    info: Option[AssessmentCentrePassMarkInfo])
+
+object AssessmentCentrePassMarkSettingsResponse {
+  implicit val assessmentCentrePassMarkSettingsResponseFormat = Json.format[AssessmentCentrePassMarkSettingsResponse]
+}
+

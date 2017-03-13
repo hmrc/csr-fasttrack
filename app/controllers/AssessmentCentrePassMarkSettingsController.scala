@@ -38,7 +38,8 @@ trait AssessmentCentrePassMarkSettingsController extends BaseController {
   val auditService: AuditService
 
   def getLatestVersion = Action.async { implicit request =>
-    assessmentCentrePassmarkService.getLatestVersion.map { passmark =>
+    assessmentCentrePassmarkService.getLatestVersion.map { passmarkOpt =>
+      val passmark = passmarkOpt.map(_.toPassmarkResponse).getOrElse(AssessmentCentrePassMarkSettings.EmptyPassmarkResponse)
       Ok(Json.toJson(passmark))
     }
   }

@@ -126,9 +126,11 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
           case Some(appId) =>
             tryToFindEvaluationData(appId, passmark)
           case None =>
+            Logger.debug("Assessment evaluation completed")
             Future.successful(None)
         }
       case None =>
+        Logger.debug("Assessment Passmark not set")
         Future.successful(None)
     }
   }

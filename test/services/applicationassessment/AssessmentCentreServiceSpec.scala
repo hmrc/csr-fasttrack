@@ -267,7 +267,7 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
       AssessmentCentrePassMarkScheme(Scheme.Finance, Some(Threshold)),
       AssessmentCentrePassMarkScheme(Scheme.ProjectDelivery, Some(Threshold))
     ), AssessmentCentrePassMarkInfo("1", DateTime.now, "user"))
-    val PassmarkSchemesNotSet = PassmarkSettings.schemes.map(p => AssessmentCentrePassMarkScheme(p.schemeName))
+    val PassmarkSchemesNotSet = PassmarkSettings.schemes.map(p => AssessmentCentrePassMarkScheme(p.scheme))
 
     val exerciseScoresAndFeedback = ExerciseScoresAndFeedback("app1", AssessmentExercise.interview,
       ScoresAndFeedback(
