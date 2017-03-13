@@ -35,5 +35,5 @@ class ApplicationAssessmentScoresInMemoryRepository extends ApplicationAssessmen
 
   def saveAll(scoresAndFeedback: CandidateScoresAndFeedback, newVersion: Option[String]): Future[Unit] = ???
 
-  override def findByAssessor(assessorId: String): Future[List[CandidateScoresAndFeedback]] = ???
+  override def findNonSubmittedScores(assessorId: String): Future[List[CandidateScoresAndFeedback]] = ???
 }

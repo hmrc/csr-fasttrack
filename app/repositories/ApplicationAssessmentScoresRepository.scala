@@ -35,7 +35,7 @@ trait ApplicationAssessmentScoresRepository {
   def save(exerciseScoresAndFeedback: ExerciseScoresAndFeedback,
            newVersion: Option[String] = Some(UUIDFactory.generateUUID())): Future[Unit]
 
-  def findByAssessor(assessorId: String) : Future[List[CandidateScoresAndFeedback]]
+  def findNonSubmittedScores(assessorId: String) : Future[List[CandidateScoresAndFeedback]]
 
   def saveAll(scoresAndFeedback: CandidateScoresAndFeedback,
            newVersion: Option[String] = Some(UUIDFactory.generateUUID())): Future[Unit]
@@ -52,7 +52,7 @@ class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(impl
     collection.find(query).one[BSONDocument].map { _.map(candidateScoresAndFeedback.read) }
   }
 
-  def findByAssessor(assessorId: String): Future[List[CandidateScoresAndFeedback]] = {
+  def findNonSubmittedScores(assessorId: String): Future[List[CandidateScoresAndFeedback]] = {
     val query = BSONDocument("$or" -> BSONArray(
       BSONDocument(
         s"${AssessmentExercise.interview}.submittedDate" -> BSONDocument("$exists" -> BSONBoolean(false)),

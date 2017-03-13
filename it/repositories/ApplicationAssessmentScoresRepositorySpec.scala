@@ -71,7 +71,7 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
       val interviewExercise = exerciseScoresAndFeedback.copy(scoresAndFeedback =
         exerciseScoresAndFeedback.scoresAndFeedback.copy(updatedBy = assessorId))
       repository.save(interviewExercise, None).futureValue
-      val result = repository.findByAssessor(assessorId).futureValue
+      val result = repository.findNonSubmittedScores(assessorId).futureValue
       result.head mustBe CandidateScoresAndFeedback(applicationId = "app1",
         interview = Some(interviewExercise.scoresAndFeedback))
     }
@@ -82,7 +82,7 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
         exerciseScoresAndFeedback.scoresAndFeedback.copy(updatedBy = assessorId,
           submittedDate = Some(new DateTime())))
       repository.save(interviewExercise, None).futureValue
-      val result = repository.findByAssessor(assessorId).futureValue
+      val result = repository.findNonSubmittedScores(assessorId).futureValue
       result mustBe Nil
     }
 
@@ -97,7 +97,7 @@ class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
         scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback.copy(updatedBy = assessorId))
       repository.save(interviewExercise, None).futureValue
       repository.save(groupExercise, None).futureValue
-      val result = repository.findByAssessor(assessorId).futureValue
+      val result = repository.findNonSubmittedScores(assessorId).futureValue
       result.size mustBe 1
     }
 
