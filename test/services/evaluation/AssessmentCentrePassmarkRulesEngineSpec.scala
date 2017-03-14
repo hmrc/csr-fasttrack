@@ -116,7 +116,7 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
 
       result.passedMinimumCompetencyLevel mustBe Some(true)
 
-      val expectedCompetencyAverage = CompetencyAverageResult(2.9333333333333336, 2.5, 3.5, 3.5, 4.0, 4.0, 6.0, 26.433333333333334)
+      val expectedCompetencyAverage = CompetencyAverageResult(2.933333333333333, 2.5, 3.5, 3.5, 4.0, 4.0, 6.0, 26.433333333333334)
       result.competencyAverageResult mustBe expectedCompetencyAverage
 
       result.schemesEvaluation mustBe List(SchemeEvaluationResult(Business, Amber))
