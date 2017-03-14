@@ -41,7 +41,7 @@ trait EvaluateAssessmentScoreJob extends SingleInstanceScheduledJob with Evaluat
 
 trait EvaluateAssessmentScoreJobConfig extends BasicJobConfig[ScheduledJobConfig] {
   this: SingleInstanceScheduledJob =>
-  val conf = config.MicroserviceAppConfig.evaluateCandidateScoreJobConfig
+  val conf = config.MicroserviceAppConfig.evaluateAssessmentScoreJobConfig
   val configPrefix = "scheduling.evaluate-assessment-score-job."
   val name = "EvaluateAssessmentScoreJob"
   val minimumCompetencyLevelConfig = config.MicroserviceAppConfig.assessmentEvaluationMinimumCompetencyLevelConfig
