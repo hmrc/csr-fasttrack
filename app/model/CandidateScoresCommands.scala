@@ -47,6 +47,39 @@ object CandidateScoresCommands {
         writtenExercise = updateVersion(writtenExercise)
       )
     }
+
+    private def average(list: List[Double], elements: Int) =
+      (list.map(BigDecimal(_)).sum / elements).toDouble
+
+    def leadingAndCommunicatingAvg = {
+      average(List(interview, groupExercise, writtenExercise).flatMap(_.flatMap(_.leadingAndCommunicating)), 3)
+    }
+
+    def deliveringAtPaceAvg = {
+      average(List(interview, writtenExercise).flatMap(_.flatMap(_.deliveringAtPace)), 2)
+    }
+
+    def changingAndImprovingAvg = {
+      average(List(interview, writtenExercise).flatMap(_.flatMap(_.changingAndImproving)), 2)
+    }
+
+    def buildingCapabilityForAllAvg = {
+      average(List(interview, groupExercise).flatMap(_.flatMap(_.buildingCapabilityForAll)), 2)
+    }
+
+    def collaboratingAndPartneringAvg = {
+      average(List(groupExercise, writtenExercise).flatMap(_.flatMap(_.collaboratingAndPartnering)), 2)
+    }
+
+    def makingEffectiveDecisionsAvg = {
+      average(List(groupExercise, writtenExercise).flatMap(_.flatMap(_.makingEffectiveDecisions)), 2)
+    }
+
+    // It has weight equals 2 - no need to divide by 2
+    // sum * 2 / 2 = sum
+    def motivationalFitDoubledAvg = {
+      average(List(interview, groupExercise).flatMap(_.flatMap(_.motivationFit)), 1)
+    }
   }
 
   case class ExerciseScoresAndFeedback(
