@@ -25,7 +25,7 @@ import org.scalatestplus.play.PlaySpec
 class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
   val PassmarkSettings = AssessmentCentrePassMarkSettings(List(
     AssessmentCentrePassMarkScheme(Scheme.Business, Some(PassMarkSchemeThreshold(10.0, 20.0))),
-    AssessmentCentrePassMarkScheme(Scheme.Commercial, Some(PassMarkSchemeThreshold(15.0, 25.0))),
+    AssessmentCentrePassMarkScheme(Scheme.Commercial, Some(PassMarkSchemeThreshold(15.0, 24.99))),
     AssessmentCentrePassMarkScheme(Scheme.DigitalAndTechnology, Some(PassMarkSchemeThreshold(20.0, 30.0))),
     AssessmentCentrePassMarkScheme(Scheme.Finance, Some(PassMarkSchemeThreshold(25.0, 30.0))),
     AssessmentCentrePassMarkScheme(Scheme.ProjectDelivery, Some(PassMarkSchemeThreshold(30.0, 40.0)))
@@ -35,7 +35,7 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
 
   "evaluate schemes" should {
     "evaluate all schemes" in {
-      val overallScore = 25.0
+      val overallScore = 24.99
       val evaluation = evaluator.evaluateSchemes("appId", PassmarkSettings, overallScore, Scheme.AllSchemes)
       evaluation mustBe List(
         SchemeEvaluationResult(Scheme.Business, Green),
@@ -54,7 +54,7 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
       }
     }
 
-    "Evaluate a candidate to Green if the pass threshold is equal to fail threshold and the overall scores" in {
+    "evaluate a candidate to Green if the pass threshold is equal to fail threshold and the overall scores" in {
       val PassmarkSettings = AssessmentCentrePassMarkSettings(List(
         AssessmentCentrePassMarkScheme(Scheme.Business, Some(PassMarkSchemeThreshold(20.0, 20.0)))
       ), AssessmentCentrePassMarkInfo("1", DateTime.now, "user"))
@@ -64,6 +64,19 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
       evaluation mustBe List(
         SchemeEvaluationResult(Scheme.Business, Green)
       )
+    }
+
+    "evaluate a candidate to Amber if their score is equal to Failmark" in {
+      val overallScore = 10.0
+      val evaluation = evaluator.evaluateSchemes("appId", PassmarkSettings, overallScore, Scheme.AllSchemes)
+      evaluation mustBe List(
+        SchemeEvaluationResult(Scheme.Business, Amber),
+        SchemeEvaluationResult(Scheme.Commercial, Red),
+        SchemeEvaluationResult(Scheme.DigitalAndTechnology, Red),
+        SchemeEvaluationResult(Scheme.Finance, Red),
+        SchemeEvaluationResult(Scheme.ProjectDelivery, Red)
+      )
+
     }
   }
 }
