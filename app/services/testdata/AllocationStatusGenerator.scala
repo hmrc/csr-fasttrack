@@ -29,7 +29,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 object AllocationStatusGenerator extends AllocationStatusGenerator {
-  override val previousStatusGenerator = AwaitingAllocationStatusGenerator
+  override val previousStatusGenerator = AwaitingAllocationNotifiedStatusGenerator
   override val otRepository = onlineTestRepository
   override val aaRepository = assessmentCentreAllocationRepository
 
