@@ -498,6 +498,8 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
           case ApplicationStatuses.AwaitingOnlineTestReevaluation => ProgressStatuses.AwaitingOnlineTestReevaluationProgress
           case ApplicationStatuses.OnlineTestFailed => ProgressStatuses.OnlineTestFailedProgress
           case ApplicationStatuses.AwaitingAllocation => ProgressStatuses.AwaitingAllocationProgress
+          case _ => throw new IllegalStateException(s"Saving assessment evaluation result to " +
+            s"appId=$applicationId is not supported for $status")
         }
 
         BSONDocument("$set" ->

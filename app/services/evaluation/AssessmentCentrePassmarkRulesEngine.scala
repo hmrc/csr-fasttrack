@@ -60,6 +60,9 @@ object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRules
 
   private def passMinimumCompetencyLevel(competencyAverage: CompetencyAverageResult,
                                          config: AssessmentEvaluationMinimumCompetencyLevel): Option[Boolean] = {
+    require(competencyAverage.scoresWithWeightOne.nonEmpty, "Scores with weight one in minimum competency level cannot be empty")
+    require(competencyAverage.scoresWithWeightTwo.nonEmpty, "Scores with weight two in minimum competency level cannot be empty")
+
     val result = for {
       mclWeightOne <- config.minimumCompetencyLevelScore if config.enabled
       mclWeightTwo <- config.motivationalFitMinimumCompetencyLevelScore

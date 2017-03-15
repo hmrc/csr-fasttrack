@@ -617,14 +617,14 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         "assessment-centre-passmark-evaluation" -> BSONDocument("passmarkVersion" -> passmarkVersion)
           .add(booleanToBSON("passedMinimumCompetencyLevel", evaluationResult.passedMinimumCompetencyLevel))
           .add(BSONDocument("competency-average" -> evaluationResult.competencyAverageResult))
-          .add(schemesToBSONhemes("schemes-evaluation", evaluationResult.schemesEvaluation))
-          .add(schemesToBSONhemes("overall-evaluation", evaluationResult.overallEvaluation))
+          .add(toBSONSchemes("schemes-evaluation", evaluationResult.schemesEvaluation))
+          .add(toBSONSchemes("overall-evaluation", evaluationResult.overallEvaluation))
       ))
 
     collection.update(query, passMarkEvaluation, upsert = false) map { _ => () }
   }
 
-  private def schemesToBSONhemes(name: String, schemes: List[SchemeEvaluationResult]): BSONDocument = {
+  private def toBSONSchemes(name: String, schemes: List[SchemeEvaluationResult]): BSONDocument = {
     val schemesList = schemes.map(x => BSONDocument(x.scheme.toString -> x.result))
     val schemesDoc = schemesList.foldRight(BSONDocument.empty)((acc, doc) => acc.add(doc))
     BSONDocument(name -> schemesDoc)
