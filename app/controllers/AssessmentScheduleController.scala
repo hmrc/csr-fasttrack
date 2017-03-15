@@ -30,6 +30,7 @@ import model.AssessmentScheduleCommands.ApplicationForAssessmentAllocationResult
 import model.AssessmentScheduleCommands.Implicits.ApplicationForAssessmentAllocationResultFormats
 import model.Commands.AssessmentCentreAllocation
 import model.Commands.Implicits.applicationAssessmentFormat
+import model.CandidateScoresCommands.Implicits.ApplicationScoresFormats
 import model.Exceptions.NotFoundException
 import model.{ ApplicationStatusOrder, Commands, ProgressStatuses }
 import org.joda.time.LocalDate
@@ -400,6 +401,12 @@ trait AssessmentScheduleController extends BaseController {
   def assessmentCentres: Action[AnyContent] = Action.async { implicit request =>
     acRepository.assessmentCentreCapacities.map { m =>
       Ok(Json.toJson(m.flatMap(_.venues.map(_.venueName))))
+    }
+  }
+
+  def getNonSubmittedScores(assessorId: String): Action[AnyContent] = Action.async { implicit request =>
+    aaService.getNonSubmittedCandidateScores(assessorId).map { applicationScores =>
+      Ok(Json.toJson(applicationScores))
     }
   }
 }

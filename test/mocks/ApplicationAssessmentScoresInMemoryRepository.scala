@@ -34,4 +34,6 @@ class ApplicationAssessmentScoresInMemoryRepository extends ApplicationAssessmen
            newVersion: Option[String] = Some(UUIDFactory.generateUUID())): Future[Unit] = ???
 
   def saveAll(scoresAndFeedback: CandidateScoresAndFeedback, newVersion: Option[String]): Future[Unit] = ???
+
+  override def findNonSubmittedScores(assessorId: String): Future[List[CandidateScoresAndFeedback]] = ???
 }

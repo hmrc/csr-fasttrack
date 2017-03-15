@@ -44,6 +44,7 @@ PUT         /assessment-centre/pass-mark-settings                        control
 
 GET         /assessment-schedule                                         controllers.AssessmentScheduleController.getAssessmentSchedule
 GET         /assessment-schedule/venue/:venue/date/:date                 controllers.AssessmentScheduleController.getVenueDayCandidateSchedule(venue: String, date: String)
+GET         /assessment-schedule/non-submitted-scores/:assessorId        controllers.AssessmentScheduleController.getNonSubmittedScores(assessorId: String)
 GET         /assessment-schedule/details/venue/:venue/date/:date         controllers.AssessmentScheduleController.getVenueDayCandidateScheduleWithDetails(venue: String, date: String)
 GET         /assessment-schedule/application/:applicationId              controllers.AssessmentScheduleController.getApplicationAssessment(applicationId: String)
 DELETE      /assessment-schedule/application/:applicationId              controllers.AssessmentScheduleController.deleteApplicationAssessment(applicationId: String)
