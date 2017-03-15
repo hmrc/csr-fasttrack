@@ -47,7 +47,10 @@ trait AssessmentCentreAllSchemesEvaluator {
   private def determineSchemeResult(overallScore: Double, passmarkThreshold: PassMarkSchemeThreshold): Result = {
     if (overallScore >= passmarkThreshold.passThreshold) {
       Green
-    } else if (overallScore > passmarkThreshold.failThreshold) {
+      // There is a subtle difference in assessment evaluation
+      // If overallScore is equal to fail threshold, then the scheme is AMBER,
+      // not RED (like it was in online test evaluation phase)
+    } else if (overallScore >= passmarkThreshold.failThreshold) {
       Amber
     } else {
       Red
