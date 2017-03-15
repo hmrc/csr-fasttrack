@@ -31,39 +31,41 @@ trait CSREmailClient extends EmailClient {
   import Implicits._
   import config.MicroserviceAppConfig.emailConfig._
 
-  private def sendEmail(to: String, template: String, parameters: Map[String, String])(implicit hc: HeaderCarrier) =
-    POST(s"$url/send-templated-email", UserEmail(List(to), template, parameters), Seq()).map(_ => (): Unit)
+  private def sendEmail(to: String, template: String, parameters: Map[String, String])(implicit hc: HeaderCarrier) = {
+    val emailRequest = SendEmailRequest(to :: Nil, template, Map("programme" -> "fasttrack") ++ parameters)
+    POST(s"$url/fset/email/", emailRequest, Seq()).map(_ => (): Unit)
+  }
 
-  override def sendApplicationSubmittedConfirmation(to: String, name: String)(implicit hc: HeaderCarrier) =
+  override def sendApplicationSubmittedConfirmation(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit] =
     sendEmail(to, "csr_app_submit_confirmation", Map("name" -> name))
 
   override def sendAdjustmentsConfirmation(to: String, name: String, onlineTestsAdjustments: String,
-    assessmentCenterAdjustments: String)(implicit hc: HeaderCarrier) =
+    assessmentCenterAdjustments: String)(implicit hc: HeaderCarrier): Future[Unit] =
     sendEmail(to, "fset_fasttrack_adjustments_confirmation",
       Map("name" -> name, "onlineTestsAdjustments" -> onlineTestsAdjustments,
         "assessmentCenterAdjustments" -> assessmentCenterAdjustments))
 
   override def sendAdjustmentsUpdateConfirmation(to: String, name: String, onlineTestsAdjustments: String,
-    assessmentCenterAdjustments: String)(implicit hc: HeaderCarrier) =
+    assessmentCenterAdjustments: String)(implicit hc: HeaderCarrier): Future[Unit] =
     sendEmail(to, "fset_fasttrack_adjustments_changed",
       Map("name" -> name, "onlineTestsAdjustments" -> onlineTestsAdjustments,
         "assessmentCenterAdjustments" -> assessmentCenterAdjustments))
 
-  override def sendOnlineTestInvitation(to: String, name: String, expireDateTime: DateTime)(implicit hc: HeaderCarrier) =
+  override def sendOnlineTestInvitation(to: String, name: String, expireDateTime: DateTime)(implicit hc: HeaderCarrier): Future[Unit] =
     sendEmail(
       to,
       "csr_app_online_test_invitation",
       Map("expireDateTime" -> EmailDateFormatter.toExpiryTime(expireDateTime), "name" -> name)
     )
 
-  override def sendOnlineTestExpired(to: String, name: String)(implicit hc: HeaderCarrier) =
+  override def sendOnlineTestExpired(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit] =
     sendEmail(
       to,
       "csr_app_online_test_expired",
       Map("name" -> name)
     )
 
-  override def sendOnlineTestResultReady(to: String, name: String)(implicit hc: HeaderCarrier) =
+  override def sendOnlineTestResultReady(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit] =
     sendEmail(
       to,
       "csr_app_online_test_failed",
@@ -73,7 +75,7 @@ trait CSREmailClient extends EmailClient {
   override def sendConfirmAttendance(to: String, name: String, assessmentDateTime: DateTime, confirmByDate: LocalDate)(
     implicit
     hc: HeaderCarrier
-  ) =
+  ): Future[Unit] =
     sendEmail(
       to,
       "csr_app_confirm_attendance",
