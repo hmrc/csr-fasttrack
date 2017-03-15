@@ -16,10 +16,13 @@
 
 package controllers
 
+import akka.stream.scaladsl.Source
 import play.api.libs.json.{ JsObject, Json }
 import play.api.mvc.{ Action, AnyContent }
 import model.PersistedObjects.Implicits.candidateTestReportFormats
 import model.CandidateScoresCommands.Implicits.CandidateScoresAndFeedbackFormats
+import play.api.Logger
+import play.api.libs.streams.Streams
 import repositories._
 import repositories.application.DiagnosticReportingRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -69,6 +72,7 @@ trait DiagnosticReportController extends BaseController {
   }
 
   def getAllApplications = Action { implicit request =>
-    Ok.chunked(drRepository.findAll())
+    val response = Source.fromPublisher(Streams.enumeratorToPublisher(drRepository.findAll()))
+    Ok.chunked(response)
   }
 }
