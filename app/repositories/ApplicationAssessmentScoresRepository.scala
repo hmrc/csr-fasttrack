@@ -35,6 +35,8 @@ trait ApplicationAssessmentScoresRepository {
   def save(exerciseScoresAndFeedback: ExerciseScoresAndFeedback,
            newVersion: Option[String] = Some(UUIDFactory.generateUUID())): Future[Unit]
 
+  def findNonSubmittedScores(assessorId: String) : Future[List[CandidateScoresAndFeedback]]
+
   def saveAll(scoresAndFeedback: CandidateScoresAndFeedback,
            newVersion: Option[String] = Some(UUIDFactory.generateUUID())): Future[Unit]
 }
@@ -48,6 +50,25 @@ class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(impl
     val query = BSONDocument("applicationId" -> applicationId)
 
     collection.find(query).one[BSONDocument].map { _.map(candidateScoresAndFeedback.read) }
+  }
+
+  def findNonSubmittedScores(assessorId: String): Future[List[CandidateScoresAndFeedback]] = {
+    val query = BSONDocument("$or" -> BSONArray(
+      BSONDocument(
+        s"${AssessmentExercise.interview}.submittedDate" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"${AssessmentExercise.interview}.updatedBy" -> assessorId
+      ),
+      BSONDocument(
+        s"${AssessmentExercise.groupExercise}.submittedDate" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"${AssessmentExercise.groupExercise}.updatedBy" -> assessorId
+      ),
+      BSONDocument(
+        s"${AssessmentExercise.writtenExercise}.submittedDate" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"${AssessmentExercise.writtenExercise}.updatedBy" -> assessorId
+      )
+    ))
+
+    collection.find(query).cursor[BSONDocument]().collect[List]().map { _.map(candidateScoresAndFeedback.read) }
   }
 
   def allScores: Future[Map[String, CandidateScoresAndFeedback]] = {
@@ -66,11 +87,11 @@ class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(impl
     val applicationId = exerciseScoresAndFeedback.applicationId
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId),
-      BSONDocument("$or" -> BSONArray(BSONDocument(
-        s"${exerciseScoresAndFeedback.exercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
-        s"${exerciseScoresAndFeedback.exercise}.version" -> exerciseScoresAndFeedback.scoresAndFeedback.version)
+      BSONDocument("$or" -> BSONArray(
+        BSONDocument(s"${exerciseScoresAndFeedback.exercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false))),
+        BSONDocument(s"${exerciseScoresAndFeedback.exercise}.version" -> exerciseScoresAndFeedback.scoresAndFeedback.version))
       ))
-    ))
+    )
 
     val scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback
     val applicationScoresBSON = exerciseScoresAndFeedback.scoresAndFeedback.version match {

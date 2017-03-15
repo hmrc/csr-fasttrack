@@ -95,6 +95,22 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
     }
   }
 
+  def getNonSubmittedCandidateScores(assessorId: String): Future[List[ApplicationScores]] = {
+    def getApplicationScores(candidateScores: CandidateScoresAndFeedback) = {
+      val assessmentCentreAllocationFut = assessmentCentreAllocationRepo.findOne(candidateScores.applicationId)
+      val personalDetailsFut = personalDetailsRepo.find(candidateScores.applicationId)
+      for {
+        a <- assessmentCentreAllocationFut
+        c <- personalDetailsFut
+      } yield {
+        ApplicationScores(RecordCandidateScores(c.firstName, c.lastName, a.venue, a.date), Some(candidateScores))
+      }
+    }
+    aasRepository.findNonSubmittedScores(assessorId).flatMap { candidateScores =>
+      Future.traverse(candidateScores)(getApplicationScores)
+    }
+  }
+
   def getCandidateScores(applicationId: String): Future[ApplicationScores] = {
     val assessment = assessmentCentreAllocationRepo.findOne(applicationId)
     val candidate = personalDetailsRepo.find(applicationId)
