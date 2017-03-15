@@ -21,7 +21,6 @@ import controllers._
 import model.CandidateScoresCommands.Implicits._
 import model.Exceptions.{ NoResultsReturned, TooManyEntries }
 import model.OnlineTestCommands.Implicits._
-import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme }
 import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
 import model.commands.OnlineTestProgressResponse
 import org.joda.time.{ DateTime, LocalDate, LocalTime }
@@ -172,11 +171,6 @@ object Commands {
     def expireDate: LocalDate = date.minusDays(11)
   }
 
-  case class AssessmentCentrePassMarkSettingsResponse(
-    schemes: List[AssessmentCentrePassMarkScheme],
-    info: Option[AssessmentCentrePassMarkInfo]
-  )
-
   case class CandidateEditableDetails(
     firstName: String,
     lastName: String,
@@ -221,11 +215,8 @@ object Commands {
     implicit val onlineTestExtensionFormats = Json.format[OnlineTestExtension]
     implicit val userIdWrapperFormats = Json.format[UserIdWrapper]
 
-    import PassmarkPersistedObjects.Implicits._
-
     implicit val applicationAssessmentFormat = Json.format[AssessmentCentreAllocation]
     implicit val phoneAndEmailFormat = Json.format[ContactDetails]
-    implicit val assessmentCentrePassMarkSettingsResponseFormat = Json.format[AssessmentCentrePassMarkSettingsResponse]
 
     implicit val candidateEditableDetailsFormat = Json.format[CandidateEditableDetails]
   }

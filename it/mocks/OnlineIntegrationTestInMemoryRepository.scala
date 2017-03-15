@@ -17,12 +17,10 @@
 package mocks
 
 import model.ApplicationStatuses.EnumVal
-import model.EvaluationResults._
-import model.{ ApplicationStatuses, ReminderNotice }
 import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser }
-import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest, OnlineTestPassmarkEvaluation }
-import model.Scheme.Scheme
+import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest }
 import model.persisted.{ CubiksTestProfile, NotificationExpiringOnlineTest, SchemeEvaluationResult }
+import model.{ ApplicationStatuses, ReminderNotice }
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.OnlineTestRepository
 
@@ -30,7 +28,7 @@ import scala.collection.mutable
 import scala.concurrent.Future
 
 case class TestableResult(version: String, evaluatedSchemes: List[SchemeEvaluationResult],
-                          applicationStatus: ApplicationStatuses.EnumVal)
+                          applicationStatus: Option[ApplicationStatuses.EnumVal])
 
 /**
   * @deprecated Please use Mockito
@@ -84,7 +82,7 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
   override def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = ???
 
   override def savePassMarkScore(applicationId: String, version: String, evaluationResult: List[SchemeEvaluationResult],
-    applicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = {
+    applicationStatus: Option[ApplicationStatuses.EnumVal]): Future[Unit] = {
     inMemoryRepo += applicationId -> TestableResult(version, evaluationResult, applicationStatus)
     Future.successful(())
   }
@@ -98,7 +96,7 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
 
   def removeOnlineTestEvaluationAndReports(applicationId: String): Future[Unit] = ???
 
-  def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = ???
+  def findPassmarkEvaluation(appId: String): Future[List[SchemeEvaluationResult]] = ???
 
   def nextTestForReminder(reminder: ReminderNotice): Future[Option[NotificationExpiringOnlineTest]] = ???
 

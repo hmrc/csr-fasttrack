@@ -33,7 +33,7 @@ import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.OneAppPerSuite
 import play.Logger
 import repositories.application.GeneralApplicationRepository
-import repositories.{ FrameworkPreferenceRepository, FrameworkRepository, OnlineTestPassMarkSettingsRepository, TestReportRepository }
+import repositories.{ OnlineTestPassMarkSettingsRepository, TestReportRepository }
 import services.onlinetesting.EvaluateOnlineTestService
 import services.passmarksettings.OnlineTestPassMarkSettingsService
 import services.testmodel.{ OnlineTestPassmarkServiceTest, SchemeEvaluationTestResult }
@@ -42,12 +42,9 @@ import testkit.IntegrationSpec
 class EvaluateOnlineTestServiceSpec extends IntegrationSpec with MockitoSugar with OneAppPerSuite {
 
   lazy val service = new EvaluateOnlineTestService {
-
-    val fpRepository = mock[FrameworkPreferenceRepository]
     val testReportRepository = mock[TestReportRepository]
     val onlineTestRepository = OnlineIntegrationTestInMemoryRepository
     val passMarkRulesEngine = EvaluateOnlineTestService.passMarkRulesEngine
-    val pmsRepository: OnlineTestPassMarkSettingsRepository = mock[OnlineTestPassMarkSettingsRepository]
     val passMarkSettingsService = new OnlineTestPassMarkSettingsService {
       override val onlineTestPassMarkSettingsRepository = mock[OnlineTestPassMarkSettingsRepository]
     }
@@ -101,13 +98,16 @@ class EvaluateOnlineTestServiceSpec extends IntegrationSpec with MockitoSugar wi
             val actualResult = actual(appId)
 
             val testMessage = s"suite=$suiteFileName, test=$testCaseFileName, applicationId=$appId"
-            Logger.info(s"Processing $testMessage")
-
-            withClue(testMessage + " location1Scheme1") {
+            withClue(testMessage) {
               actualResult.evaluatedSchemes mustBe toSchemeEvaluationResult(expected.result)
             }
             withClue(testMessage + " applicationStatus") {
-              actualResult.applicationStatus mustBe ApplicationStatuses.stringToEnum(expected.applicationStatus)
+              val expectedStatus = if (expected.applicationStatus == "None") {
+                None
+              } else {
+                Some(ApplicationStatuses.stringToEnum(expected.applicationStatus))
+              }
+              actualResult.applicationStatus mustBe expectedStatus
             }
             withClue(testMessage + " version") {
               actualResult.version mustBe passmarkSettings.version

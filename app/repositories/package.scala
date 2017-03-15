@@ -20,7 +20,6 @@ import model.CandidateScoresCommands._
 import model.Commands._
 import model.EvaluationResults._
 import model.FlagCandidatePersistedObject.FlagCandidate
-import model.PassmarkPersistedObjects._
 import model.PersistedObjects.{ ContactDetails, PersistedAnswer, _ }
 import org.joda.time.{ DateTime, DateTimeZone, LocalDate }
 import reactivemongo.api.indexes.Index
@@ -47,7 +46,6 @@ package object repositories {
   lazy val mediaRepository = new MediaMongoRepository()
   lazy val assistanceDetailsRepository = new AssistanceDetailsMongoRepository()
   lazy val frameworkRepository = new FrameworkYamlRepository()
-  lazy val frameworkPreferenceRepository = new FrameworkPreferenceMongoRepository()
   lazy val questionnaireRepository = new QuestionnaireMongoRepository(new SocioEconomicScoreCalculator {})
   lazy val onlineTestRepository = new OnlineTestMongoRepository(DateTimeFactory)
   lazy val onlineTestPDFReportRepository = new OnlineTestPDFReportMongoRepository()
@@ -144,14 +142,6 @@ package object repositories {
   implicit val scoresAndFeedbackHandler: BSONHandler[BSONDocument, ScoresAndFeedback] = Macros.handler[ScoresAndFeedback]
   implicit val exerciseScoresAndFeedbackHandler: BSONHandler[BSONDocument, ExerciseScoresAndFeedback] = Macros.handler[ExerciseScoresAndFeedback]
   implicit val candidateScoresAndFeedback: BSONHandler[BSONDocument, CandidateScoresAndFeedback] = Macros.handler[CandidateScoresAndFeedback]
-  implicit val passMarkSchemeThresholdHandler: BSONHandler[BSONDocument, PassMarkSchemeThreshold] =
-    Macros.handler[PassMarkSchemeThreshold]
-  implicit val assessmentCentrePassMarkInfoHandler: BSONHandler[BSONDocument, AssessmentCentrePassMarkInfo] =
-    Macros.handler[AssessmentCentrePassMarkInfo]
-  implicit val assessmentCentrePassMarkSchemeHandler: BSONHandler[BSONDocument, AssessmentCentrePassMarkScheme] =
-    Macros.handler[AssessmentCentrePassMarkScheme]
-  implicit val assessmentCentrePassMarkSettingsHandler: BSONHandler[BSONDocument, AssessmentCentrePassMarkSettings] =
-    Macros.handler[AssessmentCentrePassMarkSettings]
   implicit val competencyAverageResultHandler: BSONHandler[BSONDocument, CompetencyAverageResult] =
     Macros.handler[CompetencyAverageResult]
   implicit val flagCandidateHandler: BSONHandler[BSONDocument, FlagCandidate] = Macros.handler[FlagCandidate]

@@ -16,8 +16,6 @@
 
 package mocks.application
 
-import common.Constants.{ No, Yes }
-import model.{ Adjustments, AdjustmentsComment, ApplicationStatuses, ProgressStatuses }
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.EvaluationResults.AssessmentRuleCategoryResult
@@ -25,6 +23,7 @@ import model.Exceptions.ApplicationNotFound
 import model.PersistedObjects.ApplicationForNotification
 import model.Scheme.Scheme
 import model.commands.ApplicationStatusDetails
+import model.{ Adjustments, AdjustmentsComment, ApplicationStatuses, ProgressStatuses }
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.GeneralApplicationRepository
 
@@ -99,7 +98,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   def nextApplicationReadyForAssessmentScoreEvaluation(currentPassmarkVersion: String): Future[Option[String]] = ???
 
   def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResult,
-    newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = ???
+                                    newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = ???
 
   def getSchemeLocations(applicationId: String): Future[List[String]] = ???
 

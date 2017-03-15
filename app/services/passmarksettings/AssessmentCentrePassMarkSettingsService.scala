@@ -16,37 +16,19 @@
 
 package services.passmarksettings
 
-import model.Commands.AssessmentCentrePassMarkSettingsResponse
-import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkScheme }
+import model.persisted.AssessmentCentrePassMarkSettings
 import repositories._
 
 import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object AssessmentCentrePassMarkSettingsService extends AssessmentCentrePassMarkSettingsService {
   val assessmentCentrePassmarkSettingRepository = repositories.assessmentCentrePassMarkSettingsRepository
-  val locationSchemeRepository = repositories.fileLocationSchemeRepository
 }
 
 trait AssessmentCentrePassMarkSettingsService {
   val assessmentCentrePassmarkSettingRepository: AssessmentCentrePassMarkSettingsRepository
-  val locationSchemeRepository: LocationSchemeRepository
 
-  def getLatestVersion: Future[AssessmentCentrePassMarkSettingsResponse] = {
-    for {
-      latestVersionOpt <- assessmentCentrePassmarkSettingRepository.tryGetLatestVersion
-      schemes = locationSchemeRepository.schemeInfoList.map(_.id)
-    } yield {
-      latestVersionOpt.map(latestVersion => {
-        val responseSchemes = latestVersion.schemes.map(scheme => AssessmentCentrePassMarkScheme(scheme.scheme, scheme.overallPassMarks))
-        AssessmentCentrePassMarkSettingsResponse(
-          schemes = responseSchemes,
-          info = Some(latestVersion.info)
-        )
-      }).getOrElse({
-        val emptyPassMarkSchemes = schemes.map(scheme => AssessmentCentrePassMarkScheme(scheme, None))
-        AssessmentCentrePassMarkSettingsResponse(emptyPassMarkSchemes, None)
-      })
-    }
+  def getLatestVersion: Future[Option[AssessmentCentrePassMarkSettings]] = {
+    assessmentCentrePassmarkSettingRepository.tryGetLatestVersion
   }
 }

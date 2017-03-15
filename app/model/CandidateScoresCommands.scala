@@ -30,7 +30,7 @@ object CandidateScoresCommands {
       groupExercise: Option[ScoresAndFeedback] = None,
       writtenExercise: Option[ScoresAndFeedback] = None
   ) {
-    def allVersionsEmpty = List(
+    def allVersionsEmpty: Boolean = List(
       interview.flatMap(_.version),
       groupExercise.flatMap(_.version),
       writtenExercise.flatMap(_.version)
@@ -46,6 +46,40 @@ object CandidateScoresCommands {
         groupExercise = updateVersion(groupExercise),
         writtenExercise = updateVersion(writtenExercise)
       )
+    }
+
+    def leadingAndCommunicatingAvg: Double = {
+      average(List(interview, groupExercise, writtenExercise).flatMap(_.flatMap(_.leadingAndCommunicating)), 3)
+    }
+
+    def deliveringAtPaceAvg: Double = {
+      average(List(interview, writtenExercise).flatMap(_.flatMap(_.deliveringAtPace)), 2)
+    }
+
+    def changingAndImprovingAvg: Double = {
+      average(List(interview, writtenExercise).flatMap(_.flatMap(_.changingAndImproving)), 2)
+    }
+
+    def buildingCapabilityForAllAvg: Double = {
+      average(List(interview, groupExercise).flatMap(_.flatMap(_.buildingCapabilityForAll)), 2)
+    }
+
+    def collaboratingAndPartneringAvg: Double = {
+      average(List(groupExercise, writtenExercise).flatMap(_.flatMap(_.collaboratingAndPartnering)), 2)
+    }
+
+    def makingEffectiveDecisionsAvg: Double = {
+      average(List(groupExercise, writtenExercise).flatMap(_.flatMap(_.makingEffectiveDecisions)), 2)
+    }
+
+    // It has weight equals 2 - no need to divide by 2
+    // sum * 2 / 2 = sum
+    def motivationalFitDoubledAvg: Double = {
+      average(List(interview, groupExercise).flatMap(_.flatMap(_.motivationFit)), 1)
+    }
+
+    private def average(list: List[Double], mandatoryNumberOfElements: Int) = {
+      (list.map(BigDecimal(_)).sum / mandatoryNumberOfElements).toDouble
     }
   }
 

@@ -17,9 +17,6 @@
 package controllers
 
 import config.TestFixtureBase
-import model.Commands.AssessmentCentrePassMarkSettingsResponse
-import model.PassmarkPersistedObjects.Implicits._
-import model.PassmarkPersistedObjects._
 import org.joda.time.DateTime
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
@@ -33,6 +30,8 @@ import model.Scheme
 import services.AuditService
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import model.Commands.Implicits._
+import model.persisted.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, AssessmentCentrePassMarkSettings, PassMarkSchemeThreshold }
+
 import scala.concurrent.Future
 
 class AssessmentCentrePassMarkSettingsControllerSpec extends PlaySpec with MockitoSugar {
@@ -54,7 +53,7 @@ class AssessmentCentrePassMarkSettingsControllerSpec extends PlaySpec with Mocki
 
   "get latest version" should {
     "get latest version" in new TestFixture {
-      when(mockAssessmentCentrePassmarkSettingsService.getLatestVersion).thenReturn(Future.successful(SettingsResponse))
+      when(mockAssessmentCentrePassmarkSettingsService.getLatestVersion).thenReturn(Future.successful(Some(SettingsResponse)))
       val result = TestableAssessmentCentrePassMarkSettingsController.getLatestVersion()(FakeRequest())
       contentAsJson(result) must be(Json.toJson(SettingsResponse))
     }
@@ -99,5 +98,5 @@ trait TestFixture extends TestFixtureBase {
     Info
   )
 
-  val SettingsResponse = AssessmentCentrePassMarkSettingsResponse(AllAssessmentCentrePassMarkSchemes, Some(Info))
+  val SettingsResponse = AssessmentCentrePassMarkSettings(AllAssessmentCentrePassMarkSchemes, Info)
 }

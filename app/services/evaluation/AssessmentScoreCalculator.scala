@@ -22,53 +22,24 @@ import model.EvaluationResults.CompetencyAverageResult
 trait AssessmentScoreCalculator {
 
   def countAverage(scores: CandidateScoresAndFeedback): CompetencyAverageResult = {
-    val interviewScores = scores.interview
-    val groupScores = scores.groupExercise
-    val writtenScores = scores.writtenExercise
-    val leadingAndCommunicating = average(Seq(
-      interviewScores.flatMap(_.leadingAndCommunicating),
-      groupScores.flatMap(_.leadingAndCommunicating),
-      writtenScores.flatMap(_.leadingAndCommunicating)
-    ):_*)
-    val collaboratingAndPartnering = average(Seq(
-      interviewScores.flatMap(_.collaboratingAndPartnering),
-      groupScores.flatMap(_.collaboratingAndPartnering),
-      writtenScores.flatMap(_.collaboratingAndPartnering)
-    ):_*)
-    val deliveringAtPace = average(Seq(
-      interviewScores.flatMap(_.deliveringAtPace),
-      groupScores.flatMap(_.deliveringAtPace),
-      writtenScores.flatMap(_.deliveringAtPace)
-    ):_*)
-    val makingEffectiveDecisions = average(Seq(
-      interviewScores.flatMap(_.makingEffectiveDecisions),
-      groupScores.flatMap(_.makingEffectiveDecisions),
-      writtenScores.flatMap(_.makingEffectiveDecisions)
-    ):_*)
-    val changingAndImproving = average(Seq(
-      interviewScores.flatMap(_.changingAndImproving),
-      groupScores.flatMap(_.changingAndImproving),
-      writtenScores.flatMap(_.changingAndImproving)
-    ):_*)
-    val buildingCapabilityForAll = average(Seq(
-      interviewScores.flatMap(_.buildingCapabilityForAll),
-      groupScores.flatMap(_.buildingCapabilityForAll),
-      writtenScores.flatMap(_.buildingCapabilityForAll)
-    ):_*)
+    val overallScores = List(
+      scores.leadingAndCommunicatingAvg,
+      scores.collaboratingAndPartneringAvg,
+      scores.deliveringAtPaceAvg,
+      scores.makingEffectiveDecisionsAvg,
+      scores.changingAndImprovingAvg,
+      scores.buildingCapabilityForAllAvg,
+      scores.motivationalFitDoubledAvg
+    ).map(BigDecimal.apply).sum
 
-    val motivationFit = Seq(
-      interviewScores.flatMap(_.motivationFit),
-      groupScores.flatMap(_.motivationFit),
-      writtenScores.flatMap(_.motivationFit)
-    ).flatten.map(BigDecimal(_)).sum.toDouble
-
-    val overallScores = List(leadingAndCommunicating, collaboratingAndPartnering,
-      deliveringAtPace, makingEffectiveDecisions, changingAndImproving,
-      buildingCapabilityForAll, motivationFit).map(BigDecimal(_)).sum.toDouble
-
-    CompetencyAverageResult(leadingAndCommunicating, collaboratingAndPartnering, deliveringAtPace, makingEffectiveDecisions,
-      changingAndImproving, buildingCapabilityForAll, motivationFit, overallScores)
+    CompetencyAverageResult(
+      scores.leadingAndCommunicatingAvg,
+      scores.collaboratingAndPartneringAvg,
+      scores.deliveringAtPaceAvg,
+      scores.makingEffectiveDecisionsAvg,
+      scores.changingAndImprovingAvg,
+      scores.buildingCapabilityForAllAvg,
+      scores.motivationalFitDoubledAvg,
+      overallScores.toDouble)
   }
-
-  private def average(scores: Option[Double]*) = scores.flatten.map(BigDecimal(_)).sum.toDouble / scores.flatten.length
 }
