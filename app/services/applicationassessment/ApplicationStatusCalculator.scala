@@ -18,6 +18,8 @@ package services.applicationassessment
 
 import model.ApplicationStatuses
 import model.EvaluationResults._
+import model.persisted.SchemeEvaluationResult
+import play.api.Logger
 
 trait ApplicationStatusCalculator {
 
@@ -25,20 +27,30 @@ trait ApplicationStatusCalculator {
     case Some(false) =>
       ApplicationStatuses.AssessmentCentreFailed
     case _ =>
-      val allResultsOrderedByPreferences = List(result.location1Scheme1, result.location1Scheme2,
-        result.location2Scheme1, result.location2Scheme2, result.alternativeScheme).flatten
-      statusBasedOnFirstNonRedResult(allResultsOrderedByPreferences)
+      calculateStatus(result.overallEvaluation)
   }
 
-  private def statusBasedOnFirstNonRedResult(allResultsInPreferenceOrder: List[Result]) = {
-    val amberOrGreenOnly = allResultsInPreferenceOrder filterNot (_ == Red)
+  private def calculateStatus(assessmentCentreOverallResults: List[SchemeEvaluationResult]) = {
+    def finalStatus(results: List[Result]) = {
+      val allReds = results.forall(_ == Red)
+      val atLeastOneAmber = results.contains(Amber)
 
-    amberOrGreenOnly.headOption match {
-      case Some(Green) => ApplicationStatuses.AssessmentCentrePassed
-      case Some(Amber) => ApplicationStatuses.AwaitingAssessmentCentreReevaluation
-      case _ => ApplicationStatuses.AssessmentCentreFailed
+      if (allReds) {
+        ApplicationStatuses.AssessmentCentreFailed
+      } else if (atLeastOneAmber) {
+        ApplicationStatuses.AwaitingAssessmentCentreReevaluation
+      } else {
+        ApplicationStatuses.AssessmentCentrePassed
+      }
     }
 
+    if (assessmentCentreOverallResults.nonEmpty) {
+      val results = assessmentCentreOverallResults.map(_.result)
+      val status = finalStatus(results)
+      Logger.debug(s"Final status for assessment evaluation is $status")
+      status
+    } else {
+      throw new IllegalArgumentException("Cannot determine final application status after assessment evaluation for an empty result list")
+    }
   }
-
 }

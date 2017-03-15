@@ -24,56 +24,54 @@ import org.scalatestplus.play.PlaySpec
 class AssessmentScoreCalculatorSpec extends PlaySpec with MustMatchers {
 
   val calculator = new AssessmentScoreCalculator {}
-
   "Assessment Score Calculator" should {
     "count scores" in {
       val Scores = CandidateScoresAndFeedback("appId",
         interview = Some(
           ScoresAndFeedback(
-            false,
+            attended = false,
             assessmentIncomplete = false,
-            Some(4),
-            Some(3.25),
-            Some(3.05),
-            None,
-            Some(3.1),
-            Some(3.98),
-            Some(2.99),
-            Some("feedback"),
-            "xyz"
+            leadingAndCommunicating = Some(4),
+            collaboratingAndPartnering = None,
+            deliveringAtPace = Some(3.05),
+            makingEffectiveDecisions = None,
+            changingAndImproving = Some(3.1),
+            buildingCapabilityForAll = Some(3.98),
+            motivationFit = Some(2.99),
+            feedback = Some("feedback"),
+            updatedBy = "xyz"
           )),
         groupExercise = Some(
           ScoresAndFeedback(
-            false,
+            attended = false,
             assessmentIncomplete = false,
-            Some(4),
-            None,
-            None,
-            Some(3.12),
-            None,
-            Some(3.99),
-            Some(2.76),
-            Some("feedback"),
-            "xyz"
+            leadingAndCommunicating = Some(4),
+            collaboratingAndPartnering = Some(3.25),
+            deliveringAtPace = None,
+            makingEffectiveDecisions = Some(3.12),
+            changingAndImproving = None,
+            buildingCapabilityForAll = Some(3.99),
+            motivationFit = Some(2.76),
+            feedback = Some("feedback"),
+            updatedBy = "xyz"
           )),
         writtenExercise = Some(
           ScoresAndFeedback(
-            false,
+            attended = false,
             assessmentIncomplete = false,
-            Some(4),
-            Some(3.98),
-            Some(2.98),
-            Some(3.66),
-            Some(3.09),
-            None,
-            None,
-            Some("feedback"),
-            "xyz"
+            leadingAndCommunicating = Some(4),
+            collaboratingAndPartnering = Some(3.98),
+            deliveringAtPace = Some(2.98),
+            makingEffectiveDecisions = Some(3.66),
+            changingAndImproving = Some(3.09),
+            buildingCapabilityForAll = None,
+            motivationFit = None,
+            feedback = Some("feedback"),
+            updatedBy = "xyz"
           ))
       )
 
       val result = calculator.countAverage(Scores)
-
       result must be(CompetencyAverageResult(4.00, 3.615, 3.015, 3.39, 3.095, 3.985, 5.75, 26.85))
     }
   }

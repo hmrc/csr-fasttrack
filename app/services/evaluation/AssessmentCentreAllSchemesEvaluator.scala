@@ -16,52 +16,44 @@
 
 package services.evaluation
 
-import model.Commands.AssessmentCentrePassMarkSettingsResponse
 import model.EvaluationResults._
-import model.PassmarkPersistedObjects.{ AssessmentCentrePassMarkScheme, PassMarkSchemeThreshold }
-import model.persisted.SchemeEvaluationResult
+import model.Scheme.Scheme
+import model.persisted.{ AssessmentCentrePassMarkScheme, AssessmentCentrePassMarkSettings, PassMarkSchemeThreshold, SchemeEvaluationResult }
 
 trait AssessmentCentreAllSchemesEvaluator {
 
-  def evaluateSchemes(passmark: AssessmentCentrePassMarkSettingsResponse, overallScore: Double,
-    eligibleSchemes: List[String]): List[SchemeEvaluationResult] = {
-    passmark.schemes.map { scheme =>
-      val result = if (eligibleSchemes.contains(scheme.scheme.toString)) evaluateScore(scheme, passmark, overallScore) else Red
-      SchemeEvaluationResult(scheme.scheme, result)
+  def evaluateSchemes(applicationId: String,
+                      passmark: AssessmentCentrePassMarkSettings,
+                      overallScore: Double,
+                      schemes: List[Scheme]): List[SchemeEvaluationResult] = {
+    schemes.map { scheme =>
+      val assessmentCentrePassMarkScheme = passmark.schemes.find { _.scheme == scheme }
+        .getOrElse(throw new IllegalStateException(s"Did not find assessment centre pass mark for scheme = $scheme, " +
+          s"applicationId = $applicationId"))
+      val result = evaluateScore(assessmentCentrePassMarkScheme, passmark, overallScore)
+      SchemeEvaluationResult(scheme, result)
     }
   }
 
-  private def evaluateScore(scheme: AssessmentCentrePassMarkScheme, passmark: AssessmentCentrePassMarkSettingsResponse,
-    overallScore: Double): Result = {
+  private def evaluateScore(scheme: AssessmentCentrePassMarkScheme,
+                            passmark: AssessmentCentrePassMarkSettings,
+                            overallScore: Double): Result = {
     val passmarkSetting = scheme.overallPassMarks
       .getOrElse(throw new IllegalStateException(s"Scheme threshold for ${scheme.scheme} is not set in Passmark settings"))
 
     determineSchemeResult(overallScore, passmarkSetting)
   }
 
-  def evaluateAlternativeSchemes(allSchemesEvaluation: Map[model.Scheme.Scheme, Result], alternativeSchemes: List[String]): Result = {
-    val evaluatedAlternativeSchemes = allSchemesEvaluation.filter {
-      case (scheme, _) =>
-        alternativeSchemes.contains(scheme.toString)
-    }
-
-    val evaluation = evaluatedAlternativeSchemes.values.toList
-    if (evaluation.contains(Green)) {
-      Green
-    } else if (evaluation.contains(Amber)) {
-      Amber
-    } else {
-      Red
-    }
-  }
-
   private def determineSchemeResult(overallScore: Double, passmarkThreshold: PassMarkSchemeThreshold): Result = {
-    if (overallScore <= passmarkThreshold.failThreshold) {
-      Red
-    } else if (overallScore >= passmarkThreshold.passThreshold) {
+    if (overallScore >= passmarkThreshold.passThreshold) {
       Green
-    } else {
+      // There is a subtle difference in assessment evaluation
+      // If overallScore is equal to fail threshold, then the scheme is AMBER,
+      // not RED (like it was in online test evaluation phase)
+    } else if (overallScore >= passmarkThreshold.failThreshold) {
       Amber
+    } else {
+      Red
     }
   }
 }

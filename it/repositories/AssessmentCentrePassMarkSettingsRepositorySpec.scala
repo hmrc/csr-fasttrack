@@ -16,8 +16,8 @@
 
 package repositories
 
-import model.PassmarkPersistedObjects._
 import model.Scheme
+import model.persisted.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, AssessmentCentrePassMarkSettings, PassMarkSchemeThreshold }
 import org.joda.time.{ DateTime, DateTimeZone }
 import testkit.MongoRepositorySpec
 

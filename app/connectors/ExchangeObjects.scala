@@ -19,13 +19,25 @@ package connectors
 import java.util.UUID
 
 import org.joda.time.{ DateTime, LocalDate }
-import play.api.libs.json.Json
+import play.api.libs.json.{ Format, Json }
 
 object ExchangeObjects {
 
   val frameworkId = "FastTrack-2015"
 
-  case class UserEmail(to: List[String], templateId: String, parameters: Map[String, String])
+  case class SendEmailRequest(
+    to: List[String],
+    templateId: String,
+    parameters: Map[String, String],
+    force: Boolean = false,
+    eventUrl: Option[String] = None,
+    onSendUrl: Option[String] = None,
+    auditData: Map[String, String] = Map.empty
+  )
+
+  object SendEmailRequest {
+    implicit val format: Format[SendEmailRequest] = Json.format[SendEmailRequest]
+  }
 
   case class Candidate(firstName: String, lastName: String, preferredName: Option[String], email: String, userId: String)
   case class AuthProviderUserDetails(firstName: String, lastName: String, email: Option[String], preferredName: Option[String],
@@ -59,7 +71,7 @@ object ExchangeObjects {
 
   object Implicits {
     implicit val authProviderUserDetailsFormat = Json.format[AuthProviderUserDetails]
-    implicit val userEmailFormat = Json.format[UserEmail]
+    implicit val userEmailFormat = Json.format[SendEmailRequest]
     implicit val candidateFormat = Json.format[Candidate]
     implicit val registrationFormat = Json.format[Registration]
     implicit val registerApplicantFormat = Json.format[RegisterApplicant]

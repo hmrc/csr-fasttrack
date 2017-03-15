@@ -17,6 +17,7 @@
 package controllers.testdata
 
 import play.api.mvc.Action
+import scheduler.assessment.EvaluateAssessmentScoreJob
 import scheduler.onlinetesting.{ EvaluateCandidateScoreJob, SendOnlineTestResultJob }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -28,14 +29,19 @@ class TestJobsController extends BaseController {
 
   def evaluateCandidate = Action.async { implicit request =>
     EvaluateCandidateScoreJob.tryExecute().map { _ =>
-      Ok("Evaluate Candidate Score Job started")
+      Ok("Evaluate candidate score job started")
     }
   }
 
   def sendOnlineTestResult = Action.async { implicit request =>
     SendOnlineTestResultJob.tryExecute().map { _ =>
-      Ok("Send Online Test Result Job started")
+      Ok("Send online test result job started")
     }
   }
 
+  def evaluateAssessmentScore = Action.async { implicit request =>
+    EvaluateAssessmentScoreJob.tryExecute().map { _ =>
+      Ok("Evaluate assessment score job started")
+    }
+  }
 }

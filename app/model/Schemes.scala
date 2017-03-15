@@ -22,17 +22,4 @@ object Schemes {
   val DigitalAndTechnology = "Digital and technology"
   val Finance = "Finance"
   val ProjectDelivery = "Project delivery"
-
-  case class Requirement(aLevel: Boolean, stemLevel: Boolean)
-
-  val AllSchemes = Business :: Commercial :: DigitalAndTechnology :: Finance :: ProjectDelivery :: Nil
-
-  val AllSchemeRequirements = Map(
-    Business -> Requirement(aLevel = false, stemLevel = false),
-    Commercial -> Requirement(aLevel = false, stemLevel = false),
-    Finance -> Requirement(aLevel = false, stemLevel = false),
-    ProjectDelivery -> Requirement(aLevel = true, stemLevel = false),
-    DigitalAndTechnology -> Requirement(aLevel = false, stemLevel = true)
-  )
-
 }

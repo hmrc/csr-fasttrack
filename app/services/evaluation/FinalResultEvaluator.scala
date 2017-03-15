@@ -17,56 +17,23 @@
 package services.evaluation
 
 import model.EvaluationResults._
-import model.PersistedObjects.OnlineTestPassmarkEvaluation
-import play.api.Logger
+import model.persisted.SchemeEvaluationResult
 
 trait FinalResultEvaluator {
-  case class OnlineTestAndAssessmentResultPairNotFound(msg: String) extends Exception(msg)
 
-  def mergeResults(
-    onlineTestResult: OnlineTestPassmarkEvaluation,
-    assessmentCentreResult: AssessmentRuleCategoryResult,
-    schemePreferences: SchemePreferences
-  ): FinalEvaluationResult = {
-    val location1Scheme1Result = determineResult(onlineTestResult.location1Scheme1, assessmentCentreResult.location1Scheme1)
-    val location1Scheme2Result = determineResult(onlineTestResult.location1Scheme2, assessmentCentreResult.location1Scheme2)
-    val location2Scheme1Result = determineResult(onlineTestResult.location2Scheme1, assessmentCentreResult.location2Scheme1)
-    val location2Scheme2Result = determineResult(onlineTestResult.location2Scheme2, assessmentCentreResult.location2Scheme2)
-    val alternativeSchemeResult = determineResult(onlineTestResult.alternativeScheme, assessmentCentreResult.alternativeScheme)
-
-    val preferredSchemeToResultMap = List(
-      (Some(schemePreferences.location1Scheme1), location1Scheme1Result),
-      (schemePreferences.location1Scheme2, location1Scheme2Result),
-      (schemePreferences.location2Scheme1, location2Scheme1Result),
-      (schemePreferences.location2Scheme2, location2Scheme2Result)
-    ).collect {
-        case (Some(scheme), Some(result)) =>
-          (scheme, result)
-      }.toMap
-
-    val finalSchemesEvaluation = assessmentCentreResult.schemesEvaluation.map { assessmentSchemeEvaluations =>
-      assessmentSchemeEvaluations.map { evaluation =>
-        evaluation.copy(result = preferredSchemeToResultMap.getOrElse(evaluation.scheme.toString, evaluation.result))
-      }
-    }
-
-    FinalEvaluationResult(location1Scheme1Result, location1Scheme2Result, location2Scheme1Result, location2Scheme2Result,
-      alternativeSchemeResult, finalSchemesEvaluation)
-  }
-
-  private def determineResult(onlineTestResult: Result, assessmentCentreResult: Option[Result]): Option[Result] =
-    determineResult(Some(onlineTestResult), assessmentCentreResult)
-
-  private def determineResult(onlineTestResult: Option[Result], assessmentCentreResult: Option[Result]): Option[Result] = {
-    (onlineTestResult, assessmentCentreResult) match {
-      case (None, None) => None
-      case (r1 @ Some(Red), _) => r1
-      case (r1 @ Some(Amber), _) => r1
-      case (Some(Green), r2) => r2
-      case (r1, r2) =>
-        throw OnlineTestAndAssessmentResultPairNotFound(s"The pair: Online Test [$r1] and Assessment Centre result [$r2] " +
-          s"are not in acceptable state: Red/Amber/Green or both None")
+  def combine(onlineTestEvaluation: List[SchemeEvaluationResult],
+              assessmentCentreEvaluation: List[SchemeEvaluationResult]): List[SchemeEvaluationResult] = {
+    onlineTestEvaluation.map { onlineTestResult =>
+      assessmentCentreEvaluation.find(_.scheme == onlineTestResult.scheme).map { assessmentCentreResult =>
+        val scheme = assessmentCentreResult.scheme
+        val schemeResult = (onlineTestResult.result, assessmentCentreResult.result) match {
+          case (Red, _) | (_, Red) => Red
+          case (Green, Green) => Green
+          case _  => Amber
+        }
+        SchemeEvaluationResult(scheme, schemeResult)
+      }.getOrElse(throw new IllegalArgumentException("Cannot find evaluated scheme in Assessment Centre, but the result " +
+        s"for that scheme is present is Online Test Evaluation: ${onlineTestResult.scheme}"))
     }
   }
-
 }
