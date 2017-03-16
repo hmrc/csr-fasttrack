@@ -80,6 +80,8 @@ trait OnlineTestRepository {
 
   def findAllPassMarkEvaluations: Future[Map[String, List[SchemeEvaluationResult]]]
 
+  def findAllAssessmentCentreEvaluations: Future[Map[String, List[SchemeEvaluationResult]]]
+
   def removeCandidateAllocationStatus(applicationId: String): Future[Unit]
 
   def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal,
@@ -616,6 +618,25 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
           root.getAs[List[SchemeEvaluationResult]]("result")
         }
         appId -> passMarkEvaluationResults.getOrElse(Nil)
+      }.toMap
+    }
+  }
+
+  def findAllAssessmentCentreEvaluations: Future[Map[String, List[SchemeEvaluationResult]]] = {
+    val query = BSONDocument()
+    val projection = BSONDocument(
+      "applicationId" -> 1,
+      "assessment-centre-passmark-evaluation" -> 1
+    )
+    collection.find(query, projection).cursor[BSONDocument]().collect[List]().map {
+      _.map { doc =>
+        val appId = doc.getAs[String]("applicationId").get
+        val assessmentCentreEvaluation: Option[BSONDocument] = doc.getAs[BSONDocument]("assessment-centre-passmark-evaluation")
+
+        val overallEvaluation:Option[List[SchemeEvaluationResult]] = assessmentCentreEvaluation.flatMap { root =>
+          root.getAs[List[SchemeEvaluationResult]]("overall-evaluation")
+        }
+        appId -> overallEvaluation.getOrElse(Nil)
       }.toMap
     }
   }

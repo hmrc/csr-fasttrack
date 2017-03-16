@@ -25,6 +25,7 @@ import model.ReportExchangeObjects.Implicits._
 import model.ReportExchangeObjects.{ Implicits => _, _ }
 import model.persisted.SchemeEvaluationResult
 import model.report.{ PassMarkReportItem, DiversityReportItem }
+import model.Scheme.Scheme
 import model.{ ApplicationStatusOrder, ProgressStatuses, UniqueIdentifier }
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
@@ -158,6 +159,7 @@ trait ReportingController extends BaseController {
     val allMediaFut = mediaRepository.findAll
     val allScoresFut = assessmentScoresRepository.allScores
     val allPassMarkEvaluationsFut = onlineTestRepository.findAllPassMarkEvaluations
+    val allAssessmentCentreEvaluationsFut = onlineTestRepository.findAllAssessmentCentreEvaluations
     // Process the futures
     val reportFut: Future[List[PassMarkReportItem]] = for {
       applications <- applicationsFut
@@ -168,13 +170,15 @@ trait ReportingController extends BaseController {
       allMedia <- allMediaFut
       allScores <- allScoresFut
       allPassMarkEvaluations <- allPassMarkEvaluationsFut
+      allAssessmentCentreEvaluations <- allAssessmentCentreEvaluationsFut
     } yield {
       buildPassMarkReportRows(applications, allContactDetails, allLocations, allDiversityQuestions, allMedia,
-        allTestScores, allScores, allPassMarkEvaluations)
+        allTestScores, allScores, allPassMarkEvaluations, allAssessmentCentreEvaluations)
     }
     reportFut.map { report => Ok(Json.toJson(report)) }
   }
 
+  // scalastyle:off parameter.number
   private def buildPassMarkReportRows(applications: List[ApplicationForCandidateProgressReport],
                                       allContactDetails: Map[String, ContactDetailsWithId],
                                       allLocations: List[LocationSchemes],
@@ -182,7 +186,8 @@ trait ReportingController extends BaseController {
                                       allMedia: Map[UniqueIdentifier, String],
                                       allTestResults: Map[String, PassMarkReportTestResults],
                                       allAssessmentScores: Map[String, CandidateScoresAndFeedback],
-                                      allPassMarkEvaluations: Map[String, List[SchemeEvaluationResult]]): List[PassMarkReportItem] = {
+                                      allPassMarkEvaluations: Map[String, List[SchemeEvaluationResult]],
+                                      allAssessmentCentreEvaluations: Map[String, List[SchemeEvaluationResult]]): List[PassMarkReportItem] = {
 
     val passMarkResultsEmpty = PassMarkReportTestResults(competency = None, numerical = None, verbal = None, situational = None)
     applications.map { application =>
@@ -205,13 +210,11 @@ trait ReportingController extends BaseController {
         val onlineTestResults = allTestResults.getOrElse(appId.toString(), passMarkResultsEmpty)
         val assessmentScores = allAssessmentScores.get(appId.toString())
 
-        val schemeOnlineTestResults = application.schemes.map { scheme =>
-          val schemeEvaluationResultList: List[SchemeEvaluationResult] = allPassMarkEvaluations.getOrElse(appId.toString(), Nil)
-          val maybeSchemeEvaluationResult: Option[SchemeEvaluationResult] = schemeEvaluationResultList.find(_.scheme == scheme)
-          maybeSchemeEvaluationResult.fold("") {_.result.toString}
-        }
+        val schemeOnlineTestResults = processEvaluations(appId, application.schemes, allPassMarkEvaluations)
+        val assessmentCentreTestResults = processEvaluations(appId, application.schemes, allAssessmentCentreEvaluations)
+
         PassMarkReportItem(application, diversityAnswers, ses, hearAboutUs, allocatedAssessmentCentre, onlineTestResults,
-          schemeOnlineTestResults, assessmentScores, List())
+          schemeOnlineTestResults, assessmentScores, assessmentCentreTestResults)
           .copy(
             locations = locationNames,
             onlineAdjustments = onlineAdjustmentsVal,
@@ -220,6 +223,14 @@ trait ReportingController extends BaseController {
       }
       passMarkReportItem.getOrElse(throw new IllegalStateException(s"Application Id does not exist in pass mark report generation " +
         s"for the user Id = ${application.userId}"))
+    }
+  }
+
+  private def processEvaluations(appId: UniqueIdentifier, schemes: List[Scheme], allEvaluations: Map[String, List[SchemeEvaluationResult]]) = {
+    schemes.map { scheme =>
+      val schemeEvaluationResultList: List[SchemeEvaluationResult] = allEvaluations.getOrElse(appId.toString(), Nil)
+      val maybeSchemeEvaluationResult: Option[SchemeEvaluationResult] = schemeEvaluationResultList.find(_.scheme == scheme)
+      maybeSchemeEvaluationResult.fold("") {_.result.toString}
     }
   }
 
