@@ -47,7 +47,7 @@ object Exceptions {
 
   case class AssistanceDetailsNotFound(id: String) extends Exception(id)
 
-  case class CannotUpdateAssistanceDetails(userId: String) extends Exception(userId)
+  case class CannotUpdateAssistanceDetails(id: String) extends Exception(id)
 
   case class CannotUpdateReview(applicationId: String) extends Exception(applicationId)
 

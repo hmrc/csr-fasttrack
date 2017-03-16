@@ -3,6 +3,7 @@
 POST        /personal-details/:userId/:applicationId                     controllers.PersonalDetailsController.personalDetails(userId: String, applicationId: String)
 GET         /personal-details/:userId/:applicationId                     controllers.PersonalDetailsController.find(userId: String, applicationId: String)
 
+PUT         /assistance-details/update-to-gis/:applicationId             controllers.AssistanceDetailsController.updateToGis(applicationId: String)
 PUT         /assistance-details/:userId/:applicationId                   controllers.AssistanceDetailsController.update(userId: String, applicationId: String)
 GET         /assistance-details/:userId/:applicationId                   controllers.AssistanceDetailsController.find(userId: String, applicationId: String)
 

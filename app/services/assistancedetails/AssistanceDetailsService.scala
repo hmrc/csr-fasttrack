@@ -36,4 +36,8 @@ trait AssistanceDetailsService {
   def find(applicationId: String, userId: String): Future[AssistanceDetails] = {
     adRepository.find(applicationId)
   }
+
+  def updateToGis(applicationId: String): Future[Unit] = {
+    adRepository.updateToGis(applicationId)
+  }
 }
