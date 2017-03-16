@@ -16,12 +16,10 @@
 
 package model
 
-import model.persisted.OnlineTestPassmarkEvaluation
-import play.api.libs.json.Json
+import model.EvaluationResults.AssessmentRuleCategoryResult
 
-case class OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation: OnlineTestPassmarkEvaluation,
-                                                         assessmentScores: AssessmentPassmarkPreferencesAndScores)
-
-object OnlineTestEvaluationAndAssessmentCentreScores {
-  implicit val onlineTestEvaluationAndAssessmentCentreScoresFormat = Json.format[OnlineTestEvaluationAndAssessmentCentreScores]
-}
+case class AssessmentPassmarkEvaluation(applicationId: String,
+                                        passmarkVersion: String,
+                                        onlineTestPassMarkVersion: String,
+                                        evaluationResult: AssessmentRuleCategoryResult,
+                                        newApplicationStatus: ApplicationStatuses.EnumVal)

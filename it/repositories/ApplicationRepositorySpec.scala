@@ -16,7 +16,7 @@
 
 package repositories
 
-import model.ApplicationStatuses
+import model.{ ApplicationStatuses, AssessmentPassmarkEvaluation }
 import model.ApplicationStatuses._
 import model.AssessmentScheduleCommands.ApplicationForAssessmentAllocationResult
 import model.EvaluationResults.{ AssessmentRuleCategoryResult, CompetencyAverageResult }
@@ -189,7 +189,8 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       createApplication("app1", ApplicationStatuses.AssessmentScoresAccepted)
 
       val result = AssessmentRuleCategoryResult(Some(true), competencyAverageResult, schemesEvaluation = Nil, overallEvaluation = Nil)
-      applicationRepo.saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AwaitingAssessmentCentreReevaluation).futureValue
+      applicationRepo.saveAssessmentScoreEvaluation(
+        AssessmentPassmarkEvaluation("app1", "1", "2", result, ApplicationStatuses.AwaitingAssessmentCentreReevaluation)).futureValue
 
       val status = getApplicationStatus("app1")
       status mustBe ApplicationStatuses.AwaitingAssessmentCentreReevaluation
@@ -199,7 +200,8 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       createApplication("app1", ApplicationStatuses.AwaitingAssessmentCentreReevaluation)
 
       val result = AssessmentRuleCategoryResult(Some(true), competencyAverageResult, schemesEvaluation = Nil, overallEvaluation = Nil)
-      applicationRepo.saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AssessmentScoresAccepted).futureValue
+      applicationRepo.saveAssessmentScoreEvaluation(
+        AssessmentPassmarkEvaluation("app1", "1", "2", result, ApplicationStatuses.AssessmentScoresAccepted)).futureValue
 
       val status = getApplicationStatus("app1")
       status mustBe ApplicationStatuses.AssessmentScoresAccepted
@@ -209,7 +211,8 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       createApplication("app1", ApplicationStatuses.Withdrawn)
 
       val result = AssessmentRuleCategoryResult(Some(true), competencyAverageResult, schemesEvaluation = Nil, overallEvaluation = Nil)
-      applicationRepo.saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AssessmentScoresAccepted).futureValue
+      applicationRepo.saveAssessmentScoreEvaluation(AssessmentPassmarkEvaluation(
+        "app1", "1", "2", result, ApplicationStatuses.AssessmentScoresAccepted)).futureValue
 
       val status = getApplicationStatus("app1")
       status mustBe ApplicationStatuses.Withdrawn

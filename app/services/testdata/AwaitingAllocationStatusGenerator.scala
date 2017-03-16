@@ -16,8 +16,6 @@
 
 package services.testdata
 
-import java.util.UUID
-
 import model.EvaluationResults.Amber
 import model.persisted.SchemeEvaluationResult
 import model.testdata.GeneratorConfig
@@ -41,7 +39,7 @@ trait AwaitingAllocationStatusGenerator extends ConstructiveGenerator {
 
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      _ <- otRepository.savePassMarkScore(candidateInPreviousStatus.applicationId.get, UUID.randomUUID().toString,
+      _ <- otRepository.savePassMarkScore(candidateInPreviousStatus.applicationId.get, "passmarkVersion1",
         evaluationResult, Some(ApplicationStatuses.AwaitingAllocation))
     } yield {
       candidateInPreviousStatus.copy(applicationStatus = ApplicationStatuses.AwaitingAllocation)

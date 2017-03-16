@@ -20,12 +20,11 @@ import factories.UUIDFactory
 import model.ApplicationStatuses.EnumVal
 import model.{ ApplicationStatuses, Scheme }
 import model.PersistedObjects._
-import model.persisted.{ CubiksTestProfile, SchemeEvaluationResult }
+import model.persisted.{ CubiksTestProfile, OnlineTestPassmarkEvaluation, SchemeEvaluationResult }
 import model.EvaluationResults._
 import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser }
 import model.PersistedObjects._
 import model.Scheme.Scheme
-import model.persisted.SchemeEvaluationResult
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.OnlineTestRepository
 
@@ -105,7 +104,7 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
   def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, version: String,
     evaluationResult: List[SchemeEvaluationResult]): Future[Unit] = ???
 
-  override def findPassmarkEvaluation(appId: String): Future[List[SchemeEvaluationResult]] = ???
+  override def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = ???
 
   def addReminderNotificationStatus(userId: String, notificationStatus: String): scala.concurrent.Future[Unit] = ???
 

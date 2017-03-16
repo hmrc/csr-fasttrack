@@ -19,12 +19,11 @@ package services.evaluation
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import model.AssessmentPassmarkPreferencesAndScores
 import model.EvaluationResults._
-import model.persisted.SchemeEvaluationResult
-import play.api.Logger
+import model.persisted.{ OnlineTestPassmarkEvaluation, SchemeEvaluationResult }
 
 trait AssessmentCentrePassmarkRulesEngine {
 
-  def evaluate(onlineTestEvaluation: List[SchemeEvaluationResult],
+  def evaluate(onlineTestEvaluation: OnlineTestPassmarkEvaluation,
                candidateScore: AssessmentPassmarkPreferencesAndScores,
                config: AssessmentEvaluationMinimumCompetencyLevel): AssessmentRuleCategoryResult
 }
@@ -32,7 +31,7 @@ trait AssessmentCentrePassmarkRulesEngine {
 object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRulesEngine with AssessmentScoreCalculator
     with AssessmentCentreAllSchemesEvaluator with FinalResultEvaluator {
 
-  def evaluate(onlineTestEvaluation: List[SchemeEvaluationResult],
+  def evaluate(onlineTestEvaluation: OnlineTestPassmarkEvaluation,
                candidateScores: AssessmentPassmarkPreferencesAndScores,
                config: AssessmentEvaluationMinimumCompetencyLevel): AssessmentRuleCategoryResult = {
     val competencyAverage = countAverage(candidateScores.scores)
@@ -47,7 +46,7 @@ object AssessmentCentrePassmarkRulesEngine extends AssessmentCentrePassmarkRules
         val onlyAssessmentCentreEvaluation = evaluateSchemes(appId, candidateScores.passmark,
           competencyAverage.overallScore, candidateScores.schemes)
 
-        val overallEvaluation = combine(onlineTestEvaluation, onlyAssessmentCentreEvaluation)
+        val overallEvaluation = combine(onlineTestEvaluation.result, onlyAssessmentCentreEvaluation)
 
         AssessmentRuleCategoryResult(
           passedMinimumCompetencyLevelCheckOpt,

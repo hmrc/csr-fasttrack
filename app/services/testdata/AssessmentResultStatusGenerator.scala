@@ -17,7 +17,7 @@
 package services.testdata
 
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import model.ApplicationStatuses
+import model.{ ApplicationStatuses, AssessmentPassmarkEvaluation }
 import model.EvaluationResults._
 import model.persisted.SchemeEvaluationResult
 import model.testdata.GeneratorConfig
@@ -129,7 +129,8 @@ trait AssessmentResultStatusGenerator extends ConstructiveGenerator {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       appId = candidateInPreviousStatus.applicationId.get
-      _ <- aRepository.saveAssessmentScoreEvaluation(appId, "version1", getAssessmentRuleCategoryResult, status)
+      _ <- aRepository.saveAssessmentScoreEvaluation(AssessmentPassmarkEvaluation(
+        appId, "version1", "passmarkVersion1", getAssessmentRuleCategoryResult, status))
     } yield {
       candidateInPreviousStatus.copy(applicationStatus = status)
     }

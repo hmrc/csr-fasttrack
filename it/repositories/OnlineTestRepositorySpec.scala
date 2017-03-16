@@ -25,7 +25,7 @@ import model.Exceptions._
 import model.OnlineTestCommands.OnlineTestApplicationWithCubiksUser
 import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest }
 import model._
-import model.persisted.{ CubiksTestProfile, SchemeEvaluationResult }
+import model.persisted.{ CubiksTestProfile, OnlineTestPassmarkEvaluation, SchemeEvaluationResult }
 import org.joda.time.{ DateTime, DateTimeZone }
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{ BSONArray, BSONDocument }
@@ -670,9 +670,9 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       result mustBe empty
     }
 
-    "return a candidate who is in ASSESSMENT_SCORES_ACCEPTED status and with an old passmark version" in {
+    "return a candidate who is in AWAITING_ASSESSMENT_CENTRE_RE_EVALUATION status and with an old passmark version" in {
       val AppId = UUID.randomUUID().toString
-      createOnlineTestApplication(AppId, ApplicationStatuses.AssessmentScoresAccepted,
+      createOnlineTestApplication(AppId, ApplicationStatuses.AwaitingAssessmentCentreReevaluation,
         xmlReportSavedOpt = Some(true), alreadyEvaluatedAgainstPassmarkVersionOpt = Some("oldVersion"))
 
       val result = onlineTestRepo.nextApplicationPassMarkProcessing("currentVersion").futureValue
@@ -710,12 +710,12 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       )).futureValue
 
       val result = onlineTestRepo.findPassmarkEvaluation(appId).futureValue
-      result mustBe List(
+      result mustBe OnlineTestPassmarkEvaluation("passmarkVersion", List(
         SchemeEvaluationResult(model.Scheme.Business, Green),
         SchemeEvaluationResult(model.Scheme.Commercial, Red),
         SchemeEvaluationResult(model.Scheme.DigitalAndTechnology, Amber),
         SchemeEvaluationResult(model.Scheme.Finance, Green),
-        SchemeEvaluationResult(model.Scheme.ProjectDelivery, Green)
+        SchemeEvaluationResult(model.Scheme.ProjectDelivery, Green))
       )
     }
 
