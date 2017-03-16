@@ -99,6 +99,8 @@ trait GeneralApplicationRepository {
   def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResult,
                                     newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit]
 
+  def findAssessmentCentreCompetencyAverageResult(applicationId: String): Future[Option[CompetencyAverageResult]]
+
   def getSchemeLocations(applicationId: String): Future[List[String]]
 
   def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit]
@@ -579,6 +581,21 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         ))
 
     selectRandom(query).map(_.map(doc => doc.getAs[String]("applicationId").get))
+  }
+
+  def findAssessmentCentreCompetencyAverageResult(applicationId: String): Future[Option[CompetencyAverageResult]] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    val projection = BSONDocument(
+      "assessment-centre-passmark-evaluation.competency-average" -> 2
+    )
+    collection.find(query, projection).one[BSONDocument] map {
+      case Some(doc) =>
+        val passMarkEvaluationDocOpt = doc.getAs[BSONDocument]("assessment-centre-passmark-evaluation")
+        passMarkEvaluationDocOpt.flatMap { passMarkEvaluationDoc =>
+          passMarkEvaluationDoc.getAs[CompetencyAverageResult]("competency-average")
+        }
+      case _ => None
+    }
   }
 
   def nextAssessmentCentrePassedOrFailedApplication(): Future[Option[ApplicationForNotification]] = {
