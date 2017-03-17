@@ -58,6 +58,8 @@ POST        /assessment-centre-allocation                                control
 GET         /allocation-status/:applicationId                            controllers.AssessmentScheduleController.allocationStatus(applicationId)
 POST        /allocation-status/confirm/:applicationId                    controllers.AssessmentScheduleController.confirmAllocation(applicationId)
 
+POST        /assessment-indicator/update                                 controllers.AssessmentCentreIndicatorController.applyNewAssessmentMapping(batchSize: Int)
+
 PUT         /questionnaire/:applicationId/:sectionKey                    controllers.QuestionnaireController.addSection(applicationId: String,sectionKey: String)
 
 GET         /search/find-by-id/user/:userId/framework/:frameworkId       controllers.SearchForApplicantsController.findById(userId: String, frameworkId: String)
