@@ -122,7 +122,7 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
     }
   }
 
-  def getCompetencyAverage(applicationId: String): Future[Option[CompetencyAverageResult]] = {
+  def getCompetencyAverageResult(applicationId: String): Future[Option[CompetencyAverageResult]] = {
     aRepository.findAssessmentCentreCompetencyAverageResult(applicationId)
   }
 
