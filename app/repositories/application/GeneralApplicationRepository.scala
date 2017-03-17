@@ -115,6 +115,8 @@ trait GeneralApplicationRepository {
   def removeSchemeLocations(applicationId: String): Future[Unit]
 
   def removeProgressStatuses(applicationId: String, progressStatuses: List[ProgressStatuses.ProgressStatus]): Future[Unit]
+
+  def nextUserAndAppIdsReadyForAssessmentIndicatorUpdate(batchSize: Int, mappingVersion: String): Future[Map[String, String]]
 }
 
 // scalastyle:on number.of.methods
@@ -710,6 +712,26 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       "scheme-locations" -> BSONString("")
     ))
     collection.update(query, schemeLocationsBSON, upsert = false) map { _ => () }
+  }
+
+  override def nextUserAndAppIdsReadyForAssessmentIndicatorUpdate(batchSize: Int,
+                                                                  mappingVersion: String): Future[Map[String, String]] = {
+    import ApplicationStatuses._
+    val ignoredStatuses = List(AllocationConfirmed, AllocationUnconfirmed)
+    val query = BSONDocument(
+      "applicationStatus" -> BSONDocument("$nin" -> ignoredStatuses),
+      "assessment-centre-indicator" -> BSONDocument("$exists" -> true),
+      "assessment-centre-indicator.version" -> BSONDocument("$ne" -> mappingVersion)
+    )
+
+    val projection = BSONDocument("applicationId" -> 1, "userId" -> 1, "_id" -> 0)
+    collection.find(query, projection).cursor[BSONDocument]().collect[List](batchSize).map(_.flatMap { doc =>
+      doc.getAs[String]("applicationId").flatMap { appId =>
+        doc.getAs[String]("userId").map { userId =>
+          userId -> appId
+        }
+      }
+    }.toMap)
   }
 
   private def resultToBSON(schemeName: String, result: Option[EvaluationResults.Result]): BSONDocument = result match {

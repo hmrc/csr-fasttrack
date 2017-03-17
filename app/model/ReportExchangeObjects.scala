@@ -85,6 +85,13 @@ object ReportExchangeObjects {
     assessmentCentreIndicator: Option[AssessmentCentreIndicator]
   )
 
+  case class AssessmentCentreIndicatorReport(
+    applicationId: Option[String],
+    userId: String,
+    applicationStatus: Option[String],
+    assessmentCentreIndicator: Option[AssessmentCentreIndicator]
+  )
+
   case class ReportWithPersonalDetails(
     applicationId: UniqueIdentifier,
     userId: UniqueIdentifier,
@@ -247,6 +254,7 @@ object ReportExchangeObjects {
     implicit val applicationPreferencesWithTestResultsFormats = Json.format[ApplicationPreferencesWithTestResults]
     implicit val successfulCandidatesReportFormats = Json.format[ApplicationPreferencesWithTestResultsAndContactDetails]
     implicit val candidateAwaitingAllocationFormats = Json.format[CandidateAwaitingAllocation]
+    implicit val assessmentCentreIndicatorReportFormats = Json.format[AssessmentCentreIndicatorReport]
   }
 
   val fromBooleanToYesNo: Boolean => String = (b: Boolean) => if (b) "Yes" else "No"

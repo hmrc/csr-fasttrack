@@ -127,6 +127,8 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
 
   override def removeSchemeLocations(applicationId: String): Future[Unit] = ???
 
+  def nextUserAndAppIdsReadyForAssessmentIndicatorUpdate(batchSize: Int, mappingVersion: String): Future[Map[String, String]] = ???
+
   def saveAssessmentScoreEvaluation(evaluation: AssessmentPassmarkEvaluation): Future[Unit] = ???
 }
 // scalastyle:on number.of.methods
