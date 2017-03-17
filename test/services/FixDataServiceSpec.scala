@@ -27,6 +27,7 @@ import repositories.application.{ GeneralApplicationRepository, OnlineTestReposi
 import testkit.MockitoSugar
 import org.mockito.Matchers._
 import org.mockito.Mockito._
+import play.api.mvc.RequestHeader
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -45,8 +46,9 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures wi
       when(mockOnlineTestRepo.savePassMarkScore(any[String], any[String], any[List[SchemeEvaluationResult]],
         any[Option[ApplicationStatuses.EnumVal]])
       ).thenReturn(Future.successful(()))
+      when(mockAuditService.logEvent(any[String], any[Map[String, String]])(any[HeaderCarrier], any[RequestHeader])).thenReturn(())
 
-      val actual = Service.promoteToAssessmentCentre("appId")(hc, rh).futureValue
+      val actual = service.promoteToAssessmentCentre("appId")(hc, rh).futureValue
       actual mustBe (())
     }
 
@@ -61,6 +63,11 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures wi
     implicit val hc = HeaderCarrier()
     implicit val rh = EmptyRequestHeader
 
-    object Service extends FixDataService(mockAppRepo, mockPassMarkSettingsRepo, mockOnlineTestRepo, mockAuditService)
+    val service = new FixDataService {
+      val appRepo = mockAppRepo
+      val passmarkSettingsRepo = mockPassMarkSettingsRepo
+      val onlineTestRepo = mockOnlineTestRepo
+      val auditService = mockAuditService
+    }
   }
 }

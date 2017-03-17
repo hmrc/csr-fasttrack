@@ -21,22 +21,24 @@ import model.EvaluationResults.Green
 import model.persisted.SchemeEvaluationResult
 import play.api.mvc.RequestHeader
 import repositories._
-import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
+import repositories.application._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object FixDataService extends FixDataService(applicationRepository, onlineTestPassMarkSettingsRepository,
-  onlineTestRepository, AuditService
-)
+object FixDataService extends FixDataService {
+  val appRepo: GeneralApplicationMongoRepository = applicationRepository
+  val passmarkSettingsRepo: OnlineTestPassMarkSettingsRepository = onlineTestPassMarkSettingsRepository
+  val onlineTestRepo: OnlineTestMongoRepository = onlineTestRepository
+  val auditService = AuditService
+}
 
-abstract class FixDataService(
-  appRepo: GeneralApplicationRepository,
-  passmarkSettingsRepo: OnlineTestPassMarkSettingsRepository,
-  onlineTestRepo: OnlineTestRepository,
-  auditService: AuditService
-) {
+trait FixDataService {
+  def appRepo: GeneralApplicationRepository
+  def passmarkSettingsRepo: OnlineTestPassMarkSettingsRepository
+  def onlineTestRepo: OnlineTestRepository
+  def auditService: AuditService
 
   def promoteToAssessmentCentre(appId: String)(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
     for {
