@@ -79,6 +79,7 @@ GET         /report/candidates-details-stream/previous-year              control
 
 GET         /diagnostic/user/:applicationId                              controllers.DiagnosticReportController.getApplicationByApplicationId(applicationId: String)
 GET         /diagnostic/all-users                                        controllers.DiagnosticReportController.getAllApplications
+GET         /diagnostic/all-users-assessment-centre-indicator            controllers.DiagnosticReportController.getAllUsersAssessmentCentreIndicatorReport
 
 GET         /online-test/candidate/:userId                               controllers.OnlineTestController.getOnlineTest(userId: String)
 POST        /online-test/candidate/:userId/status                        controllers.OnlineTestController.onlineTestStatusUpdate(userId: String)
