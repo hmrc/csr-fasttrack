@@ -19,7 +19,9 @@ package model
 import play.api.libs.json.Json
 import reactivemongo.bson.{ BSONDocument, BSONHandler, Macros }
 
-final case class AssessmentCentreIndicator(area: String, assessmentCentre: String)
+final case class AssessmentCentreIndicator(area: String,
+                                           assessmentCentre: String,
+                                           version: Option[String] = None)
 
 object AssessmentCentreIndicator {
   implicit val formats = Json.format[AssessmentCentreIndicator]

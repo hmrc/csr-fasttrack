@@ -24,7 +24,13 @@ import scala.io.Source
 
 object AssessmentCentreIndicatorCSVRepository extends AssessmentCentreIndicatorRepository {
   private val CsvFileName = "AssessmentCentreIndicatorLookup.csv"
+
   override val expectedNumberOfHeaders = 3
+
+  /**
+    * Bump the version in order to enable re-mapping for the all existing users
+    */
+  val AssessmentCentreIndicatorVersion = "2"
 
   import play.api.Play.current
 
@@ -41,7 +47,7 @@ object AssessmentCentreIndicatorCSVRepository extends AssessmentCentreIndicatorR
           headers.length == line.length,
           s"Number of columns must be equal to number of headers. Incorrect line: ${line.mkString("|")}"
         )
-        m + ((line(0), AssessmentCentreIndicator(line(1), line(2))))
+        m + ((line(0), AssessmentCentreIndicator(line(1), line(2), Some(AssessmentCentreIndicatorVersion))))
       }
 
       values.foldLeft(Map.empty[String, AssessmentCentreIndicator])((acc, line) => toMap(acc, line))
@@ -63,7 +69,9 @@ object AssessmentCentreIndicatorCSVRepository extends AssessmentCentreIndicatorR
 }
 
 trait AssessmentCentreIndicatorRepository extends CsvHelper {
-  val DefaultIndicator = AssessmentCentreIndicator("London", "London")
+  val DefaultIndicator = AssessmentCentreIndicator("London", "London",
+    Some(AssessmentCentreIndicatorCSVRepository.AssessmentCentreIndicatorVersion))
   private[repositories] val assessmentCentreIndicators: Map[String, AssessmentCentreIndicator]
+
   def calculateIndicator(postcode: Option[String]): AssessmentCentreIndicator
 }
