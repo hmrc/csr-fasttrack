@@ -375,3 +375,10 @@ London:
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
+         - date: 27/05/2017
+           amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
+           pmCapacity: 36
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
