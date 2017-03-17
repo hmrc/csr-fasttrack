@@ -17,6 +17,9 @@
 package controllers
 
 import akka.stream.scaladsl.Source
+import model.PersistedObjects.ContactDetailsWithId
+import model.ReportExchangeObjects.AssessmentCentreIndicatorReport
+import model.report.AssessmentCentreIndicatorReportItem
 import play.api.libs.json.{ JsObject, Json }
 import play.api.mvc.{ Action, AnyContent }
 import model.PersistedObjects.Implicits.candidateTestReportFormats
@@ -28,6 +31,7 @@ import repositories.application.DiagnosticReportingRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object DiagnosticReportController extends DiagnosticReportController {
   val drRepository: DiagnosticReportingRepository = diagnosticReportRepository
@@ -74,5 +78,58 @@ trait DiagnosticReportController extends BaseController {
   def getAllApplications = Action { implicit request =>
     val response = Source.fromPublisher(Streams.enumeratorToPublisher(drRepository.findAll()))
     Ok.chunked(response)
+  }
+
+  private val assessmentCentreIndicatorHeaders = "ApplicationId, UserId, ApplicationStatus, Area, AssessmentCentre, Postcode"
+
+  def getAllUsersAssessmentCentreIndicatorReport = Action.async { implicit request =>
+    val applicationsFut = reportingRepository.assessmentCentreIndicatorReport
+    val allContactDetailsFut = contactDetailsRepository.findAll.map(x => x.map(cd => cd.userId -> cd).toMap)
+    val reportFut: Future[String] = for {
+      allApplications <- applicationsFut
+      allContactDetails <- allContactDetailsFut
+    } yield {
+      val data = buildAssessmentCentreIndicatorReportRows(allApplications, allContactDetails)
+
+      data.map { row =>
+        makeRow(
+          row.applicationId,
+          Some(row.userId),
+          row.applicationStatus,
+          row.assessmentCentreIndicator.map(_.area),
+          row.assessmentCentreIndicator.map(_.assessmentCentre),
+          row.postcode
+        )
+      }.mkString("\n")
+    }
+    reportFut.map { csvData =>
+      val csvReport = assessmentCentreIndicatorHeaders + "\n" + csvData
+      Ok(csvReport)
+    }
+  }
+
+  private def makeRow(values: Option[String]*) =
+    values.map { s =>
+      val ret = s.getOrElse(" ").replace("\r", " ").replace("\n", " ").replace("\"", "'")
+      "\"" + ret + "\""
+    }.mkString(",")
+
+  private def buildAssessmentCentreIndicatorReportRows(allApplications: List[AssessmentCentreIndicatorReport],
+                                                       allContactDetails: Map[String, ContactDetailsWithId])
+  : List[AssessmentCentreIndicatorReportItem] = {
+    allApplications.map { application =>
+
+      val postcode = allContactDetails.get(application.userId).flatMap { contactDetails =>
+        contactDetails.postCode
+      }
+
+      AssessmentCentreIndicatorReportItem(
+        applicationId = application.applicationId,
+        userId = application.userId,
+        applicationStatus = application.applicationStatus,
+        assessmentCentreIndicator = application.assessmentCentreIndicator,
+        postcode = postcode
+      )
+    }
   }
 }
