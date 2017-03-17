@@ -162,7 +162,7 @@ trait ReportingController extends BaseController {
     val allAssessmentCentreEvaluationsFut = onlineTestRepository.findAllAssessmentCentreEvaluations
     // Process the futures
     val reportFut: Future[List[PassMarkReportItem]] = for {
-      applications <- applicationsFut
+      allApplications <- applicationsFut
       allContactDetails <- allContactDetailsFut
       allLocations <- allLocationsFut
       allDiversityQuestions <- allQuestionsFut
@@ -172,46 +172,57 @@ trait ReportingController extends BaseController {
       allPassMarkEvaluations <- allPassMarkEvaluationsFut
       allAssessmentCentreEvaluations <- allAssessmentCentreEvaluationsFut
     } yield {
-      buildPassMarkReportRows(applications, allContactDetails, allLocations, allDiversityQuestions, allMedia,
-        allTestScores, allScores, allPassMarkEvaluations, allAssessmentCentreEvaluations)
+      val passMarkData = PassMarkData(
+        allApplications,
+        allContactDetails,
+        allLocations,
+        allDiversityQuestions,
+        allMedia,
+        allTestScores,
+        allScores,
+        allPassMarkEvaluations,
+        allAssessmentCentreEvaluations
+      )
+      buildPassMarkReportRows(passMarkData)
     }
     reportFut.map { report => Ok(Json.toJson(report)) }
   }
 
-  // scalastyle:off parameter.number
-  private def buildPassMarkReportRows(applications: List[ApplicationForCandidateProgressReport],
-                                      allContactDetails: Map[String, ContactDetailsWithId],
-                                      allLocations: List[LocationSchemes],
-                                      allDiversityQuestions: Map[String, Map[String, String]],
-                                      allMedia: Map[UniqueIdentifier, String],
-                                      allTestResults: Map[String, PassMarkReportTestResults],
-                                      allAssessmentScores: Map[String, CandidateScoresAndFeedback],
-                                      allPassMarkEvaluations: Map[String, List[SchemeEvaluationResult]],
-                                      allAssessmentCentreEvaluations: Map[String, List[SchemeEvaluationResult]]): List[PassMarkReportItem] = {
+  case class PassMarkData(allApplications: List[ApplicationForCandidateProgressReport],
+                          allContactDetails: Map[String, ContactDetailsWithId],
+                          allLocations: List[LocationSchemes],
+                          allDiversityQuestions: Map[String, Map[String, String]],
+                          allMedia: Map[UniqueIdentifier, String],
+                          allTestResults: Map[String, PassMarkReportTestResults],
+                          allAssessmentScores: Map[String, CandidateScoresAndFeedback],
+                          allPassMarkEvaluations: Map[String, List[SchemeEvaluationResult]],
+                          allAssessmentCentreEvaluations: Map[String, List[SchemeEvaluationResult]]
+                         )
 
+  private def buildPassMarkReportRows(data: PassMarkData): List[PassMarkReportItem] = {
     val passMarkResultsEmpty = PassMarkReportTestResults(competency = None, numerical = None, verbal = None, situational = None)
-    applications.map { application =>
+    data.allApplications.map { application =>
       val passMarkReportItem = application.applicationId.map { appId =>
-        val diversityAnswers = extractDiversityAnswers(appId, allDiversityQuestions)
+        val diversityAnswers = extractDiversityAnswers(appId, data.allDiversityQuestions)
         val locationIds = application.locationIds
         val onlineAdjustmentsVal = reportingFormatter.getOnlineAdjustments(application.onlineAdjustments, application.adjustments)
         val assessmentCentreAdjustmentsVal = reportingFormatter.getAssessmentCentreAdjustments(
           application.assessmentCentreAdjustments,
           application.adjustments
         )
-        val locationNames = locationIds.flatMap(locationId => allLocations.find(_.id == locationId).map { _.locationName })
-        val ses = allDiversityQuestions.get(appId.toString()).map {
+        val locationNames = locationIds.flatMap(locationId => data.allLocations.find(_.id == locationId).map { _.locationName })
+        val ses = data.allDiversityQuestions.get(appId.toString()).map {
           questions => socioEconomicScoreCalculator.calculate(questions)
         }.getOrElse("N/A")
-        val hearAboutUs = allMedia.getOrElse(application.userId, "")
-        val allocatedAssessmentCentre = allContactDetails.get(application.userId.toString()).map { contactDetails =>
+        val hearAboutUs = data.allMedia.getOrElse(application.userId, "")
+        val allocatedAssessmentCentre = data.allContactDetails.get(application.userId.toString()).map { contactDetails =>
           assessmentCentreIndicatorRepository.calculateIndicator(contactDetails.postCode).assessmentCentre
         }
-        val onlineTestResults = allTestResults.getOrElse(appId.toString(), passMarkResultsEmpty)
-        val assessmentScores = allAssessmentScores.get(appId.toString())
+        val onlineTestResults = data.allTestResults.getOrElse(appId.toString(), passMarkResultsEmpty)
+        val assessmentScores = data.allAssessmentScores.get(appId.toString())
 
-        val schemeOnlineTestResults = processEvaluations(appId, application.schemes, allPassMarkEvaluations)
-        val assessmentCentreTestResults = processEvaluations(appId, application.schemes, allAssessmentCentreEvaluations)
+        val schemeOnlineTestResults = processEvaluations(appId, application.schemes, data.allPassMarkEvaluations)
+        val assessmentCentreTestResults = processEvaluations(appId, application.schemes, data.allAssessmentCentreEvaluations)
 
         PassMarkReportItem(application, diversityAnswers, ses, hearAboutUs, allocatedAssessmentCentre, onlineTestResults,
           schemeOnlineTestResults, assessmentScores, assessmentCentreTestResults)
