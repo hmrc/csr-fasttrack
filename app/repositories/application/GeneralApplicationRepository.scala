@@ -580,6 +580,8 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
           BSONDocument(
             "$and" -> BSONArray(
               BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingAssessmentCentreReevaluation),
+              BSONDocument("passmarkEvaluation.passmarkVersion" -> BSONDocument("$exists" -> true)),
+              BSONDocument("assessment-centre-passmark-evaluation.onlineTestPassMarkVersion" -> BSONDocument("$exists" -> true)),
               BSONDocument("$where" ->
                 "this['assessment-centre-passmark-evaluation'].onlineTestPassMarkVersion != this.passmarkEvaluation.passmarkVersion")
             ))
