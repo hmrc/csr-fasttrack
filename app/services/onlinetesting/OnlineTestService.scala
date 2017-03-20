@@ -163,7 +163,7 @@ trait OnlineTestService {
         case OnlineTestInvited | OnlineTestStarted | OnlineTestCompleted =>
           val appId = app.applicationId
           val isGis = app.assistanceDetails.isGis
-          val candidateTestReport = toCandidateTestReport(appId, testResultMap)
+          val candidateTestReport = toCandidateTestReport(appId, testResultMap, isGis)
           if (candidateTestReport.isValid(isGis)) {
             saveOnlineTestReport(appId, candidateTestReport)
           } else {
@@ -295,18 +295,25 @@ trait OnlineTestService {
     }
   }
 
-  private def toCandidateTestReport(appId: String, tests: Map[String, TestResult]) = {
+  private def toCandidateTestReport(appId: String, tests: Map[String, TestResult], isGis: Boolean) = {
     val VerbalTestName = "Logiks Verbal and Numerical (Intermediate) - Verbal"
     val NumericalTestName = "Logiks Verbal and Numerical (Intermediate) - Numerical"
     val CompetencyTestName = "Cubiks Factors"
     val SituationalTestName = "Civil Service Fast Track Apprentice SJQ"
 
-    CandidateTestReport(
+    val candidateOnlineTestReport = CandidateTestReport(
       appId, "XML",
       tests.get(CompetencyTestName),
       tests.get(NumericalTestName),
       tests.get(VerbalTestName),
       tests.get(SituationalTestName)
     )
+
+    isGis && tests.size > 2 match {
+      case true => Logger.warn(s"Remove unwanted test results for gis application $appId")
+        candidateOnlineTestReport.copy(numerical = None, verbal = None)
+      case false =>
+        candidateOnlineTestReport
+    }
   }
 }

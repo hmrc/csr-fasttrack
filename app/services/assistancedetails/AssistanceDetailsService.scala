@@ -16,18 +16,27 @@
 
 package services.assistancedetails
 
+import model.ApplicationStatuses._
 import model.exchange.AssistanceDetails
 import repositories._
-import repositories.application.AssistanceDetailsRepository
+import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository, OnlineTestRepository }
+import services.onlinetesting.OnlineTestService
+import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 
 object AssistanceDetailsService extends AssistanceDetailsService {
   val adRepository = assistanceDetailsRepository
+  val appRepository = applicationRepository
+  val onlineTestingRepo = onlineTestRepository
+  val onlineTestService = OnlineTestService
 }
 
 trait AssistanceDetailsService {
   val adRepository: AssistanceDetailsRepository
+  val appRepository: GeneralApplicationRepository
+  val onlineTestService: OnlineTestService
+  val onlineTestingRepo: OnlineTestRepository
 
   def update(applicationId: String, userId: String, assistanceDetails: AssistanceDetails): Future[Unit] = {
     adRepository.update(applicationId, userId, assistanceDetails)
@@ -38,6 +47,21 @@ trait AssistanceDetailsService {
   }
 
   def updateToGis(applicationId: String): Future[Unit] = {
-    adRepository.updateToGis(applicationId)
+    for {
+      _ <- adRepository.updateToGis(applicationId)
+      _ <- mayBeResetOnlineTests(applicationId)
+    } yield {
+
+    }
+  }
+
+  private def mayBeResetOnlineTests(applicationId: String) = {
+    onlineTestingRepo.getOnlineTestApplication(applicationId).flatMap {
+      case Some(onlineTestApp) if List(OnlineTestInvited, OnlineTestStarted, OnlineTestExpired).contains(onlineTestApp.applicationStatus)  =>
+        onlineTestService.registerAndInviteApplicant(onlineTestApp).map { _ => () }
+      /*case Some(onlineTestApp) if OnlineTestCompleted == onlineTestApp.applicationStatus  =>
+        onlineTestService.registerAndInviteApplicant(onlineTestApp).map { _ => () }*/
+      case _ => Future.successful(())
+    }
   }
 }

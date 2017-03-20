@@ -16,6 +16,7 @@
 
 package repositories.application
 
+import model.ApplicationStatuses._
 import model.Exceptions.{ ApplicationNotFound, AssistanceDetailsNotFound, CannotUpdateAssistanceDetails }
 import model.exchange.AssistanceDetails
 import model.persisted.ApplicationAssistanceDetails
@@ -63,7 +64,11 @@ class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
   }
 
   override def updateToGis(applicationId: String): Future[Unit] = {
-    val query = BSONDocument("applicationId" -> applicationId)
+    val query = BSONDocument(
+      "applicationId" -> applicationId,
+      "applicationStatus" -> BSONDocument("$in" ->
+        List(Submitted, OnlineTestInvited, OnlineTestStarted, OnlineTestExpired, OnlineTestCompleted)))
+
     val updateBSON = BSONDocument("$set" -> BSONDocument(
       "assistance-details.hasDisability" -> "Yes",
       "assistance-details.guaranteedInterview" -> true,
