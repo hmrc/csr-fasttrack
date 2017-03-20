@@ -24,7 +24,7 @@ import model.EvaluationResults._
 import model.Exceptions.{ IncorrectStatusInApplicationException, NotFoundException }
 import model.PersistedObjects.{ ApplicationForNotification, ContactDetails }
 import model.Scheme._
-import model._
+import model.{ AssessmentPassmarkEvaluation, _ }
 import model.persisted._
 import org.joda.time.DateTime
 import org.mockito.Matchers.{ eq => eqTo, _ }
@@ -97,7 +97,7 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
 
   "next Assessment Candidate" must {
     "return an assessment candidate score with application Id" in new ApplicationAssessmentServiceFixture {
-      val onlineTestEvaluation = List(SchemeEvaluationResult(Business, Green))
+      val onlineTestEvaluation = OnlineTestPassmarkEvaluation("passmark", List(SchemeEvaluationResult(Business, Green)))
       when(onlineTestRepositoryMock.findPassmarkEvaluation("app1")).thenReturn(Future.successful(onlineTestEvaluation))
       val result = applicationAssessmentService.nextAssessmentCandidateReadyForEvaluation.futureValue
 
@@ -136,16 +136,18 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
         schemesEvaluation = Nil,
         overallEvaluation = List(SchemeEvaluationResult(Scheme.Business, Red))
       )
-      val onlineTestEvaluation = List(SchemeEvaluationResult(Business, Green))
+      val onlineTestEvaluation = OnlineTestPassmarkEvaluation("passmark", List(SchemeEvaluationResult(Business, Green)))
       when(passmarkRulesEngineMock.evaluate(onlineTestEvaluation, scores, config)).thenReturn(result)
-      when(aRepositoryMock.saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AssessmentCentreFailed))
+      when(aRepositoryMock.saveAssessmentScoreEvaluation(AssessmentPassmarkEvaluation(
+        "app1", "1", "passmark", result, ApplicationStatuses.AssessmentCentreFailed)))
         .thenReturn(Future.successful(()))
 
       applicationAssessmentService.evaluateAssessmentCandidate(
         OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation, scores), config
       ).futureValue
 
-      verify(aRepositoryMock).saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AssessmentCentreFailed)
+      verify(aRepositoryMock).saveAssessmentScoreEvaluation(
+        AssessmentPassmarkEvaluation("app1", "1", "passmark", result, ApplicationStatuses.AssessmentCentreFailed))
       verify(auditServiceMock).logEventNoRequest(
         "ApplicationAssessmentEvaluated",
         Map("applicationId" -> "app1", "applicationStatus" -> ApplicationStatuses.AssessmentCentreFailed)
@@ -162,16 +164,18 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
         schemesEvaluation = List(SchemeEvaluationResult(Scheme.Business, Green)),
         overallEvaluation = List(SchemeEvaluationResult(Scheme.Business, Green))
       )
-      val onlineTestEvaluation = List(SchemeEvaluationResult(Business, Green))
+      val onlineTestEvaluation = OnlineTestPassmarkEvaluation("passmark", List(SchemeEvaluationResult(Business, Green)))
       when(passmarkRulesEngineMock.evaluate(onlineTestEvaluation, scores, config)).thenReturn(result)
-      when(aRepositoryMock.saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AssessmentCentrePassed))
+      when(aRepositoryMock.saveAssessmentScoreEvaluation(
+        AssessmentPassmarkEvaluation("app1", "1", "passmark", result, ApplicationStatuses.AssessmentCentrePassed)))
         .thenReturn(Future.successful(()))
 
       applicationAssessmentService.evaluateAssessmentCandidate(
         OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation, scores), config
       ).futureValue
 
-      verify(aRepositoryMock).saveAssessmentScoreEvaluation("app1", "1", result, ApplicationStatuses.AssessmentCentrePassed)
+      verify(aRepositoryMock).saveAssessmentScoreEvaluation(
+        AssessmentPassmarkEvaluation("app1", "1", "passmark", result, ApplicationStatuses.AssessmentCentrePassed))
       verify(auditServiceMock).logEventNoRequest(
         "ApplicationAssessmentEvaluated",
         Map("applicationId" -> "app1", "applicationStatus" -> ApplicationStatuses.AssessmentCentrePassed)

@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package model
+package model.persisted
 
-import model.persisted.OnlineTestPassmarkEvaluation
 import play.api.libs.json.Json
+import reactivemongo.bson.Macros
 
-case class OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation: OnlineTestPassmarkEvaluation,
-                                                         assessmentScores: AssessmentPassmarkPreferencesAndScores)
+case class OnlineTestPassmarkEvaluation(passmarkVersion: String, result: List[SchemeEvaluationResult])
 
-object OnlineTestEvaluationAndAssessmentCentreScores {
-  implicit val onlineTestEvaluationAndAssessmentCentreScoresFormat = Json.format[OnlineTestEvaluationAndAssessmentCentreScores]
+object OnlineTestPassmarkEvaluation {
+  implicit val onlineTestPassmarkEvaluationFormat = Json.format[OnlineTestPassmarkEvaluation]
+  implicit val onlineTestPassmarkEvaluationHandler = Macros.handler[OnlineTestPassmarkEvaluation]
 }

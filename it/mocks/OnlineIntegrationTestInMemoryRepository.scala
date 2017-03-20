@@ -19,7 +19,7 @@ package mocks
 import model.ApplicationStatuses.EnumVal
 import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser }
 import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest }
-import model.persisted.{ CubiksTestProfile, NotificationExpiringOnlineTest, SchemeEvaluationResult }
+import model.persisted.{ CubiksTestProfile, NotificationExpiringOnlineTest, OnlineTestPassmarkEvaluation, SchemeEvaluationResult }
 import model.{ ApplicationStatuses, ReminderNotice }
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.OnlineTestRepository
@@ -96,7 +96,7 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
 
   def removeOnlineTestEvaluationAndReports(applicationId: String): Future[Unit] = ???
 
-  def findPassmarkEvaluation(appId: String): Future[List[SchemeEvaluationResult]] = ???
+  def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = ???
 
   def nextTestForReminder(reminder: ReminderNotice): Future[Option[NotificationExpiringOnlineTest]] = ???
 

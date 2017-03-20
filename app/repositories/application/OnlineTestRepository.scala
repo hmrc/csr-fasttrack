@@ -23,7 +23,7 @@ import model.EvaluationResults._
 import model.Exceptions._
 import model.OnlineTestCommands._
 import model.PersistedObjects.{ ApplicationForNotification, ApplicationIdWithUserIdAndStatus, ExpiringOnlineTest }
-import model.persisted.{ CubiksTestProfile, NotificationExpiringOnlineTest, SchemeEvaluationResult }
+import model.persisted.{ CubiksTestProfile, NotificationExpiringOnlineTest, OnlineTestPassmarkEvaluation, SchemeEvaluationResult }
 import model._
 import model.Adjustments._
 import org.joda.time.{ DateTime, LocalDate }
@@ -85,7 +85,7 @@ trait OnlineTestRepository {
   def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal,
     expireDate: Option[LocalDate]): Future[Unit]
 
-  def findPassmarkEvaluation(appId: String): Future[List[SchemeEvaluationResult]]
+  def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation]
 
   def nextTestForReminder(reminder: ReminderNotice): Future[Option[NotificationExpiringOnlineTest]]
 
@@ -472,7 +472,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
         "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)
       ),
       BSONDocument(
-        "applicationStatus" -> ApplicationStatuses.AssessmentScoresAccepted,
+        "applicationStatus" -> ApplicationStatuses.AwaitingAssessmentCentreReevaluation,
         "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)
       )
 
@@ -591,14 +591,13 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     collection.update(query, update, upsert = false) map validator
   }
 
-  def findPassmarkEvaluation(appId: String): Future[List[SchemeEvaluationResult]] = {
+  def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = {
     val query = BSONDocument("applicationId" -> appId)
     val projection = BSONDocument("passmarkEvaluation" -> 1)
 
     collection.find(query, projection).one[BSONDocument] map {
       case Some(doc) if doc.getAs[BSONDocument]("passmarkEvaluation").isDefined =>
-        val root = doc.getAs[BSONDocument]("passmarkEvaluation").get
-        root.getAs[List[SchemeEvaluationResult]]("result").getOrElse(Nil)
+        doc.getAs[OnlineTestPassmarkEvaluation]("passmarkEvaluation").get
       case _ => throw OnlineTestPassmarkEvaluationNotFound(appId)
     }
   }
