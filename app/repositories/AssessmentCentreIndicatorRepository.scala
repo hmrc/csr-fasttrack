@@ -27,11 +27,6 @@ object AssessmentCentreIndicatorCSVRepository extends AssessmentCentreIndicatorR
 
   override val expectedNumberOfHeaders = 3
 
-  /**
-    * Bump the version in order to enable re-mapping for the all existing users
-    */
-  val AssessmentCentreIndicatorVersion = "2"
-
   import play.api.Play.current
 
   override private[repositories] val assessmentCentreIndicators: Map[String, AssessmentCentreIndicator] = {
@@ -69,6 +64,10 @@ object AssessmentCentreIndicatorCSVRepository extends AssessmentCentreIndicatorR
 }
 
 trait AssessmentCentreIndicatorRepository extends CsvHelper {
+  /**
+    * Bump the version in order to enable re-mapping for the all existing users
+    */
+  val AssessmentCentreIndicatorVersion = "2"
   val DefaultIndicator = AssessmentCentreIndicator("London", "London",
     Some(AssessmentCentreIndicatorCSVRepository.AssessmentCentreIndicatorVersion))
   private[repositories] val assessmentCentreIndicators: Map[String, AssessmentCentreIndicator]
