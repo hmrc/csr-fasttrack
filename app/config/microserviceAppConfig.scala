@@ -20,7 +20,7 @@ import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import play.api.Play.{ configuration, current }
 import play.api.libs.json.Json
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.config.{ RunMode, ServicesConfig }
 
 case class FrameworksConfig(yamlFilePath: String)
 
@@ -138,5 +138,14 @@ object MicroserviceAppConfig extends ServicesConfig {
   lazy val assessmentEvaluationMinimumCompetencyLevelConfig =
     configuration.underlying
       .as[AssessmentEvaluationMinimumCompetencyLevel]("microservice.services.assessment-evaluation.minimum-competency-level")
+
+  object StaticDataFixupConfig {
+    private lazy val promoteToAwaitingAllocationCandidate =
+      configuration.underlying.getString("microservice.fixup.promoteToAwaitingAllocationId")
+
+    def validateAppId(appId: String): Boolean = {
+
+    }
+  }
 
 }

@@ -43,7 +43,7 @@ trait FixDataService {
   def promoteToAssessmentCentre(appId: String)(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
     for {
       latestPassmarkSettings <- passmarkSettingsRepo.tryGetLatestVersion()
-      schemes <- applicationRepository.getSchemes(appId)
+      schemes <- appRepo.getSchemes(appId)
       fakeSchemeEvaluation = schemes.map { s => SchemeEvaluationResult(s, Green) }
       version = latestPassmarkSettings.getOrElse(throw new IllegalStateException("No pass marks set")).version
       _ <- onlineTestRepo.savePassMarkScore(appId, version, fakeSchemeEvaluation, Some(ApplicationStatuses.AwaitingAllocation))

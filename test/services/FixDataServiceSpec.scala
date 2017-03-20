@@ -29,14 +29,15 @@ import org.mockito.Matchers._
 import org.mockito.Mockito._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.play.http.HeaderCarrier
-
+import org.mockito.Matchers.{ eq => eqTo, _ }
 import scala.concurrent.Future
 
-class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures with OneAppPerSuite {
+class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
 
   "FixDataServiceSpec" must {
 
     "promote a candidate to awaiting assessment centre allocation" in new TestFixture {
+
       when(mockPassMarkSettingsRepo.tryGetLatestVersion()).thenReturn(
         Future.successful(Some(OnlineTestPassmarkSettings(Nil, "version", DateTime.now, "user")))
       )
@@ -46,22 +47,37 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures wi
       when(mockOnlineTestRepo.savePassMarkScore(any[String], any[String], any[List[SchemeEvaluationResult]],
         any[Option[ApplicationStatuses.EnumVal]])
       ).thenReturn(Future.successful(()))
-      when(mockAuditService.logEvent(any[String], any[Map[String, String]])(any[HeaderCarrier], any[RequestHeader])).thenReturn(())
 
-      val actual = service.promoteToAssessmentCentre("appId")(hc, rh).futureValue
+      val actual = service.promoteToAssessmentCentre("appId").futureValue
+
+      verify(mockAuditService).logEvent(any[String], any[Map[String, String]])(any[HeaderCarrier], any[RequestHeader])
+
       actual mustBe (())
+    }
+
+    "throw an exception if pass marks have not been set" in new TestFixture {
+      when(mockPassMarkSettingsRepo.tryGetLatestVersion()).thenReturn(
+        Future.successful(None)
+      )
+      when(mockAppRepo.getSchemes(any[String])).thenReturn(Future.successful(
+        List(Scheme.Finance, Scheme.Business, Scheme.DigitalAndTechnology)
+      ))
+
+      val actual = service.promoteToAssessmentCentre("appId").failed.futureValue
+      actual mustBe an[IllegalStateException]
+      verify(mockAuditService, times(0)).logEvent(any[String], any[Map[String, String]])(any[HeaderCarrier], any[RequestHeader])
     }
 
   }
 
 
   trait TestFixture {
+    implicit val hc = HeaderCarrier()
+    implicit val rh = EmptyRequestHeader
     val mockAppRepo = mock[GeneralApplicationRepository]
     val mockPassMarkSettingsRepo = mock[OnlineTestPassMarkSettingsRepository]
     val mockOnlineTestRepo = mock[OnlineTestRepository]
     val mockAuditService = mock[AuditService]
-    implicit val hc = HeaderCarrier()
-    implicit val rh = EmptyRequestHeader
 
     val service = new FixDataService {
       val appRepo = mockAppRepo

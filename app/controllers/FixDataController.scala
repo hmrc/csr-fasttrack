@@ -27,9 +27,11 @@ object FixDataController extends FixDataController(FixDataService)
 
 abstract class FixDataController(fixDataService: FixDataService) extends BaseController {
 
-  def promoteToAssessmentCentre(): Action[AnyContent] = Action.async { implicit request =>
-
-    Future.successful(Ok(""))
+  def promoteToAssessmentCentre(appId: String): Action[AnyContent] = Action.async { implicit request =>
+    fixDataService.promoteToAssessmentCentre(appId).map( _ => Ok )
+      .recover {
+        case e: Exception => InternalServerError(e.getMessage)
+      }
   }
 
 }
