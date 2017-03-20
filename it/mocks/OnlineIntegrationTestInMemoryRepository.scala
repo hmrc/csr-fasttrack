@@ -113,4 +113,6 @@ class OnlineIntegrationTestInMemoryRepository extends OnlineTestRepository {
   override def updateStatus(userId: String, currentStatuses: List[EnumVal], newStatus: EnumVal): Future[Unit] = ???
 
   override def findAllPassMarkEvaluations: Future[Map[String, List[SchemeEvaluationResult]]] = ???
+
+  override def findAllAssessmentCentreEvaluations: Future[Map[String, List[SchemeEvaluationResult]]] = ???
 }
