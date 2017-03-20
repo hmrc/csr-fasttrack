@@ -98,3 +98,5 @@ PUT         /application/:applicationId/issue                            control
 DELETE      /application/:applicationId/issue                            controllers.FlagCandidateController.remove(applicationId: String)
 
 GET         /schools                                                     controllers.SchoolsController.getSchools(term: String)
+
+POST        /fixdata/:applicationId                                      controllers.FixDataController.progressToAssessmentCentre(applicationId: String)

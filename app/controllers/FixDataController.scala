@@ -16,21 +16,22 @@
 
 package controllers
 
+import model.Exceptions.PassMarkSettingsNotFound
 import play.api.mvc.{ Action, AnyContent }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import services.FixDataService
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 object FixDataController extends FixDataController(FixDataService)
 
 abstract class FixDataController(fixDataService: FixDataService) extends BaseController {
 
-  def promoteToAssessmentCentre(appId: String): Action[AnyContent] = Action.async { implicit request =>
-    fixDataService.promoteToAssessmentCentre(appId).map( _ => Ok )
+  def progressToAssessmentCentre(appId: String): Action[AnyContent] = Action.async { implicit request =>
+    fixDataService.progressToAssessmentCentre(appId).map( _ => Ok )
       .recover {
-        case e: Exception => InternalServerError(e.getMessage)
+        case _: PassMarkSettingsNotFound => InternalServerError("Pass Mark settings not found")
+        case e: IllegalArgumentException => MethodNotAllowed(e.getMessage)
       }
   }
 

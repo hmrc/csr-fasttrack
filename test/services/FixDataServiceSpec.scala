@@ -16,7 +16,11 @@
 
 package services
 
+import config.DataFixupConfig
 import connectors.PassMarkExchangeObjects.OnlineTestPassmarkSettings
+import model.Commands.ProgressResponse
+import model.Exceptions.PassMarkSettingsNotFound
+import model.commands.OnlineTestProgressResponse
 import model.{ ApplicationStatuses, EmptyRequestHeader, Scheme }
 import model.persisted.SchemeEvaluationResult
 import org.joda.time.DateTime
@@ -30,13 +34,19 @@ import org.mockito.Mockito._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.play.http.HeaderCarrier
 import org.mockito.Matchers.{ eq => eqTo, _ }
+
 import scala.concurrent.Future
 
 class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
 
   "FixDataServiceSpec" must {
 
-    "promote a candidate to awaiting assessment centre allocation" in new TestFixture {
+    "throw an exception if the app Id does not match the configured one" in new TestFixture {
+      val actual = service.progressToAssessmentCentre("blah").failed.futureValue
+      actual mustBe an[IllegalArgumentException]
+    }
+
+    "progress a candidate to awaiting assessment centre allocation" in new TestFixture {
 
       when(mockPassMarkSettingsRepo.tryGetLatestVersion()).thenReturn(
         Future.successful(Some(OnlineTestPassmarkSettings(Nil, "version", DateTime.now, "user")))
@@ -48,7 +58,7 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
         any[Option[ApplicationStatuses.EnumVal]])
       ).thenReturn(Future.successful(()))
 
-      val actual = service.promoteToAssessmentCentre("appId").futureValue
+      val actual = service.progressToAssessmentCentre("appId").futureValue
 
       verify(mockAuditService).logEvent(any[String], any[Map[String, String]])(any[HeaderCarrier], any[RequestHeader])
 
@@ -63,8 +73,8 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
         List(Scheme.Finance, Scheme.Business, Scheme.DigitalAndTechnology)
       ))
 
-      val actual = service.promoteToAssessmentCentre("appId").failed.futureValue
-      actual mustBe an[IllegalStateException]
+      val actual = service.progressToAssessmentCentre("appId").failed.futureValue
+      actual mustBe a[PassMarkSettingsNotFound]
       verify(mockAuditService, times(0)).logEvent(any[String], any[Map[String, String]])(any[HeaderCarrier], any[RequestHeader])
     }
 
@@ -78,12 +88,16 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
     val mockPassMarkSettingsRepo = mock[OnlineTestPassMarkSettingsRepository]
     val mockOnlineTestRepo = mock[OnlineTestRepository]
     val mockAuditService = mock[AuditService]
+    val mockConfig = mock[DataFixupConfig]
 
     val service = new FixDataService {
       val appRepo = mockAppRepo
       val passmarkSettingsRepo = mockPassMarkSettingsRepo
       val onlineTestRepo = mockOnlineTestRepo
       val auditService = mockAuditService
+      val progressToAssessmentCentreConfig = mockConfig
     }
+
+    when(mockConfig.isValid("appId")).thenReturn(true)
   }
 }
