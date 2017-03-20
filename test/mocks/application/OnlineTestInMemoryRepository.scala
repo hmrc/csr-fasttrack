@@ -39,6 +39,7 @@ object OnlineTestInMemoryRepository extends OnlineTestInMemoryRepository
 /**
  * @deprecated Please use Mockito
  */
+// scalastyle:off number.of.methods
 class OnlineTestInMemoryRepository extends OnlineTestRepository {
   case class RuleCategoryResult(location1Scheme1: Result, location1Scheme2: Option[Result],
     location2Scheme1: Option[Result], location2Scheme2: Option[Result], alternativeScheme: Option[Result])
@@ -121,4 +122,6 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
   override def updateStatus(userId: String, currentStatuses: List[EnumVal], newStatus: EnumVal): Future[Unit] = ???
 
   override def findAllPassMarkEvaluations: Future[Map[String, List[SchemeEvaluationResult]]] = ???
+
+  override def findAllAssessmentCentreEvaluations: Future[Map[String, List[SchemeEvaluationResult]]] = ???
 }
