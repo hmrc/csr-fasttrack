@@ -16,6 +16,7 @@
 
 package repositories
 
+import model.ApplicationStatuses._
 import model.ReportExchangeObjects.PassMarkReportTestResults
 import model.OnlineTestCommands.TestResult
 import model.PersistedObjects.CandidateTestReport
@@ -23,7 +24,7 @@ import model.PersistedObjects.Implicits._
 import model.ReportExchangeObjects
 import play.api.libs.json.Format
 import reactivemongo.api.{ DB, ReadPreference }
-import reactivemongo.bson.{ BSONDocument, BSONDouble, BSONObjectID }
+import reactivemongo.bson.{ BSONDocument, BSONDouble, BSONObjectID, BSONString }
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -38,6 +39,8 @@ trait TestReportRepository {
   def getReportByApplicationId(applicationId: String): Future[Option[CandidateTestReport]]
 
   def remove(applicationId: String): Future[Unit]
+
+  def removeNonGis(applicationId: String): Future[Unit]
 }
 
 class TestReportMongoRepository(implicit mongo: () => DB)
@@ -151,6 +154,17 @@ class TestReportMongoRepository(implicit mongo: () => DB)
     val query = BSONDocument("applicationId" -> applicationId)
 
     collection.remove(query, firstMatchOnly = false).map { _ => () }
+  }
+
+  def removeNonGis(applicationId: String) = {
+    val query = BSONDocument("applicationId" -> applicationId)
+
+    val updateBSON = BSONDocument("$unset" -> BSONDocument(
+      "verbal" -> BSONString(""),
+      "numerical" -> BSONString("")
+    ))
+
+    collection.update(query, updateBSON, upsert = false) map {_ => ()}
   }
 
 }

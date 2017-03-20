@@ -43,4 +43,6 @@ class TestReportInMemoryRepository extends TestReportRepository {
   }
 
   def remove(applicationId: String): Future[Unit] = Future.successful(())
+
+  override def removeNonGis(applicationId: String): Future[Unit] = ???
 }

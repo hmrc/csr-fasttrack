@@ -30,6 +30,7 @@ object AssistanceDetailsService extends AssistanceDetailsService {
   val appRepository = applicationRepository
   val onlineTestingRepo = onlineTestRepository
   val onlineTestService = OnlineTestService
+  val trRepository = testReportRepository
 }
 
 trait AssistanceDetailsService {
@@ -37,6 +38,7 @@ trait AssistanceDetailsService {
   val appRepository: GeneralApplicationRepository
   val onlineTestService: OnlineTestService
   val onlineTestingRepo: OnlineTestRepository
+  val trRepository: TestReportRepository
 
   def update(applicationId: String, userId: String, assistanceDetails: AssistanceDetails): Future[Unit] = {
     adRepository.update(applicationId, userId, assistanceDetails)
@@ -59,8 +61,8 @@ trait AssistanceDetailsService {
     onlineTestingRepo.getOnlineTestApplication(applicationId).flatMap {
       case Some(onlineTestApp) if List(OnlineTestInvited, OnlineTestStarted, OnlineTestExpired).contains(onlineTestApp.applicationStatus)  =>
         onlineTestService.registerAndInviteApplicant(onlineTestApp).map { _ => () }
-      /*case Some(onlineTestApp) if OnlineTestCompleted == onlineTestApp.applicationStatus  =>
-        onlineTestService.registerAndInviteApplicant(onlineTestApp).map { _ => () }*/
+      case Some(onlineTestApp) if OnlineTestCompleted == onlineTestApp.applicationStatus  =>
+        trRepository.removeNonGis(applicationId).map { _ => () }
       case _ => Future.successful(())
     }
   }
