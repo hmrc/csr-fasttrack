@@ -52,15 +52,20 @@ trait AssistanceDetailsService {
     for {
       _ <- adRepository.updateToGis(applicationId)
       _ <- mayBeResetOnlineTests(applicationId)
-    } yield {
-
-    }
+      _ <- mayBeRemoveNonGisTestReports(applicationId)
+    } yield { () }
   }
 
   private def mayBeResetOnlineTests(applicationId: String) = {
     onlineTestingRepo.getOnlineTestApplication(applicationId).flatMap {
       case Some(onlineTestApp) if List(OnlineTestInvited, OnlineTestStarted, OnlineTestExpired).contains(onlineTestApp.applicationStatus)  =>
         onlineTestService.registerAndInviteApplicant(onlineTestApp).map { _ => () }
+      case _ => Future.successful(())
+    }
+  }
+
+  private def mayBeRemoveNonGisTestReports(applicationId: String) = {
+    onlineTestingRepo.getOnlineTestApplication(applicationId).flatMap {
       case Some(onlineTestApp) if OnlineTestCompleted == onlineTestApp.applicationStatus  =>
         trRepository.removeNonGis(applicationId).map { _ => () }
       case _ => Future.successful(())

@@ -17,6 +17,7 @@
 package repositories
 
 import model.ApplicationStatuses._
+import model.Exceptions.CannotUpdateAssistanceDetails
 import model.ReportExchangeObjects.PassMarkReportTestResults
 import model.OnlineTestCommands.TestResult
 import model.PersistedObjects.CandidateTestReport
@@ -45,7 +46,7 @@ trait TestReportRepository {
 
 class TestReportMongoRepository(implicit mongo: () => DB)
     extends ReactiveRepository[CandidateTestReport, BSONObjectID](CollectionNames.ONLINE_TEST_REPORT, mongo,
-      candidateTestReportFormats, ReactiveMongoFormats.objectIdFormats) with TestReportRepository {
+      candidateTestReportFormats, ReactiveMongoFormats.objectIdFormats) with TestReportRepository with ReactiveRepositoryHelpers {
 
   def saveOnlineTestReport(report: CandidateTestReport): Future[Unit] = {
     val query = BSONDocument("applicationId" -> report.applicationId)
@@ -164,7 +165,9 @@ class TestReportMongoRepository(implicit mongo: () => DB)
       "numerical" -> BSONString("")
     ))
 
-    collection.update(query, updateBSON, upsert = false) map {_ => ()}
+    val validator = singleUpdateValidator(applicationId, actionDesc = "Remove numerical and verbal test reports for Gis", ignoreNotFound = true)
+
+    collection.update(query, updateBSON, upsert = false) map validator
   }
 
 }
