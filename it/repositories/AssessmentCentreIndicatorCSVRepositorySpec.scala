@@ -15,7 +15,7 @@ class AssessmentCentreIndicatorCSVRepositorySpec extends UnitWithAppSpec with Sh
   "calculateFsacIndicator" should {
     "return default indicator when no postcode" in {
       val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(None)
-      result mustBe AssessmentCentreIndicatorCSVRepository.DefaultIndicator
+      result mustBe AssessmentCentreIndicator("London", "London", Some("2"))
     }
     "return default indicator when no postcode match is found" in {
       val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some("BOGUS3"))
