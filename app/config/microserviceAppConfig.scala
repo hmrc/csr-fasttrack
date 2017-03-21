@@ -149,5 +149,5 @@ object MicroserviceAppConfig extends ServicesConfig {
       .as[AssessmentEvaluationMinimumCompetencyLevel]("microservice.services.assessment-evaluation.minimum-competency-level")
 
   lazy val progressToAssessmentCentreConfig =
-    configuration.underlying.as[DataFixupConfig]("microservice.dataFixup.progressToAssessmetnCentre")
+    configuration.underlying.as[DataFixupConfig]("microservice.dataFixup.progressToAssessmentCentre")
 }

@@ -99,4 +99,4 @@ DELETE      /application/:applicationId/issue                            control
 
 GET         /schools                                                     controllers.SchoolsController.getSchools(term: String)
 
-POST        /fixdata/:applicationId                                      controllers.FixDataController.progressToAssessmentCentre(applicationId: String)
+POST        /fixdata/:applicationId/progressToAssessmentCentre           controllers.FixDataController.progressToAssessmentCentre(applicationId: String)

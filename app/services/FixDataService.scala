@@ -46,13 +46,23 @@ trait FixDataService {
 
   def progressToAssessmentCentre(appId: String)(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
 
+    def progressCheck = {
+      appRepo.findProgress(appId).map { progress =>
+        if (progress.onlineTest.awaitingAllocationNotified || progress.onlineTest.awaitingAllocation) {
+          throw new IllegalStateException(s"$appId has already moved to assessment centre allocation")
+        }
+      }
+    }
+
     if (progressToAssessmentCentreConfig.isValid(appId)) {
       for {
+        _ <- progressCheck
         latestPassmarkSettings <- passmarkSettingsRepo.tryGetLatestVersion()
         schemes <- appRepo.getSchemes(appId)
         fakeSchemeEvaluation = schemes.map { s => SchemeEvaluationResult(s, Green) }
         version = latestPassmarkSettings.getOrElse(throw new PassMarkSettingsNotFound).version
-        _ <- onlineTestRepo.savePassMarkScore(appId, version, fakeSchemeEvaluation, Some(ApplicationStatuses.AwaitingAllocationNotified))
+        _ <- onlineTestRepo.savePassMarkScore(appId, version, fakeSchemeEvaluation, None)
+        _ <- appRepo.updateStatus(appId, ApplicationStatuses.AwaitingAllocationNotified)
       } yield {
         auditService.logEvent("CandidatePromotedToAwaitingAllocation", Map("applicationId" -> appId))
       }

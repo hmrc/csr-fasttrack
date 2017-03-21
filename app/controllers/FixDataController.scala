@@ -32,6 +32,7 @@ abstract class FixDataController(fixDataService: FixDataService) extends BaseCon
       .recover {
         case _: PassMarkSettingsNotFound => InternalServerError("Pass Mark settings not found")
         case e: IllegalArgumentException => MethodNotAllowed(e.getMessage)
+        case e => InternalServerError(e.getMessage)
       }
   }
 

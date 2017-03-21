@@ -46,6 +46,14 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
       actual mustBe an[IllegalArgumentException]
     }
 
+    "throw an exception if the canddate has already moved to assessment centre allocation" in new TestFixture {
+      when(mockAppRepo.findProgress(any[String])).thenReturn(Future.successful(
+        ProgressResponse("appId").copy(
+          onlineTest = OnlineTestProgressResponse(awaitingAllocation = true, awaitingAllocationNotified = true
+        ))
+      ))
+    }
+
     "progress a candidate to awaiting assessment centre allocation" in new TestFixture {
 
       when(mockPassMarkSettingsRepo.tryGetLatestVersion()).thenReturn(
@@ -57,6 +65,7 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
       when(mockOnlineTestRepo.savePassMarkScore(any[String], any[String], any[List[SchemeEvaluationResult]],
         any[Option[ApplicationStatuses.EnumVal]])
       ).thenReturn(Future.successful(()))
+      when(mockAppRepo.updateStatus(any[String], any[ApplicationStatuses.EnumVal])).thenReturn(Future.successful(()))
 
       val actual = service.progressToAssessmentCentre("appId").futureValue
 
@@ -72,6 +81,7 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
       when(mockAppRepo.getSchemes(any[String])).thenReturn(Future.successful(
         List(Scheme.Finance, Scheme.Business, Scheme.DigitalAndTechnology)
       ))
+      when(mockAppRepo.updateStatus(any[String], any[ApplicationStatuses.EnumVal])).thenReturn(Future.successful(()))
 
       val actual = service.progressToAssessmentCentre("appId").failed.futureValue
       actual mustBe a[PassMarkSettingsNotFound]
@@ -99,5 +109,8 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
     }
 
     when(mockConfig.isValid("appId")).thenReturn(true)
+    when(mockAppRepo.findProgress(any[String])).thenReturn(Future.successful(
+      ProgressResponse("appId")
+    ))
   }
 }
