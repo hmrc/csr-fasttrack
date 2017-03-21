@@ -36,7 +36,7 @@ import org.joda.time.format.DateTimeFormat
 import org.joda.time.{ DateTime, LocalDate }
 import play.api.libs.json.{ Format, JsNumber, JsObject }
 import reactivemongo.api.{ DB, QueryOpts }
-import reactivemongo.bson.{ BSONDocument, _ }
+import reactivemongo.bson.{ BSONArray, BSONDocument, _ }
 import reactivemongo.json.collection.JSONBatchCommands.JSONCountCommand
 import repositories._
 import services.TimeZoneService
@@ -722,7 +722,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val ignoredStatuses = List(AllocationConfirmed, AllocationUnconfirmed)
     val query = BSONDocument(
       "applicationStatus" -> BSONDocument("$nin" -> ignoredStatuses),
-      "assessment-centre-indicator" -> BSONDocument("$exists" -> true),
+      "progress-status.submitted" -> true,
       "assessment-centre-indicator.version" -> BSONDocument("$ne" -> mappingVersion)
     )
 
