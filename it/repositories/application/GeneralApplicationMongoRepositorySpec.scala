@@ -16,11 +16,12 @@
 
 package repositories.application
 
-import factories.UUIDFactory
+import factories.{ DateTimeFactory, UUIDFactory }
 import model.ApplicationStatuses._
-import model.Exceptions.{ AdjustmentsCommentNotFound, LocationPreferencesNotFound, SchemePreferencesNotFound }
+import model.Exceptions.{ AdjustmentsCommentNotFound, LocationPreferencesNotFound, NotFoundException, SchemePreferencesNotFound }
 import model._
 import model.commands.ApplicationStatusDetails
+import model.persisted.SchemeEvaluationResult
 import org.joda.time.{ DateTime, DateTimeZone }
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
@@ -224,6 +225,37 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
           status mustBe ApplicationStatuses.Created
           statusDate mustBe Some(progressStatuses(ProgressStatuses.PersonalDetailsCompletedProgress).withZone(DateTimeZone.UTC))
           overrideSubmissionDeadline mustBe None
+      }
+    }
+  }
+
+  "Progress to assessment centre allocation" must {
+    "update the passmarks and application status" in {
+      val helperRepo = new OnlineTestMongoRepository(DateTimeFactory)
+      createMinimumApplication("userId", "appId", "FastTrack")
+      val evaluation = SchemeEvaluationResult(Scheme.Business, EvaluationResults.Green) :: Nil
+      val version = "version1"
+
+      repository.progressToAssessmentCentre("appId", evaluation, version).futureValue
+
+      val appStatus = repository.findApplicationStatusDetails("appId").futureValue
+      appStatus.status mustBe ApplicationStatuses.AwaitingAllocationNotified
+      val progress = repository.findProgress("appId").futureValue
+      progress.onlineTest.awaitingAllocationNotified mustBe true
+      val evaluationResults = helperRepo.findPassmarkEvaluation("appId").futureValue
+
+      evaluationResults mustBe evaluation
+
+    }
+
+    "do nothing if the application has already progressed to awaiting allocation" in {
+      createApplicationWithAllFields("userId", "appId", "frameworkId", ApplicationStatuses.AwaitingAllocationNotified,
+        buildProgressStatusBSON(Map(ProgressStatuses.AwaitingAllocationNotifiedProgress -> DateTime.now)))
+
+      val evaluation = SchemeEvaluationResult(Scheme.Business, EvaluationResults.Green) :: Nil
+      val version = "version1"
+      a[NotFoundException] mustBe thrownBy {
+        Await.result(repository.progressToAssessmentCentre("appId", evaluation, version), 5 seconds)
       }
     }
   }

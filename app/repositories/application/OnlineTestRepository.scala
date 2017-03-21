@@ -461,21 +461,23 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
   }
 
   def nextApplicationPassMarkProcessing(currentVersion: String): Future[Option[ApplicationIdWithUserIdAndStatus]] = {
-    val query = BSONDocument("$or" -> BSONArray(
-      BSONDocument(
-        "applicationStatus" -> ApplicationStatuses.OnlineTestCompleted,
-        "online-tests.xmlReportSaved" -> true,
-        "passmarkEvaluation.passmarkVersion" -> BSONDocument("$exists" -> false)
-      ),
-      BSONDocument(
-        "applicationStatus" -> ApplicationStatuses.AwaitingOnlineTestReevaluation,
-        "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)
-      ),
-      BSONDocument(
-        "applicationStatus" -> ApplicationStatuses.AssessmentScoresAccepted,
-        "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)
-      )
-
+    val query = BSONDocument("$and" -> BSONArray(
+      BSONDocument("$or" -> BSONArray(
+        BSONDocument(
+          "applicationStatus" -> ApplicationStatuses.OnlineTestCompleted,
+          "online-tests.xmlReportSaved" -> true,
+          "passmarkEvaluation.passmarkVersion" -> BSONDocument("$exists" -> false)
+        ),
+        BSONDocument(
+          "applicationStatus" -> ApplicationStatuses.AwaitingOnlineTestReevaluation,
+          "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)
+        ),
+        BSONDocument(
+          "applicationStatus" -> ApplicationStatuses.AssessmentScoresAccepted,
+          "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)
+        )
+      )),
+      BSONDocument("noOnlineTestReEvaluation" -> BSONDocument("$ne" ->true))
     ))
 
     selectRandom(query).map(_.map { doc =>
