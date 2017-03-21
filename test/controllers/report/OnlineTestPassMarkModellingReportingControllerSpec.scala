@@ -47,6 +47,7 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
       when(mediaRepositoryMock.findAll).thenReturnAsync(Map.empty)
       when(assessmentScoresRepoMock.allScores).thenReturnAsync(Map.empty)
       when(onlineTestRepositoryMock.findAllPassMarkEvaluations).thenReturnAsync(Map.empty)
+      when(onlineTestRepositoryMock.findAllAssessmentCentreEvaluations).thenReturnAsync(Map.empty)
 
       val response = controller.createOnlineTestPassMarkModellingReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[PassMarkReportItem]]
@@ -66,6 +67,7 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
       when(reportingFormatterMock.getOnlineAdjustments(any[Option[Boolean]], any[Option[Adjustments]])).thenReturn(Some("Yes"))
       when(reportingFormatterMock.getAssessmentCentreAdjustments(any[Option[Boolean]], any[Option[Adjustments]])).thenReturn(Some("Yes"))
       when(onlineTestRepositoryMock.findAllPassMarkEvaluations).thenReturnAsync(Map.empty)
+      when(onlineTestRepositoryMock.findAllAssessmentCentreEvaluations).thenReturnAsync(Map.empty)
 
       val response = controller.createOnlineTestPassMarkModellingReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[PassMarkReportItem]]
@@ -111,6 +113,12 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
       ))
       when(onlineTestRepositoryMock.findAllPassMarkEvaluations).thenReturnAsync(passMarkEvaluations)
 
+      val assessmentCentreEvaluations = Map(appId -> List(
+        SchemeEvaluationResult(scheme = model.Scheme.ProjectDelivery, result = model.EvaluationResults.Green),
+        SchemeEvaluationResult(scheme = model.Scheme.Business, result = model.EvaluationResults.Red)
+      ))
+      when(onlineTestRepositoryMock.findAllAssessmentCentreEvaluations).thenReturnAsync(assessmentCentreEvaluations)
+
       when(assessmentCentreIndicatorRepoMock.calculateIndicator(any[Option[String]]))
         .thenReturn(AssessmentCentreIndicator(area = "South", assessmentCentre = "London AC"))
 
@@ -138,7 +146,7 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
       passMarkReportItem.schemeOnlineTestResults mustBe List("Green", "Amber")
 
       passMarkReportItem.candidateScores mustBe None
-      passMarkReportItem.schemeAssessmentCentreTestResults mustBe List.empty
+      passMarkReportItem.schemeAssessmentCentreTestResults mustBe List("Red", "Green")
     }
   }
 

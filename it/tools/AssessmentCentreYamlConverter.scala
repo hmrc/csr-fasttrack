@@ -22,14 +22,15 @@ import scala.collection.immutable.ListMap
 import scala.io.Source
 import scala.util.{Failure, Success, Try}
 
+// Run in IntelliJ
 //scalastyle:off printlnRegex
 object AssessmentCentreYamlConverter extends App {
   val AssessmentsCSV = "/resources/assessment-centres.csv"
   val YamlSuffix = ".yaml"
 
-  val pathToCsv = (getClass getResource AssessmentsCSV).getPath
-  val pathToYamlDev = pathToCsv.dropRight(4) + YamlSuffix
-  val pathToYamlProd = pathToCsv.dropRight(4) + "-prod" + YamlSuffix
+  lazy val pathToCsv = (getClass getResource AssessmentsCSV).getPath
+  lazy val pathToYamlDev = pathToCsv.dropRight(4) + YamlSuffix
+  lazy val pathToYamlProd = pathToCsv.dropRight(4) + "-prod" + YamlSuffix
 
   lazy val lines = Source.fromURL(getClass getResource AssessmentsCSV).getLines().toList
 

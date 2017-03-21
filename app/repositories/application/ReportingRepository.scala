@@ -64,6 +64,8 @@ trait ReportingRepository {
 
   // The progress report contains common data for pass mark
   def passMarkReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
+
+  def assessmentCentreIndicatorReport: Future[List[AssessmentCentreIndicatorReport]]
 }
 
 class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo: () => DB)
@@ -611,5 +613,31 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     )
 
     reportQueryWithProjectionsBSON[ApplicationForCandidateProgressReport](query, projection)
+  }
+
+  override def assessmentCentreIndicatorReport: Future[List[AssessmentCentreIndicatorReport]] = {
+    val allApplicationsQuery = BSONDocument()
+
+    val projection = BSONDocument(
+      "applicationId" -> "1",
+      "userId" -> "1",
+      "applicationStatus" -> "1",
+      "assessment-centre-indicator" -> "1"
+    )
+
+    reportQueryWithProjections[BSONDocument](allApplicationsQuery, projection).map { docs =>
+      docs.map { doc =>
+        val applicationId = doc.getAs[String]("applicationId")
+        val userId = doc.getAs[String]("userId").get
+        val applicationStatus = doc.getAs[String]("applicationStatus")
+        val assessmentCentreIndicator = doc.getAs[AssessmentCentreIndicator]("assessment-centre-indicator")
+        AssessmentCentreIndicatorReport(
+          applicationId = applicationId,
+          userId = userId,
+          applicationStatus = applicationStatus,
+          assessmentCentreIndicator = assessmentCentreIndicator
+        )
+      }
+    }
   }
 }

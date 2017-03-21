@@ -25,7 +25,7 @@ import model.ApplicationStatuses._
 import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.EvaluationResults._
 import model.Scheme.Scheme
-import model.persisted.{ AssessmentCentrePassMarkSettings, SchemeEvaluationResult }
+import model.persisted.{ AssessmentCentrePassMarkSettings, OnlineTestPassmarkEvaluation, SchemeEvaluationResult }
 import model.{ ApplicationStatuses, AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores, Scheme }
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
@@ -34,7 +34,7 @@ import org.joda.time.DateTime
 import org.scalatest.mock.MockitoSugar
 import play.Logger
 import play.api.libs.json._
-import reactivemongo.bson.{ BSONDocument, BSONString }
+import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
@@ -134,7 +134,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
           val candidateScores = AssessmentPassmarkPreferencesAndScores(passmark, t.schemes, t.scores)
           val schemeEvaluationResults = toSchemeEvaluationResult(t.onlineTestPassmarkEvaluation)
           val onlineTestEvaluationWithAssessmentCentreScores = OnlineTestEvaluationAndAssessmentCentreScores(
-            schemeEvaluationResults,
+            OnlineTestPassmarkEvaluation("passmarkVersion", schemeEvaluationResults),
             candidateScores
           )
 
@@ -243,14 +243,7 @@ class ApplicationAssessmentServiceSpec extends MongoRepositorySpec with MockitoS
   }
 
   private def getEvaluatedSchemes(evaluationDoc: BSONDocument, schemeTypeName: String): Option[List[SchemeEvaluationResult]] = {
-    val schemesEvaluation = evaluationDoc.getAs[BSONDocument](schemeTypeName).map { doc =>
-      doc.elements.collect {
-        case (name, BSONString(result)) => SchemeEvaluationResult(Scheme.withName(name), Result(result))
-      }.toList
-    }.getOrElse(List())
-
-    val schemesEvaluationOpt = if (schemesEvaluation.isEmpty) None else Some(schemesEvaluation)
-    schemesEvaluationOpt
+    evaluationDoc.getAs[List[SchemeEvaluationResult]](schemeTypeName)
   }
 
   def logTestData(data: AssessmentServiceTest) = {

@@ -15,7 +15,7 @@ class AssessmentCentreIndicatorCSVRepositorySpec extends UnitWithAppSpec with Sh
   "calculateFsacIndicator" should {
     "return default indicator when no postcode" in {
       val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(None)
-      result mustBe AssessmentCentreIndicatorCSVRepository.DefaultIndicator
+      result mustBe AssessmentCentreIndicator("London", "London", Some("2"))
     }
     "return default indicator when no postcode match is found" in {
       val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some("BOGUS3"))
@@ -31,15 +31,27 @@ class AssessmentCentreIndicatorCSVRepositorySpec extends UnitWithAppSpec with Sh
     }
     "return London for Oxford postcode" in {
       val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some("OX1 4DB"))
-      result mustBe AssessmentCentreIndicator("Oxford", "London")
+      result mustBe AssessmentCentreIndicator("Oxford", "London", Some("2"))
     }
     "return Newcastle for Edinburgh postcode" in {
       val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some("EH1 3EG"))
-      result mustBe AssessmentCentreIndicator("Edinburgh", "Newcastle")
+      result mustBe AssessmentCentreIndicator("Edinburgh", "Newcastle", Some("2"))
     }
     "return London even when postcode is lowercase" in {
       val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some("ec1v 3eg"))
-      result mustBe AssessmentCentreIndicator("East Central London", "London")
+      result mustBe AssessmentCentreIndicator("East Central london", "London", Some("2"))
+    }
+    "return London for Llandrindod postcode (mix lowercase + uppercase)" in {
+      val result = AssessmentCentreIndicatorCSVRepository.calculateIndicator(Some("lD1v 3eg"))
+      result mustBe AssessmentCentreIndicator("Llandrindod wells", "London", Some("2"))
+    }
+  }
+
+  "Assessment Centre Indicator Repository" should {
+    "contains only Manchester, Newcastle and London assessment centre" in {
+      val actualAssessmentCentres = AssessmentCentreIndicatorCSVRepository.assessmentCentreIndicators
+        .values.map(_.assessmentCentre).toSet
+      actualAssessmentCentres mustBe Set("Manchester", "London", "Newcastle")
     }
   }
 }
