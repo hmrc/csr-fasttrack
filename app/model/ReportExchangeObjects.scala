@@ -92,6 +92,14 @@ object ReportExchangeObjects {
     assessmentCentreIndicator: Option[AssessmentCentreIndicator]
   )
 
+  case class ApplicationForMailingListExtractReport(
+    userId: UniqueIdentifier,
+    applicationStatus: Option[String],
+    firstName: Option[String],
+    lastName: Option[String],
+    preferredName: Option[String]
+  )
+
   case class ReportWithPersonalDetails(
     applicationId: UniqueIdentifier,
     userId: UniqueIdentifier,

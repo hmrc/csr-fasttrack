@@ -66,6 +66,8 @@ trait ReportingRepository {
   def passMarkReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
 
   def assessmentCentreIndicatorReport: Future[List[AssessmentCentreIndicatorReport]]
+
+  def applicationsForMailingListExtractReport(frameworkId: String): Future[List[ApplicationForMailingListExtractReport]]
 }
 
 class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo: () => DB)
@@ -636,6 +638,36 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
           userId = userId,
           applicationStatus = applicationStatus,
           assessmentCentreIndicator = assessmentCentreIndicator
+        )
+      }
+    }
+  }
+
+  override def applicationsForMailingListExtractReport(frameworkId: String): Future[List[ApplicationForMailingListExtractReport]] = {
+    val query = BSONDocument("frameworkId" -> frameworkId)
+
+    val projection = BSONDocument(
+      "userId" -> "1",
+      "applicationStatus" -> "1",
+      "personal-details" -> "1"
+    )
+
+    reportQueryWithProjections[BSONDocument](query, projection).map { docs =>
+      docs.map { doc =>
+        val userId = doc.getAs[String]("userId").get
+        val applicationStatus = doc.getAs[String]("applicationStatus")
+
+        val psRoot = doc.getAs[BSONDocument]("personal-details")
+        val firstName = psRoot.flatMap(_.getAs[String]("firstName"))
+        val lastName = psRoot.flatMap(_.getAs[String]("lastName"))
+        val preferredName = psRoot.flatMap(_.getAs[String]("preferredName"))
+
+        ApplicationForMailingListExtractReport(
+          userId = UniqueIdentifier(userId),
+          applicationStatus = applicationStatus,
+          firstName = firstName,
+          lastName = lastName,
+          preferredName = preferredName
         )
       }
     }

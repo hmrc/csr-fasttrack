@@ -24,7 +24,7 @@ import model.PersistedObjects.ContactDetailsWithId
 import model.ReportExchangeObjects.Implicits._
 import model.ReportExchangeObjects.{ Implicits => _, _ }
 import model.persisted.SchemeEvaluationResult
-import model.report.{ PassMarkReportItem, DiversityReportItem }
+import model.report.{ MailingListExtractReportItem, PassMarkReportItem, DiversityReportItem }
 import model.Scheme.Scheme
 import model.{ ApplicationStatusOrder, ProgressStatuses, UniqueIdentifier }
 import play.api.libs.iteratee.Enumerator
@@ -444,6 +444,31 @@ trait ReportingController extends BaseController {
           }
           Ok.chunked(Source.fromPublisher(Streams.enumeratorToPublisher(header.andThen(candidatesStream))))
         }
+    }
+  }
+
+  def createMailingListExtractReport(frameworkId: String) = Action.async { implicit request =>
+    val applicationsFut = reportingRepository.applicationsForMailingListExtractReport(frameworkId)
+    val allContactDetailsFut = contactDetailsRepository.findAll.map(x => x.map(cd => cd.userId -> cd).toMap)
+
+    val reportFut = for {
+      allApplications <- applicationsFut
+      allContactDetails <- allContactDetailsFut
+    } yield {
+      buildMailingListExtractReportItems(allApplications, allContactDetails)
+    }
+    reportFut.map { report =>
+      Ok(Json.toJson(report))
+    }
+  }
+
+  private def buildMailingListExtractReportItems(allApplications: List[ApplicationForMailingListExtractReport],
+                                      allContactDetails: Map[String, ContactDetailsWithId]): List[MailingListExtractReportItem] = {
+    allApplications.map { application =>
+      val contactDetails = allContactDetails.getOrElse(application.userId.toString(),
+        throw new IllegalStateException(s"No contact details found for user Id = ${application.userId}")
+      )
+      MailingListExtractReportItem(application, contactDetails)
     }
   }
 

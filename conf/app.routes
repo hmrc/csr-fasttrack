@@ -76,6 +76,7 @@ GET         /report/preferences-and-contact/:frameworkId                 control
 GET         /report/successful-candidates/:frameworkId                   controllers.ReportingController.createSuccessfulCandidatesReport(frameworkId: String)
 GET         /report/candidates-details/previous-year                     controllers.ReportingController.prevYearCandidatesDetailsReport
 GET         /report/candidates-details-stream/previous-year              controllers.ReportingController.streamPrevYearCandidatesDetailsReport
+GET         /report/mailing-list-extract/:frameworkId                    controllers.ReportingController.createMailingListExtractReport(frameworkId: String)
 
 GET         /diagnostic/user/:applicationId                              controllers.DiagnosticReportController.getApplicationByApplicationId(applicationId: String)
 GET         /diagnostic/all-users                                        controllers.DiagnosticReportController.getAllApplications

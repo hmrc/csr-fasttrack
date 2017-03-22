@@ -88,4 +88,6 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
   override def passMarkReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] = ???
 
   override def assessmentCentreIndicatorReport: Future[List[AssessmentCentreIndicatorReport]] = ???
+
+  override def applicationsForMailingListExtractReport(frameworkId: String): Future[List[ApplicationForMailingListExtractReport]] = ???
 }
