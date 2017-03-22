@@ -720,7 +720,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId),
       BSONDocument(s"progress-status.${ProgressStatuses.AwaitingAllocationNotifiedProgress}" -> BSONDocument("$ne" -> true)),
-      BSONDocument(s"progress-status.${ProgressStatuses.AwaitingAllocationNotifiedProgress}"  -> BSONDocument("$ne" -> true))
+      BSONDocument(s"progress-status.${ProgressStatuses.AwaitingAllocationProgress}"  -> BSONDocument("$ne" -> true))
     ))
 
     val update = BSONDocument("$set" -> BSONDocument(
