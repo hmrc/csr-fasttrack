@@ -71,10 +71,22 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
       result mustBe List(SchemeEvaluationResult(Business, Amber))
     }
 
-    "evaluate the scheme to RED when a candidate has failed one test" in {
+    "evaluate the scheme to AMBER when a candidate has tScore equals to failmark in at least one test" in {
       val candidateScores = FullTestReport.copy(
         competency = tScore(89.2),
         verbal = tScore(5.0),
+        numerical = tScore(100.0),
+        situational = tScore(99.0)
+      )
+      val result = OnlineTestPassmarkRulesEngine.evaluate(scoresWithPassmark.copy(scores = candidateScores))
+
+      result mustBe List(SchemeEvaluationResult(Business, Amber))
+    }
+
+    "evaluate the scheme to RED when a candidate has tScore less than failmark in at least one test" in {
+      val candidateScores = FullTestReport.copy(
+        competency = tScore(89.2),
+        verbal = tScore(4.99),
         numerical = tScore(100.0),
         situational = tScore(99.0)
       )
@@ -189,8 +201,7 @@ class OnlineTestPassmarkRulesEngineSpec extends PlaySpec {
       )
 
       val result = OnlineTestPassmarkRulesEngine.evaluate(scoresWithPassmark.copy(scores = candidateScores))
-
-      result mustBe List(SchemeEvaluationResult(Business, Red), SchemeEvaluationResult(Commercial, Amber),
+      result mustBe List(SchemeEvaluationResult(Business, Amber), SchemeEvaluationResult(Commercial, Amber),
         SchemeEvaluationResult(DigitalAndTechnology, Amber), SchemeEvaluationResult(Finance, Green),
         SchemeEvaluationResult(ProjectDelivery, Green))
     }
