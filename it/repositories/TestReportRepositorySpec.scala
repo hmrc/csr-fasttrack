@@ -49,11 +49,43 @@ class TestReportRepositorySpec extends MongoRepositorySpec {
       repo.remove(candidateTestReport.applicationId).futureValue
       repo.getReportByApplicationId("appId").futureValue mustBe empty
     }
+
+    "remove non gis report" in {
+      repo.saveOnlineTestReport(fullTestReport).futureValue
+      repo.removeNonGis(fullTestReport.applicationId).futureValue
+      val testReport = repo.getReportByApplicationId("appId").futureValue
+      testReport.get.verbal mustBe None
+      testReport.get.numerical mustBe None
+      testReport.get.competency.isDefined mustBe true
+      testReport.get.situational.isDefined mustBe true
+    }
   }
 }
 
 object TestReportRepositorySpec {
   val candidateTestReport = CandidateTestReport("appId", "XML",
+    competency = Some(TestResult("Completed", "Test Norm",
+      tScore = Some(1.1),
+      percentile = Some(2.2),
+      raw = Some(3),
+      sten = Some(4))))
+
+  val fullTestReport = CandidateTestReport("appId", "XML",
+    verbal = Some(TestResult("Completed", "Test Norm",
+      tScore = Some(1.1),
+      percentile = Some(2.2),
+      raw = Some(3),
+      sten = Some(4))),
+    numerical = Some(TestResult("Completed", "Test Norm",
+      tScore = Some(1.1),
+      percentile = Some(2.2),
+      raw = Some(3),
+      sten = Some(4))),
+    situational = Some(TestResult("Completed", "Test Norm",
+      tScore = Some(1.1),
+      percentile = Some(2.2),
+      raw = Some(3),
+      sten = Some(4))),
     competency = Some(TestResult("Completed", "Test Norm",
       tScore = Some(1.1),
       percentile = Some(2.2),

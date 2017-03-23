@@ -16,6 +16,8 @@
 
 package repositories
 
+import model.ApplicationStatuses._
+import model.Exceptions.CannotUpdateAssistanceDetails
 import model.ReportExchangeObjects.PassMarkReportTestResults
 import model.OnlineTestCommands.TestResult
 import model.PersistedObjects.CandidateTestReport
@@ -23,7 +25,7 @@ import model.PersistedObjects.Implicits._
 import model.ReportExchangeObjects
 import play.api.libs.json.Format
 import reactivemongo.api.{ DB, ReadPreference }
-import reactivemongo.bson.{ BSONDocument, BSONDouble, BSONObjectID }
+import reactivemongo.bson.{ BSONDocument, BSONDouble, BSONObjectID, BSONString }
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
@@ -38,11 +40,13 @@ trait TestReportRepository {
   def getReportByApplicationId(applicationId: String): Future[Option[CandidateTestReport]]
 
   def remove(applicationId: String): Future[Unit]
+
+  def removeNonGis(applicationId: String): Future[Unit]
 }
 
 class TestReportMongoRepository(implicit mongo: () => DB)
     extends ReactiveRepository[CandidateTestReport, BSONObjectID](CollectionNames.ONLINE_TEST_REPORT, mongo,
-      candidateTestReportFormats, ReactiveMongoFormats.objectIdFormats) with TestReportRepository {
+      candidateTestReportFormats, ReactiveMongoFormats.objectIdFormats) with TestReportRepository with ReactiveRepositoryHelpers {
 
   def saveOnlineTestReport(report: CandidateTestReport): Future[Unit] = {
     val query = BSONDocument("applicationId" -> report.applicationId)
@@ -151,6 +155,19 @@ class TestReportMongoRepository(implicit mongo: () => DB)
     val query = BSONDocument("applicationId" -> applicationId)
 
     collection.remove(query, firstMatchOnly = false).map { _ => () }
+  }
+
+  def removeNonGis(applicationId: String) = {
+    val query = BSONDocument("applicationId" -> applicationId)
+
+    val updateBSON = BSONDocument("$unset" -> BSONDocument(
+      "verbal" -> BSONString(""),
+      "numerical" -> BSONString("")
+    ))
+
+    val validator = singleUpdateValidator(applicationId, actionDesc = "Remove numerical and verbal test reports for Gis", ignoreNotFound = true)
+
+    collection.update(query, updateBSON, upsert = false) map validator
   }
 
 }

@@ -20,12 +20,11 @@ import factories.UUIDFactory
 import model.ApplicationStatuses.EnumVal
 import model.{ ApplicationStatuses, Scheme }
 import model.PersistedObjects._
-import model.persisted.{ CubiksTestProfile, SchemeEvaluationResult }
+import model.persisted.{ CubiksTestProfile, OnlineTestPassmarkEvaluation, SchemeEvaluationResult }
 import model.EvaluationResults._
 import model.OnlineTestCommands.{ OnlineTestApplication, OnlineTestApplicationWithCubiksUser }
 import model.PersistedObjects._
 import model.Scheme.Scheme
-import model.persisted.SchemeEvaluationResult
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.OnlineTestRepository
 
@@ -40,6 +39,7 @@ object OnlineTestInMemoryRepository extends OnlineTestInMemoryRepository
 /**
  * @deprecated Please use Mockito
  */
+// scalastyle:off number.of.methods
 class OnlineTestInMemoryRepository extends OnlineTestRepository {
   case class RuleCategoryResult(location1Scheme1: Result, location1Scheme2: Option[Result],
     location2Scheme1: Option[Result], location2Scheme2: Option[Result], alternativeScheme: Option[Result])
@@ -105,7 +105,7 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
   def savePassMarkScoreWithoutApplicationStatusUpdate(applicationId: String, version: String,
     evaluationResult: List[SchemeEvaluationResult]): Future[Unit] = ???
 
-  override def findPassmarkEvaluation(appId: String): Future[List[SchemeEvaluationResult]] = ???
+  override def findPassmarkEvaluation(appId: String): Future[OnlineTestPassmarkEvaluation] = ???
 
   def addReminderNotificationStatus(userId: String, notificationStatus: String): scala.concurrent.Future[Unit] = ???
 
@@ -122,4 +122,6 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
   override def updateStatus(userId: String, currentStatuses: List[EnumVal], newStatus: EnumVal): Future[Unit] = ???
 
   override def findAllPassMarkEvaluations: Future[Map[String, List[SchemeEvaluationResult]]] = ???
+
+  override def findAllAssessmentCentreEvaluations: Future[Map[String, List[SchemeEvaluationResult]]] = ???
 }

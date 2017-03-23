@@ -23,7 +23,7 @@ import model.EvaluationResults.CompetencyAverageResult
 import model.Exceptions.IncorrectStatusInApplicationException
 import model.PersistedObjects.ApplicationForNotification
 import model.persisted.AssessmentCentrePassMarkSettings
-import model.{ ApplicationStatuses, AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
+import model.{ ApplicationStatuses, AssessmentPassmarkEvaluation, AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import play.api.Logger
 import play.api.mvc.RequestHeader
 import repositories._
@@ -190,9 +190,10 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
       s"\n Evaluation for Assessment Centre: $assessmentEvaluation" +
       s"\n Application Status evaluated to: $applicationStatus")
 
-    aRepository.saveAssessmentScoreEvaluation(assessmentScores.scores.applicationId,
-      assessmentScores.passmark.info.version, assessmentEvaluation, applicationStatus
-    ).map { _ =>
+    val evaluation = AssessmentPassmarkEvaluation(assessmentScores.scores.applicationId,
+      assessmentScores.passmark.info.version, onlineTestEvaluation.passmarkVersion,
+      assessmentEvaluation, applicationStatus)
+    aRepository.saveAssessmentScoreEvaluation(evaluation).map { _ =>
       auditNewStatus(assessmentScores.scores.applicationId, applicationStatus)
     }
   }

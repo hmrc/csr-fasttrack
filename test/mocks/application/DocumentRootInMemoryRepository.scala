@@ -23,7 +23,7 @@ import model.Exceptions.ApplicationNotFound
 import model.PersistedObjects.ApplicationForNotification
 import model.Scheme.Scheme
 import model.commands.ApplicationStatusDetails
-import model.{ Adjustments, AdjustmentsComment, ApplicationStatuses, ProgressStatuses }
+import model._
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.GeneralApplicationRepository
 
@@ -97,9 +97,6 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
 
   def nextApplicationReadyForAssessmentScoreEvaluation(currentPassmarkVersion: String): Future[Option[String]] = ???
 
-  def saveAssessmentScoreEvaluation(applicationId: String, passmarkVersion: String, evaluationResult: AssessmentRuleCategoryResult,
-                                    newApplicationStatus: ApplicationStatuses.EnumVal): Future[Unit] = ???
-
   def getSchemeLocations(applicationId: String): Future[List[String]] = ???
 
   def updateSchemeLocations(applicationId: String, locationIds: List[String]): Future[Unit] = ???
@@ -131,5 +128,9 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   override def removeSchemeLocations(applicationId: String): Future[Unit] = ???
 
   override def findAssessmentCentreCompetencyAverageResult(applicationId: String):Future[Option[CompetencyAverageResult]] = ???
+
+  def nextUserAndAppIdsReadyForAssessmentIndicatorUpdate(batchSize: Int, mappingVersion: String): Future[Map[String, String]] = ???
+
+  def saveAssessmentScoreEvaluation(evaluation: AssessmentPassmarkEvaluation): Future[Unit] = ???
 }
 // scalastyle:on number.of.methods

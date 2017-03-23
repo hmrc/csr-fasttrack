@@ -16,10 +16,10 @@
 
 package model
 
-import model.persisted.SchemeEvaluationResult
+import model.persisted.OnlineTestPassmarkEvaluation
 import play.api.libs.json.Json
 
-case class OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation: List[SchemeEvaluationResult],
+case class OnlineTestEvaluationAndAssessmentCentreScores(onlineTestEvaluation: OnlineTestPassmarkEvaluation,
                                                          assessmentScores: AssessmentPassmarkPreferencesAndScores)
 
 object OnlineTestEvaluationAndAssessmentCentreScores {
