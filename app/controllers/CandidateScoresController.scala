@@ -39,6 +39,10 @@ trait CandidateScoresController extends BaseController {
   def assessmentCentreService: AssessmentCentreService
 
   def getCandidateScores(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    assessmentCentreService.getCandidateScores(applicationId).map(scores => Ok(Json.toJson(scores)))
+  }
+
+  def getCandidateScoresAndFeedback(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
     assessmentCentreService.getCandidateScoresAndFeedback(applicationId).map(scores => Ok(Json.toJson(scores)))
   }
 
