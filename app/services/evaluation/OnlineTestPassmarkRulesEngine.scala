@@ -69,7 +69,7 @@ object OnlineTestPassmarkRulesEngine extends OnlineTestPassmarkRulesEngine {
   private def schemeResult(tScore: Double, passMark: SchemeThreshold) = {
     if (tScore >= passMark.passThreshold) {
       Green
-    } else if (tScore > passMark.failThreshold) {
+    } else if (tScore >= passMark.failThreshold) {
       Amber
     } else {
       Red
