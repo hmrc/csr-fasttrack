@@ -122,6 +122,10 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
     }
   }
 
+  def getCandidateScoresAndFeedback(applicationId: String): Future[Option[CandidateScoresAndFeedback]] = {
+    aasRepository.tryFind(applicationId)
+  }
+
   def getCompetencyAverageResult(applicationId: String): Future[Option[CompetencyAverageResult]] = {
     aRepository.findAssessmentCentreCompetencyAverageResult(applicationId)
   }
