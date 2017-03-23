@@ -43,6 +43,15 @@ class AssistanceDetailsMongoRepositorySpec extends MongoRepositorySpec {
       ex mustBe an[IllegalStateException]
     }
 
+    "convert application to gis" in {
+      create(cubiksUserId = 1, application = appAssistanceDetails)
+      repository.updateToGis(appAssistanceDetails.applicationId).futureValue
+      val result = repository.findApplication(cubiksUserId).futureValue
+      result.assistanceDetails.guaranteedInterview mustBe Some(true)
+      result.assistanceDetails.hasDisability mustBe "Yes"
+      result.assistanceDetails.needsSupportForOnlineAssessment mustBe false
+    }
+
     "return an application" in {
       create(cubiksUserId = 1, application = appAssistanceDetails)
       val result = repository.findApplication(cubiksUserId).futureValue

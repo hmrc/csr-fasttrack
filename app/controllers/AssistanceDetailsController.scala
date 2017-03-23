@@ -43,9 +43,20 @@ trait AssistanceDetailsController extends BaseController {
         auditService.logEvent("AssistanceDetailsSaved")
         Created
       }).recover {
-        case e: CannotUpdateAssistanceDetails => BadRequest(s"cannot update assistance details for user: ${e.userId}")
+        case e: CannotUpdateAssistanceDetails => BadRequest(s"cannot update assistance details for user: ${e.id}")
       }
     }
+  }
+
+  def updateToGis(applicationId: String) = Action.async { implicit request =>
+      (for {
+        _ <- assistanceDetailsService.updateToGis(applicationId)
+      } yield {
+        auditService.logEvent("CandidateUpdatedAsGis")
+        Ok
+      }).recover {
+        case e: CannotUpdateAssistanceDetails => BadRequest(s"cannot update candidate application as Gis: ${e.id}")
+      }
   }
 
   def find(userId: String, applicationId: String) = Action.async { implicit request =>
