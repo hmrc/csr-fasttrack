@@ -32,7 +32,6 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object FixDataService extends FixDataService {
   val appRepo: GeneralApplicationMongoRepository = applicationRepository
   val passmarkSettingsRepo: OnlineTestPassMarkSettingsRepository = onlineTestPassMarkSettingsRepository
-  val onlineTestRepo: OnlineTestMongoRepository = onlineTestRepository
   val auditService = AuditService
   val progressToAssessmentCentreConfig = config.MicroserviceAppConfig.progressToAssessmentCentreConfig
 }
@@ -40,7 +39,6 @@ object FixDataService extends FixDataService {
 trait FixDataService {
   def appRepo: GeneralApplicationRepository
   def passmarkSettingsRepo: OnlineTestPassMarkSettingsRepository
-  def onlineTestRepo: OnlineTestRepository
   def auditService: AuditService
   def progressToAssessmentCentreConfig: DataFixupConfig
 

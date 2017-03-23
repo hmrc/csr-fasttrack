@@ -16,6 +16,7 @@
 
 package repositories.application
 
+import model.ApplicationStatuses._
 import model.Exceptions.{ ApplicationNotFound, AssistanceDetailsNotFound, CannotUpdateAssistanceDetails }
 import model.exchange.AssistanceDetails
 import model.persisted.ApplicationAssistanceDetails
@@ -31,6 +32,8 @@ import scala.concurrent.Future
 
 trait AssistanceDetailsRepository {
   def update(applicationId: String, userId: String, ad: AssistanceDetails): Future[Unit]
+
+  def updateToGis(applicationId: String): Future[Unit]
 
   def find(applicationId: String): Future[AssistanceDetails]
 
@@ -56,6 +59,26 @@ class AssistanceDetailsMongoRepository(implicit mongo: () => DB)
 
     val validator = singleUpdateValidator(applicationId, actionDesc = "updating assistance details",
       CannotUpdateAssistanceDetails(userId))
+
+    collection.update(query, updateBSON, upsert = false) map validator
+  }
+
+  override def updateToGis(applicationId: String): Future[Unit] = {
+    val query = BSONDocument(
+      "applicationId" -> applicationId,
+      "applicationStatus" -> BSONDocument("$in" ->
+        List(Submitted, OnlineTestInvited, OnlineTestStarted, OnlineTestExpired, OnlineTestCompleted)))
+
+    val updateBSON = BSONDocument("$set" -> BSONDocument(
+      "assistance-details.hasDisability" -> "Yes",
+      "assistance-details.guaranteedInterview" -> true,
+      "assistance-details.needsSupportForOnlineAssessment" -> false
+    )) ++ BSONDocument("$unset" -> BSONDocument(
+      "assistance-details.needsSupportForOnlineAssessmentDescription" -> BSONString("")
+    ))
+
+    val validator = singleUpdateValidator(applicationId, actionDesc = "update candidate as GIS",
+      CannotUpdateAssistanceDetails(applicationId))
 
     collection.update(query, updateBSON, upsert = false) map validator
   }

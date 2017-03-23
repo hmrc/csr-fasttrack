@@ -24,6 +24,7 @@ import model.PersistedObjects.ApplicationForNotification
 import model.Scheme.Scheme
 import model.commands.ApplicationStatusDetails
 import model._
+import model.persisted.SchemeEvaluationResult
 import org.joda.time.{ DateTime, LocalDate }
 import repositories.application.GeneralApplicationRepository
 
@@ -130,5 +131,8 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   def nextUserAndAppIdsReadyForAssessmentIndicatorUpdate(batchSize: Int, mappingVersion: String): Future[Map[String, String]] = ???
 
   def saveAssessmentScoreEvaluation(evaluation: AssessmentPassmarkEvaluation): Future[Unit] = ???
+
+  override def progressToAssessmentCentre(applicationId: String, evaluationResult: List[SchemeEvaluationResult],
+    version: String): Future[Unit] = ???
 }
 // scalastyle:on number.of.methods

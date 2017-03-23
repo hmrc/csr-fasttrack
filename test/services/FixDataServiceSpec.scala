@@ -62,10 +62,8 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
       when(mockAppRepo.getSchemes(any[String])).thenReturn(Future.successful(
         List(Scheme.Finance, Scheme.Business, Scheme.DigitalAndTechnology)
       ))
-      when(mockOnlineTestRepo.savePassMarkScore(any[String], any[String], any[List[SchemeEvaluationResult]],
-        any[Option[ApplicationStatuses.EnumVal]])
-      ).thenReturn(Future.successful(()))
-      when(mockAppRepo.updateStatus(any[String], any[ApplicationStatuses.EnumVal])).thenReturn(Future.successful(()))
+      when(mockAppRepo.progressToAssessmentCentre(any[String], any[List[SchemeEvaluationResult]], any[String]))
+        .thenReturn(Future.successful(()))
 
       val actual = service.progressToAssessmentCentre("appId").futureValue
 
@@ -96,14 +94,12 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
     implicit val rh = EmptyRequestHeader
     val mockAppRepo = mock[GeneralApplicationRepository]
     val mockPassMarkSettingsRepo = mock[OnlineTestPassMarkSettingsRepository]
-    val mockOnlineTestRepo = mock[OnlineTestRepository]
     val mockAuditService = mock[AuditService]
     val mockConfig = mock[DataFixupConfig]
 
     val service = new FixDataService {
       val appRepo = mockAppRepo
       val passmarkSettingsRepo = mockPassMarkSettingsRepo
-      val onlineTestRepo = mockOnlineTestRepo
       val auditService = mockAuditService
       val progressToAssessmentCentreConfig = mockConfig
     }

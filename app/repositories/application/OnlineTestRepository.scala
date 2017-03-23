@@ -477,10 +477,6 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
         BSONDocument(
           "applicationStatus" -> ApplicationStatuses.AwaitingAssessmentCentreReevaluation,
           "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)
-        ),
-        BSONDocument(
-          "applicationStatus" -> ApplicationStatuses.AssessmentScoresAccepted,
-          "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)
         )
       )),
       BSONDocument("noOnlineTestReEvaluation" -> BSONDocument("$ne" -> true))
