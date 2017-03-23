@@ -19,7 +19,7 @@ package scheduler.assessment
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.EvaluationResults._
-import model.persisted.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkSettings, SchemeEvaluationResult }
+import model.persisted.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkSettings, OnlineTestPassmarkEvaluation, SchemeEvaluationResult }
 import model.{ AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import org.joda.time.DateTime
 import org.mockito.Mockito._
@@ -32,7 +32,7 @@ import scala.concurrent.Future
 class EvaluateAssessmentScoreJobSpec extends UnitWithAppSpec with ShortTimeout {
   val applicationAssessmentServiceMock = mock[AssessmentCentreService]
   val config = AssessmentEvaluationMinimumCompetencyLevel(enabled = false, None, None)
-  val onlineTestEvaluation = List(SchemeEvaluationResult(model.Scheme.Business, Green))
+  val onlineTestEvaluation = OnlineTestPassmarkEvaluation("passmark", List(SchemeEvaluationResult(model.Scheme.Business, Green)))
   val assessmentEvaluation = AssessmentPassmarkPreferencesAndScores(
     AssessmentCentrePassMarkSettings(List(), AssessmentCentrePassMarkInfo("1", DateTime.now, "user")),
     List(model.Scheme.Business), CandidateScoresAndFeedback("appId"))

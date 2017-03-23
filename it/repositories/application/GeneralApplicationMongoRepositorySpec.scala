@@ -21,7 +21,7 @@ import model.ApplicationStatuses._
 import model.Exceptions.{ AdjustmentsCommentNotFound, LocationPreferencesNotFound, NotFoundException, SchemePreferencesNotFound }
 import model._
 import model.commands.ApplicationStatusDetails
-import model.persisted.SchemeEvaluationResult
+import model.persisted.{ OnlineTestPassmarkEvaluation, SchemeEvaluationResult }
 import org.joda.time.{ DateTime, DateTimeZone }
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
@@ -244,7 +244,7 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
       progress.onlineTest.awaitingAllocationNotified mustBe true
       val evaluationResults = helperRepo.findPassmarkEvaluation("appId").futureValue
 
-      evaluationResults mustBe evaluation
+      evaluationResults mustBe OnlineTestPassmarkEvaluation(version, evaluation)
 
     }
 

@@ -16,12 +16,11 @@
 
 package mocks.application
 
-import common.Constants.{ No, Yes }
-import model._
 import model.Commands._
-import model.report.AdjustmentReportItem
 import model.ReportExchangeObjects._
-import model.exchange.{ ApplicationForCandidateProgressReportItemExamples, AssistanceDetails }
+import model._
+import model.exchange.AssistanceDetails
+import model.report.AdjustmentReportItem
 import org.joda.time.LocalDate
 import repositories.application.ReportingRepository
 
@@ -87,4 +86,6 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
   override def diversityReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] = ???
 
   override def passMarkReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] = ???
+
+  override def assessmentCentreIndicatorReport: Future[List[AssessmentCentreIndicatorReport]] = ???
 }

@@ -81,8 +81,8 @@ class AssessmentCentrePassmarkRulesEngineSpec extends PlaySpec with MustMatchers
     )
     val CandidateSchemes = List(model.Scheme.Business)
 
-    val CandidateOnlineTestEvaluation = List(
-      SchemeEvaluationResult(model.Scheme.Business, Green)
+    val CandidateOnlineTestEvaluation = OnlineTestPassmarkEvaluation("passmark", List(
+      SchemeEvaluationResult(model.Scheme.Business, Green))
   )
 
   val rulesEngine = AssessmentCentrePassmarkRulesEngine

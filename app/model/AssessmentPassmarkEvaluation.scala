@@ -16,15 +16,10 @@
 
 package model
 
-import play.api.libs.json.Json
-import reactivemongo.bson.{ BSONDocument, BSONHandler, Macros }
+import model.EvaluationResults.AssessmentRuleCategoryResult
 
-final case class AssessmentCentreIndicator(area: String,
-                                           assessmentCentre: String,
-                                           version: Option[String] = None)
-
-object AssessmentCentreIndicator {
-  implicit val formats = Json.format[AssessmentCentreIndicator]
-  implicit val bsonHandler: BSONHandler[BSONDocument, AssessmentCentreIndicator] = Macros.handler[AssessmentCentreIndicator]
-
-}
+case class AssessmentPassmarkEvaluation(applicationId: String,
+                                        passmarkVersion: String,
+                                        onlineTestPassMarkVersion: String,
+                                        evaluationResult: AssessmentRuleCategoryResult,
+                                        newApplicationStatus: ApplicationStatuses.EnumVal)

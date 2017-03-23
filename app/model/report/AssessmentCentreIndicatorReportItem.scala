@@ -14,17 +14,19 @@
  * limitations under the License.
  */
 
-package model
+package model.report
 
+import model.AssessmentCentreIndicator
 import play.api.libs.json.Json
-import reactivemongo.bson.{ BSONDocument, BSONHandler, Macros }
 
-final case class AssessmentCentreIndicator(area: String,
-                                           assessmentCentre: String,
-                                           version: Option[String] = None)
+case class AssessmentCentreIndicatorReportItem(
+  applicationId: Option[String],
+  userId: String,
+  applicationStatus: Option[String],
+  assessmentCentreIndicator: Option[AssessmentCentreIndicator],
+  postcode: Option[String]
+)
 
-object AssessmentCentreIndicator {
-  implicit val formats = Json.format[AssessmentCentreIndicator]
-  implicit val bsonHandler: BSONHandler[BSONDocument, AssessmentCentreIndicator] = Macros.handler[AssessmentCentreIndicator]
-
+case object AssessmentCentreIndicatorReportItem {
+  implicit val assessmentCentreIndicatorReportItemFormat = Json.format[AssessmentCentreIndicatorReportItem]
 }
