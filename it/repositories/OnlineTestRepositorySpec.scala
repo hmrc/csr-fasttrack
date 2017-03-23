@@ -631,6 +631,12 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
   }
 
   "next application ready for online test evaluation" must {
+    "return no candidate if there is only one and it is marked as noOnlineTestReEvaluation" in {
+      createOnlineTestApplication("appId", ApplicationStatuses.OnlineTestStarted, noEvaluation = Some(true))
+      val result = onlineTestRepo.nextApplicationPassMarkProcessing("currentVersion").futureValue
+      result mustBe empty
+    }
+
     "return no candidate if there is only a candidate in ONLINE_TEST_STARTED status" in {
       val AppId = UUID.randomUUID().toString
       createOnlineTestApplication(AppId, ApplicationStatuses.OnlineTestStarted)
@@ -880,36 +886,41 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
   //scalastyle:on
 
   def createOnlineTestApplication(appId: String, applicationStatus: String, xmlReportSavedOpt: Option[Boolean] = None,
-                                  alreadyEvaluatedAgainstPassmarkVersionOpt: Option[String] = None): String = {
+                                  alreadyEvaluatedAgainstPassmarkVersionOpt: Option[String] = None,
+                                  noEvaluation: Option[Boolean] = None): String = {
     val result = (xmlReportSavedOpt, alreadyEvaluatedAgainstPassmarkVersionOpt) match {
       case (None, None ) =>
         helperRepo.collection.insert(BSONDocument(
           "applicationId" -> appId,
           "userId" -> appId,
-          "applicationStatus" -> applicationStatus
-        ))
+          "applicationStatus" -> applicationStatus) ++
+          noEvaluation.map( x => BSONDocument("noOnlineTestReEvaluation" -> x)).getOrElse(BSONDocument())
+        )
       case (Some(xmlReportSaved), None) =>
         helperRepo.collection.insert(BSONDocument(
           "applicationId" -> appId,
           "userId" -> appId,
           "applicationStatus" -> applicationStatus,
-          "online-tests" -> BSONDocument("xmlReportSaved" -> xmlReportSaved)
-        ))
+          "online-tests" -> BSONDocument("xmlReportSaved" -> xmlReportSaved)) ++
+          noEvaluation.map( x => BSONDocument("noOnlineTestReEvaluation" -> x)).getOrElse(BSONDocument())
+        )
       case (None, Some(alreadyEvaluatedAgainstPassmarkVersion)) =>
         helperRepo.collection.insert(BSONDocument(
           "applicationId" -> appId,
           "userId" -> appId,
           "applicationStatus" -> applicationStatus,
-          "passmarkEvaluation" -> BSONDocument("passmarkVersion" -> alreadyEvaluatedAgainstPassmarkVersion)
-        ))
+          "passmarkEvaluation" -> BSONDocument("passmarkVersion" -> alreadyEvaluatedAgainstPassmarkVersion)) ++
+          noEvaluation.map( x => BSONDocument("noOnlineTestReEvaluation" -> x)).getOrElse(BSONDocument())
+        )
       case (Some(xmlReportSaved), Some(alreadyEvaluatedAgainstPassmarkVersion)) =>
         helperRepo.collection.insert(BSONDocument(
           "applicationId" -> appId,
           "userId" -> appId,
           "applicationStatus" -> applicationStatus,
           "online-tests" -> BSONDocument("xmlReportSaved" -> xmlReportSaved),
-          "passmarkEvaluation" -> BSONDocument("passmarkVersion" -> alreadyEvaluatedAgainstPassmarkVersion)
-        ))
+          "passmarkEvaluation" -> BSONDocument("passmarkVersion" -> alreadyEvaluatedAgainstPassmarkVersion)) ++
+          noEvaluation.map( x => BSONDocument("noOnlineTestReEvaluation" -> x)).getOrElse(BSONDocument())
+        )
     }
 
     result.futureValue

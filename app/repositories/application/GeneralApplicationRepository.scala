@@ -116,6 +116,8 @@ trait GeneralApplicationRepository {
 
   def removeProgressStatuses(applicationId: String, progressStatuses: List[ProgressStatuses.ProgressStatus]): Future[Unit]
 
+  def progressToAssessmentCentre(applicationId: String, evaluationResult: List[SchemeEvaluationResult], version: String): Future[Unit]
+
   def nextUserAndAppIdsReadyForAssessmentIndicatorUpdate(batchSize: Int, mappingVersion: String): Future[Map[String, String]]
 }
 
@@ -714,6 +716,31 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       "scheme-locations" -> BSONString("")
     ))
     collection.update(query, schemeLocationsBSON, upsert = false) map { _ => () }
+  }
+
+  def progressToAssessmentCentre(applicationId: String, evaluationResult: List[SchemeEvaluationResult],
+    version: String
+  ): Future[Unit] = {
+    val query = BSONDocument("$and" -> BSONArray(
+      BSONDocument("applicationId" -> applicationId),
+      BSONDocument(s"progress-status.${ProgressStatuses.AwaitingAllocationNotifiedProgress}" -> BSONDocument("$ne" -> true)),
+      BSONDocument(s"progress-status.${ProgressStatuses.AwaitingAllocationProgress}"  -> BSONDocument("$ne" -> true))
+    ))
+
+    val update = BSONDocument("$set" -> BSONDocument(
+
+      "passmarkEvaluation" -> BSONDocument(
+        "passmarkVersion" -> version,
+        "result" -> evaluationResult
+      ),
+      "applicationStatus" -> ApplicationStatuses.AwaitingAllocationNotified,
+      s"progress-status.${ProgressStatuses.AwaitingAllocationNotifiedProgress}" -> true,
+      "noOnlineTestReEvaluation" -> true
+    ))
+
+    val validator = singleUpdateValidator(applicationId, "force progress to assessment centre", NotFoundException())
+
+    collection.update(query, update, upsert = false) map validator
   }
 
   override def nextUserAndAppIdsReadyForAssessmentIndicatorUpdate(batchSize: Int,

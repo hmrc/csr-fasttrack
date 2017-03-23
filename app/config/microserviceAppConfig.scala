@@ -20,7 +20,9 @@ import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import play.api.Play.{ configuration, current }
 import play.api.libs.json.Json
-import uk.gov.hmrc.play.config.ServicesConfig
+import uk.gov.hmrc.play.config.{ RunMode, ServicesConfig }
+
+import scala.concurrent.Future
 
 case class FrameworksConfig(yamlFilePath: String)
 
@@ -102,6 +104,13 @@ object AssessmentEvaluationMinimumCompetencyLevel {
   implicit val assessmentEvaluationMinimumCompetencyLevelFormat = Json.format[AssessmentEvaluationMinimumCompetencyLevel]
 }
 
+case class DataFixupConfig(
+  appId: String,
+  forceAppIdCheck: Boolean
+) {
+  def isValid(id: String): Boolean = if (forceAppIdCheck) { appId == id } else { true }
+}
+
 object MicroserviceAppConfig extends ServicesConfig {
   lazy val emailConfig = configuration.underlying.as[EmailConfig]("microservice.services.email")
   lazy val frameworksConfig = configuration.underlying.as[FrameworksConfig]("microservice.frameworks")
@@ -139,4 +148,6 @@ object MicroserviceAppConfig extends ServicesConfig {
     configuration.underlying
       .as[AssessmentEvaluationMinimumCompetencyLevel]("microservice.services.assessment-evaluation.minimum-competency-level")
 
+  lazy val progressToAssessmentCentreConfig =
+    configuration.underlying.as[DataFixupConfig]("microservice.dataFixup.progressToAssessmentCentre")
 }
