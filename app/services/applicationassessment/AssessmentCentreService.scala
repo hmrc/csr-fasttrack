@@ -82,13 +82,27 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
 
   def acceptScoresAndFeedback(applicationId: String, scoresAndFeedback: CandidateScoresAndFeedback)
                              (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
-    val newStatus = ApplicationStatuses.AssessmentScoresAccepted
+    val newStatus = determineStatus(scoresAndFeedback)
     for {
       _ <- aasRepository.saveAll(scoresAndFeedback)
       _ <- aRepository.updateStatus(applicationId, newStatus)
     } yield {
       auditService.logEvent("ApplicationScoresAndFeedbackAccepted", Map("applicationId" -> applicationId))
       auditService.logEvent(s"ApplicationStatusSetTo$newStatus", Map("applicationId" -> applicationId))
+    }
+  }
+
+  private def determineStatus(scoresAndFeedback: CandidateScoresAndFeedback) = {
+    val exerciseAttendList = List(
+      scoresAndFeedback.interview.map(_.attended),
+      scoresAndFeedback.groupExercise.map(_.attended),
+      scoresAndFeedback.writtenExercise.map(_.attended)
+    ).map(_.getOrElse(throw new IllegalStateException("Cannot accept scores with empty attend field")))
+
+    if (exerciseAttendList.contains(true)) {
+      ApplicationStatuses.AssessmentScoresAccepted
+    } else {
+      ApplicationStatuses.FailedToAttend
     }
   }
 
