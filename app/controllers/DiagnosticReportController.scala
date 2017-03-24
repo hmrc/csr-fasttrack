@@ -35,7 +35,7 @@ import scala.concurrent.Future
 object DiagnosticReportController extends DiagnosticReportController {
   val drRepository: DiagnosticReportingRepository = diagnosticReportRepository
   val trRepository: TestReportRepository = testReportRepository
-  val assessmentScoresRepo: ApplicationAssessmentScoresRepository = applicationAssessmentScoresRepository
+  val assessmentScoresRepo: ApplicationAssessmentScoresRepository = assessorAssessmentScoresRepository
 }
 
 trait DiagnosticReportController extends BaseController {

@@ -23,7 +23,7 @@ import org.joda.time.DateTime
 import testkit.MongoRepositorySpec
 
 class AssessorApplicationAssessmentScoresRepositorySpec extends ApplicationAssessmentScoresRepositorySpec {
-  def repository = new ApplicationAssessmentScoresMongoRepository(DateTimeFactory)
+  def repository = new AssessorApplicationAssessmentScoresMongoRepository(DateTimeFactory)
   def name = "Assessor"
 }
 
@@ -40,7 +40,7 @@ trait ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
 
   s"$name Application Scores Repository" should {
     "create indexes for the repository" in {
-      val repo = repositories.applicationAssessmentScoresRepository
+      val repo = repositories.assessorAssessmentScoresRepository
 
       val indexes = indexesWithFields(repo)
       indexes must contain (List("_id"))

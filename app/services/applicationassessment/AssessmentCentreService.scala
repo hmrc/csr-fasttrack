@@ -40,7 +40,7 @@ object AssessmentCentreService extends AssessmentCentreService {
   val personalDetailsRepo = personalDetailsRepository
   val otRepository = onlineTestRepository
   val aRepository = applicationRepository
-  val aasRepository = applicationAssessmentScoresRepository
+  val aasRepository = assessorAssessmentScoresRepository
   val cdRepository = contactDetailsRepository
 
   val emailClient = CSREmailClient

@@ -31,7 +31,7 @@ import scala.concurrent.Future
 object FailedToAttendStatusGenerator extends FailedToAttendStatusGenerator {
   override val previousStatusGenerator = AllocationStatusGenerator
   override val aRepository = applicationRepository
-  override val aasRepository = applicationAssessmentScoresRepository
+  override val aasRepository = assessorAssessmentScoresRepository
 }
 
 trait FailedToAttendStatusGenerator extends ConstructiveGenerator {

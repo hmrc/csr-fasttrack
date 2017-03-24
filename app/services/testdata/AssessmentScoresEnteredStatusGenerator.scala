@@ -33,7 +33,7 @@ import scala.concurrent.Future
 object AssessmentScoresEnteredStatusGenerator extends AssessmentScoresEnteredStatusGenerator {
   override val previousStatusGenerator = AllocationStatusGenerator
   override val aRepository = applicationRepository
-  override val aasRepository = applicationAssessmentScoresRepository
+  override val aasRepository = assessorAssessmentScoresRepository
 }
 
 trait AssessmentScoresEnteredStatusGenerator extends ConstructiveGenerator {
