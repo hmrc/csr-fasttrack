@@ -47,10 +47,10 @@ trait CandidateScoresController extends BaseController {
   }
 
   def getCompetencyAverageResult(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
-    assessmentCentreService.getCompetencyAverageResult(applicationId).map { _ match {
+    assessmentCentreService.getCompetencyAverageResult(applicationId).map {
       case None => NotFound(s"Competency average result for $applicationId could not be found")
       case Some(result) => Ok(Json.toJson(result))
-    }}
+    }
   }
 
   def saveExerciseScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
