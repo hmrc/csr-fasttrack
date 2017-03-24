@@ -23,7 +23,6 @@ import model.report.AssessmentCentreIndicatorReportItem
 import play.api.libs.json.{ JsObject, Json }
 import play.api.mvc.{ Action, AnyContent }
 import model.PersistedObjects.Implicits.candidateTestReportFormats
-import model.CandidateScoresCommands.Implicits.CandidateScoresAndFeedbackFormats
 import play.api.Logger
 import play.api.libs.streams.Streams
 import repositories._

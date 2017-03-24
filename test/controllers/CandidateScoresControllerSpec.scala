@@ -18,7 +18,6 @@ package controllers
 
 import factories.DateTimeFactory
 import model.CandidateScoresCommands.{ ExerciseScoresAndFeedback, ScoresAndFeedback }
-import model.CandidateScoresCommands.Implicits._
 import model.{ AssessmentExercise, EmptyRequestHeader }
 import org.mockito.Mockito._
 import play.api.libs.json.Json

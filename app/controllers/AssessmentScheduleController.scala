@@ -30,7 +30,6 @@ import model.AssessmentScheduleCommands.ApplicationForAssessmentAllocationResult
 import model.AssessmentScheduleCommands.Implicits.ApplicationForAssessmentAllocationResultFormats
 import model.Commands.AssessmentCentreAllocation
 import model.Commands.Implicits.applicationAssessmentFormat
-import model.CandidateScoresCommands.Implicits.ApplicationScoresFormats
 import model.Exceptions.NotFoundException
 import model.{ ApplicationStatusOrder, Commands, ProgressStatuses }
 import org.joda.time.LocalDate

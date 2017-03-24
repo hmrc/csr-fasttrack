@@ -18,7 +18,6 @@ package model
 
 import connectors.PassMarkExchangeObjects.OnlineTestPassmarkSettings
 import controllers._
-import model.CandidateScoresCommands.Implicits._
 import model.Exceptions.{ NoResultsReturned, TooManyEntries }
 import model.OnlineTestCommands.Implicits._
 import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }

@@ -18,7 +18,6 @@ package controllers
 
 import factories.DateTimeFactory
 import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScoresAndFeedback }
-import model.CandidateScoresCommands.Implicits._
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent }
 import services.applicationassessment.AssessmentCentreService

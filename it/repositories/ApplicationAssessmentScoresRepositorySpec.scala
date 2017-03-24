@@ -22,13 +22,23 @@ import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScore
 import org.joda.time.DateTime
 import testkit.MongoRepositorySpec
 
-class ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
-
-  override val collectionName = CollectionNames.APPLICATION_ASSESSMENT_SCORES
-
+class AssessorApplicationAssessmentScoresRepositorySpec extends ApplicationAssessmentScoresRepositorySpec {
   def repository = new ApplicationAssessmentScoresMongoRepository(DateTimeFactory)
+  def name = "Assessor"
+}
 
-  "Application Scores Repository" should {
+class ReviewerApplicationAssessmentScoresRepositorySpec extends ApplicationAssessmentScoresRepositorySpec {
+  def repository = new ReviewerApplicationAssessmentScoresMongoRepository(DateTimeFactory)
+  def name = "Reviewer"
+}
+
+trait ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
+
+  val collectionName = CollectionNames.APPLICATION_ASSESSMENT_SCORES
+  def repository: ApplicationAssessmentScoresRepository
+  def name: String
+
+  s"$name Application Scores Repository" should {
     "create indexes for the repository" in {
       val repo = repositories.applicationAssessmentScoresRepository
 
