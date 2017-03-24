@@ -93,9 +93,11 @@ POST        /online-test/extend/:appId                                   control
 GET         /online-test/pdf-report/:applicationId                       controllers.OnlineTestController.getPDFReport(applicationId: String)
 
 GET         /test-scores/application/:applicationId                      controllers.CandidateScoresController.getCandidateScores(applicationId: String)
+GET         /test-scores-feedback/application/:applicationId             controllers.CandidateScoresController.getCandidateScoresAndFeedback(applicationId: String)
 PUT         /test-scores/application/:applicationId/save                 controllers.CandidateScoresController.saveExerciseScoresAndFeedback(applicationId: String)
 PUT         /test-scores/application/:applicationId/submit               controllers.CandidateScoresController.submitExerciseScoresAndFeedback(applicationId: String)
 PUT         /test-scores/application/:applicationId/accept               controllers.CandidateScoresController.acceptCandidateScoresAndFeedback(applicationId: String)
+GET         /test-scores/competency-average/application/:applicationId   controllers.CandidateScoresController.getCompetencyAverageResult(applicationId: String)
 
 GET         /application/:applicationId/issue                            controllers.FlagCandidateController.find(applicationId: String)
 PUT         /application/:applicationId/issue                            controllers.FlagCandidateController.save(applicationId: String)

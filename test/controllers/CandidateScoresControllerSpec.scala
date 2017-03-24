@@ -19,6 +19,7 @@ package controllers
 import factories.DateTimeFactory
 import model.CandidateScoresCommands.{ ExerciseScoresAndFeedback, ScoresAndFeedback }
 import model.CandidateScoresCommands.Implicits._
+import model.EvaluationResults.CompetencyAverageResult
 import model.{ AssessmentExercise, EmptyRequestHeader }
 import org.mockito.Mockito._
 import play.api.libs.json.Json
@@ -31,6 +32,7 @@ import play.api.mvc.RequestHeader
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import org.mockito.Matchers.{ eq => eqTo, _ }
 
 class CandidateScoresControllerSpec extends UnitWithAppSpec {
 
@@ -58,7 +60,7 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
 
       val result = TestCandidateScoresController.saveExerciseScoresAndFeedback("app1")(
-        createSaveCandidateScoresAndFeedback("app1", Json.toJson(exerciseScoresAndFeedback).toString())
+        createSaveCandidateScoresAndFeedbackRequest("app1", Json.toJson(exerciseScoresAndFeedback).toString())
       )
 
       status(result) must be(CREATED)
@@ -69,10 +71,32 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(new IllegalStateException("blah")))
 
       val result = TestCandidateScoresController.saveExerciseScoresAndFeedback("app1")(
-        createSaveCandidateScoresAndFeedback("app1", Json.toJson(exerciseScoresAndFeedback).toString())
+        createSaveCandidateScoresAndFeedbackRequest("app1", Json.toJson(exerciseScoresAndFeedback).toString())
       )
 
       status(result) must be(BAD_REQUEST)
+    }
+  }
+
+  "get competency average result" should {
+    "Not Found if it cannot be found" in new TestFixture {
+      val NotFoundAppId = "notFoundApplicationId1"
+      when(mockAssessmentCentreService.getCompetencyAverageResult(eqTo(NotFoundAppId))).thenReturn(Future.successful(None))
+      val result = TestCandidateScoresController.getCompetencyAverageResult(NotFoundAppId)(
+        createGetCompetencyAverageResultRequest(NotFoundAppId))
+      status(result) must be(NOT_FOUND)
+      contentAsString(result) must include(s"Competency average result for $NotFoundAppId could not be found")
+    }
+
+    "OK with corresponding Competency average result if it can be found" in new TestFixture {
+      val FoundAppId = "FoundApplicationId1"
+      val CompetencyAverageResultExample = CompetencyAverageResult(2.0, 2.0, 3.0, 3.1, 1.5, 2.5, 2.7, 3.3)
+      when(mockAssessmentCentreService.getCompetencyAverageResult(eqTo(FoundAppId))).
+        thenReturn(Future.successful(Some(CompetencyAverageResultExample)))
+      val result = TestCandidateScoresController.getCompetencyAverageResult(FoundAppId)(
+        createGetCompetencyAverageResultRequest(FoundAppId))
+      status(result) must be(OK)
+      contentAsJson(result) must be (Json.toJson(CompetencyAverageResultExample))
     }
   }
 
@@ -85,13 +109,19 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
       val dateTimeFactory: DateTimeFactory = DateTimeFactory
     }
 
-    def createSaveCandidateScoresAndFeedback(applicationId: String, jsonString: String) = {
+    def createSaveCandidateScoresAndFeedbackRequest(applicationId: String, jsonString: String) = {
       val json = Json.parse(jsonString)
       FakeRequest(
         Helpers.POST,
         controllers.routes.CandidateScoresController.saveExerciseScoresAndFeedback(applicationId).url, FakeHeaders(), json
-      )
-        .withHeaders("Content-Type" -> "application/json")
+      ).withHeaders("Content-Type" -> "application/json")
+    }
+
+    def createGetCompetencyAverageResultRequest(applicationId: String) = {
+      FakeRequest(
+        Helpers.POST,
+        controllers.routes.CandidateScoresController.getCandidateScores(applicationId).url
+      ).withHeaders("Content-Type" -> "application/json")
     }
   }
 }

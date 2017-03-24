@@ -18,7 +18,7 @@ package mocks.application
 
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
-import model.EvaluationResults.AssessmentRuleCategoryResult
+import model.EvaluationResults.{ AssessmentRuleCategoryResult, CompetencyAverageResult }
 import model.Exceptions.ApplicationNotFound
 import model.PersistedObjects.ApplicationForNotification
 import model.Scheme.Scheme
@@ -127,6 +127,8 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
   override def removeSchemes(applicationId: String): Future[Unit] = ???
 
   override def removeSchemeLocations(applicationId: String): Future[Unit] = ???
+
+  override def findAssessmentCentreCompetencyAverageResult(applicationId: String):Future[Option[CompetencyAverageResult]] = ???
 
   def nextUserAndAppIdsReadyForAssessmentIndicatorUpdate(batchSize: Int, mappingVersion: String): Future[Map[String, String]] = ???
 

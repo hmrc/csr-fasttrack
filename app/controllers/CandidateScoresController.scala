@@ -19,12 +19,14 @@ package controllers
 import factories.DateTimeFactory
 import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScoresAndFeedback }
 import model.CandidateScoresCommands.Implicits._
+import model.EvaluationResults.CompetencyAverageResult
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent }
 import services.applicationassessment.AssessmentCentreService
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object CandidateScoresController extends CandidateScoresController {
   val assessmentCentreService = AssessmentCentreService
@@ -38,6 +40,17 @@ trait CandidateScoresController extends BaseController {
 
   def getCandidateScores(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
     assessmentCentreService.getCandidateScores(applicationId).map(scores => Ok(Json.toJson(scores)))
+  }
+
+  def getCandidateScoresAndFeedback(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    assessmentCentreService.getCandidateScoresAndFeedback(applicationId).map(scores => Ok(Json.toJson(scores)))
+  }
+
+  def getCompetencyAverageResult(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    assessmentCentreService.getCompetencyAverageResult(applicationId).map {
+      case None => NotFound(s"Competency average result for $applicationId could not be found")
+      case Some(result) => Ok(Json.toJson(result))
+    }
   }
 
   def saveExerciseScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>

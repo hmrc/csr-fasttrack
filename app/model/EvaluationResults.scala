@@ -18,7 +18,7 @@ package model
 
 import model.Scheme.Scheme
 import model.persisted.SchemeEvaluationResult
-import play.api.libs.json.{ Format, JsString, JsSuccess, JsValue }
+import play.api.libs.json._
 import reactivemongo.bson.{ BSON, BSONHandler, BSONString }
 
 object EvaluationResults {
@@ -55,18 +55,30 @@ object EvaluationResults {
     }
   }
 
-  case class CompetencyAverageResult(leadingAndCommunicatingAverage: Double, collaboratingAndPartneringAverage: Double,
-      deliveringAtPaceAverage: Double, makingEffectiveDecisionsAverage: Double,
-      changingAndImprovingAverage: Double, buildingCapabilityForAllAverage: Double,
-      motivationFitAverage: Double, overallScore: Double) {
+  case class CompetencyAverageResult(
+                                      leadingAndCommunicatingAverage: Double,
+                                      collaboratingAndPartneringAverage: Double,
+                                      deliveringAtPaceAverage: Double,
+                                      makingEffectiveDecisionsAverage: Double,
+                                      changingAndImprovingAverage: Double,
+                                      buildingCapabilityForAllAverage: Double,
+                                      motivationFitAverage: Double,
+                                      overallScore: Double) {
 
     def scoresWithWeightOne = List(
       leadingAndCommunicatingAverage,
-      collaboratingAndPartneringAverage, deliveringAtPaceAverage,
-      makingEffectiveDecisionsAverage, changingAndImprovingAverage, buildingCapabilityForAllAverage
+      collaboratingAndPartneringAverage,
+      deliveringAtPaceAverage,
+      makingEffectiveDecisionsAverage,
+      changingAndImprovingAverage,
+      buildingCapabilityForAllAverage
     )
 
     def scoresWithWeightTwo = List(motivationFitAverage)
+  }
+
+  object CompetencyAverageResult {
+    implicit val CompetencyAverageResultFormats = Json.format[CompetencyAverageResult]
   }
 
   case class AssessmentRuleCategoryResult(passedMinimumCompetencyLevel: Option[Boolean],
