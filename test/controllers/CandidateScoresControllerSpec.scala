@@ -26,7 +26,7 @@ import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import services.applicationassessment.{ AssessmentCentreScoresService, AssessmentCentreService }
 import testkit.UnitWithAppSpec
 import org.mockito.Matchers._
-import play.api.mvc.{ RequestHeader, Result }
+import play.api.mvc.{ Action, RequestHeader, Result }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -70,7 +70,6 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
       val result: Future[Result] = TestCandidateScoresController.saveExerciseScoresAndFeedback("app1")(
         createSaveCandidateScoresAndFeedback("app1", Json.toJson(exerciseScoresAndFeedback).toString())
       )
-
       status(result) must be(BAD_REQUEST)
     }
   }
@@ -79,18 +78,16 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
     val mockAssessorAssessmentCentreScoresService: AssessmentCentreScoresService = mock[AssessmentCentreScoresService]
     val mockReviewerAssessmentCentreScoresService: AssessmentCentreScoresService = mock[AssessmentCentreScoresService]
 
-    object TestCandidateScoresController extends CandidateScoresController {
-      def assessorAssessmentCentreService: AssessmentCentreScoresService = mockAssessorAssessmentCentreScoresService
-      def reviewerAssessmentCentreService: AssessmentCentreScoresService = mockReviewerAssessmentCentreScoresService
-
+    object TestCandidateScoresController extends AssessorScoresController {
       val dateTimeFactory: DateTimeFactory = DateTimeFactory
+      val assessmentCentreScoresService: AssessmentCentreScoresService = mockAssessorAssessmentCentreScoresService
     }
 
     def createSaveCandidateScoresAndFeedback(applicationId: String, jsonString: String): FakeRequest[JsValue] = {
       val json = Json.parse(jsonString)
       FakeRequest(
         Helpers.POST,
-        controllers.routes.CandidateScoresController.saveExerciseScoresAndFeedback(applicationId).url, FakeHeaders(), json
+        controllers.routes.AssessorScoresController.saveExerciseScoresAndFeedback(applicationId).url, FakeHeaders(), json
       )
         .withHeaders("Content-Type" -> "application/json")
     }

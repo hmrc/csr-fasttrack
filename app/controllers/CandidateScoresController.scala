@@ -20,31 +20,35 @@ import factories.DateTimeFactory
 import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScoresAndFeedback }
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent }
-import services.applicationassessment.{ AssessmentCentreScoresService, AssessmentCentreService, AssessorAssessmentScoresService, ReviewerAssessmentScoresService }
+import services.applicationassessment.{ AssessmentCentreScoresService, AssessorAssessmentScoresService, ReviewerAssessmentScoresService }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
-object CandidateScoresController extends CandidateScoresController {
-  val assessorAssessmentCentreService = AssessorAssessmentScoresService
-  val reviewerAssessmentCentreService = ReviewerAssessmentScoresService
+object AssessorScoresController extends AssessorScoresController {
+  val dateTimeFactory = DateTimeFactory
+  val assessmentCentreScoresService: AssessmentCentreScoresService = AssessorAssessmentScoresService
+}
+
+object ReviewerScoresController extends ReviewerScoresController {
+  val assessmentCentreScoresService: AssessmentCentreScoresService = ReviewerAssessmentScoresService
   val dateTimeFactory = DateTimeFactory
 }
 
-trait CandidateScoresController extends BaseController {
+trait AssessmentCentreScoresController extends BaseController {
   val dateTimeFactory: DateTimeFactory
 
-  def assessorAssessmentCentreService: AssessmentCentreScoresService
-  def reviewerAssessmentCentreService: AssessmentCentreScoresService
+  def assessmentCentreScoresService: AssessmentCentreScoresService
 
   def getCandidateScores(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
-    assessorAssessmentCentreService.getCandidateScores(applicationId).map(scores => Ok(Json.toJson(scores)))
+    assessmentCentreScoresService.getCandidateScores(applicationId).map(scores => Ok(Json.toJson(scores)))
   }
 
   def saveExerciseScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[ExerciseScoresAndFeedback] { exerciseScoresAndFeedback =>
       val scoresAndFeedbackWithDate = exerciseScoresAndFeedback.scoresAndFeedback.copy(savedDate = Some(dateTimeFactory.nowLocalTimeZone))
-      assessorAssessmentCentreService.saveScoresAndFeedback(applicationId,
+      assessmentCentreScoresService.saveScoresAndFeedback(applicationId,
         exerciseScoresAndFeedback.copy(scoresAndFeedback = scoresAndFeedbackWithDate)).map { _ =>
         Created
       }.recover {
@@ -52,11 +56,13 @@ trait CandidateScoresController extends BaseController {
       }
     }
   }
+}
 
+trait AssessorScoresController extends AssessmentCentreScoresController {
   def submitExerciseScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[ExerciseScoresAndFeedback] { exerciseScoresAndFeedback =>
       val scoresAndFeedbackWithDate = exerciseScoresAndFeedback.scoresAndFeedback.copy(submittedDate = Some(dateTimeFactory.nowLocalTimeZone))
-      assessorAssessmentCentreService.saveScoresAndFeedback(applicationId,
+      assessmentCentreScoresService.saveScoresAndFeedback(applicationId,
         exerciseScoresAndFeedback.copy(scoresAndFeedback = scoresAndFeedbackWithDate)).map { _ =>
       Created
       }.recover {
@@ -64,10 +70,12 @@ trait CandidateScoresController extends BaseController {
       }
     }
   }
+}
 
+trait ReviewerScoresController extends AssessmentCentreScoresController {
   def acceptCandidateScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[CandidateScoresAndFeedback] { scoresAndFeedback =>
-      assessorAssessmentCentreService.acceptScoresAndFeedback(applicationId, scoresAndFeedback).map { _ =>
+      assessmentCentreScoresService.acceptScoresAndFeedback(applicationId, scoresAndFeedback).map { _ =>
         Ok
       }.recover {
         case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")

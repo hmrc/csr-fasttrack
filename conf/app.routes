@@ -92,10 +92,13 @@ POST        /online-test/reset/:appId                                    control
 POST        /online-test/extend/:appId                                   controllers.OnlineTestController.extendOnlineTests(appId: String)
 GET         /online-test/pdf-report/:applicationId                       controllers.OnlineTestController.getPDFReport(applicationId: String)
 
-GET         /test-scores/application/:applicationId                      controllers.CandidateScoresController.getCandidateScores(applicationId: String)
-PUT         /test-scores/application/:applicationId/save                 controllers.CandidateScoresController.saveExerciseScoresAndFeedback(applicationId: String)
-PUT         /test-scores/application/:applicationId/submit               controllers.CandidateScoresController.submitExerciseScoresAndFeedback(applicationId: String)
-PUT         /test-scores/application/:applicationId/accept               controllers.CandidateScoresController.acceptCandidateScoresAndFeedback(applicationId: String)
+GET         /test-scores/assessor/application/:applicationId             controllers.AssessorScoresController.getCandidateScores(applicationId: String)
+PUT         /test-scores/assessor/application/:applicationId/save        controllers.AssessorScoresController.saveExerciseScoresAndFeedback(applicationId: String)
+PUT         /test-scores/assessor/application/:applicationId/submit      controllers.AssessorScoresController.submitExerciseScoresAndFeedback(applicationId: String)
+
+GET         /test-scores/reviewer/application/:applicationId             controllers.ReviewerScoresController.getCandidateScores(applicationId: String)
+PUT         /test-scores/reviewer/application/:applicationId/save        controllers.ReviewerScoresController.saveExerciseScoresAndFeedback(applicationId: String)
+PUT         /test-scores/reviewer/application/:applicationId/accept      controllers.ReviewerScoresController.acceptCandidateScoresAndFeedback(applicationId: String)
 
 GET         /application/:applicationId/issue                            controllers.FlagCandidateController.find(applicationId: String)
 PUT         /application/:applicationId/issue                            controllers.FlagCandidateController.save(applicationId: String)
