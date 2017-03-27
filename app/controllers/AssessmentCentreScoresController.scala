@@ -24,7 +24,6 @@ import services.applicationassessment.{ AssessmentCentreScoresService, AssessorA
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 object AssessorScoresController extends AssessorScoresController {
   val dateTimeFactory = DateTimeFactory

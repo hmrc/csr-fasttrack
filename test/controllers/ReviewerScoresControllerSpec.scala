@@ -19,19 +19,19 @@ package controllers
 import factories.DateTimeFactory
 import model.CandidateScoresCommands.{ ExerciseScoresAndFeedback, ScoresAndFeedback }
 import model.{ AssessmentExercise, EmptyRequestHeader }
+import org.mockito.Matchers._
 import org.mockito.Mockito._
 import play.api.libs.json.{ JsValue, Json }
+import play.api.mvc.{ RequestHeader, Result }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import services.applicationassessment.{ AssessmentCentreScoresService, AssessmentCentreService }
+import services.applicationassessment.AssessmentCentreScoresService
 import testkit.UnitWithAppSpec
-import org.mockito.Matchers._
-import play.api.mvc.{ Action, RequestHeader, Result }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class CandidateScoresControllerSpec extends UnitWithAppSpec {
+class ReviewerScoresControllerSpec extends UnitWithAppSpec {
 
   implicit val hc = HeaderCarrier()
   implicit val rh = EmptyRequestHeader
@@ -53,7 +53,7 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
 
   "Save Candidate Scores" should {
     "save candidate scores & feedback and update application status" in new TestFixture {
-      when(mockAssessorAssessmentCentreScoresService.saveScoresAndFeedback(any[String], any[ExerciseScoresAndFeedback])
+      when(mockReviewerAssessmentCentreScoresService.saveScoresAndFeedback(any[String], any[ExerciseScoresAndFeedback])
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
 
       val result: Future[Result] = TestCandidateScoresController.saveExerciseScoresAndFeedback("app1")(
@@ -64,7 +64,7 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
     }
 
     "return Bad Request when attendancy is not set" in new TestFixture {
-      when(mockAssessorAssessmentCentreScoresService.saveScoresAndFeedback(any[String], any[ExerciseScoresAndFeedback])
+      when(mockReviewerAssessmentCentreScoresService.saveScoresAndFeedback(any[String], any[ExerciseScoresAndFeedback])
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(new IllegalStateException("blah")))
 
       val result: Future[Result] = TestCandidateScoresController.saveExerciseScoresAndFeedback("app1")(
@@ -75,19 +75,18 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
   }
 
   trait TestFixture {
-    val mockAssessorAssessmentCentreScoresService: AssessmentCentreScoresService = mock[AssessmentCentreScoresService]
     val mockReviewerAssessmentCentreScoresService: AssessmentCentreScoresService = mock[AssessmentCentreScoresService]
 
-    object TestCandidateScoresController extends AssessorScoresController {
+    object TestCandidateScoresController extends ReviewerScoresController {
       val dateTimeFactory: DateTimeFactory = DateTimeFactory
-      val assessmentCentreScoresService: AssessmentCentreScoresService = mockAssessorAssessmentCentreScoresService
+      val assessmentCentreScoresService: AssessmentCentreScoresService = mockReviewerAssessmentCentreScoresService
     }
 
     def createSaveCandidateScoresAndFeedback(applicationId: String, jsonString: String): FakeRequest[JsValue] = {
       val json = Json.parse(jsonString)
       FakeRequest(
         Helpers.POST,
-        controllers.routes.AssessorScoresController.saveExerciseScoresAndFeedback(applicationId).url, FakeHeaders(), json
+        controllers.routes.ReviewerScoresController.saveExerciseScoresAndFeedback(applicationId).url, FakeHeaders(), json
       )
         .withHeaders("Content-Type" -> "application/json")
     }
