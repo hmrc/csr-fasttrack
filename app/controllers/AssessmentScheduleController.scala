@@ -39,7 +39,7 @@ import repositories.AssessmentCentreLocation.assessmentCentreVenueFormat
 import repositories._
 import repositories.application._
 import services.AuditService
-import services.applicationassessment.AssessmentCentreService
+import services.applicationassessment.{ AssessmentCentreScoresService, AssessmentCentreService, AssessorAssessmentScoresService }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -56,6 +56,7 @@ object AssessmentScheduleController extends AssessmentScheduleController {
   val cdRepository: ContactDetailsRepository = contactDetailsRepository
   val emailClient = CSREmailClient
   val aaService = AssessmentCentreService
+  val assessmentScoresService = AssessorAssessmentScoresService
 }
 
 trait AssessmentScheduleController extends BaseController {
@@ -68,6 +69,7 @@ trait AssessmentScheduleController extends BaseController {
   val cdRepository: ContactDetailsRepository
   val emailClient: EmailClient
   val aaService: AssessmentCentreService
+  val assessmentScoresService: AssessmentCentreScoresService
 
   private def calculateUsedCapacity(assessments: Option[List[AssessmentCentreAllocation]], sessionCapacity: Int,
     minViableAttendees: Int, preferredAttendeeMargin: Int): UsedCapacity = {
@@ -403,8 +405,9 @@ trait AssessmentScheduleController extends BaseController {
     }
   }
 
+  // TODO Do we need to get un-submitted scores for both assessors and reviewers?
   def getNonSubmittedScores(assessorId: String): Action[AnyContent] = Action.async { implicit request =>
-    aaService.getNonSubmittedCandidateScores(assessorId).map { applicationScores =>
+    assessmentScoresService.getNonSubmittedCandidateScores(assessorId).map { applicationScores =>
       Ok(Json.toJson(applicationScores))
     }
   }
