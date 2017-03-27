@@ -33,7 +33,20 @@ class AssessorApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFacto
       CandidateScoresCommands.CandidateScoresAndFeedback.CandidateScoresAndFeedbackFormats, ReactiveMongoFormats.objectIdFormats)
     with ApplicationAssessmentScoresRepository {
 
-  val role = "assessor"
+  val rolePrefix = ""
+
+  def docToDomain(doc: BSONDocument): Option[CandidateScoresAndFeedback] = for {
+    appId <- doc.getAs[String]("applicationId")
+  } yield {
+    CandidateScoresAndFeedback(
+      appId,
+      doc.getAs[ScoresAndFeedback]("interview"),
+      doc.getAs[ScoresAndFeedback]("groupExercise"),
+      doc.getAs[ScoresAndFeedback]("writtenExercise")
+    )
+  }
+
+  def saveAllBson(scores: CandidateScoresAndFeedback): BSONDocument = BSONDocument("$set" -> scores)
 }
 
 class ReviewerApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
@@ -41,17 +54,11 @@ class ReviewerApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFacto
       CandidateScoresCommands.CandidateScoresAndFeedback.CandidateScoresAndFeedbackFormats, ReactiveMongoFormats.objectIdFormats)
     with ApplicationAssessmentScoresRepository {
 
-  val role = "reviewer"
-}
-
-trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {
-  this: ReactiveRepository[CandidateScoresAndFeedback, BSONObjectID] =>
-
-  def role: String
+  val rolePrefix = "reviewer."
 
   def docToDomain(doc: BSONDocument): Option[CandidateScoresAndFeedback] = for {
     appId <- doc.getAs[String]("applicationId")
-    roleDoc <- doc.getAs[BSONDocument](role)
+    roleDoc <- doc.getAs[BSONDocument]("reviewer")
   } yield {
     CandidateScoresAndFeedback(
       appId,
@@ -61,41 +68,48 @@ trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {
     )
   }
 
+  def saveAllBson(scores: CandidateScoresAndFeedback): BSONDocument =
+    BSONDocument("$set" -> BSONDocument("reviewer" -> scores))
+}
+
+trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {
+  this: ReactiveRepository[CandidateScoresAndFeedback, BSONObjectID] =>
+
+  def rolePrefix: String
+
+  def docToDomain(doc: BSONDocument): Option[CandidateScoresAndFeedback]
+
+  def saveAllBson(scores: CandidateScoresAndFeedback): BSONDocument
+
   def tryFind(applicationId: String): Future[Option[CandidateScoresAndFeedback]] = {
     val query = BSONDocument("applicationId" -> applicationId)
-    val projection = BSONDocument("_id" -> false,
-      "applicationId" -> true,
-      role -> true
-    )
 
-    collection.find(query, projection).one[BSONDocument].map(_.flatMap(docToDomain))
+    collection.find(query).one[BSONDocument].map(_.flatMap(docToDomain))
   }
 
   def findNonSubmittedScores(assessorId: String): Future[List[CandidateScoresAndFeedback]] = {
     val query = BSONDocument("$or" -> BSONArray(
       BSONDocument(
-        s"$role.${AssessmentExercise.interview}.submittedDate" -> BSONDocument("$exists" -> BSONBoolean(false)),
-        s"$role.${AssessmentExercise.interview}.updatedBy" -> assessorId
+        s"$rolePrefix${AssessmentExercise.interview}.submittedDate" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"$rolePrefix${AssessmentExercise.interview}.updatedBy" -> assessorId
       ),
       BSONDocument(
-        s"$role.${AssessmentExercise.groupExercise}.submittedDate" -> BSONDocument("$exists" -> BSONBoolean(false)),
-        s"$role.${AssessmentExercise.groupExercise}.updatedBy" -> assessorId
+        s"$rolePrefix${AssessmentExercise.groupExercise}.submittedDate" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"$rolePrefix${AssessmentExercise.groupExercise}.updatedBy" -> assessorId
       ),
       BSONDocument(
-        s"$role.${AssessmentExercise.writtenExercise}.submittedDate" -> BSONDocument("$exists" -> BSONBoolean(false)),
-        s"$role.${AssessmentExercise.writtenExercise}.updatedBy" -> assessorId
+        s"$rolePrefix${AssessmentExercise.writtenExercise}.submittedDate" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"$rolePrefix${AssessmentExercise.writtenExercise}.updatedBy" -> assessorId
       )
     ))
 
-    val projection = BSONDocument("applicationId" -> true, "_id" -> false, role -> true)
 
-    collection.find(query, projection).cursor[BSONDocument]().collect[List]().map { _.flatMap(docToDomain) }
+    collection.find(query).cursor[BSONDocument]().collect[List]().map { _.flatMap(docToDomain) }
   }
 
   def allScores: Future[Map[String, CandidateScoresAndFeedback]] = {
     val query = BSONDocument()
-    val projection = BSONDocument("applicationId" -> true, "_id" -> false, role -> true)
-    val queryResult = collection.find(query, projection).cursor[BSONDocument](ReadPreference.nearest).collect[List]()
+    val queryResult = collection.find(query).cursor[BSONDocument](ReadPreference.nearest).collect[List]()
     queryResult.map { docs =>
       docs.flatMap { doc =>
         docToDomain(doc).map { cf =>
@@ -111,19 +125,19 @@ trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId),
       BSONDocument("$or" -> BSONArray(
-        BSONDocument(s"$role.${exerciseScoresAndFeedback.exercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false))),
-        BSONDocument(s"$role.${exerciseScoresAndFeedback.exercise}.version" -> exerciseScoresAndFeedback.scoresAndFeedback.version))
+        BSONDocument(s"$rolePrefix${exerciseScoresAndFeedback.exercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false))),
+        BSONDocument(s"$rolePrefix${exerciseScoresAndFeedback.exercise}.version" -> exerciseScoresAndFeedback.scoresAndFeedback.version))
       ))
     )
 
     val scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback
     val applicationScoresBSON = exerciseScoresAndFeedback.scoresAndFeedback.version match {
       case Some(_) => BSONDocument(
-        s"$role.${exerciseScoresAndFeedback.exercise}" -> scoresAndFeedback.copy(version = newVersion)
+        s"$rolePrefix${exerciseScoresAndFeedback.exercise}" -> scoresAndFeedback.copy(version = newVersion)
       )
       case _ => BSONDocument(
         "applicationId" -> exerciseScoresAndFeedback.applicationId,
-        s"$role.${exerciseScoresAndFeedback.exercise}" -> scoresAndFeedback.copy(version = newVersion)
+        s"$rolePrefix${exerciseScoresAndFeedback.exercise}" -> scoresAndFeedback.copy(version = newVersion)
       )
     }
 
@@ -140,22 +154,20 @@ trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId),
       BSONDocument("$or" -> BSONArray(BSONDocument(
-        s"$role.${AssessmentExercise.interview}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
-        s"$role.${AssessmentExercise.interview}.version" -> scoresAndFeedback.interview.flatMap(_.version))
+        s"$rolePrefix${AssessmentExercise.interview}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"$rolePrefix${AssessmentExercise.interview}.version" -> scoresAndFeedback.interview.flatMap(_.version))
       )),
       BSONDocument("$or" -> BSONArray(BSONDocument(
-        s"$role.${AssessmentExercise.groupExercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
-        s"$role.${AssessmentExercise.groupExercise}.version" -> scoresAndFeedback.groupExercise.flatMap(_.version))
+        s"$rolePrefix${AssessmentExercise.groupExercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"$rolePrefix${AssessmentExercise.groupExercise}.version" -> scoresAndFeedback.groupExercise.flatMap(_.version))
       )),
       BSONDocument("$or" -> BSONArray(BSONDocument(
-        s"$role.${AssessmentExercise.writtenExercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
-        s"$role.${AssessmentExercise.writtenExercise}.version" -> scoresAndFeedback.writtenExercise.flatMap(_.version))
+        s"$rolePrefix${AssessmentExercise.writtenExercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"$rolePrefix${AssessmentExercise.writtenExercise}.version" -> scoresAndFeedback.writtenExercise.flatMap(_.version))
       ))
     ))
 
-    val candidateScoresAndFeedbackBSON = BSONDocument("$set" -> BSONDocument(
-      role -> scoresAndFeedback.setVersion(newVersion)
-    ))
+    val candidateScoresAndFeedbackBSON = saveAllBson(scoresAndFeedback.setVersion(newVersion))
 
     val validator = singleUpdateValidator(applicationId, "Application with correct version not found for 'Review scores'")
 

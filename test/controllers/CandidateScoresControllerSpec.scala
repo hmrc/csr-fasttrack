@@ -20,13 +20,13 @@ import factories.DateTimeFactory
 import model.CandidateScoresCommands.{ ExerciseScoresAndFeedback, ScoresAndFeedback }
 import model.{ AssessmentExercise, EmptyRequestHeader }
 import org.mockito.Mockito._
-import play.api.libs.json.Json
+import play.api.libs.json.{ JsValue, Json }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import services.applicationassessment.AssessmentCentreService
+import services.applicationassessment.{ AssessmentCentreScoresService, AssessmentCentreService }
 import testkit.UnitWithAppSpec
 import org.mockito.Matchers._
-import play.api.mvc.RequestHeader
+import play.api.mvc.{ RequestHeader, Result }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -53,10 +53,10 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
 
   "Save Candidate Scores" should {
     "save candidate scores & feedback and update application status" in new TestFixture {
-      when(mockAssessmentCentreService.saveScoresAndFeedback(any[String], any[ExerciseScoresAndFeedback])
+      when(mockAssessorAssessmentCentreScoresService.saveScoresAndFeedback(any[String], any[ExerciseScoresAndFeedback])
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
 
-      val result = TestCandidateScoresController.saveExerciseScoresAndFeedback("app1")(
+      val result: Future[Result] = TestCandidateScoresController.saveExerciseScoresAndFeedback("app1")(
         createSaveCandidateScoresAndFeedback("app1", Json.toJson(exerciseScoresAndFeedback).toString())
       )
 
@@ -64,10 +64,10 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
     }
 
     "return Bad Request when attendancy is not set" in new TestFixture {
-      when(mockAssessmentCentreService.saveScoresAndFeedback(any[String], any[ExerciseScoresAndFeedback])
+      when(mockAssessorAssessmentCentreScoresService.saveScoresAndFeedback(any[String], any[ExerciseScoresAndFeedback])
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(new IllegalStateException("blah")))
 
-      val result = TestCandidateScoresController.saveExerciseScoresAndFeedback("app1")(
+      val result: Future[Result] = TestCandidateScoresController.saveExerciseScoresAndFeedback("app1")(
         createSaveCandidateScoresAndFeedback("app1", Json.toJson(exerciseScoresAndFeedback).toString())
       )
 
@@ -76,15 +76,17 @@ class CandidateScoresControllerSpec extends UnitWithAppSpec {
   }
 
   trait TestFixture {
-    val mockAssessmentCentreService = mock[AssessmentCentreService]
+    val mockAssessorAssessmentCentreScoresService: AssessmentCentreScoresService = mock[AssessmentCentreScoresService]
+    val mockReviewerAssessmentCentreScoresService: AssessmentCentreScoresService = mock[AssessmentCentreScoresService]
 
     object TestCandidateScoresController extends CandidateScoresController {
-      override def assessmentCentreService: AssessmentCentreService = mockAssessmentCentreService
+      def assessorAssessmentCentreService: AssessmentCentreScoresService = mockAssessorAssessmentCentreScoresService
+      def reviewerAssessmentCentreService: AssessmentCentreScoresService = mockReviewerAssessmentCentreScoresService
 
       val dateTimeFactory: DateTimeFactory = DateTimeFactory
     }
 
-    def createSaveCandidateScoresAndFeedback(applicationId: String, jsonString: String) = {
+    def createSaveCandidateScoresAndFeedback(applicationId: String, jsonString: String): FakeRequest[JsValue] = {
       val json = Json.parse(jsonString)
       FakeRequest(
         Helpers.POST,
