@@ -17,6 +17,7 @@
 package model.testdata
 
 import model.ApplicationStatuses
+import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.EvaluationResults.Result
 import model.Scheme.Scheme
 import model.exchange.testdata.OnlineTestScoresRequest
@@ -47,7 +48,8 @@ case class GeneratorConfig(
   loc1scheme2Passmark: Option[Result] = None,
   previousStatus: Option[String] = None,
   confirmedAllocation: Boolean = true,
-  testScores: Option[OnlineTestScores] = None
+  testScores: Option[OnlineTestScores] = None,
+  assessmentScores: Option[CandidateScoresAndFeedback] = None
 )
 
 object GeneratorConfig {
@@ -65,7 +67,8 @@ object GeneratorConfig {
       loc1scheme1Passmark = request.loc1scheme1EvaluationResult.map(Result.apply),
       loc1scheme2Passmark = request.loc1scheme2EvaluationResult.map(Result.apply),
       confirmedAllocation = statusData.applicationStatus == ApplicationStatuses.AllocationConfirmed.name,
-      testScores = request.onlineTestScores.map(OnlineTestScores.apply)
+      testScores = request.onlineTestScores.map(OnlineTestScores.apply),
+      assessmentScores = request.assessmentScores
     )
   }
 }

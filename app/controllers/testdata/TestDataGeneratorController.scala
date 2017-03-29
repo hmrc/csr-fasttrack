@@ -21,15 +21,16 @@ import java.io.File
 import com.typesafe.config.ConfigFactory
 import connectors.AuthProviderClient
 import connectors.testdata.ExchangeObjects.Implicits._
+import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ScoresAndFeedback }
 import model._
-import model.EvaluationResults.Result
 import model.Exceptions.EmailTakenException
 import model.exchange.testdata._
 import model.ProgressStatuses._
-import model.testdata.{ GeneratorConfig, OnlineTestScores, PersonalData }
+import model.testdata.GeneratorConfig
+import org.joda.time.DateTime
 import play.api.Play
 import play.api.libs.json.{ JsObject, JsString, Json }
-import play.api.mvc.{ Action, RequestHeader }
+import play.api.mvc.Action
 import services.testdata._
 import services.testdata.faker.DataFaker.Random
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -52,7 +53,11 @@ trait TestDataGeneratorController extends BaseController {
     }
   }
 
+  // scalastyle:off method.length
   def requestExample = Action {
+    val exerciseScoreAndFeedback = ScoresAndFeedback(attended = true, assessmentIncomplete = true, Some(3.0), Some(3.0),
+      Some(3.0), Some(3.0), Some(3.0), Some(3.0), Some(3.0), Some("feedback1"), "updatedBy", Some(DateTime.now()),
+      Some(DateTime.now), None)
     val example = CreateCandidateInStatusRequest(
       statusData = StatusDataRequest(
         applicationStatus = "SUBMITTED",
@@ -91,11 +96,16 @@ trait TestDataGeneratorController extends BaseController {
         verbal = Some("80.2"),
         situational = Some("80.3"),
         competency = Some("80.4")
+      )),
+      assessmentScores = Some(CandidateScoresAndFeedback(
+        "appId",
+        Some(exerciseScoreAndFeedback),
+        Some(exerciseScoreAndFeedback),
+        Some(exerciseScoreAndFeedback)
       ))
     )
     Ok(Json.toJson(example))
   }
-
   // scalastyle:on method.length
 
   def createAdminUsers(numberToGenerate: Int, emailPrefix: Option[String], role: String) = Action.async { implicit request =>
@@ -147,6 +157,8 @@ trait TestDataGeneratorController extends BaseController {
       competency = None
     )
 
+    val assessmentScores = CandidateScoresAndFeedback("appId")
+
     val createCandidateRequest = CreateCandidateInStatusRequest(
       statusData = StatusDataRequest(status, previousStatus, None),
       personalData = Some(PersonalDataRequest(emailPrefix = Some(emailPrefix))),
@@ -163,7 +175,8 @@ trait TestDataGeneratorController extends BaseController {
       },
       isCivilServant = None,
       hasDegree = None,
-      onlineTestScores = Some(testScoresReq)
+      onlineTestScores = Some(testScoresReq),
+      assessmentScores = Some(assessmentScores)
     )
     // scalastyle:on
     createCandidateInStatus(status, GeneratorConfig.apply(cubiksUrlFromConfig, createCandidateRequest), numberToGenerate)
