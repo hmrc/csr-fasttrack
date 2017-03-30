@@ -44,7 +44,7 @@ object ReportingController extends ReportingController {
   val locationSchemeService = LocationSchemeService
   val reportingFormatter = ReportingFormatter
   val assessmentCentreIndicatorRepository = AssessmentCentreIndicatorCSVRepository
-  val assessmentScoresRepository = repositories.assessorAssessmentScoresRepository
+  val assessmentScoresRepository = repositories.reviewerAssessmentScoresRepository
   val contactDetailsRepository = repositories.contactDetailsRepository
   val questionnaireRepository = repositories.questionnaireRepository
   val reportingRepository = repositories.reportingRepository
