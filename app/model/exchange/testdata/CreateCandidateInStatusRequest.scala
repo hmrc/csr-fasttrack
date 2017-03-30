@@ -16,6 +16,7 @@
 
 package model.exchange.testdata
 
+import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.Scheme.Scheme
 import play.api.libs.json.Json
 
@@ -31,10 +32,12 @@ case class CreateCandidateInStatusRequest(
   loc1scheme1EvaluationResult: Option[String],
   loc1scheme2EvaluationResult: Option[String],
   confirmedAllocation: Option[Boolean],
-  onlineTestScores: Option[OnlineTestScoresRequest]
+  onlineTestScores: Option[OnlineTestScoresRequest],
+  assessmentScores: Option[CandidateScoresAndFeedback]
 )
 
 object CreateCandidateInStatusRequest {
+  import model.CandidateScoresCommands.Implicits._
   implicit val createCandidateInStatusRequestFormat = Json.format[CreateCandidateInStatusRequest]
 
   def create(status: String, progressStatus: Option[String]): CreateCandidateInStatusRequest = {
@@ -50,7 +53,8 @@ object CreateCandidateInStatusRequest {
       loc1scheme1EvaluationResult = None,
       loc1scheme2EvaluationResult = None,
       confirmedAllocation = None,
-      onlineTestScores = None
+      onlineTestScores = None,
+      assessmentScores = None
     )
   }
 }
