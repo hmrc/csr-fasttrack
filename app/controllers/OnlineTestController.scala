@@ -178,4 +178,8 @@ trait OnlineTestController extends BaseController {
     }
   }
 
+  def resetStatusToContinueOnlineTests(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    generalApplicationRepository.resetStatusToContinueOnlineTests(applicationId).map(_ => Ok)
+  }
+
 }
