@@ -18,6 +18,7 @@ package services.applicationassessment
 
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import connectors.{ CSREmailClient, EmailClient }
+import model.AssessmentExercise.AssessmentExercise
 import model.CandidateScoresCommands.{ ApplicationScores, CandidateScoresAndFeedback, ExerciseScoresAndFeedback, RecordCandidateScores }
 import model.EvaluationResults.CompetencyAverageResult
 import model.Exceptions.IncorrectStatusInApplicationException
@@ -25,7 +26,8 @@ import model.PersistedObjects.ApplicationForNotification
 import model.persisted.AssessmentCentrePassMarkSettings
 import model.{ ApplicationStatuses, AssessmentPassmarkEvaluation, AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import play.api.Logger
-import play.api.mvc.RequestHeader
+import play.api.libs.json.JsValue
+import play.api.mvc.{ Action, RequestHeader }
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
 import services.AuditService
@@ -78,6 +80,18 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
       auditService.logEvent("ApplicationScoresAndFeedbackSaved", Map("applicationId" -> applicationId))
       auditService.logEvent(s"ApplicationStatusSetTo$newStatus", Map("applicationId" -> applicationId))
     }
+  }
+
+  def removeScoresAndFeedback(applicationId: String, exercise: AssessmentExercise)(implicit hc: HeaderCarrier,
+                                                                                   rh: RequestHeader): Future[Unit] = {
+    for {
+      _ <- aasRepository.removeExercise(applicationId: String, exercise)
+    } yield {
+      auditService.logEvent("ApplicationExerciseScoresAndFeedbackRemoved", Map(
+        "applicationId" -> applicationId, "exercise" -> exercise.toString)
+      )
+    }
+
   }
 
   def acceptScoresAndFeedback(applicationId: String, scoresAndFeedback: CandidateScoresAndFeedback)

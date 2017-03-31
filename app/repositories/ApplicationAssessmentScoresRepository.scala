@@ -17,8 +17,10 @@
 package repositories
 
 import factories.{ DateTimeFactory, UUIDFactory }
+import model.AssessmentExercise.AssessmentExercise
 import model.{ AssessmentExercise, CandidateScoresCommands, UniqueIdentifier }
 import model.CandidateScoresCommands._
+import model.Exceptions.ApplicationNotFound
 import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID, _ }
 import uk.gov.hmrc.mongo.ReactiveRepository
@@ -39,6 +41,8 @@ trait ApplicationAssessmentScoresRepository {
 
   def saveAll(scoresAndFeedback: CandidateScoresAndFeedback,
            newVersion: Option[String] = Some(UUIDFactory.generateUUID())): Future[Unit]
+
+  def removeExercise(applicationId: String, exercise: AssessmentExercise): Future[Unit]
 }
 
 class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
@@ -135,6 +139,16 @@ class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(impl
     val validator = singleUpdateValidator(applicationId, "Application with correct version not found for 'Review scores'")
 
     collection.update(query, candidateScoresAndFeedbackBSON, upsert = scoresAndFeedback.allVersionsEmpty) map validator
+  }
+
+  def removeExercise(applicationId: String, exercise: AssessmentExercise): Future[Unit] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    val update = BSONDocument("$unset" -> BSONDocument(exercise.toString -> ""))
+
+    val validator = singleUpdateValidator(applicationId, "Could not find application",
+      ApplicationNotFound(s"Could not find application '$applicationId'"))
+
+    collection.update(query, update).map(validator)
   }
 
 }

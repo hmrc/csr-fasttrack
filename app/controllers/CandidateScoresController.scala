@@ -17,9 +17,10 @@
 package controllers
 
 import factories.DateTimeFactory
+import model.AssessmentExercise
 import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScoresAndFeedback }
 import model.CandidateScoresCommands.Implicits._
-import model.EvaluationResults.CompetencyAverageResult
+import model.Exceptions.ApplicationNotFound
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent }
 import services.applicationassessment.AssessmentCentreService
@@ -84,6 +85,15 @@ trait CandidateScoresController extends BaseController {
       }.recover {
         case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
       }
+    }
+  }
+
+  def unlockExercise(applicationId: String, exercise: String): Action[AnyContent] = Action.async { implicit request =>
+    assessmentCentreService.removeScoresAndFeedback(applicationId, AssessmentExercise.withName(exercise)).map { _ =>
+      Ok
+    }.recover {
+      case e: NoSuchElementException => BadRequest(s"No such exercise '$exercise'")
+      case e: ApplicationNotFound => BadRequest(s"No such application '$applicationId'")
     }
   }
 }
