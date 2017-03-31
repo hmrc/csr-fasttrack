@@ -136,5 +136,7 @@ class DocumentRootInMemoryRepository extends GeneralApplicationRepository {
 
   override def progressToAssessmentCentre(applicationId: String, evaluationResult: List[SchemeEvaluationResult],
     version: String): Future[Unit] = ???
+
+  override def resetStatusToContinueOnlineTests(applicationId: String): Future[Unit] = ???
 }
 // scalastyle:on number.of.methods

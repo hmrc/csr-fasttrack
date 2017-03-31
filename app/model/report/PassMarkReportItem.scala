@@ -22,7 +22,6 @@ import model.Scheme.Scheme
 import model.UniqueIdentifier
 import play.api.libs.json.Json
 import model.ReportExchangeObjects.Implicits.passMarkReportTestResultsFormats
-import model.CandidateScoresCommands.Implicits.CandidateScoresAndFeedbackFormats
 
 case class PassMarkReportItem(
   applicationId: UniqueIdentifier,

@@ -26,6 +26,5 @@ case class AssessmentPassmarkPreferencesAndScores(passmark: AssessmentCentrePass
                                                   scores: CandidateScoresAndFeedback)
 
 object AssessmentPassmarkPreferencesAndScores {
-  import model.CandidateScoresCommands.Implicits.CandidateScoresAndFeedbackFormats
   implicit val assessmentPassmarkPreferencesAndScoresFormat = Json.format[AssessmentPassmarkPreferencesAndScores]
 }

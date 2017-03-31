@@ -29,59 +29,94 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait ApplicationAssessmentScoresRepository {
-  def allScores: Future[Map[String, CandidateScoresAndFeedback]]
 
-  def tryFind(applicationId: String): Future[Option[CandidateScoresAndFeedback]]
+class AssessorApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
+    extends ReactiveRepository[CandidateScoresAndFeedback, BSONObjectID](CollectionNames.APPLICATION_ASSESSMENT_SCORES, mongo,
+      CandidateScoresCommands.CandidateScoresAndFeedback.CandidateScoresAndFeedbackFormats, ReactiveMongoFormats.objectIdFormats)
+    with ApplicationAssessmentScoresRepository {
 
-  def save(exerciseScoresAndFeedback: ExerciseScoresAndFeedback,
-           newVersion: Option[String] = Some(UUIDFactory.generateUUID())): Future[Unit]
+  val rolePrefix = ""
 
-  def findNonSubmittedScores(assessorId: String) : Future[List[CandidateScoresAndFeedback]]
+  def docToDomain(doc: BSONDocument): Option[CandidateScoresAndFeedback] = for {
+    appId <- doc.getAs[String]("applicationId")
+  } yield {
+    CandidateScoresAndFeedback(
+      appId,
+      doc.getAs[ScoresAndFeedback]("interview"),
+      doc.getAs[ScoresAndFeedback]("groupExercise"),
+      doc.getAs[ScoresAndFeedback]("writtenExercise")
+    )
+  }
 
-  def saveAll(scoresAndFeedback: CandidateScoresAndFeedback,
-           newVersion: Option[String] = Some(UUIDFactory.generateUUID())): Future[Unit]
-
-  def removeExercise(applicationId: String, exercise: AssessmentExercise): Future[Unit]
+  def saveAllBson(scores: CandidateScoresAndFeedback): BSONDocument = BSONDocument("$set" -> scores)
 }
 
-class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
+class ReviewerApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
     extends ReactiveRepository[CandidateScoresAndFeedback, BSONObjectID](CollectionNames.APPLICATION_ASSESSMENT_SCORES, mongo,
-      CandidateScoresCommands.Implicits.CandidateScoresAndFeedbackFormats, ReactiveMongoFormats.objectIdFormats)
-    with ApplicationAssessmentScoresRepository with ReactiveRepositoryHelpers {
+      CandidateScoresCommands.CandidateScoresAndFeedback.CandidateScoresAndFeedbackFormats, ReactiveMongoFormats.objectIdFormats)
+    with ApplicationAssessmentScoresRepository {
+
+  val rolePrefix = "reviewer."
+
+  def docToDomain(doc: BSONDocument): Option[CandidateScoresAndFeedback] = for {
+    appId <- doc.getAs[String]("applicationId")
+    roleDoc <- doc.getAs[BSONDocument]("reviewer")
+  } yield {
+    CandidateScoresAndFeedback(
+      appId,
+      roleDoc.getAs[ScoresAndFeedback]("interview"),
+      roleDoc.getAs[ScoresAndFeedback]("groupExercise"),
+      roleDoc.getAs[ScoresAndFeedback]("writtenExercise")
+    )
+  }
+
+  def saveAllBson(scores: CandidateScoresAndFeedback): BSONDocument =
+    BSONDocument("$set" -> BSONDocument("reviewer" -> scores))
+}
+
+trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {
+  this: ReactiveRepository[CandidateScoresAndFeedback, BSONObjectID] =>
+
+  def rolePrefix: String
+
+  def docToDomain(doc: BSONDocument): Option[CandidateScoresAndFeedback]
+
+  def saveAllBson(scores: CandidateScoresAndFeedback): BSONDocument
 
   def tryFind(applicationId: String): Future[Option[CandidateScoresAndFeedback]] = {
     val query = BSONDocument("applicationId" -> applicationId)
 
-    collection.find(query).one[BSONDocument].map { _.map(candidateScoresAndFeedback.read) }
+    collection.find(query).one[BSONDocument].map(_.flatMap(docToDomain))
   }
 
   def findNonSubmittedScores(assessorId: String): Future[List[CandidateScoresAndFeedback]] = {
     val query = BSONDocument("$or" -> BSONArray(
       BSONDocument(
-        s"${AssessmentExercise.interview}.submittedDate" -> BSONDocument("$exists" -> BSONBoolean(false)),
-        s"${AssessmentExercise.interview}.updatedBy" -> assessorId
+        s"$rolePrefix${AssessmentExercise.interview}.submittedDate" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"$rolePrefix${AssessmentExercise.interview}.updatedBy" -> assessorId
       ),
       BSONDocument(
-        s"${AssessmentExercise.groupExercise}.submittedDate" -> BSONDocument("$exists" -> BSONBoolean(false)),
-        s"${AssessmentExercise.groupExercise}.updatedBy" -> assessorId
+        s"$rolePrefix${AssessmentExercise.groupExercise}.submittedDate" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"$rolePrefix${AssessmentExercise.groupExercise}.updatedBy" -> assessorId
       ),
       BSONDocument(
-        s"${AssessmentExercise.writtenExercise}.submittedDate" -> BSONDocument("$exists" -> BSONBoolean(false)),
-        s"${AssessmentExercise.writtenExercise}.updatedBy" -> assessorId
+        s"$rolePrefix${AssessmentExercise.writtenExercise}.submittedDate" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"$rolePrefix${AssessmentExercise.writtenExercise}.updatedBy" -> assessorId
       )
     ))
 
-    collection.find(query).cursor[BSONDocument]().collect[List]().map { _.map(candidateScoresAndFeedback.read) }
+
+    collection.find(query).cursor[BSONDocument]().collect[List]().map { _.flatMap(docToDomain) }
   }
 
   def allScores: Future[Map[String, CandidateScoresAndFeedback]] = {
     val query = BSONDocument()
     val queryResult = collection.find(query).cursor[BSONDocument](ReadPreference.nearest).collect[List]()
     queryResult.map { docs =>
-      docs.map { doc =>
-        val cf = candidateScoresAndFeedback.read(doc)
-        (cf.applicationId, cf)
+      docs.flatMap { doc =>
+        docToDomain(doc).map { cf =>
+          (cf.applicationId, cf)
+        }
       }.toMap
     }
   }
@@ -92,19 +127,19 @@ class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(impl
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId),
       BSONDocument("$or" -> BSONArray(
-        BSONDocument(s"${exerciseScoresAndFeedback.exercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false))),
-        BSONDocument(s"${exerciseScoresAndFeedback.exercise}.version" -> exerciseScoresAndFeedback.scoresAndFeedback.version))
+        BSONDocument(s"$rolePrefix${exerciseScoresAndFeedback.exercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false))),
+        BSONDocument(s"$rolePrefix${exerciseScoresAndFeedback.exercise}.version" -> exerciseScoresAndFeedback.scoresAndFeedback.version))
       ))
     )
 
     val scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback
     val applicationScoresBSON = exerciseScoresAndFeedback.scoresAndFeedback.version match {
       case Some(_) => BSONDocument(
-        s"${exerciseScoresAndFeedback.exercise}" -> scoresAndFeedback.copy(version = newVersion)
+        s"$rolePrefix${exerciseScoresAndFeedback.exercise}" -> scoresAndFeedback.copy(version = newVersion)
       )
       case _ => BSONDocument(
         "applicationId" -> exerciseScoresAndFeedback.applicationId,
-        s"${exerciseScoresAndFeedback.exercise}" -> scoresAndFeedback.copy(version = newVersion)
+        s"$rolePrefix${exerciseScoresAndFeedback.exercise}" -> scoresAndFeedback.copy(version = newVersion)
       )
     }
 
@@ -121,20 +156,20 @@ class ApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(impl
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId),
       BSONDocument("$or" -> BSONArray(BSONDocument(
-        s"${AssessmentExercise.interview}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
-        s"${AssessmentExercise.interview}.version" -> scoresAndFeedback.interview.flatMap(_.version))
+        s"$rolePrefix${AssessmentExercise.interview}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"$rolePrefix${AssessmentExercise.interview}.version" -> scoresAndFeedback.interview.flatMap(_.version))
       )),
       BSONDocument("$or" -> BSONArray(BSONDocument(
-        s"${AssessmentExercise.groupExercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
-        s"${AssessmentExercise.groupExercise}.version" -> scoresAndFeedback.groupExercise.flatMap(_.version))
+        s"$rolePrefix${AssessmentExercise.groupExercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"$rolePrefix${AssessmentExercise.groupExercise}.version" -> scoresAndFeedback.groupExercise.flatMap(_.version))
       )),
       BSONDocument("$or" -> BSONArray(BSONDocument(
-        s"${AssessmentExercise.writtenExercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
-        s"${AssessmentExercise.writtenExercise}.version" -> scoresAndFeedback.writtenExercise.flatMap(_.version))
+        s"$rolePrefix${AssessmentExercise.writtenExercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
+        s"$rolePrefix${AssessmentExercise.writtenExercise}.version" -> scoresAndFeedback.writtenExercise.flatMap(_.version))
       ))
     ))
 
-    val candidateScoresAndFeedbackBSON = BSONDocument("$set" -> scoresAndFeedback.setVersion(newVersion))
+    val candidateScoresAndFeedbackBSON = saveAllBson(scoresAndFeedback.setVersion(newVersion))
 
     val validator = singleUpdateValidator(applicationId, "Application with correct version not found for 'Review scores'")
 

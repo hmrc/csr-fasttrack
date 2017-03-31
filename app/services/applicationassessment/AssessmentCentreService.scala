@@ -18,16 +18,13 @@ package services.applicationassessment
 
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import connectors.{ CSREmailClient, EmailClient }
-import model.AssessmentExercise.AssessmentExercise
-import model.CandidateScoresCommands.{ ApplicationScores, CandidateScoresAndFeedback, ExerciseScoresAndFeedback, RecordCandidateScores }
 import model.EvaluationResults.CompetencyAverageResult
 import model.Exceptions.IncorrectStatusInApplicationException
 import model.PersistedObjects.ApplicationForNotification
 import model.persisted.AssessmentCentrePassMarkSettings
 import model.{ ApplicationStatuses, AssessmentPassmarkEvaluation, AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
 import play.api.Logger
-import play.api.libs.json.JsValue
-import play.api.mvc.{ Action, RequestHeader }
+import play.api.mvc.RequestHeader
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
 import services.AuditService
@@ -43,7 +40,7 @@ object AssessmentCentreService extends AssessmentCentreService {
   val personalDetailsRepo = personalDetailsRepository
   val otRepository = onlineTestRepository
   val aRepository = applicationRepository
-  val aasRepository = applicationAssessmentScoresRepository
+  val aasRepository = reviewerAssessmentScoresRepository
   val cdRepository = contactDetailsRepository
 
   val emailClient = CSREmailClient
@@ -70,94 +67,9 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
   val passmarkService: AssessmentCentrePassMarkSettingsService
   val passmarkRulesEngine: AssessmentCentrePassmarkRulesEngine
 
-  def saveScoresAndFeedback(applicationId: String, exerciseScoresAndFeedback: ExerciseScoresAndFeedback)
-                           (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
-    val newStatus = ApplicationStatuses.AssessmentScoresEntered
-    for {
-      _ <- aasRepository.save(exerciseScoresAndFeedback)
-      _ <- aRepository.updateStatus(applicationId, newStatus)
-    } yield {
-      auditService.logEvent("ApplicationScoresAndFeedbackSaved", Map("applicationId" -> applicationId))
-      auditService.logEvent(s"ApplicationStatusSetTo$newStatus", Map("applicationId" -> applicationId))
-    }
-  }
-
-  def removeScoresAndFeedback(applicationId: String, exercise: AssessmentExercise)(implicit hc: HeaderCarrier,
-                                                                                   rh: RequestHeader): Future[Unit] = {
-    for {
-      _ <- aasRepository.removeExercise(applicationId: String, exercise)
-    } yield {
-      auditService.logEvent("ApplicationExerciseScoresAndFeedbackRemoved", Map(
-        "applicationId" -> applicationId, "exercise" -> exercise.toString)
-      )
-    }
-
-  }
-
-  def acceptScoresAndFeedback(applicationId: String, scoresAndFeedback: CandidateScoresAndFeedback)
-                             (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
-    val newStatus = determineStatus(scoresAndFeedback)
-    for {
-      _ <- aasRepository.saveAll(scoresAndFeedback)
-      _ <- aRepository.updateStatus(applicationId, newStatus)
-    } yield {
-      auditService.logEvent("ApplicationScoresAndFeedbackAccepted", Map("applicationId" -> applicationId))
-      auditService.logEvent(s"ApplicationStatusSetTo$newStatus", Map("applicationId" -> applicationId))
-    }
-  }
-
-  private def determineStatus(scoresAndFeedback: CandidateScoresAndFeedback) = {
-    val exerciseAttendList = List(
-      scoresAndFeedback.interview.map(_.attended),
-      scoresAndFeedback.groupExercise.map(_.attended),
-      scoresAndFeedback.writtenExercise.map(_.attended)
-    ).map(_.getOrElse(throw new IllegalStateException("Cannot accept scores with empty attend field")))
-
-    if (exerciseAttendList.contains(true)) {
-      ApplicationStatuses.AssessmentScoresAccepted
-    } else {
-      ApplicationStatuses.FailedToAttend
-    }
-  }
-
-  def getNonSubmittedCandidateScores(assessorId: String): Future[List[ApplicationScores]] = {
-    def getApplicationScores(candidateScores: CandidateScoresAndFeedback) = {
-      val assessmentCentreAllocationFut = assessmentCentreAllocationRepo.findOne(candidateScores.applicationId)
-      val personalDetailsFut = personalDetailsRepo.find(candidateScores.applicationId)
-      for {
-        a <- assessmentCentreAllocationFut
-        c <- personalDetailsFut
-      } yield {
-        ApplicationScores(RecordCandidateScores(c.firstName, c.lastName, a.venue, a.date), Some(candidateScores))
-      }
-    }
-    aasRepository.findNonSubmittedScores(assessorId).flatMap { candidateScores =>
-      Future.traverse(candidateScores)(getApplicationScores)
-    }
-  }
-
-  def getCandidateScores(applicationId: String): Future[ApplicationScores] = {
-    val assessment = assessmentCentreAllocationRepo.findOne(applicationId)
-    val candidate = personalDetailsRepo.find(applicationId)
-    val applicationScores = aasRepository.tryFind(applicationId)
-
-    for {
-      a <- assessment
-      c <- candidate
-      as <- applicationScores
-    } yield {
-      ApplicationScores(RecordCandidateScores(c.firstName, c.lastName, a.venue, a.date), as)
-    }
-  }
-
-  def getCandidateScoresAndFeedback(applicationId: String): Future[Option[CandidateScoresAndFeedback]] = {
-    aasRepository.tryFind(applicationId)
-  }
-
   def getCompetencyAverageResult(applicationId: String): Future[Option[CompetencyAverageResult]] = {
     aRepository.findAssessmentCentreCompetencyAverageResult(applicationId)
   }
-
 
   def removeFromAssessmentCentreSlot(applicationId: String): Future[Unit] = {
     deleteAssessmentCentreAllocation(applicationId).flatMap { _ =>

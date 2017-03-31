@@ -118,6 +118,8 @@ trait GeneralApplicationRepository {
 
   def removeProgressStatuses(applicationId: String, progressStatuses: List[ProgressStatuses.ProgressStatus]): Future[Unit]
 
+  def resetStatusToContinueOnlineTests(applicationId: String): Future[Unit]
+
   def progressToAssessmentCentre(applicationId: String, evaluationResult: List[SchemeEvaluationResult], version: String): Future[Unit]
 
   def nextUserAndAppIdsReadyForAssessmentIndicatorUpdate(batchSize: Int, mappingVersion: String): Future[Map[String, String]]
@@ -824,5 +826,25 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val personalDetailsRoot = doc.getAs[BSONDocument]("personal-details").get
     val preferredName = personalDetailsRoot.getAs[String]("preferredName").get
     ApplicationForNotification(applicationId, userId, preferredName, applicationStatus)
+  }
+
+  override def resetStatusToContinueOnlineTests(applicationId: String) = {
+    val query = BSONDocument("$and" -> BSONArray(
+      BSONDocument("applicationId" -> applicationId),
+      BSONDocument("applicationStatus" -> ApplicationStatuses.OnlineTestCompleted)
+    ))
+
+    val update = BSONDocument("$set" -> BSONDocument(
+      "applicationStatus" -> ApplicationStatuses.OnlineTestStarted
+    )) ++ ("$unset" -> BSONDocument(
+      s"progress-status.${ProgressStatuses.OnlineTestCompletedProgress.name}" -> BSONString("")
+    ))
+
+    val validator = singleUpdateValidator(applicationId,
+      s"Unable to find application $applicationId in online test completed status",
+      NotFoundException())
+
+    collection.update(query, update, upsert = false) map validator
+
   }
 }

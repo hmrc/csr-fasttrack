@@ -19,33 +19,36 @@ package controllers
 import factories.DateTimeFactory
 import model.AssessmentExercise
 import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScoresAndFeedback }
-import model.CandidateScoresCommands.Implicits._
+
 import model.Exceptions.ApplicationNotFound
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent }
-import services.applicationassessment.AssessmentCentreService
+import services.applicationassessment._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object CandidateScoresController extends CandidateScoresController {
-  val assessmentCentreService = AssessmentCentreService
+object AssessorScoresController extends AssessorScoresController {
+  val dateTimeFactory = DateTimeFactory
+  val assessmentCentreService: AssessmentCentreService = AssessmentCentreService
+  val assessmentCentreScoresService: AssessmentCentreScoresService = AssessorAssessmentScoresService
+}
+
+object ReviewerScoresController extends ReviewerScoresController {
+  val assessmentCentreScoresService: AssessmentCentreScoresService = ReviewerAssessmentScoresService
+  val assessmentCentreService: AssessmentCentreService = AssessmentCentreService
   val dateTimeFactory = DateTimeFactory
 }
 
-trait CandidateScoresController extends BaseController {
+object EvaluatedAssessmentCentreScoresController extends EvaluatedAssessmentCentreScoresController {
+  val assessmentCentreService: AssessmentCentreService = AssessmentCentreService
+  val dateTimeFactory = DateTimeFactory
+}
+
+trait EvaluatedAssessmentCentreScoresController extends BaseController {
   val dateTimeFactory: DateTimeFactory
-
   def assessmentCentreService: AssessmentCentreService
-
-  def getCandidateScores(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
-    assessmentCentreService.getCandidateScores(applicationId).map(scores => Ok(Json.toJson(scores)))
-  }
-
-  def getCandidateScoresAndFeedback(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
-    assessmentCentreService.getCandidateScoresAndFeedback(applicationId).map(scores => Ok(Json.toJson(scores)))
-  }
 
   def getCompetencyAverageResult(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
     assessmentCentreService.getCompetencyAverageResult(applicationId).map {
@@ -53,11 +56,26 @@ trait CandidateScoresController extends BaseController {
       case Some(result) => Ok(Json.toJson(result))
     }
   }
+}
+
+trait AssessmentCentreScoresController extends BaseController {
+  val dateTimeFactory: DateTimeFactory
+
+  def assessmentCentreScoresService: AssessmentCentreScoresService
+  def assessmentCentreService: AssessmentCentreService
+
+  def getCandidateScores(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    assessmentCentreScoresService.getCandidateScores(applicationId).map(scores => Ok(Json.toJson(scores)))
+  }
+
+  def getCandidateScoresAndFeedback(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    assessmentCentreScoresService.getCandidateScoresAndFeedback(applicationId).map(scores => Ok(Json.toJson(scores)))
+  }
 
   def saveExerciseScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[ExerciseScoresAndFeedback] { exerciseScoresAndFeedback =>
       val scoresAndFeedbackWithDate = exerciseScoresAndFeedback.scoresAndFeedback.copy(savedDate = Some(dateTimeFactory.nowLocalTimeZone))
-      assessmentCentreService.saveScoresAndFeedback(applicationId,
+      assessmentCentreScoresService.saveScoresAndFeedback(applicationId,
         exerciseScoresAndFeedback.copy(scoresAndFeedback = scoresAndFeedbackWithDate)).map { _ =>
         Created
       }.recover {
@@ -65,11 +83,13 @@ trait CandidateScoresController extends BaseController {
       }
     }
   }
+}
 
+trait AssessorScoresController extends AssessmentCentreScoresController {
   def submitExerciseScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[ExerciseScoresAndFeedback] { exerciseScoresAndFeedback =>
       val scoresAndFeedbackWithDate = exerciseScoresAndFeedback.scoresAndFeedback.copy(submittedDate = Some(dateTimeFactory.nowLocalTimeZone))
-      assessmentCentreService.saveScoresAndFeedback(applicationId,
+      assessmentCentreScoresService.saveScoresAndFeedback(applicationId,
         exerciseScoresAndFeedback.copy(scoresAndFeedback = scoresAndFeedbackWithDate)).map { _ =>
       Created
       }.recover {
@@ -77,10 +97,12 @@ trait CandidateScoresController extends BaseController {
       }
     }
   }
+}
 
+trait ReviewerScoresController extends AssessmentCentreScoresController {
   def acceptCandidateScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
     withJsonBody[CandidateScoresAndFeedback] { scoresAndFeedback =>
-      assessmentCentreService.acceptScoresAndFeedback(applicationId, scoresAndFeedback).map { _ =>
+      assessmentCentreScoresService.acceptScoresAndFeedback(applicationId, scoresAndFeedback).map { _ =>
         Ok
       }.recover {
         case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
@@ -89,7 +111,7 @@ trait CandidateScoresController extends BaseController {
   }
 
   def unlockExercise(applicationId: String, exercise: String): Action[AnyContent] = Action.async { implicit request =>
-    assessmentCentreService.removeScoresAndFeedback(applicationId, AssessmentExercise.withName(exercise)).map { _ =>
+    assessmentCentreScoresService.removeScoresAndFeedback(applicationId, AssessmentExercise.withName(exercise)).map { _ =>
       Ok
     }.recover {
       case e: NoSuchElementException => BadRequest(s"No such exercise '$exercise'")
