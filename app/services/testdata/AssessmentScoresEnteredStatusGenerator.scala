@@ -16,6 +16,7 @@
 
 package services.testdata
 
+import common.FutureEx
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import factories.UUIDFactory
 import model.{ ApplicationStatuses, AssessmentExercise }
@@ -41,32 +42,49 @@ trait AssessmentScoresEnteredStatusGenerator extends ConstructiveGenerator {
   val aasRepository: ApplicationAssessmentScoresRepository
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
-
-    def getScoresAndFeedback(applicationId: String, assessmentExercise: AssessmentExercise): ExerciseScoresAndFeedback = {
-      def randScore = Some(Random.randDouble(1, 4))
-      ExerciseScoresAndFeedback(applicationId, assessmentExercise, ScoresAndFeedback(
-        attended = true,
-        assessmentIncomplete = false,
-        leadingAndCommunicating     = randScore,
-        collaboratingAndPartnering  = randScore,
-        deliveringAtPace            = randScore,
-        makingEffectiveDecisions    = randScore,
-        changingAndImproving        = randScore,
-        buildingCapabilityForAll    = randScore,
-        motivationFit               = randScore,
-        feedback = Some("Good interview"),
-        updatedBy = UUIDFactory.generateUUID())
-      )
-    }
-
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      _ <- aasRepository.save(getScoresAndFeedback(candidateInPreviousStatus.applicationId.get, AssessmentExercise.interview))
-      _ <- aasRepository.save(getScoresAndFeedback(candidateInPreviousStatus.applicationId.get, AssessmentExercise.groupExercise))
-      _ <- aasRepository.save(getScoresAndFeedback(candidateInPreviousStatus.applicationId.get, AssessmentExercise.writtenExercise))
+      _ <- saveScores(candidateInPreviousStatus.applicationId.get, generatorConfig)
       _ <- aRepository.updateStatus(candidateInPreviousStatus.applicationId.get, ApplicationStatuses.AssessmentScoresEntered)
     } yield {
       candidateInPreviousStatus.copy(applicationStatus = ApplicationStatuses.AssessmentScoresEntered)
     }
+  }
+
+  private def saveScores(appId: String, generatorConfig: GeneratorConfig) = {
+    val toInsert = generatorConfig.assessmentScores match {
+      case None =>
+        val interviewScores = randomScoresAndFeedback(appId, AssessmentExercise.interview)
+        val groupScores = randomScoresAndFeedback(appId, AssessmentExercise.groupExercise)
+        val writtenScores = randomScoresAndFeedback(appId, AssessmentExercise.writtenExercise)
+        List(interviewScores, groupScores, writtenScores)
+      case Some(scores) =>
+        List(
+          scores.interview.map(s => ExerciseScoresAndFeedback(appId, AssessmentExercise.interview, s)),
+          scores.groupExercise.map(s => ExerciseScoresAndFeedback(appId, AssessmentExercise.groupExercise, s)),
+          scores.writtenExercise.map(s => ExerciseScoresAndFeedback(appId, AssessmentExercise.writtenExercise, s))
+        ).flatten
+    }
+
+    FutureEx.traverseSerial(toInsert)(aasRepository.save(_))
+  }
+
+  private def randomScoresAndFeedback(applicationId: String, assessmentExercise: AssessmentExercise): ExerciseScoresAndFeedback = {
+    def randScore = Some(Random.randDouble(1, 4))
+
+    val scoresAndFeedback = ScoresAndFeedback(
+      attended = true,
+      assessmentIncomplete = false,
+      leadingAndCommunicating     = randScore,
+      collaboratingAndPartnering  = randScore,
+      deliveringAtPace            = randScore,
+      makingEffectiveDecisions    = randScore,
+      changingAndImproving        = randScore,
+      buildingCapabilityForAll    = randScore,
+      motivationFit               = randScore,
+      feedback = Some("Good interview"),
+      updatedBy = UUIDFactory.generateUUID())
+
+    ExerciseScoresAndFeedback(applicationId, assessmentExercise, scoresAndFeedback)
   }
 }

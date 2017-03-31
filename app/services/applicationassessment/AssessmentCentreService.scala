@@ -19,6 +19,7 @@ package services.applicationassessment
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import connectors.{ CSREmailClient, EmailClient }
 import model.CandidateScoresCommands.{ ApplicationScores, CandidateScoresAndFeedback, ExerciseScoresAndFeedback, RecordCandidateScores }
+import model.EvaluationResults.CompetencyAverageResult
 import model.Exceptions.IncorrectStatusInApplicationException
 import model.PersistedObjects.ApplicationForNotification
 import model.persisted.AssessmentCentrePassMarkSettings
@@ -66,6 +67,10 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
   val auditService: AuditService
   val passmarkService: AssessmentCentrePassMarkSettingsService
   val passmarkRulesEngine: AssessmentCentrePassmarkRulesEngine
+
+  def getCompetencyAverageResult(applicationId: String): Future[Option[CompetencyAverageResult]] = {
+    aRepository.findAssessmentCentreCompetencyAverageResult(applicationId)
+  }
 
   def removeFromAssessmentCentreSlot(applicationId: String): Future[Unit] = {
     deleteAssessmentCentreAllocation(applicationId).flatMap { _ =>

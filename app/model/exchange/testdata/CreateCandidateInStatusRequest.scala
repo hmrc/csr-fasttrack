@@ -16,7 +16,7 @@
 
 package model.exchange.testdata
 
-import model.Scheme.Scheme
+import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import play.api.libs.json.Json
 
 case class CreateCandidateInStatusRequest(
@@ -31,7 +31,8 @@ case class CreateCandidateInStatusRequest(
   loc1scheme1EvaluationResult: Option[String],
   loc1scheme2EvaluationResult: Option[String],
   confirmedAllocation: Option[Boolean],
-  onlineTestScores: Option[OnlineTestScoresRequest]
+  onlineTestScores: Option[OnlineTestScoresRequest],
+  assessmentScores: Option[CandidateScoresAndFeedback]
 )
 
 object CreateCandidateInStatusRequest {
@@ -50,7 +51,8 @@ object CreateCandidateInStatusRequest {
       loc1scheme1EvaluationResult = None,
       loc1scheme2EvaluationResult = None,
       confirmedAllocation = None,
-      onlineTestScores = None
+      onlineTestScores = None,
+      assessmentScores = None
     )
   }
 }

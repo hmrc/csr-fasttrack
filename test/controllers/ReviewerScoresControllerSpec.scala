@@ -25,11 +25,12 @@ import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ RequestHeader, Result }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import services.applicationassessment.AssessmentCentreScoresService
+import services.applicationassessment.{ AssessmentCentreScoresService, AssessmentCentreService }
 import testkit.UnitWithAppSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import org.mockito.Matchers.{ eq => eqTo, _ }
 
 class ReviewerScoresControllerSpec extends UnitWithAppSpec {
 
@@ -74,12 +75,15 @@ class ReviewerScoresControllerSpec extends UnitWithAppSpec {
     }
   }
 
+
   trait TestFixture {
     val mockReviewerAssessmentCentreScoresService: AssessmentCentreScoresService = mock[AssessmentCentreScoresService]
+    val mockAssessmentCentreService: AssessmentCentreService = mock[AssessmentCentreService]
 
     object TestCandidateScoresController extends ReviewerScoresController {
       val dateTimeFactory: DateTimeFactory = DateTimeFactory
       val assessmentCentreScoresService: AssessmentCentreScoresService = mockReviewerAssessmentCentreScoresService
+      val assessmentCentreService: AssessmentCentreService = mockAssessmentCentreService
     }
 
     def createSaveCandidateScoresAndFeedback(applicationId: String, jsonString: String): FakeRequest[JsValue] = {
@@ -87,8 +91,8 @@ class ReviewerScoresControllerSpec extends UnitWithAppSpec {
       FakeRequest(
         Helpers.POST,
         controllers.routes.ReviewerScoresController.saveExerciseScoresAndFeedback(applicationId).url, FakeHeaders(), json
-      )
-        .withHeaders("Content-Type" -> "application/json")
+      ).withHeaders("Content-Type" -> "application/json")
+
     }
   }
 }

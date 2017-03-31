@@ -18,30 +18,56 @@ package controllers
 
 import factories.DateTimeFactory
 import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScoresAndFeedback }
+import model.EvaluationResults.CompetencyAverageResult
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent }
-import services.applicationassessment.{ AssessmentCentreScoresService, AssessorAssessmentScoresService, ReviewerAssessmentScoresService }
+import services.applicationassessment._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object AssessorScoresController extends AssessorScoresController {
   val dateTimeFactory = DateTimeFactory
+  val assessmentCentreService: AssessmentCentreService = AssessmentCentreService
   val assessmentCentreScoresService: AssessmentCentreScoresService = AssessorAssessmentScoresService
 }
 
 object ReviewerScoresController extends ReviewerScoresController {
   val assessmentCentreScoresService: AssessmentCentreScoresService = ReviewerAssessmentScoresService
+  val assessmentCentreService: AssessmentCentreService = AssessmentCentreService
   val dateTimeFactory = DateTimeFactory
+}
+
+object EvaluatedAssessmentCentreScoresController extends EvaluatedAssessmentCentreScoresController {
+  val assessmentCentreService: AssessmentCentreService = AssessmentCentreService
+  val dateTimeFactory = DateTimeFactory
+}
+
+trait EvaluatedAssessmentCentreScoresController extends BaseController {
+  val dateTimeFactory: DateTimeFactory
+  def assessmentCentreService: AssessmentCentreService
+
+  def getCompetencyAverageResult(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    assessmentCentreService.getCompetencyAverageResult(applicationId).map {
+      case None => NotFound(s"Competency average result for $applicationId could not be found")
+      case Some(result) => Ok(Json.toJson(result))
+    }
+  }
 }
 
 trait AssessmentCentreScoresController extends BaseController {
   val dateTimeFactory: DateTimeFactory
 
   def assessmentCentreScoresService: AssessmentCentreScoresService
+  def assessmentCentreService: AssessmentCentreService
 
   def getCandidateScores(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
     assessmentCentreScoresService.getCandidateScores(applicationId).map(scores => Ok(Json.toJson(scores)))
+  }
+
+  def getCandidateScoresAndFeedback(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    assessmentCentreScoresService.getCandidateScoresAndFeedback(applicationId).map(scores => Ok(Json.toJson(scores)))
   }
 
   def saveExerciseScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>

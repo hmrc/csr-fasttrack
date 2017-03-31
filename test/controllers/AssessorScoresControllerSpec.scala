@@ -77,10 +77,12 @@ class AssessorScoresControllerSpec extends UnitWithAppSpec {
 
   trait TestFixture {
     val mockAssessorAssessmentCentreScoresService: AssessmentCentreScoresService = mock[AssessmentCentreScoresService]
+    val mockAssessmentCentreService: AssessmentCentreService = mock[AssessmentCentreService]
 
     object TestCandidateScoresController extends AssessorScoresController {
       val dateTimeFactory: DateTimeFactory = DateTimeFactory
       val assessmentCentreScoresService: AssessmentCentreScoresService = mockAssessorAssessmentCentreScoresService
+      val assessmentCentreService: AssessmentCentreService = mockAssessmentCentreService
     }
 
     def createSaveCandidateScoresAndFeedback(applicationId: String, jsonString: String): FakeRequest[JsValue] = {

@@ -64,7 +64,7 @@ trait AssessmentCentreScoresService {
 
   def acceptScoresAndFeedback(applicationId: String, scoresAndFeedback: CandidateScoresAndFeedback)
                              (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
-    val newStatus = ApplicationStatuses.AssessmentScoresAccepted
+    val newStatus = determineStatus(scoresAndFeedback)
     for {
       _ <- assessmentScoresRepo.saveAll(scoresAndFeedback)
       _ <- appRepo.updateStatus(applicationId, newStatus)
@@ -101,6 +101,24 @@ trait AssessmentCentreScoresService {
       as <- applicationScores
     } yield {
       ApplicationScores(RecordCandidateScores(c.firstName, c.lastName, a.venue, a.date), as)
+    }
+  }
+
+  def getCandidateScoresAndFeedback(applicationId: String): Future[Option[CandidateScoresAndFeedback]] = {
+    assessmentScoresRepo.tryFind(applicationId)
+  }
+
+  private def determineStatus(scoresAndFeedback: CandidateScoresAndFeedback) = {
+    val exerciseAttendList = List(
+      scoresAndFeedback.interview.map(_.attended),
+      scoresAndFeedback.groupExercise.map(_.attended),
+      scoresAndFeedback.writtenExercise.map(_.attended)
+    ).map(_.getOrElse(throw new IllegalStateException("Cannot accept scores with empty attend field")))
+
+    if (exerciseAttendList.contains(true)) {
+      ApplicationStatuses.AssessmentScoresAccepted
+    } else {
+      ApplicationStatuses.FailedToAttend
     }
   }
 }
