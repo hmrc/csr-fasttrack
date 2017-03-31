@@ -23,7 +23,6 @@ import model.report.AssessmentCentreIndicatorReportItem
 import play.api.libs.json.{ JsObject, Json }
 import play.api.mvc.{ Action, AnyContent }
 import model.PersistedObjects.Implicits.candidateTestReportFormats
-import model.CandidateScoresCommands.Implicits.CandidateScoresAndFeedbackFormats
 import play.api.Logger
 import play.api.libs.streams.Streams
 import repositories._
@@ -36,7 +35,7 @@ import scala.concurrent.Future
 object DiagnosticReportController extends DiagnosticReportController {
   val drRepository: DiagnosticReportingRepository = diagnosticReportRepository
   val trRepository: TestReportRepository = testReportRepository
-  val assessmentScoresRepo: ApplicationAssessmentScoresRepository = applicationAssessmentScoresRepository
+  val assessmentScoresRepo: ApplicationAssessmentScoresRepository = assessorAssessmentScoresRepository
 }
 
 trait DiagnosticReportController extends BaseController {

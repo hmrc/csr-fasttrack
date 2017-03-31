@@ -19,7 +19,6 @@ package model
 import model.CandidateScoresCommands.CandidateScoresAndFeedback
 import model.Commands.ContactDetails
 import model.Commands.Implicits._
-import model.CandidateScoresCommands.Implicits._
 import model.Scheme.Scheme
 import org.joda.time.LocalDate
 import play.api.libs.json.Json

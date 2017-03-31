@@ -17,7 +17,6 @@
 package model.exchange.testdata
 
 import model.CandidateScoresCommands.CandidateScoresAndFeedback
-import model.Scheme.Scheme
 import play.api.libs.json.Json
 
 case class CreateCandidateInStatusRequest(
@@ -37,7 +36,6 @@ case class CreateCandidateInStatusRequest(
 )
 
 object CreateCandidateInStatusRequest {
-  import model.CandidateScoresCommands.Implicits._
   implicit val createCandidateInStatusRequestFormat = Json.format[CreateCandidateInStatusRequest]
 
   def create(status: String, progressStatus: Option[String]): CreateCandidateInStatusRequest = {

@@ -23,6 +23,9 @@ import play.api.libs.json.{ Format, Json }
 object CandidateScoresCommands {
 
   case class RecordCandidateScores(firstName: String, lastName: String, venueName: String, date: LocalDate)
+  object RecordCandidateScores {
+    implicit val RecordCandidateScoresFormats: Format[RecordCandidateScores] = Json.format[RecordCandidateScores]
+  }
 
   case class CandidateScoresAndFeedback(
       applicationId: String,
@@ -83,11 +86,19 @@ object CandidateScoresCommands {
     }
   }
 
+  object CandidateScoresAndFeedback {
+    implicit val CandidateScoresAndFeedbackFormats: Format[CandidateScoresAndFeedback] = Json.format[CandidateScoresAndFeedback]
+  }
+
   case class ExerciseScoresAndFeedback(
     applicationId: String,
     exercise: AssessmentExercise,
     scoresAndFeedback: ScoresAndFeedback
   )
+
+  object ExerciseScoresAndFeedback {
+    implicit val exerciseScoresAndFeedbackFormats: Format[ExerciseScoresAndFeedback] = Json.format[ExerciseScoresAndFeedback]
+  }
 
   case class ScoresAndFeedback(attended: Boolean,
                                assessmentIncomplete: Boolean,
@@ -105,13 +116,12 @@ object CandidateScoresCommands {
                                version: Option[String] = None
                               )
 
-  case class ApplicationScores(candidate: RecordCandidateScores, scoresAndFeedback: Option[CandidateScoresAndFeedback])
-
-  object Implicits {
-    implicit val RecordCandidateScoresFormats: Format[RecordCandidateScores] = Json.format[RecordCandidateScores]
+  object ScoresAndFeedback {
     implicit val scoresAndFeedbackFormats: Format[ScoresAndFeedback] = Json.format[ScoresAndFeedback]
-    implicit val exerciseScoresAndFeedbackFormats: Format[ExerciseScoresAndFeedback] = Json.format[ExerciseScoresAndFeedback]
-    implicit val CandidateScoresAndFeedbackFormats: Format[CandidateScoresAndFeedback] = Json.format[CandidateScoresAndFeedback]
+  }
+
+  case class ApplicationScores(candidate: RecordCandidateScores, scoresAndFeedback: Option[CandidateScoresAndFeedback])
+  object ApplicationScores {
     implicit val ApplicationScoresFormats: Format[ApplicationScores] = Json.format[ApplicationScores]
   }
 }

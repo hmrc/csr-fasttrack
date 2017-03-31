@@ -41,7 +41,7 @@ import play.api.test.Helpers._
 import repositories.AssessmentCentreLocation._
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
 import repositories.{ AssessmentCentreLocation, _ }
-import services.applicationassessment.AssessmentCentreService
+import services.applicationassessment.{ AssessmentCentreScoresService, AssessmentCentreService }
 import testkit.MockitoSugar
 
 import scala.concurrent.Future
@@ -504,6 +504,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
 
   trait TestFixture extends TestFixtureBase {
 
+    val mockAssessmentCentreScoresService = mock[AssessmentCentreScoresService]
     val mockApplicationAssessmentRepository = mock[AssessmentCentreAllocationRepository]
     val mockApplicationRepository = mock[GeneralApplicationRepository]
     val mockOnlineTestRepository = mock[OnlineTestRepository]
@@ -522,6 +523,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
       override val cdRepository = mockContactDetailsRepository
       override val emailClient = mockEmailClient
       override val aaService = mockApplicationAssessmentService
+      override val assessmentScoresService: AssessmentCentreScoresService = mockAssessmentCentreScoresService
     }
 
     def makeAssessmentScheduleController(op: => Unit) = {
@@ -536,6 +538,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         override val cdRepository = mockContactDetailsRepository
         override val emailClient = mockEmailClient
         override val aaService = mockApplicationAssessmentService
+        override val assessmentScoresService: AssessmentCentreScoresService = mockAssessmentCentreScoresService
       }
     }
 
