@@ -68,6 +68,13 @@ class AssessmentCentreScoresServiceSpec extends PlaySpec with MockitoSugar with 
       verify(auditServiceMock).logEvent("ApplicationScoresAndFeedbackSaved", AuditDetails)
       verify(auditServiceMock).logEvent(s"ApplicationStatusSetTo${ApplicationStatuses.AssessmentScoresEntered}", AuditDetails)
     }
+
+  }
+
+  "Remove scores and feedback" must {
+    "Remove an exercise and log an audit event to say it happened" in new ApplicationAssessmentServiceFixture {
+
+    }
   }
 
   trait ApplicationAssessmentServiceFixture {

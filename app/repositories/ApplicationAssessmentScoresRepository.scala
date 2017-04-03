@@ -178,7 +178,7 @@ trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {
 
   def removeExercise(applicationId: String, exercise: AssessmentExercise): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
-    val update = BSONDocument("$unset" -> BSONDocument(exercise.toString -> ""))
+    val update = BSONDocument("$unset" -> BSONDocument(rolePrefix + exercise.toString -> ""))
 
     val validator = singleUpdateValidator(applicationId, "Could not find application",
       ApplicationNotFound(s"Could not find application '$applicationId'"))

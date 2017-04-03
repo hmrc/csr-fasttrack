@@ -17,12 +17,14 @@
 package controllers
 
 import factories.DateTimeFactory
+import model.AssessmentExercise.AssessmentExercise
 import model.CandidateScoresCommands.{ ExerciseScoresAndFeedback, ScoresAndFeedback }
+import model.Exceptions.ApplicationNotFound
 import model.{ AssessmentExercise, EmptyRequestHeader }
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import play.api.libs.json.{ JsValue, Json }
-import play.api.mvc.{ RequestHeader, Result }
+import play.api.mvc.{ Action, AnyContent, RequestHeader, Result }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import services.applicationassessment.{ AssessmentCentreScoresService, AssessmentCentreService }
@@ -71,6 +73,35 @@ class ReviewerScoresControllerSpec extends UnitWithAppSpec {
       val result: Future[Result] = TestCandidateScoresController.saveExerciseScoresAndFeedback("app1")(
         createSaveCandidateScoresAndFeedback("app1", Json.toJson(exerciseScoresAndFeedback).toString())
       )
+      status(result) must be(BAD_REQUEST)
+    }
+  }
+
+  "Unlock exercise" should {
+    "Unlock an exercise when no exceptions occur" in new TestFixture {
+      when(mockReviewerAssessmentCentreScoresService.removeScoresAndFeedback(any[String], any[AssessmentExercise])
+      (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(unit))
+
+      val result: Future[Result] = TestCandidateScoresController.unlockExercise("app1", "interview").apply(FakeRequest())
+
+      status(result) must be(OK)
+    }
+
+    "Return a bad request when exercise is invalid" in new TestFixture {
+      when(mockReviewerAssessmentCentreScoresService.removeScoresAndFeedback(any[String], any[AssessmentExercise])
+      (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(new NoSuchElementException))
+
+      val result: Future[Result] = TestCandidateScoresController.unlockExercise("app1", "interview").apply(FakeRequest())
+
+      status(result) must be(BAD_REQUEST)
+    }
+
+    "Return a bad request when no such application exists" in new TestFixture {
+      when(mockReviewerAssessmentCentreScoresService.removeScoresAndFeedback(any[String], any[AssessmentExercise])
+      (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(ApplicationNotFound("app1")))
+
+      val result: Future[Result] = TestCandidateScoresController.unlockExercise("app1", "interview").apply(FakeRequest())
+
       status(result) must be(BAD_REQUEST)
     }
   }
