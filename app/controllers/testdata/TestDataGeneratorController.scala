@@ -102,6 +102,12 @@ trait TestDataGeneratorController extends BaseController {
         Some(exerciseScoreAndFeedback),
         Some(exerciseScoreAndFeedback),
         Some(exerciseScoreAndFeedback)
+      )),
+      reviewerAssessmentScores = Some(CandidateScoresAndFeedback(
+        "appId",
+        Some(exerciseScoreAndFeedback),
+        Some(exerciseScoreAndFeedback),
+        Some(exerciseScoreAndFeedback)
       ))
     )
     Ok(Json.toJson(example))
@@ -176,7 +182,8 @@ trait TestDataGeneratorController extends BaseController {
       isCivilServant = None,
       hasDegree = None,
       onlineTestScores = Some(testScoresReq),
-      assessmentScores = Some(assessmentScores)
+      assessmentScores = Some(assessmentScores),
+      reviewerAssessmentScores = Some(assessmentScores)
     )
     // scalastyle:on
     createCandidateInStatus(status, GeneratorConfig.apply(cubiksUrlFromConfig, createCandidateRequest), numberToGenerate)

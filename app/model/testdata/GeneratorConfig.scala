@@ -49,7 +49,8 @@ case class GeneratorConfig(
   previousStatus: Option[String] = None,
   confirmedAllocation: Boolean = true,
   testScores: Option[OnlineTestScores] = None,
-  assessmentScores: Option[CandidateScoresAndFeedback] = None
+  assessmentScores: Option[CandidateScoresAndFeedback] = None,
+  reviewerAssessmentScores: Option[CandidateScoresAndFeedback] = None
 )
 
 object GeneratorConfig {
@@ -68,7 +69,8 @@ object GeneratorConfig {
       loc1scheme2Passmark = request.loc1scheme2EvaluationResult.map(Result.apply),
       confirmedAllocation = statusData.applicationStatus == ApplicationStatuses.AllocationConfirmed.name,
       testScores = request.onlineTestScores.map(OnlineTestScores.apply),
-      assessmentScores = request.assessmentScores
+      assessmentScores = request.assessmentScores,
+      reviewerAssessmentScores = request.reviewerAssessmentScores
     )
   }
 }

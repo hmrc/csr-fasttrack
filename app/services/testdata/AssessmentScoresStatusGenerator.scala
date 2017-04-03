@@ -31,28 +31,40 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-object AssessmentScoresEnteredStatusGenerator extends AssessmentScoresEnteredStatusGenerator {
-  override val previousStatusGenerator = AllocationStatusGenerator
-  override val aRepository = applicationRepository
-  override val aasRepository = assessorAssessmentScoresRepository
+object AssessmentScoresEnteredStatusGenerator extends AssessmentScoresStatusGenerator {
+  val previousStatusGenerator = AllocationStatusGenerator
+  val aRepository = applicationRepository
+  val aasRepository = assessorAssessmentScoresRepository
+  val newStatus = ApplicationStatuses.AssessmentScoresEntered
+  val scores = (gc: GeneratorConfig) => gc.assessmentScores
 }
 
-trait AssessmentScoresEnteredStatusGenerator extends ConstructiveGenerator {
-  val aRepository: GeneralApplicationRepository
-  val aasRepository: ApplicationAssessmentScoresRepository
+object AssessmentScoresAcceptedStatusGenerator extends AssessmentScoresStatusGenerator {
+  val previousStatusGenerator = AllocationStatusGenerator
+  val aRepository = applicationRepository
+  val aasRepository = assessorAssessmentScoresRepository
+  val newStatus = ApplicationStatuses.AssessmentScoresAccepted
+  val scores = (gc: GeneratorConfig) => gc.reviewerAssessmentScores
+}
+
+trait AssessmentScoresStatusGenerator extends ConstructiveGenerator {
+  def aRepository: GeneralApplicationRepository
+  def aasRepository: ApplicationAssessmentScoresRepository
+  def newStatus: ApplicationStatuses.EnumVal
+  def scores: (GeneratorConfig) => Option[CandidateScoresAndFeedback]
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
       _ <- saveScores(candidateInPreviousStatus.applicationId.get, generatorConfig)
-      _ <- aRepository.updateStatus(candidateInPreviousStatus.applicationId.get, ApplicationStatuses.AssessmentScoresEntered)
+      _ <- aRepository.updateStatus(candidateInPreviousStatus.applicationId.get, newStatus)
     } yield {
-      candidateInPreviousStatus.copy(applicationStatus = ApplicationStatuses.AssessmentScoresEntered)
+      candidateInPreviousStatus.copy(applicationStatus = newStatus)
     }
   }
 
   private def saveScores(appId: String, generatorConfig: GeneratorConfig) = {
-    val toInsert = generatorConfig.assessmentScores match {
+    val toInsert = scores(generatorConfig) match {
       case None =>
         val interviewScores = randomScoresAndFeedback(appId, AssessmentExercise.interview)
         val groupScores = randomScoresAndFeedback(appId, AssessmentExercise.groupExercise)
