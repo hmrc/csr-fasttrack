@@ -16,6 +16,7 @@
 
 package services.applicationassessment
 
+import model.AssessmentExercise.AssessmentExercise
 import model.{ ApplicationStatuses, AssessmentExercise, EmptyRequestHeader }
 import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScoresAndFeedback, ScoresAndFeedback }
 import model.Exceptions.NotFoundException
@@ -27,12 +28,12 @@ import org.scalatestplus.play.PlaySpec
 import repositories.{ ApplicationAssessmentScoresRepository, AssessmentCentreAllocationRepository }
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
-import testkit.MockitoSugar
+import testkit.{ MockitoSugar, UnitSpec }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 
-class AssessmentCentreScoresServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
+class AssessmentCentreScoresServiceSpec extends UnitSpec {
 
   val ApplicationId = "1111-1111"
   val NotFoundApplicationId = "Not-Found-Id"
@@ -68,12 +69,15 @@ class AssessmentCentreScoresServiceSpec extends PlaySpec with MockitoSugar with 
       verify(auditServiceMock).logEvent("ApplicationScoresAndFeedbackSaved", AuditDetails)
       verify(auditServiceMock).logEvent(s"ApplicationStatusSetTo${ApplicationStatuses.AssessmentScoresEntered}", AuditDetails)
     }
-
   }
 
   "Remove scores and feedback" must {
     "Remove an exercise and log an audit event to say it happened" in new ApplicationAssessmentServiceFixture {
+      when(aasRepositoryMock.removeExercise(any[String], any[AssessmentExercise])).thenReturn(Future.successful(unit))
 
+      val result: Unit = service.removeScoresAndFeedback(ApplicationId, AssessmentExercise.interview).futureValue
+
+      verify(auditServiceMock).logEvent("ApplicationExerciseScoresAndFeedbackRemoved", AuditDetails + ("exercise" -> "interview"))
     }
   }
 
