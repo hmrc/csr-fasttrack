@@ -32,7 +32,8 @@ case class CreateCandidateInStatusRequest(
   loc1scheme2EvaluationResult: Option[String],
   confirmedAllocation: Option[Boolean],
   onlineTestScores: Option[OnlineTestScoresRequest],
-  assessmentScores: Option[CandidateScoresAndFeedback]
+  assessmentScores: Option[CandidateScoresAndFeedback],
+  reviewerAssessmentScores: Option[CandidateScoresAndFeedback]
 )
 
 object CreateCandidateInStatusRequest {
@@ -52,7 +53,8 @@ object CreateCandidateInStatusRequest {
       loc1scheme2EvaluationResult = None,
       confirmedAllocation = None,
       onlineTestScores = None,
-      assessmentScores = None
+      assessmentScores = None,
+      reviewerAssessmentScores = None
     )
   }
 }
