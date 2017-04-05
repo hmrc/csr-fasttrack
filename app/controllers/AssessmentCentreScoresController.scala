@@ -31,12 +31,14 @@ import scala.concurrent.Future
 
 object AssessorScoresController extends AssessorScoresController {
   val dateTimeFactory = DateTimeFactory
+  val assessmentCentreScoresRemovalService: AssessmentCentreScoresRemovalService = AssessmentCentreScoresRemovalService
   val assessmentCentreService: AssessmentCentreService = AssessmentCentreService
   val assessmentCentreScoresService: AssessmentCentreScoresService = AssessorAssessmentScoresService
 }
 
 object ReviewerScoresController extends ReviewerScoresController {
   val assessmentCentreScoresService: AssessmentCentreScoresService = ReviewerAssessmentScoresService
+  val assessmentCentreScoresRemovalService: AssessmentCentreScoresRemovalService = AssessmentCentreScoresRemovalService
   val assessmentCentreService: AssessmentCentreService = AssessmentCentreService
   val dateTimeFactory = DateTimeFactory
 }
@@ -61,8 +63,9 @@ trait EvaluatedAssessmentCentreScoresController extends BaseController {
 trait AssessmentCentreScoresController extends BaseController {
   val dateTimeFactory: DateTimeFactory
 
-  def assessmentCentreScoresService: AssessmentCentreScoresService
-  def assessmentCentreService: AssessmentCentreService
+  val assessmentCentreScoresService: AssessmentCentreScoresService
+  val assessmentCentreScoresRemovalService: AssessmentCentreScoresRemovalService
+  val assessmentCentreService: AssessmentCentreService
 
   def getCandidateScores(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
     assessmentCentreScoresService.getCandidateScores(applicationId).map(scores => Ok(Json.toJson(scores)))
@@ -111,7 +114,7 @@ trait ReviewerScoresController extends AssessmentCentreScoresController {
   }
 
   def unlockExercise(applicationId: String, exercise: String): Action[AnyContent] = Action.async { implicit request =>
-    assessmentCentreScoresService.removeScoresAndFeedback(applicationId, AssessmentExercise.withName(exercise)).map { _ =>
+    assessmentCentreScoresRemovalService.removeScoresAndFeedback(applicationId, AssessmentExercise.withName(exercise)).map { _ =>
       Ok
     }.recover {
       case e: NoSuchElementException => BadRequest(s"No such exercise '$exercise'")

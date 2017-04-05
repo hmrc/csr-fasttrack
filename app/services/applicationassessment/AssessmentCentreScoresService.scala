@@ -38,7 +38,6 @@ object AssessorAssessmentScoresService extends AssessmentCentreScoresService {
 
 object ReviewerAssessmentScoresService extends AssessmentCentreScoresService {
   val assessmentScoresRepo: ReviewerApplicationAssessmentScoresMongoRepository = reviewerAssessmentScoresRepository
-  val assessorAssessmentScoresRepo: AssessorApplicationAssessmentScoresMongoRepository = assessorAssessmentScoresRepository
   val appRepo: GeneralApplicationMongoRepository = applicationRepository
   val assessmentCentreAllocationRepo: AssessmentCentreAllocationMongoRepository = assessmentCentreAllocationRepository
   val personalDetailsRepo: PersonalDetailsMongoRepository = personalDetailsRepository
@@ -46,11 +45,11 @@ object ReviewerAssessmentScoresService extends AssessmentCentreScoresService {
 }
 
 trait AssessmentCentreScoresService {
-  def assessmentScoresRepo: ApplicationAssessmentScoresRepository
-  def appRepo: GeneralApplicationRepository
-  def assessmentCentreAllocationRepo: AssessmentCentreAllocationRepository
-  def personalDetailsRepo: PersonalDetailsRepository
-  def auditService: AuditService
+  val assessmentScoresRepo: ApplicationAssessmentScoresRepository
+  val appRepo: GeneralApplicationRepository
+  val assessmentCentreAllocationRepo: AssessmentCentreAllocationRepository
+  val personalDetailsRepo: PersonalDetailsRepository
+  val auditService: AuditService
 
   def saveScoresAndFeedback(applicationId: String, exerciseScoresAndFeedback: ExerciseScoresAndFeedback)
                            (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
@@ -108,18 +107,6 @@ trait AssessmentCentreScoresService {
 
   def getCandidateScoresAndFeedback(applicationId: String): Future[Option[CandidateScoresAndFeedback]] = {
     assessmentScoresRepo.tryFind(applicationId)
-  }
-
-  def removeScoresAndFeedback(applicationId: String, exercise: AssessmentExercise)(implicit hc: HeaderCarrier,
-                                                                                   rh: RequestHeader): Future[Unit] = {
-    for {
-      _ <- assessmentScoresRepo.removeExercise(applicationId, exercise)
-      _ <- assessorAssessmentScoresRepository.removeExercise(applicationId, exercise)
-    } yield {
-      auditService.logEvent("ApplicationExerciseScoresAndFeedbackRemoved", Map(
-        "applicationId" -> applicationId, "exercise" -> exercise.toString)
-      )
-    }
   }
 
   private def determineStatus(scoresAndFeedback: CandidateScoresAndFeedback) = {

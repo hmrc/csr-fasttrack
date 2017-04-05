@@ -71,16 +71,6 @@ class AssessmentCentreScoresServiceSpec extends UnitSpec {
     }
   }
 
-  "Remove scores and feedback" must {
-    "Remove an exercise and log an audit event to say it happened" in new ApplicationAssessmentServiceFixture {
-      when(aasRepositoryMock.removeExercise(any[String], any[AssessmentExercise])).thenReturn(Future.successful(unit))
-
-      val result: Unit = service.removeScoresAndFeedback(ApplicationId, AssessmentExercise.interview).futureValue
-
-      verify(auditServiceMock).logEvent("ApplicationExerciseScoresAndFeedbackRemoved", AuditDetails + ("exercise" -> "interview"))
-    }
-  }
-
   trait ApplicationAssessmentServiceFixture {
 
     val applicationAssessmentRepositoryMock: AssessmentCentreAllocationRepository = mock[AssessmentCentreAllocationRepository]
