@@ -17,6 +17,7 @@
 package services.applicationassessment
 
 import model.ApplicationStatuses
+import model.AssessmentExercise.AssessmentExercise
 import model.CandidateScoresCommands.{ ApplicationScores, CandidateScoresAndFeedback, ExerciseScoresAndFeedback, RecordCandidateScores }
 import play.api.mvc.RequestHeader
 import repositories._
@@ -44,11 +45,11 @@ object ReviewerAssessmentScoresService extends AssessmentCentreScoresService {
 }
 
 trait AssessmentCentreScoresService {
-  def assessmentScoresRepo: ApplicationAssessmentScoresRepository
-  def appRepo: GeneralApplicationRepository
-  def assessmentCentreAllocationRepo: AssessmentCentreAllocationRepository
-  def personalDetailsRepo: PersonalDetailsRepository
-  def auditService: AuditService
+  val assessmentScoresRepo: ApplicationAssessmentScoresRepository
+  val appRepo: GeneralApplicationRepository
+  val assessmentCentreAllocationRepo: AssessmentCentreAllocationRepository
+  val personalDetailsRepo: PersonalDetailsRepository
+  val auditService: AuditService
 
   def saveScoresAndFeedback(applicationId: String, exerciseScoresAndFeedback: ExerciseScoresAndFeedback)
                            (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {

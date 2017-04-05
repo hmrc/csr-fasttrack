@@ -23,7 +23,7 @@ import org.mockito.Mockito._
 import play.api.libs.json.{ JsValue, Json }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import services.applicationassessment.{ AssessmentCentreScoresService, AssessmentCentreService }
+import services.applicationassessment.{ AssessmentCentreScoresRemovalService, AssessmentCentreScoresService, AssessmentCentreService }
 import testkit.UnitWithAppSpec
 import org.mockito.Matchers._
 import play.api.mvc.{ Action, RequestHeader, Result }
@@ -82,6 +82,7 @@ class AssessorScoresControllerSpec extends UnitWithAppSpec {
     object TestCandidateScoresController extends AssessorScoresController {
       val dateTimeFactory: DateTimeFactory = DateTimeFactory
       val assessmentCentreScoresService: AssessmentCentreScoresService = mockAssessorAssessmentCentreScoresService
+      val assessmentCentreScoresRemovalService: AssessmentCentreScoresRemovalService = mock[AssessmentCentreScoresRemovalService]
       val assessmentCentreService: AssessmentCentreService = mockAssessmentCentreService
     }
 

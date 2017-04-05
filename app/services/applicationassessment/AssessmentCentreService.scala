@@ -18,7 +18,6 @@ package services.applicationassessment
 
 import config.AssessmentEvaluationMinimumCompetencyLevel
 import connectors.{ CSREmailClient, EmailClient }
-import model.CandidateScoresCommands.{ ApplicationScores, CandidateScoresAndFeedback, ExerciseScoresAndFeedback, RecordCandidateScores }
 import model.EvaluationResults.CompetencyAverageResult
 import model.Exceptions.IncorrectStatusInApplicationException
 import model.PersistedObjects.ApplicationForNotification
