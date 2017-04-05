@@ -38,6 +38,7 @@ object AssessorAssessmentScoresService extends AssessmentCentreScoresService {
 
 object ReviewerAssessmentScoresService extends AssessmentCentreScoresService {
   val assessmentScoresRepo: ReviewerApplicationAssessmentScoresMongoRepository = reviewerAssessmentScoresRepository
+  val assessorAssessmentScoresRepo: AssessorApplicationAssessmentScoresMongoRepository = assessorAssessmentScoresRepository
   val appRepo: GeneralApplicationMongoRepository = applicationRepository
   val assessmentCentreAllocationRepo: AssessmentCentreAllocationMongoRepository = assessmentCentreAllocationRepository
   val personalDetailsRepo: PersonalDetailsMongoRepository = personalDetailsRepository
@@ -112,7 +113,8 @@ trait AssessmentCentreScoresService {
   def removeScoresAndFeedback(applicationId: String, exercise: AssessmentExercise)(implicit hc: HeaderCarrier,
                                                                                    rh: RequestHeader): Future[Unit] = {
     for {
-      _ <- assessmentScoresRepo.removeExercise(applicationId: String, exercise)
+      _ <- assessmentScoresRepo.removeExercise(applicationId, exercise)
+      _ <- assessorAssessmentScoresRepository.removeExercise(applicationId, exercise)
     } yield {
       auditService.logEvent("ApplicationExerciseScoresAndFeedbackRemoved", Map(
         "applicationId" -> applicationId, "exercise" -> exercise.toString)
