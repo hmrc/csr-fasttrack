@@ -40,7 +40,7 @@ object AssessmentScoresEnteredStatusGenerator extends AssessmentScoresStatusGene
 }
 
 object AssessmentScoresAcceptedStatusGenerator extends AssessmentScoresStatusGenerator {
-  val previousStatusGenerator = AllocationStatusGenerator
+  val previousStatusGenerator = AssessmentScoresEnteredStatusGenerator
   val aRepository = applicationRepository
   val aasRepository = reviewerAssessmentScoresRepository
   val newStatus = ApplicationStatuses.AssessmentScoresAccepted
