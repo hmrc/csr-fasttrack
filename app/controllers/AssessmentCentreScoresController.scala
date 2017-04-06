@@ -19,10 +19,10 @@ package controllers
 import factories.DateTimeFactory
 import model.AssessmentExercise
 import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScoresAndFeedback }
-
 import model.Exceptions.ApplicationNotFound
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent }
+import services.applicationassessment.AssessorAssessmentScoresService.ReviewerScoresExistForExerciseException
 import services.applicationassessment._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 

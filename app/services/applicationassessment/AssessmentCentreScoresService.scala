@@ -17,7 +17,6 @@
 package services.applicationassessment
 
 import model.ApplicationStatuses
-import model.AssessmentExercise.AssessmentExercise
 import model.CandidateScoresCommands.{ ApplicationScores, CandidateScoresAndFeedback, ExerciseScoresAndFeedback, RecordCandidateScores }
 import play.api.mvc.RequestHeader
 import repositories._
@@ -29,9 +28,9 @@ import uk.gov.hmrc.play.http.HeaderCarrier
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
+
 object AssessorAssessmentScoresService extends AssessorAssessmentCentreScoresService {
   case class ReviewerScoresExistForExerciseException(m: String) extends Exception(m)
-  
   val assessmentScoresRepo: AssessorApplicationAssessmentScoresMongoRepository = assessorAssessmentScoresRepository
   val reviewerScoresRepo: ReviewerApplicationAssessmentScoresMongoRepository = reviewerAssessmentScoresRepository
   val appRepo: GeneralApplicationMongoRepository = applicationRepository

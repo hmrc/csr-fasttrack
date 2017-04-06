@@ -28,6 +28,7 @@ import org.scalatestplus.play.PlaySpec
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
+import services.applicationassessment.AssessorAssessmentScoresService.ReviewerScoresExistForExerciseException
 import testkit.{ MockitoSugar, UnitSpec }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
