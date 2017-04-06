@@ -38,10 +38,15 @@ class DiagnosticReportControllerSpec extends UnitWithAppSpec {
       val expectedApplication = Json.obj("applicationId" -> "app1", "userId" -> "user1", "frameworkId" -> "FastTrack-2017",
         "online-test-results" -> Json.obj("applicationId" -> "app1", "reportType" -> "XML",
           "competency" -> Json.obj("status" -> "complete", "norm" -> "norm", "tScore" -> 1, "percentile" -> 22, "raw" -> 5, "sten" -> 55)),
-        "assessment-centre-results" -> Json.obj("applicationId" -> "app1", "interview" -> Json.obj("attended" -> true,
+        "assessor-assessment-centre-results" -> Json.obj("applicationId" -> "app1", "interview" -> Json.obj("attended" -> true,
         "assessmentIncomplete" -> false, "leadingAndCommunicating" -> 1, "collaboratingAndPartnering" -> 1, "deliveringAtPace" -> 1,
         "makingEffectiveDecisions" -> 1,"changingAndImproving" -> 1, "buildingCapabilityForAll" -> 1,
-        "motivationFit" -> 1,"feedback" -> "blah", "updatedBy" -> "xyz")))
+        "motivationFit" -> 1,"feedback" -> "blah", "updatedBy" -> "xyz")),
+        "quality-controlled-assessment-centre-results" -> Json.obj("applicationId" -> "app1", "groupExercise" -> Json.obj("attended" -> true,
+        "assessmentIncomplete" -> false, "leadingAndCommunicating" -> 1, "collaboratingAndPartnering" -> 1, "deliveringAtPace" -> 1,
+        "makingEffectiveDecisions" -> 1,"changingAndImproving" -> 1, "buildingCapabilityForAll" -> 1,
+        "motivationFit" -> 1,"feedback" -> "blah", "updatedBy" -> "xyz"))
+      )
 
       val testResult = TestResult("complete", "norm", Some(1.0), Some(22.0), Some(5.0), Some(55.0))
       val candidateScore = Some(1.0)
@@ -51,8 +56,15 @@ class DiagnosticReportControllerSpec extends UnitWithAppSpec {
       when(mockTestResultRepo.getReportByApplicationId("app1")).thenReturn(Future.successful(
         Some(CandidateTestReport("app1", "XML", Some(testResult), None, None, None))
       ))
-      when(mockAssessmentResultRepo.tryFind("app1")).thenReturn(Future.successful(
+      when(mockAssessorAssessmentResultRepo.tryFind("app1")).thenReturn(Future.successful(
         Some(CandidateScoresAndFeedback("app1", interview = Some(ScoresAndFeedback(attended = true,
+          assessmentIncomplete = false, leadingAndCommunicating = candidateScore,
+          collaboratingAndPartnering = candidateScore, deliveringAtPace = candidateScore, makingEffectiveDecisions = candidateScore,
+          changingAndImproving = candidateScore, buildingCapabilityForAll = candidateScore, motivationFit = candidateScore,
+          feedback = candidateScoreFeedback, updatedBy = "xyz"))))
+      ))
+      when(mockReviewerAssessmentResultRepo.tryFind("app1")).thenReturn(Future.successful(
+        Some(CandidateScoresAndFeedback("app1", groupExercise = Some(ScoresAndFeedback(attended = true,
           assessmentIncomplete = false, leadingAndCommunicating = candidateScore,
           collaboratingAndPartnering = candidateScore, deliveringAtPace = candidateScore, makingEffectiveDecisions = candidateScore,
           changingAndImproving = candidateScore, buildingCapabilityForAll = candidateScore, motivationFit = candidateScore,
@@ -85,12 +97,14 @@ class DiagnosticReportControllerSpec extends UnitWithAppSpec {
   trait TestFixture extends TestFixtureBase {
     val mockDiagnosticReportRepository = mock[DiagnosticReportingRepository]
     val mockTestResultRepo = mock[TestReportRepository]
-    val mockAssessmentResultRepo = mock[ApplicationAssessmentScoresRepository]
+    val mockAssessorAssessmentResultRepo = mock[ApplicationAssessmentScoresRepository]
+    val mockReviewerAssessmentResultRepo = mock[ApplicationAssessmentScoresRepository]
 
     object TestableDiagnosticReportingController extends DiagnosticReportController {
       val drRepository = mockDiagnosticReportRepository
       override val trRepository: TestReportRepository = mockTestResultRepo
-      override val assessmentScoresRepo: ApplicationAssessmentScoresRepository = mockAssessmentResultRepo
+      override val assessorAssessmentScoresRepo: ApplicationAssessmentScoresRepository = mockAssessorAssessmentResultRepo
+      override val reviewerAssessmentScoresRepo: ApplicationAssessmentScoresRepository = mockReviewerAssessmentResultRepo
     }
 
     def createOnlineTestRequest(userId: String) = {
