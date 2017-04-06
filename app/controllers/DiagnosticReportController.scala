@@ -35,14 +35,16 @@ import scala.concurrent.Future
 object DiagnosticReportController extends DiagnosticReportController {
   val drRepository: DiagnosticReportingRepository = diagnosticReportRepository
   val trRepository: TestReportRepository = testReportRepository
-  val assessmentScoresRepo: ApplicationAssessmentScoresRepository = assessorAssessmentScoresRepository
+  val assessorAssessmentScoresRepo: ApplicationAssessmentScoresRepository = assessorAssessmentScoresRepository
+  val reviewerAssessmentScoresRepo: ApplicationAssessmentScoresRepository = reviewerAssessmentScoresRepository
 }
 
 trait DiagnosticReportController extends BaseController {
 
   val drRepository: DiagnosticReportingRepository
   val trRepository: TestReportRepository
-  val assessmentScoresRepo: ApplicationAssessmentScoresRepository
+  val assessorAssessmentScoresRepo: ApplicationAssessmentScoresRepository
+  val reviewerAssessmentScoresRepo: ApplicationAssessmentScoresRepository
 
   def getApplicationByApplicationId(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
 
@@ -54,19 +56,29 @@ trait DiagnosticReportController extends BaseController {
     (for {
       application <- drRepository.findByApplicationId(applicationId)
       testResults <- trRepository.getReportByApplicationId(applicationId)
-      assessmentScores <- assessmentScoresRepo.tryFind(applicationId)
+      assessorAssessmentScores <- assessorAssessmentScoresRepo.tryFind(applicationId)
+      reviewerAssessmentScores <- reviewerAssessmentScoresRepo.tryFind(applicationId)
     } yield {
 
       val testResultsJson = testResults.map { tr =>
         val results = Json.toJson(tr)
         Json.obj("online-test-results" -> results)
       }
-      val assessmentCentreResultsJson = assessmentScores.map { ar =>
+
+      val assessorAssessmentCentreResultsJson = assessorAssessmentScores.map { ar =>
         val results = Json.toJson(ar).as[JsObject]
-        Json.obj("assessment-centre-results" -> results)
+        Json.obj("assessor-assessment-centre-results" -> results)
       }
 
-      val fullJson = mergeJsonObjects(mergeJsonObjects(application, testResultsJson), assessmentCentreResultsJson)
+      val reviewerAssessmentCentreResultsJson = reviewerAssessmentScores.map { ar =>
+        val results = Json.toJson(ar).as[JsObject]
+        Json.obj("quality-controlled-assessment-centre-results" -> results)
+      }
+
+      val fullJson = mergeJsonObjects(
+        mergeJsonObjects(mergeJsonObjects(application, testResultsJson), assessorAssessmentCentreResultsJson),
+        reviewerAssessmentCentreResultsJson
+      )
 
       Ok(Json.toJson(fullJson))
     }) recover {
