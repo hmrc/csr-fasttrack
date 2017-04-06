@@ -17,6 +17,7 @@
 package services.applicationassessment
 
 import model.ApplicationStatuses
+import model.AssessmentExercise.AssessmentExercise
 import model.CandidateScoresCommands.{ ApplicationScores, CandidateScoresAndFeedback, ExerciseScoresAndFeedback, RecordCandidateScores }
 import play.api.mvc.RequestHeader
 import repositories._

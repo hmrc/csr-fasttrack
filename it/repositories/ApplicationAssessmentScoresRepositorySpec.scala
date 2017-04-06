@@ -156,5 +156,22 @@ trait ApplicationAssessmentScoresRepositorySpec extends MongoRepositorySpec {
         groupExercise = Some(exerciseScoresAndFeedback2.scoresAndFeedback),
         writtenExercise = Some(exerciseScoresAndFeedback2.scoresAndFeedback)))
     }
+
+    "remove exercise should unset the appropriate exercise key" in {
+      repository.save(exerciseScoresAndFeedback, None).futureValue
+      repository.save(exerciseScoresAndFeedback.copy(exercise = AssessmentExercise.groupExercise), None).futureValue
+      repository.save(exerciseScoresAndFeedback.copy(exercise = AssessmentExercise.writtenExercise), None).futureValue
+
+      repository.removeExercise(exerciseScoresAndFeedback.applicationId, AssessmentExercise.interview).futureValue
+
+      val result = repository.allScores.futureValue
+
+      result must have size 1
+      result must contain ("app1" -> CandidateScoresAndFeedback(applicationId = "app1",
+        interview = None,
+        groupExercise = Some(exerciseScoresAndFeedback.scoresAndFeedback),
+        writtenExercise = Some(exerciseScoresAndFeedback.scoresAndFeedback)
+      ))
+    }
   }
 }
