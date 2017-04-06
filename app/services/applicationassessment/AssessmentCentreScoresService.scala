@@ -17,26 +17,30 @@
 package services.applicationassessment
 
 import model.ApplicationStatuses
-import model.AssessmentExercise.AssessmentExercise
 import model.CandidateScoresCommands.{ ApplicationScores, CandidateScoresAndFeedback, ExerciseScoresAndFeedback, RecordCandidateScores }
 import play.api.mvc.RequestHeader
 import repositories._
 import repositories.application._
 import services.AuditService
+import services.applicationassessment.AssessorAssessmentScoresService.ReviewerScoresExistForExerciseException
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-object AssessorAssessmentScoresService extends AssessmentCentreScoresService {
+
+object AssessorAssessmentScoresService extends AssessorAssessmentCentreScoresService {
+  case class ReviewerScoresExistForExerciseException(m: String) extends Exception(m)
   val assessmentScoresRepo: AssessorApplicationAssessmentScoresMongoRepository = assessorAssessmentScoresRepository
+  val reviewerScoresRepo: ReviewerApplicationAssessmentScoresMongoRepository = reviewerAssessmentScoresRepository
   val appRepo: GeneralApplicationMongoRepository = applicationRepository
   val assessmentCentreAllocationRepo: AssessmentCentreAllocationMongoRepository = assessmentCentreAllocationRepository
   val personalDetailsRepo: PersonalDetailsMongoRepository = personalDetailsRepository
   val auditService = AuditService
+
 }
 
-object ReviewerAssessmentScoresService extends AssessmentCentreScoresService {
+object ReviewerAssessmentScoresService extends ReviewerAssessmentScoresService {
   val assessmentScoresRepo: ReviewerApplicationAssessmentScoresMongoRepository = reviewerAssessmentScoresRepository
   val appRepo: GeneralApplicationMongoRepository = applicationRepository
   val assessmentCentreAllocationRepo: AssessmentCentreAllocationMongoRepository = assessmentCentreAllocationRepository
@@ -44,13 +48,29 @@ object ReviewerAssessmentScoresService extends AssessmentCentreScoresService {
   val auditService = AuditService
 }
 
-trait AssessmentCentreScoresService {
-  val assessmentScoresRepo: ApplicationAssessmentScoresRepository
-  val appRepo: GeneralApplicationRepository
-  val assessmentCentreAllocationRepo: AssessmentCentreAllocationRepository
-  val personalDetailsRepo: PersonalDetailsRepository
-  val auditService: AuditService
+trait AssessorAssessmentCentreScoresService extends AssessmentCentreScoresService {
+  val reviewerScoresRepo: ApplicationAssessmentScoresRepository
 
+  def saveScoresAndFeedback(applicationId: String, exerciseScoresAndFeedback: ExerciseScoresAndFeedback)
+                           (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
+    val newStatus = ApplicationStatuses.AssessmentScoresEntered
+
+    for {
+      _ <- reviewerScoresRepo.tryFind(applicationId).map(_.map(_ =>
+        throw ReviewerScoresExistForExerciseException(
+          s"Reviewer scores already exist for $applicationId ${exerciseScoresAndFeedback.exercise}"
+        )
+      ))
+      _ <- assessmentScoresRepo.save(exerciseScoresAndFeedback)
+      _ <- appRepo.updateStatus(applicationId, newStatus)
+    } yield {
+      auditService.logEvent("ApplicationScoresAndFeedbackSaved", Map("applicationId" -> applicationId))
+      auditService.logEvent(s"ApplicationStatusSetTo$newStatus", Map("applicationId" -> applicationId))
+    }
+  }
+}
+
+trait ReviewerAssessmentScoresService extends AssessmentCentreScoresService {
   def saveScoresAndFeedback(applicationId: String, exerciseScoresAndFeedback: ExerciseScoresAndFeedback)
                            (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
     val newStatus = ApplicationStatuses.AssessmentScoresEntered
@@ -62,6 +82,17 @@ trait AssessmentCentreScoresService {
       auditService.logEvent(s"ApplicationStatusSetTo$newStatus", Map("applicationId" -> applicationId))
     }
   }
+}
+
+trait AssessmentCentreScoresService {
+  def assessmentScoresRepo: ApplicationAssessmentScoresRepository
+  def appRepo: GeneralApplicationRepository
+  def assessmentCentreAllocationRepo: AssessmentCentreAllocationRepository
+  def personalDetailsRepo: PersonalDetailsRepository
+  def auditService: AuditService
+
+  def saveScoresAndFeedback(applicationId: String, exerciseScoresAndFeedback: ExerciseScoresAndFeedback)
+                           (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit]
 
   def acceptScoresAndFeedback(applicationId: String, scoresAndFeedback: CandidateScoresAndFeedback)
                              (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
