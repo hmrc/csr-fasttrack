@@ -23,20 +23,22 @@ import play.api.mvc.RequestHeader
 import repositories._
 import repositories.application._
 import services.AuditService
+import services.applicationassessment.AssessorAssessmentScoresService.ReviewerScoresExistForExerciseException
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-case class ReviewerScoresExistForExerciseException(m: String) extends Exception(m)
-
 object AssessorAssessmentScoresService extends AssessorAssessmentCentreScoresService {
+  case class ReviewerScoresExistForExerciseException(m: String) extends Exception(m)
+  
   val assessmentScoresRepo: AssessorApplicationAssessmentScoresMongoRepository = assessorAssessmentScoresRepository
   val reviewerScoresRepo: ReviewerApplicationAssessmentScoresMongoRepository = reviewerAssessmentScoresRepository
   val appRepo: GeneralApplicationMongoRepository = applicationRepository
   val assessmentCentreAllocationRepo: AssessmentCentreAllocationMongoRepository = assessmentCentreAllocationRepository
   val personalDetailsRepo: PersonalDetailsMongoRepository = personalDetailsRepository
   val auditService = AuditService
+
 }
 
 object ReviewerAssessmentScoresService extends ReviewerAssessmentScoresService {
