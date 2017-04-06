@@ -1,4 +1,4 @@
-# Civil Service Fast Track Service
+## Civil Service Fast Track Service
 
 [![Build Status](https://travis-ci.org/hmrc/fset-fasttrack.svg?branch=fset-580-run-integration-tests)](https://travis-ci.org/hmrc/fset-fasttrack)
 
