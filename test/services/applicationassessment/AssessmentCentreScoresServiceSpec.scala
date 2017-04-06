@@ -24,7 +24,7 @@ import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{ Seconds, Span }
 import org.scalatestplus.play.PlaySpec
-import repositories.{ ApplicationAssessmentScoresRepository, AssessmentCentreAllocationRepository }
+import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
 import testkit.MockitoSugar
@@ -68,6 +68,17 @@ class AssessmentCentreScoresServiceSpec extends PlaySpec with MockitoSugar with 
       verify(auditServiceMock).logEvent("ApplicationScoresAndFeedbackSaved", AuditDetails)
       verify(auditServiceMock).logEvent(s"ApplicationStatusSetTo${ApplicationStatuses.AssessmentScoresEntered}", AuditDetails)
     }
+
+    "throw an exception if reviewer scores already exist" in new ApplicationAssessmentServiceFixture {
+      when(rasRepositoryMock.tryFind(any[String])).thenReturn(Future.successful(Some(
+        CandidateScoresAndFeedback("appId")
+      )))
+      val result: Throwable = service.saveScoresAndFeedback(ApplicationId,
+        exerciseScoresAndFeedback.copy(scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback.copy(attended = false))
+      ).failed.futureValue
+
+      result mustBe a[ReviewerScoresExistForExerciseException]
+    }
   }
 
   trait ApplicationAssessmentServiceFixture {
@@ -76,6 +87,7 @@ class AssessmentCentreScoresServiceSpec extends PlaySpec with MockitoSugar with 
     val auditServiceMock: AuditService = mock[AuditService]
     val aRepositoryMock: GeneralApplicationRepository = mock[GeneralApplicationRepository]
     val aasRepositoryMock: ApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
+    val rasRepositoryMock: ApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
     val personalDetailsRepoMock: PersonalDetailsRepository = mock[PersonalDetailsRepository]
 
     val exerciseScoresAndFeedback = ExerciseScoresAndFeedback("app1", AssessmentExercise.interview,
@@ -100,12 +112,15 @@ class AssessmentCentreScoresServiceSpec extends PlaySpec with MockitoSugar with 
       Future.failed(new NotFoundException("No application assessments were found"))
     )
 
-    val service = new AssessmentCentreScoresService {
+    when(rasRepositoryMock.tryFind(any[String])).thenReturn(Future.successful(None))
+
+    val service = new AssessorAssessmentCentreScoresService {
       val assessmentScoresRepo: ApplicationAssessmentScoresRepository = aasRepositoryMock
       val appRepo: GeneralApplicationRepository = aRepositoryMock
       val assessmentCentreAllocationRepo: AssessmentCentreAllocationRepository = applicationAssessmentRepositoryMock
       val personalDetailsRepo: PersonalDetailsRepository = personalDetailsRepoMock
       val auditService: AuditService = auditServiceMock
+      val reviewerScoresRepo: ApplicationAssessmentScoresRepository = rasRepositoryMock
     }
   }
 }

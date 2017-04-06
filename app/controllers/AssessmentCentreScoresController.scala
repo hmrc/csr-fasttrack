@@ -78,6 +78,7 @@ trait AssessmentCentreScoresController extends BaseController {
         Created
       }.recover {
         case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
+        case e: ReviewerScoresExistForExerciseException => Conflict(e.getMessage)
       }
     }
   }
@@ -92,6 +93,7 @@ trait AssessorScoresController extends AssessmentCentreScoresController {
       Created
       }.recover {
         case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
+        case e: ReviewerScoresExistForExerciseException => Conflict(e.getMessage)
       }
     }
   }
