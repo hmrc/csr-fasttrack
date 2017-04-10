@@ -75,6 +75,7 @@ GET         /report/pass-mark-modelling/:frameworkId                     control
 GET         /report/pass-mark-personal-data/:frameworkId                 controllers.ReportingController.createOnlineTestPassMarkWithPersonalDataReport(frameworkId: String)
 GET         /report/preferences-and-contact/:frameworkId                 controllers.ReportingController.createPreferencesAndContactReports(frameworkId: String)
 GET         /report/successful-candidates/:frameworkId                   controllers.ReportingController.createSuccessfulCandidatesReport(frameworkId: String)
+GET         /report/assessment-scores/:frameworkId                       controllers.ReportingController.createAssessmentCentreScoresReport(frameworkId: String)
 GET         /report/candidates-details/previous-year                     controllers.ReportingController.prevYearCandidatesDetailsReport
 GET         /report/candidates-details-stream/previous-year              controllers.ReportingController.streamPrevYearCandidatesDetailsReport
 

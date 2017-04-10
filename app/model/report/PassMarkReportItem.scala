@@ -45,7 +45,7 @@ case class PassMarkReportItem(
   schemeAssessmentCentreTestResults: List[String]
 )
 
-case object PassMarkReportItem {
+object PassMarkReportItem {
   //scalastyle:off parameter.number
   def apply(application: ApplicationForCandidateProgressReport, diversityAnswers: DiversityReportDiversityAnswers,
             socialEconomicScore: String, hearAboutUs: String, allocatedAssessmentCentre: Option[String], testResults: PassMarkReportTestResults,

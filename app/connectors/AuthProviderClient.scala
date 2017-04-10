@@ -154,4 +154,12 @@ trait AuthProviderClient {
       }
   }
 
+  def findByUserIds(userIds: List[String])(implicit hc: HeaderCarrier): Future[List[Candidate]] = {
+    WSHttp.POST(s"$url/service/$ServiceName/findUsersByIds", FindByUserIdsRequest(userIds)).map { response =>
+      response.json.as[List[Candidate]]
+    }.recover {
+      case errorResponse =>
+        throw new ConnectorException(s"Bad response received when getting token for user: $errorResponse")
+    }
+  }
 }

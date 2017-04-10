@@ -27,6 +27,6 @@ case class AssessmentCentreIndicatorReportItem(
   postcode: Option[String]
 )
 
-case object AssessmentCentreIndicatorReportItem {
+object AssessmentCentreIndicatorReportItem {
   implicit val assessmentCentreIndicatorReportItemFormat = Json.format[AssessmentCentreIndicatorReportItem]
 }

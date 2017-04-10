@@ -17,8 +17,8 @@
 package repositories
 
 import factories.{ DateTimeFactory, UUIDFactory }
-import model.{ AssessmentExercise, CandidateScoresCommands, UniqueIdentifier }
 import model.CandidateScoresCommands._
+import model.{ AssessmentExercise, CandidateScoresCommands }
 import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID, _ }
 import uk.gov.hmrc.mongo.ReactiveRepository
@@ -26,7 +26,6 @@ import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
-
 
 class AssessorApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
     extends ReactiveRepository[CandidateScoresAndFeedback, BSONObjectID](CollectionNames.APPLICATION_ASSESSMENT_SCORES, mongo,
@@ -87,6 +86,12 @@ trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {
     collection.find(query).one[BSONDocument].map(_.flatMap(docToDomain))
   }
 
+  def findByApplicationIds(applicationIds: List[String]): Future[List[CandidateScoresAndFeedback]] = {
+    val query = BSONDocument("applicationId" -> BSONDocument("$in" -> applicationIds))
+
+    collection.find(query).cursor[BSONDocument]().collect[List]().map { _.flatMap(docToDomain) }
+  }
+
   def findNonSubmittedScores(assessorId: String): Future[List[CandidateScoresAndFeedback]] = {
     val query = BSONDocument("$or" -> BSONArray(
       BSONDocument(
@@ -102,7 +107,6 @@ trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {
         s"$rolePrefix${AssessmentExercise.writtenExercise}.updatedBy" -> assessorId
       )
     ))
-
 
     collection.find(query).cursor[BSONDocument]().collect[List]().map { _.flatMap(docToDomain) }
   }
@@ -173,5 +177,4 @@ trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {
 
     collection.update(query, candidateScoresAndFeedbackBSON, upsert = scoresAndFeedback.allVersionsEmpty) map validator
   }
-
 }

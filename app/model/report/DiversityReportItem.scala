@@ -39,7 +39,7 @@ case class DiversityReportItem(
   allocatedAssessmentCentre: Option[String]
 )
 
-case object DiversityReportItem {
+object DiversityReportItem {
   def apply(application: ApplicationForCandidateProgressReport, diversityAnswers: DiversityReportDiversityAnswers,
     ses: String, hearAboutUs: String, allocatedAssessmentCentre: Option[String]): DiversityReportItem = {
     DiversityReportItem(

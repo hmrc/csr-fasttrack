@@ -18,13 +18,13 @@ package controllers
 
 import akka.stream.scaladsl.Source
 import connectors.{ AuthProviderClient, ExchangeObjects }
-import model.CandidateScoresCommands.CandidateScoresAndFeedback
+import model.CandidateScoresCommands.{ ScoresAndFeedback, CandidateScoresAndFeedback }
 import model.Commands.{ CsvExtract, _ }
 import model.PersistedObjects.ContactDetailsWithId
 import model.ReportExchangeObjects.Implicits._
 import model.ReportExchangeObjects.{ Implicits => _, _ }
 import model.persisted.SchemeEvaluationResult
-import model.report.{ PassMarkReportItem, DiversityReportItem }
+import model.report.{ AssessmentCentreScoresReportItem, PassMarkReportItem, DiversityReportItem }
 import model.Scheme.Scheme
 import model.{ ApplicationStatusOrder, ProgressStatuses, UniqueIdentifier }
 import play.api.libs.iteratee.Enumerator
@@ -44,7 +44,8 @@ object ReportingController extends ReportingController {
   val locationSchemeService = LocationSchemeService
   val reportingFormatter = ReportingFormatter
   val assessmentCentreIndicatorRepository = AssessmentCentreIndicatorCSVRepository
-  val assessmentScoresRepository = repositories.reviewerAssessmentScoresRepository
+  val assessorAssessmentScoresRepository = repositories.assessorAssessmentScoresRepository
+  val reviewerAssessmentScoresRepository = repositories.reviewerAssessmentScoresRepository
   val contactDetailsRepository = repositories.contactDetailsRepository
   val questionnaireRepository = repositories.questionnaireRepository
   val reportingRepository = repositories.reportingRepository
@@ -55,6 +56,7 @@ object ReportingController extends ReportingController {
   val mediaRepository = repositories.mediaRepository
   val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
   val onlineTestRepository = repositories.onlineTestRepository
+  val assessmentCentreAllocationRepository = repositories.assessmentCentreAllocationRepository
 }
 
 trait ReportingController extends BaseController {
@@ -64,7 +66,8 @@ trait ReportingController extends BaseController {
   val locationSchemeService: LocationSchemeService
   val reportingFormatter: ReportingFormatter
   val assessmentCentreIndicatorRepository: AssessmentCentreIndicatorRepository
-  val assessmentScoresRepository: ApplicationAssessmentScoresRepository
+  val assessorAssessmentScoresRepository: ApplicationAssessmentScoresRepository
+  val reviewerAssessmentScoresRepository: ApplicationAssessmentScoresRepository
   val contactDetailsRepository: ContactDetailsRepository
   val questionnaireRepository: QuestionnaireRepository
   val reportingRepository: ReportingRepository
@@ -75,6 +78,7 @@ trait ReportingController extends BaseController {
   val mediaRepository: MediaRepository
   val socioEconomicScoreCalculator: SocioEconomicScoreCalculator
   val onlineTestRepository: OnlineTestRepository
+  val assessmentCentreAllocationRepository: AssessmentCentreAllocationRepository
 
   def createDiversityReport(frameworkId: String) = Action.async { implicit request =>
     val applicationsFut = reportingRepository.diversityReport(frameworkId)
@@ -157,7 +161,7 @@ trait ReportingController extends BaseController {
     val allQuestionsFut = questionnaireRepository.passMarkReport
     val allTestResultsFut = testReportRepository.getOnlineTestReports
     val allMediaFut = mediaRepository.findAll
-    val allScoresFut = assessmentScoresRepository.allScores
+    val allScoresFut = reviewerAssessmentScoresRepository.allScores
     val allPassMarkEvaluationsFut = onlineTestRepository.findAllPassMarkEvaluations
     val allAssessmentCentreEvaluationsFut = onlineTestRepository.findAllAssessmentCentreEvaluations
     // Process the futures
@@ -396,6 +400,160 @@ trait ReportingController extends BaseController {
     reports.map { list =>
       Ok(Json.toJson(list))
     }
+  }
+
+  private def extractAssessorUserIds(assessorAssessmentScoresData: List[CandidateScoresAndFeedback]) = {
+    assessorAssessmentScoresData.map { data =>
+      val interviewAssessorUserId = data.interview.map{ interview =>
+        interview.updatedBy
+      }.getOrElse("")
+      val groupExerciseUserId = data.groupExercise.map{ groupExercise =>
+        groupExercise.updatedBy
+      }.getOrElse("")
+      val writtenExerciseUserId = data.writtenExercise.map{ writtenExercise =>
+        writtenExercise.updatedBy
+      }.getOrElse("")
+      List(interviewAssessorUserId, groupExerciseUserId, writtenExerciseUserId)
+    }.flatMap(_.toSet)
+  }
+
+  def createAssessmentCentreScoresReport(frameworkId: String) = Action.async { implicit request =>
+    val applicationsFut = reportingRepository.applicationsForAssessmentScoresReport(frameworkId)
+
+    val reportItems = for {
+      apps <- applicationsFut
+      applicationIds = apps.map(_.applicationId.getOrElse(""))
+      assessmentCentreData <- assessmentCentreAllocationRepository.findByApplicationIds(applicationIds)
+      assessmentCentreMap = assessmentCentreData.map(a => a.applicationId -> a).toMap
+      assessorAssessmentScoresData <- assessorAssessmentScoresRepository.findByApplicationIds(applicationIds)
+      assessorAssessmentScoresMap = assessorAssessmentScoresData.map(a => a.applicationId -> a).toMap
+      reviewerAssessmentScoresData <- reviewerAssessmentScoresRepository.findByApplicationIds(applicationIds)
+      reviewerAssessmentScoresMap = reviewerAssessmentScoresData.map(r => r.applicationId -> r).toMap
+      assessorUserIds = extractAssessorUserIds(assessorAssessmentScoresData)
+      assessorsData <- authProviderClient.findByUserIds(assessorUserIds)
+      assessorsMap = assessorsData.map(a => a.userId -> a).toMap
+    } yield {
+      buildAssessmentCentreScoresReportRows(apps, assessmentCentreMap, assessorAssessmentScoresMap,
+        reviewerAssessmentScoresMap, assessorsMap)
+    }
+
+    reportItems.map( items => Ok(Json.toJson(items)) )
+  }
+
+  private def buildFullName(firstName: Option[String], lastName: Option[String]) =
+    for {
+      firstName <- firstName
+      lastName <- lastName
+    } yield {
+      s"$firstName $lastName"
+    }
+
+  private val Interview = "interview"
+  private val GroupExercise = "groupExercise"
+  private val WrittenExercise = "writtenExercise"
+
+  private def getAssessorForExercise(appId: String,
+                                     exerciseType: String,
+                                     assessorAssessmentScoresData: Map[String, CandidateScoresAndFeedback],
+                                     assessorsMap: Map[String, ExchangeObjects.Candidate]): Option[ExchangeObjects.Candidate] =
+    exerciseType match {
+      case Interview =>
+        val assessorUserId = assessorAssessmentScoresData.get(appId).flatMap { data =>
+          data.interview.map(_.updatedBy)
+        }
+        assessorUserId.flatMap( userId => assessorsMap.get(userId))
+      case GroupExercise =>
+        val assessorUserId = assessorAssessmentScoresData.get(appId).flatMap { data =>
+          data.groupExercise.map(_.updatedBy)
+        }
+        assessorUserId.flatMap( userId => assessorsMap.get(userId))
+      case WrittenExercise =>
+        val assessorUserId = assessorAssessmentScoresData.get(appId).flatMap { data =>
+          data.writtenExercise.map(_.updatedBy)
+        }
+        assessorUserId.flatMap( userId => assessorsMap.get(userId))
+      case _ =>
+        val msg = s"Error generating assessment centre scores report for appId = $appId. Exercise type not recognised: $exerciseType"
+        throw new IllegalStateException(msg)
+  }
+
+  private def buildAssessmentCentreScoresReportRows(applications: List[ApplicationForAssessmentScoresReport],
+                                                    assessmentCentreData: Map[String, AssessmentCentreAllocation],
+                                                    assessorAssessmentScoresData: Map[String, CandidateScoresAndFeedback],
+                                                    reviewerAssessmentScoresData: Map[String, CandidateScoresAndFeedback],
+                                                    assessorsMap: Map[String, ExchangeObjects.Candidate]
+                                                   ): List[AssessmentCentreScoresReportItem] = {
+
+    applications.map { application =>
+      val reportItem = application.applicationId.map{ appId =>
+
+        val candidateFullName = buildFullName(application.firstName, application.lastName)
+
+        val interviewStatus =
+          evaluateAssessmentStatus(appId, Interview, assessorAssessmentScoresData, reviewerAssessmentScoresData)
+        val groupExerciseStatus =
+          evaluateAssessmentStatus(appId, GroupExercise, assessorAssessmentScoresData, reviewerAssessmentScoresData)
+        val writtenExerciseStatus =
+          evaluateAssessmentStatus(appId, WrittenExercise, assessorAssessmentScoresData, reviewerAssessmentScoresData)
+
+        val interviewAssessor = getAssessorForExercise(appId, Interview, assessorAssessmentScoresData, assessorsMap)
+        val groupExerciseAssessor = getAssessorForExercise(appId, GroupExercise, assessorAssessmentScoresData, assessorsMap)
+        val writtenExerciseAssessor = getAssessorForExercise(appId, WrittenExercise, assessorAssessmentScoresData, assessorsMap)
+
+        AssessmentCentreScoresReportItem(
+          assessmentCentreLocation = application.assessmentCentreIndicator.map(_.area),
+          assessmentCentreVenue = assessmentCentreData.get(appId).map(_.venue),
+          assessmentCentreDate = assessmentCentreData.get(appId).map(_.date.toString()),
+          amOrPm = assessmentCentreData.get(appId).map(_.session),
+          candidateName = candidateFullName,
+          interview = Some(interviewStatus),
+          interviewAssessor = buildFullName(interviewAssessor.map(_.firstName), interviewAssessor.map(_.lastName)),
+          groupExercise = Some(groupExerciseStatus),
+          groupExerciseAssessor = buildFullName(groupExerciseAssessor.map(_.firstName), groupExerciseAssessor.map(_.lastName)),
+          writtenExercise = Some(writtenExerciseStatus),
+          writtenExerciseAssessor = buildFullName(writtenExerciseAssessor.map(_.firstName), writtenExerciseAssessor.map(_.lastName))
+        )
+      }
+      reportItem.getOrElse(throw new IllegalStateException(s"Application Id does not exist in assessment centre scores report generation " +
+        s"for the user Id = ${application.userId}"))
+    }
+  }
+
+  private def evaluateAssessmentStatus(applicationId: String,
+                             exerciseType: String,
+                             assessorAssessmentScoresData: Map[String, CandidateScoresAndFeedback],
+                             reviewerAssessmentScoresData: Map[String, CandidateScoresAndFeedback]
+                            ) = {
+
+    def evaluateAssessorStatus(scoresAndFeedback: Option[ScoresAndFeedback], exerciseType: String) = {
+      scoresAndFeedback.map { sAndF =>
+        (sAndF.submittedDate, sAndF.savedDate) match {
+          case (Some(_), _) => "Submitted" // Presence of submitted date indicates the exercise has been submitted
+          case (_, Some(_)) => "Saved" // Presence of saved date indicates the exercise has been saved
+          case _ =>
+            val msg = s"Error generating assessment centre scores report for appId = $applicationId. " +
+              s"No saved or submitted date found when evaluating $exerciseType"
+            throw new IllegalStateException(msg)
+        }
+      }.getOrElse("Not entered")
+    }
+
+    val reviewerFeedback: Option[CandidateScoresAndFeedback] = reviewerAssessmentScoresData.get(applicationId)
+    val assessorFeedback: Option[CandidateScoresAndFeedback] = assessorAssessmentScoresData.get(applicationId)
+    val status = (reviewerFeedback, assessorFeedback) match {
+      case (Some(rf), _) => "Accepted" // Presence of reviewer feedback means it has been accepted
+      case (_, Some(af)) => // We have assessor feedback
+        exerciseType match {
+          case Interview => evaluateAssessorStatus(af.interview, exerciseType)
+          case GroupExercise => evaluateAssessorStatus(af.groupExercise, exerciseType)
+          case WrittenExercise => evaluateAssessorStatus(af.writtenExercise, exerciseType)
+          case _ =>
+            val msg = s"Error generating assessment centre scores report for appId = $applicationId. Exercise type not recognised: $exerciseType"
+            throw new IllegalStateException(msg)
+        }
+      case _ => "Not entered"
+    }
+    status
   }
 
   def prevYearCandidatesDetailsReport = Action.async { implicit request =>

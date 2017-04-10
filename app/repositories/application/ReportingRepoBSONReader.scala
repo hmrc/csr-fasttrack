@@ -16,20 +16,18 @@
 
 package repositories.application
 
-import common.Constants.{ No, Yes }
 import model.ApplicationStatusOrder.getStatus
 import model.Commands._
-import model.ReportExchangeObjects.ApplicationForCandidateProgressReport
+import model.ReportExchangeObjects.{ ApplicationForAssessmentScoresReport, ApplicationForCandidateProgressReport }
 import model.Scheme.Scheme
-import model.{ Adjustments, AssessmentCentreIndicator, UniqueIdentifier }
 import model.exchange.AssistanceDetails
+import model.{ Adjustments, AssessmentCentreIndicator, UniqueIdentifier }
 import reactivemongo.bson.{ BSONDocument, _ }
 import repositories.{ BaseBSONReader, CommonBSONDocuments }
 
 trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
   implicit val toApplicationForCandidateProgressReport = bsonReader {
     (doc: BSONDocument) =>
-      {
         val applicationId = doc.getAs[String]("applicationId").getOrElse("")
         val userId = doc.getAs[String]("userId").getOrElse("")
         val progress: ProgressResponse = toProgressResponse(applicationId).read(doc)
@@ -50,6 +48,23 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
           assistanceDetails.map(_.needsSupportForOnlineAssessment), assistanceDetails.map(_.needsSupportAtVenue),
           adjustments, civilServant, assessmentCentreIndicator
         )
-      }
+  }
+
+  implicit val toApplicationForAssessmentScoresReport = bsonReader {
+    (doc: BSONDocument) =>
+      val applicationId = doc.getAs[String]("applicationId")
+      val userId = doc.getAs[String]("userId").get
+      val assessmentCentreIndicator = doc.getAs[AssessmentCentreIndicator]("assessment-centre-indicator")
+      val pdDoc = doc.getAs[BSONDocument]("personal-details")
+      val firstName = pdDoc.flatMap(_.getAs[String]("firstName"))
+      val lastName = pdDoc.flatMap(_.getAs[String]("lastName"))
+
+      ApplicationForAssessmentScoresReport(
+        applicationId = applicationId,
+        userId = userId,
+        assessmentCentreIndicator = assessmentCentreIndicator,
+        firstName = firstName,
+        lastName = lastName
+      )
   }
 }
