@@ -69,6 +69,13 @@ object AssessmentScoresReportExamples {
     ))
   ))
 
+  val assessorInterviewScoresAndFeedbackForCandidateButNoDatesPersisted = List(CandidateScoresAndFeedback(
+    applicationId = ApplicationIdExamples.appId1.toString(),
+    interview = Some(ScoresAndFeedback(
+      attended = true, assessmentIncomplete = false, updatedBy = "assessor1UserId"
+    ))
+  ))
+
   val reviewerInterviewScoresAndFeedbackForCandidate = List(CandidateScoresAndFeedback(
     applicationId = ApplicationIdExamples.appId1.toString(),
     interview = Some(ScoresAndFeedback(

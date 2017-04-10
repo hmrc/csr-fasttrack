@@ -162,6 +162,20 @@ class AssessmentScoresReportingControllerSpec extends BaseReportingControllerSpe
       ))
       result mustBe expectedData
     }
+
+    "expect an exception to be thrown if feedback has been saved for an exercise " +
+      "but no dates have been persisted" in new AssessmentScoresReportTestFixture {
+      when(assessorAssessmentScoresRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(
+        assessorInterviewScoresAndFeedbackForCandidateButNoDatesPersisted)
+      when(reviewerAssessmentScoresRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(Nil)
+
+      when(authProviderClientMock.findByUserIds(any[List[String]])(any[HeaderCarrier])).thenReturnAsync(authProviderAssessors)
+
+      val response = controller.createAssessmentCentreScoresReport(frameworkId)(request).run
+      intercept[IllegalStateException] {
+        contentAsJson(response).as[List[AssessmentCentreScoresReportItem]]
+      }
+    }
   }
 
   trait AssessmentScoresReportTestFixture extends TestFixture {
