@@ -47,8 +47,9 @@ trait AuthProviderClient {
   case object ServiceAdminRole extends UserRole("service-admin")
   case object SuperAdminRole extends UserRole("super-admin")
   case object TechnicalAdminRole extends UserRole("tech-admin")
+  case object Assessor extends UserRole("assessor")
 
-  val allRoles = List(FasttrackTeamRole, ServiceSupportRole, ServiceAdminRole, SuperAdminRole, TechnicalAdminRole)
+  val allRoles = List(FasttrackTeamRole, ServiceSupportRole, ServiceAdminRole, SuperAdminRole, TechnicalAdminRole, Assessor)
 
   def getRole(roleName: String) = allRoles.find(_.name == roleName).getOrElse(throw new UserRoleDoesNotExist(s"No such role: $roleName"))
 

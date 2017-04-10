@@ -94,16 +94,16 @@ POST        /online-test/extend/:appId                                          
 GET         /online-test/pdf-report/:applicationId                              controllers.OnlineTestController.getPDFReport(applicationId: String)
 PUT         /online-test/reset-status-to-continue-online-tests/:applicationId   controllers.OnlineTestController.resetStatusToContinueOnlineTests(applicationId: String)
 
-
 GET         /test-scores/assessor/application/:applicationId             controllers.AssessorScoresController.getCandidateScores(applicationId: String)
 PUT         /test-scores/assessor/application/:applicationId/save        controllers.AssessorScoresController.saveExerciseScoresAndFeedback(applicationId: String)
 PUT         /test-scores/assessor/application/:applicationId/submit      controllers.AssessorScoresController.submitExerciseScoresAndFeedback(applicationId: String)
 GET         /test-scores-feedback/assessor/application/:applicationId    controllers.AssessorScoresController.getCandidateScoresAndFeedback(applicationId: String)
 
-GET         /test-scores/reviewer/application/:applicationId             controllers.ReviewerScoresController.getCandidateScores(applicationId: String)
-PUT         /test-scores/reviewer/application/:applicationId/save        controllers.ReviewerScoresController.saveExerciseScoresAndFeedback(applicationId: String)
-PUT         /test-scores/reviewer/application/:applicationId/accept      controllers.ReviewerScoresController.acceptCandidateScoresAndFeedback(applicationId: String)
-GET         /test-scores-feedback/reviewer/application/:applicationId    controllers.ReviewerScoresController.getCandidateScoresAndFeedback(applicationId: String)
+GET         /test-scores/reviewer/application/:applicationId/:exercise/unlock     controllers.ReviewerScoresController.unlockExercise(applicationId: String, exercise: String)
+GET         /test-scores/reviewer/application/:applicationId                      controllers.ReviewerScoresController.getCandidateScores(applicationId: String)
+PUT         /test-scores/reviewer/application/:applicationId/save                 controllers.ReviewerScoresController.saveExerciseScoresAndFeedback(applicationId: String)
+PUT         /test-scores/reviewer/application/:applicationId/accept               controllers.ReviewerScoresController.acceptCandidateScoresAndFeedback(applicationId: String)
+GET         /test-scores-feedback/reviewer/application/:applicationId             controllers.ReviewerScoresController.getCandidateScoresAndFeedback(applicationId: String)
 
 GET         /test-scores/competency-average/application/:applicationId   controllers.EvaluatedAssessmentCentreScoresController.getCompetencyAverageResult(applicationId: String)
 

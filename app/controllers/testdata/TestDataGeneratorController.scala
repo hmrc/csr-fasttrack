@@ -21,6 +21,7 @@ import java.io.File
 import com.typesafe.config.ConfigFactory
 import connectors.AuthProviderClient
 import connectors.testdata.ExchangeObjects.Implicits._
+import factories.UUIDFactory
 import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ScoresAndFeedback }
 import model._
 import model.Exceptions.EmailTakenException
@@ -56,7 +57,7 @@ trait TestDataGeneratorController extends BaseController {
   // scalastyle:off method.length
   def requestExample = Action {
     val exerciseScoreAndFeedback = ScoresAndFeedback(attended = true, assessmentIncomplete = true, Some(3.0), Some(3.0),
-      Some(3.0), Some(3.0), Some(3.0), Some(3.0), Some(3.0), Some("feedback1"), "updatedBy", Some(DateTime.now()),
+      Some(3.0), Some(3.0), Some(3.0), Some(3.0), Some(3.0), Some("feedback1"), UUIDFactory.generateUUID().toString, Some(DateTime.now()),
       Some(DateTime.now), None)
     val example = CreateCandidateInStatusRequest(
       statusData = StatusDataRequest(

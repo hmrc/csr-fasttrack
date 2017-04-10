@@ -17,7 +17,9 @@
 package repositories
 
 import factories.{ DateTimeFactory, UUIDFactory }
+import model.AssessmentExercise.AssessmentExercise
 import model.CandidateScoresCommands._
+import model.Exceptions.ApplicationNotFound
 import model.{ AssessmentExercise, CandidateScoresCommands }
 import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID, _ }
@@ -176,5 +178,15 @@ trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {
     val validator = singleUpdateValidator(applicationId, "Application with correct version not found for 'Review scores'")
 
     collection.update(query, candidateScoresAndFeedbackBSON, upsert = scoresAndFeedback.allVersionsEmpty) map validator
+  }
+
+  def removeExercise(applicationId: String, exercise: AssessmentExercise): Future[Unit] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    val update = BSONDocument("$unset" -> BSONDocument(rolePrefix + exercise.toString -> ""))
+
+    val validator = singleUpdateValidator(applicationId, s"attempting to remove exercise '$exercise'",
+      ApplicationNotFound(s"Could not find application '$applicationId'"))
+
+    collection.update(query, update).map(validator)
   }
 }

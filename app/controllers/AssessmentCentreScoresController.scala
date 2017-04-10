@@ -17,10 +17,12 @@
 package controllers
 
 import factories.DateTimeFactory
+import model.AssessmentExercise
 import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScoresAndFeedback }
-import model.EvaluationResults.CompetencyAverageResult
+import model.Exceptions.ApplicationNotFound
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent }
+import services.applicationassessment.AssessorAssessmentScoresService.ReviewerScoresExistForExerciseException
 import services.applicationassessment._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -29,12 +31,14 @@ import scala.concurrent.Future
 
 object AssessorScoresController extends AssessorScoresController {
   val dateTimeFactory = DateTimeFactory
+  val assessmentCentreScoresRemovalService: AssessmentCentreScoresRemovalService = AssessmentCentreScoresRemovalService
   val assessmentCentreService: AssessmentCentreService = AssessmentCentreService
   val assessmentCentreScoresService: AssessmentCentreScoresService = AssessorAssessmentScoresService
 }
 
 object ReviewerScoresController extends ReviewerScoresController {
   val assessmentCentreScoresService: AssessmentCentreScoresService = ReviewerAssessmentScoresService
+  val assessmentCentreScoresRemovalService: AssessmentCentreScoresRemovalService = AssessmentCentreScoresRemovalService
   val assessmentCentreService: AssessmentCentreService = AssessmentCentreService
   val dateTimeFactory = DateTimeFactory
 }
@@ -59,8 +63,9 @@ trait EvaluatedAssessmentCentreScoresController extends BaseController {
 trait AssessmentCentreScoresController extends BaseController {
   val dateTimeFactory: DateTimeFactory
 
-  def assessmentCentreScoresService: AssessmentCentreScoresService
-  def assessmentCentreService: AssessmentCentreService
+  val assessmentCentreScoresService: AssessmentCentreScoresService
+  val assessmentCentreScoresRemovalService: AssessmentCentreScoresRemovalService
+  val assessmentCentreService: AssessmentCentreService
 
   def getCandidateScores(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
     assessmentCentreScoresService.getCandidateScores(applicationId).map(scores => Ok(Json.toJson(scores)))
@@ -78,6 +83,7 @@ trait AssessmentCentreScoresController extends BaseController {
         Created
       }.recover {
         case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
+        case e: ReviewerScoresExistForExerciseException => Conflict(e.getMessage)
       }
     }
   }
@@ -92,6 +98,7 @@ trait AssessorScoresController extends AssessmentCentreScoresController {
       Created
       }.recover {
         case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
+        case e: ReviewerScoresExistForExerciseException => Conflict(e.getMessage)
       }
     }
   }
@@ -105,6 +112,15 @@ trait ReviewerScoresController extends AssessmentCentreScoresController {
       }.recover {
         case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
       }
+    }
+  }
+
+  def unlockExercise(applicationId: String, exercise: String): Action[AnyContent] = Action.async { implicit request =>
+    assessmentCentreScoresRemovalService.removeScoresAndFeedback(applicationId, AssessmentExercise.withName(exercise)).map { _ =>
+      Ok
+    }.recover {
+      case e: NoSuchElementException => BadRequest(s"No such exercise '$exercise'")
+      case e: ApplicationNotFound => BadRequest(s"No such application '$applicationId'")
     }
   }
 }
