@@ -176,6 +176,16 @@ class AssessmentScoresReportingControllerSpec extends BaseReportingControllerSpe
         contentAsJson(response).as[List[AssessmentCentreScoresReportItem]]
       }
     }
+
+    "expect an exception to be thrown if application id is missing" in new AssessmentScoresReportTestFixture {
+      when(reportingRepoMock.applicationsForAssessmentScoresReport(eqTo(frameworkId)))
+        .thenReturnAsync(applicationForAssessmentScoresReportMissingApplicationId)
+
+      val response = controller.createAssessmentCentreScoresReport(frameworkId)(request).run
+      intercept[IllegalStateException] {
+        contentAsJson(response).as[List[AssessmentCentreScoresReportItem]]
+      }
+    }
   }
 
   trait AssessmentScoresReportTestFixture extends TestFixture {

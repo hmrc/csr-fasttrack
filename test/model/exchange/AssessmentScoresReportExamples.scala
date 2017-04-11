@@ -35,6 +35,14 @@ object AssessmentScoresReportExamples {
     lastName = Some("Bloggs")
   ))
 
+  val applicationForAssessmentScoresReportMissingApplicationId = List(ApplicationForAssessmentScoresReport(
+    applicationId = None,
+    userId = userId.toString(),
+    assessmentCentreIndicator = Some(AssessmentCentreIndicator(area = "London", assessmentCentre = "London")),
+    firstName = Some("Joe"),
+    lastName = Some("Bloggs")
+  ))
+
   val assessmentCentreAllocations = List(AssessmentCentreAllocation(
     applicationId = ApplicationIdExamples.appId1.toString(),
     venue = "London FSAC", date = new LocalDate(2017, 4, 3), session = "PM", slot = 1, confirmed = true
