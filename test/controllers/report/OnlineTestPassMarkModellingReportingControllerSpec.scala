@@ -45,7 +45,7 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
       when(questionnaireRepoMock.passMarkReport).thenReturnAsync(Map.empty)
       when(testReportRepoMock.getOnlineTestReports).thenReturnAsync(Map.empty)
       when(mediaRepositoryMock.findAll).thenReturnAsync(Map.empty)
-      when(assessmentScoresRepoMock.allScores).thenReturnAsync(Map.empty)
+      when(reviewerAssessmentScoresRepoMock.allScores).thenReturnAsync(Map.empty)
       when(onlineTestRepositoryMock.findAllPassMarkEvaluations).thenReturnAsync(Map.empty)
       when(onlineTestRepositoryMock.findAllAssessmentCentreEvaluations).thenReturnAsync(Map.empty)
 
@@ -63,7 +63,7 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
       when(questionnaireRepoMock.passMarkReport).thenReturnAsync(Map.empty)
       when(testReportRepoMock.getOnlineTestReports).thenReturnAsync(Map.empty)
       when(mediaRepositoryMock.findAll).thenReturnAsync(Map.empty)
-      when(assessmentScoresRepoMock.allScores).thenReturnAsync(Map.empty)
+      when(reviewerAssessmentScoresRepoMock.allScores).thenReturnAsync(Map.empty)
       when(reportingFormatterMock.getOnlineAdjustments(any[Option[Boolean]], any[Option[Adjustments]])).thenReturn(Some("Yes"))
       when(reportingFormatterMock.getAssessmentCentreAdjustments(any[Option[Boolean]], any[Option[Adjustments]])).thenReturn(Some("Yes"))
       when(onlineTestRepositoryMock.findAllPassMarkEvaluations).thenReturnAsync(Map.empty)
@@ -103,7 +103,7 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
       val onlineTestReports = Map(appId -> passMarkTestResults)
       when(testReportRepoMock.getOnlineTestReports).thenReturnAsync(onlineTestReports)
       when(mediaRepositoryMock.findAll).thenReturnAsync(Map(userId -> "Google"))
-      when(assessmentScoresRepoMock.allScores).thenReturnAsync(Map.empty)
+      when(reviewerAssessmentScoresRepoMock.allScores).thenReturnAsync(Map.empty)
       when(reportingFormatterMock.getOnlineAdjustments(any[Option[Boolean]], any[Option[Adjustments]])).thenReturn(Some("Yes"))
       when(reportingFormatterMock.getAssessmentCentreAdjustments(any[Option[Boolean]], any[Option[Adjustments]])).thenReturn(Some("Yes"))
       // Schemes results deliberately in different order to the preferred schemes list

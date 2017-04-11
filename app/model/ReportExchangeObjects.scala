@@ -91,6 +91,14 @@ object ReportExchangeObjects {
     assessmentCentreIndicator: Option[AssessmentCentreIndicator]
   )
 
+  case class ApplicationForAssessmentScoresReport(
+    applicationId: Option[String],
+    userId: String,
+    assessmentCentreIndicator: Option[AssessmentCentreIndicator],
+    firstName: Option[String],
+    lastName: Option[String]
+  )
+
   case class ReportWithPersonalDetails(
     applicationId: UniqueIdentifier,
     userId: UniqueIdentifier,

@@ -34,6 +34,7 @@ trait AssessmentCentreAllocationRepository {
   def findAll: Future[List[AssessmentCentreAllocation]]
   def findAllForDate(venue: String, date: LocalDate): Future[List[AssessmentCentreAllocation]]
   def findAllForVenue(venue: String): Future[List[AssessmentCentreAllocation]]
+  def findByApplicationIds(applicationIds: List[String]): Future[List[AssessmentCentreAllocation]]
   def create(applications: List[AssessmentCentreAllocation]): Future[Seq[AssessmentCentreAllocation]]
   def confirmAllocation(applicationId: String): Future[Unit]
   def delete(applicationId: String): Future[Unit]
@@ -43,7 +44,7 @@ class AssessmentCentreAllocationMongoRepository()(implicit mongo: () => DB)
     extends ReactiveRepository[AssessmentCentreAllocation, BSONObjectID](CollectionNames.APPLICATION_ASSESSMENT, mongo,
       Commands.Implicits.applicationAssessmentFormat, ReactiveMongoFormats.objectIdFormats) with AssessmentCentreAllocationRepository {
 
-  def findOne(applicationId: String): Future[AssessmentCentreAllocation] = {
+  override def findOne(applicationId: String): Future[AssessmentCentreAllocation] = {
     val query = BSONDocument(
       "applicationId" -> applicationId
     )
@@ -54,7 +55,7 @@ class AssessmentCentreAllocationMongoRepository()(implicit mongo: () => DB)
     }
   }
 
-  def find(applicationId: String): Future[Option[AssessmentCentreAllocation]] = {
+  override def find(applicationId: String): Future[Option[AssessmentCentreAllocation]] = {
     val query = BSONDocument(
       "applicationId" -> applicationId
     )
@@ -65,13 +66,20 @@ class AssessmentCentreAllocationMongoRepository()(implicit mongo: () => DB)
     }
   }
 
-  def findAll: Future[List[AssessmentCentreAllocation]] = {
+  override def findByApplicationIds(applicationIds: List[String]): Future[List[AssessmentCentreAllocation]] = {
+    val query = BSONDocument("applicationId" -> BSONDocument("$in" -> applicationIds))
+
+    getApplicationAssessments(query)
+  }
+
+
+  override def findAll: Future[List[AssessmentCentreAllocation]] = {
     val query = BSONDocument()
 
     getApplicationAssessments(query)
   }
 
-  def findAllForDate(venue: String, date: LocalDate): Future[List[AssessmentCentreAllocation]] = {
+  override def findAllForDate(venue: String, date: LocalDate): Future[List[AssessmentCentreAllocation]] = {
     val query = BSONDocument(
       "venue" -> venue,
       "date" -> date
@@ -80,7 +88,7 @@ class AssessmentCentreAllocationMongoRepository()(implicit mongo: () => DB)
     getApplicationAssessments(query)
   }
 
-  def delete(applicationId: String): Future[Unit] = {
+  override def delete(applicationId: String): Future[Unit] = {
     val query = BSONDocument(
       "applicationId" -> applicationId
     )
@@ -102,7 +110,7 @@ class AssessmentCentreAllocationMongoRepository()(implicit mongo: () => DB)
     }
   }
 
-  def findAllForVenue(venue: String): Future[List[AssessmentCentreAllocation]] = {
+  override def findAllForVenue(venue: String): Future[List[AssessmentCentreAllocation]] = {
     val query = BSONDocument("venue" -> venue)
 
     collection.find(query).cursor[BSONDocument]().collect[List]().map {
@@ -110,7 +118,7 @@ class AssessmentCentreAllocationMongoRepository()(implicit mongo: () => DB)
     }
   }
 
-  def create(applications: List[AssessmentCentreAllocation]): Future[Seq[AssessmentCentreAllocation]] = {
+  override def create(applications: List[AssessmentCentreAllocation]): Future[Seq[AssessmentCentreAllocation]] = {
     val applicationsBSON = applications.map { app =>
       BSONDocument(
         "applicationId" -> app.applicationId,
@@ -129,7 +137,7 @@ class AssessmentCentreAllocationMongoRepository()(implicit mongo: () => DB)
     }
   }
 
-  def confirmAllocation(applicationId: String): Future[Unit] = {
+  override def confirmAllocation(applicationId: String): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val confirmedBSON = BSONDocument("$set" -> BSONDocument("confirmed" -> true))
     collection.update(query, confirmedBSON, upsert = false) map { _ => () }

@@ -44,7 +44,8 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
     Future.successful(app1 :: app2 :: Nil)
   }
 
-  override def applicationsForCandidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] = Future.successful(List(
+  override def applicationsForCandidateProgressReport(frameworkId: String):
+    Future[List[ApplicationForCandidateProgressReport]] = Future.successful(List(
     ApplicationForCandidateProgressReport(Some(UniqueIdentifier.randomUniqueIdentifier), UniqueIdentifier.randomUniqueIdentifier,
       Some("SUBMITTED"), List.empty, List.empty, None, None, None, None, None, None, None),
     ApplicationForCandidateProgressReport(Some(UniqueIdentifier.randomUniqueIdentifier), UniqueIdentifier.randomUniqueIdentifier,
@@ -88,4 +89,6 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
   override def passMarkReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] = ???
 
   override def assessmentCentreIndicatorReport: Future[List[AssessmentCentreIndicatorReport]] = ???
+
+  override def applicationsForAssessmentScoresReport(frameworkId: String): Future[List[ApplicationForAssessmentScoresReport]] = ???
 }

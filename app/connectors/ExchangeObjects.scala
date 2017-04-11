@@ -66,6 +66,7 @@ object ExchangeObjects {
   case class FindByLastNameRequest(roles: List[String], lastName: String)
   case class FindByFirstNameLastNameRequest(roles: List[String], firstName: String, lastName: String)
   case class FindByUserIdRequest(userId: String)
+  case class FindByUserIdsRequest(userIds: List[String])
   case class UpdateDetailsRequest(firstName: String, lastName: String,
     email: Option[String], preferredName: Option[String], role: Option[String], disabled: Option[Boolean])
 
@@ -89,6 +90,7 @@ object ExchangeObjects {
     implicit val findByLastNameRequestFormat = Json.format[FindByLastNameRequest]
     implicit val findByFirstNameLastNameRequestFormat = Json.format[FindByFirstNameLastNameRequest]
     implicit val findByUserIdRequestFormat = Json.format[FindByUserIdRequest]
+    implicit val findByUserIdsRequestFormat = Json.format[FindByUserIdsRequest]
     implicit val updateDetailsRequestFormat = Json.format[UpdateDetailsRequest]
 
   }

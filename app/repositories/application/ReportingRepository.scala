@@ -66,6 +66,8 @@ trait ReportingRepository {
   def passMarkReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]]
 
   def assessmentCentreIndicatorReport: Future[List[AssessmentCentreIndicatorReport]]
+
+  def applicationsForAssessmentScoresReport(frameworkId: String): Future[List[ApplicationForAssessmentScoresReport]]
 }
 
 class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo: () => DB)
@@ -639,5 +641,24 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
         )
       }
     }
+  }
+
+  override def applicationsForAssessmentScoresReport(frameworkId: String): Future[List[ApplicationForAssessmentScoresReport]] = {
+    val query = BSONDocument("$and" ->
+      BSONArray(
+        BSONDocument("frameworkId" -> frameworkId),
+        BSONDocument(s"progress-status.${ProgressStatuses.AllocationConfirmedProgress}" -> true)
+      ))
+
+    val projection = BSONDocument(
+      "applicationId" -> "1",
+      "userId" -> "1",
+      "applicationStatus" -> "1",
+      "assessment-centre-indicator" -> "1",
+      "personal-details.firstName" -> "1",
+      "personal-details.lastName" -> "1"
+    )
+
+    reportQueryWithProjectionsBSON[ApplicationForAssessmentScoresReport](query, projection)
   }
 }
