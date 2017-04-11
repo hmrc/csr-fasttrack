@@ -18,17 +18,16 @@ package controllers
 
 import akka.stream.scaladsl.Source
 import connectors.{ AuthProviderClient, ExchangeObjects }
-import model.AssessmentExercise
 import model.AssessmentExercise.AssessmentExercise
-import model.CandidateScoresCommands.{ ScoresAndFeedback, CandidateScoresAndFeedback }
+import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ScoresAndFeedback }
 import model.Commands.{ CsvExtract, _ }
 import model.PersistedObjects.ContactDetailsWithId
 import model.ReportExchangeObjects.Implicits._
 import model.ReportExchangeObjects.{ Implicits => _, _ }
-import model.persisted.SchemeEvaluationResult
-import model.report.{ AssessmentCentreScoresReportItem, PassMarkReportItem, DiversityReportItem }
 import model.Scheme.Scheme
-import model.{ AssessmentExercise, ApplicationStatusOrder, ProgressStatuses, UniqueIdentifier }
+import model.persisted.SchemeEvaluationResult
+import model.report.{ AssessmentCentreScoresReportItem, DiversityReportItem, PassMarkReportItem }
+import model.{ ApplicationStatusOrder, AssessmentExercise, ProgressStatuses, UniqueIdentifier }
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
 import play.api.libs.streams.Streams
@@ -414,9 +413,11 @@ trait ReportingController extends BaseController {
 
   def createAssessmentCentreScoresReport(frameworkId: String) = Action.async { implicit request =>
     def extractApplicationIds(apps: List[ApplicationForAssessmentScoresReport]) = {
-      val msg = s"Application Id does not exist in assessment centre scores report generation (extracting from " +
-        s"ApplicationForAssessmentScoresReport object)"
-      apps.map(_.applicationId.getOrElse(throw new IllegalStateException(msg)))
+      apps.map(app => app.applicationId.getOrElse {
+        val msg = s"Application Id does not exist in assessment centre scores report generation (extracting from " +
+          s"ApplicationForAssessmentScoresReport object) for userId = ${app.userId}"
+        throw new IllegalStateException(msg)
+      })
     }
     val applicationsFut = reportingRepository.applicationsForAssessmentScoresReport(frameworkId)
 
