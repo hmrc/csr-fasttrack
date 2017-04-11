@@ -155,8 +155,8 @@ trait AuthProviderClient {
       }
   }
 
-  def findByUserIds(userIds: List[String])(implicit hc: HeaderCarrier): Future[List[Candidate]] = {
-    WSHttp.POST(s"$url/service/$ServiceName/findUsersByIds", FindByUserIdsRequest(userIds)).map { response =>
+  def findByUserIds(userIds: Set[String])(implicit hc: HeaderCarrier): Future[List[Candidate]] = {
+    WSHttp.POST(s"$url/service/$ServiceName/findUsersByIds", FindByUserIdsRequest(userIds.toList)).map { response =>
       response.json.as[List[Candidate]]
     }.recover {
       case errorResponse =>

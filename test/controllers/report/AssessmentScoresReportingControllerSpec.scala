@@ -34,7 +34,7 @@ class AssessmentScoresReportingControllerSpec extends BaseReportingControllerSpe
       when(assessmentCentreAllocationRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(Nil)
       when(assessorAssessmentScoresRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(Nil)
       when(reviewerAssessmentScoresRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(Nil)
-      when(authProviderClientMock.findByUserIds(any[List[String]])(any[HeaderCarrier])).thenReturnAsync(Nil)
+      when(authProviderClientMock.findByUserIds(any[Set[String]])(any[HeaderCarrier])).thenReturnAsync(Nil)
 
       val response = controller.createAssessmentCentreScoresReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[AssessmentCentreScoresReportItem]]
@@ -52,7 +52,7 @@ class AssessmentScoresReportingControllerSpec extends BaseReportingControllerSpe
       when(reviewerAssessmentScoresRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(
         reviewerInterviewScoresAndFeedbackForCandidate)
 
-      when(authProviderClientMock.findByUserIds(any[List[String]])(any[HeaderCarrier])).thenReturnAsync(authProviderAssessors)
+      when(authProviderClientMock.findByUserIds(any[Set[String]])(any[HeaderCarrier])).thenReturnAsync(authProviderAssessors)
 
       val response = controller.createAssessmentCentreScoresReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[AssessmentCentreScoresReportItem]]
@@ -83,7 +83,7 @@ class AssessmentScoresReportingControllerSpec extends BaseReportingControllerSpe
       // Absence of reviewer data means the candidate's statuses are determined by assessor data
       when(reviewerAssessmentScoresRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(Nil)
 
-      when(authProviderClientMock.findByUserIds(any[List[String]])(any[HeaderCarrier])).thenReturnAsync(authProviderAssessors)
+      when(authProviderClientMock.findByUserIds(any[Set[String]])(any[HeaderCarrier])).thenReturnAsync(authProviderAssessors)
 
       val response = controller.createAssessmentCentreScoresReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[AssessmentCentreScoresReportItem]]
@@ -114,7 +114,7 @@ class AssessmentScoresReportingControllerSpec extends BaseReportingControllerSpe
       // Absence of reviewer data means the candidate's statuses are determined by assessor data
       when(reviewerAssessmentScoresRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(Nil)
 
-      when(authProviderClientMock.findByUserIds(any[List[String]])(any[HeaderCarrier])).thenReturnAsync(authProviderAssessors)
+      when(authProviderClientMock.findByUserIds(any[Set[String]])(any[HeaderCarrier])).thenReturnAsync(authProviderAssessors)
 
       val response = controller.createAssessmentCentreScoresReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[AssessmentCentreScoresReportItem]]
@@ -140,7 +140,7 @@ class AssessmentScoresReportingControllerSpec extends BaseReportingControllerSpe
     "return report with not entered statuses when the candidate has not been assessed" in new AssessmentScoresReportTestFixture {
       when(assessorAssessmentScoresRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(Nil)
       when(reviewerAssessmentScoresRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(Nil)
-      when(authProviderClientMock.findByUserIds(any[List[String]])(any[HeaderCarrier])).thenReturnAsync(Nil)
+      when(authProviderClientMock.findByUserIds(any[Set[String]])(any[HeaderCarrier])).thenReturnAsync(Nil)
 
       val response = controller.createAssessmentCentreScoresReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[AssessmentCentreScoresReportItem]]
@@ -169,7 +169,7 @@ class AssessmentScoresReportingControllerSpec extends BaseReportingControllerSpe
         assessorInterviewScoresAndFeedbackForCandidateButNoDatesPersisted)
       when(reviewerAssessmentScoresRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(Nil)
 
-      when(authProviderClientMock.findByUserIds(any[List[String]])(any[HeaderCarrier])).thenReturnAsync(authProviderAssessors)
+      when(authProviderClientMock.findByUserIds(any[Set[String]])(any[HeaderCarrier])).thenReturnAsync(authProviderAssessors)
 
       val response = controller.createAssessmentCentreScoresReport(frameworkId)(request).run
       intercept[IllegalStateException] {
