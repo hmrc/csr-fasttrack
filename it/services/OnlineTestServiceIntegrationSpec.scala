@@ -45,7 +45,7 @@ class OnlineTestServiceIntegrationSpec extends MongoRepositorySpec with MockitoS
     "retrieve online test result" in new TestFixture {
       mongo().collection[JSONCollection](reportCollectionName).drop().futureValue
       createApplication("appId", "userId", "frameworkId", ApplicationStatuses.OnlineTestCompleted).futureValue
-      service.tryToDownloadOnlineTestResult(1, CubiksTestResultReady(Some(384), Some(1), "Ready", None)).futureValue
+      service.tryToDownloadOnlineTestResult(1, CubiksTestResultReady(Some(384), Some(1), "Ready")).futureValue
       val reportOpt = service.trRepository.getReportByApplicationId("appId").futureValue
       reportOpt mustNot be (empty)
 

@@ -20,8 +20,7 @@ import play.api.libs.json.Json
 
 case class CubiksTestResultReady(reportId: Option[Int],
                                  requestReportId: Option[Int],
-                                 reportStatus: String,
-                                 reportLinkURL: Option[String])
+                                 reportStatus: String)
 
 case object CubiksTestResultReady {
   implicit val cubiksTestResultReadyFormat = Json.format[CubiksTestResultReady]
