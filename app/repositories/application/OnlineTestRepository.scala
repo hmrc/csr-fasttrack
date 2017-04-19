@@ -61,7 +61,7 @@ trait OnlineTestRepository {
   def updateStatus(userId: String, currentStatuses: List[ApplicationStatuses.EnumVal],
     newStatus: ApplicationStatuses.EnumVal): Future[Unit]
 
-  def updateExpiryTime(userId: String, expirationDate: DateTime): Future[Unit]
+  def updateExpiryTime(userId: String, expirationDate: DateTime, limitToStatuses: List[ApplicationStatuses.EnumVal]): Future[Unit]
 
   def consumeToken(token: String): Future[Unit]
 
@@ -216,12 +216,13 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     collection.update(query, updateStatus, upsert = false).map(_ => ())
   }
 
-  override def updateExpiryTime(userId: String, expirationDate: DateTime): Future[Unit] = {
+  override def updateExpiryTime(userId: String, expirationDate: DateTime,
+                                limitToStatuses: List[ApplicationStatuses.EnumVal]): Future[Unit] = {
     import model.ApplicationStatuses.BSONEnumHandler
 
     val query = BSONDocument(
       "userId" -> userId,
-      "applicationStatus" -> BSONDocument("$in" -> List(ApplicationStatuses.OnlineTestInvited, ApplicationStatuses.OnlineTestStarted))
+      "applicationStatus" -> BSONDocument("$in" -> limitToStatuses)
     )
 
     val update = BSONDocument("$set" -> BSONDocument(

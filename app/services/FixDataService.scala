@@ -17,14 +17,17 @@
 package services
 
 import config.DataFixupConfig
+import controllers.OnlineTestExtension
 import model.ApplicationStatuses
 import model.EvaluationResults.Green
 import model.Exceptions.{ InvalidStatusException, PassMarkSettingsNotFound }
 import model.persisted.SchemeEvaluationResult
-import play.api.mvc.RequestHeader
+import play.api.mvc.{ RequestHeader, Result, Results }
 import repositories._
 import repositories.application._
+import services.onlinetesting.OnlineTestExtensionService
 import uk.gov.hmrc.play.http.HeaderCarrier
+import play.api.mvc.Results._
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -32,6 +35,8 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object FixDataService extends FixDataService {
   val appRepo: GeneralApplicationMongoRepository = applicationRepository
   val passmarkSettingsRepo: OnlineTestPassMarkSettingsRepository = onlineTestPassMarkSettingsRepository
+  val onlineTestingRepo: OnlineTestRepository = onlineTestRepository
+  val onlineTestExtensionService: OnlineTestExtensionService = OnlineTestExtensionService
   val auditService = AuditService
   val progressToAssessmentCentreConfig = config.MicroserviceAppConfig.progressToAssessmentCentreConfig
 }
@@ -39,11 +44,12 @@ object FixDataService extends FixDataService {
 trait FixDataService {
   def appRepo: GeneralApplicationRepository
   def passmarkSettingsRepo: OnlineTestPassMarkSettingsRepository
+  def onlineTestingRepo: OnlineTestRepository
+  def onlineTestExtensionService: OnlineTestExtensionService
   def auditService: AuditService
   def progressToAssessmentCentreConfig: DataFixupConfig
 
   def progressToAssessmentCentre(appId: String)(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
-
     if (progressToAssessmentCentreConfig.isValid(appId)) {
       for {
         latestPassmarkSettings <- passmarkSettingsRepo.tryGetLatestVersion()
@@ -57,5 +63,13 @@ trait FixDataService {
     } else {
       Future.failed(new IllegalArgumentException(s"$appId does not match configured application Id for this action"))
     }
+  }
+
+  def extendExpiredOnlineTests(appId: String, extendDays: Int)(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Result] = {
+      onlineTestingRepo.getOnlineTestApplication(appId).flatMap {
+        case Some(onlineTestApp) =>
+          onlineTestExtensionService.extendExpiryTimeForExpiredTests(onlineTestApp, extendDays).map { _ => Ok }
+        case _ => Future.successful(NotFound)
+      }
   }
 }

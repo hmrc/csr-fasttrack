@@ -22,18 +22,23 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 import services.FixDataService
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 object FixDataController extends FixDataController(FixDataService)
 
 abstract class FixDataController(fixDataService: FixDataService) extends BaseController {
 
   def progressToAssessmentCentre(appId: String): Action[AnyContent] = Action.async { implicit request =>
-    fixDataService.progressToAssessmentCentre(appId).map( _ => Ok )
+    fixDataService.progressToAssessmentCentre(appId).map(_ => Ok)
       .recover {
         case _: PassMarkSettingsNotFound => InternalServerError("Pass Mark settings not found")
         case e: IllegalArgumentException => MethodNotAllowed(e.getMessage)
         case e => InternalServerError(e.getMessage)
       }
+  }
+
+  def extendExpiredOnlineTests(appId: String, extendDays: Int): Action[AnyContent] = Action.async { implicit request =>
+      fixDataService.extendExpiredOnlineTests(appId, extendDays).map(_ => Ok)
   }
 
 }
