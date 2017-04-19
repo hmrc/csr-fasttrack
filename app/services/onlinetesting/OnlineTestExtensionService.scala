@@ -40,36 +40,44 @@ class OnlineTestExtensionServiceImpl(
 ) extends OnlineTestExtensionService {
 
   override def extendExpiryTimeForExpiredTests(application: OnlineTestApplication, extraDays: Int): Future[Unit] = {
-    val userId = application.userId
-    val applicationId = application.applicationId
-
     val extendFromStatuses = List(ApplicationStatuses.OnlineTestExpired)
 
+    for {
+      _ <- extendTestCommon(
+        applicationId = application.applicationId,
+        userId = application.userId,
+        extraDays = extraDays,
+        userWasInExpired = true,
+        extendFromStatuses = extendFromStatuses
+      )
+      _ <- appRepository.updateStatus(application.applicationId, ApplicationStatuses.OnlineTestStarted)
+    } yield ()
+  }
+
+  private def extendTestCommon(applicationId: String, userId: String, extraDays: Int, userWasInExpired: Boolean,
+                               extendFromStatuses: List[ApplicationStatuses.EnumVal]): Future[Unit] = {
     for {
       expiryDate <- getExpiryDate(userId)
       newExpiryDate = calculateNewExpiryDate(expiryDate, extraDays)
       _ <- otRepository.updateExpiryTime(userId, newExpiryDate, extendFromStatuses)
-      _ <- progressStatusesToRemove(newExpiryDate, userWasInExpired = true).fold(NoOp)(p =>
+      _ <- progressStatusesToRemove(newExpiryDate, userWasInExpired).fold(NoOp)(p =>
         appRepository.removeProgressStatuses(applicationId, p)
       )
-      _ <- appRepository.updateStatus(applicationId, ApplicationStatuses.OnlineTestStarted)
     } yield ()
   }
 
   override def extendExpiryTime(application: OnlineTestApplication, extraDays: Int): Future[Unit] = {
-    val userId = application.userId
-    val applicationId = application.applicationId
-
     val extendFromStatuses = List(ApplicationStatuses.OnlineTestInvited,
       ApplicationStatuses.OnlineTestStarted)
 
     for {
-      expiryDate <- getExpiryDate(userId)
-      newExpiryDate = calculateNewExpiryDate(expiryDate, extraDays)
-      _ <- otRepository.updateExpiryTime(userId, newExpiryDate, extendFromStatuses)
-      _ <- progressStatusesToRemove(newExpiryDate, userWasInExpired = false).fold(NoOp)(p =>
-        appRepository.removeProgressStatuses(applicationId, p)
-      )
+      _ <- extendTestCommon(
+          applicationId = application.applicationId,
+          userId = application.userId,
+          extraDays = extraDays,
+          userWasInExpired = false,
+          extendFromStatuses = extendFromStatuses
+        )
     } yield ()
   }
 
