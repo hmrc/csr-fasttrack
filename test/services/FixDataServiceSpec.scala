@@ -34,6 +34,7 @@ import org.mockito.Mockito._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.play.http.HeaderCarrier
 import org.mockito.Matchers.{ eq => eqTo, _ }
+import services.onlinetesting.OnlineTestExtensionService
 
 import scala.concurrent.Future
 
@@ -96,12 +97,16 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
     val mockPassMarkSettingsRepo = mock[OnlineTestPassMarkSettingsRepository]
     val mockAuditService = mock[AuditService]
     val mockConfig = mock[DataFixupConfig]
+    val mockOnlineTestRepository = mock[OnlineTestRepository]
+    val mockOnlineTestExtensionService = mock[OnlineTestExtensionService]
 
     val service = new FixDataService {
       val appRepo = mockAppRepo
       val passmarkSettingsRepo = mockPassMarkSettingsRepo
       val auditService = mockAuditService
       val progressToAssessmentCentreConfig = mockConfig
+      val onlineTestingRepo: OnlineTestRepository = mockOnlineTestRepository
+      val onlineTestExtensionService: OnlineTestExtensionService = mockOnlineTestExtensionService
     }
 
     when(mockConfig.isValid("appId")).thenReturn(true)

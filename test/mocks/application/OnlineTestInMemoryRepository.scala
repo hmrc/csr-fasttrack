@@ -65,7 +65,8 @@ class OnlineTestInMemoryRepository extends OnlineTestRepository {
 
   def updateStatus(userId: String, status: ApplicationStatuses.EnumVal): Future[Unit] = Future.successful(Unit)
 
-  def updateExpiryTime(userId: String, expirationDate: DateTime): Future[Unit] = Future.successful(Unit)
+  def updateExpiryTime(userId: String, expirationDate: DateTime, limitToStatuses: List[ApplicationStatuses.EnumVal])
+  : Future[Unit] = Future.successful(Unit)
 
   def consumeToken(token: String): Future[Unit] = Future.successful(Unit)
 

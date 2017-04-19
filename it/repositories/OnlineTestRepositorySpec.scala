@@ -261,7 +261,8 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
     "not update expired tests" in {
       val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestExpired, expirationDate = DateTime.now)
-      val result = onlineTestRepo.updateExpiryTime(appIdWithUserId.userId, DateTime.now.plusDays(5)).failed.futureValue
+      val result = onlineTestRepo.updateExpiryTime(appIdWithUserId.userId, DateTime.now.plusDays(5),
+        List(ApplicationStatuses.OnlineTestInvited, ApplicationStatuses.OnlineTestStarted)).failed.futureValue
 
       result mustBe a[CannotExtendCubiksTest]
     }
@@ -271,7 +272,8 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
       val newExpiration = oldExpiration.plusDays(3)
       val appIdWithUserId = createOnlineTest(currentStatus, expirationDate = oldExpiration)
 
-      onlineTestRepo.updateExpiryTime(appIdWithUserId.userId, newExpiration).futureValue
+      onlineTestRepo.updateExpiryTime(appIdWithUserId.userId, newExpiration,
+        List(ApplicationStatuses.OnlineTestInvited, ApplicationStatuses.OnlineTestStarted)).futureValue
 
       val expireDate = onlineTestRepo.getCubiksTestProfile(appIdWithUserId.userId).map(_.expirationDate).futureValue
       expireDate.toDate mustBe newExpiration.toDate

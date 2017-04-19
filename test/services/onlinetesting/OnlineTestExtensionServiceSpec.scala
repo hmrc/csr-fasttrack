@@ -23,25 +23,24 @@ import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.play.PlaySpec
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
 import testkit.MockitoImplicits.{ OngoingStubbingExtension, OngoingStubbingExtensionUnit }
-import testkit.MockitoSugar
+import testkit.UnitSpec
 
-class OnlineTestExtensionServiceSpec extends PlaySpec with ScalaFutures with MockitoSugar {
+class OnlineTestExtensionServiceSpec extends UnitSpec {
   "when extending the expiration time of a test" should {
 
     "add extra days onto expiry, from the expiry time, if not expired" in new TestFixture {
       when(dateTime.nowLocalTimeZone).thenReturn(now)
       when(otRepository.getCubiksTestProfile(any[String])).thenReturnAsync(onlineTest)
-      when(otRepository.updateExpiryTime(any(), any())).thenReturnAsync()
+      when(otRepository.updateExpiryTime(any(), any(), any())).thenReturnAsync()
       when(appRepository.removeProgressStatuses(any(), any())).thenReturnAsync()
 
-      service.extendExpiryTime(onlineTestApp, oneExtraDays).futureValue mustBe (())
+      service.extendExpiryTime(onlineTestApp, oneExtraDays).futureValue mustBe unit
 
       verify(otRepository).getCubiksTestProfile(userId)
-      verify(otRepository).updateExpiryTime(userId, expirationDate.plusDays(oneExtraDays))
+      verify(otRepository).updateExpiryTime(userId, expirationDate.plusDays(oneExtraDays), List(ApplicationStatuses.OnlineTestInvited,
+        ApplicationStatuses.OnlineTestStarted))
       verify(appRepository).removeProgressStatuses(applicationId, List(ProgressStatuses.OnlineTestSecondExpiryNotification))
       verifyNoMoreInteractions(otRepository, appRepository)
     }
@@ -50,12 +49,13 @@ class OnlineTestExtensionServiceSpec extends PlaySpec with ScalaFutures with Moc
       val nowBeyondExpiry = expirationDate.plusDays(10)
       when(dateTime.nowLocalTimeZone).thenReturn(nowBeyondExpiry)
       when(otRepository.getCubiksTestProfile(any[String])).thenReturnAsync(onlineTest)
-      when(otRepository.updateExpiryTime(any(), any())).thenReturnAsync()
+      when(otRepository.updateExpiryTime(any(), any(), any())).thenReturnAsync()
       when(appRepository.removeProgressStatuses(any(), any())).thenReturnAsync()
 
-      service.extendExpiryTime(onlineTestApp, fourExtraDays).futureValue mustBe (())
+      service.extendExpiryTime(onlineTestApp, fourExtraDays).futureValue mustBe unit
 
-      verify(otRepository).updateExpiryTime(userId, nowBeyondExpiry.plusDays(fourExtraDays))
+      verify(otRepository).updateExpiryTime(userId, nowBeyondExpiry.plusDays(fourExtraDays), List(ApplicationStatuses.OnlineTestInvited,
+        ApplicationStatuses.OnlineTestStarted))
       verify(appRepository).removeProgressStatuses(
         applicationId,
         List(ProgressStatuses.OnlineTestFirstExpiryNotification, ProgressStatuses.OnlineTestSecondExpiryNotification)
