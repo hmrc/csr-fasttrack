@@ -20,33 +20,34 @@ import config.DataFixupConfig
 import connectors.PassMarkExchangeObjects.OnlineTestPassmarkSettings
 import model.Commands.ProgressResponse
 import model.Exceptions.PassMarkSettingsNotFound
+import model.OnlineTestCommands.OnlineTestApplication
 import model.commands.OnlineTestProgressResponse
 import model.{ ApplicationStatuses, EmptyRequestHeader, Scheme }
 import model.persisted.SchemeEvaluationResult
 import org.joda.time.DateTime
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatestplus.play.{ OneAppPerSuite, PlaySpec }
+import play.api.test.Helpers._
 import repositories.OnlineTestPassMarkSettingsRepository
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
-import testkit.MockitoSugar
+import testkit.{ MockitoSugar, UnitSpec }
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import play.api.mvc.RequestHeader
 import uk.gov.hmrc.play.http.HeaderCarrier
 import org.mockito.Matchers.{ eq => eqTo, _ }
+import services.onlinetesting.OnlineTestExtensionService
 
 import scala.concurrent.Future
 
-class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
+class FixDataServiceSpec extends UnitSpec {
 
-  "FixDataServiceSpec" must {
+  "Progress to assessment centre" must {
 
     "throw an exception if the app Id does not match the configured one" in new TestFixture {
       val actual = service.progressToAssessmentCentre("blah").failed.futureValue
       actual mustBe an[IllegalArgumentException]
     }
 
-    "throw an exception if the canddate has already moved to assessment centre allocation" in new TestFixture {
+    "throw an exception if the candidate has already moved to assessment centre allocation" in new TestFixture {
       when(mockAppRepo.findProgress(any[String])).thenReturn(Future.successful(
         ProgressResponse("appId").copy(
           onlineTest = OnlineTestProgressResponse(awaitingAllocation = true, awaitingAllocationNotified = true
@@ -55,7 +56,6 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
     }
 
     "progress a candidate to awaiting assessment centre allocation" in new TestFixture {
-
       when(mockPassMarkSettingsRepo.tryGetLatestVersion()).thenReturn(
         Future.successful(Some(OnlineTestPassmarkSettings(Nil, "version", DateTime.now, "user")))
       )
@@ -69,7 +69,7 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
 
       verify(mockAuditService).logEvent(any[String], any[Map[String, String]])(any[HeaderCarrier], any[RequestHeader])
 
-      actual mustBe (())
+      actual mustBe unit
     }
 
     "throw an exception if pass marks have not been set" in new TestFixture {
@@ -85,7 +85,40 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
       actual mustBe a[PassMarkSettingsNotFound]
       verify(mockAuditService, times(0)).logEvent(any[String], any[Map[String, String]])(any[HeaderCarrier], any[RequestHeader])
     }
+  }
 
+  "Extend expired online tests" must {
+    "Return Ok when a valid application is extended" in new TestFixture {
+      when(mockOnlineTestRepository.getOnlineTestApplication(any[String]())).thenReturn(Future.successful(Some(
+        OnlineTestApplication(
+          "appId1",
+          ApplicationStatuses.OnlineTestExpired,
+          "userId1",
+          guaranteedInterview = false,
+          needsAdjustments = false,
+          "Pref1",
+          None
+        )
+      )))
+
+      when(mockOnlineTestExtensionService.extendExpiryTimeForExpiredTests(any(), any())).thenReturn(Future.successful(unit))
+
+      val result = service.extendExpiredOnlineTests("appId1", 7)
+
+      status(result) mustBe OK
+
+      verify(mockOnlineTestExtensionService, times(1)).extendExpiryTimeForExpiredTests(any(), eqTo(7))
+    }
+
+    "Return NotFound when an application is invalid" in new TestFixture {
+      when(mockOnlineTestRepository.getOnlineTestApplication(any[String]())).thenReturn(Future.successful(None))
+
+      val result = service.extendExpiredOnlineTests("appId1", 7)
+
+      status(result) mustBe NOT_FOUND
+
+      verify(mockOnlineTestExtensionService, times(0)).extendExpiryTimeForExpiredTests(any(), eqTo(7))
+    }
   }
 
 
@@ -96,12 +129,16 @@ class FixDataServiceSpec extends PlaySpec with MockitoSugar with ScalaFutures {
     val mockPassMarkSettingsRepo = mock[OnlineTestPassMarkSettingsRepository]
     val mockAuditService = mock[AuditService]
     val mockConfig = mock[DataFixupConfig]
+    val mockOnlineTestRepository = mock[OnlineTestRepository]
+    val mockOnlineTestExtensionService = mock[OnlineTestExtensionService]
 
     val service = new FixDataService {
       val appRepo = mockAppRepo
       val passmarkSettingsRepo = mockPassMarkSettingsRepo
       val auditService = mockAuditService
       val progressToAssessmentCentreConfig = mockConfig
+      val onlineTestingRepo: OnlineTestRepository = mockOnlineTestRepository
+      val onlineTestExtensionService: OnlineTestExtensionService = mockOnlineTestExtensionService
     }
 
     when(mockConfig.isValid("appId")).thenReturn(true)

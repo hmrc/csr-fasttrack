@@ -18,7 +18,7 @@ package services.onlinetesting
 
 import factories.DateTimeFactory
 import model.OnlineTestCommands.OnlineTestApplication
-import model.{ FirstReminder, ProgressStatuses, SecondReminder }
+import model.{ ApplicationStatuses, FirstReminder, ProgressStatuses, SecondReminder }
 import org.joda.time.DateTime
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
@@ -29,6 +29,7 @@ import scala.concurrent.Future
 object OnlineTestExtensionService extends OnlineTestExtensionServiceImpl(onlineTestRepository, applicationRepository, DateTimeFactory)
 
 trait OnlineTestExtensionService {
+  def extendExpiryTimeForExpiredTests(application: OnlineTestApplication, extraDays: Int): Future[Unit]
   def extendExpiryTime(application: OnlineTestApplication, extraDays: Int): Future[Unit]
 }
 
@@ -38,14 +39,45 @@ class OnlineTestExtensionServiceImpl(
     dateTime: DateTimeFactory
 ) extends OnlineTestExtensionService {
 
-  override def extendExpiryTime(application: OnlineTestApplication, extraDays: Int): Future[Unit] = {
-    val userId = application.userId
-    val applicationId = application.applicationId
+  override def extendExpiryTimeForExpiredTests(application: OnlineTestApplication, extraDays: Int): Future[Unit] = {
+    val extendFromStatuses = List(ApplicationStatuses.OnlineTestExpired)
+
+    for {
+      _ <- extendTestCommon(
+        applicationId = application.applicationId,
+        userId = application.userId,
+        extraDays = extraDays,
+        userWasInExpired = true,
+        extendFromStatuses = extendFromStatuses
+      )
+      _ <- appRepository.updateStatus(application.applicationId, ApplicationStatuses.OnlineTestStarted)
+    } yield ()
+  }
+
+  private def extendTestCommon(applicationId: String, userId: String, extraDays: Int, userWasInExpired: Boolean,
+                               extendFromStatuses: List[ApplicationStatuses.EnumVal]): Future[Unit] = {
     for {
       expiryDate <- getExpiryDate(userId)
       newExpiryDate = calculateNewExpiryDate(expiryDate, extraDays)
-      _ <- otRepository.updateExpiryTime(userId, newExpiryDate)
-      _ <- progressStatusesToRemove(newExpiryDate).fold(NoOp)(p => appRepository.removeProgressStatuses(applicationId, p))
+      _ <- otRepository.updateExpiryTime(userId, newExpiryDate, extendFromStatuses)
+      _ <- progressStatusesToRemove(newExpiryDate, userWasInExpired).fold(NoOp)(p =>
+        appRepository.removeProgressStatuses(applicationId, p)
+      )
+    } yield ()
+  }
+
+  override def extendExpiryTime(application: OnlineTestApplication, extraDays: Int): Future[Unit] = {
+    val extendFromStatuses = List(ApplicationStatuses.OnlineTestInvited,
+      ApplicationStatuses.OnlineTestStarted)
+
+    for {
+      _ <- extendTestCommon(
+          applicationId = application.applicationId,
+          userId = application.userId,
+          extraDays = extraDays,
+          userWasInExpired = false,
+          extendFromStatuses = extendFromStatuses
+        )
     } yield ()
   }
 
@@ -60,12 +92,14 @@ class OnlineTestExtensionServiceImpl(
     List(dateTime1, dateTime2).max
   }
 
-  private def progressStatusesToRemove(newExpiryDate: DateTime): Option[List[ProgressStatuses.ProgressStatus]] = {
+  private def progressStatusesToRemove(newExpiryDate: DateTime, userWasInExpired: Boolean): Option[List[ProgressStatuses.ProgressStatus]] = {
     val today = DateTime.now()
     val hasToBeNotified72hBefore = newExpiryDate.minusHours(FirstReminder.hoursBeforeReminder).isAfter(today)
     val hasToBeNotified24hBefore = newExpiryDate.minusHours(SecondReminder.hoursBeforeReminder).isAfter(today)
 
-    (hasToBeNotified24hBefore, hasToBeNotified72hBefore) match {
+    val maybeExpiredStatusToRemove = if (userWasInExpired) { List(ProgressStatuses.OnlineTestExpiredProgress) } else { Nil }
+
+    val reminderStatusesToRemove = (hasToBeNotified24hBefore, hasToBeNotified72hBefore) match {
       case (_, true) =>
         Some(ProgressStatuses.OnlineTestFirstExpiryNotification :: ProgressStatuses.OnlineTestSecondExpiryNotification :: Nil)
       case (true, false) =>
@@ -74,6 +108,7 @@ class OnlineTestExtensionServiceImpl(
         None
     }
 
+    reminderStatusesToRemove.map(x => x ++ maybeExpiredStatusToRemove).orElse(Some(maybeExpiredStatusToRemove))
   }
 
   private val NoOp: Future[Unit] = Future.successful(())
