@@ -18,7 +18,7 @@ package services.testdata
 
 import common.FutureEx
 import connectors.testdata.ExchangeObjects.DataGenerationResponse
-import factories.UUIDFactory
+import factories.{ DateTimeFactory, UUIDFactory }
 import model.{ ApplicationStatuses, AssessmentExercise }
 import model.AssessmentExercise._
 import model.CandidateScoresCommands._
@@ -37,14 +37,38 @@ object AssessmentScoresEnteredStatusGenerator extends AssessmentScoresStatusGene
   val aasRepository = assessorAssessmentScoresRepository
   val newStatus = ApplicationStatuses.AssessmentScoresEntered
   val scores = (gc: GeneratorConfig) => gc.assessmentScores
+  val isSubmitted = false
+}
+
+object AssessmentScoresSubmittedStatusGenerator extends AssessmentScoresStatusGenerator {
+  val previousStatusGenerator = AssessmentScoresEnteredStatusGenerator
+  val aRepository = applicationRepository
+  val aasRepository = assessorAssessmentScoresRepository
+  val newStatus = ApplicationStatuses.AssessmentScoresEntered
+  val scores = (gc: GeneratorConfig) => {
+    gc.assessmentScores.map { assessmentScores =>
+      val newInterviewScores = assessmentScores.interview.map { interview =>
+        interview.copy(submittedDate = Some(DateTimeFactory.nowLocalTimeZone))
+      }
+      val newGroupExerciseScores = assessmentScores.groupExercise.map { groupExercise =>
+        groupExercise.copy(submittedDate = Some(DateTimeFactory.nowLocalTimeZone))
+      }
+      val newWrittenExerciseScores = assessmentScores.writtenExercise.map { writtenExercise =>
+        writtenExercise.copy(submittedDate = Some(DateTimeFactory.nowLocalTimeZone))
+      }
+      assessmentScores.copy(interview = newInterviewScores, groupExercise = newGroupExerciseScores, writtenExercise = newWrittenExerciseScores)
+    }
+  }
+  val isSubmitted = true
 }
 
 object AssessmentScoresAcceptedStatusGenerator extends AssessmentScoresStatusGenerator {
-  val previousStatusGenerator = AssessmentScoresEnteredStatusGenerator
+  val previousStatusGenerator = AssessmentScoresSubmittedStatusGenerator
   val aRepository = applicationRepository
   val aasRepository = reviewerAssessmentScoresRepository
   val newStatus = ApplicationStatuses.AssessmentScoresAccepted
   val scores = (gc: GeneratorConfig) => gc.reviewerAssessmentScores
+  val isSubmitted = true
 }
 
 trait AssessmentScoresStatusGenerator extends ConstructiveGenerator {
@@ -52,6 +76,7 @@ trait AssessmentScoresStatusGenerator extends ConstructiveGenerator {
   def aasRepository: ApplicationAssessmentScoresRepository
   def newStatus: ApplicationStatuses.EnumVal
   def scores: (GeneratorConfig) => Option[CandidateScoresAndFeedback]
+  def isSubmitted: Boolean
 
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier): Future[DataGenerationResponse] = {
     for {
@@ -66,9 +91,9 @@ trait AssessmentScoresStatusGenerator extends ConstructiveGenerator {
   private def saveScores(appId: String, generatorConfig: GeneratorConfig) = {
     val toInsert = scores(generatorConfig) match {
       case None =>
-        val interviewScores = randomScoresAndFeedback(appId, AssessmentExercise.interview)
-        val groupScores = randomScoresAndFeedback(appId, AssessmentExercise.groupExercise)
-        val writtenScores = randomScoresAndFeedback(appId, AssessmentExercise.writtenExercise)
+        val interviewScores = randomScoresAndFeedback(appId, AssessmentExercise.interview, isSubmitted)
+        val groupScores = randomScoresAndFeedback(appId, AssessmentExercise.groupExercise, isSubmitted)
+        val writtenScores = randomScoresAndFeedback(appId, AssessmentExercise.writtenExercise, isSubmitted)
         List(interviewScores, groupScores, writtenScores)
       case Some(scores) =>
         List(
@@ -81,7 +106,8 @@ trait AssessmentScoresStatusGenerator extends ConstructiveGenerator {
     FutureEx.traverseSerial(toInsert)(aasRepository.save(_))
   }
 
-  private def randomScoresAndFeedback(applicationId: String, assessmentExercise: AssessmentExercise): ExerciseScoresAndFeedback = {
+  private def randomScoresAndFeedback(applicationId: String, assessmentExercise: AssessmentExercise,
+                                      isSubmitted: Boolean = false): ExerciseScoresAndFeedback = {
     def randScore = Some(Random.randDouble(1, 4))
 
     val scoresAndFeedback = ScoresAndFeedback(
@@ -95,7 +121,9 @@ trait AssessmentScoresStatusGenerator extends ConstructiveGenerator {
       buildingCapabilityForAll    = randScore,
       motivationFit               = randScore,
       feedback = Some("Good interview"),
-      updatedBy = UUIDFactory.generateUUID())
+      updatedBy = UUIDFactory.generateUUID(),
+      submittedDate = if (isSubmitted) { Some(DateTimeFactory.nowLocalTimeZone) } else { None }
+    )
 
     ExerciseScoresAndFeedback(applicationId, assessmentExercise, scoresAndFeedback)
   }
