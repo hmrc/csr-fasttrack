@@ -114,3 +114,4 @@ DELETE      /application/:applicationId/issue                            control
 GET         /schools                                                     controllers.SchoolsController.getSchools(term: String)
 
 POST        /fixdata/:applicationId/progressToAssessmentCentre           controllers.FixDataController.progressToAssessmentCentre(applicationId: String)
+POST        /fixdata/extendExpiredOnlineTests                            controllers.FixDataController.extendExpiredOnlineTests(applicationId: String, extendDays: Int)
