@@ -33,7 +33,7 @@ trait CSREmailClient extends EmailClient {
 
   private def sendEmail(to: String, template: String, parameters: Map[String, String])(implicit hc: HeaderCarrier) = {
     val emailRequest = SendEmailRequest(to :: Nil, template, Map("programme" -> "fasttrack") ++ parameters)
-    POST(s"$url/fset/email/", emailRequest, Seq()).map(_ => (): Unit)
+    POST(s"$url/fsetfasttrack/email/", emailRequest, Seq()).map(_ => (): Unit)
   }
 
   override def sendApplicationSubmittedConfirmation(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit] =
