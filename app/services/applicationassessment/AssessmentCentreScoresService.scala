@@ -16,7 +16,7 @@
 
 package services.applicationassessment
 
-import model.ApplicationStatuses
+import model.{ ApplicationStatuses, AssessmentExercise }
 import model.CandidateScoresCommands.{ ApplicationScores, CandidateScoresAndFeedback, ExerciseScoresAndFeedback, RecordCandidateScores }
 import play.api.mvc.RequestHeader
 import repositories._
@@ -62,10 +62,14 @@ trait AssessorAssessmentCentreScoresService extends AssessmentCentreScoresServic
           s"Reviewer scores already exist for $applicationId ${exerciseScoresAndFeedback.exercise}"
         )
       ))
-      _ <- assessmentScoresRepo.tryFind(applicationId).map(_.map(_ =>
-        throw AssessorScoresExistForExerciseException(
-          s"Assessor scores already exist for $applicationId ${exerciseScoresAndFeedback.exercise}"
-        )
+      _ <- assessmentScoresRepo.tryFind(applicationId).map(_.foreach( scoresAndFeedback =>
+        if (doesAnotherScoreExist(scoresAndFeedback, exerciseScoresAndFeedback.exercise,
+          exerciseScoresAndFeedback.scoresAndFeedback.updatedBy)
+        ) {
+          throw AssessorScoresExistForExerciseException(
+            s"Assessor scores already exist for $applicationId ${exerciseScoresAndFeedback.exercise}"
+          )
+        }
       ))
       _ <- assessmentScoresRepo.save(exerciseScoresAndFeedback)
       _ <- appRepo.updateStatus(applicationId, newStatus)
@@ -73,6 +77,13 @@ trait AssessorAssessmentCentreScoresService extends AssessmentCentreScoresServic
       auditService.logEvent("ApplicationScoresAndFeedbackSaved", Map("applicationId" -> applicationId))
       auditService.logEvent(s"ApplicationStatusSetTo$newStatus", Map("applicationId" -> applicationId))
     }
+  }
+
+  private def doesAnotherScoreExist(existingScoresAndFeedback: CandidateScoresAndFeedback, exercise: AssessmentExercise.Value,
+    updatedBy: String) = exercise match {
+    case AssessmentExercise.interview => existingScoresAndFeedback.interview.exists(_.updatedBy != updatedBy)
+    case AssessmentExercise.groupExercise => existingScoresAndFeedback.groupExercise.exists(_.updatedBy != updatedBy)
+    case AssessmentExercise.writtenExercise => existingScoresAndFeedback.writtenExercise.exists(_.updatedBy != updatedBy)
   }
 }
 
