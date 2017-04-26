@@ -54,7 +54,6 @@ class AssessmentCentreScoresServiceSpec extends UnitSpec {
 
       service.saveScoresAndFeedback(ApplicationId, exerciseScoresAndFeedback).futureValue
 
-
       verify(auditServiceMock).logEvent("ApplicationScoresAndFeedbackSaved", AuditDetails)
       verify(auditServiceMock).logEvent(s"ApplicationStatusSetTo${ApplicationStatuses.AssessmentScoresEntered}", AuditDetails)
     }

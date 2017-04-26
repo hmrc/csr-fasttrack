@@ -57,14 +57,14 @@ trait AssessorAssessmentCentreScoresService extends AssessmentCentreScoresServic
     val newStatus = ApplicationStatuses.AssessmentScoresEntered
 
     for {
-      _ <- assessmentScoresRepo.tryFind(applicationId).map(_.map(_ =>
-        throw AssessorScoresExistForExerciseException(
-          s"Assessor scores already exist for $applicationId ${exerciseScoresAndFeedback.exercise}"
-        )
-      ))
       _ <- reviewerScoresRepo.tryFind(applicationId).map(_.map(_ =>
         throw ReviewerScoresExistForExerciseException(
           s"Reviewer scores already exist for $applicationId ${exerciseScoresAndFeedback.exercise}"
+        )
+      ))
+      _ <- assessmentScoresRepo.tryFind(applicationId).map(_.map(_ =>
+        throw AssessorScoresExistForExerciseException(
+          s"Assessor scores already exist for $applicationId ${exerciseScoresAndFeedback.exercise}"
         )
       ))
       _ <- assessmentScoresRepo.save(exerciseScoresAndFeedback)
