@@ -16,20 +16,18 @@
 
 package services.applicationassessment
 
-import model.AssessmentExercise.AssessmentExercise
 import model.{ ApplicationStatuses, AssessmentExercise, EmptyRequestHeader }
 import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScoresAndFeedback, ScoresAndFeedback }
 import model.Exceptions.NotFoundException
 import org.mockito.Mockito._
 import org.mockito.Matchers.{ eq => eqTo, _ }
-import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{ Seconds, Span }
-import org.scalatestplus.play.PlaySpec
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
-import services.applicationassessment.AssessorAssessmentScoresService.AssessorScoresExistForExerciseException
-import testkit.{ MockitoSugar, UnitSpec }
+import services.applicationassessment.AssessorAssessmentScoresService.{ AssessorScoresExistForExerciseException, ReviewerScoresExistForExerciseException }
+import testkit.UnitSpec
+import testkit.MockitoImplicits._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -51,6 +49,7 @@ class AssessmentCentreScoresServiceSpec extends UnitSpec {
     "save feedback and log an audit event for an attended candidate" in new ApplicationAssessmentServiceFixture {
       when(aasRepositoryMock.save(any[ExerciseScoresAndFeedback], any[Option[String]])).thenReturn(Future.successful(()))
       when(aRepositoryMock.updateStatus(any[String], any[ApplicationStatuses.EnumVal])).thenReturn(Future.successful(()))
+      when(aasRepositoryMock.tryFind(any[String])).thenReturnAsync(None)
 
       service.saveScoresAndFeedback(ApplicationId, exerciseScoresAndFeedback).futureValue
 
@@ -61,6 +60,7 @@ class AssessmentCentreScoresServiceSpec extends UnitSpec {
     "save feedback and log an audit event for a 'failed to attend' candidate" in new ApplicationAssessmentServiceFixture {
       when(aasRepositoryMock.save(any[ExerciseScoresAndFeedback], any[Option[String]])).thenReturn(Future.successful(()))
       when(aRepositoryMock.updateStatus(any[String], any[ApplicationStatuses.EnumVal])).thenReturn(Future.successful(()))
+      when(aasRepositoryMock.tryFind(any[String])).thenReturnAsync(None)
 
       val result: Unit = service.saveScoresAndFeedback(ApplicationId,
         exerciseScoresAndFeedback.copy(scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback.copy(attended = false))
@@ -74,6 +74,21 @@ class AssessmentCentreScoresServiceSpec extends UnitSpec {
       when(rasRepositoryMock.tryFind(any[String])).thenReturn(Future.successful(Some(
         CandidateScoresAndFeedback("appId")
       )))
+      when(aasRepositoryMock.tryFind(any[String])).thenReturnAsync(None)
+
+      val result: Throwable = service.saveScoresAndFeedback(ApplicationId,
+        exerciseScoresAndFeedback.copy(scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback.copy(attended = false))
+      ).failed.futureValue
+
+      result mustBe a[ReviewerScoresExistForExerciseException]
+    }
+
+    "throw an exception if assessor scores already exist" in new ApplicationAssessmentServiceFixture {
+      when(rasRepositoryMock.tryFind(any[String])).thenReturnAsync(None)
+      when(aasRepositoryMock.tryFind(any[String])).thenReturnAsync(Some(
+        CandidateScoresAndFeedback("appId")
+      ))
+
       val result: Throwable = service.saveScoresAndFeedback(ApplicationId,
         exerciseScoresAndFeedback.copy(scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback.copy(attended = false))
       ).failed.futureValue
@@ -108,12 +123,12 @@ class AssessmentCentreScoresServiceSpec extends UnitSpec {
     when(aasRepositoryMock.tryFind("app1")).thenReturn(Future.successful(Some(CandidateScoresAndFeedback("app1",
       interview = Some(exerciseScoresAndFeedback.scoresAndFeedback)))))
 
-    when(applicationAssessmentRepositoryMock.delete(eqTo(ApplicationId))).thenReturn(Future.successful(()))
+    when(applicationAssessmentRepositoryMock.delete(eqTo(ApplicationId))).thenReturnAsync()
     when(applicationAssessmentRepositoryMock.delete(eqTo(NotFoundApplicationId))).thenReturn(
       Future.failed(new NotFoundException("No application assessments were found"))
     )
 
-    when(rasRepositoryMock.tryFind(any[String])).thenReturn(Future.successful(None))
+    when(rasRepositoryMock.tryFind(any[String])).thenReturnAsync(None)
 
     val service = new AssessorAssessmentCentreScoresService {
       val assessmentScoresRepo: ApplicationAssessmentScoresRepository = aasRepositoryMock
