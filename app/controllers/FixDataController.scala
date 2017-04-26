@@ -38,7 +38,15 @@ abstract class FixDataController(fixDataService: FixDataService) extends BaseCon
   }
 
   def extendExpiredOnlineTests(appId: String, extendDays: Int): Action[AnyContent] = Action.async { implicit request =>
-      fixDataService.extendExpiredOnlineTests(appId, extendDays).map(_ => Ok)
+    fixDataService.extendExpiredOnlineTests(appId, extendDays).map(_ => Ok)
+  }
+
+  def countNoDateScoresAndFeedback: Action[AnyContent] = Action.async { implicit request =>
+    fixDataService.countNoDateScoresAndFeedback.map(json => Ok(json))
+  }
+
+  def fixNoDateScoresAndFeedback: Action[AnyContent] = Action.async { implicit request =>
+    fixDataService.fixNoDateScoresAndFeedback.map(json => Ok(json))
   }
 
 }

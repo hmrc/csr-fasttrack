@@ -22,7 +22,8 @@ import play.api.mvc.RequestHeader
 import repositories._
 import repositories.application._
 import services.AuditService
-import services.applicationassessment.AssessorAssessmentScoresService.{ AssessorScoresExistForExerciseException, ReviewerScoresExistForExerciseException }
+import services.applicationassessment.AssessorAssessmentScoresService.{ AssessorScoresExistForExerciseException,
+ReviewerScoresExistForExerciseException }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
