@@ -22,7 +22,7 @@ import play.api.mvc.RequestHeader
 import repositories._
 import repositories.application._
 import services.AuditService
-import services.applicationassessment.AssessorAssessmentScoresService.ReviewerScoresExistForExerciseException
+import services.applicationassessment.AssessorAssessmentScoresService.{ AssessorScoresExistForExerciseException, ReviewerScoresExistForExerciseException }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -30,6 +30,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 
 object AssessorAssessmentScoresService extends AssessorAssessmentCentreScoresService {
+  case class AssessorScoresExistForExerciseException(m: String) extends Exception(m)
   case class ReviewerScoresExistForExerciseException(m: String) extends Exception(m)
   val assessmentScoresRepo: AssessorApplicationAssessmentScoresMongoRepository = assessorAssessmentScoresRepository
   val reviewerScoresRepo: ReviewerApplicationAssessmentScoresMongoRepository = reviewerAssessmentScoresRepository
@@ -59,6 +60,11 @@ trait AssessorAssessmentCentreScoresService extends AssessmentCentreScoresServic
       _ <- reviewerScoresRepo.tryFind(applicationId).map(_.map(_ =>
         throw ReviewerScoresExistForExerciseException(
           s"Reviewer scores already exist for $applicationId ${exerciseScoresAndFeedback.exercise}"
+        )
+      ))
+      _ <- assessmentScoresRepo.tryFind(applicationId).map(_.map(_ =>
+        throw AssessorScoresExistForExerciseException(
+          s"Assessor scores already exist for $applicationId ${exerciseScoresAndFeedback.exercise}"
         )
       ))
       _ <- assessmentScoresRepo.save(exerciseScoresAndFeedback)

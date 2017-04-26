@@ -22,7 +22,7 @@ import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScore
 import model.Exceptions.ApplicationNotFound
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent }
-import services.applicationassessment.AssessorAssessmentScoresService.ReviewerScoresExistForExerciseException
+import services.applicationassessment.AssessorAssessmentScoresService.{ AssessorScoresExistForExerciseException, ReviewerScoresExistForExerciseException }
 import services.applicationassessment._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -83,7 +83,8 @@ trait AssessmentCentreScoresController extends BaseController {
         Created
       }.recover {
         case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
-        case e: ReviewerScoresExistForExerciseException => Conflict(e.getMessage)
+        case e: AssessorScoresExistForExerciseException => Conflict(e.getMessage)
+        case e: ReviewerScoresExistForExerciseException => MethodNotAllowed(e.getMessage)
       }
     }
   }
@@ -98,7 +99,8 @@ trait AssessorScoresController extends AssessmentCentreScoresController {
       Created
       }.recover {
         case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
-        case e: ReviewerScoresExistForExerciseException => Conflict(e.getMessage)
+        case e: AssessorScoresExistForExerciseException => Conflict(e.getMessage)
+        case e: ReviewerScoresExistForExerciseException => MethodNotAllowed(e.getMessage)
       }
     }
   }
