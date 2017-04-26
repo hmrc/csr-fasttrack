@@ -517,7 +517,7 @@ trait ReportingController extends BaseController {
                              exerciseType: AssessmentExercise,
                              assessorAssessmentScoresData: Map[String, CandidateScoresAndFeedback],
                              reviewerAssessmentScoresData: Map[String, CandidateScoresAndFeedback]
-                            ) = {
+                            ): String = {
 
     def evaluateAssessorStatus(scoresAndFeedback: Option[ScoresAndFeedback], exerciseType: AssessmentExercise) = {
       scoresAndFeedback.map { sAndF =>

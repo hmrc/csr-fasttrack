@@ -91,7 +91,7 @@ trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {
   def findByApplicationIds(applicationIds: List[String]): Future[List[CandidateScoresAndFeedback]] = {
     val query = BSONDocument("applicationId" -> BSONDocument("$in" -> applicationIds))
 
-    collection.find(query).cursor[BSONDocument]().collect[List]().map { _.flatMap(docToDomain) }
+    collection.find(query).cursor[BSONDocument]().collect[List]().map(_.flatMap(docToDomain))
   }
 
   def findNonSubmittedScores(assessorId: String): Future[List[CandidateScoresAndFeedback]] = {
