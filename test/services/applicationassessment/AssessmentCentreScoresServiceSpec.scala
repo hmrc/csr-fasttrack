@@ -28,7 +28,7 @@ import org.scalatestplus.play.PlaySpec
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
-import services.applicationassessment.AssessorAssessmentScoresService.ReviewerScoresExistForExerciseException
+import services.applicationassessment.AssessorAssessmentScoresService.AssessorScoresExistForExerciseException
 import testkit.{ MockitoSugar, UnitSpec }
 import uk.gov.hmrc.play.http.HeaderCarrier
 
@@ -79,7 +79,7 @@ class AssessmentCentreScoresServiceSpec extends UnitSpec {
         exerciseScoresAndFeedback.copy(scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback.copy(attended = false))
       ).failed.futureValue
 
-      result mustBe a[ReviewerScoresExistForExerciseException]
+      result mustBe a[AssessorScoresExistForExerciseException]
     }
   }
 
