@@ -83,17 +83,43 @@ class AssessmentCentreScoresServiceSpec extends UnitSpec {
       result mustBe a[ReviewerScoresExistForExerciseException]
     }
 
-    "throw an exception if assessor scores already exist" in new ApplicationAssessmentServiceFixture {
+    "throw an exception if different assessor scores already exist" in new ApplicationAssessmentServiceFixture {
       when(rasRepositoryMock.tryFind(any[String])).thenReturnAsync(None)
       when(aasRepositoryMock.tryFind(any[String])).thenReturnAsync(Some(
-        CandidateScoresAndFeedback("appId")
+        CandidateScoresAndFeedback("appId", interview = Some(
+          ScoresAndFeedback(attended = true,
+            assessmentIncomplete = false,
+            updatedBy = "abc"
+          )
+        ))
       ))
 
       val result: Throwable = service.saveScoresAndFeedback(ApplicationId,
         exerciseScoresAndFeedback.copy(scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback.copy(attended = false))
       ).failed.futureValue
 
-      result mustBe a[AssessorScoresExistForExerciseException]
+      result mustBe an[AssessorScoresExistForExerciseException]
+    }
+
+    "not throw an exception if the current assessor scores already exist" in new ApplicationAssessmentServiceFixture {
+      when(rasRepositoryMock.tryFind(any[String])).thenReturnAsync(None)
+      when(aasRepositoryMock.tryFind(any[String])).thenReturnAsync(Some(
+        CandidateScoresAndFeedback("appId", interview = Some(
+          ScoresAndFeedback(attended = true,
+            assessmentIncomplete = false,
+            updatedBy = "xyz"
+          )
+        ))
+      ))
+      when(aasRepositoryMock.save(any[ExerciseScoresAndFeedback], any[Option[String]])).thenReturn(Future.successful(()))
+      when(aRepositoryMock.updateStatus(any[String], any[ApplicationStatuses.EnumVal])).thenReturn(Future.successful(()))
+
+      val result = service.saveScoresAndFeedback(ApplicationId,
+        exerciseScoresAndFeedback.copy(scoresAndFeedback = exerciseScoresAndFeedback.scoresAndFeedback.copy(attended = false))
+      ).futureValue
+
+      verify(auditServiceMock).logEvent("ApplicationScoresAndFeedbackSaved", AuditDetails)
+      verify(auditServiceMock).logEvent(s"ApplicationStatusSetTo${ApplicationStatuses.AssessmentScoresEntered}", AuditDetails)
     }
   }
 
