@@ -60,8 +60,8 @@ class AssessorApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFacto
       ))
 
     collection.find(query).cursor[BSONDocument]().collect[List]().map {
-      listFut => listFut.map { item =>
-        item.getAs[String]("applicationId").get
+      scoresAndFeedbackWithNoSavedOrSubmittedDates => scoresAndFeedbackWithNoSavedOrSubmittedDates.map { scoresAndFeedback =>
+        scoresAndFeedback.getAs[String]("applicationId").get
       }
     }
   }
@@ -74,6 +74,7 @@ class AssessorApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFacto
     ))
   }
 
+  // For fixdata only
   def fixNoDateScoresAndFeedback(applicationId: String): Future[Unit] = {
     val appIdQuery = BSONDocument("applicationId" -> applicationId)
 

@@ -17,6 +17,7 @@
 package controllers
 
 import model.Exceptions.PassMarkSettingsNotFound
+import play.api.libs.json.Json
 import play.api.mvc.{ Action, AnyContent }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import services.FixDataService
@@ -42,11 +43,11 @@ abstract class FixDataController(fixDataService: FixDataService) extends BaseCon
   }
 
   def countNoDateScoresAndFeedback: Action[AnyContent] = Action.async { implicit request =>
-    fixDataService.countNoDateScoresAndFeedback.map(Ok(_))
+    fixDataService.countNoDateScoresAndFeedback.map(applicationIdsList => Ok(Json.toJson(applicationIdsList)))
   }
 
   def fixNoDateScoresAndFeedback: Action[AnyContent] = Action.async { implicit request =>
-    fixDataService.fixNoDateScoresAndFeedback.map(Ok(_))
+    fixDataService.fixNoDateScoresAndFeedback.map(applicationIdsList => Ok(Json.toJson(applicationIdsList)))
   }
 
 }

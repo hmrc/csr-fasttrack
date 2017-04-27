@@ -77,20 +77,18 @@ trait FixDataService {
       }
   }
 
-  def countNoDateScoresAndFeedback(implicit hc: HeaderCarrier, rh: RequestHeader): Future[JsValue] = {
+  def countNoDateScoresAndFeedback(implicit hc: HeaderCarrier, rh: RequestHeader): Future[List[String]] = {
     assessmentScoresRepo.noDateScoresAndFeedback.map { resultList =>
-      val amendedResultList = ("Count: " + resultList.length) :: resultList
-      Json.toJson(amendedResultList)
+      ("Count: " + resultList.length) :: resultList
     }
   }
 
-  def fixNoDateScoresAndFeedback(implicit hc: HeaderCarrier, rh: RequestHeader): Future[JsValue] = {
+  def fixNoDateScoresAndFeedback(implicit hc: HeaderCarrier, rh: RequestHeader): Future[List[String]] = {
     assessmentScoresRepo.noDateScoresAndFeedback.map { brokenSandFList =>
       brokenSandFList.map { applicationId =>
         assessmentScoresRepo.fixNoDateScoresAndFeedback(applicationId)
       }
-      val amendedResultList = ("Count: " + brokenSandFList.length) :: brokenSandFList
-      Json.toJson(amendedResultList)
+      ("Count: " + brokenSandFList.length) :: brokenSandFList
     }
   }
 }
