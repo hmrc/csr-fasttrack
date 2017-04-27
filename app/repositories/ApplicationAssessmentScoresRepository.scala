@@ -75,7 +75,6 @@ class AssessorApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFacto
   }
 
   def fixNoDateScoresAndFeedback(applicationId: String): Future[Unit] = {
-
     val appIdQuery = BSONDocument("applicationId" -> applicationId)
 
     val query = BSONDocument("$and" -> BSONArray(
