@@ -103,7 +103,8 @@ class AssessorApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFacto
       case _ => throw new Exception("Application ID does not have scores and feedback entries that need the date adding")
     }
 
-    val validator = singleUpdateValidator(applicationId, "Passed applicationid to update but no rows could be updated")
+    val validator = singleUpdateValidator(applicationId, s"Passed applicationid '$applicationId' to update but no rows " +
+      s"could be updated")
 
     addDateQueriesFut.map { addDateQueries =>
       Logger.warn("[NoSaveDateFix] Running " + addDateQueries.length + " correction queries for appId = " + applicationId)
