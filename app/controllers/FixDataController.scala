@@ -42,11 +42,11 @@ abstract class FixDataController(fixDataService: FixDataService) extends BaseCon
   }
 
   def countNoDateScoresAndFeedback: Action[AnyContent] = Action.async { implicit request =>
-    fixDataService.countNoDateScoresAndFeedback.map(json => Ok(json))
+    fixDataService.countNoDateScoresAndFeedback.map(Ok(_))
   }
 
   def fixNoDateScoresAndFeedback: Action[AnyContent] = Action.async { implicit request =>
-    fixDataService.fixNoDateScoresAndFeedback.map(json => Ok(json))
+    fixDataService.fixNoDateScoresAndFeedback.map(Ok(_))
   }
 
 }
