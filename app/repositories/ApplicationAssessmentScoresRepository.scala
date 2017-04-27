@@ -99,7 +99,8 @@ class AssessorApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFacto
             None
           }
         }
-      case _ => throw new Exception("Application ID does not have scores and feedback entries that need the date adding")
+      case _ => throw new Exception(s"Application ID '$applicationId' does not have scores and feedback entries that need " +
+        s"the date adding")
     }
 
     val validator = singleUpdateValidator(applicationId, s"Passed applicationid '$applicationId' to update but no rows " +
