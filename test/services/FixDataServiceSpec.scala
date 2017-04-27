@@ -26,7 +26,7 @@ import model.{ ApplicationStatuses, EmptyRequestHeader, Scheme }
 import model.persisted.SchemeEvaluationResult
 import org.joda.time.DateTime
 import play.api.test.Helpers._
-import repositories.OnlineTestPassMarkSettingsRepository
+import repositories.{ AssessorApplicationAssessmentScoresMongoRepository, OnlineTestPassMarkSettingsRepository }
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
 import testkit.{ MockitoSugar, UnitSpec }
 import org.mockito.Matchers._
@@ -129,6 +129,7 @@ class FixDataServiceSpec extends UnitSpec {
     val mockPassMarkSettingsRepo = mock[OnlineTestPassMarkSettingsRepository]
     val mockAuditService = mock[AuditService]
     val mockConfig = mock[DataFixupConfig]
+    val mockAssessorApplicationAssessmentScoresMongoRepository = mock[AssessorApplicationAssessmentScoresMongoRepository]
     val mockOnlineTestRepository = mock[OnlineTestRepository]
     val mockOnlineTestExtensionService = mock[OnlineTestExtensionService]
 
@@ -137,6 +138,7 @@ class FixDataServiceSpec extends UnitSpec {
       val passmarkSettingsRepo = mockPassMarkSettingsRepo
       val auditService = mockAuditService
       val progressToAssessmentCentreConfig = mockConfig
+      val assessmentScoresRepo: AssessorApplicationAssessmentScoresMongoRepository = mockAssessorApplicationAssessmentScoresMongoRepository
       val onlineTestingRepo: OnlineTestRepository = mockOnlineTestRepository
       val onlineTestExtensionService: OnlineTestExtensionService = mockOnlineTestExtensionService
     }
