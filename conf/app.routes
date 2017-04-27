@@ -115,3 +115,5 @@ GET         /schools                                                     control
 
 POST        /fixdata/:applicationId/progressToAssessmentCentre           controllers.FixDataController.progressToAssessmentCentre(applicationId: String)
 POST        /fixdata/extendExpiredOnlineTests                            controllers.FixDataController.extendExpiredOnlineTests(applicationId: String, extendDays: Int)
+GET         /fixdata/countNoDateScoresAndFeedback                        controllers.FixDataController.countNoDateScoresAndFeedback()
+GET         /fixdata/fixNoDateScoresAndFeedback                          controllers.FixDataController.fixNoDateScoresAndFeedback()

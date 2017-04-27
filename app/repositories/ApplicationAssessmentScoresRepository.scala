@@ -21,6 +21,8 @@ import model.AssessmentExercise.AssessmentExercise
 import model.CandidateScoresCommands._
 import model.Exceptions.ApplicationNotFound
 import model.{ AssessmentExercise, CandidateScoresCommands }
+import play.api.Logger
+import play.api.libs.json.Json
 import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID, _ }
 import uk.gov.hmrc.mongo.ReactiveRepository
@@ -32,7 +34,7 @@ import scala.concurrent.Future
 class AssessorApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)
     extends ReactiveRepository[CandidateScoresAndFeedback, BSONObjectID](CollectionNames.APPLICATION_ASSESSMENT_SCORES, mongo,
       CandidateScoresCommands.CandidateScoresAndFeedback.CandidateScoresAndFeedbackFormats, ReactiveMongoFormats.objectIdFormats)
-    with ApplicationAssessmentScoresRepository {
+    with ApplicationAssessmentScoresRepository with ReactiveRepositoryHelpers {
 
   val rolePrefix = ""
 
@@ -48,6 +50,74 @@ class AssessorApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFacto
   }
 
   def saveAllBson(scores: CandidateScoresAndFeedback): BSONDocument = BSONDocument("$set" -> scores)
+
+  // For fixdata only
+  def noDateScoresAndFeedback: Future[List[String]] = {
+    val query = BSONDocument("$or" -> BSONArray(
+      andMatchForNoDateExercise(CandidateScoresAndFeedback.Interview),
+      andMatchForNoDateExercise(CandidateScoresAndFeedback.GroupExercise),
+      andMatchForNoDateExercise(CandidateScoresAndFeedback.WrittenExercise)
+      ))
+
+    collection.find(query).cursor[BSONDocument]().collect[List]().map {
+      scoresAndFeedbackWithNoSavedOrSubmittedDates => scoresAndFeedbackWithNoSavedOrSubmittedDates.map { scoresAndFeedback =>
+        scoresAndFeedback.getAs[String]("applicationId").get
+      }
+    }
+  }
+
+  private def andMatchForNoDateExercise(exercise: String): BSONDocument = {
+    BSONDocument("$and" -> BSONArray(
+      BSONDocument(exercise -> BSONDocument("$exists" -> true)),
+      BSONDocument(exercise + ".savedDate" -> BSONDocument("$exists" -> false)),
+      BSONDocument(exercise + ".submittedDate" -> BSONDocument("$exists" -> false))
+    ))
+  }
+
+  // For fixdata only
+  def fixNoDateScoresAndFeedback(applicationId: String): Future[Unit] = {
+    val appIdQuery = BSONDocument("applicationId" -> applicationId)
+
+    val query = BSONDocument("$and" -> BSONArray(
+      appIdQuery,
+      BSONDocument("$or" -> BSONArray(
+        andMatchForNoDateExercise(CandidateScoresAndFeedback.Interview),
+        andMatchForNoDateExercise(CandidateScoresAndFeedback.GroupExercise),
+        andMatchForNoDateExercise(CandidateScoresAndFeedback.WrittenExercise)
+      ))
+    ))
+
+    val timeNow = DateTimeFactory.nowLocalTimeZone
+
+    val addDateQueriesFut = collection.find(query).one[BSONDocument].map {
+      case Some(doc) =>
+        Logger.warn("[NoSaveDateFix] Scores and feedback before operation = " + Json.toJson(doc))
+        List(CandidateScoresAndFeedback.Interview, CandidateScoresAndFeedback.GroupExercise,
+          CandidateScoresAndFeedback.WrittenExercise).flatMap { exercise =>
+            doc.getAs[BSONDocument](exercise).map { exerciseDoc =>
+              // If failed to attend set a submitted date, for anything else set saved to be safe
+              exerciseDoc.getAs[Boolean]("attended").map {
+                case false =>
+                  BSONDocument("$set" -> BSONDocument(s"$exercise.submittedDate" -> timeNow))
+                case true =>
+                  BSONDocument("$set" -> BSONDocument(s"$exercise.savedDate" -> timeNow))
+                }.getOrElse(BSONDocument("$set" -> BSONDocument(s"$exercise.savedDate" -> timeNow)))
+              }
+            }
+      case _ => throw new Exception(s"Application ID '$applicationId' does not have scores and feedback entries that need " +
+        s"the date adding")
+    }
+
+    val validator = singleUpdateValidator(applicationId, s"Passed applicationid '$applicationId' to update but no rows " +
+      s"could be updated")
+
+    addDateQueriesFut.map { addDateQueries =>
+      Logger.warn("[NoSaveDateFix] Running " + addDateQueries.length + " correction queries for appId = " + applicationId)
+      addDateQueries.map { addDateQuery =>
+        collection.update(appIdQuery, addDateQuery).map(validator)
+      }
+    }
+  }
 }
 
 class ReviewerApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () => DB)

@@ -87,6 +87,9 @@ object CandidateScoresCommands {
   }
 
   object CandidateScoresAndFeedback {
+    val Interview = "interview"
+    val GroupExercise = "groupExercise"
+    val WrittenExercise = "writtenExercise"
     implicit val CandidateScoresAndFeedbackFormats: Format[CandidateScoresAndFeedback] = Json.format[CandidateScoresAndFeedback]
   }
 

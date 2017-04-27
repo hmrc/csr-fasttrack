@@ -22,12 +22,14 @@ import model.ApplicationStatuses
 import model.EvaluationResults.Green
 import model.Exceptions.{ InvalidStatusException, PassMarkSettingsNotFound }
 import model.persisted.SchemeEvaluationResult
+import play.api.libs.json.{ JsString, JsValue, Json }
 import play.api.mvc.{ RequestHeader, Result, Results }
 import repositories._
 import repositories.application._
 import services.onlinetesting.OnlineTestExtensionService
 import uk.gov.hmrc.play.http.HeaderCarrier
 import play.api.mvc.Results._
+import services.applicationassessment.{ AssessorAssessmentCentreScoresService, AssessorAssessmentScoresService }
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -37,6 +39,7 @@ object FixDataService extends FixDataService {
   val passmarkSettingsRepo: OnlineTestPassMarkSettingsRepository = onlineTestPassMarkSettingsRepository
   val onlineTestingRepo: OnlineTestRepository = onlineTestRepository
   val onlineTestExtensionService: OnlineTestExtensionService = OnlineTestExtensionService
+  val assessmentScoresRepo: AssessorApplicationAssessmentScoresMongoRepository = assessorAssessmentScoresRepository
   val auditService = AuditService
   val progressToAssessmentCentreConfig = config.MicroserviceAppConfig.progressToAssessmentCentreConfig
 }
@@ -46,6 +49,7 @@ trait FixDataService {
   def passmarkSettingsRepo: OnlineTestPassMarkSettingsRepository
   def onlineTestingRepo: OnlineTestRepository
   def onlineTestExtensionService: OnlineTestExtensionService
+  def assessmentScoresRepo: AssessorApplicationAssessmentScoresMongoRepository
   def auditService: AuditService
   def progressToAssessmentCentreConfig: DataFixupConfig
 
@@ -71,5 +75,20 @@ trait FixDataService {
           onlineTestExtensionService.extendExpiryTimeForExpiredTests(onlineTestApp, extendDays).map { _ => Ok }
         case _ => Future.successful(NotFound)
       }
+  }
+
+  def countNoDateScoresAndFeedback(implicit hc: HeaderCarrier, rh: RequestHeader): Future[List[String]] = {
+    assessmentScoresRepo.noDateScoresAndFeedback.map { resultList =>
+      ("Count: " + resultList.length) :: resultList
+    }
+  }
+
+  def fixNoDateScoresAndFeedback(implicit hc: HeaderCarrier, rh: RequestHeader): Future[List[String]] = {
+    assessmentScoresRepo.noDateScoresAndFeedback.map { brokenSandFList =>
+      brokenSandFList.map { applicationId =>
+        assessmentScoresRepo.fixNoDateScoresAndFeedback(applicationId)
+      }
+      ("Count: " + brokenSandFList.length) :: brokenSandFList
+    }
   }
 }
