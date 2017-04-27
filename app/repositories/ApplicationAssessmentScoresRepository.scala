@@ -93,12 +93,16 @@ class AssessorApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFacto
         Logger.warn("[NoSaveDateFix] Scores and feedback before operation = " + Json.toJson(doc))
         List(CandidateScoresAndFeedback.Interview, CandidateScoresAndFeedback.GroupExercise,
           CandidateScoresAndFeedback.WrittenExercise).flatMap { exercise =>
-          if (doc.getAs[BSONDocument](exercise).isDefined) {
-            Some(BSONDocument("$set" -> BSONDocument(s"$exercise.savedDate" -> timeNow)))
-          } else {
-            None
-          }
-        }
+            doc.getAs[BSONDocument](exercise).map { exerciseDoc =>
+              // If failed to attend set a submitted date, for anything else set saved to be safe
+              exerciseDoc.getAs[Boolean]("attended").map {
+                case false =>
+                  BSONDocument("$set" -> BSONDocument(s"$exercise.submittedDate" -> timeNow))
+                case true =>
+                  BSONDocument("$set" -> BSONDocument(s"$exercise.savedDate" -> timeNow))
+                }.getOrElse(BSONDocument("$set" -> BSONDocument(s"$exercise.savedDate" -> timeNow)))
+              }
+            }
       case _ => throw new Exception(s"Application ID '$applicationId' does not have scores and feedback entries that need " +
         s"the date adding")
     }
