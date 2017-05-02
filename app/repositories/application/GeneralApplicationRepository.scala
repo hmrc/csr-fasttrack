@@ -143,6 +143,15 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
       "applicationStatus" -> ApplicationStatuses.Created
     )
 
+    //scalastyle:off
+    println(s"_________________________")
+    println(s"__________applicationId=$applicationId")
+    println(s"__________userId=$userId")
+    println(s"__________frameworkId=$frameworkId")
+    println(s"__________applicationStatus=${ApplicationStatuses.Created}")
+    println(s"_________________________")
+    //scalastyle:on
+
     collection.insert(applicationBSON) flatMap { _ =>
       findProgress(applicationId).map { p =>
         ApplicationResponse(applicationId, ApplicationStatuses.Created, userId, p)
