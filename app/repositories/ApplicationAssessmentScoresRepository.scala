@@ -141,6 +141,18 @@ class ReviewerApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFacto
 
   def saveAllBson(scores: CandidateScoresAndFeedback): BSONDocument =
     BSONDocument("$set" -> BSONDocument("reviewer" -> scores))
+
+  override def saveAll(scoresAndFeedback: CandidateScoresAndFeedback,
+              newVersion: Option[String] = Some(UUIDFactory.generateUUID())): Future[Unit] = {
+    val applicationId = scoresAndFeedback.applicationId
+    val query = BSONDocument("applicationId" -> applicationId)
+
+    val candidateScoresAndFeedbackBSON = saveAllBson(scoresAndFeedback.setVersion(newVersion))
+
+    val validator = singleUpdateValidator(applicationId, s"Reviewer scores not found for application ID $applicationId")
+
+    collection.update(query, candidateScoresAndFeedbackBSON, upsert = scoresAndFeedback.allVersionsEmpty) map validator
+  }
 }
 
 trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {
