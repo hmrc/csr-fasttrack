@@ -124,6 +124,15 @@ trait AssessmentCentreScoresService {
     }
   }
 
+  def saveScoresAndFeedback(applicationId: String, scoresAndFeedback: CandidateScoresAndFeedback)
+                             (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
+    for {
+      _ <- assessmentScoresRepo.saveAll(scoresAndFeedback)
+    } yield {
+      auditService.logEvent("ApplicationScoresAndFeedbackSaved", Map("applicationId" -> applicationId))
+    }
+  }
+
   def getNonSubmittedCandidateScores(assessorId: String): Future[List[ApplicationScores]] = {
     def getApplicationScores(candidateScores: CandidateScoresAndFeedback) = {
       val assessmentCentreAllocationFut = assessmentCentreAllocationRepo.findOne(candidateScores.applicationId)

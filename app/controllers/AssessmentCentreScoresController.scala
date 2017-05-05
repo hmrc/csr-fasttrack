@@ -117,6 +117,16 @@ trait ReviewerScoresController extends AssessmentCentreScoresController {
     }
   }
 
+  def saveCandidateScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    withJsonBody[CandidateScoresAndFeedback] { scoresAndFeedback =>
+      assessmentCentreScoresService.saveScoresAndFeedback(applicationId, scoresAndFeedback).map { _ =>
+        Ok
+      }.recover {
+        case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
+      }
+    }
+  }
+
   def unlockExercise(applicationId: String, exercise: String): Action[AnyContent] = Action.async { implicit request =>
     assessmentCentreScoresRemovalService.removeScoresAndFeedback(applicationId, AssessmentExercise.withName(exercise)).map { _ =>
       Ok
