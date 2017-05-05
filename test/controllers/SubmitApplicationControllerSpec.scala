@@ -22,7 +22,7 @@ import connectors.EmailClient
 import common.Constants.No
 import model.Commands.{ Address, PostCode }
 import model.PersistedObjects.ContactDetails
-import model.{ AssessmentCentreIndicator, LocationPreference, Preferences, Scheme }
+import model.{ AssessmentCentreIndicator, Scheme }
 import model.exchange.AssistanceDetails
 import model.persisted.PersonalDetails
 import org.joda.time.LocalDate

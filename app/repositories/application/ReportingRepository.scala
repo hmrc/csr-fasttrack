@@ -205,93 +205,32 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
   override def applicationsPassedInAssessmentCentre(frameworkId: String): Future[List[ApplicationPreferencesWithTestResults]] =
     applicationPreferencesWithTestResults(BSONDocument("$and" -> BSONArray(
       BSONDocument("frameworkId" -> frameworkId),
-      BSONDocument(s"progress-status.${ProgressStatuses.AssessmentCentrePassedProgress}" -> true),
+      BSONDocument("$or" ->
+        BSONArray(
+          BSONDocument(s"progress-status.${ProgressStatuses.AssessmentCentrePassedProgress}" -> true),
+          BSONDocument(s"progress-status.${ProgressStatuses.AssessmentCentrePassedNotifiedProgress}" -> true)
+        )),
       BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn))
     )))
 
-  // scalastyle:off method.length
   private def applicationPreferencesWithTestResults(query: BSONDocument): Future[List[ApplicationPreferencesWithTestResults]] = {
     val projection = BSONDocument(
       "userId" -> "1",
-      "framework-preferences.alternatives.location" -> "1",
-      "framework-preferences.alternatives.framework" -> "1",
-      "framework-preferences.firstLocation.location" -> "1",
-      "framework-preferences.secondLocation.location" -> "1",
-      "framework-preferences.firstLocation.firstFramework" -> "1",
-      "framework-preferences.secondLocation.firstFramework" -> "1",
-      "framework-preferences.firstLocation.secondFramework" -> "1",
-      "framework-preferences.secondLocation.secondFramework" -> "1",
-      "assessment-centre-passmark-evaluation" -> "2",
       "applicationId" -> "1",
       "personal-details.firstName" -> "1",
       "personal-details.lastName" -> "1",
       "personal-details.preferredName" -> "1",
       "personal-details.aLevel" -> "1",
       "personal-details.stemLevel" -> "1",
-      "personal-details.dateOfBirth" -> "1"
+      "personal-details.dateOfBirth" -> "1",
+      "schemes" -> "1",
+      "scheme-locations" -> "1",
+      "assessment-centre-passmark-evaluation.competency-average" -> "1",
+      "assessment-centre-passmark-evaluation.schemes-evaluation" -> "1"
     )
 
-    reportQueryWithProjections[BSONDocument](query, projection).map { list =>
-      list.map { document =>
-        val userId = document.getAs[String]("userId").getOrElse("")
-
-        val fr = document.getAs[BSONDocument]("framework-preferences")
-
-        val fr1 = fr.flatMap(_.getAs[BSONDocument]("firstLocation"))
-        val fr1FirstLocation = fr1.flatMap(_.getAs[String]("location"))
-        val fr1FirstFramework = fr1.flatMap(_.getAs[String]("firstFramework"))
-        val fr1SecondFramework = fr1.flatMap(_.getAs[String]("secondFramework"))
-
-        val fr2 = fr.flatMap(_.getAs[BSONDocument]("secondLocation"))
-        val fr2FirstLocation = fr2.flatMap(_.getAs[String]("location"))
-        val fr2FirstFramework = fr2.flatMap(_.getAs[String]("firstFramework"))
-        val fr2SecondFramework = fr2.flatMap(_.getAs[String]("secondFramework"))
-
-        val frAlternatives = fr.flatMap(_.getAs[BSONDocument]("alternatives"))
-        val location = frAlternatives.flatMap(_.getAs[Boolean]("location").map(booleanTranslator))
-        val framework = frAlternatives.flatMap(_.getAs[Boolean]("framework").map(booleanTranslator))
-
-        val applicationId = document.getAs[String]("applicationId").getOrElse("")
-
-        val pe = document.getAs[BSONDocument]("assessment-centre-passmark-evaluation")
-
-        val ca = pe.flatMap(_.getAs[BSONDocument]("competency-average"))
-        val leadingAndCommunicatingAverage = ca.flatMap(_.getAs[Double]("leadingAndCommunicatingAverage"))
-        val collaboratingAndPartneringAverage = ca.flatMap(_.getAs[Double]("collaboratingAndPartneringAverage"))
-        val deliveringAtPaceAverage = ca.flatMap(_.getAs[Double]("deliveringAtPaceAverage"))
-        val makingEffectiveDecisionsAverage = ca.flatMap(_.getAs[Double]("makingEffectiveDecisionsAverage"))
-        val changingAndImprovingAverage = ca.flatMap(_.getAs[Double]("changingAndImprovingAverage"))
-        val buildingCapabilityForAllAverage = ca.flatMap(_.getAs[Double]("buildingCapabilityForAllAverage"))
-        val motivationFitAverage = ca.flatMap(_.getAs[Double]("motivationFitAverage"))
-        val overallScore = ca.flatMap(_.getAs[Double]("overallScore"))
-
-        val se = pe.flatMap(_.getAs[BSONDocument]("schemes-evaluation"))
-        val commercial = se.flatMap(_.getAs[String](Schemes.Commercial).map(Result(_).toPassmark))
-        val digitalAndTechnology = se.flatMap(_.getAs[String](Schemes.DigitalAndTechnology).map(Result(_).toPassmark))
-        val business = se.flatMap(_.getAs[String](Schemes.Business).map(Result(_).toPassmark))
-        val projectDelivery = se.flatMap(_.getAs[String](Schemes.ProjectDelivery).map(Result(_).toPassmark))
-        val finance = se.flatMap(_.getAs[String](Schemes.Finance).map(Result(_).toPassmark))
-
-        val pd = document.getAs[BSONDocument]("personal-details")
-        val firstName = pd.flatMap(_.getAs[String]("firstName"))
-        val lastName = pd.flatMap(_.getAs[String]("lastName"))
-        val preferredName = pd.flatMap(_.getAs[String]("preferredName"))
-        val aLevel = pd.flatMap(_.getAs[Boolean]("aLevel").map(booleanTranslator))
-        val stemLevel = pd.flatMap(_.getAs[Boolean]("stemLevel").map(booleanTranslator))
-        val dateOfBirth = pd.flatMap(_.getAs[LocalDate]("dateOfBirth"))
-
-        ApplicationPreferencesWithTestResults(UniqueIdentifier(userId), UniqueIdentifier(applicationId), fr1FirstLocation, fr1FirstFramework,
-          fr1SecondFramework, fr2FirstLocation, fr2FirstFramework, fr2SecondFramework, location, framework,
-          PersonalInfo(firstName, lastName, preferredName, aLevel, stemLevel, dateOfBirth),
-          CandidateScoresSummary(leadingAndCommunicatingAverage, collaboratingAndPartneringAverage,
-            deliveringAtPaceAverage, makingEffectiveDecisionsAverage, changingAndImprovingAverage,
-            buildingCapabilityForAllAverage, motivationFitAverage, overallScore),
-          SchemeEvaluation(commercial, digitalAndTechnology, business, projectDelivery, finance))
-      }
-    }
+    reportQueryWithProjectionsBSON[ApplicationPreferencesWithTestResults](query, projection)
   }
-
-  // scalstyle:on method.length
 
   private def overallReportWithPersonalDetails(query: BSONDocument): Future[List[ReportWithPersonalDetails]] = {
     val projection = BSONDocument(
@@ -541,7 +480,9 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     upTo: Int = Int.MaxValue,
     stopOnError: Boolean = true
   )(implicit reader: Format[A]): Future[List[A]] =
-    collection.find(query).projection(prj).cursor[A](ReadPreference.nearest).collect[List](upTo, stopOnError)
+    collection.find(query).projection(prj)
+      .cursor[A](ReadPreference.nearest)
+      .collect[List](upTo, stopOnError)
 
   private def reportQueryWithProjectionsBSON[A](
     query: BSONDocument,

@@ -204,22 +204,16 @@ object ReportExchangeObjects {
   )
 
   case class ApplicationPreferencesWithTestResults(
-    userId: UniqueIdentifier,
-    applicationId: UniqueIdentifier,
-    location1: Option[String],
-    location1Scheme1: Option[String],
-    location1Scheme2: Option[String],
-    location2: Option[String],
-    location2Scheme1: Option[String],
-    location2Scheme2: Option[String],
-    alternativeLocation: Option[String],
-    alternativeScheme: Option[String],
-    personalDetails: PersonalInfo,
-    scores: CandidateScoresSummary,
-    passmarks: SchemeEvaluation
+                                                    userId: UniqueIdentifier,
+                                                    applicationId: UniqueIdentifier,
+                                                    schemes: List[Scheme],
+                                                    locations: List[String],
+                                                    personalDetails: PersonalInfo,
+                                                    scores: CandidateScoresSummary,
+                                                    schemeEvaluation: SchemeEvaluation
   )
 
-  case class ApplicationPreferencesWithTestResultsAndContactDetails(
+  case class SuccessfulCandidatesReportItem(
     application: ApplicationPreferencesWithTestResults,
     contactDetails: ContactDetails
   )
@@ -259,7 +253,7 @@ object ReportExchangeObjects {
     implicit val candidateScoresSummaryFormats = Json.format[CandidateScoresSummary]
     implicit val schemeEvaluationFormats = Json.format[SchemeEvaluation]
     implicit val applicationPreferencesWithTestResultsFormats = Json.format[ApplicationPreferencesWithTestResults]
-    implicit val successfulCandidatesReportFormats = Json.format[ApplicationPreferencesWithTestResultsAndContactDetails]
+    implicit val successfulCandidatesReportFormats = Json.format[SuccessfulCandidatesReportItem]
     implicit val candidateAwaitingAllocationFormats = Json.format[CandidateAwaitingAllocation]
     implicit val assessmentCentreIndicatorReportFormats = Json.format[AssessmentCentreIndicatorReport]
   }
