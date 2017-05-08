@@ -205,11 +205,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
   override def applicationsPassedInAssessmentCentre(frameworkId: String): Future[List[ApplicationPreferencesWithTestResults]] =
     applicationPreferencesWithTestResults(BSONDocument("$and" -> BSONArray(
       BSONDocument("frameworkId" -> frameworkId),
-      BSONDocument("$or" ->
-        BSONArray(
-          BSONDocument(s"progress-status.${ProgressStatuses.AssessmentCentrePassedProgress}" -> true),
-          BSONDocument(s"progress-status.${ProgressStatuses.AssessmentCentrePassedNotifiedProgress}" -> true)
-        )),
+      BSONDocument(s"progress-status.${ProgressStatuses.AssessmentCentrePassedProgress}" -> true),
       BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn))
     )))
 

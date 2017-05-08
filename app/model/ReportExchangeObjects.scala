@@ -204,13 +204,13 @@ object ReportExchangeObjects {
   )
 
   case class ApplicationPreferencesWithTestResults(
-                                                    userId: UniqueIdentifier,
-                                                    applicationId: UniqueIdentifier,
-                                                    schemes: List[Scheme],
-                                                    locations: List[String],
-                                                    personalDetails: PersonalInfo,
-                                                    scores: CandidateScoresSummary,
-                                                    schemeEvaluation: SchemeEvaluation
+    userId: UniqueIdentifier,
+    applicationId: UniqueIdentifier,
+    schemes: List[Scheme],
+    locations: List[String],
+    personalDetails: PersonalInfo,
+    scores: CandidateScoresSummary,
+    schemeEvaluation: SchemeEvaluation
   )
 
   case class SuccessfulCandidatesReportItem(

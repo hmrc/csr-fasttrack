@@ -38,7 +38,7 @@ class SuccessfulCandidatesReportingControllerSpec extends BaseReportingControlle
     "return results report" in new SuccessfulCandidatesReportTestFixture {
       when(reportingRepoMock.applicationsPassedInAssessmentCentre(any())).thenReturnAsync(appPreferencesList)
       when(contactDetailsRepoMock.findAll).thenReturnAsync(allContactDetailsList)
-      when(controller.locationSchemeService.getAllSchemeLocations).thenReturn(Future.successful(allLocationSchemes))
+      when(controller.locationSchemeService.getAllSchemeLocations).thenReturnAsync(allLocationSchemes)
 
       val response = controller.createSuccessfulCandidatesReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[SuccessfulCandidatesReportItem]]
@@ -54,7 +54,7 @@ class SuccessfulCandidatesReportingControllerSpec extends BaseReportingControlle
     "return results report without locations if locations cannot be found" in new SuccessfulCandidatesReportTestFixture {
       when(reportingRepoMock.applicationsPassedInAssessmentCentre(any())).thenReturnAsync(appPreferencesList)
       when(contactDetailsRepoMock.findAll).thenReturnAsync(allContactDetailsList)
-      when(controller.locationSchemeService.getAllSchemeLocations).thenReturn(Future.successful(Nil))
+      when(controller.locationSchemeService.getAllSchemeLocations).thenReturnAsync(Nil)
 
       val response = controller.createSuccessfulCandidatesReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[SuccessfulCandidatesReportItem]]
@@ -70,7 +70,7 @@ class SuccessfulCandidatesReportingControllerSpec extends BaseReportingControlle
     "return nothing if no applications exist" in new SuccessfulCandidatesReportTestFixture {
       when(reportingRepoMock.applicationsPassedInAssessmentCentre(any())).thenReturnAsync(Nil)
       when(contactDetailsRepoMock.findAll).thenReturnAsync(allContactDetailsList)
-      when(controller.locationSchemeService.getAllSchemeLocations).thenReturn(Future.successful(allLocationSchemes))
+      when(controller.locationSchemeService.getAllSchemeLocations).thenReturnAsync(allLocationSchemes)
 
       val response = controller.createSuccessfulCandidatesReport(frameworkId)(request).run
       val result = contentAsJson(response).as[List[SuccessfulCandidatesReportItem]]
@@ -83,7 +83,7 @@ class SuccessfulCandidatesReportingControllerSpec extends BaseReportingControlle
     "return nothing if no contact details exist" in new SuccessfulCandidatesReportTestFixture {
       when(reportingRepoMock.applicationsPassedInAssessmentCentre(any())).thenReturnAsync(appPreferencesList)
       when(contactDetailsRepoMock.findAll).thenReturnAsync(Nil)
-      when(controller.locationSchemeService.getAllSchemeLocations).thenReturn(Future.successful(allLocationSchemes))
+      when(controller.locationSchemeService.getAllSchemeLocations).thenReturnAsync(allLocationSchemes)
 
 
       val response = controller.createSuccessfulCandidatesReport(frameworkId)(request).run

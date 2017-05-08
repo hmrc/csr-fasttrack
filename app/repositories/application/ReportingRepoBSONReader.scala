@@ -74,8 +74,8 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
 
   implicit val toApplicationPreferencesWithTestResults = bsonReader {
     (doc: BSONDocument) =>
-      val applicationId = doc.getAs[String]("applicationId").getOrElse("")
-      val userId = doc.getAs[String]("userId").getOrElse("")
+      val applicationId = doc.getAs[String]("applicationId").get
+      val userId = doc.getAs[String]("userId").get
 
       val personalDetails = doc.getAs[BSONDocument]("personal-details")
       val firstName = personalDetails.flatMap(_.getAs[String]("firstName"))
@@ -102,9 +102,9 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
 
       val schemesEvaluation = passmarkEvaluation.flatMap(_.getAs[List[SchemeEvaluationResult]]("schemes-evaluation")).getOrElse(List.empty)
 
-      val schemesEvaluationMap = Scheme.AllSchemes.map { scheme =>
+      val schemesEvaluationMap = Scheme.AllSchemes.flatMap { scheme =>
         schemesEvaluation.find(_.scheme == scheme).map { scheme -> _.result.toPassmark }
-      }.flatten.toMap
+      }.toMap
 
       val commercial = schemesEvaluationMap.get(Scheme.Commercial)
       val digitalAndTechnology = schemesEvaluationMap.get(Scheme.DigitalAndTechnology)

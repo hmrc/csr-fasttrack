@@ -388,13 +388,13 @@ trait ReportingController extends BaseController {
       allContactDetails <- allContactDetailsFut
       allLocations <- allLocationsFut
     } yield {
-      val allContatDetailsMap = allContactDetails.map(c => c.userId -> c).toMap
+      val allContactDetailsMap = allContactDetails.map(c => c.userId -> c).toMap
       val allLocationsMap = allLocations.map(l => l.id -> l.locationName).toMap
       for {
         application <- applications
-        contactDetails <- allContatDetailsMap.get(application.userId.toString)
+        contactDetails <- allContactDetailsMap.get(application.userId.toString)
       } yield {
-        val locations = application.locations.map { locationId => allLocationsMap.get(locationId) }.flatten
+        val locations = application.locations.flatMap { locationId => allLocationsMap.get(locationId) }
         SuccessfulCandidatesReportItem(
           application.copy(locations = locations),
           ContactDetails(contactDetails.phone, contactDetails.email, contactDetails.address, contactDetails.postCode)
