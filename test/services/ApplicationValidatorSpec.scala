@@ -18,7 +18,7 @@ package services
 
 import model.persisted.PersonalDetails
 import model.exchange.AssistanceDetailsExamples
-import model.{ ApplicationValidator, LocationPreference, Preferences }
+import model.{ ApplicationValidator, LocationPreference }
 import org.joda.time.LocalDate
 import org.scalatestplus.play.PlaySpec
 import repositories.FrameworkRepository.{ CandidateHighestQualification, Framework, Location, Region }
@@ -71,10 +71,6 @@ object ApplicationValidatorSpec {
     stemLevel = true, civilServant = false, department = None)
 
   def assistanceDetails = AssistanceDetailsExamples.DisabilityGisAndAdjustments
-
-  def preferences: Option[Preferences] = Some(
-    Preferences(LocationPreference("London", "London", "Business", Some("IT")), Some(LocationPreference("London", "Reading", "Logistics", None)))
-  )
 
   def regions = List(
     Region(
