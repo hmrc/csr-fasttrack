@@ -141,6 +141,7 @@ class ReviewerApplicationAssessmentScoresMongoRepository(dateTime: DateTimeFacto
 
   def saveAllBson(scores: CandidateScoresAndFeedback): BSONDocument =
     BSONDocument("$set" -> BSONDocument("reviewer" -> scores))
+
 }
 
 trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {

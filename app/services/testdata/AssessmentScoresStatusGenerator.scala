@@ -122,6 +122,7 @@ trait AssessmentScoresStatusGenerator extends ConstructiveGenerator {
       motivationFit               = randScore,
       feedback = Some("Good interview"),
       updatedBy = UUIDFactory.generateUUID(),
+      savedDate = Some(DateTimeFactory.nowLocalTimeZone),
       submittedDate = if (isSubmitted) { Some(DateTimeFactory.nowLocalTimeZone) } else { None }
     )
 

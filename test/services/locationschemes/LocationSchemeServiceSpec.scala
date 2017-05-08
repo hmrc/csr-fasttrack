@@ -55,7 +55,10 @@ class LocationSchemeServiceSpec extends UnitSpec {
     "return a list of location/scheme combinations sorted closest first" in new TestFixture {
       when(pdRepoMock.find(appId)).thenReturn(Future.successful(personalDetailsMock.copy(aLevel = false, stemLevel = false)))
       val result = service.getEligibleSchemeLocations(appId, latitudeOpt = Some(1.1), longitudeOpt = Some(2.2)).futureValue
-      result.map(_.locationName) mustBe List("testLocation4", "testLocation3", "testLocation1", "testLocation2")
+      result.map(_.locationName) mustBe List(LocationSchemesExamples.Edinburgh.locationName,
+        LocationSchemesExamples.Bristol.locationName,
+        LocationSchemesExamples.London.locationName,
+        LocationSchemesExamples.Manchester.locationName)
     }
   }
 
@@ -71,8 +74,8 @@ class LocationSchemeServiceSpec extends UnitSpec {
     when(locationSchemeRepoMock.getSchemesAndLocations)
       .thenReturn(Future.successful(
         List(
-          LocationSchemesExamples.LocationSchemes1, LocationSchemesExamples.LocationSchemes2,
-          LocationSchemesExamples.LocationSchemes3, LocationSchemesExamples.LocationSchemes4
+          LocationSchemesExamples.London, LocationSchemesExamples.Manchester,
+          LocationSchemesExamples.Bristol, LocationSchemesExamples.Edinburgh
         )
       ))
 
