@@ -19,7 +19,7 @@ package connectors.testdata
 import model.Commands.AssessmentCentreAllocation
 import model.PersistedObjects.ContactDetails
 import model.exchange.AssistanceDetails
-import model.{ ApplicationStatuses, AssessmentCentreIndicator, Preferences }
+import model.{ ApplicationStatuses, AssessmentCentreIndicator }
 import model.persisted.PersonalDetails
 import play.api.libs.json.Json
 import repositories.SchemeInfo
@@ -36,7 +36,6 @@ object ExchangeObjects {
     lastName: String,
     onlineTestProfile: Option[OnlineTestProfileResponse] = None,
     applicationAssessment: Option[AssessmentCentreAllocation] = None,
-    preferences: Option[Preferences] = None,
     contactDetails: Option[ContactDetails] = None,
     personalDetails: Option[PersonalDetails] = None,
     assistanceDetails: Option[AssistanceDetails] = None,

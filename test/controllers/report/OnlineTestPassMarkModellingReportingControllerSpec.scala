@@ -37,7 +37,7 @@ import scala.language.postfixOps
 import scala.util.Random
 
 class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingControllerSpec {
-  "Pass mark modelling report" should {
+  "Online Test Pass mark modelling report" should {
     "return nothing if no applications exist" in new PassMarkReportTestFixture {
       when(reportingRepoMock.passMarkReport(any())).thenReturnAsync(Nil)
       when(contactDetailsRepoMock.findAll).thenReturnAsync(Nil)
@@ -86,7 +86,7 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
         country = None, email = "joe@bloggs.com", phone = Some("07720809809")
       ))
       when(contactDetailsRepoMock.findAll).thenReturnAsync(contactDetails)
-      when(locationSchemeServiceMock.getAllSchemeLocations).thenReturnAsync(List(LocationSchemesExamples.LocationSchemes1))
+      when(locationSchemeServiceMock.getAllSchemeLocations).thenReturnAsync(List(LocationSchemesExamples.London))
       val diversityQuestions = Map(appId -> Map(
         QuestionnaireRepository.genderQuestionText -> "Male",
         QuestionnaireRepository.sexualOrientationQuestionText -> "Gay",
@@ -130,7 +130,7 @@ class OnlineTestPassMarkModellingReportingControllerSpec extends BaseReportingCo
       val passMarkReportItem = result.head
       passMarkReportItem.progress mustBe Some("assessment_scores_accepted")
       passMarkReportItem.schemes mustBe List(model.Scheme.Business, model.Scheme.ProjectDelivery)
-      passMarkReportItem.locations mustBe List("testLocation1")
+      passMarkReportItem.locations mustBe List("London")
       passMarkReportItem.gender mustBe "Male"
       passMarkReportItem.sexualOrientation mustBe "Gay"
       passMarkReportItem.ethnicity mustBe "Irish"

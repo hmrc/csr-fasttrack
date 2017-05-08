@@ -379,21 +379,25 @@ trait ReportingController extends BaseController {
 
   def createSuccessfulCandidatesReport(frameworkId: String) = Action.async { implicit request =>
 
-    val applications = reportingRepository.applicationsPassedInAssessmentCentre(frameworkId)
-    val allCandidates = contactDetailsRepository.findAll
+    val applicationsFut = reportingRepository.applicationsPassedInAssessmentCentre(frameworkId)
+    val allContactDetailsFut = contactDetailsRepository.findAll
+    val allLocationsFut = locationSchemeService.getAllSchemeLocations
 
     val reports = for {
-      apps <- applications
-      acs <- allCandidates
-      candidates = acs.map(c => c.userId -> c).toMap
+      applications <- applicationsFut
+      allContactDetails <- allContactDetailsFut
+      allLocations <- allLocationsFut
     } yield {
+      val allContactDetailsMap = allContactDetails.map(c => c.userId -> c).toMap
+      val allLocationsMap = allLocations.map(l => l.id -> l.locationName).toMap
       for {
-        a <- apps
-        c <- candidates.get(a.userId.toString)
+        application <- applications
+        contactDetails <- allContactDetailsMap.get(application.userId.toString)
       } yield {
-        ApplicationPreferencesWithTestResultsAndContactDetails(
-          a,
-          ContactDetails(c.phone, c.email, c.address, c.postCode)
+        val locations = application.locations.flatMap { locationId => allLocationsMap.get(locationId) }
+        SuccessfulCandidatesReportItem(
+          application.copy(locations = locations),
+          ContactDetails(contactDetails.phone, contactDetails.email, contactDetails.address, contactDetails.postCode)
         )
       }
     }
