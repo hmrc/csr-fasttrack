@@ -94,6 +94,7 @@ object ReportExchangeObjects {
   case class ApplicationForAssessmentScoresReport(
     applicationId: Option[String],
     userId: String,
+    applicationStatus: String,
     assessmentCentreIndicator: Option[AssessmentCentreIndicator],
     firstName: Option[String],
     lastName: Option[String]

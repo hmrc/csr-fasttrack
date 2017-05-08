@@ -229,18 +229,18 @@ trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {
     val applicationId = scoresAndFeedback.applicationId
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> applicationId),
-      BSONDocument("$or" -> BSONArray(BSONDocument(
-        s"$rolePrefix${AssessmentExercise.interview}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
-        s"$rolePrefix${AssessmentExercise.interview}.version" -> scoresAndFeedback.interview.flatMap(_.version))
-      )),
-      BSONDocument("$or" -> BSONArray(BSONDocument(
-        s"$rolePrefix${AssessmentExercise.groupExercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
-        s"$rolePrefix${AssessmentExercise.groupExercise}.version" -> scoresAndFeedback.groupExercise.flatMap(_.version))
-      )),
-      BSONDocument("$or" -> BSONArray(BSONDocument(
-        s"$rolePrefix${AssessmentExercise.writtenExercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false)),
-        s"$rolePrefix${AssessmentExercise.writtenExercise}.version" -> scoresAndFeedback.writtenExercise.flatMap(_.version))
-      ))
+      BSONDocument("$or" -> BSONArray(
+        BSONDocument(s"$rolePrefix${AssessmentExercise.interview}.version" -> BSONDocument("$exists" -> BSONBoolean(false))),
+        BSONDocument(s"$rolePrefix${AssessmentExercise.interview}.version" -> scoresAndFeedback.interview.flatMap(_.version)))
+      ),
+      BSONDocument("$or" -> BSONArray(
+        BSONDocument(s"$rolePrefix${AssessmentExercise.groupExercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false))),
+        BSONDocument(s"$rolePrefix${AssessmentExercise.groupExercise}.version" -> scoresAndFeedback.groupExercise.flatMap(_.version)))
+      ),
+      BSONDocument("$or" -> BSONArray(
+        BSONDocument(s"$rolePrefix${AssessmentExercise.writtenExercise}.version" -> BSONDocument("$exists" -> BSONBoolean(false))),
+        BSONDocument(s"$rolePrefix${AssessmentExercise.writtenExercise}.version" -> scoresAndFeedback.writtenExercise.flatMap(_.version)))
+      )
     ))
 
     val candidateScoresAndFeedbackBSON = saveAllBson(scoresAndFeedback.setVersion(newVersion))
