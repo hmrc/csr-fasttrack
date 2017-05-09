@@ -27,7 +27,7 @@ import model.ReportExchangeObjects.{ Implicits => _, _ }
 import model.Scheme.Scheme
 import model.persisted.SchemeEvaluationResult
 import model.report.{ AssessmentCentreScoresReportItem, DiversityReportItem, PassMarkReportItem }
-import model._
+import model.{ ApplicationStatusOrder, ApplicationStatuses, AssessmentExercise, ProgressStatuses, UniqueIdentifier }
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
 import play.api.libs.streams.Streams
@@ -518,12 +518,12 @@ trait ReportingController extends BaseController {
     }
   }
 
-  private def evaluateAssessmentStatus(applicationId: String,
-                                       applicationStatus: String,
-                                       exerciseType: AssessmentExercise,
-                                       assessorAssessmentScoresData: Map[String, CandidateScoresAndFeedback],
-                                       reviewerAssessmentScoresData: Map[String, CandidateScoresAndFeedback]
-                                      ): String = {
+  private def evaluateAssessmentStatus(
+    applicationId: String,
+    applicationStatus: String, exerciseType: AssessmentExercise,
+    assessorAssessmentScoresData: Map[String, CandidateScoresAndFeedback],
+    reviewerAssessmentScoresData: Map[String, CandidateScoresAndFeedback]
+  ): String = {
 
     def evaluateAssessorStatus(scoresAndFeedback: Option[ScoresAndFeedback], exerciseType: AssessmentExercise) = {
       scoresAndFeedback.map { sAndF =>
@@ -542,8 +542,11 @@ trait ReportingController extends BaseController {
     val assessorFeedback: Option[CandidateScoresAndFeedback] = assessorAssessmentScoresData.get(applicationId)
     val status = (reviewerFeedback, assessorFeedback) match {
       case (Some(rf), _) =>
-        if (ApplicationStatuses.AssessmentScoresAccepted.toString() == applicationStatus) { "QA accepted" }
-        else { "QA saved" }
+        if (ApplicationStatuses.AssessmentScoresAccepted.toString() == applicationStatus) {
+          "QA accepted"
+        } else {
+          "QA saved"
+        }
       case (_, Some(af)) => // We have assessor feedback
         exerciseType match {
           case AssessmentExercise.interview => evaluateAssessorStatus(af.interview, exerciseType)
