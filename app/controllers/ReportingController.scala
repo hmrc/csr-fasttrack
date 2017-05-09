@@ -27,7 +27,7 @@ import model.ReportExchangeObjects.{ Implicits => _, _ }
 import model.Scheme.Scheme
 import model.persisted.SchemeEvaluationResult
 import model.report.{ AssessmentCentreScoresReportItem, DiversityReportItem, PassMarkReportItem }
-import model.{ ApplicationStatusOrder, AssessmentExercise, ProgressStatuses, UniqueIdentifier }
+import model.{ ApplicationStatusOrder, ApplicationStatuses, AssessmentExercise, ProgressStatuses, UniqueIdentifier }
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
 import play.api.libs.streams.Streams
@@ -484,14 +484,15 @@ trait ReportingController extends BaseController {
     applications.map { application =>
       val reportItem = application.applicationId.map{ appId =>
 
+        val status = application.applicationStatus
         val candidateFullName = buildFullName(application.firstName, application.lastName)
 
         val interviewStatus =
-          evaluateAssessmentStatus(appId, AssessmentExercise.interview, assessorAssessmentScoresData, reviewerAssessmentScoresData)
+          evaluateAssessmentStatus(appId, status, AssessmentExercise.interview, assessorAssessmentScoresData, reviewerAssessmentScoresData)
         val groupExerciseStatus =
-          evaluateAssessmentStatus(appId, AssessmentExercise.groupExercise, assessorAssessmentScoresData, reviewerAssessmentScoresData)
+          evaluateAssessmentStatus(appId, status, AssessmentExercise.groupExercise, assessorAssessmentScoresData, reviewerAssessmentScoresData)
         val writtenExerciseStatus =
-          evaluateAssessmentStatus(appId, AssessmentExercise.writtenExercise, assessorAssessmentScoresData, reviewerAssessmentScoresData)
+          evaluateAssessmentStatus(appId, status, AssessmentExercise.writtenExercise, assessorAssessmentScoresData, reviewerAssessmentScoresData)
 
         val interviewAssessor = getAssessorForExercise(appId, AssessmentExercise.interview, assessorAssessmentScoresData, assessorsMap)
         val groupExerciseAssessor = getAssessorForExercise(appId, AssessmentExercise.groupExercise, assessorAssessmentScoresData, assessorsMap)
@@ -517,17 +518,18 @@ trait ReportingController extends BaseController {
     }
   }
 
-  private def evaluateAssessmentStatus(applicationId: String,
-                             exerciseType: AssessmentExercise,
-                             assessorAssessmentScoresData: Map[String, CandidateScoresAndFeedback],
-                             reviewerAssessmentScoresData: Map[String, CandidateScoresAndFeedback]
-                            ): String = {
+  private def evaluateAssessmentStatus(
+    applicationId: String,
+    applicationStatus: String, exerciseType: AssessmentExercise,
+    assessorAssessmentScoresData: Map[String, CandidateScoresAndFeedback],
+    reviewerAssessmentScoresData: Map[String, CandidateScoresAndFeedback]
+  ): String = {
 
     def evaluateAssessorStatus(scoresAndFeedback: Option[ScoresAndFeedback], exerciseType: AssessmentExercise) = {
       scoresAndFeedback.map { sAndF =>
         (sAndF.submittedDate, sAndF.savedDate) match {
-          case (Some(_), _) => "Submitted" // Presence of submitted date indicates the exercise has been submitted
-          case (_, Some(_)) => "Saved" // Presence of saved date indicates the exercise has been saved
+          case (Some(_), _) => "Assessor submitted" // Presence of submitted date indicates the exercise has been submitted
+          case (_, Some(_)) => "Assessor saved" // Presence of saved date indicates the exercise has been saved
           case _ =>
             val msg = s"Error generating assessment centre scores report for appId = $applicationId. " +
               s"No saved or submitted date found when evaluating $exerciseType"
@@ -539,7 +541,12 @@ trait ReportingController extends BaseController {
     val reviewerFeedback: Option[CandidateScoresAndFeedback] = reviewerAssessmentScoresData.get(applicationId)
     val assessorFeedback: Option[CandidateScoresAndFeedback] = assessorAssessmentScoresData.get(applicationId)
     val status = (reviewerFeedback, assessorFeedback) match {
-      case (Some(rf), _) => "Accepted" // Presence of reviewer feedback means it has been accepted
+      case (Some(rf), _) =>
+        if (ApplicationStatuses.AssessmentScoresAccepted.toString() == applicationStatus) {
+          "QA accepted"
+        } else {
+          "QA saved"
+        }
       case (_, Some(af)) => // We have assessor feedback
         exerciseType match {
           case AssessmentExercise.interview => evaluateAssessorStatus(af.interview, exerciseType)

@@ -27,9 +27,20 @@ object AssessmentScoresReportExamples {
 
   val userId = UniqueIdentifier.randomUniqueIdentifier
 
-  val applicationForAssessmentScoresReport = List(ApplicationForAssessmentScoresReport(
+  val applicationForAssessmentScoresReportQaAccepted = List(ApplicationForAssessmentScoresReport(
     applicationId = Some(ApplicationIdExamples.appId1.toString()),
     userId = userId.toString(),
+    applicationStatus = "ASSESSMENT_SCORES_ACCEPTED",
+    assessmentCentreIndicator = Some(AssessmentCentreIndicator(area = "London", assessmentCentre = "London")),
+    firstName = Some("Joe"),
+    lastName = Some("Bloggs")
+  ))
+
+  // ASSESSMENT_SCORES_ENTERED covers assessor saved, submitted and qa saved
+  val applicationForAssessmentScoresReportAssessorSaved = List(ApplicationForAssessmentScoresReport(
+    applicationId = Some(ApplicationIdExamples.appId1.toString()),
+    userId = userId.toString(),
+    applicationStatus = "ASSESSMENT_SCORES_ENTERED",
     assessmentCentreIndicator = Some(AssessmentCentreIndicator(area = "London", assessmentCentre = "London")),
     firstName = Some("Joe"),
     lastName = Some("Bloggs")
@@ -38,6 +49,7 @@ object AssessmentScoresReportExamples {
   val applicationForAssessmentScoresReportMissingApplicationId = List(ApplicationForAssessmentScoresReport(
     applicationId = None,
     userId = userId.toString(),
+    applicationStatus = "",
     assessmentCentreIndicator = Some(AssessmentCentreIndicator(area = "London", assessmentCentre = "London")),
     firstName = Some("Joe"),
     lastName = Some("Bloggs")

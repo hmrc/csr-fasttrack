@@ -29,7 +29,7 @@ import scala.language.postfixOps
 
 class AssessmentScoresReportingControllerSpec extends BaseReportingControllerSpec {
   "Candidate progress report" should {
-    "return empty report when no data is are returned" in new AssessmentScoresReportTestFixture {
+    "return empty report when no data is returned" in new AssessmentScoresReportTestFixture {
       when(reportingRepoMock.applicationsForAssessmentScoresReport(eqTo(frameworkId))).thenReturnAsync(Nil)
       when(assessmentCentreAllocationRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(Nil)
       when(assessorAssessmentScoresRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(Nil)
@@ -44,7 +44,10 @@ class AssessmentScoresReportingControllerSpec extends BaseReportingControllerSpe
       result mustBe List.empty
     }
 
-    "return report with accepted statuses when the candidate has been reviewed" in new AssessmentScoresReportTestFixture {
+    "return report with qa accepted statuses when the candidate has been reviewed by the qa" in new AssessmentScoresReportTestFixture {
+      when(reportingRepoMock.applicationsForAssessmentScoresReport(eqTo(frameworkId)))
+        .thenReturnAsync(applicationForAssessmentScoresReportQaAccepted)
+
       when(assessorAssessmentScoresRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(
         assessorSavedAndSubmittedScoresAndFeedbackForCandidate)
 
@@ -65,18 +68,51 @@ class AssessmentScoresReportingControllerSpec extends BaseReportingControllerSpe
         assessmentCentreDate = Some("2017-04-03"),
         amOrPm = Some("PM"),
         candidateName = Some("Joe Bloggs"),
-        interview = Some("Accepted"),
+        interview = Some("QA accepted"),
         interviewAssessor = Some("John Doe"),
-        groupExercise = Some("Accepted"),
+        groupExercise = Some("QA accepted"),
         groupExerciseAssessor = Some("Jane Doe"),
-        writtenExercise = Some("Accepted"),
+        writtenExercise = Some("QA accepted"),
         writtenExerciseAssessor = Some("Jenny Jackson")
       ))
       result mustBe expectedData
     }
 
-    "return report with submitted statuses when the candidate has been assessed and submitted " +
-      "but not reviewed" in new AssessmentScoresReportTestFixture {
+    "return report with qa saved statuses when the qa has saved the candidate but not accepted" in new AssessmentScoresReportTestFixture {
+      when(assessorAssessmentScoresRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(
+        assessorSavedScoresAndFeedbackForCandidate)
+
+      when(reviewerAssessmentScoresRepoMock.findByApplicationIds(any[List[String]]))
+        .thenReturnAsync(reviewerInterviewScoresAndFeedbackForCandidate)
+
+      when(authProviderClientMock.findByUserIds(any[Set[String]])(any[HeaderCarrier])).thenReturnAsync(authProviderAssessors)
+
+      val response = controller.createAssessmentCentreScoresReport(frameworkId)(request).run
+      val result = contentAsJson(response).as[List[AssessmentCentreScoresReportItem]]
+
+      status(response) mustBe OK
+
+      val expectedData = List(AssessmentCentreScoresReportItem(
+        assessmentCentreLocation = Some("London"),
+        assessmentCentreVenue = Some("London FSAC"),
+        assessmentCentreDate = Some("2017-04-03"),
+        amOrPm = Some("PM"),
+        candidateName = Some("Joe Bloggs"),
+        interview = Some("QA saved"),
+        interviewAssessor = Some("John Doe"),
+        groupExercise = Some("QA saved"),
+        groupExerciseAssessor = Some("Jane Doe"),
+        writtenExercise = Some("QA saved"),
+        writtenExerciseAssessor = Some("Jenny Jackson")
+      ))
+      result mustBe expectedData
+    }
+
+    "return report with assessor submitted statuses when the candidate has been submitted by the assessor " +
+      "but not reviewed by the qa" in new AssessmentScoresReportTestFixture {
+      when(reportingRepoMock.applicationsForAssessmentScoresReport(eqTo(frameworkId)))
+        .thenReturnAsync(applicationForAssessmentScoresReportAssessorSaved)
+
       when(assessorAssessmentScoresRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(
         assessorSavedAndSubmittedScoresAndFeedbackForCandidate)
 
@@ -96,18 +132,18 @@ class AssessmentScoresReportingControllerSpec extends BaseReportingControllerSpe
         assessmentCentreDate = Some("2017-04-03"),
         amOrPm = Some("PM"),
         candidateName = Some("Joe Bloggs"),
-        interview = Some("Submitted"),
+        interview = Some("Assessor submitted"),
         interviewAssessor = Some("John Doe"),
-        groupExercise = Some("Submitted"),
+        groupExercise = Some("Assessor submitted"),
         groupExerciseAssessor = Some("Jane Doe"),
-        writtenExercise = Some("Submitted"),
+        writtenExercise = Some("Assessor submitted"),
         writtenExerciseAssessor = Some("Jenny Jackson")
       ))
       result mustBe expectedData
     }
 
-    "return report with saved statuses when the candidate has been assessed and saved but not submitted " +
-      "and not reviewed" in new AssessmentScoresReportTestFixture {
+    "return report with assessor saved statuses when the assessor has saved the candidate but not submitted " +
+      "and not reviewed by the qa" in new AssessmentScoresReportTestFixture {
       when(assessorAssessmentScoresRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(
         assessorSavedScoresAndFeedbackForCandidate)
 
@@ -127,11 +163,11 @@ class AssessmentScoresReportingControllerSpec extends BaseReportingControllerSpe
         assessmentCentreDate = Some("2017-04-03"),
         amOrPm = Some("PM"),
         candidateName = Some("Joe Bloggs"),
-        interview = Some("Saved"),
+        interview = Some("Assessor saved"),
         interviewAssessor = Some("John Doe"),
-        groupExercise = Some("Saved"),
+        groupExercise = Some("Assessor saved"),
         groupExerciseAssessor = Some("Jane Doe"),
-        writtenExercise = Some("Saved"),
+        writtenExercise = Some("Assessor saved"),
         writtenExerciseAssessor = Some("Jenny Jackson")
       ))
       result mustBe expectedData
@@ -189,7 +225,9 @@ class AssessmentScoresReportingControllerSpec extends BaseReportingControllerSpe
   }
 
   trait AssessmentScoresReportTestFixture extends TestFixture {
-    when(reportingRepoMock.applicationsForAssessmentScoresReport(eqTo(frameworkId))).thenReturnAsync(applicationForAssessmentScoresReport)
+    when(reportingRepoMock.applicationsForAssessmentScoresReport(eqTo(frameworkId)))
+      .thenReturnAsync(applicationForAssessmentScoresReportAssessorSaved)
+
     when(assessmentCentreAllocationRepoMock.findByApplicationIds(any[List[String]])).thenReturnAsync(assessmentCentreAllocations)
 
     def request = {

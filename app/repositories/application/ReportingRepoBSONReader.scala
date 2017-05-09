@@ -58,6 +58,7 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
     (doc: BSONDocument) =>
       val applicationId = doc.getAs[String]("applicationId")
       val userId = doc.getAs[String]("userId").get
+      val applicationStatus = doc.getAs[String]("applicationStatus").get
       val assessmentCentreIndicator = doc.getAs[AssessmentCentreIndicator]("assessment-centre-indicator")
       val pdDoc = doc.getAs[BSONDocument]("personal-details")
       val firstName = pdDoc.flatMap(_.getAs[String]("firstName"))
@@ -66,6 +67,7 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
       ApplicationForAssessmentScoresReport(
         applicationId = applicationId,
         userId = userId,
+        applicationStatus = applicationStatus,
         assessmentCentreIndicator = assessmentCentreIndicator,
         firstName = firstName,
         lastName = lastName
