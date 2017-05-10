@@ -93,6 +93,27 @@ Newcastle:
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
+         - date: 01/06/2017
+           amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
+           pmCapacity: 36
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 02/06/2017
+           amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
+           pmCapacity: 36
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 05/06/2017
+           amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
+           pmCapacity: 36
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
   - Newcastle (Longbenton):
       description: Longbenton
       capacities:
@@ -228,6 +249,20 @@ Manchester:
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
          - date: 05/05/2017
+           amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
+           pmCapacity: 18
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
+         - date: 02/06/2017
+           amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
+           pmCapacity: 18
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
+         - date: 09/06/2017
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
@@ -376,6 +411,41 @@ London:
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
          - date: 27/05/2017
+           amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
+           pmCapacity: 36
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 05/06/2017
+           amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
+           pmCapacity: 36
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 06/06/2017
+           amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
+           pmCapacity: 36
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 07/06/2017
+           amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
+           pmCapacity: 36
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 08/06/2017
+           amCapacity: 36
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 8
+           pmCapacity: 36
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 8
+         - date: 09/06/2017
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
