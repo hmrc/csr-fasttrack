@@ -2,91 +2,91 @@ Newcastle:
   - Newcastle (FSAC):
       description: FSAC
       capacities:
-         - date: 05/04/2017
+         - date: 05/04/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 22/04/2017
+         - date: 22/04/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 06/05/2017
+         - date: 06/05/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 08/05/2017
+         - date: 08/05/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 13/05/2017
+         - date: 13/05/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 19/05/2017
+         - date: 19/05/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 20/05/2017
+         - date: 20/05/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 22/05/2017
+         - date: 22/05/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 23/05/2017
+         - date: 23/05/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 24/05/2017
+         - date: 24/05/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 25/05/2017
+         - date: 25/05/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 26/05/2017
+         - date: 26/05/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 27/05/2017
+         - date: 27/05/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
@@ -96,234 +96,234 @@ Newcastle:
   - Newcastle (Longbenton):
       description: Longbenton
       capacities:
-         - date: 04/04/2017
+         - date: 04/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 05/04/2017
+         - date: 05/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 10/04/2017
+         - date: 10/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 18/04/2017
+         - date: 18/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 21/04/2017
+         - date: 21/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 28/04/2017
+         - date: 28/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 03/05/2017
+         - date: 03/05/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-
+         
 Manchester:
   - Manchester (Trinity Bridge House):
       description: Trinity Bridge House
       capacities:
-         - date: 03/04/2017
+         - date: 03/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 04/04/2017
+         - date: 04/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 18/04/2017
+         - date: 18/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 20/04/2017
+         - date: 20/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 21/04/2017
+         - date: 21/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 24/04/2017
+         - date: 24/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 26/04/2017
+         - date: 26/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 28/04/2017
+         - date: 28/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 02/05/2017
+         - date: 02/05/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 03/05/2017
+         - date: 03/05/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 04/05/2017
+         - date: 04/05/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 05/05/2017
+         - date: 05/05/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-
+         
 London:
   - London (Euston Tower):
       description: Euston Tower
       capacities:
-         - date: 07/04/2017
+         - date: 07/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 10/04/2017
+         - date: 10/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 21/04/2017
+         - date: 21/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 24/04/2017
+         - date: 24/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 26/04/2017
+         - date: 26/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 28/04/2017
+         - date: 28/04/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 02/05/2017
+         - date: 02/05/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 03/05/2017
+         - date: 03/05/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 04/05/2017
+         - date: 04/05/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 05/05/2017
+         - date: 05/05/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 08/05/2017
+         - date: 08/05/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 09/05/2017
+         - date: 09/05/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
            pmCapacity: 18
            pmMinViableAttendees: 10
            pmPreferredAttendeeMargin: 4
-         - date: 12/05/2017
+         - date: 12/05/2018
            amCapacity: 18
            amMinViableAttendees: 10
            amPreferredAttendeeMargin: 4
@@ -333,52 +333,53 @@ London:
   - London (FSAC):
       description: FSAC
       capacities:
-         - date: 22/04/2017
+         - date: 22/04/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 29/04/2017
+         - date: 29/04/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 06/05/2017
+         - date: 06/05/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 11/05/2017
+         - date: 11/05/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 13/05/2017
+         - date: 13/05/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 20/05/2017
+         - date: 20/05/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
-         - date: 27/05/2017
+         - date: 27/05/2018
            amCapacity: 36
            amMinViableAttendees: 20
            amPreferredAttendeeMargin: 8
            pmCapacity: 36
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 8
+         
