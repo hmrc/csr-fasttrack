@@ -22,6 +22,7 @@ import model.OnlineTestCommands.{ CandidateEvaluationData, TestResult }
 import model.PersistedObjects.CandidateTestReport
 import model.Scheme.Scheme
 import model.persisted.SchemeEvaluationResult
+import play.api.Logger
 
 trait OnlineTestPassmarkRulesEngine {
 
