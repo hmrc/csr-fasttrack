@@ -637,7 +637,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> evaluation.applicationId)
       )
-    ))
+    )
     val progressStatus = evaluation.newApplicationStatus.name.toLowerCase
 
     val passMarkEvaluation = BSONDocument("$set" ->
