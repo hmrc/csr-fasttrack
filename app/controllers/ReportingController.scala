@@ -28,6 +28,7 @@ import model.Scheme.Scheme
 import model.persisted.SchemeEvaluationResult
 import model.report.{ AssessmentCentreScoresReportItem, DiversityReportItem, PassMarkReportItem }
 import model.{ ApplicationStatusOrder, ApplicationStatuses, AssessmentExercise, ProgressStatuses, UniqueIdentifier }
+import model.ApplicationStatuses.AssessmentScoresAccepted
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
 import play.api.libs.streams.Streams
@@ -224,7 +225,12 @@ trait ReportingController extends BaseController {
           assessmentCentreIndicatorRepository.calculateIndicator(contactDetails.postCode).assessmentCentre
         }
         val onlineTestResults = data.allTestResults.getOrElse(appId.toString(), passMarkResultsEmpty)
-        val assessmentScores = data.allAssessmentScores.get(appId.toString())
+
+        val assessmentScores = if(application.progress.contains(AssessmentScoresAccepted.toString.toLowerCase())) {
+          data.allAssessmentScores.get(appId.toString())
+        } else {
+          None
+        }
 
         val schemeOnlineTestResults = processEvaluations(appId, application.schemes, data.allPassMarkEvaluations)
         val assessmentCentreTestResults = processEvaluations(appId, application.schemes, data.allAssessmentCentreEvaluations)
