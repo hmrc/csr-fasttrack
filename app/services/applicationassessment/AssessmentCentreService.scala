@@ -125,7 +125,7 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
     val canProgressStatuses = List(ApplicationStatuses.AssessmentScoresAccepted, ApplicationStatuses.AwaitingAssessmentCentreReevaluation)
 
     val applicationId = onlineTestWithAssessmentCentreScores.assessmentScores.scores.applicationId
-    aRepository.findApplicationStatusDetails(applicationId).map { candidateStatusDetails =>
+    aRepository.findApplicationStatusDetails(applicationId).flatMap { candidateStatusDetails =>
 
       val applicationStatus = if (canProgressStatuses.contains(candidateStatusDetails.status)) {
         determineStatus(assessmentEvaluation)

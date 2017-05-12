@@ -474,7 +474,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
         BSONDocument(
           "applicationStatus" -> BSONDocument("$nin" -> List(ApplicationStatuses.OnlineTestFailed,
             ApplicationStatuses.OnlineTestFailedNotified, ApplicationStatuses.AssessmentCentreFailed,
-            ApplicationStatuses.AssessmentCentreFailedNotified)),
+            ApplicationStatuses.AssessmentCentreFailedNotified, ApplicationStatuses.Withdrawn)),
           "online-tests.xmlReportSaved" -> true,
           "passmarkEvaluation.passmarkVersion" -> BSONDocument("$exists" -> true),
           "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)
