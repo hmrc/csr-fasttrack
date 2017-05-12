@@ -121,20 +121,31 @@ trait AssessmentCentreService extends ApplicationStatusCalculator {
     val assessmentScores = onlineTestWithAssessmentCentreScores.assessmentScores
 
     val assessmentEvaluation = passmarkRulesEngine.evaluate(onlineTestEvaluation, assessmentScores, config)
-    val applicationStatus = determineStatus(assessmentEvaluation)
 
-    Logger.debug(s"Start assessment evaluation, appId: " +
-      s"${onlineTestWithAssessmentCentreScores.assessmentScores.scores.applicationId}" +
-      s"\n Evaluation from Online Test: $onlineTestEvaluation" +
-      s"\n Assessment Scores: $assessmentScores" +
-      s"\n Evaluation for Assessment Centre: $assessmentEvaluation" +
-      s"\n Application Status evaluated to: $applicationStatus")
+    val canProgressStatuses = List(ApplicationStatuses.AssessmentScoresAccepted, ApplicationStatuses.AwaitingAssessmentCentreReevaluation)
 
-    val evaluation = AssessmentPassmarkEvaluation(assessmentScores.scores.applicationId,
-      assessmentScores.passmark.info.version, onlineTestEvaluation.passmarkVersion,
-      assessmentEvaluation, applicationStatus)
-    aRepository.saveAssessmentScoreEvaluation(evaluation).map { _ =>
-      auditNewStatus(assessmentScores.scores.applicationId, applicationStatus)
+    val applicationId = onlineTestWithAssessmentCentreScores.assessmentScores.scores.applicationId
+    aRepository.findApplicationStatusDetails(applicationId).map { candidateStatusDetails =>
+
+      val applicationStatus = if (canProgressStatuses.contains(candidateStatusDetails.status)) {
+        determineStatus(assessmentEvaluation)
+      } else {
+        candidateStatusDetails.status
+      }
+
+      Logger.debug(s"Start assessment evaluation, appId: " +
+        s"$applicationId" +
+        s"\n Evaluation from Online Test: $onlineTestEvaluation" +
+        s"\n Assessment Scores: $assessmentScores" +
+        s"\n Evaluation for Assessment Centre: $assessmentEvaluation" +
+        s"\n Application Status evaluated to: $applicationStatus")
+
+      val evaluation = AssessmentPassmarkEvaluation(assessmentScores.scores.applicationId,
+        assessmentScores.passmark.info.version, onlineTestEvaluation.passmarkVersion,
+        assessmentEvaluation, applicationStatus)
+      aRepository.saveAssessmentScoreEvaluation(evaluation).map { _ =>
+        auditNewStatus(assessmentScores.scores.applicationId, applicationStatus)
+      }
     }
   }
 
