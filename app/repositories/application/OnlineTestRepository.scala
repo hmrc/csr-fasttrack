@@ -472,11 +472,11 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
           "passmarkEvaluation.passmarkVersion" -> BSONDocument("$exists" -> false)
         ),
         BSONDocument(
-          "applicationStatus" -> ApplicationStatuses.AwaitingOnlineTestReevaluation,
-          "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)
-        ),
-        BSONDocument(
-          "applicationStatus" -> ApplicationStatuses.AwaitingAssessmentCentreReevaluation,
+          "applicationStatus" -> BSONDocument("$nin" -> List(ApplicationStatuses.OnlineTestFailed,
+            ApplicationStatuses.OnlineTestFailedNotified, ApplicationStatuses.AssessmentCentreFailed,
+            ApplicationStatuses.AssessmentCentreFailedNotified, ApplicationStatuses.Withdrawn)),
+          "online-tests.xmlReportSaved" -> true,
+          "passmarkEvaluation.passmarkVersion" -> BSONDocument("$exists" -> true),
           "passmarkEvaluation.passmarkVersion" -> BSONDocument("$ne" -> currentVersion)
         )
       )),

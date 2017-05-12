@@ -568,6 +568,11 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   }
 
   def nextApplicationReadyForAssessmentScoreEvaluation(currentPassmarkVersion: String): Future[Option[String]] = {
+
+    val doNotEvaluateStatuses = List(ApplicationStatuses.OnlineTestFailed,
+      ApplicationStatuses.OnlineTestFailedNotified, ApplicationStatuses.AssessmentCentreFailed,
+      ApplicationStatuses.AssessmentCentreFailedNotified, ApplicationStatuses.Withdrawn)
+
     val query =
       BSONDocument("$or" ->
         BSONArray(
@@ -579,13 +584,15 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
           ),
           BSONDocument(
             "$and" -> BSONArray(
-              BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingAssessmentCentreReevaluation),
+              BSONDocument("applicationStatus" -> BSONDocument("$nin" -> doNotEvaluateStatuses)),
+              BSONDocument("assessment-centre-passmark-evaluation.passmarkVersion" -> BSONDocument("$exists" -> true)),
               BSONDocument("assessment-centre-passmark-evaluation.passmarkVersion" -> BSONDocument("$ne" -> currentPassmarkVersion))
             )
           ),
           BSONDocument(
             "$and" -> BSONArray(
-              BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingAssessmentCentreReevaluation),
+              BSONDocument("applicationStatus" -> BSONDocument("$nin" -> doNotEvaluateStatuses)),
+              BSONDocument("assessment-centre-passmark-evaluation.passmarkVersion" -> BSONDocument("$exists" -> true)),
               BSONDocument("passmarkEvaluation.passmarkVersion" -> BSONDocument("$exists" -> true)),
               BSONDocument("assessment-centre-passmark-evaluation.onlineTestPassMarkVersion" -> BSONDocument("$exists" -> true)),
               BSONDocument("$where" ->
@@ -630,13 +637,9 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   def saveAssessmentScoreEvaluation(evaluation: AssessmentPassmarkEvaluation) = {
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationId" -> evaluation.applicationId),
-      BSONDocument(
-        "$or" -> BSONArray(
-          BSONDocument("applicationStatus" -> ApplicationStatuses.AssessmentScoresAccepted),
-          BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingAssessmentCentreReevaluation)
-        )
-      )
+      BSONDocument("applicationStatus" -> BSONDocument("$ne" -> ApplicationStatuses.Withdrawn))
     ))
+
     val progressStatus = evaluation.newApplicationStatus.name.toLowerCase
 
     val passMarkEvaluation = BSONDocument("$set" ->
