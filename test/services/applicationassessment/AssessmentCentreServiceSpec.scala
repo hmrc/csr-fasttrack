@@ -24,6 +24,7 @@ import model.EvaluationResults._
 import model.Exceptions.{ IncorrectStatusInApplicationException, NotFoundException }
 import model.PersistedObjects.{ ApplicationForNotification, ContactDetails }
 import model.Scheme._
+import model.commands.ApplicationStatusDetails
 import model.{ AssessmentPassmarkEvaluation, _ }
 import model.persisted._
 import org.joda.time.DateTime
@@ -55,8 +56,6 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
   val AuditDetails = Map(
     "applicationId" -> ApplicationId
   )
-
-
 
   "delete an Application Assessment" must {
     "return a deletion success response when an application id exists" in new ApplicationAssessmentServiceFixture {
@@ -115,6 +114,9 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
       )
       val onlineTestEvaluation = OnlineTestPassmarkEvaluation("passmark", List(SchemeEvaluationResult(Business, Green)))
       when(passmarkRulesEngineMock.evaluate(onlineTestEvaluation, scores, config)).thenReturn(result)
+      when(aRepositoryMock.findApplicationStatusDetails(any[String]())).thenReturn(Future.successful(
+        ApplicationStatusDetails(ApplicationStatuses.AssessmentScoresAccepted)
+      ))
       when(aRepositoryMock.saveAssessmentScoreEvaluation(AssessmentPassmarkEvaluation(
         "app1", "1", "passmark", result, ApplicationStatuses.AssessmentCentreFailed)))
         .thenReturn(Future.successful(()))
@@ -143,6 +145,9 @@ class AssessmentCentreServiceSpec extends PlaySpec with MockitoSugar with ScalaF
       )
       val onlineTestEvaluation = OnlineTestPassmarkEvaluation("passmark", List(SchemeEvaluationResult(Business, Green)))
       when(passmarkRulesEngineMock.evaluate(onlineTestEvaluation, scores, config)).thenReturn(result)
+      when(aRepositoryMock.findApplicationStatusDetails(any[String]())).thenReturn(Future.successful(
+        ApplicationStatusDetails(ApplicationStatuses.AssessmentScoresAccepted)
+      ))
       when(aRepositoryMock.saveAssessmentScoreEvaluation(
         AssessmentPassmarkEvaluation("app1", "1", "passmark", result, ApplicationStatuses.AssessmentCentrePassed)))
         .thenReturn(Future.successful(()))
