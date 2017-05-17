@@ -91,4 +91,16 @@ trait FixDataService {
       ("Count: " + brokenSandFList.length) :: brokenSandFList
     }
   }
+
+  def forcePassmarkReevaluationForOnlineTestComplete(applicationId: String)(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
+    onlineTestingRepo.getOnlineTestApplication(applicationId).map { testRecord =>
+      if (testRecord.get.applicationStatus == ApplicationStatuses.OnlineTestCompleted) {
+        onlineTestingRepo.findPassmarkEvaluation(applicationId).map { passmarkEvaluation =>
+          onlineTestingRepo.savePassMarkScore(applicationId, "NOVERSION", passmarkEvaluation.result, None).map(_ => ())
+        }
+      } else {
+          throw new Exception("User was not in the required state")
+      }
+    }
+  }
 }

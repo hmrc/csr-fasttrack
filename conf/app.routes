@@ -117,3 +117,4 @@ POST        /fixdata/:applicationId/progressToAssessmentCentre           control
 POST        /fixdata/extendExpiredOnlineTests                            controllers.FixDataController.extendExpiredOnlineTests(applicationId: String, extendDays: Int)
 GET         /fixdata/countNoDateScoresAndFeedback                        controllers.FixDataController.countNoDateScoresAndFeedback()
 GET         /fixdata/fixNoDateScoresAndFeedback                          controllers.FixDataController.fixNoDateScoresAndFeedback()
+GET         /fixdata/forcePassmarkReevaluationForOnlineTestComplete      controllers.FixDataController.forcePassmarkReevaluationForOnlineTestComplete(applicationId: String)
