@@ -50,4 +50,8 @@ abstract class FixDataController(fixDataService: FixDataService) extends BaseCon
     fixDataService.fixNoDateScoresAndFeedback.map(applicationIdsList => Ok(Json.toJson(applicationIdsList)))
   }
 
+  def forcePassmarkReevaluationForOnlineTestComplete(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    fixDataService.forcePassmarkReevaluationForOnlineTestComplete(applicationId).map(_ => Ok)
+  }
+
 }
