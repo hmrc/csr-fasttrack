@@ -58,7 +58,7 @@ class ReviewerScoresControllerSpec extends UnitWithAppSpec {
 
   "Save Candidate Scores" should {
     "save candidate scores & feedback" in new TestFixture {
-      when(mockReviewerAssessmentCentreScoresService.saveScoresAndFeedback(any[String], any[CandidateScoresAndFeedback])
+      when(mockReviewerAssessmentCentreScoresService.saveScoresAndFeedback(any[String], any[CandidateScoresAndFeedback], any[Boolean])
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
 
       val result: Future[Result] = TestReviewerScoresController.saveCandidateScoresAndFeedback("app1")(
@@ -68,7 +68,7 @@ class ReviewerScoresControllerSpec extends UnitWithAppSpec {
     }
 
     "return Bad Request when attendancy is not set" in new TestFixture {
-      when(mockReviewerAssessmentCentreScoresService.saveScoresAndFeedback(any[String], any[CandidateScoresAndFeedback])
+      when(mockReviewerAssessmentCentreScoresService.saveScoresAndFeedback(any[String], any[CandidateScoresAndFeedback], any[Boolean])
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(new IllegalStateException("blah")))
 
       val result: Future[Result] = TestReviewerScoresController.saveExerciseScoresAndFeedback("app1")(

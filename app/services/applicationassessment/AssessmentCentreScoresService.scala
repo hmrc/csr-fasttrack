@@ -16,30 +16,30 @@
 
 package services.applicationassessment
 
-import model.{ ApplicationStatuses, AssessmentExercise }
 import model.CandidateScoresCommands.{ ApplicationScores, CandidateScoresAndFeedback, ExerciseScoresAndFeedback, RecordCandidateScores }
+import model.{ ApplicationStatusOrder, ApplicationStatuses, AssessmentExercise }
+import model.ProgressStatuses.AssessmentScoresAcceptedProgress
 import play.api.mvc.RequestHeader
 import repositories._
 import repositories.application._
 import services.AuditService
-import services.applicationassessment.AssessorAssessmentScoresService.{ AssessorScoresExistForExerciseException,
-ReviewerScoresExistForExerciseException }
+import services.applicationassessment.AssessorAssessmentScoresService._
 import uk.gov.hmrc.play.http.HeaderCarrier
 
-import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
-
+import scala.concurrent.Future
 
 object AssessorAssessmentScoresService extends AssessorAssessmentCentreScoresService {
   case class AssessorScoresExistForExerciseException(m: String) extends Exception(m)
   case class ReviewerScoresExistForExerciseException(m: String) extends Exception(m)
+  case class ReviewerScoresOutOfDateException(m: String) extends Exception(m)
+  case class ReviewerAlreadyAcceptedScoresException(m: String) extends Exception(m)
   val assessmentScoresRepo: AssessorApplicationAssessmentScoresMongoRepository = assessorAssessmentScoresRepository
   val reviewerScoresRepo: ReviewerApplicationAssessmentScoresMongoRepository = reviewerAssessmentScoresRepository
   val appRepo: GeneralApplicationMongoRepository = applicationRepository
   val assessmentCentreAllocationRepo: AssessmentCentreAllocationMongoRepository = assessmentCentreAllocationRepository
   val personalDetailsRepo: PersonalDetailsMongoRepository = personalDetailsRepository
   val auditService = AuditService
-
 }
 
 object ReviewerAssessmentScoresService extends ReviewerAssessmentScoresService {
@@ -48,10 +48,10 @@ object ReviewerAssessmentScoresService extends ReviewerAssessmentScoresService {
   val assessmentCentreAllocationRepo: AssessmentCentreAllocationMongoRepository = assessmentCentreAllocationRepository
   val personalDetailsRepo: PersonalDetailsMongoRepository = personalDetailsRepository
   val auditService = AuditService
+  val reviewerScoresRepo: ReviewerApplicationAssessmentScoresMongoRepository = reviewerAssessmentScoresRepository
 }
 
 trait AssessorAssessmentCentreScoresService extends AssessmentCentreScoresService {
-  val reviewerScoresRepo: ApplicationAssessmentScoresRepository
 
   def saveScoresAndFeedback(applicationId: String, exerciseScoresAndFeedback: ExerciseScoresAndFeedback)
                            (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
@@ -89,6 +89,7 @@ trait AssessorAssessmentCentreScoresService extends AssessmentCentreScoresServic
 }
 
 trait ReviewerAssessmentScoresService extends AssessmentCentreScoresService {
+
   def saveScoresAndFeedback(applicationId: String, exerciseScoresAndFeedback: ExerciseScoresAndFeedback)
                            (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
     val newStatus = ApplicationStatuses.AssessmentScoresEntered
@@ -108,14 +109,53 @@ trait AssessmentCentreScoresService {
   def assessmentCentreAllocationRepo: AssessmentCentreAllocationRepository
   def personalDetailsRepo: PersonalDetailsRepository
   def auditService: AuditService
+  def reviewerScoresRepo: ApplicationAssessmentScoresRepository
+
 
   def saveScoresAndFeedback(applicationId: String, exerciseScoresAndFeedback: ExerciseScoresAndFeedback)
                            (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit]
 
-  def acceptScoresAndFeedback(applicationId: String, scoresAndFeedback: CandidateScoresAndFeedback)
+
+  private def performChecks(applicationId: String, scoresAndFeedback: CandidateScoresAndFeedback, ignoreAccepted: Boolean) = {
+    def isDataOutOfDate(candidateScoresAndFeedbackOpt: Option[CandidateScoresAndFeedback],
+                                scoresAndFeedback: CandidateScoresAndFeedback): Boolean =
+    candidateScoresAndFeedbackOpt.exists { existingCSAndF =>
+      val interviewOutOfDate = existingCSAndF.interview.flatMap(existingInterview =>
+        scoresAndFeedback.interview.map( newInterview =>
+          newInterview.version != existingInterview.version)).getOrElse(false)
+      val groupOutOfDate = existingCSAndF.groupExercise.flatMap(existingGroupExercise =>
+        scoresAndFeedback.groupExercise.map( newGroupExercise =>
+          newGroupExercise.version != existingGroupExercise.version)).getOrElse(false)
+      val writtenOutOfDate = existingCSAndF.writtenExercise.flatMap(existingWrittenExercise =>
+        scoresAndFeedback.writtenExercise.map( newWrittenExercise =>
+          newWrittenExercise.version != existingWrittenExercise.version)).getOrElse(false)
+
+      interviewOutOfDate || groupOutOfDate || writtenOutOfDate
+    }
+
+    for {
+      _ <- appRepo.findProgress(applicationId).map(progress =>
+          if (ApplicationStatusOrder.getStatus(progress) == AssessmentScoresAcceptedProgress && !ignoreAccepted) {
+            throw ReviewerAlreadyAcceptedScoresException(
+              s"Reviewer has already accepted scores for $applicationId"
+            )
+          }
+        )
+      _ <- reviewerScoresRepo.tryFind(applicationId).map( candidateScoresAndFeedbackOpt =>
+        if (isDataOutOfDate(candidateScoresAndFeedbackOpt, scoresAndFeedback)) {
+          throw ReviewerScoresOutOfDateException(
+            s"Reviewer scores are out of date for $applicationId"
+          )
+        }
+      )
+    } yield {}
+  }
+
+  def acceptScoresAndFeedback(applicationId: String, scoresAndFeedback: CandidateScoresAndFeedback, ignoreAccepted: Boolean = false)
                              (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
     val newStatus = determineStatus(scoresAndFeedback)
     for {
+      _ <- performChecks(applicationId, scoresAndFeedback, ignoreAccepted)
       _ <- assessmentScoresRepo.saveAll(scoresAndFeedback)
       _ <- appRepo.updateStatus(applicationId, newStatus)
     } yield {
@@ -124,9 +164,11 @@ trait AssessmentCentreScoresService {
     }
   }
 
-  def saveScoresAndFeedback(applicationId: String, scoresAndFeedback: CandidateScoresAndFeedback)
+  def saveScoresAndFeedback(applicationId: String, scoresAndFeedback: CandidateScoresAndFeedback, ignoreAccepted: Boolean = false)
                              (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
+
     for {
+      _ <- performChecks(applicationId, scoresAndFeedback, ignoreAccepted)
       _ <- assessmentScoresRepo.saveAll(scoresAndFeedback)
     } yield {
       auditService.logEvent("ApplicationScoresAndFeedbackSaved", Map("applicationId" -> applicationId))
