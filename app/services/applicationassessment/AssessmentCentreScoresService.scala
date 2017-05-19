@@ -115,8 +115,8 @@ trait AssessmentCentreScoresService {
   def saveScoresAndFeedback(applicationId: String, exerciseScoresAndFeedback: ExerciseScoresAndFeedback)
                            (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit]
 
-
   private def performChecks(applicationId: String, scoresAndFeedback: CandidateScoresAndFeedback, ignoreAccepted: Boolean) = {
+
     def isDataOutOfDate(candidateScoresAndFeedbackOpt: Option[CandidateScoresAndFeedback],
                                 scoresAndFeedback: CandidateScoresAndFeedback): Boolean =
     candidateScoresAndFeedbackOpt.exists { existingCSAndF =>
@@ -133,22 +133,22 @@ trait AssessmentCentreScoresService {
       interviewOutOfDate || groupOutOfDate || writtenOutOfDate
     }
 
-    for {
-      _ <- appRepo.findProgress(applicationId).map(progress =>
-          if (ApplicationStatusOrder.getStatus(progress) == AssessmentScoresAcceptedProgress && !ignoreAccepted) {
-            throw ReviewerAlreadyAcceptedScoresException(
-              s"Reviewer has already accepted scores for $applicationId"
-            )
-          }
-        )
-      _ <- reviewerScoresRepo.tryFind(applicationId).map( candidateScoresAndFeedbackOpt =>
-        if (isDataOutOfDate(candidateScoresAndFeedbackOpt, scoresAndFeedback)) {
-          throw ReviewerScoresOutOfDateException(
-            s"Reviewer scores are out of date for $applicationId"
-          )
-        }
-      )
-    } yield {}
+    def checkScoresOutOfDate = reviewerScoresRepo.tryFind(applicationId).map(candidateScoresAndFeedbackOpt =>
+      if (isDataOutOfDate(candidateScoresAndFeedbackOpt, scoresAndFeedback)) {
+        throw ReviewerScoresOutOfDateException(s"Reviewer scores are out of date for $applicationId")
+      }
+    )
+
+    // The order of the checks is important here (first check accepted then out of date)
+    if (!ignoreAccepted) { appRepo.findProgress(applicationId).map(progress =>
+      if (ApplicationStatusOrder.getStatus(progress) == AssessmentScoresAcceptedProgress) {
+        throw ReviewerAlreadyAcceptedScoresException(s"Reviewer has already accepted scores for $applicationId")
+      } else {
+        checkScoresOutOfDate
+      }
+    )} else {
+      checkScoresOutOfDate
+    }
   }
 
   def acceptScoresAndFeedback(applicationId: String, scoresAndFeedback: CandidateScoresAndFeedback, ignoreAccepted: Boolean = false)
