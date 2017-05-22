@@ -22,12 +22,11 @@ import model.CandidateScoresCommands.{ CandidateScoresAndFeedback, ExerciseScore
 import model.Exceptions.ApplicationNotFound
 import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ Action, AnyContent }
-import services.applicationassessment.AssessorAssessmentScoresService.{ AssessorScoresExistForExerciseException, ReviewerScoresExistForExerciseException }
+import services.applicationassessment.AssessorAssessmentScoresService._
 import services.applicationassessment._
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 object AssessorScoresController extends AssessorScoresController {
   val dateTimeFactory = DateTimeFactory
@@ -113,6 +112,8 @@ trait ReviewerScoresController extends AssessmentCentreScoresController {
         Ok
       }.recover {
         case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
+        case e: ReviewerAlreadyAcceptedScoresException => Conflict(e.getMessage)
+        case e: ReviewerScoresOutOfDateException => MethodNotAllowed(e.getMessage)
       }
     }
   }
@@ -123,6 +124,30 @@ trait ReviewerScoresController extends AssessmentCentreScoresController {
         Ok
       }.recover {
         case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
+        case e: ReviewerAlreadyAcceptedScoresException => Conflict(e.getMessage)
+        case e: ReviewerScoresOutOfDateException => MethodNotAllowed(e.getMessage)
+      }
+    }
+  }
+
+  def acceptSuperReviewerCandidateScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    withJsonBody[CandidateScoresAndFeedback] { scoresAndFeedback =>
+      assessmentCentreScoresService.acceptScoresAndFeedback(applicationId, scoresAndFeedback, ignoreAccepted = true).map { _ =>
+        Ok
+      }.recover {
+        case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
+        case e: ReviewerScoresOutOfDateException => MethodNotAllowed(e.getMessage)
+      }
+    }
+  }
+
+  def saveSuperReviewerCandidateScoresAndFeedback(applicationId: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    withJsonBody[CandidateScoresAndFeedback] { scoresAndFeedback =>
+      assessmentCentreScoresService.saveScoresAndFeedback(applicationId, scoresAndFeedback, ignoreAccepted = true).map { _ =>
+        Ok
+      }.recover {
+        case e: IllegalStateException => BadRequest(s"${e.getMessage} for applicationId $applicationId")
+        case e: ReviewerScoresOutOfDateException => MethodNotAllowed(e.getMessage)
       }
     }
   }

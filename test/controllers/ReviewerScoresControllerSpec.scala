@@ -27,6 +27,7 @@ import play.api.libs.json.{ JsValue, Json }
 import play.api.mvc.{ RequestHeader, Result }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
+import services.applicationassessment.AssessorAssessmentScoresService._
 import services.applicationassessment.{ AssessmentCentreScoresRemovalService, AssessmentCentreScoresService, AssessmentCentreService }
 import testkit.UnitWithAppSpec
 import uk.gov.hmrc.play.http.HeaderCarrier
@@ -56,54 +57,127 @@ class ReviewerScoresControllerSpec extends UnitWithAppSpec {
     )
   )
 
-  "Save Candidate Scores" should {
+  "Reviewer saving candidate scores" should {
     "save candidate scores & feedback" in new TestFixture {
-      when(mockReviewerAssessmentCentreScoresService.saveScoresAndFeedback(any[String], any[CandidateScoresAndFeedback])
+      when(mockReviewerAssessmentCentreScoresService.saveScoresAndFeedback(any[String], any[CandidateScoresAndFeedback], any[Boolean])
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
 
       val result: Future[Result] = TestReviewerScoresController.saveCandidateScoresAndFeedback("app1")(
-        createSaveCandidateScoresAndFeedback("app1", Json.toJson(candidateScoresAndFeedback).toString())
+        createSaveCandidateScoresAndFeedback("app1", Json.toJson(candidateScoresAndFeedback))
       )
-      status(result) must be(OK)
+      status(result) mustBe OK
     }
 
     "return Bad Request when attendancy is not set" in new TestFixture {
-      when(mockReviewerAssessmentCentreScoresService.saveScoresAndFeedback(any[String], any[CandidateScoresAndFeedback])
+      when(mockReviewerAssessmentCentreScoresService.saveScoresAndFeedback(any[String], any[CandidateScoresAndFeedback], any[Boolean])
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(new IllegalStateException("blah")))
 
       val result: Future[Result] = TestReviewerScoresController.saveExerciseScoresAndFeedback("app1")(
-        createSaveCandidateScoresAndFeedback("app1", Json.toJson(candidateScoresAndFeedback).toString())
+        createSaveCandidateScoresAndFeedback("app1", Json.toJson(candidateScoresAndFeedback))
       )
-      status(result) must be(BAD_REQUEST)
+      status(result) mustBe BAD_REQUEST
+    }
+  }
+
+  "Reviewer accepting candidate scores" should {
+    "accept candidate scores & feedback" in new TestFixture {
+      when(mockReviewerAssessmentCentreScoresService.acceptScoresAndFeedback(any[String], any[CandidateScoresAndFeedback], any[Boolean])
+        (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
+
+      val result: Future[Result] = TestReviewerScoresController.acceptCandidateScoresAndFeedback("app1")(
+        createSaveCandidateScoresAndFeedback("app1", Json.toJson(candidateScoresAndFeedback))
+      )
+      status(result) mustBe OK
+    }
+
+    "return a conflict if another reviewer has already accepted candidate scores and feedback" in new TestFixture {
+      when(mockReviewerAssessmentCentreScoresService.acceptScoresAndFeedback(any[String], any[CandidateScoresAndFeedback], any[Boolean])
+      (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(ReviewerAlreadyAcceptedScoresException("Boom")))
+
+      val result: Future[Result] = TestReviewerScoresController.acceptCandidateScoresAndFeedback("app1")(
+        createSaveCandidateScoresAndFeedback("app1", Json.toJson(candidateScoresAndFeedback))
+      )
+      status(result) mustBe CONFLICT
+    }
+
+    "return method not allowed if the reviewed scores are out of date" in new TestFixture {
+      when(mockReviewerAssessmentCentreScoresService.acceptScoresAndFeedback(any[String], any[CandidateScoresAndFeedback], any[Boolean])
+      (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(ReviewerScoresOutOfDateException("Boom")))
+
+      val result: Future[Result] = TestReviewerScoresController.acceptCandidateScoresAndFeedback("app1")(
+        createSaveCandidateScoresAndFeedback("app1", Json.toJson(candidateScoresAndFeedback))
+      )
+      status(result) mustBe METHOD_NOT_ALLOWED
+    }
+  }
+
+  "Super reviewer accepting scores" should {
+    "accept candidate scores & feedback" in new TestFixture {
+      when(mockReviewerAssessmentCentreScoresService.acceptScoresAndFeedback(any[String], any[CandidateScoresAndFeedback], any[Boolean])
+      (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
+
+      val result: Future[Result] = TestReviewerScoresController.acceptSuperReviewerCandidateScoresAndFeedback("app1")(
+        createSaveCandidateScoresAndFeedback("app1", Json.toJson(candidateScoresAndFeedback))
+      )
+      status(result) mustBe OK
+    }
+
+    "return method not allowed if the accepted scores are out of date" in new TestFixture {
+      when(mockReviewerAssessmentCentreScoresService.acceptScoresAndFeedback(any[String], any[CandidateScoresAndFeedback], any[Boolean])
+      (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(ReviewerScoresOutOfDateException("Boom")))
+
+      val result: Future[Result] = TestReviewerScoresController.acceptSuperReviewerCandidateScoresAndFeedback("app1")(
+        createSaveCandidateScoresAndFeedback("app1", Json.toJson(candidateScoresAndFeedback))
+      )
+      status(result) mustBe METHOD_NOT_ALLOWED
+    }
+  }
+
+  "Super reviewer saving scores" should {
+    "save candidate scores & feedback" in new TestFixture {
+      when(mockReviewerAssessmentCentreScoresService.saveScoresAndFeedback(any[String], any[CandidateScoresAndFeedback], any[Boolean])
+      (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
+
+      val result: Future[Result] = TestReviewerScoresController.saveSuperReviewerCandidateScoresAndFeedback("app1")(
+        createSaveCandidateScoresAndFeedback("app1", Json.toJson(candidateScoresAndFeedback))
+      )
+      status(result) mustBe OK
+    }
+
+    "return method not allowed if the saved scores are out of date" in new TestFixture {
+      when(mockReviewerAssessmentCentreScoresService.saveScoresAndFeedback(any[String], any[CandidateScoresAndFeedback], any[Boolean])
+      (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(ReviewerScoresOutOfDateException("Boom")))
+
+      val result: Future[Result] = TestReviewerScoresController.saveSuperReviewerCandidateScoresAndFeedback("app1")(
+        createSaveCandidateScoresAndFeedback("app1", Json.toJson(candidateScoresAndFeedback))
+      )
+      status(result) mustBe METHOD_NOT_ALLOWED
     }
   }
 
   "Unlock exercise" should {
-    "Unlock an exercise when no exceptions occur" in new TestFixture {
+    "unlock an exercise when no exceptions occur" in new TestFixture {
       when(mockAssessmentCentreScoresRemovalService.removeScoresAndFeedback(any[String], any[AssessmentExercise])
       (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(unit))
 
       val result: Future[Result] = TestReviewerScoresController.unlockExercise("app1", "interview").apply(FakeRequest())
-
-      status(result) must be(OK)
+      status(result) mustBe OK
     }
 
-    "Return a bad request when exercise is invalid" in new TestFixture {
+    "return a bad request when exercise is invalid" in new TestFixture {
       when(mockAssessmentCentreScoresRemovalService.removeScoresAndFeedback(any[String], any[AssessmentExercise])
       (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(new NoSuchElementException))
 
       val result: Future[Result] = TestReviewerScoresController.unlockExercise("app1", "interview").apply(FakeRequest())
-
-      status(result) must be(BAD_REQUEST)
+      status(result) mustBe BAD_REQUEST
     }
 
-    "Return a bad request when no such application exists" in new TestFixture {
+    "return a bad request when no such application exists" in new TestFixture {
       when(mockAssessmentCentreScoresRemovalService.removeScoresAndFeedback(any[String], any[AssessmentExercise])
       (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(ApplicationNotFound("app1")))
 
       val result: Future[Result] = TestReviewerScoresController.unlockExercise("app1", "interview").apply(FakeRequest())
-
-      status(result) must be(BAD_REQUEST)
+      status(result) mustBe BAD_REQUEST
     }
   }
 
@@ -119,8 +193,7 @@ class ReviewerScoresControllerSpec extends UnitWithAppSpec {
       val assessmentCentreScoresRemovalService: AssessmentCentreScoresRemovalService = mockAssessmentCentreScoresRemovalService
     }
 
-    def createSaveCandidateScoresAndFeedback(applicationId: String, jsonString: String): FakeRequest[JsValue] = {
-      val json = Json.parse(jsonString)
+    def createSaveCandidateScoresAndFeedback(applicationId: String, json: JsValue): FakeRequest[JsValue] = {
       FakeRequest(
         Helpers.POST,
         controllers.routes.ReviewerScoresController.saveCandidateScoresAndFeedback(applicationId).url, FakeHeaders(), json

@@ -57,9 +57,8 @@ class AssessorScoresControllerSpec extends UnitWithAppSpec {
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
 
       val result: Future[Result] = TestCandidateScoresController.saveExerciseScoresAndFeedback("app1")(
-        createSaveCandidateScoresAndFeedback("app1", Json.toJson(exerciseScoresAndFeedback).toString())
+        createSaveCandidateScoresAndFeedback("app1", Json.toJson(exerciseScoresAndFeedback))
       )
-
       status(result) mustBe CREATED
     }
 
@@ -68,12 +67,11 @@ class AssessorScoresControllerSpec extends UnitWithAppSpec {
         (any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(new IllegalStateException("blah")))
 
       val result: Future[Result] = TestCandidateScoresController.saveExerciseScoresAndFeedback("app1")(
-        createSaveCandidateScoresAndFeedback("app1", Json.toJson(exerciseScoresAndFeedback).toString())
+        createSaveCandidateScoresAndFeedback("app1", Json.toJson(exerciseScoresAndFeedback))
       )
       status(result) mustBe BAD_REQUEST
     }
   }
-
 
   trait TestFixture {
     val mockAssessorAssessmentCentreScoresService: AssessmentCentreScoresService = mock[AssessmentCentreScoresService]
@@ -86,13 +84,11 @@ class AssessorScoresControllerSpec extends UnitWithAppSpec {
       val assessmentCentreService: AssessmentCentreService = mockAssessmentCentreService
     }
 
-    def createSaveCandidateScoresAndFeedback(applicationId: String, jsonString: String): FakeRequest[JsValue] = {
-      val json = Json.parse(jsonString)
+    def createSaveCandidateScoresAndFeedback(applicationId: String, json: JsValue): FakeRequest[JsValue] = {
       FakeRequest(
         Helpers.POST,
         controllers.routes.AssessorScoresController.saveExerciseScoresAndFeedback(applicationId).url, FakeHeaders(), json
-      )
-        .withHeaders("Content-Type" -> "application/json")
+      ).withHeaders("Content-Type" -> "application/json")
     }
   }
 }
