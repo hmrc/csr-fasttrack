@@ -140,7 +140,7 @@ trait AssessmentCentreScoresService {
     )
 
     // The order of the checks is important here (first check accepted then out of date)
-    if (!ignoreAccepted) { appRepo.findProgress(applicationId).map(progress =>
+    if (!ignoreAccepted) { appRepo.findProgress(applicationId).flatMap(progress =>
       if (ApplicationStatusOrder.getStatus(progress) == AssessmentScoresAcceptedProgress) {
         throw ReviewerAlreadyAcceptedScoresException(s"Reviewer has already accepted scores for $applicationId")
       } else {
