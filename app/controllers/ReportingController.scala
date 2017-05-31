@@ -226,11 +226,7 @@ trait ReportingController extends BaseController {
         }
         val onlineTestResults = data.allTestResults.getOrElse(appId.toString(), passMarkResultsEmpty)
 
-        val assessmentScores = if(application.progress.contains(AssessmentScoresAccepted.toString.toLowerCase())) {
-          data.allAssessmentScores.get(appId.toString())
-        } else {
-          None
-        }
+        val assessmentScores = data.allAssessmentScores.get(appId.toString())
 
         val schemeOnlineTestResults = processEvaluations(appId, application.schemes, data.allPassMarkEvaluations)
         val assessmentCentreTestResults = processEvaluations(appId, application.schemes, data.allAssessmentCentreEvaluations)
