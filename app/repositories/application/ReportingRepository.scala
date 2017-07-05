@@ -222,7 +222,8 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       "schemes" -> "1",
       "scheme-locations" -> "1",
       "assessment-centre-passmark-evaluation.competency-average" -> "1",
-      "assessment-centre-passmark-evaluation.schemes-evaluation" -> "1"
+      "assessment-centre-passmark-evaluation.schemes-evaluation" -> "1",
+      "assessment-centre-passmark-evaluation.overall-evaluation" -> "1"
     )
 
     reportQueryWithProjectionsBSON[ApplicationPreferencesWithTestResults](query, projection)

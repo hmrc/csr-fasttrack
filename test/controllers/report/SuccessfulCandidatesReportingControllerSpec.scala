@@ -117,6 +117,8 @@ class SuccessfulCandidatesReportingControllerSpec extends BaseReportingControlle
       Some(10d), Some(10d), Some(10d), Some(20d), Some(80d))
     lazy val schemeEvaluationsLondon = SchemeEvaluation(Some("Pass"), None, Some("Amber"), Some("Pass"),
       None)
+    lazy val overallEvaluationsLondon = SchemeEvaluation(Some("Green"), None, Some("Amber"), Some("Green"),
+      None)
 
     def newAppPreferences(userId: UniqueIdentifier, appId: UniqueIdentifier) =
       ApplicationPreferencesWithTestResults(userId, appId,
@@ -124,7 +126,7 @@ class SuccessfulCandidatesReportingControllerSpec extends BaseReportingControlle
         List(LocationSchemesExamples.London.id),
         PersonalInfo(someRnd("firstname-"), someRnd("lastName-"), someRnd("preferredName-"),
           yesNoRnd, yesNoRnd, Some(new LocalDate("2001-01-01"))),
-        summaryScores, schemeEvaluationsLondon)
+        summaryScores, schemeEvaluationsLondon, overallEvaluationsLondon)
 
     def newContactDetailsWithId(userId: UniqueIdentifier) = ContactDetailsWithId(
       userId.toString(),
