@@ -33,9 +33,9 @@ import repositories.ContactDetailsRepository
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
 import services.applicationassessment.AssessmentCentreService
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
+import uk.gov.hmrc.http.HeaderCarrier
 
 class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with MockitoSugar with ScalaFutures {
   implicit val ec: ExecutionContext = ExecutionContext.global

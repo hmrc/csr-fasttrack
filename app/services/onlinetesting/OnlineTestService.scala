@@ -31,12 +31,12 @@ import play.api.Logger
 import play.libs.Akka
 import repositories._
 import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository, OnlineTestRepository }
-import uk.gov.hmrc.play.http.HeaderCarrier
 import model.exchange.CubiksTestResultReady
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.language.postfixOps
+import uk.gov.hmrc.http.HeaderCarrier
 
 object OnlineTestService extends OnlineTestService {
   import config.MicroserviceAppConfig._

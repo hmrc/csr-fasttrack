@@ -26,9 +26,9 @@ import play.api.test.{ FakeRequest, Helpers }
 import play.api.test.Helpers._
 import services.applicationassessment.AssessmentCentreService
 import testkit.UnitWithAppSpec
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class EvaluatedAssessmentCentreScoresControllerSpec extends UnitWithAppSpec {
 

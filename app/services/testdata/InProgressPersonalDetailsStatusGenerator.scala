@@ -25,10 +25,10 @@ import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.testdata.faker.DataFaker.Random
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 object InProgressPersonalDetailsStatusGenerator extends InProgressPersonalDetailsStatusGenerator {
   override val previousStatusGenerator = CreatedStatusGenerator

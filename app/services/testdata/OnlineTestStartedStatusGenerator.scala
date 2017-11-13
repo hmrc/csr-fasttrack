@@ -20,9 +20,9 @@ import model.ApplicationStatuses
 import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.OnlineTestRepository
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 object OnlineTestStartedStatusGenerator extends OnlineTestStartedStatusGenerator {
   override val previousStatusGenerator = OnlineTestInvitedStatusGenerator

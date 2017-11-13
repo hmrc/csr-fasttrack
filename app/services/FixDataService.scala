@@ -27,12 +27,12 @@ import play.api.mvc.{ RequestHeader, Result, Results }
 import repositories._
 import repositories.application._
 import services.onlinetesting.OnlineTestExtensionService
-import uk.gov.hmrc.play.http.HeaderCarrier
 import play.api.mvc.Results._
 import services.applicationassessment.{ AssessorAssessmentCentreScoresService, AssessorAssessmentScoresService }
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 object FixDataService extends FixDataService {
   val appRepo: GeneralApplicationMongoRepository = applicationRepository

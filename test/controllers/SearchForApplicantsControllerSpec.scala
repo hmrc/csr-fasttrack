@@ -28,9 +28,9 @@ import repositories.ContactDetailsRepository
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.search.SearchForApplicantService
 import testkit.UnitWithAppSpec
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class SearchForApplicantsControllerSpec extends UnitWithAppSpec {
   "Search for applicants controller" should {

@@ -30,9 +30,9 @@ import repositories.application.OnlineTestRepository
 import services.AuditService
 import services.onlinetesting.SendOnlineTestResultServiceImpl.{ OnlineTestResultReadyEmailSent, OnlineTestResultReadyUpdated }
 import testkit.MockitoSugar
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class SendOnlinetestResultServiceImplSpec extends PlaySpec with ScalaFutures with MockitoSugar {
 

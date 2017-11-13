@@ -18,12 +18,13 @@ package config
 
 import play.api.Play.current
 import play.api.libs.ws.{ WS, WSClient }
-import uk.gov.hmrc.play.audit.http.config.LoadAuditingConfig
+import uk.gov.hmrc.http.{ HttpDelete, HttpGet, HttpPost, HttpPut }
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 import uk.gov.hmrc.play.config.AppName
 import uk.gov.hmrc.play.http.ws._
+import uk.gov.hmrc.play.microservice.config.LoadAuditingConfig
 
-trait WSHttp extends WSGet with WSPut with WSPost with WSDelete with AppName {
+trait WSHttp extends HttpGet with WSGet with HttpPut with WSPut with HttpPost with WSPost with HttpDelete with WSDelete with AppName {
   // Disable implicit _outbound_ auditing.
   override val hooks = NoneRequired
   val playWS: WSClient = WS.client

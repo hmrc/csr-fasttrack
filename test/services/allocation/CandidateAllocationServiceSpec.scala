@@ -29,9 +29,9 @@ import org.scalatestplus.play.PlaySpec
 import repositories.application.CandidateAllocationRepository
 import repositories.{ AssessmentCentreAllocationRepository, ContactDetailsRepository }
 import services.AuditService
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class CandidateAllocationServiceSpec extends PlaySpec with ScalaFutures with MockitoSugar {
 

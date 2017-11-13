@@ -38,9 +38,9 @@ import repositories.OnlineTestPDFReportRepository
 import services.onlinetesting.{ OnlineTestExtensionService, OnlineTestService }
 import testkit.MockitoImplicits.OngoingStubbingExtensionUnit
 import testkit.UnitWithAppSpec
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class OnlineTestControllerSpec extends UnitWithAppSpec {
   "Get Online Test" must {

@@ -29,9 +29,9 @@ import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.QuestionnaireRepository
 import repositories.application.GeneralApplicationRepository
 import services.AuditService
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.language.postfixOps
+import uk.gov.hmrc.http.HeaderCarrier
 
 class QuestionnaireControllerSpec extends PlaySpec with Results {
 

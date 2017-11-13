@@ -18,9 +18,9 @@ package mocks
 
 import connectors.EmailClient
 import org.joda.time.{ DateTime, LocalDate }
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 object EmailClientStub extends EmailClient {
   override def sendApplicationSubmittedConfirmation(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit] =

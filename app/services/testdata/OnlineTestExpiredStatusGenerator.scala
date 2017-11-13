@@ -25,9 +25,9 @@ import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
 import repositories._
 import repositories.application.OnlineTestRepository
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 object OnlineTestExpiredStatusGenerator extends OnlineTestExpiredStatusGenerator {
   // Theoretically previous status generator should be ONLINE_TEST_INVITED, ONLINE_TEST_STARTED, etc

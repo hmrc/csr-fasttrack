@@ -22,11 +22,11 @@ import repositories.application.{ GeneralApplicationRepository, PersonalDetailsR
 import repositories.{ FileLocationSchemeRepository, LocationSchemeRepository, LocationSchemes, _ }
 import services.AuditService
 import services.locationschemes.exchangeobjects.GeoLocationSchemeResult
-import uk.gov.hmrc.play.http.HeaderCarrier
 import play.api.mvc.RequestHeader
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 object LocationSchemeService extends LocationSchemeService {
   val locationSchemeRepository = FileLocationSchemeRepository

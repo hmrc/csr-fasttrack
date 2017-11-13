@@ -42,9 +42,9 @@ import repositories.application.{ AssistanceDetailsRepository, GeneralApplicatio
 import repositories.{ ContactDetailsRepository, OnlineTestPDFReportRepository, TestReportRepository }
 import services.AuditService
 import testkit.ExtendedTimeout
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
+import uk.gov.hmrc.http.HeaderCarrier
 
 class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with MockitoSugar with ScalaFutures with ExtendedTimeout {
   implicit val ec: ExecutionContext = ExecutionContext.global

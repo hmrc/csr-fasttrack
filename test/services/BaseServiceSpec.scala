@@ -19,7 +19,7 @@ package services
 import org.joda.time.{ DateTime, DateTimeZone }
 import play.api.mvc.RequestHeader
 import testkit.{ FutureHelper, UnitSpec }
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 /**
  * Common base class for all service tests
