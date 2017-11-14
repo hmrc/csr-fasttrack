@@ -25,11 +25,11 @@ import play.api.Logger
 import play.libs.Akka
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.language.postfixOps
+import uk.gov.hmrc.http.HeaderCarrier
 
 object OnlineTestRetrievePDFReportService extends OnlineTestRetrievePDFReportService {
   import config.MicroserviceAppConfig._

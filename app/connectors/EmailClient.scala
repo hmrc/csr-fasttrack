@@ -19,10 +19,10 @@ package connectors
 import config.WSHttp
 import connectors.ExchangeObjects._
 import org.joda.time.{ DateTime, LocalDate }
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 object CSREmailClient extends CSREmailClient
 

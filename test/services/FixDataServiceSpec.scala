@@ -32,11 +32,11 @@ import testkit.{ MockitoSugar, UnitSpec }
 import org.mockito.Matchers._
 import org.mockito.Mockito._
 import play.api.mvc.RequestHeader
-import uk.gov.hmrc.play.http.HeaderCarrier
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import services.onlinetesting.OnlineTestExtensionService
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class FixDataServiceSpec extends UnitSpec {
 

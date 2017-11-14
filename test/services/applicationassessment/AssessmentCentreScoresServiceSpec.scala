@@ -28,9 +28,9 @@ import services.AuditService
 import services.applicationassessment.AssessorAssessmentScoresService.{ AssessorScoresExistForExerciseException, ReviewerScoresExistForExerciseException }
 import testkit.UnitSpec
 import testkit.MockitoImplicits._
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class AssessmentCentreScoresServiceSpec extends UnitSpec {
 

@@ -32,10 +32,10 @@ import repositories.application.GeneralApplicationRepository
 import services.AuditService
 import services.application.ApplicationService
 import testkit.{ UnitSpec, UnitWithAppSpec }
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.language.postfixOps
+import uk.gov.hmrc.http.HeaderCarrier
 
 class ApplicationControllerSpec extends UnitWithAppSpec {
 

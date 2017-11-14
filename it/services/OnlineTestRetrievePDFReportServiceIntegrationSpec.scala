@@ -32,7 +32,7 @@ import reactivemongo.json.collection.JSONCollection
 import repositories._
 import repositories.application.GeneralApplicationMongoRepository
 import testkit.IntegrationSpec
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 

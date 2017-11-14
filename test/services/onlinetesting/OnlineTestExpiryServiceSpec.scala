@@ -32,7 +32,7 @@ import repositories.application.OnlineTestRepository
 import services.AuditService
 import testkit.MockitoImplicits.{ OngoingStubbingExtension, OngoingStubbingExtensionUnit }
 import testkit.MockitoSugar
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 class OnlineTestExpiryServiceSpec extends PlaySpec with ScalaFutures with MockitoSugar {
 

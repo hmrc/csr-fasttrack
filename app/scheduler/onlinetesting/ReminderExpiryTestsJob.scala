@@ -25,9 +25,9 @@ import repositories._
 import scheduler.clustering.SingleInstanceScheduledJob
 import services.AuditService
 import services.onlinetesting.{ OnlineTestExpiryService, OnlineTestExpiryServiceImpl }
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
+import uk.gov.hmrc.http.HeaderCarrier
 
 object FirstReminderExpiryTestsJob extends ReminderExpiryTestsJob {
   override val conf = config.MicroserviceAppConfig.firstReminderOnlineTestJobConfig

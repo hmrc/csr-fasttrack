@@ -24,10 +24,10 @@ import repositories._
 import repositories.application._
 import services.AuditService
 import services.applicationassessment.AssessorAssessmentScoresService._
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 object AssessorAssessmentScoresService extends AssessorAssessmentCentreScoresService {
   case class AssessorScoresExistForExerciseException(m: String) extends Exception(m)

@@ -26,9 +26,9 @@ import repositories.ContactDetailsRepository
 import repositories.application.GeneralApplicationRepository
 import services.adjustmentsmanagement.AdjustmentsManagementService
 import services.{ AuditService, BaseServiceSpec }
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class AdjustmentManagementServiceSpec extends BaseServiceSpec {
 

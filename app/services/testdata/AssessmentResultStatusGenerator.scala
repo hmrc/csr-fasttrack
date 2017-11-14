@@ -24,11 +24,11 @@ import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.GeneralApplicationRepository
 import services.testdata.faker.DataFaker.Random
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.language.postfixOps
+import uk.gov.hmrc.http.HeaderCarrier
 
 object AwaitingAssessmentCentreReevalationStatusGenerator extends AssessmentResultStatusGenerator {
   override val previousStatusGenerator = AssessmentScoresAcceptedStatusGenerator

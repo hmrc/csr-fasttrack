@@ -30,9 +30,9 @@ import repositories.application.{ GeneralApplicationRepository, OnlineTestReposi
 import services.AuditService
 import services.evaluation.AssessmentCentrePassmarkRulesEngine
 import services.passmarksettings.AssessmentCentrePassMarkSettingsService
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
+import uk.gov.hmrc.http.HeaderCarrier
 
 object AssessmentCentreService extends AssessmentCentreService {
 

@@ -22,13 +22,13 @@ import connectors.testdata.ExchangeObjects.DataGenerationResponse
 import model.testdata.GeneratorConfig
 import repositories.MongoDbConnection
 import services.testdata.faker.DataFaker.Random
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.collection.parallel.ForkJoinTaskSupport
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{ Await, Future }
 import scala.language.postfixOps
+import uk.gov.hmrc.http.HeaderCarrier
 
 object TestDataGeneratorService extends TestDataGeneratorService {
 }

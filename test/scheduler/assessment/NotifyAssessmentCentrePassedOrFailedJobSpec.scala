@@ -23,10 +23,10 @@ import play.api.mvc.RequestHeader
 import play.test.WithApplication
 import services.applicationassessment.AssessmentCentreService
 import testkit.{ ExtendedTimeout, UnitWithAppSpec }
-import uk.gov.hmrc.play.http.HeaderCarrier
 import org.mockito.Matchers.any
 
 import scala.concurrent.{ ExecutionContext, Future }
+import uk.gov.hmrc.http.HeaderCarrier
 
 class NotifyAssessmentCentrePassedOrFailedJobSpec extends UnitWithAppSpec with ExtendedTimeout {
   implicit val ec: ExecutionContext = ExecutionContext.global

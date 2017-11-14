@@ -31,9 +31,10 @@ import play.api.mvc.Action
 import play.api.mvc.Results._
 import play.api.test.Helpers._
 import testkit.ShortTimeout
-import uk.gov.hmrc.play.http.{ HeaderCarrier, HttpResponse, _ }
+import uk.gov.hmrc.play.http._
 
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
+import uk.gov.hmrc.http.{ HeaderCarrier, HttpReads, HttpResponse }
 
 class CubiksGatewayClientSpec extends PlaySpec with MockitoSugar with ScalaFutures with ShortTimeout {
 
@@ -155,7 +156,8 @@ class CubiksGatewayClientSpec extends PlaySpec with MockitoSugar with ScalaFutur
 
     def mockPost[T] = {
       when(
-        mockWSHttp.POST(anyString(), any[T], anyObject())(any[Writes[T]], any[HttpReads[HttpResponse]], any[HeaderCarrier])
+        mockWSHttp.POST(anyString(), any[T], anyObject())(any[Writes[T]],
+          any[HttpReads[HttpResponse]], any[HeaderCarrier], any[ExecutionContext])
       )
     }
   }

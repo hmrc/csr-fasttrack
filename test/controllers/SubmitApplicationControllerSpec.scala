@@ -38,10 +38,10 @@ import repositories.application.{ GeneralApplicationRepository, PersonalDetailsR
 import services.AuditService
 import services.assistancedetails.AssistanceDetailsService
 import play.api.test.Helpers._
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.language.postfixOps
+import uk.gov.hmrc.http.HeaderCarrier
 
 class SubmitApplicationControllerSpec extends PlaySpec with Results with OneAppPerSuite {
 

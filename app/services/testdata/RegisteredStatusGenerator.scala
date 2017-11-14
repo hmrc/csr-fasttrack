@@ -22,7 +22,7 @@ import model.ApplicationStatuses
 import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 object RegisteredStatusGenerator extends RegisteredStatusGenerator {
   override val appRepository = applicationRepository

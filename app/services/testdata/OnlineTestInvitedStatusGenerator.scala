@@ -25,9 +25,9 @@ import model.persisted.CubiksTestProfile
 import org.joda.time.DateTime
 import repositories._
 import repositories.application.OnlineTestRepository
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 object OnlineTestInvitedStatusGenerator extends OnlineTestInvitedStatusGenerator {
   override val previousStatusGenerator = SubmittedStatusGenerator

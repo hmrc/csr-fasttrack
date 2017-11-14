@@ -24,9 +24,9 @@ import play.api.Logger
 import repositories._
 import repositories.application.CandidateAllocationRepository
 import services.AuditService
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
+import uk.gov.hmrc.http.HeaderCarrier
 
 object CandidateAllocationService extends CandidateAllocationService {
   val caRepository = candidateAllocationMongoRepository
