@@ -40,13 +40,11 @@ object OnlineTestCommands {
                                       applicationStatus: ApplicationStatuses.EnumVal
   )
 
-  case class TimeAdjustmentsOnlineTestApplication(verbalTimeAdjustmentPercentage: Int, numericalTimeAdjustmentPercentage: Int)
   case class TestResult(status: String, norm: String,
     tScore: Option[Double], percentile: Option[Double], raw: Option[Double], sten: Option[Double])
 
   object Implicits {
 
-    implicit val TimeAdjustmentsOnlineTestApplicationFormats = Json.format[TimeAdjustmentsOnlineTestApplication]
     implicit val ApplicationForOnlineTestingFormats = Json.format[OnlineTestApplication]
     implicit val OnlineTestReportNormFormats = Json.format[ReportNorm]
     implicit val OnlineTestApplicationForReportRetrievingFormats = Json.format[OnlineTestApplicationForReportRetrieving]

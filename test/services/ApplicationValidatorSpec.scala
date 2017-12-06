@@ -18,7 +18,7 @@ package services
 
 import model.persisted.PersonalDetails
 import model.exchange.AssistanceDetailsExamples
-import model.{ ApplicationValidator, LocationPreference }
+import model.ApplicationValidator
 import org.joda.time.LocalDate
 import org.scalatestplus.play.PlaySpec
 import repositories.FrameworkRepository.{ CandidateHighestQualification, Framework, Location, Region }

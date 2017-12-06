@@ -35,15 +35,6 @@ class ReportingDocumentRootInMemoryRepository extends ReportingRepository {
 
   val inMemoryRepo = new mutable.HashMap[String, ApplicationResponse]
 
-  override def applicationsReport(frameworkId: String): Future[List[(String, IsNonSubmitted, PreferencesWithContactDetails)]] = {
-    val app1 = ("user1", true, PreferencesWithContactDetails(Some("John"), Some("Smith"), Some("Jo"),
-      Some("user1@email.com"), None, Some("location1"), Some("location1Scheme1"), Some("location1Scheme2"), Some("location2"),
-      Some("location2Scheme1"), Some("location2Scheme2"), None, Some("2016-12-25 13:00:14")))
-    val app2 = ("user2", true, PreferencesWithContactDetails(Some("John"), Some("Smith"), Some("Jo"),
-      None, None, None, None, None, None, None, None, None, None))
-    Future.successful(app1 :: app2 :: Nil)
-  }
-
   override def applicationsForCandidateProgressReport(frameworkId: String):
     Future[List[ApplicationForCandidateProgressReport]] = Future.successful(List(
     ApplicationForCandidateProgressReport(Some(UniqueIdentifier.randomUniqueIdentifier), UniqueIdentifier.randomUniqueIdentifier,

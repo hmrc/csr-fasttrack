@@ -53,8 +53,6 @@ trait ReportingRepository {
 
   def candidatesAwaitingAllocation(frameworkId: String): Future[List[CandidateAwaitingAllocation]]
 
-  def applicationsReport(frameworkId: String): Future[List[(String, IsNonSubmitted, PreferencesWithContactDetails)]]
-
   def allApplicationAndUserIds(frameworkId: String): Future[List[ApplicationUserIdReport]]
 
   def applicationsPassedInAssessmentCentre(frameworkId: String): Future[List[ApplicationPreferencesWithTestResults]]
@@ -415,49 +413,6 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
         val typeOfAdjustments = assistance.flatMap(_.getAs[List[String]]("typeOfAdjustments")).map(_.mkString("|"))
 
         CandidateAwaitingAllocation(userId, firstName, lastName, preferredName, dateOfBirth, typeOfAdjustments, assessmentCentreLocation)
-      }
-    }
-  }
-
-  def applicationsReport(frameworkId: String): Future[List[(String, IsNonSubmitted, PreferencesWithContactDetails)]] = {
-    val query = BSONDocument("frameworkId" -> frameworkId)
-
-    val projection = BSONDocument(
-      "applicationId" -> "1",
-      "personal-details.preferredName" -> "1",
-      "userId" -> "1",
-      "framework-preferences" -> "1",
-      "progress-status" -> "2"
-    )
-
-    val seed = Future.successful(List.empty[(String, Boolean, PreferencesWithContactDetails)])
-    reportQueryWithProjections[BSONDocument](query, projection).flatMap { lst =>
-      lst.foldLeft(seed) { (applicationsFuture, document) =>
-        applicationsFuture.map { applications =>
-          val timeCreated = isoTimeToPrettyDateTime(getDocumentId(document).time)
-          val applicationId = document.getAs[String]("applicationId").get
-          val personalDetails = document.getAs[BSONDocument]("personal-details")
-          val preferredName = extract("preferredName")(personalDetails)
-          val userId = document.getAs[String]("userId").get
-          val frameworkPreferences = document.getAs[Preferences]("framework-preferences")
-
-          val location1 = frameworkPreferences.map(_.firstLocation.location)
-          val location1Scheme1 = frameworkPreferences.map(_.firstLocation.firstFramework)
-          val location1Scheme2 = frameworkPreferences.flatMap(_.firstLocation.secondFramework)
-
-          val location2 = frameworkPreferences.flatMap(_.secondLocation.map(_.location))
-          val location2Scheme1 = frameworkPreferences.flatMap(_.secondLocation.map(_.firstFramework))
-          val location2Scheme2 = frameworkPreferences.flatMap(_.secondLocation.flatMap(_.secondFramework))
-
-          val p = findProgress(document, applicationId)
-
-          val preferences = PreferencesWithContactDetails(None, None, preferredName, None, None,
-            location1, location1Scheme1, location1Scheme2,
-            location2, location2Scheme1, location2Scheme2,
-            Some(ApplicationStatusOrder.getStatus(p)), Some(timeCreated))
-
-          (userId, isNonSubmittedStatus(p), preferences) +: applications
-        }
       }
     }
   }

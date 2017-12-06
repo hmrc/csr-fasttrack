@@ -376,9 +376,6 @@ trait ReportingController extends BaseController {
     }
   }
 
-  def createPreferencesAndContactReports(frameworkId: String) =
-    preferencesAndContactReports(nonSubmittedOnly = false)(frameworkId)
-
   def createSuccessfulCandidatesReport(frameworkId: String) = Action.async { implicit request =>
 
     val applicationsFut = reportingRepository.applicationsPassedInAssessmentCentre(frameworkId)
@@ -563,63 +560,40 @@ trait ReportingController extends BaseController {
     status
   }
 
-  def prevYearCandidatesDetailsReport = Action.async { implicit request =>
-    val applicationFut = prevYearCandidatesDetailsRepository.findApplicationDetails()
-    for {
-      applications <- applicationFut
-      result <- enrichPreviousYearCandidateDetails {
-        (contactDetails, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores) =>
-          {
-            val header = (
-              applications.header ::
-              contactDetails.header ::
-              questionnaireDetails.header ::
-              onlineTestReports.header ::
-              assessmentCenterDetails.header ::
-              assessmentScores.header :: Nil
-            ).mkString(",")
-
-            val records = applications.records.values.map { app =>
-              createCandidateInfoBackUpRecord(app, contactDetails, questionnaireDetails,
-                onlineTestReports, assessmentCenterDetails, assessmentScores)
-            }
-            Ok((header :: records.toList).mkString("\n"))
-          }
-      }
-    } yield {
-      result
-    }
-  }
-
-  def streamPrevYearCandidatesDetailsReport = Action.async { implicit request =>
+  def streamPrevYearCandidatesDetailsReport: Action[AnyContent] = Action.async { implicit request =>
     enrichPreviousYearCandidateDetails {
-      (contactDetails, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores) =>
-        {
-          val header = Enumerator(
-            (prevYearCandidatesDetailsRepository.applicationDetailsHeader ::
-              prevYearCandidatesDetailsRepository.contactDetailsHeader ::
-              prevYearCandidatesDetailsRepository.questionnaireDetailsHeader ::
-              prevYearCandidatesDetailsRepository.onlineTestReportHeader ::
-              prevYearCandidatesDetailsRepository.assessmentCenterDetailsHeader ::
-              prevYearCandidatesDetailsRepository.assessmentScoresHeader :: Nil).mkString(",") + "\n"
-          )
-          val candidatesStream = prevYearCandidatesDetailsRepository.applicationDetailsStream().map { app =>
+      (contactDetails, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores) => {
+        val header = Enumerator(
+          (prevYearCandidatesDetailsRepository.applicationDetailsHeader ::
+            prevYearCandidatesDetailsRepository.contactDetailsHeader ::
+            prevYearCandidatesDetailsRepository.questionnaireDetailsHeader ::
+            prevYearCandidatesDetailsRepository.onlineTestReportHeader ::
+            prevYearCandidatesDetailsRepository.assessmentCenterDetailsHeader ::
+            prevYearCandidatesDetailsRepository.assessmentScoresHeader :: Nil).mkString(",") + "\n"
+        )
+
+        val candidatesStream = prevYearCandidatesDetailsRepository.applicationDetailsStream().map { appEnum =>
+          appEnum.map { app =>
             createCandidateInfoBackUpRecord(app, contactDetails, questionnaireDetails,
               onlineTestReports, assessmentCenterDetails, assessmentScores) + "\n"
           }
-          Ok.chunked(Source.fromPublisher(Streams.enumeratorToPublisher(header.andThen(candidatesStream))))
         }
+
+        candidatesStream.map { candStream =>
+          Ok.chunked(Source.fromPublisher(Streams.enumeratorToPublisher(header.andThen(candStream))))
+        }
+      }
     }
   }
 
   // scalastyle:off line.size.limit
-  private def enrichPreviousYearCandidateDetails(block: (CsvExtract[String], CsvExtract[String], CsvExtract[String], CsvExtract[String], CsvExtract[String]) => Result) = {
+  private def enrichPreviousYearCandidateDetails(block: (CsvExtract[String], CsvExtract[String], CsvExtract[String], CsvExtract[String], CsvExtract[String]) => Future[Result]): Future[Result] = {
     val candidateDetailsFut = prevYearCandidatesDetailsRepository.findContactDetails()
     val questionnaireDetailsFut = prevYearCandidatesDetailsRepository.findQuestionnaireDetails()
     val onlineTestReportsFut = prevYearCandidatesDetailsRepository.findOnlineTestReports()
-    val assessmentCenterDetailsFut = prevYearCandidatesDetailsRepository.findAssessmentCenterDetails()
+    val assessmentCenterDetailsFut = prevYearCandidatesDetailsRepository.findAssessmentCentreDetails()
     val assessmentScoresFut = prevYearCandidatesDetailsRepository.findAssessmentScores()
-    for {
+    (for {
       contactDetails <- candidateDetailsFut
       questionnaireDetails <- questionnaireDetailsFut
       onlineTestReports <- onlineTestReportsFut
@@ -627,7 +601,7 @@ trait ReportingController extends BaseController {
       assessmentScores <- assessmentScoresFut
     } yield {
       block(contactDetails, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores)
-    }
+    }).flatMap(identity)
   }
   // scalastyle:on
 
@@ -640,18 +614,6 @@ trait ReportingController extends BaseController {
       onlineTestReports.records.getOrElse(candidateDetails.appId, onlineTestReports.emptyRecord()) ::
       assessmentCenterDetails.records.getOrElse(candidateDetails.appId, assessmentCenterDetails.emptyRecord()) ::
       assessmentScores.records.getOrElse(candidateDetails.appId, assessmentScores.emptyRecord()) :: Nil).mkString(",")
-  }
-
-  private def preferencesAndContactReports(nonSubmittedOnly: Boolean)(frameworkId: String) = Action.async { implicit request =>
-    for {
-      applications <- reportingRepository.applicationsReport(frameworkId)
-      applicationsToExclude = getApplicationsNotToIncludeInReport(applications, nonSubmittedOnly)
-      users <- getAppsFromAuthProvider(applicationsToExclude)
-      contactDetails <- contactDetailsRepository.findAll
-      reports = mergeApplications(users, contactDetails, applications)
-    } yield {
-      Ok(Json.toJson(reports.values))
-    }
   }
 
   private def mergeApplications(

@@ -29,10 +29,10 @@ object CollectionNames {
   val QUESTIONNAIRE = "questionnaire17"
   val ONLINE_TEST_REPORT = "online-test-report17"
 
-  val APPLICATION_2016 = "application"
-  val APPLICATION_ASSESSMENT_2016 = "application-assessment"
-  val APPLICATION_ASSESSMENT_SCORES_2016 = "application-assessment-scores"
-  val CONTACT_DETAILS_2016 = "contact-details"
-  val QUESTIONNAIRE_2016 = "questionnaire"
-  val ONLINE_TEST_REPORT_2016 = "online-test-report"
+  val APPLICATION_2017 = "application17"
+  val APPLICATION_ASSESSMENT_2017 = "application-assessment17"
+  val APPLICATION_ASSESSMENT_SCORES_2017 = "application-assessment-scores17"
+  val CONTACT_DETAILS_2017 = "contact-details17"
+  val QUESTIONNAIRE_2017 = "questionnaire17"
+  val ONLINE_TEST_REPORT_2017 = "online-test-report17"
 }
