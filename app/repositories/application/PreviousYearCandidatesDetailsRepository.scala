@@ -354,9 +354,9 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
       assistanceDetails.flatMap(_.getAs[String]("hasDisability")),
       assistanceDetails.flatMap(_.getAs[String]("hasDisabilityDescription")),
       assistanceDetails.flatMap(ad => mapYesNo(ad.getAs[Boolean]("guaranteedInterview"))),
-      assistanceDetails.flatMap(_.getAs[String]("needsSupportForOnlineAssessment")),
+      assistanceDetails.flatMap(ad => mapYesNo(ad.getAs[Boolean]("needsSupportForOnlineAssessment"))),
       assistanceDetails.flatMap(_.getAs[String]("needsSupportForOnlineAssessmentDescription")),
-      assistanceDetails.flatMap(_.getAs[String]("needsSupportAtVenue")),
+      assistanceDetails.flatMap(ad => mapYesNo(ad.getAs[Boolean]("needsSupportAtVenue"))),
       assistanceDetails.flatMap(_.getAs[String]("needsSupportAtVenueDescription"))
     )
   }
