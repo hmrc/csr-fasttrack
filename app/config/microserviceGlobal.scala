@@ -100,7 +100,7 @@ trait Scheduler extends RunningOfScheduledJobs {
 
   private lazy val notifyAssessmentCentrePassedOrFailedJob: Option[ScheduledJob] =
     if (notifyAssessmentCentrePassedOrFailedJobConfigValues.enabled) Some(NotifyAssessmentCentrePassedOrFailedJob) else {
-      Logger.warn("notify assessment centre passsed or failed job is disabled")
+      Logger.warn("notify assessment centre passed or failed job is disabled")
       None
     }
 
