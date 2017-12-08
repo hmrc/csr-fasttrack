@@ -16,54 +16,33 @@
 
 package controllers.report
 
-import connectors.AuthProviderClient
-import controllers.ReportingController
-import mocks.application.ReportingDocumentRootInMemoryRepository
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
+import model.exchange.AssistanceDetails
 import model.report.AdjustmentReportItem
+import model.{ Adjustments, AdjustmentsComment, AssessmentCentreIndicator }
+import org.mockito.Matchers._
 import org.mockito.Mockito._
 import play.api.libs.json.JsArray
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories._
-import repositories.application.{ OnlineTestRepository, ReportingRepository }
-import services.reporting.SocioEconomicScoreCalculator
+import testkit.MockitoImplicits._
 
-import scala.concurrent.Future
 import scala.language.postfixOps
 
 class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
 
   "Reporting controller create adjustment report" should {
     "return the adjustment report when we execute adjustment reports" in new AdjustmentsTestFixture {
-      override val controller = new ReportingController {
-        override val reportingFormatter = reportingFormatterMock
-        override val locationSchemeService = locationSchemeServiceMock
-        override val authProviderClient: AuthProviderClient = authProviderClientMock
-        override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
-        override val assessorAssessmentScoresRepository: ApplicationAssessmentScoresRepository = assessorAssessmentScoresRepoMock
-        override val reviewerAssessmentScoresRepository: ApplicationAssessmentScoresRepository = reviewerAssessmentScoresRepoMock
-        override val contactDetailsRepository = contactDetailsRepoMock
-        override val questionnaireRepository = questionnaireRepoMock
-        override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
-        override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
-        override val testReportRepository = testReportRepoMock
-        override val locationSchemeRepository = mock[LocationSchemeRepository]
-        override val mediaRepository = mock[MediaRepository]
-        override val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
-        override val onlineTestRepository = mock[OnlineTestRepository]
-        override val assessmentCentreAllocationRepository = mock[AssessmentCentreAllocationRepository]
-      }
-      when(contactDetailsRepoMock.findAll).thenReturn(
-        Future.successful(List(
+      when(contactDetailsRepoMock.findAll).thenReturnAsync(
+        List(
           ContactDetailsWithId("1", outsideUk = false, Address("First Line", None, None, None), Some("HP18 9DN"),
             None, "joe@bloggs.com", None),
           ContactDetailsWithId("2", outsideUk = false, Address("First Line", None, None, None), Some("HP18 9DN"),
             None, "joe@bloggs.com", None),
           ContactDetailsWithId("3", outsideUk = false, Address("First Line", None, None, None), Some("HP18 9DN"),
             None, "joe@bloggs.com", None)
-        ))
+        )
       )
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
@@ -77,25 +56,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
     }
 
     "return the adjustment report without contact details data" in new AdjustmentsTestFixture {
-      override val controller = new ReportingController {
-        override val reportingFormatter = reportingFormatterMock
-        override val locationSchemeService = locationSchemeServiceMock
-        override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
-        override val assessorAssessmentScoresRepository: ApplicationAssessmentScoresRepository = assessorAssessmentScoresRepoMock
-        override val reviewerAssessmentScoresRepository: ApplicationAssessmentScoresRepository = reviewerAssessmentScoresRepoMock
-        override val contactDetailsRepository = contactDetailsRepoMock
-        override val questionnaireRepository = questionnaireRepoMock
-        override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
-        override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
-        override val testReportRepository = testReportRepoMock
-        override val authProviderClient: AuthProviderClient = authProviderClientMock
-        override val locationSchemeRepository = mock[LocationSchemeRepository]
-        override val mediaRepository = mock[MediaRepository]
-        override val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
-        override val onlineTestRepository = mock[OnlineTestRepository]
-        override val assessmentCentreAllocationRepository = mock[AssessmentCentreAllocationRepository]
-      }
-      when(contactDetailsRepoMock.findAll).thenReturn(Future.successful(Nil))
+      when(contactDetailsRepoMock.findAll).thenReturnAsync(Nil)
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
       val finalResult = contentAsJson(result).as[JsArray].value
@@ -109,29 +70,8 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
     }
 
     "return no adjustments if there's no data on the server" in new AdjustmentsTestFixture {
-      override val controller = new ReportingController {
-        override val reportingFormatter = reportingFormatterMock
-        override val locationSchemeService = locationSchemeServiceMock
-        override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
-        override val assessorAssessmentScoresRepository: ApplicationAssessmentScoresRepository = assessorAssessmentScoresRepoMock
-        override val reviewerAssessmentScoresRepository: ApplicationAssessmentScoresRepository = reviewerAssessmentScoresRepoMock
-        override val contactDetailsRepository = contactDetailsRepoMock
-        override val questionnaireRepository = questionnaireRepoMock
-        override val reportingRepository = new ReportingDocumentRootInMemoryRepository {
-          override def adjustmentReport(frameworkId: String): Future[List[AdjustmentReportItem]] = {
-            Future.successful(List.empty[AdjustmentReportItem])
-          }
-        }
-        override val testReportRepository = testReportRepoMock
-        override val authProviderClient: AuthProviderClient = authProviderClientMock
-        override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
-        override val locationSchemeRepository = mock[LocationSchemeRepository]
-        override val mediaRepository = mock[MediaRepository]
-        override val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
-        override val onlineTestRepository = mock[OnlineTestRepository]
-        override val assessmentCentreAllocationRepository = mock[AssessmentCentreAllocationRepository]
-      }
-      when(contactDetailsRepoMock.findAll).thenReturn(Future.successful(Nil))
+      when(contactDetailsRepoMock.findAll).thenReturnAsync(Nil)
+      when(reportingRepoMock.adjustmentReport(any[String])).thenReturnAsync(Nil)
       val result = controller.createAdjustmentReports(frameworkId)(createAdjustmentsReport(frameworkId)).run
 
       val finalResult = contentAsJson(result).as[JsArray].value
@@ -146,5 +86,22 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
       FakeRequest(Helpers.GET, controllers.routes.ReportingController.createAdjustmentReports(frameworkId).url, FakeHeaders(), "")
         .withHeaders("Content-Type" -> "application/json")
     }
+
+    when(reportingRepoMock.adjustmentReport(any[String])).thenReturnAsync(
+      List(
+        AdjustmentReportItem("1", Some("123"), Some("John"), Some("Smith"), Some("Spiderman"),
+          None, None, Some("SUBMITTED"), Some(AssistanceDetails("Yes", None, Some(true), needsSupportForOnlineAssessment = true,
+            Some("more time"), needsSupportAtVenue = true, Some("big chair"))),
+          Some(Adjustments(None, None, None, None)), Some(AdjustmentsComment("comment")), Some(AssessmentCentreIndicator("Sutton", "London"))),
+        AdjustmentReportItem("2", Some("123"), Some("Mary"), Some("Smith"), Some("Spiderwoman"),
+          None, None, Some("SUBMITTED"), Some(AssistanceDetails("Yes", None, Some(true), needsSupportForOnlineAssessment = true,
+            Some("more time"), needsSupportAtVenue = true, Some("big chair"))),
+          Some(Adjustments(None, None, None, None)), Some(AdjustmentsComment("comment")), Some(AssessmentCentreIndicator("Sutton", "London"))),
+        AdjustmentReportItem("3", Some("123"), Some("Peter"), Some("Smith"), Some("Spiderchild"),
+          None, None, Some("SUBMITTED"), Some(AssistanceDetails("Yes", None, Some(true), needsSupportForOnlineAssessment = true,
+            Some("more time"), needsSupportAtVenue = true, Some("big chair"))),
+          Some(Adjustments(None, None, None, None)), Some(AdjustmentsComment("comment")), Some(AssessmentCentreIndicator("Sutton", "London")))
+      )
+    )
   }
 }
