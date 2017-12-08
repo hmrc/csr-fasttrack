@@ -18,7 +18,6 @@ package controllers.report
 
 import connectors.AuthProviderClient
 import controllers.ReportingController
-import mocks._
 import mocks.application.ReportingDocumentRootInMemoryRepository
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
@@ -43,13 +42,13 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val locationSchemeService = locationSchemeServiceMock
         override val authProviderClient: AuthProviderClient = authProviderClientMock
         override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
-        override val assessorAssessmentScoresRepository: ApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
-        override val reviewerAssessmentScoresRepository: ApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
+        override val assessorAssessmentScoresRepository: ApplicationAssessmentScoresRepository = assessorAssessmentScoresRepoMock
+        override val reviewerAssessmentScoresRepository: ApplicationAssessmentScoresRepository = reviewerAssessmentScoresRepoMock
         override val contactDetailsRepository = contactDetailsRepoMock
         override val questionnaireRepository = questionnaireRepoMock
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
         override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
-        override val testReportRepository = TestReportInMemoryRepository
+        override val testReportRepository = testReportRepoMock
         override val locationSchemeRepository = mock[LocationSchemeRepository]
         override val mediaRepository = mock[MediaRepository]
         override val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
@@ -82,13 +81,13 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val reportingFormatter = reportingFormatterMock
         override val locationSchemeService = locationSchemeServiceMock
         override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
-        override val assessorAssessmentScoresRepository: ApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
-        override val reviewerAssessmentScoresRepository: ApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
+        override val assessorAssessmentScoresRepository: ApplicationAssessmentScoresRepository = assessorAssessmentScoresRepoMock
+        override val reviewerAssessmentScoresRepository: ApplicationAssessmentScoresRepository = reviewerAssessmentScoresRepoMock
         override val contactDetailsRepository = contactDetailsRepoMock
         override val questionnaireRepository = questionnaireRepoMock
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
         override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
-        override val testReportRepository = TestReportInMemoryRepository
+        override val testReportRepository = testReportRepoMock
         override val authProviderClient: AuthProviderClient = authProviderClientMock
         override val locationSchemeRepository = mock[LocationSchemeRepository]
         override val mediaRepository = mock[MediaRepository]
@@ -114,8 +113,8 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val reportingFormatter = reportingFormatterMock
         override val locationSchemeService = locationSchemeServiceMock
         override val assessmentCentreIndicatorRepository = assessmentCentreIndicatorRepoMock
-        override val assessorAssessmentScoresRepository: ApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
-        override val reviewerAssessmentScoresRepository: ApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
+        override val assessorAssessmentScoresRepository: ApplicationAssessmentScoresRepository = assessorAssessmentScoresRepoMock
+        override val reviewerAssessmentScoresRepository: ApplicationAssessmentScoresRepository = reviewerAssessmentScoresRepoMock
         override val contactDetailsRepository = contactDetailsRepoMock
         override val questionnaireRepository = questionnaireRepoMock
         override val reportingRepository = new ReportingDocumentRootInMemoryRepository {
@@ -123,7 +122,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
             Future.successful(List.empty[AdjustmentReportItem])
           }
         }
-        override val testReportRepository = TestReportInMemoryRepository
+        override val testReportRepository = testReportRepoMock
         override val authProviderClient: AuthProviderClient = authProviderClientMock
         override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
         override val locationSchemeRepository = mock[LocationSchemeRepository]
