@@ -23,14 +23,12 @@ import mocks.application.ReportingDocumentRootInMemoryRepository
 import model.Commands._
 import model.PersistedObjects.ContactDetailsWithId
 import model.report.AdjustmentReportItem
-import org.mockito.Matchers._
 import org.mockito.Mockito._
 import play.api.libs.json.JsArray
-import play.api.libs.json.{ JsArray, JsValue }
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, ReportingRepository }
 import repositories._
+import repositories.application.{ OnlineTestRepository, ReportingRepository }
 import services.reporting.SocioEconomicScoreCalculator
 
 import scala.concurrent.Future
@@ -48,7 +46,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val assessorAssessmentScoresRepository: ApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
         override val reviewerAssessmentScoresRepository: ApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
         override val contactDetailsRepository = contactDetailsRepoMock
-        override val questionnaireRepository = QuestionnaireInMemoryRepository
+        override val questionnaireRepository = questionnaireRepoMock
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
         override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
         override val testReportRepository = TestReportInMemoryRepository
@@ -87,7 +85,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val assessorAssessmentScoresRepository: ApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
         override val reviewerAssessmentScoresRepository: ApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
         override val contactDetailsRepository = contactDetailsRepoMock
-        override val questionnaireRepository = QuestionnaireInMemoryRepository
+        override val questionnaireRepository = questionnaireRepoMock
         override val reportingRepository: ReportingRepository = ReportingDocumentRootInMemoryRepository
         override val prevYearCandidatesDetailsRepository = previousYearContactDetailsRepositoryMock
         override val testReportRepository = TestReportInMemoryRepository
@@ -119,7 +117,7 @@ class AdjustmentsReportingControllerSpec extends BaseReportingControllerSpec {
         override val assessorAssessmentScoresRepository: ApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
         override val reviewerAssessmentScoresRepository: ApplicationAssessmentScoresRepository = mock[ApplicationAssessmentScoresRepository]
         override val contactDetailsRepository = contactDetailsRepoMock
-        override val questionnaireRepository = QuestionnaireInMemoryRepository
+        override val questionnaireRepository = questionnaireRepoMock
         override val reportingRepository = new ReportingDocumentRootInMemoryRepository {
           override def adjustmentReport(frameworkId: String): Future[List[AdjustmentReportItem]] = {
             Future.successful(List.empty[AdjustmentReportItem])
