@@ -29,11 +29,10 @@ import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.QuestionnaireRepository
 import repositories.application.GeneralApplicationRepository
 import services.AuditService
-
-import scala.language.postfixOps
+import testkit.MockitoImplicits._
 import uk.gov.hmrc.http.HeaderCarrier
 
-import scala.concurrent.Future
+import scala.language.postfixOps
 
 class QuestionnaireControllerSpec extends PlaySpec with Results {
 
@@ -108,7 +107,7 @@ class QuestionnaireControllerSpec extends PlaySpec with Results {
       override val auditService: AuditService = mockAuditService
     }
 
-    when(questionnaireRepoMock.addQuestions(any[String], any[List[PersistedQuestion]])).thenReturn(Future.successful(()))
+    when(questionnaireRepoMock.addQuestions(any[String], any[List[PersistedQuestion]])).thenReturnAsync()
 
     def addQuestionnaireSection(applicationId: String, section: String)(jsonString: String) = {
       val json = Json.parse(jsonString)
