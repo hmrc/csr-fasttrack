@@ -83,7 +83,7 @@ abstract class PreviousYearCandidatesDetailsRepository(locationSchemeRepository:
 
   val assessmentCentreDetailsHeader = "Assessment venue,Assessment date,Assessment session,Assessment slot,Assessment confirmed"
 
-  def genAssessmentScoresHeaders(exercise: String) = {
+  def generateAssessmentScoresHeaders(exercise: String) = {
     List(s"$exercise - attended",
     s"$exercise - incomplete",
     s"$exercise - last updated by",
@@ -102,12 +102,12 @@ abstract class PreviousYearCandidatesDetailsRepository(locationSchemeRepository:
   }
 
   val assessmentScoresHeader =
-    genAssessmentScoresHeaders("Assessor Interview") + "," +
-    genAssessmentScoresHeaders("Assessor Group Exercise") + "," +
-    genAssessmentScoresHeaders("Assessor Written Exercise") +   "," +
-    genAssessmentScoresHeaders("QAC/Final Interview") + "," +
-    genAssessmentScoresHeaders("QAC/Final Group Exercise") + "," +
-    genAssessmentScoresHeaders("QAC/Final Written Exercise")
+    generateAssessmentScoresHeaders("Assessor Interview") + "," +
+    generateAssessmentScoresHeaders("Assessor Group Exercise") + "," +
+    generateAssessmentScoresHeaders("Assessor Written Exercise") +   "," +
+    generateAssessmentScoresHeaders("QAC/Final Interview") + "," +
+    generateAssessmentScoresHeaders("QAC/Final Group Exercise") + "," +
+    generateAssessmentScoresHeaders("QAC/Final Written Exercise")
 
 
   def applicationDetailsStream(): Future[Enumerator[CandidateDetailsReportItem]]
