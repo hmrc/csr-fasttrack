@@ -29,6 +29,7 @@ import model.persisted.SchemeEvaluationResult
 import model.report.{ AssessmentCentreScoresReportItem, DiversityReportItem, PassMarkReportItem }
 import model.{ ApplicationStatusOrder, ApplicationStatuses, AssessmentExercise, ProgressStatuses, UniqueIdentifier }
 import model.ApplicationStatuses.AssessmentScoresAccepted
+import play.api.Logger
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
 import play.api.libs.streams.Streams
