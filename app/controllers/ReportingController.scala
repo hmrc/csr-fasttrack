@@ -29,6 +29,7 @@ import model.persisted.SchemeEvaluationResult
 import model.report.{ AssessmentCentreScoresReportItem, DiversityReportItem, PassMarkReportItem }
 import model.{ ApplicationStatusOrder, ApplicationStatuses, AssessmentExercise, ProgressStatuses, UniqueIdentifier }
 import model.ApplicationStatuses.AssessmentScoresAccepted
+import play.api.Logger
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
 import play.api.libs.streams.Streams
@@ -562,57 +563,66 @@ trait ReportingController extends BaseController {
 
   def streamPrevYearCandidatesDetailsReport: Action[AnyContent] = Action.async { implicit request =>
     enrichPreviousYearCandidateDetails {
-      (contactDetails, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores) => {
-        val header = Enumerator(
-          (prevYearCandidatesDetailsRepository.applicationDetailsHeader ::
-            prevYearCandidatesDetailsRepository.contactDetailsHeader ::
-            prevYearCandidatesDetailsRepository.questionnaireDetailsHeader ::
-            prevYearCandidatesDetailsRepository.onlineTestReportHeader ::
-            prevYearCandidatesDetailsRepository.assessmentCenterDetailsHeader ::
-            prevYearCandidatesDetailsRepository.assessmentScoresHeader :: Nil).mkString(",") + "\n"
-        )
+      (contactDetails, media, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores) => {
 
-        val candidatesStream = prevYearCandidatesDetailsRepository.applicationDetailsStream().map { appEnum =>
-          appEnum.map { app =>
-            createCandidateInfoBackUpRecord(app, contactDetails, questionnaireDetails,
-              onlineTestReports, assessmentCenterDetails, assessmentScores) + "\n"
+          val headerFut = prevYearCandidatesDetailsRepository.applicationDetailsHeader.map { appDetailsHeader =>
+            Enumerator(
+              (appDetailsHeader ::
+                prevYearCandidatesDetailsRepository.mediaHeader ::
+                prevYearCandidatesDetailsRepository.contactDetailsHeader ::
+                prevYearCandidatesDetailsRepository.questionnaireDetailsHeader ::
+                prevYearCandidatesDetailsRepository.onlineTestReportHeader ::
+                prevYearCandidatesDetailsRepository.assessmentCentreDetailsHeader ::
+                prevYearCandidatesDetailsRepository.assessmentScoresHeader :: Nil).mkString(",") + "\n"
+            )
           }
-        }
 
-        candidatesStream.map { candStream =>
-          Ok.chunked(Source.fromPublisher(Streams.enumeratorToPublisher(header.andThen(candStream))))
+          val candidatesStream = prevYearCandidatesDetailsRepository.applicationDetailsStream().map { appEnum =>
+            appEnum.map { app =>
+              createCandidateInfoBackUpRecord(app, media, contactDetails, questionnaireDetails,
+                onlineTestReports, assessmentCenterDetails, assessmentScores) + "\n"
+            }
+          }
+
+        headerFut.flatMap { header =>
+          candidatesStream.map { candStream =>
+            Ok.chunked(Source.fromPublisher(Streams.enumeratorToPublisher(header.andThen(candStream))))
+          }
         }
       }
     }
   }
 
   // scalastyle:off line.size.limit
-  private def enrichPreviousYearCandidateDetails(block: (CsvExtract[String], CsvExtract[String], CsvExtract[String], CsvExtract[String], CsvExtract[String]) => Future[Result]): Future[Result] = {
+  private def enrichPreviousYearCandidateDetails(block: (CsvExtract[String], CsvExtract[String], CsvExtract[String], CsvExtract[String], CsvExtract[String], CsvExtract[String]) => Future[Result]): Future[Result] = {
     val candidateDetailsFut = prevYearCandidatesDetailsRepository.findContactDetails()
+    val mediaFut = prevYearCandidatesDetailsRepository.findMedia()
     val questionnaireDetailsFut = prevYearCandidatesDetailsRepository.findQuestionnaireDetails()
     val onlineTestReportsFut = prevYearCandidatesDetailsRepository.findOnlineTestReports()
-    val assessmentCenterDetailsFut = prevYearCandidatesDetailsRepository.findAssessmentCentreDetails()
+    val assessmentCentreDetailsFut = prevYearCandidatesDetailsRepository.findAssessmentCentreDetails()
     val assessmentScoresFut = prevYearCandidatesDetailsRepository.findAssessmentScores()
     (for {
       contactDetails <- candidateDetailsFut
+      media <- mediaFut
       questionnaireDetails <- questionnaireDetailsFut
       onlineTestReports <- onlineTestReportsFut
-      assessmentCenterDetails <- assessmentCenterDetailsFut
+      assessmentCentreDetails <- assessmentCentreDetailsFut
       assessmentScores <- assessmentScoresFut
     } yield {
-      block(contactDetails, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores)
+      block(contactDetails, media, questionnaireDetails, onlineTestReports, assessmentCentreDetails, assessmentScores)
     }).flatMap(identity)
   }
   // scalastyle:on
 
-  private def createCandidateInfoBackUpRecord(candidateDetails: CandidateDetailsReportItem, contactDetails: CsvExtract[String],
-    questionnaireDetails: CsvExtract[String], onlineTestReports: CsvExtract[String],
-    assessmentCenterDetails: CsvExtract[String], assessmentScores: CsvExtract[String]) = {
+  private def createCandidateInfoBackUpRecord(candidateDetails: CandidateDetailsReportItem, media: CsvExtract[String],
+    contactDetails: CsvExtract[String], questionnaireDetails: CsvExtract[String], onlineTestReports: CsvExtract[String],
+    assessmentCentreDetails: CsvExtract[String], assessmentScores: CsvExtract[String]) = {
     (candidateDetails.csvRecord ::
+      media.records.getOrElse(candidateDetails.userId, media.emptyRecord()) ::
       contactDetails.records.getOrElse(candidateDetails.userId, contactDetails.emptyRecord()) ::
       questionnaireDetails.records.getOrElse(candidateDetails.appId, questionnaireDetails.emptyRecord()) ::
       onlineTestReports.records.getOrElse(candidateDetails.appId, onlineTestReports.emptyRecord()) ::
-      assessmentCenterDetails.records.getOrElse(candidateDetails.appId, assessmentCenterDetails.emptyRecord()) ::
+      assessmentCentreDetails.records.getOrElse(candidateDetails.appId, assessmentCentreDetails.emptyRecord()) ::
       assessmentScores.records.getOrElse(candidateDetails.appId, assessmentScores.emptyRecord()) :: Nil).mkString(",")
   }
 
