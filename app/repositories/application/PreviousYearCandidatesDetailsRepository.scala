@@ -52,10 +52,10 @@ abstract class PreviousYearCandidatesDetailsRepository(locationSchemeRepository:
   lazy val applicationDetailsHeader = {
     locationHeader.map { locHeader =>
       "FrameworkId,Application status,First name,Last name,Preferred name,Date of birth," +
-        "A level,Stem level,Civil Servant,Civil Service Department," + schemesHeader + "," + locHeader + "," +
-        "Has disability,Disability Description,GIS,Needs support for online assessment," +
+        "A level,Stem level,Civil servant,Civil Service department," + schemesHeader + "," + locHeader + "," +
+        "Has disability,Disability description,GIS,Needs support for online assessment," +
         "Support for online assessment description,Needs support at venue,Support at venue description," +
-        "Assessment centre area,Assessment Centre,Assessment centre indicator version"
+        "Assessment centre area,Assessment centre,Assessment centre indicator version"
     }
   }
 
