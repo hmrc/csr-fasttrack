@@ -51,7 +51,7 @@ class PersonalDetailsServiceSpec extends PlaySpec with MockitoSugar with ScalaFu
 
       inside(result) {
         case UpdateGeneralDetails(
-          fname, lname, prefname, email, dob, outsideUk, addr, postcode, country, phone, alevel, stemlevel, isCivilServant, dept) =>
+          fname, lname, prefname, email, dob, _, addr, postcode, _, phone, alevel, stemlevel, isCivilServant, dept) =>
           fname mustBe personalDetails.firstName
           lname mustBe personalDetails.lastName
           prefname mustBe personalDetails.preferredName

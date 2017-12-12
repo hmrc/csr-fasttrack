@@ -56,7 +56,7 @@ trait WireLevelHttpSpec
 
   val JSON_CONTENT_TYPE = "application/json"
 
-  implicit val hc: HeaderCarrier = new HeaderCarrier()
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   implicit override lazy val app: Application =
     new GuiceApplicationBuilder().disable[EhCacheModule].build()

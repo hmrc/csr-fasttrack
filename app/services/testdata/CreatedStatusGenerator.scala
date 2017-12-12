@@ -53,7 +53,7 @@ trait CreatedStatusGenerator extends ConstructiveGenerator {
     for {
       user <- AuthProviderClient.addUser(email, "Service01", firstName, lastName, role)
       token <- AuthProviderClient.getToken(email)
-      activateUser <- AuthProviderClient.activate(email, token)
+      _ <- AuthProviderClient.activate(email, token)
     } yield {
       user.userId.toString
     }

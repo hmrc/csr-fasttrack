@@ -68,7 +68,7 @@ class FlagCandidateControllerSpec extends PlaySpec with MockitoSugar with Result
 
     "Return NOT_FOUND when save an issue for incorrect applicationId" in {
       val flagCandidate = FlagCandidate("appId", Some("some issue"))
-      when(mockFlagCandidateRepository.save(flagCandidate)).thenReturn(Future.failed(new NotFoundException()))
+      when(mockFlagCandidateRepository.save(flagCandidate)).thenReturn(Future.failed(NotFoundException()))
 
       val response = TestableFlagCandidateController.save("appId")(createPutRequest("appId", Json.toJson(flagCandidate).toString()))
 
@@ -84,8 +84,7 @@ class FlagCandidateControllerSpec extends PlaySpec with MockitoSugar with Result
     }
 
     "Return NOT_FOUND when remove an issue for incorrect applicationId" in {
-      val flagCandidate = FlagCandidate("different-appId", Some("some issue"))
-      when(mockFlagCandidateRepository.remove("appId")).thenReturn(Future.failed(new NotFoundException()))
+      when(mockFlagCandidateRepository.remove("appId")).thenReturn(Future.failed(NotFoundException()))
 
       val response = TestableFlagCandidateController.remove("appId")(FakeRequest())
 

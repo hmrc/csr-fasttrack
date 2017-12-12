@@ -529,11 +529,6 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     collection.update(query, updateQuery, upsert = false).map(checkUpdateWriteResult)
   }
 
-  private def schemeToBSON(scheme: (String, Option[Result])) = scheme._2 match {
-    case Some(s) => BSONDocument(scheme._1 -> s.toString)
-    case _ => BSONDocument.empty
-  }
-
   def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal,
     expireDate: Option[LocalDate]): Future[Unit] = {
     import ApplicationStatuses._

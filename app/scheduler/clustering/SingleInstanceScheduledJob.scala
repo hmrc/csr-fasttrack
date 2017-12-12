@@ -41,7 +41,7 @@ trait SingleInstanceScheduledJob extends ExclusiveScheduledJob {
   def executeInMutex(implicit ec: ExecutionContext): Future[this.Result] = lockKeeper.tryLock {
     tryExecute
   }.map {
-    case Some(x) => Result("Done")
+    case Some(_) => Result("Done")
     case None => Result("Nothing")
   }
 

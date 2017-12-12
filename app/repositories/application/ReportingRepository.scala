@@ -417,15 +417,6 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     }
   }
 
-  private def getDocumentId(document: BSONDocument): BSONObjectID =
-    document.get("_id").get match {
-      case id: BSONObjectID => id
-      case id: BSONString => BSONObjectID(id.value)
-    }
-
-  private def isoTimeToPrettyDateTime(utcMillis: Long): String =
-    timeZoneService.localize(utcMillis).toString("yyyy-MM-dd HH:mm:ss")
-
   private def reportQueryWithProjections[A](
     query: BSONDocument,
     prj: BSONDocument,
@@ -447,14 +438,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       .collect[List](Int.MaxValue, stopOnError = true)
 
   def extract(key: String)(root: Option[BSONDocument]) = root.flatMap(_.getAs[String](key))
-
-  private def getAdjustmentsConfirmed(assistance: Option[BSONDocument]): Option[String] = {
-    assistance.flatMap(_.getAs[Boolean]("adjustmentsConfirmed")).getOrElse(false) match {
-      case false => Some("Unconfirmed")
-      case true => Some("Confirmed")
-    }
-  }
-
+  
   def allApplicationAndUserIds(frameworkId: String): Future[List[ApplicationUserIdReport]] = {
     val query = BSONDocument("frameworkId" -> frameworkId)
     val projection = BSONDocument(

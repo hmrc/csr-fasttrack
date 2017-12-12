@@ -82,9 +82,9 @@ trait AssessmentCentreLocationRepositoryImpl extends AssessmentCentreLocationRep
     assessmentCentreCapacities.map(
       _.flatMap(
         _.venues.find(_.venueName == venue)
-      ).headOption.getOrElse(throw new NoSuchVenueException(s"The venue $venue does not exist"))
+      ).headOption.getOrElse(throw NoSuchVenueException(s"The venue $venue does not exist"))
         .capacityDates.find(_.date == date)
-        .getOrElse(throw new NoSuchVenueDateException(s"There are no session on that date at venue $venue"))
+        .getOrElse(throw NoSuchVenueDateException(s"There are no session on that date at venue $venue"))
     )
   }
 

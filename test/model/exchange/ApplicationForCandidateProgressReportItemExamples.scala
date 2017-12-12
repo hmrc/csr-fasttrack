@@ -16,7 +16,7 @@
 
 package model.exchange
 
-import model.ReportExchangeObjects.{ ApplicationForCandidateProgressReport }
+import model.ReportExchangeObjects.ApplicationForCandidateProgressReport
 import model.{ ProgressStatuses, Scheme, UniqueIdentifier }
 
 object ApplicationForCandidateProgressReportItemExamples {

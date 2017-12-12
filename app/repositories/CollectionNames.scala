@@ -33,6 +33,7 @@ object CollectionNames {
   val APPLICATION_ASSESSMENT_2017 = "application-assessment17"
   val APPLICATION_ASSESSMENT_SCORES_2017 = "application-assessment-scores17"
   val CONTACT_DETAILS_2017 = "contact-details17"
+  val MEDIA_2017 = "media17"
   val QUESTIONNAIRE_2017 = "questionnaire17"
   val ONLINE_TEST_REPORT_2017 = "online-test-report17"
 }
