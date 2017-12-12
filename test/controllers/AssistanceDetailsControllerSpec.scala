@@ -43,7 +43,7 @@ class AssistanceDetailsControllerSpec extends UnitWithAppSpec {
     }
 
     "return NOT_FOUND" in new TestFixture {
-      when(mockAssistanceDetailsService.find(AppId, UserId)).thenReturn(Future.failed(new AssistanceDetailsNotFound(AppId)))
+      when(mockAssistanceDetailsService.find(AppId, UserId)).thenReturn(Future.failed(AssistanceDetailsNotFound(AppId)))
       val result = controller.find(UserId, AppId)(fakeRequest)
       status(result) must be(NOT_FOUND)
       contentAsString(result) must be(s"cannot find assistance details for application: $AppId")

@@ -39,7 +39,7 @@ object DataFaker {
     def randOne[T](options: List[T], cannotBe: List[T] = Nil) = {
       val filtered = options.filterNot(cannotBe.contains)
       if (filtered.isEmpty) {
-        throw new DataFakingException(s"There were no items left after filtering.")
+        throw DataFakingException(s"There were no items left after filtering.")
       } else {
         util.Random.shuffle(filtered).head
       }

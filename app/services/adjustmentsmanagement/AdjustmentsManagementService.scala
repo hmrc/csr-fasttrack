@@ -61,15 +61,14 @@ trait AdjustmentsManagementService {
         case (_, false) => auditService.logEvent(s"Candidate ${candidate.userId} AdjustmentsConfirmed by $actionTriggeredBy")
       }
 
-      hasPreviousAdjustments match {
-        case true =>
-          emailClient.sendAdjustmentsUpdateConfirmation(
-            contactDetails.email,
-            candidate.preferredName.getOrElse(candidate.firstName.getOrElse("")),
-            onlineTestsAdjustmentsString("Online tests:", adjustments.onlineTests),
-            assessmentCenterAdjustmentsString("Assessment center:", adjustments)
-          )
-        case false =>
+      if (hasPreviousAdjustments) {
+        emailClient.sendAdjustmentsUpdateConfirmation(
+          contactDetails.email,
+          candidate.preferredName.getOrElse(candidate.firstName.getOrElse("")),
+          onlineTestsAdjustmentsString("Online tests:", adjustments.onlineTests),
+          assessmentCenterAdjustmentsString("Assessment center:", adjustments)
+        )
+      } else {
           emailClient.sendAdjustmentsConfirmation(
             contactDetails.email,
             candidate.preferredName.getOrElse(candidate.firstName.getOrElse("")),

@@ -66,6 +66,6 @@ class OnlineTestPDFReportMongoRepository(implicit mongo: () => DB)
   def remove(applicationId: String): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
 
-    collection.remove(query, firstMatchOnly = false).map { writeResult => () }
+    collection.remove(query, firstMatchOnly = false).map { _ => () }
   }
 }

@@ -59,9 +59,7 @@ class CandidateAllocationMongoRepository(dateTime: DateTimeFactory)(implicit mon
       "allocation-reminder-sent-date" -> date
     ))
 
-    collection.update(query, result, upsert = false) map {
-      case _ => ()
-    }
+    collection.update(query, result, upsert = false).map(_ => ())
   }
 
   private def bsonToAllocatedCandidate(doc: BSONDocument) = {
