@@ -146,7 +146,7 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
   )
   val Postcode = "WC2B 4"
   val EmailContactDetails = "emailfjjfjdf@mailinator.com"
-  val contactDetails = ContactDetails(false, Address("Aldwych road"), Some(Postcode), None, EmailContactDetails, Some("111111"))
+  val contactDetails = ContactDetails(outsideUk = false, Address("Aldwych road"), Some(Postcode), None, EmailContactDetails, Some("111111"))
 
   val auditDetails = Map("userId" -> UserId)
   val auditDetailsWithEmail = auditDetails + ("email" -> EmailContactDetails)

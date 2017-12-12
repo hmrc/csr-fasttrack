@@ -761,10 +761,30 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         )
       ))
       when(mockApplicationRepository.findProgress(any())).thenReturn(Future.successful(
-        ProgressResponse("appid-1", true, true, true, true, false, QuestionnaireProgressResponse(), true, false,
-          OnlineTestProgressResponse(true, true, true, true, false, false, false, true, true, false), false)
+        ProgressResponse("appid-1", personalDetails = true, hasSchemeLocations = true, hasSchemes = true, assistanceDetails = true,
+          review = false, QuestionnaireProgressResponse(), submitted = true, withdrawn = false,
+          OnlineTestProgressResponse(invited = true, started = true, completed = true, expired = true, awaitingReevaluation = false,
+            failed = false, failedNotified = false, awaitingAllocation = true, awaitingAllocationNotified = true, allocationConfirmed = false),
+          failedToAttend = false)
       ))
     }
+/*
+case class OnlineTestProgressResponse(
+  invited: Boolean = false,
+  started: Boolean = false,
+  completed: Boolean = false,
+  expired: Boolean = false,
+  awaitingReevaluation: Boolean = false,
+  failed: Boolean = false,
+  failedNotified: Boolean = false,
+  awaitingAllocation: Boolean = false,
+  awaitingAllocationNotified: Boolean = false,
+  allocationConfirmed: Boolean = false,
+  allocationUnconfirmed: Boolean = false
+)
+
+ */
+
 
     def applicationRepositoryWithOneVenueOneDateOneCandidateInPMOneInAMSession = {
       when(mockApplicationRepository.find(any[List[String]])).thenReturn(Future.successful(

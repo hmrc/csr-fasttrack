@@ -40,7 +40,7 @@ class PersonalDetailsServiceSpec extends PlaySpec with MockitoSugar with ScalaFu
         department = None)
       val address = Address("line1", Some("line2"), Some("line3"), Some("line4"))
       val contactDetails = ContactDetails(
-        false, address, Some("QQ1 1QQ"): Option[PostCode], None, "test@test.com", Some("0123456789": PhoneNumber)
+        outsideUk = false, address, Some("QQ1 1QQ"): Option[PostCode], None, "test@test.com", Some("0123456789": PhoneNumber)
       )
 
       when(mockPersonalDetailsRepo.find("appId")).thenReturn(Future.successful(personalDetails))

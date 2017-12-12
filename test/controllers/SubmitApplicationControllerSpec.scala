@@ -105,7 +105,7 @@ class SubmitApplicationControllerSpec extends PlaySpec with Results with OneAppP
       needsSupportForOnlineAssessmentDescription = None, needsSupportAtVenue = false, needsSupportAtVenueDescription = None
     )))
 
-    when(mockCdRepo.find(any[String])).thenReturn(Future.successful(ContactDetails(false, address, Some("QQ1 1QQ"): Option[PostCode],
+    when(mockCdRepo.find(any[String])).thenReturn(Future.successful(ContactDetails(outsideUk = false, address, Some("QQ1 1QQ"): Option[PostCode],
       None, "test@test.com", phone = None)))
 
     when(mockAppRepo.getSchemes(any[String])).thenReturn(Future.successful(
