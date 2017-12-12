@@ -17,14 +17,13 @@
 package testkit
 
 import akka.stream.Materializer
-import com.codahale.metrics.json.MetricsModule
 import com.kenshoo.play.metrics.PlayModule
 import org.scalatestplus.play.OneAppPerSuite
-import play.api.{ Application, Play }
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{ Json, Writes }
 import play.api.mvc.Results
 import play.api.test.{ FakeHeaders, FakeRequest }
+import play.api.{ Application, Play }
 import play.modules.reactivemongo.ReactiveMongoHmrcModule
 /**
  * Common base class for all controller tests
