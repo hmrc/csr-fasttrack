@@ -49,7 +49,7 @@ trait ApplicationService {
   private val UserNotFoundError = Future.failed(new RuntimeException("User not found for the given userId"))
 
   def withdraw(applicationId: String, withdrawRequest: WithdrawApplicationRequest): Future[Unit] = {
-    appRepository.withdraw(applicationId, withdrawRequest).flatMap { result =>
+    appRepository.withdraw(applicationId, withdrawRequest).flatMap { _ =>
       auditService.logEventNoRequest(
         "ApplicationWithdrawn",
         Map("applicationId" -> applicationId, "withdrawRequest" -> withdrawRequest.toString)

@@ -55,7 +55,7 @@ trait ReminderExpiryTestsJob extends SingleInstanceScheduledJob with BasicJobCon
   override implicit val ec = ExecutionContext.fromExecutor(new ThreadPoolExecutor(2, 2, 180, TimeUnit.SECONDS, new ArrayBlockingQueue(4)))
 
   def tryExecute()(implicit ec: ExecutionContext): Future[Unit] = {
-    implicit val hc = new HeaderCarrier()
+    implicit val hc: HeaderCarrier = HeaderCarrier()
     service.processNextTestForReminder(reminderNotice)
   }
 }

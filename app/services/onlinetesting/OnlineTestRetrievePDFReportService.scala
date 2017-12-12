@@ -43,7 +43,7 @@ object OnlineTestRetrievePDFReportService extends OnlineTestRetrievePDFReportSer
 }
 
 trait OnlineTestRetrievePDFReportService {
-  implicit def headerCarrier = new HeaderCarrier()
+  implicit def headerCarrier: HeaderCarrier = HeaderCarrier()
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val auditService: AuditService

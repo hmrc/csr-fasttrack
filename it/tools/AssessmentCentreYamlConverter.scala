@@ -63,7 +63,7 @@ object AssessmentCentreYamlConverter extends App {
       item => item.capacityInfo.length == 7 && item.capacityInfo.forall(_.nonEmpty)
     }
 
-    val venuesStrList = venues.collect { case (venueDescription, venueDetails) if filterVenuesWithSlots(venueDetails).nonEmpty  =>
+    val venuesStrList = venues.collect { case (_, venueDetails) if filterVenuesWithSlots(venueDetails).nonEmpty  =>
 
       val capacities = "" +
           "      capacities:\n" + filterVenuesWithSlots(venueDetails).map { venueInfo =>
@@ -82,15 +82,17 @@ object AssessmentCentreYamlConverter extends App {
            |$capacities""".stripMargin
     }
 
-    venuesStrList.nonEmpty match {
-      case true =>
-        val venuesStr = venuesStrList.mkString("\n")
-        Some(
-            s"""$loc:
-               |$venuesStr
-         """.stripMargin
-        )
-      case false => None
+    if (venuesStrList.nonEmpty) {
+      val venuesStr = venuesStrList.mkString("\n")
+      Some(
+        s"""$loc
+:
+           |$venuesStr
+         """.
+          stripMargin
+      )
+    } else {
+      None
     }
   }
 

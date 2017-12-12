@@ -31,7 +31,7 @@ class ContactDetailsInMemoryRepository extends ContactDetailsRepository with InM
     "000-000" ->
     ContactDetails(false, Address("First Line", None, None, None), Some("HP18 9DN"), None, "joe@bloggs.com", None)
 
-  override def notFound(userId: String) = throw new ContactDetailsNotFound(userId)
+  override def notFound(userId: String) = throw ContactDetailsNotFound(userId)
 
   override def findByPostCode(postCode: String): Future[List[ContactDetailsWithId]] = Future.successful(List.empty[ContactDetailsWithId])
 

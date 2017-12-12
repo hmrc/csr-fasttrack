@@ -53,8 +53,8 @@ trait SubmitApplicationController extends BaseController {
       personalDetails <- pdRepository.find(applicationId)
       assistanceDetails <- adService.find(applicationId, userId)
       contactDetails <- cdRepository.find(userId)
-      schemePreferences <- appRepository.getSchemes(applicationId)
-      schemeLocationPreferences <- appRepository.getSchemeLocations(applicationId)
+      _ <- appRepository.getSchemes(applicationId)
+      _ <- appRepository.getSchemeLocations(applicationId)
     } yield {
 
       if (ApplicationValidator(personalDetails, assistanceDetails).validate) {

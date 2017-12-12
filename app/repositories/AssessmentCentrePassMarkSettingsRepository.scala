@@ -54,8 +54,6 @@ class AssessmentCentrePassMarkSettingsMongoRepository(implicit mongo: () => DB)
   def create(settings: AssessmentCentrePassMarkSettings): Future[Unit] = {
     val doc = AssessmentCentrePassMarkSettings.assessmentCentrePassMarkSettingsHandler.write(settings)
 
-    collection.insert(doc) map {
-      case _ => ()
-    }
+    collection.insert(doc).map(_ => ())
   }
 }

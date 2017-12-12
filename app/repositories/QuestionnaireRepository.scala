@@ -56,9 +56,7 @@ class QuestionnaireMongoRepository(socioEconomicCalculator: SocioEconomicScoreCa
       BSONDocument(appId),
       BSONDocument("$set" -> questions.map(q => s"questions.${q.question}" -> q.answer).foldLeft(document ++ appId)((d, v) => d ++ v)),
       upsert = true
-    ) map {
-        case _ => ()
-      }
+    ).map(_ => ())
   }
 
   override def findQuestions(applicationId: String): Future[Map[String, String]] = {
@@ -117,44 +115,6 @@ class QuestionnaireMongoRepository(socioEconomicCalculator: SocioEconomicScoreCa
 
   private def getAnswer(questionsDoc: Option[BSONDocument], question: String): Option[String] = {
     val questionDoc = questionsDoc.flatMap(_.getAs[BSONDocument](question))
-    val answer = questionDoc.flatMap(_.getAs[String]("answer"))
-    answer
-  }
-
-  private def docToReport(document: BSONDocument): (String, PassMarkReportQuestionnaireData) = {
-    import QuestionnaireRepository._
-    val questionsDoc = document.getAs[BSONDocument]("questions")
-
-    val applicationId = document.getAs[String]("applicationId").get
-    val gender = getAnswer(questionsDoc, genderQuestionText)
-    val sexualOrientation = getAnswer(questionsDoc, sexualOrientationQuestionText)
-    val ethnicity = getAnswer(questionsDoc, ethnicityQuestionText)
-
-    val employmentStatus = getAnswer(questionsDoc, "Which type of occupation did they have?")
-    val isEmployed = employmentStatus.exists(s => !s.startsWith("Unemployed"))
-    val parentEmploymentStatus = if (isEmployed) Some("Employed") else employmentStatus
-    val parentOccupation = if (isEmployed) employmentStatus else None
-
-    val parentEmployedOrSelf = getAnswer(questionsDoc, "Did they work as an employee or were they self-employed?")
-    val parentCompanySize = getAnswer(questionsDoc, "Which size would best describe their place of work?")
-
-    val qAndA = questionsDoc.toList.flatMap(_.elements).map {
-      case (question, _) =>
-        val answer = getAnswer(questionsDoc, question).getOrElse("Unknown")
-        (question, answer)
-    }.toMap
-
-    val socioEconomicScore = socioEconomicCalculator.calculate(qAndA)
-
-    (applicationId, PassMarkReportQuestionnaireData(
-      gender,
-      sexualOrientation,
-      ethnicity,
-      parentEmploymentStatus,
-      parentOccupation,
-      parentEmployedOrSelf,
-      parentCompanySize,
-      socioEconomicScore
-    ))
+    questionDoc.flatMap(_.getAs[String]("answer"))
   }
 }

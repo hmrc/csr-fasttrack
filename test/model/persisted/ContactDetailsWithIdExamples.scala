@@ -16,8 +16,8 @@
 
 package model.persisted
 
-import model.Commands.{ Address }
-import model.PersistedObjects.{ ContactDetailsWithId }
+import model.Commands.Address
+import model.PersistedObjects.ContactDetailsWithId
 import model.exchange.UserIdExamples
 
 object ContactDetailsWithIdExamples {

@@ -218,9 +218,10 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
     def getAnswer(question: String, doc: Option[BSONDocument]) = {
       val questionDoc = doc.flatMap(_.getAs[BSONDocument](question))
       val isUnknown = questionDoc.flatMap(_.getAs[Boolean]("unknown")).contains(true)
-      isUnknown match {
-        case true => Some("Unknown")
-        case _ => questionDoc.flatMap(q => q.getAs[String]("answer")
+      if (isUnknown) {
+        Some("Unknown")
+      } else {
+        questionDoc.flatMap(q => q.getAs[String]("answer")
           .orElse(q.getAs[String]("otherDetails")))
       }
     }

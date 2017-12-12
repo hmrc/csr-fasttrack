@@ -55,7 +55,7 @@ object OnlineTestService extends OnlineTestService {
 }
 
 trait OnlineTestService {
-  implicit def headerCarrier = new HeaderCarrier()
+  implicit def headerCarrier: HeaderCarrier = HeaderCarrier()
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val appRepository: GeneralApplicationRepository
@@ -309,11 +309,11 @@ trait OnlineTestService {
       tests.get(SituationalTestName)
     )
 
-    isGis && tests.size > 2 match {
-      case true => Logger.warn(s"Remove unwanted test results for gis application $appId")
-        candidateOnlineTestReport.copy(numerical = None, verbal = None)
-      case false =>
-        candidateOnlineTestReport
+    if (isGis && tests.size > 2) {
+      Logger.warn(s"Remove unwanted test results for gis application $appId")
+      candidateOnlineTestReport.copy(numerical = None, verbal = None)
+    } else {
+      candidateOnlineTestReport
     }
   }
 }
