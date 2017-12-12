@@ -22,12 +22,12 @@ import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import repositories.{ AssessmentCentrePassMarkSettingsMongoRepository, FrameworkRepository, LocationSchemeRepository, SchemeInfo }
+import repositories.{ AssessmentCentrePassMarkSettingsMongoRepository, LocationSchemeRepository, SchemeInfo }
 
 import scala.concurrent.Future
 import model.Scheme
 import model.Scheme.{ Business, Commercial, DigitalAndTechnology, Finance, ProjectDelivery }
-import model.persisted.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, AssessmentCentrePassMarkSettings, PassMarkSchemeThreshold }
+import model.persisted._
 
 class AssessmentCentrePassMarkSettingsServiceSpec extends PlaySpec with ScalaFutures with MockitoSugar {
 

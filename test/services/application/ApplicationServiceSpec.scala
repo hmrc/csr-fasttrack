@@ -43,7 +43,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
   "withdraw an application" should {
     "work and log audit event" in new ApplicationServiceFixture {
       val result = applicationService.withdraw(ApplicationId, withdrawApplicationRequest)
-      result.futureValue mustBe (())
+      result.futureValue mustBe ()
 
       verify(appAssessServiceMock).deleteAssessmentCentreAllocation(eqTo(ApplicationId))
       verify(auditServiceMock).logEventNoRequest("ApplicationWithdrawn", withdrawAuditDetails)
@@ -57,7 +57,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       )
 
       val result = applicationService.withdraw(ApplicationId, withdrawApplicationRequest)
-      result.futureValue mustBe (())
+      result.futureValue mustBe ()
 
       verify(appAssessServiceMock).deleteAssessmentCentreAllocation(eqTo(ApplicationId))
       verify(auditServiceMock).logEventNoRequest("ApplicationWithdrawn", withdrawAuditDetails)
@@ -75,7 +75,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
         .thenReturn(Future.successful(()))
 
       val result = applicationService.editDetails(userId, ApplicationId, editedDetails)
-      result.futureValue mustBe (())
+      result.futureValue mustBe ()
 
       verify(contactDetailsRepositoryMock).find(eqTo(userId))
       verify(personalDetailsRepositoryMock).find(ApplicationId)
@@ -98,7 +98,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
         .thenReturn(Future.successful(()))
 
       val result = applicationService.editDetails(userId, ApplicationId, editedDetails).failed.futureValue
-      result mustBe (error)
+      result mustBe error
 
       verify(contactDetailsRepositoryMock).find(eqTo(userId))
       verify(personalDetailsRepositoryMock).find(ApplicationId)
@@ -106,7 +106,6 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
 
       verifyNoMoreInteractions(personalDetailsRepositoryMock, contactDetailsRepositoryMock, authProviderClientMock, auditServiceMock)
     }
-
   }
 
   trait ApplicationServiceFixture {
@@ -139,7 +138,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
 
     val currentAddress = Address("First Line", Some("line2"), None, None)
     val newAddress = Address("new 1 Line", Some("new 2 Line"), Some("new 3 Line"), None)
-    val currentContactDetails = ContactDetails(false, currentAddress, Some("N1 3GF"), None, "mazurka@jjj.yyy", Some("0988726353"))
+    val currentContactDetails = ContactDetails(outsideUk = false, currentAddress, Some("N1 3GF"), None, "mazurka@jjj.yyy", Some("0988726353"))
     val currentPersonalDetails = PersonalDetails(
       firstName = "Marcel",
       lastName = "Cerdan",
@@ -183,7 +182,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       currentUser.disabled
     )
 
-    val expectedContactDetails = ContactDetails(true, newAddress, None, Some("Mexico"), "mazurka@jjj.yyy", Some("2222909090"))
+    val expectedContactDetails = ContactDetails(outsideUk = true, newAddress, None, Some("Mexico"), "mazurka@jjj.yyy", Some("2222909090"))
 
     val error = new RuntimeException("Something bad happened")
     val failedFuture = Future.failed(error)

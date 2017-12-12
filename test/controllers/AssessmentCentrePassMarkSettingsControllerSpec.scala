@@ -27,10 +27,9 @@ import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories._
 import services.passmarksettings.AssessmentCentrePassMarkSettingsService
 import model.Scheme
-import services.AuditService
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import model.Commands.Implicits._
-import model.persisted.{ AssessmentCentrePassMarkInfo, AssessmentCentrePassMarkScheme, AssessmentCentrePassMarkSettings, PassMarkSchemeThreshold }
+import model.persisted._
 
 import scala.concurrent.Future
 
@@ -66,7 +65,6 @@ class AssessmentCentrePassMarkSettingsControllerSpec extends PlaySpec with Mocki
       controllers.routes.AssessmentCentrePassMarkSettingsController.create.url, FakeHeaders(), json
     ).withHeaders("Content-Type" -> "application/json")
   }
-
 }
 
 trait TestFixture extends TestFixtureBase {
