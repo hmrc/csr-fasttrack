@@ -17,7 +17,6 @@
 package controllers
 
 import config.TestFixtureBase
-import mocks.application.DocumentRootInMemoryRepository
 import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
@@ -100,14 +99,16 @@ class QuestionnaireControllerSpec extends PlaySpec with Results {
 
   trait TestFixture extends TestFixtureBase {
     val questionnaireRepoMock = mock[QuestionnaireRepository]
+    val generalApplicationRepoMock = mock[GeneralApplicationRepository]
 
     object TestQuestionnaireController extends QuestionnaireController {
       override val qRepository: QuestionnaireRepository = questionnaireRepoMock
-      override val appRepository: GeneralApplicationRepository = DocumentRootInMemoryRepository
+      override val appRepository: GeneralApplicationRepository = generalApplicationRepoMock
       override val auditService: AuditService = mockAuditService
     }
 
     when(questionnaireRepoMock.addQuestions(any[String], any[List[PersistedQuestion]])).thenReturnAsync()
+    when(generalApplicationRepoMock.updateQuestionnaireStatus(any[String], any[String])).thenReturnAsync()
 
     def addQuestionnaireSection(applicationId: String, section: String)(jsonString: String) = {
       val json = Json.parse(jsonString)
