@@ -64,7 +64,7 @@ class OnlineTestServiceIntegrationSpec extends MongoRepositorySpec with MockitoS
     val auditMock = mock[AuditService]
     val cubiksGatewayClientMock = mock[CubiksGatewayClient]
     when(cubiksGatewayClientMock.getReport(any[OnlineTestApplicationForReportRetrieving])(any[HeaderCarrier]))
-      .thenReturn(Future.successful(OnlineTestReportAvailability(1, false)))
+      .thenReturn(Future.successful(OnlineTestReportAvailability(1, available = false)))
     when(cubiksGatewayClientMock.downloadXmlReport(any[Int])(any[HeaderCarrier]))
       .thenReturn(Future.successful {
         val VerbalTestName = "Logiks Verbal and Numerical (Intermediate) - Verbal"
