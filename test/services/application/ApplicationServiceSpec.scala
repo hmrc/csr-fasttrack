@@ -43,7 +43,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
   "withdraw an application" should {
     "work and log audit event" in new ApplicationServiceFixture {
       val result = applicationService.withdraw(ApplicationId, withdrawApplicationRequest)
-      result.futureValue mustBe ()
+      result.futureValue mustBe unit
 
       verify(appAssessServiceMock).deleteAssessmentCentreAllocation(eqTo(ApplicationId))
       verify(auditServiceMock).logEventNoRequest("ApplicationWithdrawn", withdrawAuditDetails)
@@ -57,7 +57,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       )
 
       val result = applicationService.withdraw(ApplicationId, withdrawApplicationRequest)
-      result.futureValue mustBe ()
+      result.futureValue mustBe unit
 
       verify(appAssessServiceMock).deleteAssessmentCentreAllocation(eqTo(ApplicationId))
       verify(auditServiceMock).logEventNoRequest("ApplicationWithdrawn", withdrawAuditDetails)
@@ -75,7 +75,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
         .thenReturn(Future.successful(()))
 
       val result = applicationService.editDetails(userId, ApplicationId, editedDetails)
-      result.futureValue mustBe ()
+      result.futureValue mustBe unit
 
       verify(contactDetailsRepositoryMock).find(eqTo(userId))
       verify(personalDetailsRepositoryMock).find(ApplicationId)
@@ -112,6 +112,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
     import model.PersistedObjects.ContactDetails
     implicit val hc = HeaderCarrier()
 
+    val unit = ()
     val ApplicationId = "1111-1111"
     val userId = "a22b033f-846c-4712-9d19-357819f7491c"
     val withdrawApplicationRequest = WithdrawApplicationRequest("reason", Some("other reason"), "Candidate")
