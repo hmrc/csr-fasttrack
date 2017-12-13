@@ -16,11 +16,10 @@
 
 package repositories
 
-import model.ReportExchangeObjects.PassMarkReportQuestionnaireData
 import model.PersistedObjects
 import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
 import play.api.libs.json._
-import reactivemongo.api.{ DB, ReadPreference }
+import reactivemongo.api.DB
 import reactivemongo.bson.Producer.nameValue2Producer
 import reactivemongo.bson._
 import services.reporting.SocioEconomicScoreCalculator
