@@ -48,7 +48,7 @@ class OnlineTestRetrievePDFReportServiceIntegrationSpec extends IntegrationSpec 
     "retrieve online test pdf report and audit 'OnlineTestPDFReportSaved' " in new TestFixture {
       clearDatabase()
       when(gatewayClientMock.getReport(any[OnlineTestApplicationForReportRetrieving])(any[HeaderCarrier]))
-        .thenReturn(Future.successful(OnlineTestReportAvailability(pdfReportId, true)))
+        .thenReturn(Future.successful(OnlineTestReportAvailability(pdfReportId, available = true)))
       when(gatewayClientMock.downloadPdfReport(eqTo(pdfReportId))(any[HeaderCarrier])).thenReturn(Future.successful(pdfReport))
       val application = mock[OnlineTestApplicationWithCubiksUser]
       when(application.applicationId).thenReturn("appId")

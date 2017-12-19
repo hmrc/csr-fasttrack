@@ -22,7 +22,6 @@ import common.Constants.{ No, Yes }
 import model.{ ApplicationStatuses, _ }
 import model.ApplicationStatusOrder.{ getStatus, _ }
 import model.Commands._
-import model.EvaluationResults._
 import model.ReportExchangeObjects._
 import model._
 import model.commands.OnlineTestProgressResponse
@@ -309,6 +308,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     )
   }
 
+  //scalastyle:off method.length
   def adjustmentReport(frameworkId: String): Future[List[AdjustmentReportItem]] = {
 
     val query = BSONDocument("$and" ->
@@ -379,6 +379,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       }
     }
   }
+  //scalastyle:on
 
   def candidatesAwaitingAllocation(frameworkId: String): Future[List[CandidateAwaitingAllocation]] = {
     val query = BSONDocument("$and" ->

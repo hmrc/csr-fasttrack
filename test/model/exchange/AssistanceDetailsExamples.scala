@@ -17,7 +17,8 @@
 package model.exchange
 
 object AssistanceDetailsExamples {
-  val OnlyDisabilityNoGisNoAdjustments = AssistanceDetails("Yes", Some(""), Some(false), false, None, false, None)
-  val DisabilityGisAndAdjustments = AssistanceDetails("Yes", Some("disability description"), Some(true), true,
-    Some("online adjustment description"), true, Some("venue adjustment description"))
+  val OnlyDisabilityNoGisNoAdjustments = AssistanceDetails("Yes", Some(""), Some(false), needsSupportForOnlineAssessment = false,
+    None, needsSupportAtVenue = false, None)
+  val DisabilityGisAndAdjustments = AssistanceDetails("Yes", Some("disability description"), Some(true), needsSupportForOnlineAssessment = true,
+    Some("online adjustment description"), needsSupportAtVenue = true, Some("venue adjustment description"))
 }

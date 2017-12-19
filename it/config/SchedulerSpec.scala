@@ -26,7 +26,7 @@ class SchedulerSpec extends PlaySpec with IntegrationTestShortTimeout with OneAp
   "Scheduler" should {
     "contain send invitation job if it is enabled" in {
       val scheduler = new Scheduler {
-        override def sendInvitationJobConfigValues = ScheduledJobConfig(true, Some("id"), Some(5), Some(5))
+        override def sendInvitationJobConfigValues = ScheduledJobConfig(enabled = true, Some("id"), Some(5), Some(5))
       }
 
       scheduler.scheduledJobs must contain(SendInvitationJob)
@@ -34,7 +34,7 @@ class SchedulerSpec extends PlaySpec with IntegrationTestShortTimeout with OneAp
 
     "not contain send invitation job if it is disabled" in {
       val scheduler = new Scheduler {
-        override def sendInvitationJobConfigValues = ScheduledJobConfig(false, Some("id"), Some(5), Some(5))
+        override def sendInvitationJobConfigValues = ScheduledJobConfig(enabled = false, Some("id"), Some(5), Some(5))
       }
 
       scheduler.scheduledJobs must not contain SendInvitationJob

@@ -130,7 +130,7 @@ class SuccessfulCandidatesReportingControllerSpec extends BaseReportingControlle
 
     def newContactDetailsWithId(userId: UniqueIdentifier) = ContactDetailsWithId(
       userId.toString(),
-      false,
+      outsideUk = false,
       Address(rnd("Line 1"), None, None, None),
       Some(rnd("PostCode")),
       None,
