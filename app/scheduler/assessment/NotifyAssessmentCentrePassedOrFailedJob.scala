@@ -23,9 +23,9 @@ import model.EmptyRequestHeader
 import scheduler.clustering.SingleInstanceScheduledJob
 import scheduler.onlinetesting.BasicJobConfig
 import services.applicationassessment.AssessmentCentreService
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
+import uk.gov.hmrc.http.HeaderCarrier
 
 object NotifyAssessmentCentrePassedOrFailedJob extends NotifyAssessmentCentrePassedOrFailedJob {
   val assessmentCentreService: AssessmentCentreService = AssessmentCentreService

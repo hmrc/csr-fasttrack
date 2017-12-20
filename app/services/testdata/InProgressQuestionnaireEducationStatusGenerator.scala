@@ -22,9 +22,9 @@ import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.GeneralApplicationRepository
 import services.testdata.faker.DataFaker._
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 object InProgressQuestionnaireEducationStatusGenerator extends InProgressQuestionnaireEducationStatusGenerator {
   override val previousStatusGenerator = InProgressQuestionnaireDiversityStatusGenerator

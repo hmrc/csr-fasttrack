@@ -24,9 +24,9 @@ import repositories._
 import repositories.application.OnlineTestRepository
 import services.AuditService
 import services.onlinetesting.SendOnlineTestResultServiceImpl._
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
+import uk.gov.hmrc.http.HeaderCarrier
 
 trait SendOnlineTestResultService {
 

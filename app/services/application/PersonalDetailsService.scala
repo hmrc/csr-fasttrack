@@ -23,10 +23,10 @@ import play.api.mvc.RequestHeader
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 trait PersonalDetailsService {
   def appRepo: GeneralApplicationRepository

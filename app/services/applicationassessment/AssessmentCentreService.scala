@@ -22,7 +22,7 @@ import model.EvaluationResults.CompetencyAverageResult
 import model.Exceptions.IncorrectStatusInApplicationException
 import model.PersistedObjects.ApplicationForNotification
 import model.persisted.AssessmentCentrePassMarkSettings
-import model.{ ApplicationStatuses, AssessmentPassmarkEvaluation, AssessmentPassmarkPreferencesAndScores, OnlineTestEvaluationAndAssessmentCentreScores }
+import model._
 import play.api.Logger
 import play.api.mvc.RequestHeader
 import repositories._
@@ -30,9 +30,9 @@ import repositories.application.{ GeneralApplicationRepository, OnlineTestReposi
 import services.AuditService
 import services.evaluation.AssessmentCentrePassmarkRulesEngine
 import services.passmarksettings.AssessmentCentrePassMarkSettingsService
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
+import uk.gov.hmrc.http.HeaderCarrier
 
 object AssessmentCentreService extends AssessmentCentreService {
 

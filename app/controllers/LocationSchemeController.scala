@@ -41,7 +41,7 @@ trait LocationSchemeController extends BaseController {
     locationSchemeService.getSchemes(applicationId).map {
       schemes => Ok(Json.toJson(schemes))
     }.recover {
-      case ex: SchemePreferencesNotFound => NotFound("Schemes not found")
+      case _: SchemePreferencesNotFound => NotFound("Schemes not found")
     }
   }
 
@@ -60,7 +60,7 @@ trait LocationSchemeController extends BaseController {
     locationSchemeService.getSchemeLocations(applicationId).map {
       locations => Ok(Json.toJson(locations))
     }.recover {
-      case ex: LocationPreferencesNotFound => NotFound("Locations not found")
+      case _: LocationPreferencesNotFound => NotFound("Locations not found")
     }
   }
 

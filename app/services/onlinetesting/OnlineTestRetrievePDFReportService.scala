@@ -25,11 +25,11 @@ import play.api.Logger
 import play.libs.Akka
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.duration._
 import scala.concurrent.{ ExecutionContext, Future }
 import scala.language.postfixOps
+import uk.gov.hmrc.http.HeaderCarrier
 
 object OnlineTestRetrievePDFReportService extends OnlineTestRetrievePDFReportService {
   import config.MicroserviceAppConfig._
@@ -43,7 +43,7 @@ object OnlineTestRetrievePDFReportService extends OnlineTestRetrievePDFReportSer
 }
 
 trait OnlineTestRetrievePDFReportService {
-  implicit def headerCarrier = new HeaderCarrier()
+  implicit def headerCarrier: HeaderCarrier = HeaderCarrier()
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val auditService: AuditService

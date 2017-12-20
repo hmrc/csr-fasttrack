@@ -30,9 +30,9 @@ import repositories.application.OnlineTestRepository
 import services.AuditService
 import services.onlinetesting.SendOnlineTestResultServiceImpl.{ OnlineTestResultReadyEmailSent, OnlineTestResultReadyUpdated }
 import testkit.MockitoSugar
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class SendOnlinetestResultServiceImplSpec extends PlaySpec with ScalaFutures with MockitoSugar {
 
@@ -107,7 +107,7 @@ class SendOnlinetestResultServiceImplSpec extends PlaySpec with ScalaFutures wit
     val userId = "xyz"
     val preferredName = "Jon"
     val emailAddress = "jon@test.com"
-    val contactDetails = ContactDetails(false, Address("line 1"), Some("HP27 9JU"), None, emailAddress, None)
+    val contactDetails = ContactDetails(outsideUk = false, Address("line 1"), Some("HP27 9JU"), None, emailAddress, None)
     val failedTest = ApplicationForNotification(applicationId, userId, preferredName, ApplicationStatuses.OnlineTestFailed)
     val passedTest = ApplicationForNotification(applicationId, userId, preferredName, ApplicationStatuses.AwaitingAllocation)
     def hc = HeaderCarrier()

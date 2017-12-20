@@ -24,7 +24,7 @@ import org.scalatestplus.play.PlaySpec
 import play.api.mvc.RequestHeader
 import play.api.test.FakeRequest
 import uk.gov.hmrc.play.audit.model.{ Audit, DataEvent }
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 class AuditServiceSpec extends PlaySpec with MockitoSugar {
   val auditMock = mock[Audit]

@@ -20,9 +20,9 @@ import model.ApplicationStatuses
 import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.OnlineTestRepository
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 object OnlineTestStartedStatusGenerator extends OnlineTestStartedStatusGenerator {
   override val previousStatusGenerator = OnlineTestInvitedStatusGenerator
@@ -35,7 +35,7 @@ trait OnlineTestStartedStatusGenerator extends ConstructiveGenerator {
   def generate(generationId: Int, generatorConfig: GeneratorConfig)(implicit hc: HeaderCarrier) = {
     for {
       candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig)
-      updateStatus <- otRepository.updateStatus(candidateInPreviousStatus.userId, ApplicationStatuses.OnlineTestStarted)
+      _ <- otRepository.updateStatus(candidateInPreviousStatus.userId, ApplicationStatuses.OnlineTestStarted)
     } yield {
       candidateInPreviousStatus.copy(applicationStatus = ApplicationStatuses.OnlineTestStarted)
     }

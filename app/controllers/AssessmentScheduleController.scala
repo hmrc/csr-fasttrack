@@ -222,12 +222,11 @@ trait AssessmentScheduleController extends BaseController {
         expiryDate <- aRepository.allocationExpireDateByApplicationId(applicationId)
       } yield {
         assessmentF match {
-          case Some(assessment) => {
+          case Some(assessment) =>
             val (locationName, venue) = assessmentCentres.flatMap(capacity =>
               capacity.venues.find(_.venueName == assessment.venue).map(capacity.locationName -> _)).head
 
             Ok(Json.toJson(AllocationDetails(locationName, venue.venueDescription, assessment.assessmentDateTime, expiryDate)))
-          }
           case _ => NotFound
         }
       }

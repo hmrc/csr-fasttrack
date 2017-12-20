@@ -38,10 +38,10 @@ import repositories.application.{ GeneralApplicationRepository, PersonalDetailsR
 import services.AuditService
 import services.assistancedetails.AssistanceDetailsService
 import play.api.test.Helpers._
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.language.postfixOps
+import uk.gov.hmrc.http.HeaderCarrier
 
 class SubmitApplicationControllerSpec extends PlaySpec with Results with OneAppPerSuite {
 
@@ -105,7 +105,7 @@ class SubmitApplicationControllerSpec extends PlaySpec with Results with OneAppP
       needsSupportForOnlineAssessmentDescription = None, needsSupportAtVenue = false, needsSupportAtVenueDescription = None
     )))
 
-    when(mockCdRepo.find(any[String])).thenReturn(Future.successful(ContactDetails(false, address, Some("QQ1 1QQ"): Option[PostCode],
+    when(mockCdRepo.find(any[String])).thenReturn(Future.successful(ContactDetails(outsideUk = false, address, Some("QQ1 1QQ"): Option[PostCode],
       None, "test@test.com", phone = None)))
 
     when(mockAppRepo.getSchemes(any[String])).thenReturn(Future.successful(

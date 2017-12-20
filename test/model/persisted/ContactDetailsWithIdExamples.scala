@@ -16,20 +16,20 @@
 
 package model.persisted
 
-import model.Commands.{ Address }
-import model.PersistedObjects.{ ContactDetailsWithId }
+import model.Commands.Address
+import model.PersistedObjects.ContactDetailsWithId
 import model.exchange.UserIdExamples
 
 object ContactDetailsWithIdExamples {
-  val ContactDetails1 = ContactDetailsWithId(UserIdExamples.userId1.toString, false, Address("address1"), Some("AAA121"),
+  val ContactDetails1 = ContactDetailsWithId(UserIdExamples.userId1.toString, outsideUk = false, Address("address1"), Some("AAA121"),
     None, "email1", Some("555555551"))
-  val ContactDetails2 = ContactDetailsWithId(UserIdExamples.userId2.toString, false, Address("address2"), Some("AAA122"),
+  val ContactDetails2 = ContactDetailsWithId(UserIdExamples.userId2.toString, outsideUk = false, Address("address2"), Some("AAA122"),
     None, "email1", Some("555555552"))
-  val ContactDetails3 = ContactDetailsWithId(UserIdExamples.userId3.toString, false, Address("address3"), Some("AAA123"),
+  val ContactDetails3 = ContactDetailsWithId(UserIdExamples.userId3.toString, outsideUk = false, Address("address3"), Some("AAA123"),
     None, "email1", Some("555555553"))
-  val ContactDetails4 = ContactDetailsWithId(UserIdExamples.userId4.toString, false, Address("address4"), Some("AAA124"),
+  val ContactDetails4 = ContactDetailsWithId(UserIdExamples.userId4.toString, outsideUk = false, Address("address4"), Some("AAA124"),
     None, "email1", Some("555555554"))
-  val ContactDetails5 = ContactDetailsWithId(UserIdExamples.userId5.toString, false, Address("address5"), Some("AAA125"),
+  val ContactDetails5 = ContactDetailsWithId(UserIdExamples.userId5.toString, outsideUk = false, Address("address5"), Some("AAA125"),
     None, "email1", Some("555555555"))
 
   val ContactDetailsList = List(ContactDetails1, ContactDetails2, ContactDetails3, ContactDetails4, ContactDetails5)

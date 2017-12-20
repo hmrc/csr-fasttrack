@@ -60,7 +60,7 @@ class TestDataContactDetailsMongoRepository(implicit mongo: () => DB)
   private def createSingleContactDetail(id: Int): Future[Unit] = {
 
     val contactDetails = ContactDetails(
-      false, Address("1st High Street"), Some(chooseOne(postcodes)), None, s"test_$id@test.com", Some("123456789")
+      outsideUk = false, Address("1st High Street"), Some(chooseOne(postcodes)), None, s"test_$id@test.com", Some("123456789")
     )
     val contactDetailsBson = BSONDocument("$set" -> BSONDocument(
       "contact-details" -> contactDetails

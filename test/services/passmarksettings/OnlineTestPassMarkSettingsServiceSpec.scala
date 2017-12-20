@@ -25,9 +25,9 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
 import repositories.{ FrameworkRepository, OnlineTestPassMarkSettingsRepository }
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
+import uk.gov.hmrc.http.HeaderCarrier
 
 class OnlineTestPassMarkSettingsServiceSpec extends PlaySpec with BeforeAndAfterEach with MockitoSugar with ScalaFutures {
   implicit val ec: ExecutionContext = ExecutionContext.global

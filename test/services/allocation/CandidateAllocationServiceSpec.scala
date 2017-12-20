@@ -29,15 +29,15 @@ import org.scalatestplus.play.PlaySpec
 import repositories.application.CandidateAllocationRepository
 import repositories.{ AssessmentCentreAllocationRepository, ContactDetailsRepository }
 import services.AuditService
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class CandidateAllocationServiceSpec extends PlaySpec with ScalaFutures with MockitoSugar {
 
   val candidate = AllocatedCandidate(PersonalDetailsWithUserId("Alice", "userId"), "app1", LocalDate.now().plusDays(3))
-  val applicationAssessment = AssessmentCentreAllocation("app1", "London 1", LocalDate.now().plusDays(3), "AM", 1, false)
-  val candidateContact = ContactDetails(false, Address("Aldwych road"), Some("AB CDE"), None, "alice@test.com", None)
+  val applicationAssessment = AssessmentCentreAllocation("app1", "London 1", LocalDate.now().plusDays(3), "AM", 1, confirmed = false)
+  val candidateContact = ContactDetails(outsideUk = false, Address("Aldwych road"), Some("AB CDE"), None, "alice@test.com", None)
 
   val caRepositoryMock = mock[CandidateAllocationRepository]
   val cdRepositoryMock = mock[ContactDetailsRepository]

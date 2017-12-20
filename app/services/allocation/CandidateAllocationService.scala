@@ -22,18 +22,18 @@ import model.PersistedObjects.{ AllocatedCandidate, ContactDetails }
 import org.joda.time.DateTime
 import play.api.Logger
 import repositories._
-import repositories.application.CandidateAllocationRepository
+import repositories.application.{ CandidateAllocationMongoRepository, CandidateAllocationRepository }
 import services.AuditService
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
+import uk.gov.hmrc.http.HeaderCarrier
 
 object CandidateAllocationService extends CandidateAllocationService {
-  val caRepository = candidateAllocationMongoRepository
-  val aaRepository = assessmentCentreAllocationRepository
-  val cdRepository = contactDetailsRepository
-  val emailClient = CSREmailClient
-  val auditService = AuditService
+  val caRepository: CandidateAllocationMongoRepository = candidateAllocationMongoRepository
+  val aaRepository: AssessmentCentreAllocationMongoRepository = assessmentCentreAllocationRepository
+  val cdRepository: ContactDetailsMongoRepository = contactDetailsRepository
+  val emailClient: CSREmailClient.type = CSREmailClient
+  val auditService: AuditService.type = AuditService
 }
 
 trait CandidateAllocationService {
@@ -43,7 +43,7 @@ trait CandidateAllocationService {
   val emailClient: EmailClient
   val auditService: AuditService
 
-  implicit def headerCarrier = new HeaderCarrier()
+  implicit def headerCarrier: HeaderCarrier = HeaderCarrier()
   implicit val ec: ExecutionContext = ExecutionContext.global
 
   private val ReminderEmailDaysBeforeExpiration = 3

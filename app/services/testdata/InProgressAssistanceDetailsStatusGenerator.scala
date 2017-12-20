@@ -20,9 +20,9 @@ import model.{ ApplicationStatuses, ProgressStatuses }
 import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.{ AssistanceDetailsRepository, GeneralApplicationRepository }
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 object InProgressAssistanceDetailsStatusGenerator extends InProgressAssistanceDetailsStatusGenerator {
   val previousStatusGenerator = InProgressSchemePreferencesStatusGenerator

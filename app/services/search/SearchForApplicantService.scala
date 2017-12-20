@@ -23,10 +23,10 @@ import model.PersistedObjects.ContactDetailsWithId
 import org.joda.time.LocalDate
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 object SearchForApplicantService extends SearchForApplicantService {
   val appRepository = applicationRepository

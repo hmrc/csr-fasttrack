@@ -98,7 +98,7 @@ class AssessmentCentreAllocationReportingControllerSpec extends BaseReportingCon
 
     def newContactDetails(id: String) = ContactDetailsWithId(
       id,
-      false,
+      outsideUk = false,
       Address(rnd("Line 1"), None, None, None),
       Some(rnd("PostCode")),
       None,

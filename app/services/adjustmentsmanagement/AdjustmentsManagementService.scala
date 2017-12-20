@@ -25,10 +25,10 @@ import play.api.mvc.RequestHeader
 import repositories._
 import repositories.application.GeneralApplicationRepository
 import services.AuditService
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 object AdjustmentsManagementService extends AdjustmentsManagementService {
   val appRepository = applicationRepository
@@ -61,15 +61,14 @@ trait AdjustmentsManagementService {
         case (_, false) => auditService.logEvent(s"Candidate ${candidate.userId} AdjustmentsConfirmed by $actionTriggeredBy")
       }
 
-      hasPreviousAdjustments match {
-        case true =>
-          emailClient.sendAdjustmentsUpdateConfirmation(
-            contactDetails.email,
-            candidate.preferredName.getOrElse(candidate.firstName.getOrElse("")),
-            onlineTestsAdjustmentsString("Online tests:", adjustments.onlineTests),
-            assessmentCenterAdjustmentsString("Assessment center:", adjustments)
-          )
-        case false =>
+      if (hasPreviousAdjustments) {
+        emailClient.sendAdjustmentsUpdateConfirmation(
+          contactDetails.email,
+          candidate.preferredName.getOrElse(candidate.firstName.getOrElse("")),
+          onlineTestsAdjustmentsString("Online tests:", adjustments.onlineTests),
+          assessmentCenterAdjustmentsString("Assessment center:", adjustments)
+        )
+      } else {
           emailClient.sendAdjustmentsConfirmation(
             contactDetails.email,
             candidate.preferredName.getOrElse(candidate.firstName.getOrElse("")),

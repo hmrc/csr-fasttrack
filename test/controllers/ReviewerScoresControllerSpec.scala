@@ -30,9 +30,9 @@ import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import services.applicationassessment.AssessorAssessmentScoresService._
 import services.applicationassessment.{ AssessmentCentreScoresRemovalService, AssessmentCentreScoresService, AssessmentCentreService }
 import testkit.UnitWithAppSpec
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class ReviewerScoresControllerSpec extends UnitWithAppSpec {
 

@@ -24,9 +24,9 @@ import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
 import services.applicationassessment.AssessmentCentreService
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
+import uk.gov.hmrc.http.HeaderCarrier
 
 object ApplicationService extends ApplicationService {
   val appRepository = applicationRepository
@@ -49,7 +49,7 @@ trait ApplicationService {
   private val UserNotFoundError = Future.failed(new RuntimeException("User not found for the given userId"))
 
   def withdraw(applicationId: String, withdrawRequest: WithdrawApplicationRequest): Future[Unit] = {
-    appRepository.withdraw(applicationId, withdrawRequest).flatMap { result =>
+    appRepository.withdraw(applicationId, withdrawRequest).flatMap { _ =>
       auditService.logEventNoRequest(
         "ApplicationWithdrawn",
         Map("applicationId" -> applicationId, "withdrawRequest" -> withdrawRequest.toString)

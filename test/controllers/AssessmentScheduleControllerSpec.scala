@@ -19,7 +19,6 @@ package controllers
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 
-import common.Constants.{ No, Yes }
 import config._
 import connectors.EmailClient
 import model.AssessmentScheduleCommands.Implicits._
@@ -761,8 +760,12 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         )
       ))
       when(mockApplicationRepository.findProgress(any())).thenReturn(Future.successful(
-        ProgressResponse("appid-1", true, true, true, true, false, QuestionnaireProgressResponse(), true, false,
-          OnlineTestProgressResponse(true, true, true, true, false, false, false, true, true, false), false)
+        ProgressResponse("appid-1", personalDetails = true, hasSchemeLocations = true, hasSchemes = true, assistanceDetails = true,
+          review = false, QuestionnaireProgressResponse(), submitted = true, withdrawn = false,
+          OnlineTestProgressResponse(invited = true, started = true, completed = true, expired = true, awaitingReevaluation = false,
+            failed = false, failedNotified = false, awaitingAllocation = true, awaitingAllocationNotified = true, allocationConfirmed = false,
+            allocationUnconfirmed = false),
+          failedToAttend = false)
       ))
     }
 
@@ -794,12 +797,18 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         )
       ))
       when(mockApplicationRepository.findProgress(eqTo("appid-1"))).thenReturn(Future.successful(
-        ProgressResponse("appid-1", true, true, true, true, true, QuestionnaireProgressResponse(), true, false,
-          OnlineTestProgressResponse(true, true, false, false, false, false, true, true, false, false))
+        ProgressResponse("appid-1", personalDetails = true, hasSchemeLocations = true, hasSchemes = true, assistanceDetails = true,
+          review = true, QuestionnaireProgressResponse(), submitted = true, withdrawn = false,
+          OnlineTestProgressResponse(invited = true, started = true, completed = false, expired = false, awaitingReevaluation = false,
+            failed = false, failedNotified = true, awaitingAllocation = true, awaitingAllocationNotified = false, allocationConfirmed = false,
+            allocationUnconfirmed = false))
       ))
       when(mockApplicationRepository.findProgress(eqTo("appid-2"))).thenReturn(Future.successful(
-        ProgressResponse("appid-2", true, true, true, true, true, QuestionnaireProgressResponse(), true, false,
-          OnlineTestProgressResponse(true, true, false, false, false, false, true, true, false, false))
+        ProgressResponse("appid-2", personalDetails = true, hasSchemeLocations = true, hasSchemes = true, assistanceDetails = true,
+          review = true, QuestionnaireProgressResponse(), submitted = true, withdrawn = false,
+          OnlineTestProgressResponse(invited = true, started = true, completed = false, expired = false, awaitingReevaluation = false,
+            failed = false, failedNotified = true, awaitingAllocation = true, awaitingAllocationNotified = false, allocationConfirmed = false,
+            allocationUnconfirmed = false))
       ))
     }
 
@@ -820,12 +829,18 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         )
       ))
       when(mockApplicationRepository.findProgress(eqTo("appid-1"))).thenReturn(Future.successful(
-        ProgressResponse("appid-1", true, true, true, true, true, QuestionnaireProgressResponse(), true, true,
-          OnlineTestProgressResponse(true, true, false, false, false, false, true, true, false, false))
+        ProgressResponse("appid-1", personalDetails = true, hasSchemeLocations = true, hasSchemes = true, assistanceDetails = true,
+          review = true, QuestionnaireProgressResponse(), submitted = true, withdrawn = true,
+          OnlineTestProgressResponse(invited = true, started = true, completed = false, expired = false, awaitingReevaluation = false,
+            failed = false, failedNotified = true, awaitingAllocation = true, awaitingAllocationNotified = false, allocationConfirmed = false,
+            allocationUnconfirmed = false))
       ))
       when(mockApplicationRepository.findProgress(eqTo("appid-2"))).thenReturn(Future.successful(
-        ProgressResponse("appid-2", true, true, true, true, true, QuestionnaireProgressResponse(), true, false,
-          OnlineTestProgressResponse(true, true, false, false, false, false, true, true, false, false))
+        ProgressResponse("appid-2", personalDetails = true, hasSchemeLocations = true, hasSchemes = true, assistanceDetails = true,
+          review = true, QuestionnaireProgressResponse(), submitted = true, withdrawn = false,
+          OnlineTestProgressResponse(invited = true, started = true, completed = false, expired = false, awaitingReevaluation = false,
+            failed = false, failedNotified = true, awaitingAllocation = true, awaitingAllocationNotified = false, allocationConfirmed = false,
+            allocationUnconfirmed = false))
       ))
     }
 
@@ -942,10 +957,14 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
 
     def contactDetailsRepository = {
       when(mockContactDetailsRepository.find(eqTo("userid-1"))).thenReturn(
-        Future.successful(ContactDetails(false, Address("address1"), Some("postCode1"), None, "email1@mailinator.com", Some("11111111")))
+        Future.successful(
+          ContactDetails(outsideUk = false, Address("address1"), Some("postCode1"), None, "email1@mailinator.com", Some("11111111"))
+        )
       )
       when(mockContactDetailsRepository.find(eqTo("userid-2"))).thenReturn(
-        Future.successful(ContactDetails(false, Address("address2"), Some("postCode2"), None, "email2@mailinator.com", Some("22222222")))
+        Future.successful(
+          ContactDetails(outsideUk = false, Address("address2"), Some("postCode2"), None, "email2@mailinator.com", Some("22222222"))
+        )
       )
     }
 

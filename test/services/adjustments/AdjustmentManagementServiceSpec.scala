@@ -26,9 +26,9 @@ import repositories.ContactDetailsRepository
 import repositories.application.GeneralApplicationRepository
 import services.adjustmentsmanagement.AdjustmentsManagementService
 import services.{ AuditService, BaseServiceSpec }
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class AdjustmentManagementServiceSpec extends BaseServiceSpec {
 
@@ -43,7 +43,8 @@ class AdjustmentManagementServiceSpec extends BaseServiceSpec {
 
     "send adjustments changed email" in new TestFixture {
       val auditEvent = s"Candidate $userId AdjustmentsUpdated by $actionTriggeredBy"
-      when(appRepository.findAdjustments(eqTo(appId))).thenReturn(Future.successful(Some(onlineTestsAdjustments.copy(adjustmentsConfirmed = Some(true)))))
+      when(appRepository.findAdjustments(eqTo(appId)))
+        .thenReturn(Future.successful(Some(onlineTestsAdjustments.copy(adjustmentsConfirmed = Some(true)))))
       when(appRepository.confirmAdjustments(eqTo(appId), eqTo(onlineTestsAdjustments))).thenReturn(emptyFuture)
       confirmAdjustment(appId, onlineTestsAdjustments, actionTriggeredBy).futureValue
       verify(emailClient).sendAdjustmentsUpdateConfirmation(eqTo(email), eqTo(preferredName), any[String], any[String])(any[HeaderCarrier])
@@ -84,7 +85,7 @@ class AdjustmentManagementServiceSpec extends BaseServiceSpec {
     val actionTriggeredBy = "adminId"
 
     val candidate = Candidate(userId, Some(appId), Some(email), Some(firstName), Some(lastName), Some(preferredName), None, None, None)
-    val contactDetails = ContactDetails(false, Address("line1"), Some("TW11ER"), None, email, None)
+    val contactDetails = ContactDetails(outsideUk = false, Address("line1"), Some("TW11ER"), None, email, None)
 
     val onlineTestsAdjustments = Adjustments(
       typeOfAdjustments = Some(List("timeExtension")),

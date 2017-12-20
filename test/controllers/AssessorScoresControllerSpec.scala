@@ -27,9 +27,9 @@ import services.applicationassessment.{ AssessmentCentreScoresRemovalService, As
 import testkit.UnitWithAppSpec
 import org.mockito.Matchers._
 import play.api.mvc.{ Action, RequestHeader, Result }
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class AssessorScoresControllerSpec extends UnitWithAppSpec {
 

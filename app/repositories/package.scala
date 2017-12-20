@@ -60,8 +60,8 @@ package object repositories {
   lazy val reportingRepository = new ReportingMongoRepository(timeZoneService)
   lazy val flagCandidateRepository = new FlagCandidateMongoRepository
   lazy val schoolsRepository = SchoolsCSVRepository
-  lazy val prevYearCandidatesDetailsRepository = new PreviousYearCandidatesDetailsMongoRepository()
   lazy val fileLocationSchemeRepository = FileLocationSchemeRepository
+  lazy val prevYearCandidatesDetailsRepository = new PreviousYearCandidatesDetailsMongoRepository(fileLocationSchemeRepository)
 
   def initIndexes = {
     Future.sequence(List(

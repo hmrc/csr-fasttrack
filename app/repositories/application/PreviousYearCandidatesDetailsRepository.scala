@@ -16,62 +16,109 @@
 
 package repositories.application
 
+import java.io
+
+import common.FutureEx
 import model.Commands.{ CandidateDetailsReportItem, CsvExtract }
+import model.{ AssessmentCentreIndicator, Scheme }
+import model.Scheme.Scheme
+import org.joda.time.DateTime
+import play.api.Logger
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
 import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.collection.JSONCollection
-import repositories.CollectionNames
+import repositories.{ CollectionNames, LocationSchemeRepository, LocationSchemes }
 import reactivemongo.json.ImplicitBSONHandlers._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-trait PreviousYearCandidatesDetailsRepository {
+abstract class PreviousYearCandidatesDetailsRepository(locationSchemeRepository: LocationSchemeRepository) {
 
-  val applicationDetailsHeader = "FrameworkId,Application status,First name,Last name,Preferred name,Date of birth," +
-    "A level,Stem level,First location region,First location,First location first framework,First location second framework," +
-    "Second location region,Second location,Second location first framework,Second location second framework,second location intended," +
-    "Alternative location,Alternative framework, Needs assistance,Type of disability, Details of disability, Guaranteed interview," +
-    "Needs adjustment,Type of adjustments,Other adjustments,Campaign referrer,Campaign other,Confirm adjustments," +
-    "Percentage of numerical time adjustment,Percentage of verbal time adjustment"
+  val schemesHeader: String = Scheme.AllSchemes.zipWithIndex.map { case (_, idx) =>
+      s"Scheme ${idx + 1}"
+  }.mkString(",")
 
-  val contactDetailsHeader = "Email,Address line1,Address line2,Address line3,Address line4,Postcode,Phone"
+  lazy val locationSize: Future[Int] = locationSchemeRepository.getSchemesAndLocations.map(_.size)
+
+  lazy val locationHeader: Future[String] = locationSchemeRepository.getSchemesAndLocations.map { locationSchemes =>
+    locationSchemes.zipWithIndex.map { case (_, idx) =>
+      s"Location ${idx + 1}"
+    }.mkString(",")
+  }
+
+  lazy val applicationDetailsHeader = {
+    locationHeader.map { locHeader =>
+      "FrameworkId,Application status,First name,Last name,Preferred name,Date of birth," +
+        "A level,Stem level,Civil servant,Civil Service department," + schemesHeader + "," + locHeader + "," +
+        "Has disability,Disability description,GIS,Needs support for online assessment," +
+        "Support for online assessment description,Needs support at venue,Support at venue description," +
+        "Assessment centre area,Assessment centre,Assessment centre indicator version"
+    }
+  }
+
+  val mediaHeader = "Referred By Media"
+
+  val contactDetailsHeader = "Email,Address line1,Address line2,Address line3,Address line4,Postcode,Outside UK,Country,Phone"
 
   val questionnaireDetailsHeader = "What is your gender identity?,What is your sexual orientation?,What is your ethnic group?," +
-    "Between the ages of 11 to 16 in which school did you spend most of your education?," +
-    "Between the ages of 16 to 18 in which school did you spend most of your education?," +
-    "What was your home postcode when you were 14?,During your school years were you at any time eligible for free school meals?," +
-    "Did any of your parent(s) or guardian(s) complete a university degree course or equivalent?,Parent/guardian work status," +
-    "Which type of occupation did they have?,Did they work as an employee or were they self-employed?," +
-    "Which size would best describe their place of work?,Did they supervise any other employees?"
+    "Did you live in the UK between the ages of 14 and 18?," +
+  "What was your home postcode when you were 14?," +
+  "Aged 14 to 16 what was the name of your school?," +
+  "What type of school was this?," +
+  "Aged 16 to 18 what was the name of your school or college? (if applicable)," +
+  "Were you at any time eligible for free school meals?," +
+  "Do you have a parent or guardian that has completed a university degree course or equivalent?," +
+  "\"When you were 14, what kind of work did your highest-earning parent or guardian do?\"," +
+  "Did they work as an employee or were they self-employed?," +
+  "Which size would best describe their place of work?," +
+  "Did they supervise employees?"
 
   val onlineTestReportHeader = "Competency status,Competency norm,Competency tscore,Competency percentile,Competency raw,Competency sten," +
     "Numerical status,Numerical norm,Numerical tscore,Numerical percentile,Numerical raw,Numerical sten," +
     "Verbal status,Verbal norm,Verbal tscore,Verbal percentile,Verbal raw,Verbal sten," +
     "Situational status,Situational norm,Situational tscore,Situational percentile,Situational raw,Situational sten"
 
-  val assessmentCenterDetailsHeader = "Assessment venue,Assessment date,Assessment session,Assessment slot,Assessment confirmed"
+  val assessmentCentreDetailsHeader = "Assessment venue,Assessment date,Assessment session,Assessment slot,Assessment confirmed"
 
-  val assessmentScoresHeader = "Assessment attended,Assessment incomplete,Leading and communicating interview," +
-    "Leading and communicating group exercise,Leading and communicating written exercise,Delivering at pace interview," +
-    "Delivering at pace group exercise,Delivering at pace written exercise,Making effective decisions interview," +
-    "Making effective decisions group exercise,Making effective decisions written exercise,Changing and improving interview," +
-    "Changing and improving group exercise,Changing and improving written exercise,Building capability for all interview," +
-    "Building capability for all group exercise,Building capability for all written exercise,Motivation fit interview," +
-    "Motivation fit group exercise,Motivation fit written exercise,Interview feedback,Group exercise feedback," +
-    "Written exercise feedback"
+  def generateAssessmentScoresHeaders(exercise: String) = {
+    List(s"$exercise - attended",
+    s"$exercise - incomplete",
+    s"$exercise - last updated by",
+    s"$exercise - version",
+    s"$exercise - submitted date",
+    s"$exercise - saved date",
+    s"$exercise - feedback",
+    s"$exercise - Motivation fit score",
+    s"$exercise - Building capability for all score",
+    s"$exercise - Changing and improving score",
+    s"$exercise - Making Effective Decisions score",
+    s"$exercise - Delivering at pace score",
+      s"$exercise - Collaborating and partnering score",
+      s"$exercise - Leading and communicating score"
+    ).mkString(",")
+  }
 
-  def findApplicationDetails(): Future[CsvExtract[CandidateDetailsReportItem]]
+  val assessmentScoresHeader =
+    generateAssessmentScoresHeaders("Assessor Interview") + "," +
+    generateAssessmentScoresHeaders("Assessor Group Exercise") + "," +
+    generateAssessmentScoresHeaders("Assessor Written Exercise") +   "," +
+    generateAssessmentScoresHeaders("QAC/Final Interview") + "," +
+    generateAssessmentScoresHeaders("QAC/Final Group Exercise") + "," +
+    generateAssessmentScoresHeaders("QAC/Final Written Exercise")
 
-  def applicationDetailsStream(): Enumerator[CandidateDetailsReportItem]
+
+  def applicationDetailsStream(): Future[Enumerator[CandidateDetailsReportItem]]
+
+  def findMedia(): Future[CsvExtract[String]]
 
   def findContactDetails(): Future[CsvExtract[String]]
 
   def findOnlineTestReports(): Future[CsvExtract[String]]
 
-  def findAssessmentCenterDetails(): Future[CsvExtract[String]]
+  def findAssessmentCentreDetails(): Future[CsvExtract[String]]
 
   def findAssessmentScores(): Future[CsvExtract[String]]
 
@@ -79,59 +126,63 @@ trait PreviousYearCandidatesDetailsRepository {
 
 }
 
-class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) extends PreviousYearCandidatesDetailsRepository {
+class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationSchemeRepository)(implicit mongo: () => DB)
+  extends PreviousYearCandidatesDetailsRepository(locationSchemeRepo) {
 
-  val applicationDetailsCollection = mongo().collection[JSONCollection](CollectionNames.APPLICATION_2016)
+  val applicationDetailsCollection = mongo().collection[JSONCollection](CollectionNames.APPLICATION_2017)
 
-  val contactDetailsCollection = mongo().collection[JSONCollection](CollectionNames.CONTACT_DETAILS_2016)
+  val contactDetailsCollection = mongo().collection[JSONCollection](CollectionNames.CONTACT_DETAILS_2017)
 
-  val questionnaireCollection = mongo().collection[JSONCollection](CollectionNames.QUESTIONNAIRE_2016)
+  val mediaCollection = mongo().collection[JSONCollection](CollectionNames.MEDIA_2017)
 
-  val onlineTestReportsCollection = mongo().collection[JSONCollection](CollectionNames.ONLINE_TEST_REPORT_2016)
+  val questionnaireCollection = mongo().collection[JSONCollection](CollectionNames.QUESTIONNAIRE_2017)
 
-  val assessmentCentersCollection = mongo().collection[JSONCollection](CollectionNames.APPLICATION_ASSESSMENT_2016)
+  val onlineTestReportsCollection = mongo().collection[JSONCollection](CollectionNames.ONLINE_TEST_REPORT_2017)
 
-  val assessmentScoresCollection = mongo().collection[JSONCollection](CollectionNames.APPLICATION_ASSESSMENT_SCORES_2016)
+  val assessmentCentresCollection = mongo().collection[JSONCollection](CollectionNames.APPLICATION_ASSESSMENT_2017)
 
-  override def findApplicationDetails(): Future[CsvExtract[CandidateDetailsReportItem]] = {
+  val assessmentScoresCollection = mongo().collection[JSONCollection](CollectionNames.APPLICATION_ASSESSMENT_SCORES_2017)
+
+  override def applicationDetailsStream(): Future[Enumerator[CandidateDetailsReportItem]] = {
     val projection = Json.obj("_id" -> 0, "progress-status" -> 0, "progress-status-dates" -> 0)
 
-    applicationDetailsCollection.find(Json.obj(), projection)
-      .cursor[BSONDocument](ReadPreference.primaryPreferred)
-      .collect[List]().map { docs =>
-        val csvRecords = docs.map { doc =>
-          val csvContent = makeRow(
-            List(doc.getAs[String]("frameworkId")) :::
-              List(doc.getAs[String]("applicationStatus")) :::
-              personalDetails(doc) ::: frameworkPreferences(doc) :::
-              assistanceDetails(doc): _*
-          )
-          doc.getAs[String]("applicationId").getOrElse("") -> CandidateDetailsReportItem(
-            doc.getAs[String]("applicationId").getOrElse(""),
-            doc.getAs[String]("userId").getOrElse(""), csvContent
-          )
+      locationSize.flatMap { locSize =>
+        locationSchemeRepo.getSchemesAndLocations.map { schemesAndLocations =>
+          applicationDetailsCollection.find(Json.obj(), projection)
+            .cursor[BSONDocument](ReadPreference.primaryPreferred)
+            .enumerate().map { doc =>
+              val csvContent = makeRow(
+                  List(doc.getAs[String]("frameworkId")) :::
+                  List(doc.getAs[String]("applicationStatus")) :::
+                  personalDetails(doc) :::
+                  schemePreferences(doc).padTo(Scheme.AllSchemes.size, None) :::
+                  locationPreferences(schemesAndLocations, doc).padTo(locSize, None) :::
+                  assistanceDetails(doc) :::
+                  assessmentCentreIndicator(doc): _*
+              )
+            CandidateDetailsReportItem(
+              doc.getAs[String]("applicationId").getOrElse(""),
+              doc.getAs[String]("userId").getOrElse(""), csvContent
+            )
+          }
         }
-        CsvExtract(applicationDetailsHeader, csvRecords.toMap)
       }
   }
 
-  override def applicationDetailsStream(): Enumerator[CandidateDetailsReportItem] = {
-    val projection = Json.obj("_id" -> 0, "progress-status" -> 0, "progress-status-dates" -> 0)
+  override def findMedia(): Future[CsvExtract[String]] = {
+    val projection = Json.obj("_id" -> 0)
 
-    applicationDetailsCollection.find(Json.obj(), projection)
+    mediaCollection.find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
-      .enumerate().map { doc =>
-        val csvContent = makeRow(
-          List(doc.getAs[String]("frameworkId")) :::
-            List(doc.getAs[String]("applicationStatus")) :::
-            personalDetails(doc) ::: frameworkPreferences(doc) :::
-            assistanceDetails(doc): _*
-        )
-        CandidateDetailsReportItem(
-          doc.getAs[String]("applicationId").getOrElse(""),
-          doc.getAs[String]("userId").getOrElse(""), csvContent
-        )
-      }
+      .collect[List]().map { docs =>
+        val csvRecords = docs.map { doc =>
+          val csvRecord = makeRow(
+            doc.getAs[String]("media")
+          )
+          doc.getAs[String]("userId").getOrElse("") -> csvRecord
+        }
+      CsvExtract(mediaHeader, csvRecords.toMap)
+    }
   }
 
   override def findContactDetails(): Future[CsvExtract[String]] = {
@@ -151,6 +202,8 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
             address.flatMap(_.getAs[String]("line3")),
             address.flatMap(_.getAs[String]("line4")),
             contactDetails.flatMap(_.getAs[String]("postCode")),
+            contactDetails.flatMap(cd => mapYesNo(cd.getAs[Boolean]("outsideUk"))),
+            contactDetails.flatMap(_.getAs[String]("country")),
             contactDetails.flatMap(_.getAs[String]("phone"))
           )
           doc.getAs[String]("userId").getOrElse("") -> csvRecord
@@ -165,9 +218,10 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
     def getAnswer(question: String, doc: Option[BSONDocument]) = {
       val questionDoc = doc.flatMap(_.getAs[BSONDocument](question))
       val isUnknown = questionDoc.flatMap(_.getAs[Boolean]("unknown")).contains(true)
-      isUnknown match {
-        case true => Some("Unknown")
-        case _ => questionDoc.flatMap(q => q.getAs[String]("answer")
+      if (isUnknown) {
+        Some("Unknown")
+      } else {
+        questionDoc.flatMap(q => q.getAs[String]("answer")
           .orElse(q.getAs[String]("otherDetails")))
       }
     }
@@ -175,27 +229,28 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
     questionnaireCollection.find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
       .collect[List]().map { docs =>
-        val csvRecords = docs.map { doc =>
-          val questions = doc.getAs[BSONDocument]("questions")
-          val csvRecord = makeRow(
-            getAnswer("What is your gender identity?", questions),
-            getAnswer("What is your sexual orientation?", questions),
-            getAnswer("What is your ethnic group?", questions),
-            getAnswer("Between the ages of 11 to 16, in which school did you spend most of your education?", questions),
-            getAnswer("Between the ages of 16 to 18, in which school did you spend most of your education?", questions),
-            getAnswer("What was your home postcode when you were 14?", questions),
-            getAnswer("During your school years, were you at any time eligible for free school meals?", questions),
-            getAnswer("Did any of your parent(s) or guardian(s) complete a university degree course or equivalent?", questions),
-            getAnswer("Parent/guardian work status", questions),
-            getAnswer("Which type of occupation did they have?", questions),
-            getAnswer("Did they work as an employee or were they self-employed?", questions),
-            getAnswer("Which size would best describe their place of work?", questions),
-            getAnswer("Did they supervise any other employees?", questions)
-          )
-          doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
-        }
-        CsvExtract(questionnaireDetailsHeader, csvRecords.toMap)
+      val csvRecords = docs.map { doc =>
+        val questions = doc.getAs[BSONDocument]("questions")
+        val csvRecord = makeRow(
+          getAnswer("What is your gender identity?", questions),
+          getAnswer("What is your sexual orientation?", questions),
+          getAnswer("What is your ethnic group?", questions),
+          getAnswer("Did you live in the UK between the ages of 14 and 18?", questions),
+          getAnswer("What was your home postcode when you were 14?", questions),
+          getAnswer("Aged 14 to 16 what was the name of your school?", questions),
+          getAnswer("Which type of school was this?", questions),
+          getAnswer("Aged 16 to 18 what was the name of your school or college? (if applicable)", questions),
+          getAnswer("Were you at any time eligible for free school meals?", questions),
+          getAnswer("Do you have a parent or guardian that has completed a university degree course or equivalent?", questions),
+          getAnswer("When you were 14, what kind of work did your highest-earning parent or guardian do?", questions),
+          getAnswer("Did they work as an employee or were they self-employed?", questions),
+          getAnswer("Which size would best describe their place of work?", questions),
+          getAnswer("Did they supervise employees?", questions)
+        )
+        doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
       }
+      CsvExtract(questionnaireDetailsHeader, csvRecords.toMap)
+    }
   }
 
   override def findOnlineTestReports(): Future[CsvExtract[String]] = {
@@ -215,8 +270,7 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
     onlineTestReportsCollection.find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
       .collect[List]().map { docs =>
-        val csvRecords = docs.map {
-          doc =>
+        val csvRecords = docs.map { doc =>
             val csvRecord = makeRow(
               onlineTestScore("competency", doc) :::
                 onlineTestScore("numerical", doc) :::
@@ -229,11 +283,11 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
       }
   }
 
-  override def findAssessmentCenterDetails(): Future[CsvExtract[String]] = {
+  override def findAssessmentCentreDetails(): Future[CsvExtract[String]] = {
 
     val projection = Json.obj("_id" -> 0)
 
-    assessmentCentersCollection.find(Json.obj(), projection)
+    assessmentCentresCollection.find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
       .collect[List]().map { docs =>
         val csvRecords = docs.map {
@@ -247,7 +301,7 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
             )
             doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
         }
-        CsvExtract(assessmentCenterDetailsHeader, csvRecords.toMap)
+        CsvExtract(assessmentCentreDetailsHeader, csvRecords.toMap)
       }
   }
 
@@ -259,95 +313,91 @@ class PreviousYearCandidatesDetailsMongoRepository(implicit mongo: () => DB) ext
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
       .collect[List]().map { docs =>
         val csvRecords = docs.map { doc =>
-          val csvRecord = makeRow(assessmentScores(doc): _*)
+          val csvRecord = makeRow(
+            assessmentScores(doc, "interview", None) :::
+            assessmentScores(doc, "groupExercise", None) :::
+            assessmentScores(doc, "writtenExercise", None) :::
+            assessmentScores(doc, "interview", Some("reviewer")) :::
+            assessmentScores(doc, "groupExercise", Some("reviewer")) :::
+            assessmentScores(doc, "writtenExercise", Some("reviewer")): _*
+          )
           doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
         }
         CsvExtract(assessmentScoresHeader, csvRecords.toMap)
       }
   }
 
-  private def assessmentScores(doc: BSONDocument) = {
-    val leadingAndCommunicating = doc.getAs[BSONDocument]("leadingAndCommunicating")
-    val deliveringAtPace = doc.getAs[BSONDocument]("deliveringAtPace")
-    val makingEffectiveDecisions = doc.getAs[BSONDocument]("makingEffectiveDecisions")
-    val changingAndImproving = doc.getAs[BSONDocument]("changingAndImproving")
-    val buildingCapabilityForAll = doc.getAs[BSONDocument]("buildingCapabilityForAll")
-    val motivationFit = doc.getAs[BSONDocument]("motivationFit")
-    val feedback = doc.getAs[BSONDocument]("feedback")
+  private def assessmentScores(doc: BSONDocument, exercise: String, parentKey: Option[String]): List[Option[String]] = {
+    import repositories.BSONDateTimeHandler
+
+    val baseDoc = parentKey.map(key => doc.getAs[BSONDocument](key)).getOrElse(Some(doc)).flatMap(_.getAs[BSONDocument](exercise))
+
     List(
-      doc.getAs[Boolean]("attendancy").map(_.toString),
-      doc.getAs[Boolean]("assessmentIncomplete").map(_.toString),
-      leadingAndCommunicating.flatMap(_.getAs[Double]("interview").map(_.toString)),
-      leadingAndCommunicating.flatMap(_.getAs[Double]("groupExercise").map(_.toString)),
-      leadingAndCommunicating.flatMap(_.getAs[Double]("writtenExercise").map(_.toString)),
-      deliveringAtPace.flatMap(_.getAs[Double]("interview").map(_.toString)),
-      deliveringAtPace.flatMap(_.getAs[Double]("groupExercise").map(_.toString)),
-      deliveringAtPace.flatMap(_.getAs[Double]("writtenExercise").map(_.toString)),
-      makingEffectiveDecisions.flatMap(_.getAs[Double]("interview").map(_.toString)),
-      makingEffectiveDecisions.flatMap(_.getAs[Double]("groupExercise").map(_.toString)),
-      makingEffectiveDecisions.flatMap(_.getAs[Double]("writtenExercise").map(_.toString)),
-      changingAndImproving.flatMap(_.getAs[Double]("interview").map(_.toString)),
-      changingAndImproving.flatMap(_.getAs[Double]("groupExercise").map(_.toString)),
-      changingAndImproving.flatMap(_.getAs[Double]("writtenExercise").map(_.toString)),
-      buildingCapabilityForAll.flatMap(_.getAs[Double]("interview").map(_.toString)),
-      buildingCapabilityForAll.flatMap(_.getAs[Double]("groupExercise").map(_.toString)),
-      buildingCapabilityForAll.flatMap(_.getAs[Double]("writtenExercise").map(_.toString)),
-      motivationFit.flatMap(_.getAs[Double]("interview").map(_.toString)),
-      motivationFit.flatMap(_.getAs[Double]("groupExercise").map(_.toString)),
-      motivationFit.flatMap(_.getAs[Double]("writtenExercise").map(_.toString)),
-      feedback.flatMap(_.getAs[String]("interviewFeedback").map(_.toString)),
-      feedback.flatMap(_.getAs[String]("groupExerciseFeedback").map(_.toString)),
-      feedback.flatMap(_.getAs[String]("writtenExerciseFeedback").map(_.toString))
+      baseDoc.flatMap(bd => mapYesNo(bd.getAs[Boolean]("attended"))),
+      baseDoc.flatMap(bd => mapYesNo(bd.getAs[Boolean]("assessmentIncomplete"))),
+      baseDoc.flatMap(_.getAs[String]("updatedBy").map(_.toString)),
+      baseDoc.flatMap(_.getAs[String]("version").map(_.toString)),
+      baseDoc.flatMap(_.getAs[DateTime]("submittedDate").map(_.toString)),
+      baseDoc.flatMap(_.getAs[DateTime]("savedDate").map(_.toString)),
+      baseDoc.flatMap(_.getAs[String]("feedback")),
+      baseDoc.flatMap(_.getAs[Double]("motivationFit").map(_.toString)),
+      baseDoc.flatMap(_.getAs[Double]("buildingCapabilityForAll").map(_.toString)),
+      baseDoc.flatMap(_.getAs[Double]("changingAndImproving").map(_.toString)),
+      baseDoc.flatMap(_.getAs[Double]("makingEffectiveDecisions").map(_.toString)),
+      baseDoc.flatMap(_.getAs[Double]("deliveringAtPace").map(_.toString)),
+      baseDoc.flatMap(_.getAs[Double]("collaboratingAndPartnering").map(_.toString)),
+      baseDoc.flatMap(_.getAs[Double]("leadingAndCommunicating").map(_.toString))
     )
   }
 
-  private def frameworkPreferences(doc: BSONDocument) = {
-    val frameworkPrefs = doc.getAs[BSONDocument]("framework-preferences")
-    val firstLocation = frameworkPrefs.flatMap(_.getAs[BSONDocument]("firstLocation"))
-    val secondLocation = frameworkPrefs.flatMap(_.getAs[BSONDocument]("secondLocation"))
-    val alternatives = frameworkPrefs.flatMap(_.getAs[BSONDocument]("alternatives"))
+  private def schemePreferences(doc: BSONDocument): List[Option[String]] = {
+    doc.getAs[List[String]]("schemes").map(_.map(Some(_))).getOrElse(Nil)
+  }
+
+  private def locationPreferences(schemesAndLocations: List[LocationSchemes], doc: BSONDocument): List[Option[String]] = {
+    val locationIds = doc.getAs[List[String]]("scheme-locations").getOrElse(Nil)
+    val lookupTable = schemesAndLocations.groupBy(_.id).mapValues(_.head)
+    locationIds.map(locationId => Some(lookupTable(locationId).locationName))
+  }
+
+  private def assessmentCentreIndicator(doc: BSONDocument): List[Option[String]] = {
+    val aciDoc = doc.getAs[AssessmentCentreIndicator]("assessment-centre-indicator")
+
     List(
-      firstLocation.flatMap(_.getAs[String]("region")),
-      firstLocation.flatMap(_.getAs[String]("location")),
-      firstLocation.flatMap(_.getAs[String]("firstFramework")),
-      firstLocation.flatMap(_.getAs[String]("secondFramework")),
-      secondLocation.flatMap(_.getAs[String]("region")),
-      secondLocation.flatMap(_.getAs[String]("location")),
-      secondLocation.flatMap(_.getAs[String]("firstFramework")),
-      secondLocation.flatMap(_.getAs[String]("secondFramework")),
-      frameworkPrefs.flatMap(_.getAs[Boolean]("secondLocationIntended").map(_.toString)),
-      alternatives.flatMap(_.getAs[Boolean]("location").map(_.toString)),
-      alternatives.flatMap(_.getAs[Boolean]("framework").map(_.toString))
+        aciDoc.map(_.area),
+        aciDoc.map(_.assessmentCentre),
+        Some(aciDoc.flatMap(_.version).map(_.toString).getOrElse("0"))
     )
   }
+
+  private def mapYesNo(potentialValue: Option[Boolean]): Option[String] = potentialValue.map { value =>
+    if (value) "Yes" else "No"
+  }.orElse(Some("No"))
 
   private def assistanceDetails(doc: BSONDocument) = {
     val assistanceDetails = doc.getAs[BSONDocument]("assistance-details")
     List(
-      assistanceDetails.flatMap(_.getAs[String]("needsAssistance")),
-      assistanceDetails.flatMap(_.getAs[List[String]]("typeOfdisability").map(_.mkString(","))),
-      assistanceDetails.flatMap(_.getAs[String]("detailsOfdisability")),
-      assistanceDetails.flatMap(_.getAs[String]("guaranteedInterview")),
-      assistanceDetails.flatMap(_.getAs[String]("needsAdjustment")),
-      assistanceDetails.flatMap(_.getAs[List[String]]("typeOfAdjustments").map(_.mkString(","))),
-      assistanceDetails.flatMap(_.getAs[String]("otherAdjustments")),
-      assistanceDetails.flatMap(_.getAs[String]("campaignReferrer")),
-      assistanceDetails.flatMap(_.getAs[String]("campaignOther")),
-      assistanceDetails.flatMap(_.getAs[Boolean]("confirmedAdjustments").map(_.toString)),
-      assistanceDetails.flatMap(_.getAs[Int]("numericalTimeAdjustmentPercentage").map(_.toString)),
-      assistanceDetails.flatMap(_.getAs[Int]("verbalTimeAdjustmentPercentage").map(_.toString))
+      assistanceDetails.flatMap(_.getAs[String]("hasDisability")),
+      assistanceDetails.flatMap(_.getAs[String]("hasDisabilityDescription")),
+      assistanceDetails.flatMap(ad => mapYesNo(ad.getAs[Boolean]("guaranteedInterview"))),
+      assistanceDetails.flatMap(ad => mapYesNo(ad.getAs[Boolean]("needsSupportForOnlineAssessment"))),
+      assistanceDetails.flatMap(_.getAs[String]("needsSupportForOnlineAssessmentDescription")),
+      assistanceDetails.flatMap(ad => mapYesNo(ad.getAs[Boolean]("needsSupportAtVenue"))),
+      assistanceDetails.flatMap(_.getAs[String]("needsSupportAtVenueDescription"))
     )
   }
 
-  private def personalDetails(doc: BSONDocument) = {
+  private def personalDetails(doc: BSONDocument): List[Option[String]] = {
     val personalDetails = doc.getAs[BSONDocument]("personal-details")
     List(
       personalDetails.flatMap(_.getAs[String]("firstName")),
       personalDetails.flatMap(_.getAs[String]("lastName")),
       personalDetails.flatMap(_.getAs[String]("preferredName")),
       personalDetails.flatMap(_.getAs[String]("dateOfBirth")),
-      personalDetails.flatMap(_.getAs[Boolean]("aLevel").map(_.toString)),
-      personalDetails.flatMap(_.getAs[Boolean]("stemLevel").map(_.toString))
+      personalDetails.flatMap(pd => mapYesNo(pd.getAs[Boolean]("aLevel"))),
+      personalDetails.flatMap(pd => mapYesNo(pd.getAs[Boolean]("stemLevel"))),
+      personalDetails.flatMap(pd => mapYesNo(pd.getAs[Boolean]("civilServant"))),
+      personalDetails.flatMap(_.getAs[String]("department").map(_.toString))
     )
   }
 

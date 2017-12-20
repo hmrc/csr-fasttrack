@@ -17,8 +17,7 @@
 package controllers
 
 import config.TestFixtureBase
-import mocks.QuestionnaireInMemoryRepository
-import mocks.application.DocumentRootInMemoryRepository
+import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import org.scalatestplus.play.PlaySpec
@@ -29,7 +28,8 @@ import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.QuestionnaireRepository
 import repositories.application.GeneralApplicationRepository
 import services.AuditService
-import uk.gov.hmrc.play.http.HeaderCarrier
+import testkit.MockitoImplicits._
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.language.postfixOps
 
@@ -49,10 +49,15 @@ class QuestionnaireControllerSpec extends PlaySpec with Results {
            |  ]
            |}
            |""".stripMargin
-      ))) must be(202)
+      ))) mustBe ACCEPTED
 
-      await(QuestionnaireInMemoryRepository.find(appId)).size must be(2)
-      verify(mockAuditService).logEvent(eqTo("QuestionnaireSectionSaved"), eqTo(Map("section" -> "section1")))(any[HeaderCarrier], any[RequestHeader])
+      verify(questionnaireRepoMock).addQuestions(eqTo(appId), eqTo(List(
+        PersistedQuestion(question = "parent occupation", answer = PersistedAnswer(answer = None, otherDetails = None, unknown = Some(true))),
+        PersistedQuestion(question = "other stuff", answer = PersistedAnswer(answer = Some("other"),
+          otherDetails = Some("something"), unknown = None))
+      )))
+      verify(mockAuditService)
+        .logEvent(eqTo("QuestionnaireSectionSaved"), eqTo(Map("section" -> "section1")))(any[HeaderCarrier], any[RequestHeader])
 
       status(TestQuestionnaireController.addSection(appId, "section2")(addQuestionnaireSection(appId, "section2")(
         s"""
@@ -64,10 +69,18 @@ class QuestionnaireControllerSpec extends PlaySpec with Results {
            |  ]
            |}
            |""".stripMargin
-      ))) must be(202)
+      ))) mustBe ACCEPTED
 
-      await(QuestionnaireInMemoryRepository.find(appId)).size must be(5)
-      verify(mockAuditService).logEvent(eqTo("QuestionnaireSectionSaved"), eqTo(Map("section" -> "section2")))(any[HeaderCarrier], any[RequestHeader])
+      verify(questionnaireRepoMock).addQuestions(eqTo(appId), eqTo(List(
+        PersistedQuestion(question = "income", answer = PersistedAnswer(answer = None, otherDetails = None, unknown = Some(true))),
+        PersistedQuestion(question = "stuff 1", answer = PersistedAnswer(answer = Some("other"),
+          otherDetails = None, unknown = None)),
+        PersistedQuestion(question = "stuff 2", answer = PersistedAnswer(answer = Some("other"),
+          otherDetails = Some("something"), unknown = None))
+      )))
+
+      verify(mockAuditService)
+        .logEvent(eqTo("QuestionnaireSectionSaved"), eqTo(Map("section" -> "section2")))(any[HeaderCarrier], any[RequestHeader])
     }
 
     "return a system error on invalid json" in new TestFixture {
@@ -80,18 +93,22 @@ class QuestionnaireControllerSpec extends PlaySpec with Results {
         """.stripMargin
       ))
 
-      status(result) must be(400)
-
+      status(result) mustBe BAD_REQUEST
     }
-
   }
 
   trait TestFixture extends TestFixtureBase {
+    val questionnaireRepoMock = mock[QuestionnaireRepository]
+    val generalApplicationRepoMock = mock[GeneralApplicationRepository]
+
     object TestQuestionnaireController extends QuestionnaireController {
-      override val qRepository: QuestionnaireRepository = QuestionnaireInMemoryRepository
-      override val appRepository: GeneralApplicationRepository = DocumentRootInMemoryRepository
+      override val qRepository: QuestionnaireRepository = questionnaireRepoMock
+      override val appRepository: GeneralApplicationRepository = generalApplicationRepoMock
       override val auditService: AuditService = mockAuditService
     }
+
+    when(questionnaireRepoMock.addQuestions(any[String], any[List[PersistedQuestion]])).thenReturnAsync()
+    when(generalApplicationRepoMock.updateQuestionnaireStatus(any[String], any[String])).thenReturnAsync()
 
     def addQuestionnaireSection(applicationId: String, section: String)(jsonString: String) = {
       val json = Json.parse(jsonString)

@@ -42,9 +42,9 @@ import repositories.application.{ AssistanceDetailsRepository, GeneralApplicatio
 import repositories.{ ContactDetailsRepository, OnlineTestPDFReportRepository, TestReportRepository }
 import services.AuditService
 import testkit.ExtendedTimeout
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.{ ExecutionContext, Future }
+import uk.gov.hmrc.http.HeaderCarrier
 
 class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with MockitoSugar with ScalaFutures with ExtendedTimeout {
   implicit val ec: ExecutionContext = ExecutionContext.global
@@ -146,7 +146,7 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
   )
   val Postcode = "WC2B 4"
   val EmailContactDetails = "emailfjjfjdf@mailinator.com"
-  val contactDetails = ContactDetails(false, Address("Aldwych road"), Some(Postcode), None, EmailContactDetails, Some("111111"))
+  val contactDetails = ContactDetails(outsideUk = false, Address("Aldwych road"), Some(Postcode), None, EmailContactDetails, Some("111111"))
 
   val auditDetails = Map("userId" -> UserId)
   val auditDetailsWithEmail = auditDetails + ("email" -> EmailContactDetails)
@@ -477,7 +477,7 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
     val adRepositoryMock = mock[AssistanceDetailsRepository]
     val cubiksGatewayClientMock = mock[CubiksGatewayClient]
     val emailClientMock = mock[CSREmailClient]
-    var auditServiceMock = mock[AuditService]
+    val auditServiceMock = mock[AuditService]
     val tokenFactoryMock = mock[UUIDFactory]
     val onlineTestInvitationDateFactoryMock = mock[DateTimeFactory]
 

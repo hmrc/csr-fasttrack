@@ -26,9 +26,9 @@ import repositories.ContactDetailsRepository
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.BaseServiceSpec
 import testkit.ShortTimeout
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
 
@@ -73,8 +73,8 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
     }
 
     "search by date of birth only" in new TestFixture {
-      when(appRepositoryMock.findByCriteria(any[Option[String]], any[Option[String]],
-        any[Option[LocalDate]], any[List[String]])).thenReturn(Future.successful(List(Candidate("123", None, None, Some("Leia"), Some("Amadala"), Some("Amadala"),
+      when(appRepositoryMock.findByCriteria(any[Option[String]], any[Option[String]], any[Option[LocalDate]], any[List[String]]))
+        .thenReturn(Future.successful(List(Candidate("123", None, None, Some("Leia"), Some("Amadala"), Some("Amadala"),
         Some(new LocalDate("1990-11-25")), None, None))))
 
       val actual = searchForApplicantService.findByCriteria(SearchCandidate(
@@ -107,7 +107,8 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
 
       val authProviderCandidate = connectors.ExchangeObjects.Candidate("Leia", "Amadala", None, "email@test.com", "userId")
       val authProviderCandidates = List(authProviderCandidate, authProviderCandidate, authProviderCandidate)
-      when(authProviderClientMock.findByFirstNameAndLastName(any[String], any[String], any[List[String]])(any[HeaderCarrier])).thenReturn(Future.successful(authProviderCandidates))
+      when(authProviderClientMock.findByFirstNameAndLastName(any[String], any[String], any[List[String]])(any[HeaderCarrier]))
+        .thenReturn(Future.successful(authProviderCandidates))
 
       val actual = searchForApplicantService.findByCriteria(SearchCandidate(
         firstOrPreferredName = Some("Leia"),
@@ -149,19 +150,19 @@ class SearchForApplicantServiceSpec extends BaseServiceSpec with ShortTimeout {
 
     when(cdRepositoryMock.findByPostCode(any[String])).thenReturn(
       Future.successful(
-        List(ContactDetailsWithId(userId = "123", false, address = testAddress, postCode = Some("QQ1 1QQ"), None, email = testEmail,
+        List(ContactDetailsWithId(userId = "123", outsideUk = false, address = testAddress, postCode = Some("QQ1 1QQ"), None, email = testEmail,
           phone = None))
       )
     )
 
     when(cdRepositoryMock.findByUserIds(any[List[String]])).thenReturn(
       Future.successful(
-        List(ContactDetailsWithId(userId = "123", false, address = testAddress, postCode = Some("QQ1 1QQ"), None, email = testEmail,
+        List(ContactDetailsWithId(userId = "123", outsideUk = false, address = testAddress, postCode = Some("QQ1 1QQ"), None, email = testEmail,
           phone = None))
       )
     )
 
-    when(appRepositoryMock.findByCriteria(any[Option[String]], any[Option[String]],
-      any[Option[LocalDate]], any[List[String]])).thenReturn(Future.successful(List(Candidate("123", None, None, Some("Leia"), Some("Amadala"), Some("Amadala"), None, None, None))))
+    when(appRepositoryMock.findByCriteria(any[Option[String]], any[Option[String]], any[Option[LocalDate]], any[List[String]]))
+      .thenReturn(Future.successful(List(Candidate("123", None, None, Some("Leia"), Some("Amadala"), Some("Amadala"), None, None, None))))
   }
 }

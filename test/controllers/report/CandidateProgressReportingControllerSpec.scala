@@ -20,16 +20,16 @@ import model.Commands.Implicits._
 import model.ReportExchangeObjects.{ CandidateProgressReportItem, _ }
 import model.ReportExchangeObjects.Implicits._
 import model.{ AssessmentCentreIndicator, UniqueIdentifier }
-import model.exchange.{ ApplicationForCandidateProgressReportItemExamples, CandidateExamples, CandidateProgressReportItemExamples, LocationSchemesExamples }
+import model.exchange._
 import model.persisted.ContactDetailsWithIdExamples
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import play.api.test.Helpers._
 import testkit.MockitoImplicits.OngoingStubbingExtension
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.language.postfixOps
+import uk.gov.hmrc.http.HeaderCarrier
 
 class CandidateProgressReportingControllerSpec extends BaseReportingControllerSpec {
   "Candidate progress report" should {

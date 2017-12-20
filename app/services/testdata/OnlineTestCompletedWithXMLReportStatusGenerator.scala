@@ -21,9 +21,9 @@ import model.PersistedObjects._
 import model.testdata.{ GeneratorConfig, OnlineTestScores }
 import repositories._
 import repositories.application.OnlineTestRepository
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 object OnlineTestCompletedWithXMLReportStatusGenerator extends OnlineTestCompletedWithXMLReportStatusGenerator {
   override val previousStatusGenerator = OnlineTestCompletedStatusGenerator

@@ -17,7 +17,7 @@
 package repositories
 
 import connectors.PassMarkExchangeObjects
-import connectors.PassMarkExchangeObjects.{ OnlineTestPassmarkSettings }
+import connectors.PassMarkExchangeObjects.OnlineTestPassmarkSettings
 import connectors.PassMarkExchangeObjects.Implicits._
 import model.Commands._
 import play.api.libs.json.{ JsNumber, JsObject }

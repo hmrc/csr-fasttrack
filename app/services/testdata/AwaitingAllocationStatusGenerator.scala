@@ -22,9 +22,9 @@ import model.testdata.GeneratorConfig
 import model.{ ApplicationStatuses, Scheme }
 import repositories._
 import repositories.application.OnlineTestRepository
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 object AwaitingAllocationStatusGenerator extends AwaitingAllocationStatusGenerator {
   override val previousStatusGenerator = OnlineTestCompletedWithPDFReportStatusGenerator

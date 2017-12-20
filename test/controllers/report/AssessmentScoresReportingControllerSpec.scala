@@ -23,9 +23,9 @@ import org.mockito.Mockito._
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import testkit.MockitoImplicits.OngoingStubbingExtension
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.language.postfixOps
+import uk.gov.hmrc.http.HeaderCarrier
 
 class AssessmentScoresReportingControllerSpec extends BaseReportingControllerSpec {
   "Candidate progress report" should {

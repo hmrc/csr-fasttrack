@@ -93,8 +93,6 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
   }
 
   "Save new settings" should {
-    def isValid(value: OnlineTestPassmarkSettings) = true
-
     "Send a complete settings object to the repository with a version UUID appended" in new TestFixture {
 
       val passMarkSettingsRepositoryWithExpectations = mock[OnlineTestPassMarkSettingsRepository]

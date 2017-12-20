@@ -22,11 +22,11 @@ import repositories.application.{ GeneralApplicationRepository, PersonalDetailsR
 import repositories.{ FileLocationSchemeRepository, LocationSchemeRepository, LocationSchemes, _ }
 import services.AuditService
 import services.locationschemes.exchangeobjects.GeoLocationSchemeResult
-import uk.gov.hmrc.play.http.HeaderCarrier
 import play.api.mvc.RequestHeader
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 object LocationSchemeService extends LocationSchemeService {
   val locationSchemeRepository = FileLocationSchemeRepository
@@ -92,9 +92,10 @@ trait LocationSchemeService {
     require(locationIds.nonEmpty, "Location preferences must not be empty")
     for {
       eligibleSchemeLocations <- getEligibleSchemeLocations(applicationId)
-      _ <- locationIds.diff(eligibleSchemeLocations.map(_.locationId)).nonEmpty match {
-        case true => Future.failed(throw NotEligibleForLocation())
-        case false => appRepository.updateSchemeLocations(applicationId, locationIds)
+      _ <- if (locationIds.diff(eligibleSchemeLocations.map(_.locationId)).nonEmpty) {
+        Future.failed(throw NotEligibleForLocation())
+      } else {
+        appRepository.updateSchemeLocations(applicationId, locationIds)
       }
     } yield {}
   }
@@ -115,9 +116,10 @@ trait LocationSchemeService {
     require(schemeNames.nonEmpty, "Scheme preferences must not be empty")
     for {
       eligibleSchemes <- getEligibleSchemes(applicationId)
-      _ <- schemeNames.diff(eligibleSchemes.map(_.id)).nonEmpty match {
-        case true => Future.failed(throw NotEligibleForScheme())
-        case false => appRepository.updateSchemes(applicationId, schemeNames)
+      _ <- if (schemeNames.diff(eligibleSchemes.map(_.id)).nonEmpty) {
+        Future.failed(throw NotEligibleForScheme())
+      } else {
+        appRepository.updateSchemes(applicationId, schemeNames)
       }
     } yield {}
   }
@@ -133,9 +135,10 @@ trait LocationSchemeService {
   }
 
   private def sortLocations(locations: List[GeoLocationSchemeResult], sortByDistance: Boolean) = {
-    sortByDistance match {
-      case true => locations.sortBy(r => r.distanceMiles.getOrElse(0d))
-      case false => locations.sortBy(_.locationName)
+    if (sortByDistance) {
+      locations.sortBy(r => r.distanceMiles.getOrElse(0d))
+    } else {
+      locations.sortBy(_.locationName)
     }
   }
 }

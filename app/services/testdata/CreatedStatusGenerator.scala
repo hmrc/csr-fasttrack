@@ -21,10 +21,10 @@ import model.ApplicationStatuses
 import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.GeneralApplicationRepository
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 object CreatedStatusGenerator extends CreatedStatusGenerator {
   override val previousStatusGenerator = RegisteredStatusGenerator
@@ -53,7 +53,7 @@ trait CreatedStatusGenerator extends ConstructiveGenerator {
     for {
       user <- AuthProviderClient.addUser(email, "Service01", firstName, lastName, role)
       token <- AuthProviderClient.getToken(email)
-      activateUser <- AuthProviderClient.activate(email, token)
+      _ <- AuthProviderClient.activate(email, token)
     } yield {
       user.userId.toString
     }

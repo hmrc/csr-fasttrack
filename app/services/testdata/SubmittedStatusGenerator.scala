@@ -20,9 +20,9 @@ import model.ApplicationStatuses
 import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.GeneralApplicationRepository
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 object SubmittedStatusGenerator extends SubmittedStatusGenerator {
   override val previousStatusGenerator = InProgressReviewStatusGenerator

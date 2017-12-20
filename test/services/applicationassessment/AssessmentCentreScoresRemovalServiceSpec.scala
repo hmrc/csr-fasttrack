@@ -25,9 +25,9 @@ import org.scalatest.time.{ Seconds, Span }
 import repositories.ApplicationAssessmentScoresRepository
 import services.AuditService
 import testkit.UnitSpec
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
+import uk.gov.hmrc.http.HeaderCarrier
 
 class AssessmentCentreScoresRemovalServiceSpec extends UnitSpec {
 

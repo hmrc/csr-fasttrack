@@ -32,26 +32,26 @@ import repositories._
 trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
   implicit val toApplicationForCandidateProgressReport = bsonReader {
     (doc: BSONDocument) =>
-        val applicationId = doc.getAs[String]("applicationId").getOrElse("")
-        val userId = doc.getAs[String]("userId").getOrElse("")
-        val progress: ProgressResponse = toProgressResponse(applicationId).read(doc)
-        val schemes = doc.getAs[List[Scheme]]("schemes").getOrElse(List.empty)
-        val schemeLocations = doc.getAs[List[String]]("scheme-locations").getOrElse(List.empty)
+      val applicationId = doc.getAs[String]("applicationId").getOrElse("")
+      val userId = doc.getAs[String]("userId").getOrElse("")
+      val progress: ProgressResponse = toProgressResponse(applicationId).read(doc)
+      val schemes = doc.getAs[List[Scheme]]("schemes").getOrElse(List.empty)
+      val schemeLocations = doc.getAs[List[String]]("scheme-locations").getOrElse(List.empty)
 
-        val assistanceDetails = doc.getAs[AssistanceDetails]("assistance-details")
-        val adjustments = doc.getAs[Adjustments]("assistance-details")
+      val assistanceDetails = doc.getAs[AssistanceDetails]("assistance-details")
+      val adjustments = doc.getAs[Adjustments]("assistance-details")
 
-        val pdDoc = doc.getAs[BSONDocument]("personal-details")
-        val civilServant = pdDoc.flatMap(_.getAs[Boolean]("civilServant"))
+      val pdDoc = doc.getAs[BSONDocument]("personal-details")
+      val civilServant = pdDoc.flatMap(_.getAs[Boolean]("civilServant"))
 
-        val assessmentCentreIndicator = doc.getAs[AssessmentCentreIndicator]("assessment-centre-indicator")
+      val assessmentCentreIndicator = doc.getAs[AssessmentCentreIndicator]("assessment-centre-indicator")
 
-        ApplicationForCandidateProgressReport(
-          Some(UniqueIdentifier(applicationId)), UniqueIdentifier(userId), Some(getStatus(progress)), schemes, schemeLocations,
-          assistanceDetails.map(_.hasDisability), assistanceDetails.flatMap(_.guaranteedInterview),
-          assistanceDetails.map(_.needsSupportForOnlineAssessment), assistanceDetails.map(_.needsSupportAtVenue),
-          adjustments, civilServant, assessmentCentreIndicator
-        )
+      ApplicationForCandidateProgressReport(
+        Some(UniqueIdentifier(applicationId)), UniqueIdentifier(userId), Some(getStatus(progress)), schemes, schemeLocations,
+        assistanceDetails.map(_.hasDisability), assistanceDetails.flatMap(_.guaranteedInterview),
+        assistanceDetails.map(_.needsSupportForOnlineAssessment), assistanceDetails.map(_.needsSupportAtVenue),
+        adjustments, civilServant, assessmentCentreIndicator
+      )
   }
 
   implicit val toApplicationForAssessmentScoresReport = bsonReader {
@@ -76,6 +76,24 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
 
   implicit val toApplicationPreferencesWithTestResults = bsonReader {
     (doc: BSONDocument) =>
+
+      def evaluation(key: String, evaluationMapDoc: Option[BSONDocument]) = {
+        val evaluation = evaluationMapDoc.flatMap(_.getAs[List[SchemeEvaluationResult]](key)).getOrElse(List.empty)
+
+        val schemesEvaluationMap = Scheme.AllSchemes.flatMap { scheme =>
+          evaluation.find(_.scheme == scheme).map {
+            scheme -> _.result.toPassmark
+          }
+        }.toMap
+
+        val commercial = schemesEvaluationMap.get(Scheme.Commercial)
+        val digitalAndTechnology = schemesEvaluationMap.get(Scheme.DigitalAndTechnology)
+        val business = schemesEvaluationMap.get(Scheme.Business)
+        val projectDelivery = schemesEvaluationMap.get(Scheme.ProjectDelivery)
+        val finance = schemesEvaluationMap.get(Scheme.Finance)
+        SchemeEvaluation(commercial, digitalAndTechnology, business, projectDelivery, finance)
+      }
+
       val applicationId = doc.getAs[String]("applicationId").get
       val userId = doc.getAs[String]("userId").get
 
@@ -90,9 +108,9 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
       val schemes = doc.getAs[List[Scheme]]("schemes").getOrElse(List.empty)
       val schemeLocations = doc.getAs[List[String]]("scheme-locations").getOrElse(List.empty)
 
-      val passmarkEvaluation = doc.getAs[BSONDocument]("assessment-centre-passmark-evaluation")
+      val passmarkEvaluationDoc = doc.getAs[BSONDocument]("assessment-centre-passmark-evaluation")
 
-      val competencyAverage = passmarkEvaluation.flatMap(_.getAs[BSONDocument]("competency-average"))
+      val competencyAverage = passmarkEvaluationDoc.flatMap(_.getAs[BSONDocument]("competency-average"))
       val leadingAndCommunicatingAverage = competencyAverage.flatMap(_.getAs[Double]("leadingAndCommunicatingAverage"))
       val collaboratingAndPartneringAverage = competencyAverage.flatMap(_.getAs[Double]("collaboratingAndPartneringAverage"))
       val deliveringAtPaceAverage = competencyAverage.flatMap(_.getAs[Double]("deliveringAtPaceAverage"))
@@ -102,17 +120,9 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
       val motivationFitAverage = competencyAverage.flatMap(_.getAs[Double]("motivationFitAverage"))
       val overallScore = competencyAverage.flatMap(_.getAs[Double]("overallScore"))
 
-      val schemesEvaluation = passmarkEvaluation.flatMap(_.getAs[List[SchemeEvaluationResult]]("schemes-evaluation")).getOrElse(List.empty)
+      val schemesEvaluation = evaluation("schemes-evaluation", passmarkEvaluationDoc)
+      val overallEvaluation = evaluation("overall-evaluation", passmarkEvaluationDoc)
 
-      val schemesEvaluationMap = Scheme.AllSchemes.flatMap { scheme =>
-        schemesEvaluation.find(_.scheme == scheme).map { scheme -> _.result.toPassmark }
-      }.toMap
-
-      val commercial = schemesEvaluationMap.get(Scheme.Commercial)
-      val digitalAndTechnology = schemesEvaluationMap.get(Scheme.DigitalAndTechnology)
-      val business = schemesEvaluationMap.get(Scheme.Business)
-      val projectDelivery = schemesEvaluationMap.get(Scheme.ProjectDelivery)
-      val finance = schemesEvaluationMap.get(Scheme.Finance)
 
       ApplicationPreferencesWithTestResults(
         UniqueIdentifier(userId),
@@ -123,6 +133,6 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
         CandidateScoresSummary(leadingAndCommunicatingAverage, collaboratingAndPartneringAverage,
           deliveringAtPaceAverage, makingEffectiveDecisionsAverage, changingAndImprovingAverage,
           buildingCapabilityForAllAverage, motivationFitAverage, overallScore),
-        SchemeEvaluation(commercial, digitalAndTechnology, business, projectDelivery, finance))
+        schemesEvaluation, overallEvaluation)
   }
 }

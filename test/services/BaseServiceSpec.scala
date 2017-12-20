@@ -19,13 +19,13 @@ package services
 import org.joda.time.{ DateTime, DateTimeZone }
 import play.api.mvc.RequestHeader
 import testkit.{ FutureHelper, UnitSpec }
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 /**
  * Common base class for all service tests
  */
 class BaseServiceSpec extends UnitSpec with FutureHelper {
   implicit val now: DateTime = DateTime.now().withZone(DateTimeZone.UTC)
-  implicit val hc = new HeaderCarrier()
-  implicit val rh = mock[RequestHeader]
+  implicit val hc: HeaderCarrier = HeaderCarrier()
+  implicit val rh: RequestHeader = mock[RequestHeader]
 }

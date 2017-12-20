@@ -211,7 +211,8 @@ object ReportExchangeObjects {
     locations: List[String],
     personalDetails: PersonalInfo,
     scores: CandidateScoresSummary,
-    schemeEvaluation: SchemeEvaluation
+    schemeEvaluation: SchemeEvaluation,
+    overallEvaluation: SchemeEvaluation
   )
 
   case class SuccessfulCandidatesReportItem(

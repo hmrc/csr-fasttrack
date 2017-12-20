@@ -16,34 +16,34 @@
 
 package controllers
 
-import common.Constants.{ Yes, No }
 import config.TestFixtureBase
 import model.Exceptions.{ AssistanceDetailsNotFound, CannotUpdateAssistanceDetails }
 import model.exchange.AssistanceDetailsExamples
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
+import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.Helpers._
 import services.assistancedetails.AssistanceDetailsService
 import testkit.UnitWithAppSpec
-import uk.gov.hmrc.play.http.HeaderCarrier
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.language.postfixOps
-import play.api.libs.json.Json
 
 class AssistanceDetailsControllerSpec extends UnitWithAppSpec {
 
   "Find" should {
     "return OK and the corresponding assistance details" in new TestFixture {
-      when(mockAssistanceDetailsService.find(AppId, UserId)).thenReturn(Future.successful((AssistanceDetailsExamples.DisabilityGisAndAdjustments)))
+      when(mockAssistanceDetailsService.find(AppId, UserId))
+        .thenReturn(Future.successful(AssistanceDetailsExamples.DisabilityGisAndAdjustments))
       val result = controller.find(UserId, AppId)(fakeRequest)
       status(result) must be(OK)
       contentAsJson(result) must be(Json.toJson(AssistanceDetailsExamples.DisabilityGisAndAdjustments))
     }
 
     "return NOT_FOUND" in new TestFixture {
-      when(mockAssistanceDetailsService.find(AppId, UserId)).thenReturn(Future.failed(new AssistanceDetailsNotFound(AppId)))
+      when(mockAssistanceDetailsService.find(AppId, UserId)).thenReturn(Future.failed(AssistanceDetailsNotFound(AppId)))
       val result = controller.find(UserId, AppId)(fakeRequest)
       status(result) must be(NOT_FOUND)
       contentAsString(result) must be(s"cannot find assistance details for application: $AppId")
@@ -53,7 +53,8 @@ class AssistanceDetailsControllerSpec extends UnitWithAppSpec {
   "Update" should {
     "return CREATED and update the details and audit AssistanceDetailsSaved event" in new TestFixture {
       val Request = fakeRequest(AssistanceDetailsExamples.DisabilityGisAndAdjustments)
-      when(mockAssistanceDetailsService.update(AppId, UserId, AssistanceDetailsExamples.DisabilityGisAndAdjustments)).thenReturn(Future.successful(()))
+      when(mockAssistanceDetailsService.update(AppId, UserId, AssistanceDetailsExamples.DisabilityGisAndAdjustments))
+        .thenReturn(Future.successful(()))
       val result = controller.update(UserId, AppId)(Request)
       status(result) must be(CREATED)
       verify(mockAuditService).logEvent(eqTo("AssistanceDetailsSaved"))(any[HeaderCarrier], any[RequestHeader])

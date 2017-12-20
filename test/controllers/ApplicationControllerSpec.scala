@@ -17,13 +17,11 @@
 package controllers
 
 import config.TestFixtureBase
-import mocks.application.DocumentRootInMemoryRepository
-import model.Commands.WithdrawApplicationRequest
-import model.Exceptions.CannotUpdateReview
+import model.ApplicationStatuses
+import model.Commands.{ ApplicationResponse, ProgressResponse, WithdrawApplicationRequest }
+import model.Exceptions.{ ApplicationNotFound, CannotUpdateReview }
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
-import org.scalatest.mock.MockitoSugar
-import org.scalatestplus.play.PlaySpec
 import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.Helpers._
@@ -31,33 +29,33 @@ import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import repositories.application.GeneralApplicationRepository
 import services.AuditService
 import services.application.ApplicationService
-import testkit.{ UnitSpec, UnitWithAppSpec }
-import uk.gov.hmrc.play.http.HeaderCarrier
+import testkit.UnitWithAppSpec
+import testkit.MockitoImplicits._
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.language.postfixOps
 
 class ApplicationControllerSpec extends UnitWithAppSpec {
 
-  val ApplicationId = "1111-1111"
-  val aWithdrawApplicationRequest = WithdrawApplicationRequest("Something", Some("Else"), "Candidate")
-  val auditDetails = Map("applicationId" -> ApplicationId, "withdrawRequest" -> aWithdrawApplicationRequest.toString)
-
   "Create Application" should {
-
     "create an application" in new TestFixture {
+      val applicationCreated = ApplicationResponse(applicationId, ApplicationStatuses.Created, userId,
+        ProgressResponse(applicationId))
+
+      when(mockGeneralApplicationRepository.create(any[String], any[String])).thenReturnAsync(applicationCreated)
       val result = TestApplicationController.createApplication(createApplicationRequest(
         s"""
            |{
-           |  "userId":"1234",
+           |  "userId":"$userId",
            |  "frameworkId":"FASTTRACK-2015"
            |}
         """.stripMargin
       ))
       val jsonResponse = contentAsJson(result)
 
-      (jsonResponse \ "applicationStatus").as[String] must be("CREATED")
-      (jsonResponse \ "userId").as[String] must be("1234")
+      (jsonResponse \ "applicationStatus").as[String] mustBe "CREATED"
+      (jsonResponse \ "userId").as[String] mustBe userId
 
       verify(mockAuditService).logEvent(eqTo("ApplicationCreated"))(any[HeaderCarrier], any[RequestHeader])
     }
@@ -67,65 +65,79 @@ class ApplicationControllerSpec extends UnitWithAppSpec {
         TestApplicationController.createApplication(createApplicationRequest(
           s"""
              |{
-             |  "some":"1234",
+             |  "some":"$userId",
              |  "other":"FASTTRACK-2015"
              |}
           """.stripMargin
         ))
 
-      status(result) must be(400)
+      status(result) mustBe BAD_REQUEST
     }
   }
 
   "Application Progress" should {
-
     "return the progress of an application" in new TestFixture {
-      val result = TestApplicationController.applicationProgress(ApplicationId)(applicationProgressRequest(ApplicationId)).run
+      when(mockGeneralApplicationRepository.findProgress(any[String])).thenReturnAsync(
+        ProgressResponse(applicationId, personalDetails = true)
+      )
+
+      val result = TestApplicationController.applicationProgress(applicationId)(applicationProgressRequest(applicationId)).run
       val jsonResponse = contentAsJson(result)
 
-      (jsonResponse \ "applicationId").as[String] must be(ApplicationId)
-      (jsonResponse \ "personalDetails").as[Boolean] must be(true)
+      (jsonResponse \ "applicationId").as[String] mustBe applicationId
+      (jsonResponse \ "personalDetails").as[Boolean] mustBe true
 
-      status(result) must be(200)
+      status(result) mustBe OK
     }
 
     "return a system error when applicationId doesn't exists" in new TestFixture {
+      when(mockGeneralApplicationRepository.findProgress(any[String])).thenReturn(
+        Future.failed(ApplicationNotFound(applicationId))
+      )
+
       val result = TestApplicationController.applicationProgress("1111-1234")(applicationProgressRequest("1111-1234")).run
 
-      status(result) must be(404)
+      status(result) mustBe NOT_FOUND
     }
   }
 
   "Find application" should {
-
     "return the application" in new TestFixture {
+      val applicationCreated = ApplicationResponse(applicationId, ApplicationStatuses.Created, userId,
+        ProgressResponse(applicationId))
+
+      when(mockGeneralApplicationRepository.findByUserId(any[String], any[String])).thenReturnAsync(applicationCreated)
+
       val result = TestApplicationController.findApplication(
         "validUser",
         "validFramework"
       )(findApplicationRequest("validUser", "validFramework")).run
       val jsonResponse = contentAsJson(result)
 
-      (jsonResponse \ "applicationId").as[String] must be(ApplicationId)
-      (jsonResponse \ "applicationStatus").as[String] must be("CREATED")
-      (jsonResponse \ "userId").as[String] must be("validUser")
+      (jsonResponse \ "applicationId").as[String] mustBe applicationId
+      (jsonResponse \ "applicationStatus").as[String] mustBe "CREATED"
+      (jsonResponse \ "userId").as[String] mustBe userId
 
-      status(result) must be(200)
+      status(result) mustBe OK
     }
 
     "return a system error when application doesn't exists" in new TestFixture {
+      when(mockGeneralApplicationRepository.findByUserId(any[String], any[String])).thenReturn(
+        Future.failed(ApplicationNotFound("invalidUser"))
+      )
+
       val result = TestApplicationController.findApplication(
         "invalidUser",
         "invalidFramework"
       )(findApplicationRequest("invalidUser", "invalidFramework")).run
 
-      status(result) must be(404)
-
+      status(result) mustBe NOT_FOUND
     }
   }
 
   "Withdraw application" should {
     "withdraw the application" in new TestFixture {
-      val result = TestApplicationController.applicationWithdraw("1111-1111")(withdrawApplicationRequest("1111-1111")(
+      val result = TestApplicationController.applicationWithdraw("1111-1111")(withdrawApplicationRequest(applicationId)(
         s"""
            |{
            |  "reason":"Something",
@@ -134,46 +146,51 @@ class ApplicationControllerSpec extends UnitWithAppSpec {
            |}
         """.stripMargin
       ))
-      status(result) must be(200)
+      status(result) mustBe OK
     }
   }
 
   "Review application" should {
     "return 200 and mark the application as reviewed" in new TestFixture {
-      val result = TestApplicationFullyMockedController.review(ApplicationId)(reviewApplicationRequest(ApplicationId)(
+      val result = TestApplicationFullyMockedController.review(applicationId)(reviewApplicationRequest(applicationId)(
         s"""
            |{
            |  "flag": true
            |}
         """.stripMargin
       ))
-      status(result) must be(200)
+      status(result) mustBe OK
       verify(mockAuditService).logEvent(eqTo("ApplicationReviewed"))(any[HeaderCarrier], any[RequestHeader])
     }
 
     "return 404 when there is an error when storing review status" in new TestFixture {
-      when(mockApplicationRepository.review(eqTo(ApplicationId))).thenReturn(Future.failed(CannotUpdateReview(s"review $ApplicationId")))
+      when(mockApplicationRepository.review(eqTo(applicationId))).thenReturn(Future.failed(CannotUpdateReview(s"review $applicationId")))
 
-      val result = TestApplicationFullyMockedController.review(ApplicationId)(reviewApplicationRequest(ApplicationId)(
+      val result = TestApplicationFullyMockedController.review(applicationId)(reviewApplicationRequest(applicationId)(
         s"""
            |{
            |  "flag": true
            |}
         """.stripMargin
       ))
-      status(result) must be(404)
+      status(result) mustBe NOT_FOUND
       verify(mockAuditService, times(0)).logEvent(eqTo("ApplicationReviewed"))(any[HeaderCarrier], any[RequestHeader])
     }
   }
 
   trait TestFixture extends TestFixtureBase {
+    val applicationId = "1111-1111"
+    val userId = "1234"
+    val withdrawApplicationRequest = WithdrawApplicationRequest("Something", Some("Else"), "Candidate")
+    val auditDetails = Map("applicationId" -> applicationId, "withdrawRequest" -> withdrawApplicationRequest.toString)
     val mockApplicationRepository = mock[GeneralApplicationRepository]
     val mockApplicationService = mock[ApplicationService]
-    when(mockApplicationService.withdraw(eqTo(ApplicationId), eqTo(aWithdrawApplicationRequest))).thenReturn(Future.successful(()))
-    when(mockApplicationRepository.review(eqTo(ApplicationId))).thenReturn(Future.successful(()))
+    val mockGeneralApplicationRepository = mock[GeneralApplicationRepository]
+    when(mockApplicationService.withdraw(eqTo(applicationId), eqTo(withdrawApplicationRequest))).thenReturnAsync()
+    when(mockApplicationRepository.review(eqTo(applicationId))).thenReturnAsync()
 
     object TestApplicationController extends ApplicationController {
-      override val appRepository: GeneralApplicationRepository = DocumentRootInMemoryRepository
+      override val appRepository: GeneralApplicationRepository = mockGeneralApplicationRepository
       override val auditService: AuditService = mockAuditService
       override val applicationService: ApplicationService = mockApplicationService
     }

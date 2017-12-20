@@ -29,10 +29,10 @@ import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import services.application.PersonalDetailsService
 import testkit.UnitWithAppSpec
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.Future
 import scala.language.postfixOps
+import uk.gov.hmrc.http.HeaderCarrier
 
 class PersonalDetailsControllerSpec extends UnitWithAppSpec {
 
@@ -64,14 +64,14 @@ class PersonalDetailsControllerSpec extends UnitWithAppSpec {
                        |}
         """.stripMargin
 
-      when(mockPersonalDetailsService.update(any[String], any[String], any[PersonalDetails], any[ContactDetails])(any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
+      when(mockPersonalDetailsService.update(any[String], any[String], any[PersonalDetails], any[ContactDetails])(
+        any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
 
       val result = TestPersonalDetailsController.personalDetails(userId, applicationId)(
         updatePersonalDetailsRequest(userId, applicationId)(request)
       )
 
       status(result) mustBe CREATED
-
     }
 
     "return a system error on invalid json" in new TestFixture {
@@ -91,7 +91,8 @@ class PersonalDetailsControllerSpec extends UnitWithAppSpec {
         )
       )
 
-      when(mockPersonalDetailsService.update(any[String], any[String], any[PersonalDetails], any[ContactDetails])(any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(CannotUpdateContactDetails("appId")))
+      when(mockPersonalDetailsService.update(any[String], any[String], any[PersonalDetails], any[ContactDetails])(
+        any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(CannotUpdateContactDetails("appId")))
 
       status(result) mustBe BAD_REQUEST
     }

@@ -19,9 +19,9 @@ package services.testdata
 import model.testdata.GeneratorConfig
 import repositories._
 import repositories.application.GeneralApplicationRepository
-import uk.gov.hmrc.play.http.HeaderCarrier
 
 import scala.concurrent.ExecutionContext.Implicits.global
+import uk.gov.hmrc.http.HeaderCarrier
 
 object InProgressSchemePreferencesStatusGenerator extends InProgressSchemePreferencesStatusGenerator {
   override val previousStatusGenerator = InProgressPersonalDetailsStatusGenerator
@@ -42,7 +42,7 @@ trait InProgressSchemePreferencesStatusGenerator extends ConstructiveGenerator {
       _ <- appRepository.updateSchemes(candidateInPreviousStatus.applicationId.get, schemesData)
     } yield {
       candidateInPreviousStatus.copy(
-        schemes = Some(schemesData.map { scheme => SchemeInfo(scheme, scheme.toString, false, false) }),
+        schemes = Some(schemesData.map { scheme => SchemeInfo(scheme, scheme.toString, requiresALevel = false, requiresALevelInStem = false) }),
         schemeLocations = Some(schemeLocationsData)
       )
     }
