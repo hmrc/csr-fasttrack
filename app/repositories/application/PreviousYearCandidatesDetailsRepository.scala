@@ -16,13 +16,9 @@
 
 package repositories.application
 
-import java.io
-
-import common.FutureEx
 import model.Commands.{ CandidateDetailsReportItem, CsvExtract }
 import model.{ AssessmentCentreIndicator, Scheme }
-import model.Scheme.Scheme
-import org.joda.time.DateTime
+import org.joda.time.{ DateTime, LocalDate }
 import play.api.Logger
 import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
@@ -31,6 +27,7 @@ import reactivemongo.bson.BSONDocument
 import reactivemongo.json.collection.JSONCollection
 import repositories.{ CollectionNames, LocationSchemeRepository, LocationSchemes }
 import reactivemongo.json.ImplicitBSONHandlers._
+import repositories._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -49,7 +46,10 @@ abstract class PreviousYearCandidatesDetailsRepository(locationSchemeRepository:
     }.mkString(",")
   }
 
-  lazy val appStatuses = "registered,personal_details_completed,scheme_locations_completed,schemes_preferences_completed,assistance_details_completed,start_questionnaire,diversity_questions_completed,education_questions_completed,occupation_questions_completed,review_completed,test_expiry_first_reminder,test_expiry_second_reminder,CREATED,WITHDRAWN,IN_PROGRESS,SUBMITTED,ONLINE_TEST_INVITED,ONLINE_TEST_STARTED,ONLINE_TEST_EXPIRED,ONLINE_TEST_COMPLETED,ONLINE_TEST_FAILED,ONLINE_TEST_FAILED_NOTIFIED,AWAITING_ONLINE_TEST_RE_EVALUATION,AWAITING_ALLOCATION,AWAITING_ALLOCATION_NOTIFIED,FAILED_TO_ATTEND,ALLOCATION_UNCONFIRMED,ALLOCATION_CONFIRMED,ASSESSMENT_SCORES_ENTERED,ASSESSMENT_SCORES_ACCEPTED,AWAITING_ASSESSMENT_CENTRE_RE_EVALUATION,ASSESSMENT_CENTRE_PASSED,ASSESSMENT_CENTRE_PASSED_NOTIFIED,ASSESSMENT_CENTRE_FAILED,ASSESSMENT_CENTRE_FAILED_NOTIFIED"
+  val appStatusesTimestamp = "personal_details_completed,review_completed,submitted"
+  val appStatusesDate = "awaiting_allocation,allocation_unconfirmed,allocation_confirmed,assessment_scores_entered,assessment_scores_accepted," +
+    "awaiting_assessment_centre_re_evaluation,assessment_centre_passed,assessment_centre_passed_notified," +
+    "assessment_centre_failed,assessment_centre_failed_notified"
 
   lazy val applicationDetailsHeader = {
     locationHeader.map { locHeader =>
@@ -57,7 +57,9 @@ abstract class PreviousYearCandidatesDetailsRepository(locationSchemeRepository:
         "A level,Stem level,Civil servant,Civil Service department," + schemesHeader + "," + locHeader + "," +
         "Has disability,Disability description,GIS,Needs support for online assessment," +
         "Support for online assessment description,Needs support at venue,Support at venue description," +
-        "Assessment centre area,Assessment centre,Assessment centre indicator version," + appStatuses
+        "Cubiks user id,Participant Schedule ID,Cubiks Invitation Datetime,Cubiks Expiration Datetime,Cubiks Started Datetime," +
+        "Cubiks Completed Datetime,Cubiks test url,Cubiks token,Cubiks XML Report Saved,Cubiks PDF Report Saved," +
+        "Assessment centre area,Assessment centre,Assessment centre indicator version," + appStatusesTimestamp + "," + appStatusesDate
     }
   }
 
@@ -78,7 +80,8 @@ abstract class PreviousYearCandidatesDetailsRepository(locationSchemeRepository:
   "Which size would best describe their place of work?," +
   "Did they supervise employees?"
 
-  val onlineTestReportHeader = "Competency status,Competency norm,Competency tscore,Competency percentile,Competency raw,Competency sten," +
+  val onlineTestReportHeader = "Invitation Datetime,Expiration Datetime,Started Datetime,Completed Datetime,Competency status," +
+    "Competency norm,Competency tscore,Competency percentile,Competency raw,Competency sten," +
     "Numerical status,Numerical norm,Numerical tscore,Numerical percentile,Numerical raw,Numerical sten," +
     "Verbal status,Verbal norm,Verbal tscore,Verbal percentile,Verbal raw,Verbal sten," +
     "Situational status,Situational norm,Situational tscore,Situational percentile,Situational raw,Situational sten"
@@ -146,7 +149,7 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
   val assessmentScoresCollection = mongo().collection[JSONCollection](CollectionNames.APPLICATION_ASSESSMENT_SCORES_2017)
 
   override def applicationDetailsStream(): Future[Enumerator[CandidateDetailsReportItem]] = {
-    val projection = Json.obj("_id" -> 0, "progress-status" -> 0, "progress-status-dates" -> 0)
+    val projection = Json.obj("_id" -> 0, "progress-status" -> 0)
 
       locationSize.flatMap { locSize =>
         locationSchemeRepo.getSchemesAndLocations.map { schemesAndLocations =>
@@ -160,7 +163,9 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
                   schemePreferences(doc).padTo(Scheme.AllSchemes.size, None) :::
                   locationPreferences(schemesAndLocations, doc).padTo(locSize, None) :::
                   assistanceDetails(doc) :::
-                  assessmentCentreIndicator(doc): _*
+                  onlineTestDetails(doc) :::
+                  assessmentCentreIndicator(doc) :::
+                  statusTimestamps(doc): _*
               )
             CandidateDetailsReportItem(
               doc.getAs[String]("applicationId").getOrElse(""),
@@ -223,8 +228,13 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
       if (isUnknown) {
         Some("Unknown")
       } else {
-        questionDoc.flatMap(q => q.getAs[String]("answer")
-          .orElse(q.getAs[String]("otherDetails")))
+        val answer = questionDoc.flatMap(q => q.getAs[String]("answer"))
+
+        if (answer.isEmpty || List("Other", "Other ethnic group").contains(answer.get)) {
+          questionDoc.flatMap(_.getAs[String]("otherDetails"))
+        } else {
+          answer
+        }
       }
     }
 
@@ -275,9 +285,9 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
         val csvRecords = docs.map { doc =>
             val csvRecord = makeRow(
               onlineTestScore("competency", doc) :::
-                onlineTestScore("numerical", doc) :::
-                onlineTestScore("verbal", doc) :::
-                onlineTestScore("situational", doc): _*
+              onlineTestScore("numerical", doc) :::
+              onlineTestScore("verbal", doc) :::
+              onlineTestScore("situational", doc): _*
             )
             doc.getAs[String]("applicationId").getOrElse("") -> csvRecord
         }
@@ -362,6 +372,21 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
     locationIds.map(locationId => Some(lookupTable(locationId).locationName))
   }
 
+  private def statusTimestamps(doc: BSONDocument): List[Option[String]] = {
+    val progressStatusTimestampsDoc = doc.getAs[BSONDocument]("progress-status-timestamp")
+    val progressStatusDatesDoc = doc.getAs[BSONDocument]("progress-status-dates")
+
+    val progressStatusTimestamps = appStatusesTimestamp.split(",").toList.map(statusKey => progressStatusTimestampsDoc.flatMap(
+      _.getAs[DateTime](statusKey).map(_.toString)
+    ))
+
+    val progressStatusDates = appStatusesDate.split(",").toList.map(statusKey => progressStatusDatesDoc.flatMap(
+      _.getAs[String](statusKey)
+    ))
+
+    progressStatusTimestamps ++ progressStatusDates
+  }
+
   private def assessmentCentreIndicator(doc: BSONDocument): List[Option[String]] = {
     val aciDoc = doc.getAs[AssessmentCentreIndicator]("assessment-centre-indicator")
 
@@ -386,6 +411,22 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
       assistanceDetails.flatMap(_.getAs[String]("needsSupportForOnlineAssessmentDescription")),
       assistanceDetails.flatMap(ad => mapYesNo(ad.getAs[Boolean]("needsSupportAtVenue"))),
       assistanceDetails.flatMap(_.getAs[String]("needsSupportAtVenueDescription"))
+    )
+  }
+
+  private def onlineTestDetails(doc: BSONDocument) = {
+    val onlineTestDetails = doc.getAs[BSONDocument]("online-tests")
+    List(
+      onlineTestDetails.flatMap(_.getAs[Int]("cubiksUserId").map(_.toString)),
+      onlineTestDetails.flatMap(_.getAs[Int]("participantScheduleId").map(_.toString)),
+      onlineTestDetails.flatMap(_.getAs[DateTime]("invitationDate").map(_.toString)),
+      onlineTestDetails.flatMap(_.getAs[DateTime]("expirationDate").map(_.toString)),
+      onlineTestDetails.flatMap(_.getAs[DateTime]("startedDateTime").map(_.toString)),
+      onlineTestDetails.flatMap(_.getAs[DateTime]("completedDateTime").map(_.toString)),
+      onlineTestDetails.flatMap(_.getAs[String]("onlineTestUrl")),
+      onlineTestDetails.flatMap(_.getAs[String]("token")),
+      onlineTestDetails.flatMap(ad => mapYesNo(ad.getAs[Boolean]("xmlReportSaved"))),
+      onlineTestDetails.flatMap(ad => mapYesNo(ad.getAs[Boolean]("pdfReportSaved")))
     )
   }
 
