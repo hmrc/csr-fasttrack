@@ -47,7 +47,7 @@ class DiagnosticReportingMongoRepository(implicit mongo: () => DB)
   ) // these reports should not export personally identifiable data
 
   private val largeFields = Json.obj(
-    "progress-status-timestamp" -> 0 // this is quite a bit of data, that is not really used for queries as progress-status is easier
+    "progress-status-timestamp" -> 1 // this is quite a bit of data, that is not really used for queries as progress-status is easier
   )
 
   override def findByApplicationId(applicationId: String): Future[JsObject] = {
