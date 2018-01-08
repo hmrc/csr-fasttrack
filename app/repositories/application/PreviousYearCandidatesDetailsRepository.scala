@@ -49,13 +49,15 @@ abstract class PreviousYearCandidatesDetailsRepository(locationSchemeRepository:
     }.mkString(",")
   }
 
+  lazy val appStatuses = "registered,personal_details_completed,scheme_locations_completed,schemes_preferences_completed,assistance_details_completed,start_questionnaire,diversity_questions_completed,education_questions_completed,occupation_questions_completed,review_completed,test_expiry_first_reminder,test_expiry_second_reminder,CREATED,WITHDRAWN,IN_PROGRESS,SUBMITTED,ONLINE_TEST_INVITED,ONLINE_TEST_STARTED,ONLINE_TEST_EXPIRED,ONLINE_TEST_COMPLETED,ONLINE_TEST_FAILED,ONLINE_TEST_FAILED_NOTIFIED,AWAITING_ONLINE_TEST_RE_EVALUATION,AWAITING_ALLOCATION,AWAITING_ALLOCATION_NOTIFIED,FAILED_TO_ATTEND,ALLOCATION_UNCONFIRMED,ALLOCATION_CONFIRMED,ASSESSMENT_SCORES_ENTERED,ASSESSMENT_SCORES_ACCEPTED,AWAITING_ASSESSMENT_CENTRE_RE_EVALUATION,ASSESSMENT_CENTRE_PASSED,ASSESSMENT_CENTRE_PASSED_NOTIFIED,ASSESSMENT_CENTRE_FAILED,ASSESSMENT_CENTRE_FAILED_NOTIFIED"
+
   lazy val applicationDetailsHeader = {
     locationHeader.map { locHeader =>
       "FrameworkId,Application status,First name,Last name,Preferred name,Date of birth," +
         "A level,Stem level,Civil servant,Civil Service department," + schemesHeader + "," + locHeader + "," +
         "Has disability,Disability description,GIS,Needs support for online assessment," +
         "Support for online assessment description,Needs support at venue,Support at venue description," +
-        "Assessment centre area,Assessment centre,Assessment centre indicator version"
+        "Assessment centre area,Assessment centre,Assessment centre indicator version," + appStatuses
     }
   }
 
