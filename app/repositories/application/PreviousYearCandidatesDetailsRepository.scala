@@ -80,7 +80,7 @@ abstract class PreviousYearCandidatesDetailsRepository(locationSchemeRepository:
   "Which size would best describe their place of work?," +
   "Did they supervise employees?"
 
-  val onlineTestReportHeader = "Invitation Datetime,Expiration Datetime,Started Datetime,Completed Datetime,Competency status," +
+  val onlineTestReportHeader = "Competency status," +
     "Competency norm,Competency tscore,Competency percentile,Competency raw,Competency sten," +
     "Numerical status,Numerical norm,Numerical tscore,Numerical percentile,Numerical raw,Numerical sten," +
     "Verbal status,Verbal norm,Verbal tscore,Verbal percentile,Verbal raw,Verbal sten," +
