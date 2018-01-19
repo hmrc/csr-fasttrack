@@ -54,7 +54,7 @@ trait AuthProviderClient {
 
   def getRole(roleName: String) = allRoles.find(_.name == roleName).getOrElse(throw new UserRoleDoesNotExist(s"No such role: $roleName"))
 
-  val ServiceName = "fasttrack17"
+  val ServiceName = "fasttrack18"
 
   import config.MicroserviceAppConfig.userManagementConfig._
 
