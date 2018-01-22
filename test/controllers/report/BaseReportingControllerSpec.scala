@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,11 +22,10 @@ import connectors.ExchangeObjects.Candidate
 import controllers.ReportingController
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
-import repositories.application.{ OnlineTestRepository, PreviousYearCandidatesDetailsRepository, ReportingRepository }
 import repositories._
+import repositories.application.{ OnlineTestRepository, PreviousYearCandidatesDetailsRepository, ReportingRepository }
 import services.locationschemes.LocationSchemeService
 import services.reporting.{ ReportingFormatter, SocioEconomicScoreCalculator }
-import testkit.MockitoImplicits.OngoingStubbingExtension
 import testkit.UnitWithAppSpec
 
 import scala.concurrent.Future

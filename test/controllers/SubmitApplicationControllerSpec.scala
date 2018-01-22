@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ class SubmitApplicationControllerSpec extends PlaySpec with Results with OneAppP
       needsSupportForOnlineAssessmentDescription = None, needsSupportAtVenue = false, needsSupportAtVenueDescription = None
     )))
 
-    when(mockCdRepo.find(any[String])).thenReturn(Future.successful(ContactDetails(false, address, Some("QQ1 1QQ"): Option[PostCode],
+    when(mockCdRepo.find(any[String])).thenReturn(Future.successful(ContactDetails(outsideUk = false, address, Some("QQ1 1QQ"): Option[PostCode],
       None, "test@test.com", phone = None)))
 
     when(mockAppRepo.getSchemes(any[String])).thenReturn(Future.successful(

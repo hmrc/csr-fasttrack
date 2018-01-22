@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ trait AdjustmentsManagementController extends BaseController {
       adjustmentsManagementService.confirmAdjustment(applicationId, data, actionTriggeredBy).map { _ =>
         Ok
       }.recover {
-        case e: NotFoundException => NotFound(s"cannot find application for application with id: $applicationId")
+        case _: NotFoundException => NotFound(s"cannot find application for application with id: $applicationId")
       }
     }
   }

@@ -31,7 +31,7 @@ class LocationSchemeRepositorySpec extends IntegrationSpec with MockitoSugar wit
 
       val schemeNames = schemes.map(_.name)
       locationSchemes.length mustBe 46
-      locationSchemes.map(_.schemes.forall(schemeNames.contains(_)))
+      locationSchemes.map(_.schemes.map(_.toString).forall(schemeNames.contains(_)))
     }
   }
 }

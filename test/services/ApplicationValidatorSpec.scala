@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ package services
 
 import model.persisted.PersonalDetails
 import model.exchange.AssistanceDetailsExamples
-import model.{ ApplicationValidator, LocationPreference }
+import model.ApplicationValidator
 import org.joda.time.LocalDate
 import org.scalatestplus.play.PlaySpec
 import repositories.FrameworkRepository.{ CandidateHighestQualification, Framework, Location, Region }

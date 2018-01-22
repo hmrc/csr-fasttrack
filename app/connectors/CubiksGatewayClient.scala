@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,54 +33,55 @@ import uk.gov.hmrc.http.HeaderCarrier
 trait CubiksGatewayClient {
   val http: WSHttp
   val url: String
+  val root = "fset-online-tests-gateway"
 
   def registerApplicant(registerApplicant: RegisterApplicant)(implicit hc: HeaderCarrier): Future[Registration] = {
-    http.POST(s"$url/csr-cubiks-gateway/register", registerApplicant).map { response =>
+    http.POST(s"$url/$root/register", registerApplicant).map { response =>
       if (response.status == OK) {
         response.json.as[Registration]
       } else {
-        throw new ConnectorException(s"There was a general problem connecting to Cubiks Gateway. HTTP response was $response")
+        throw new ConnectorException(s"There was a general problem connecting to the Online Tests Gateway. HTTP response was $response")
       }
     }
   }
 
   def inviteApplicant(inviteApplicant: InviteApplicant)(implicit hc: HeaderCarrier): Future[Invitation] = {
-    http.POST(s"$url/csr-cubiks-gateway/invite", inviteApplicant).map { response =>
+    http.POST(s"$url/$root/invite", inviteApplicant).map { response =>
       if (response.status == OK) {
         response.json.as[Invitation]
       } else {
-        throw new ConnectorException(s"There was a general problem connecting to Cubiks Gateway. HTTP response was $response")
+        throw new ConnectorException(s"There was a general problem connecting to the Online Tests Gateway. HTTP response was $response")
       }
     }
   }
 
   def getReport(application: OnlineTestApplicationForReportRetrieving)(implicit hc: HeaderCarrier): Future[OnlineTestReportAvailability] = {
-    http.POST(s"$url/csr-cubiks-gateway/report", application).map { response =>
+    http.POST(s"$url/$root/report", application).map { response =>
       if (response.status == OK) {
         response.json.as[OnlineTestReportAvailability]
       } else {
-        throw new ConnectorException(s"There was a general problem connecting to Cubiks Gateway. HTTP response was $response")
+        throw new ConnectorException(s"There was a general problem connecting to the Online Tests Gateway. HTTP response was $response")
       }
     }
   }
 
   def downloadXmlReport(reportId: Int)(implicit hc: HeaderCarrier): Future[Map[String, TestResult]] = {
-    http.GET(s"$url/csr-cubiks-gateway/report-xml/$reportId").map { response =>
+    http.GET(s"$url/$root/report-xml/$reportId").map { response =>
       if (response.status == OK) {
         response.json.as[Map[String, TestResult]]
       } else {
-        throw new ConnectorException(s"There was a general problem connecting to Cubiks Gateway. HTTP response was $response")
+        throw new ConnectorException(s"There was a general problem connecting to the Online Tests Gateway. HTTP response was $response")
       }
     }
   }
 
   def downloadPdfReport(reportId: Int)(implicit hc: HeaderCarrier): Future[Array[Byte]] = {
-    http.playWS.url(s"$url/csr-cubiks-gateway/report-pdf/$reportId").get(respHeaders =>
+    http.playWS.url(s"$url/$root/report-pdf/$reportId").get(respHeaders =>
       if (respHeaders.status == OK) {
         Iteratee.consume[Array[Byte]]()
       } else {
         throw new ConnectorException(
-          s"There was a general problem connecting to the Cubiks Gateway to download the PDF report '$reportId'. " +
+          s"There was a general problem connecting to the Online Tests Gateway to download the PDF report '$reportId'. " +
             s"HTTP response headers were $respHeaders"
         )
       }).flatMap { iteratee => iteratee.run }

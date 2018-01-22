@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,7 +17,8 @@
 package model.exchange
 
 object AssistanceDetailsExamples {
-  val OnlyDisabilityNoGisNoAdjustments = AssistanceDetails("Yes", Some(""), Some(false), false, None, false, None)
-  val DisabilityGisAndAdjustments = AssistanceDetails("Yes", Some("disability description"), Some(true), true,
-    Some("online adjustment description"), true, Some("venue adjustment description"))
+  val OnlyDisabilityNoGisNoAdjustments = AssistanceDetails("Yes", Some(""), Some(false), needsSupportForOnlineAssessment = false,
+    None, needsSupportAtVenue = false, None)
+  val DisabilityGisAndAdjustments = AssistanceDetails("Yes", Some("disability description"), Some(true), needsSupportForOnlineAssessment = true,
+    Some("online adjustment description"), needsSupportAtVenue = true, Some("venue adjustment description"))
 }

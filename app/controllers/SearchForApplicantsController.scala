@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,15 +57,15 @@ trait SearchForApplicantsController extends BaseController {
           Ok(Json.toJson(Candidate(userId, Some(application.applicationId), None, Some(pd.firstName),
             Some(pd.lastName), Some(pd.preferredName), Some(pd.dateOfBirth), Some(cd.address), cd.postCode)))
         }.recover {
-          case e: ContactDetailsNotFound => Ok(Json.toJson(Candidate(userId, Some(application.applicationId), None, Some(pd.firstName),
+          case _: ContactDetailsNotFound => Ok(Json.toJson(Candidate(userId, Some(application.applicationId), None, Some(pd.firstName),
             Some(pd.lastName), Some(pd.preferredName), Some(pd.dateOfBirth), None, None)))
         }
       }.recover {
-        case e: PersonalDetailsNotFound =>
+        case _: PersonalDetailsNotFound =>
           Ok(Json.toJson(Candidate(userId, Some(application.applicationId), None, None, None, None, None, None, None)))
       }
     }.recover {
-      case e: ApplicationNotFound => Ok(Json.toJson(Candidate(userId, None, None, None, None, None, None, None, None)))
+      case _: ApplicationNotFound => Ok(Json.toJson(Candidate(userId, None, None, None, None, None, None, None, None)))
     }
   }
 

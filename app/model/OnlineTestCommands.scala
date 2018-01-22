@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,13 +40,11 @@ object OnlineTestCommands {
                                       applicationStatus: ApplicationStatuses.EnumVal
   )
 
-  case class TimeAdjustmentsOnlineTestApplication(verbalTimeAdjustmentPercentage: Int, numericalTimeAdjustmentPercentage: Int)
   case class TestResult(status: String, norm: String,
     tScore: Option[Double], percentile: Option[Double], raw: Option[Double], sten: Option[Double])
 
   object Implicits {
 
-    implicit val TimeAdjustmentsOnlineTestApplicationFormats = Json.format[TimeAdjustmentsOnlineTestApplication]
     implicit val ApplicationForOnlineTestingFormats = Json.format[OnlineTestApplication]
     implicit val OnlineTestReportNormFormats = Json.format[ReportNorm]
     implicit val OnlineTestApplicationForReportRetrievingFormats = Json.format[OnlineTestApplicationForReportRetrieving]

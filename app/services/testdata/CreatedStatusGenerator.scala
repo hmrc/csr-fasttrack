@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ trait CreatedStatusGenerator extends ConstructiveGenerator {
     for {
       user <- AuthProviderClient.addUser(email, "Service01", firstName, lastName, role)
       token <- AuthProviderClient.getToken(email)
-      activateUser <- AuthProviderClient.activate(email, token)
+      _ <- AuthProviderClient.activate(email, token)
     } yield {
       user.userId.toString
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ object OnlineTestRetrievePDFReportService extends OnlineTestRetrievePDFReportSer
 }
 
 trait OnlineTestRetrievePDFReportService {
-  implicit def headerCarrier = new HeaderCarrier()
+  implicit def headerCarrier: HeaderCarrier = HeaderCarrier()
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val auditService: AuditService

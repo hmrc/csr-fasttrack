@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -785,26 +785,8 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     }.toMap)
   }
 
-  private def resultToBSON(schemeName: String, result: Option[EvaluationResults.Result]): BSONDocument = result match {
-    case Some(r) => BSONDocument(schemeName -> r.toString)
-    case _ => BSONDocument.empty
-  }
-
   private def booleanToBSON(schemeName: String, result: Option[Boolean]): BSONDocument = result match {
     case Some(r) => BSONDocument(schemeName -> r)
-    case _ => BSONDocument.empty
-  }
-
-  private def averageToBSON(name: String, result: Option[CompetencyAverageResult]): BSONDocument = result match {
-    case Some(r) => BSONDocument(name -> r)
-    case _ => BSONDocument.empty
-  }
-
-  private def perSchemeToBSON(name: String, result: Option[List[SchemeEvaluationResult]]): BSONDocument = result match {
-    case Some(m) =>
-      val schemes = m.map(x => BSONDocument(x.scheme.toString -> x.result.toString))
-      val schemesDoc = schemes.foldRight(BSONDocument.empty)((acc, doc) => acc.add(doc))
-      BSONDocument(name -> schemesDoc)
     case _ => BSONDocument.empty
   }
 

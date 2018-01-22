@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -61,15 +61,14 @@ trait AdjustmentsManagementService {
         case (_, false) => auditService.logEvent(s"Candidate ${candidate.userId} AdjustmentsConfirmed by $actionTriggeredBy")
       }
 
-      hasPreviousAdjustments match {
-        case true =>
-          emailClient.sendAdjustmentsUpdateConfirmation(
-            contactDetails.email,
-            candidate.preferredName.getOrElse(candidate.firstName.getOrElse("")),
-            onlineTestsAdjustmentsString("Online tests:", adjustments.onlineTests),
-            assessmentCenterAdjustmentsString("Assessment center:", adjustments)
-          )
-        case false =>
+      if (hasPreviousAdjustments) {
+        emailClient.sendAdjustmentsUpdateConfirmation(
+          contactDetails.email,
+          candidate.preferredName.getOrElse(candidate.firstName.getOrElse("")),
+          onlineTestsAdjustmentsString("Online tests:", adjustments.onlineTests),
+          assessmentCenterAdjustmentsString("Assessment center:", adjustments)
+        )
+      } else {
           emailClient.sendAdjustmentsConfirmation(
             contactDetails.email,
             candidate.preferredName.getOrElse(candidate.firstName.getOrElse("")),

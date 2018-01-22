@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ trait SingleInstanceScheduledJob extends ExclusiveScheduledJob {
   def executeInMutex(implicit ec: ExecutionContext): Future[this.Result] = lockKeeper.tryLock {
     tryExecute
   }.map {
-    case Some(x) => Result("Done")
+    case Some(_) => Result("Done")
     case None => Result("Nothing")
   }
 

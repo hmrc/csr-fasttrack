@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ object DataFaker {
     def randOne[T](options: List[T], cannotBe: List[T] = Nil) = {
       val filtered = options.filterNot(cannotBe.contains)
       if (filtered.isEmpty) {
-        throw new DataFakingException(s"There were no items left after filtering.")
+        throw DataFakingException(s"There were no items left after filtering.")
       } else {
         util.Random.shuffle(filtered).head
       }

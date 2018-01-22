@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ trait ApplicationService {
   private val UserNotFoundError = Future.failed(new RuntimeException("User not found for the given userId"))
 
   def withdraw(applicationId: String, withdrawRequest: WithdrawApplicationRequest): Future[Unit] = {
-    appRepository.withdraw(applicationId, withdrawRequest).flatMap { result =>
+    appRepository.withdraw(applicationId, withdrawRequest).flatMap { _ =>
       auditService.logEventNoRequest(
         "ApplicationWithdrawn",
         Map("applicationId" -> applicationId, "withdrawRequest" -> withdrawRequest.toString)

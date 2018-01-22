@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ object OnlineTestService extends OnlineTestService {
 }
 
 trait OnlineTestService {
-  implicit def headerCarrier = new HeaderCarrier()
+  implicit def headerCarrier: HeaderCarrier = HeaderCarrier()
   implicit val ec: ExecutionContext = scala.concurrent.ExecutionContext.Implicits.global
 
   val appRepository: GeneralApplicationRepository
@@ -299,7 +299,7 @@ trait OnlineTestService {
     val VerbalTestName = "Logiks Verbal and Numerical (Intermediate) - Verbal"
     val NumericalTestName = "Logiks Verbal and Numerical (Intermediate) - Numerical"
     val CompetencyTestName = "Cubiks Factors"
-    val SituationalTestName = "Civil Service Fast Track Apprentice SJQ"
+    val SituationalTestName = "Civil Service Fast Track Apprentice SJQ – 2017"
 
     val candidateOnlineTestReport = CandidateTestReport(
       appId, "XML",
@@ -309,11 +309,11 @@ trait OnlineTestService {
       tests.get(SituationalTestName)
     )
 
-    isGis && tests.size > 2 match {
-      case true => Logger.warn(s"Remove unwanted test results for gis application $appId")
-        candidateOnlineTestReport.copy(numerical = None, verbal = None)
-      case false =>
-        candidateOnlineTestReport
+    if (isGis && tests.size > 2) {
+      Logger.warn(s"Remove unwanted test results for gis application $appId")
+      candidateOnlineTestReport.copy(numerical = None, verbal = None)
+    } else {
+      candidateOnlineTestReport
     }
   }
 }

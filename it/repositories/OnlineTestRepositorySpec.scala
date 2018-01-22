@@ -133,7 +133,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
     "return no record for a test about to expire in more than 3 days" in {
       val expiryDate = DateTime.now().plusHours((24 * 3) + 1)
-      val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestInvited, expirationDate = expiryDate)
+      createOnlineTest(ApplicationStatuses.OnlineTestInvited, expirationDate = expiryDate)
       val result = onlineTestRepo.nextTestForReminder(FirstReminder).futureValue
 
       result mustBe None
@@ -141,7 +141,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
     "return no record for a test about to expire in less than 3 days but completed" in {
       val expiryDate = DateTime.now().plusHours((24 * 3) - 1)
-      val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestCompleted, expirationDate = expiryDate)
+      createOnlineTest(ApplicationStatuses.OnlineTestCompleted, expirationDate = expiryDate)
       val result = onlineTestRepo.nextTestForReminder(FirstReminder).futureValue
 
       result mustBe None
@@ -149,7 +149,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
     "return no record for a test about to expire in less than 3 days but failed" in {
       val expiryDate = DateTime.now().plusHours((24 * 3) - 1)
-      val appIdWithUserId = createOnlineTest(ApplicationStatuses.OnlineTestFailed, expirationDate = expiryDate)
+      createOnlineTest(ApplicationStatuses.OnlineTestFailed, expirationDate = expiryDate)
       val result = onlineTestRepo.nextTestForReminder(FirstReminder).futureValue
 
       result mustBe None
@@ -487,7 +487,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
         cubiksUserId = Some(123)
       )
 
-      onlineTestRepo.completeOnlineTest(123, 131, isGis = false).futureValue
+      onlineTestRepo.completeOnlineTest(123, 174, isGis = false).futureValue
 
       val testAfterFirstCallback = onlineTestRepo.getCubiksTestProfile(123).futureValue
       val applicationAfterFirstCallback = helperRepo.findByUserId(appIdWithUserId.userId, "frameworkId").futureValue
@@ -513,7 +513,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
         cubiksUserId = Some(123)
       )
 
-      onlineTestRepo.completeOnlineTest(123, 131, isGis = true).futureValue
+      onlineTestRepo.completeOnlineTest(123, 174, isGis = true).futureValue
 
       val testAfterFirstCallback = onlineTestRepo.getCubiksTestProfile(123).futureValue
       val applicationAfterFirstCallback = helperRepo.findByUserId(appIdWithUserId.userId, "frameworkId").futureValue
@@ -533,7 +533,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
 
     "Not update the test if it is not in progress" in {
       val date = DateTime.now(DateTimeZone.UTC)
-      val appIdWithUserId = createOnlineTest("userId", ApplicationStatuses.Withdrawn, "token", Some("http://www.someurl.com"),
+      createOnlineTest("userId", ApplicationStatuses.Withdrawn, "token", Some("http://www.someurl.com"),
         invitationDate = Some(date), expirationDate = Some(date.plusDays(7)), xmlReportSaved = Some(true), pdfReportSaved = Some(true),
         cubiksUserId = Some(123)
       )

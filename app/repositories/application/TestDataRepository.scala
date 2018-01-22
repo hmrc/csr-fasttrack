@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,7 +60,7 @@ class TestDataContactDetailsMongoRepository(implicit mongo: () => DB)
   private def createSingleContactDetail(id: Int): Future[Unit] = {
 
     val contactDetails = ContactDetails(
-      false, Address("1st High Street"), Some(chooseOne(postcodes)), None, s"test_$id@test.com", Some("123456789")
+      outsideUk = false, Address("1st High Street"), Some(chooseOne(postcodes)), None, s"test_$id@test.com", Some("123456789")
     )
     val contactDetailsBson = BSONDocument("$set" -> BSONDocument(
       "contact-details" -> contactDetails

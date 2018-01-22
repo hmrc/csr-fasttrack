@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,8 +36,8 @@ import uk.gov.hmrc.http.HeaderCarrier
 class CandidateAllocationServiceSpec extends PlaySpec with ScalaFutures with MockitoSugar {
 
   val candidate = AllocatedCandidate(PersonalDetailsWithUserId("Alice", "userId"), "app1", LocalDate.now().plusDays(3))
-  val applicationAssessment = AssessmentCentreAllocation("app1", "London 1", LocalDate.now().plusDays(3), "AM", 1, false)
-  val candidateContact = ContactDetails(false, Address("Aldwych road"), Some("AB CDE"), None, "alice@test.com", None)
+  val applicationAssessment = AssessmentCentreAllocation("app1", "London 1", LocalDate.now().plusDays(3), "AM", 1, confirmed = false)
+  val candidateContact = ContactDetails(outsideUk = false, Address("Aldwych road"), Some("AB CDE"), None, "alice@test.com", None)
 
   val caRepositoryMock = mock[CandidateAllocationRepository]
   val cdRepositoryMock = mock[ContactDetailsRepository]

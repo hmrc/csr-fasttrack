@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -60,8 +60,8 @@ package object repositories {
   lazy val reportingRepository = new ReportingMongoRepository(timeZoneService)
   lazy val flagCandidateRepository = new FlagCandidateMongoRepository
   lazy val schoolsRepository = SchoolsCSVRepository
-  lazy val prevYearCandidatesDetailsRepository = new PreviousYearCandidatesDetailsMongoRepository()
   lazy val fileLocationSchemeRepository = FileLocationSchemeRepository
+  lazy val prevYearCandidatesDetailsRepository = new PreviousYearCandidatesDetailsMongoRepository(fileLocationSchemeRepository)
 
   def initIndexes = {
     Future.sequence(List(

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -527,11 +527,6 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     }
 
     collection.update(query, updateQuery, upsert = false).map(checkUpdateWriteResult)
-  }
-
-  private def schemeToBSON(scheme: (String, Option[Result])) = scheme._2 match {
-    case Some(s) => BSONDocument(scheme._1 -> s.toString)
-    case _ => BSONDocument.empty
   }
 
   def saveCandidateAllocationStatus(applicationId: String, applicationStatus: ApplicationStatuses.EnumVal,

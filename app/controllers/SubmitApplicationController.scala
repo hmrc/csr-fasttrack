@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -53,8 +53,8 @@ trait SubmitApplicationController extends BaseController {
       personalDetails <- pdRepository.find(applicationId)
       assistanceDetails <- adService.find(applicationId, userId)
       contactDetails <- cdRepository.find(userId)
-      schemePreferences <- appRepository.getSchemes(applicationId)
-      schemeLocationPreferences <- appRepository.getSchemeLocations(applicationId)
+      _ <- appRepository.getSchemes(applicationId)
+      _ <- appRepository.getSchemeLocations(applicationId)
     } yield {
 
       if (ApplicationValidator(personalDetails, assistanceDetails).validate) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,14 +64,14 @@ class PersonalDetailsControllerSpec extends UnitWithAppSpec {
                        |}
         """.stripMargin
 
-      when(mockPersonalDetailsService.update(any[String], any[String], any[PersonalDetails], any[ContactDetails])(any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
+      when(mockPersonalDetailsService.update(any[String], any[String], any[PersonalDetails], any[ContactDetails])(
+        any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.successful(()))
 
       val result = TestPersonalDetailsController.personalDetails(userId, applicationId)(
         updatePersonalDetailsRequest(userId, applicationId)(request)
       )
 
       status(result) mustBe CREATED
-
     }
 
     "return a system error on invalid json" in new TestFixture {
@@ -91,7 +91,8 @@ class PersonalDetailsControllerSpec extends UnitWithAppSpec {
         )
       )
 
-      when(mockPersonalDetailsService.update(any[String], any[String], any[PersonalDetails], any[ContactDetails])(any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(CannotUpdateContactDetails("appId")))
+      when(mockPersonalDetailsService.update(any[String], any[String], any[PersonalDetails], any[ContactDetails])(
+        any[HeaderCarrier], any[RequestHeader])).thenReturn(Future.failed(CannotUpdateContactDetails("appId")))
 
       status(result) mustBe BAD_REQUEST
     }

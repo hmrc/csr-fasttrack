@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -135,14 +135,14 @@ class CubiksGatewayClientSpec extends PlaySpec with MockitoSugar with ScalaFutur
     def setupPDFWSMock() = {
       when(mockWSHttp.playWS).thenReturn(
         MockWS {
-          case (GET, "http://localhost/csr-cubiks-gateway/report-pdf/44444") => Action {
+          case (GET, "http://localhost/fset-online-tests-gateway/report-pdf/44444") => Action {
             BadGateway("The gateway is very naughty.")
           }
-          case (GET, "http://localhost/csr-cubiks-gateway/report-pdf/55555") => Action {
+          case (GET, "http://localhost/fset-online-tests-gateway/report-pdf/55555") => Action {
             throw new Exception()
             Ok("This will never be reached")
           }
-          case (GET, "http://localhost/csr-cubiks-gateway/report-pdf/66666") => Action {
+          case (GET, "http://localhost/fset-online-tests-gateway/report-pdf/66666") => Action {
             Ok(samplePDFValue)
           }
         }

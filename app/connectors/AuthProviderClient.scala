@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -54,7 +54,7 @@ trait AuthProviderClient {
 
   def getRole(roleName: String) = allRoles.find(_.name == roleName).getOrElse(throw new UserRoleDoesNotExist(s"No such role: $roleName"))
 
-  val ServiceName = "fasttrack17"
+  val ServiceName = "fasttrack18test"
 
   import config.MicroserviceAppConfig.userManagementConfig._
 
@@ -72,7 +72,7 @@ trait AuthProviderClient {
     WSHttp.POST(s"$url/add", AddUserRequest(email.toLowerCase, password, firstName, lastName, role.name, ServiceName)).map { response =>
       response.json.as[UserResponse]
     }.recover {
-      case Upstream4xxResponse(_, 409, _, _) => throw new EmailTakenException()
+      case Upstream4xxResponse(_, 409, _, _) => throw EmailTakenException()
     }
 
   def removeAllUsers()(implicit hc: HeaderCarrier): Future[Unit] =
@@ -97,7 +97,7 @@ trait AuthProviderClient {
     WSHttp.POST(s"$url/activate", ActivateEmailRequest(ServiceName, email.toLowerCase, token)).map(_ => (): Unit)
       .recover {
         case Upstream4xxResponse(_, 410, _, _) => throw new TokenExpiredException()
-        case e: NotFoundException => throw new TokenEmailPairInvalidException()
+        case _: NotFoundException => throw new TokenEmailPairInvalidException()
       }
 
   def findByFirstName(name: String, roles: List[String])(implicit hc: HeaderCarrier): Future[List[Candidate]] = {

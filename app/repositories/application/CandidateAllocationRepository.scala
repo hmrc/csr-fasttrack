@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -59,9 +59,7 @@ class CandidateAllocationMongoRepository(dateTime: DateTimeFactory)(implicit mon
       "allocation-reminder-sent-date" -> date
     ))
 
-    collection.update(query, result, upsert = false) map {
-      case _ => ()
-    }
+    collection.update(query, result, upsert = false).map(_ => ())
   }
 
   private def bsonToAllocatedCandidate(doc: BSONDocument) = {

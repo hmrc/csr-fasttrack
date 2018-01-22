@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ class MediaMongoRepository(implicit mongo: () => DB)
 
   override def create(addMedia: AddMedia): Future[Unit] = insert(addMedia).map { _ => ()
   } recover {
-    case e: WriteResult => throw new CannotAddMedia(addMedia.userId)
+    case _: WriteResult => throw CannotAddMedia(addMedia.userId)
   }
 
   def findAll: Future[Map[UniqueIdentifier, String]] = {

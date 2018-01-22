@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ import model.Commands.Implicits._
 import model.ReportExchangeObjects.{ CandidateProgressReportItem, _ }
 import model.ReportExchangeObjects.Implicits._
 import model.{ AssessmentCentreIndicator, UniqueIdentifier }
-import model.exchange.{ ApplicationForCandidateProgressReportItemExamples, CandidateExamples, CandidateProgressReportItemExamples, LocationSchemesExamples }
+import model.exchange._
 import model.persisted.ContactDetailsWithIdExamples
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
