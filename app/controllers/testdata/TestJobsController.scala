@@ -18,7 +18,7 @@ package controllers.testdata
 
 import play.api.mvc.Action
 import scheduler.assessment.EvaluateAssessmentScoreJob
-import scheduler.onlinetesting.{ EvaluateCandidateScoreJob, SendOnlineTestResultJob }
+import scheduler.onlinetesting.{ EvaluateCandidateScoreJob, SendInvitationJob, SendOnlineTestResultJob }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -26,6 +26,12 @@ import scala.concurrent.ExecutionContext.Implicits.global
 object TestJobsController extends TestJobsController
 
 class TestJobsController extends BaseController {
+
+  def inviteCandidate = Action.async { implicit request =>
+    SendInvitationJob.tryExecute().map { _ =>
+      Ok("Invite candidate score job started")
+    }
+  }
 
   def evaluateCandidate = Action.async { implicit request =>
     EvaluateCandidateScoreJob.tryExecute().map { _ =>
