@@ -25,11 +25,11 @@ object ApplicationForCandidateProgressReportItemExamples {
     None, None, None, None, None, Some(false), None)
   val SchemePreferencesCompleted = ApplicationForCandidateProgressReport(Some(ApplicationIdExamples.appId2), UserIdExamples.userId2,
     Some(ProgressStatuses.SchemesPreferencesCompleted), List(Scheme.Finance, Scheme.DigitalAndTechnology),
-    List(LocationSchemesExamples.London.id, LocationSchemesExamples.Manchester.id),
+    List(LocationSchemesExamples.London.id),
     None, None, None, None, None, None, None)
   val AssistanceDetailsCompleted = ApplicationForCandidateProgressReport(Some(ApplicationIdExamples.appId3), UserIdExamples.userId3,
     Some(ProgressStatuses.AssistanceDetailsCompleted), List(Scheme.Commercial, Scheme.DigitalAndTechnology),
-    List(LocationSchemesExamples.Manchester.id, LocationSchemesExamples.Bristol.id),
+    List(LocationSchemesExamples.Bristol.id),
     Some("Yes"), Some(false), Some(true), Some(true), None, Some(false), None)
   val OccupationQuestionsCompleted = ApplicationForCandidateProgressReport(Some(ApplicationIdExamples.appId4), UserIdExamples.userId4,
     Some(ProgressStatuses.OccupationQuestionsCompleted), List(Scheme.Business, Scheme.Finance),
@@ -57,7 +57,7 @@ object ApplicationForCandidateProgressReportItemExamples {
     userId = UniqueIdentifier("e0b28a6e-9092-4aa2-a19e-c6a8cb13d349"),
     progress = Some(ProgressStatuses.AssessmentScoresAcceptedProgress),
     schemes = List(Scheme.Business,Scheme.ProjectDelivery),
-    locationIds = List(LocationSchemesExamples.London.id, LocationSchemesExamples.Manchester.id),
+    locationIds = List(LocationSchemesExamples.London.id),
     hasDisability = Some("Yes"),
     gis = Some(false),
     onlineAdjustments = Some(true),

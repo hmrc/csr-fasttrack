@@ -22,14 +22,12 @@ import repositories.{ Geocode, LocationSchemes }
 object LocationSchemesExamples {
 
   val schemesLondon = List(Business, Commercial, ProjectDelivery)
-  val schemesManchester = List(Business, DigitalAndTechnology, ProjectDelivery)
   val schemesBristol = List(Commercial, Finance)
   val schemesEdinburgh = List(Finance, Commercial)
 
   val London = LocationSchemes("2643743", "London", List(Geocode(2.0, 5.0)), schemesLondon)
-  val Manchester = LocationSchemes("2643744", "Manchester", List(Geocode(6.0, 2.0)), schemesManchester)
   val Bristol = LocationSchemes("2643745", "Bristol", List(Geocode(2.5, 2.6)), schemesBristol)
   val Edinburgh = LocationSchemes("2643746", "Edinburgh", List(Geocode(1.0, 1.0), Geocode(10.0, 2.0), Geocode(12.0, 5.0)),
     schemesEdinburgh)
-  val LocationsSchemesList = List(London, Manchester, Bristol, Edinburgh)
+  val LocationsSchemesList = List(London, Bristol, Edinburgh)
 }

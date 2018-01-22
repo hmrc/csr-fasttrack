@@ -57,8 +57,7 @@ class LocationSchemeServiceSpec extends UnitSpec {
       val result = service.getEligibleSchemeLocations(appId, latitudeOpt = Some(1.1), longitudeOpt = Some(2.2)).futureValue
       result.map(_.locationName) mustBe List(LocationSchemesExamples.Edinburgh.locationName,
         LocationSchemesExamples.Bristol.locationName,
-        LocationSchemesExamples.London.locationName,
-        LocationSchemesExamples.Manchester.locationName)
+        LocationSchemesExamples.London.locationName)
     }
   }
 
@@ -73,10 +72,7 @@ class LocationSchemeServiceSpec extends UnitSpec {
 
     when(locationSchemeRepoMock.getSchemesAndLocations)
       .thenReturn(Future.successful(
-        List(
-          LocationSchemesExamples.London, LocationSchemesExamples.Manchester,
-          LocationSchemesExamples.Bristol, LocationSchemesExamples.Edinburgh
-        )
+        List(LocationSchemesExamples.London,LocationSchemesExamples.Bristol, LocationSchemesExamples.Edinburgh)
       ))
 
     when(locationSchemeRepoMock.schemeInfoList).thenReturn(

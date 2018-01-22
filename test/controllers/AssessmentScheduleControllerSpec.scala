@@ -141,7 +141,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         Future.successful(ApplicationForAssessmentAllocationResult(Nil, 0))
       )
 
-      val response = assessmentScheduleControllerWithSampleSchedule.getApplicationForAssessmentAllocation("Manchester", 0, 5)(FakeRequest())
+      val response = assessmentScheduleControllerWithSampleSchedule.getApplicationForAssessmentAllocation("London", 0, 5)(FakeRequest())
       status(response) must be(200)
 
       val result = contentAsJson(response).as[ApplicationForAssessmentAllocationResult]
@@ -725,7 +725,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
 
     def assessmentCentreRepoWithSomeLocationsAndAssessmentCentres = {
       when(mockAssessmentCentreRepository.locationsAndAssessmentCentreMapping).thenReturn(Future.successful(
-        Map[String, String]("Reading" -> "London", "Manchester" -> "Manchester / Salford")
+        Map[String, String]("Reading" -> "London")
       ))
     }
 
@@ -909,7 +909,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
       )))
 
       when(mockAssessmentCentreRepository.locationsAndAssessmentCentreMapping).thenReturn(Future.successful(
-        Map[String, String]("Reading" -> "London", "Manchester" -> "Manchester / Salford")
+        Map[String, String]("Reading" -> "London")
       ))
     }
 

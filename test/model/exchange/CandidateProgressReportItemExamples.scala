@@ -29,13 +29,13 @@ object CandidateProgressReportItemExamples {
   val SchemePreferencesCompleted = CandidateProgressReportItem(
     Some(ApplicationIdExamples.appId2),
     Some(ProgressStatuses.SchemesPreferencesCompleted), List(Scheme.Finance, Scheme.DigitalAndTechnology),
-    List(LocationSchemesExamples.London.locationName, LocationSchemesExamples.Manchester.locationName),
+    List(LocationSchemesExamples.London.locationName),
     None, None, None, None, None, None
   )
   val AssistanceDetailsCompleted = CandidateProgressReportItem(
     Some(ApplicationIdExamples.appId3),
     Some(ProgressStatuses.AssistanceDetailsCompleted), List(Scheme.Commercial, Scheme.DigitalAndTechnology),
-    List(LocationSchemesExamples.Manchester.locationName, LocationSchemesExamples.Bristol.locationName),
+    List(LocationSchemesExamples.Bristol.locationName),
     Some("Yes"), Some(false), Some("Yes"), Some("Yes"), Some(false), None
   )
   val OccupationQuestionsCompleted = CandidateProgressReportItem(

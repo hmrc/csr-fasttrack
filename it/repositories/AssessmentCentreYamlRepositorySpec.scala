@@ -69,7 +69,7 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
       val capacityDate = venue.capacityDates.head
       capacityDate.amCapacity mustBe 36
       capacityDate.pmCapacity mustBe 36
-      capacityDate.date.toString(DateFormat) mustBe "22/4/18"
+      capacityDate.date.toString(DateFormat) mustBe "22/4/19"
     }
 
     "reject invalid configuration" in {
@@ -121,7 +121,7 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
       val venue = assessmentCapacity.venues.find(_.venueDescription == "FSAC").get
       venue.venueName mustBe "London (FSAC)"
       venue.venueDescription mustBe "FSAC"
-      val capacityDate = venue.capacityDates.find(_.date == new LocalDate("2017-04-22")).get
+      val capacityDate = venue.capacityDates.find(_.date == new LocalDate("2018-04-22")).get
       capacityDate.amCapacity mustBe 36
       capacityDate.pmCapacity mustBe 36
     }

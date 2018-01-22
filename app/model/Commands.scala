@@ -145,7 +145,7 @@ object Commands {
     val assessmentDateTime = {
       // TODO This should be configurable in the future, but hardcoding it in the fasttrack service is the lesser of the evils at the moment
       // FSET-471 was an emergency last minute fix
-      if (venue == "Manchester" || venue == "London (Berkeley House)") {
+      if (venue == "London (Berkeley House)") {
         if (session == "AM") {
           date.toLocalDateTime(new LocalTime(9, 0)).toDateTime
         } else {
