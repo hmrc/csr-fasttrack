@@ -422,7 +422,7 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
       "Logiks Verbal and Numerical (Intermediate) - Verbal" -> verbal,
       "Logiks Verbal and Numerical (Intermediate) - Numerical" -> numerical,
       "Cubiks Factors" -> competency,
-      "Civil Service Fast Track Apprentice SJQ" -> situational
+      "Civil Service Fast Track Apprentice SJQ – 2017" -> situational
     )
     val assistanceDetails = AssistanceDetailsExamples.OnlyDisabilityNoGisNoAdjustments
 
