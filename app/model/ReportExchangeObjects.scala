@@ -201,7 +201,8 @@ object ReportExchangeObjects {
     digitalAndTechnology: Option[String],
     business: Option[String],
     projectDelivery: Option[String],
-    finance: Option[String]
+    finance: Option[String],
+    policy: Option[String]
   )
 
   case class ApplicationPreferencesWithTestResults(
