@@ -22,9 +22,9 @@ import reactivemongo.bson.{ BSON, BSONHandler, BSONString }
 object Scheme extends Enumeration {
   type Scheme = Value
 
-  val Business, Commercial, DigitalAndTechnology, Finance, ProjectDelivery, NewScheme = Value
+  val Business, Commercial, DigitalAndTechnology, Finance, Policy, ProjectDelivery = Value
 
-  val AllSchemes = List(Business, Commercial, DigitalAndTechnology, Finance, ProjectDelivery, NewScheme)
+  val AllSchemes = List(Business, Commercial, DigitalAndTechnology, Finance, Policy, ProjectDelivery)
   require(AllSchemes.toSet == values, "AllSchemes must contain all possible schemes")
 
   implicit val schemeFormat = new Format[Scheme] {
