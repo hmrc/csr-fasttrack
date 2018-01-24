@@ -70,7 +70,7 @@ class OnlineTestServiceIntegrationSpec extends MongoRepositorySpec with MockitoS
         val VerbalTestName = "Logiks Verbal and Numerical (Intermediate) - Verbal"
         val NumericalTestName = "Logiks Verbal and Numerical (Intermediate) - Numerical"
         val CompetencyTestName = "Cubiks Factors"
-        val SituationalTestName = "Civil Service Fast Track Apprentice SJQ"
+        val SituationalTestName = "Civil Service Fast Track Apprentice SJQ – 2017"
 
         Map(
           CompetencyTestName -> TestResult("Completed", "competency norm", Some(20.1d), Some(20.2d), Some(20.3d), Some(20.4d)),
