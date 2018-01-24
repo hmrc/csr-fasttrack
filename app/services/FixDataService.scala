@@ -103,4 +103,12 @@ trait FixDataService {
       }
     }
   }
+
+  def listCollections: Future[String] = {
+    appRepo.listCollections.map(_.mkString("\n"))
+  }
+
+  def removeCollection(name: String) = {
+    appRepo.removeCollection(name)
+  }
 }

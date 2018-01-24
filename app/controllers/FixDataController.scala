@@ -54,4 +54,12 @@ abstract class FixDataController(fixDataService: FixDataService) extends BaseCon
     fixDataService.forcePassmarkReevaluationForOnlineTestComplete(applicationId).map(_ => Ok)
   }
 
+  def listCollections: Action[AnyContent] = Action.async { implicit request =>
+    fixDataService.listCollections.map(Ok(_))
+  }
+
+  def removeCollection(name: String): Action[AnyContent] = Action.async { implicit request =>
+    fixDataService.removeCollection(name).map(_ => Ok)
+  }
+
 }
