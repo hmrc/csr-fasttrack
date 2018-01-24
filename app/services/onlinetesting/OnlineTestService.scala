@@ -247,7 +247,7 @@ trait OnlineTestService {
     )
   }
 
-  private def calculateExpireDate(invitationDate: DateTime) = invitationDate.plusDays(7)
+  private def calculateExpireDate(invitationDate: DateTime) = invitationDate.plusDays(5)
 
   private[services] def getScheduleIdForApplication(application: OnlineTestApplication) = {
     if (application.guaranteedInterview) {
