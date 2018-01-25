@@ -18,14 +18,12 @@ package repositories.application
 
 import model.ApplicationStatusOrder.getStatus
 import model.Commands._
-import model.EvaluationResults.Result
 import model.ReportExchangeObjects._
 import model.Scheme.Scheme
 import model.exchange.AssistanceDetails
 import model._
 import model.persisted.SchemeEvaluationResult
 import org.joda.time.LocalDate
-import play.api.libs.json.{ Format, JsString, JsSuccess, JsValue }
 import reactivemongo.bson._
 import repositories._
 
@@ -91,7 +89,8 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
         val business = schemesEvaluationMap.get(Scheme.Business)
         val projectDelivery = schemesEvaluationMap.get(Scheme.ProjectDelivery)
         val finance = schemesEvaluationMap.get(Scheme.Finance)
-        SchemeEvaluation(commercial, digitalAndTechnology, business, projectDelivery, finance)
+        val policy = schemesEvaluationMap.get(Scheme.Policy)
+        SchemeEvaluation(commercial, digitalAndTechnology, business, projectDelivery, finance, policy)
       }
 
       val applicationId = doc.getAs[String]("applicationId").get

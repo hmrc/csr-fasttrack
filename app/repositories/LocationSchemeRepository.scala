@@ -75,6 +75,7 @@ trait LocationSchemeRepository {
       SchemeInfo(Commercial, "Commercial", requiresALevel = false, requiresALevelInStem = false),
       SchemeInfo(DigitalAndTechnology, "Digital and technology", requiresALevel = true, requiresALevelInStem = true),
       SchemeInfo(Finance, "Finance", requiresALevel = false, requiresALevelInStem = false),
+      SchemeInfo(Policy, "Policy", requiresALevel = false, requiresALevelInStem = false),
       SchemeInfo(ProjectDelivery, "Project delivery", requiresALevel = true, requiresALevelInStem = false)
     )
   }

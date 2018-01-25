@@ -117,9 +117,9 @@ class SuccessfulCandidatesReportingControllerSpec extends BaseReportingControlle
     lazy val summaryScores = CandidateScoresSummary(Some(10d), Some(10d), Some(10d),
       Some(10d), Some(10d), Some(10d), Some(20d), Some(80d))
     lazy val schemeEvaluationsLondon = SchemeEvaluation(Some("Pass"), None, Some("Amber"), Some("Pass"),
-      None)
+      None, None)
     lazy val overallEvaluationsLondon = SchemeEvaluation(Some("Green"), None, Some("Amber"), Some("Green"),
-      None)
+      None, None)
 
     def newAppPreferences(userId: UniqueIdentifier, appId: UniqueIdentifier) =
       ApplicationPreferencesWithTestResults(userId, appId,

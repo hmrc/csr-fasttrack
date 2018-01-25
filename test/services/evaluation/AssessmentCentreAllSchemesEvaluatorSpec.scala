@@ -28,6 +28,7 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
     AssessmentCentrePassMarkScheme(Scheme.Commercial, Some(PassMarkSchemeThreshold(15.0, 24.99))),
     AssessmentCentrePassMarkScheme(Scheme.DigitalAndTechnology, Some(PassMarkSchemeThreshold(20.0, 30.0))),
     AssessmentCentrePassMarkScheme(Scheme.Finance, Some(PassMarkSchemeThreshold(25.0, 30.0))),
+    AssessmentCentrePassMarkScheme(Scheme.Policy, Some(PassMarkSchemeThreshold(30.0, 40.0))),
     AssessmentCentrePassMarkScheme(Scheme.ProjectDelivery, Some(PassMarkSchemeThreshold(30.0, 40.0)))
   ), AssessmentCentrePassMarkInfo("1", DateTime.now, "user"))
 
@@ -42,6 +43,7 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
         SchemeEvaluationResult(Scheme.Commercial, Green),
         SchemeEvaluationResult(Scheme.DigitalAndTechnology, Amber),
         SchemeEvaluationResult(Scheme.Finance, Red),
+        SchemeEvaluationResult(Scheme.Policy, Red),
         SchemeEvaluationResult(Scheme.ProjectDelivery, Red)
       )
     }
@@ -74,9 +76,9 @@ class AssessmentCentreAllSchemesEvaluatorSpec extends PlaySpec {
         SchemeEvaluationResult(Scheme.Commercial, Red),
         SchemeEvaluationResult(Scheme.DigitalAndTechnology, Red),
         SchemeEvaluationResult(Scheme.Finance, Red),
+        SchemeEvaluationResult(Scheme.Policy, Red),
         SchemeEvaluationResult(Scheme.ProjectDelivery, Red)
       )
-
     }
   }
 }

@@ -9,7 +9,8 @@
         {"lat":55.76667, "lng":-4.03333}
       ],
       "schemes":[
-        "Business"
+        "Business",
+        "Policy"
       ]
     },
     {
@@ -26,7 +27,8 @@
       "name":"Bathgate",
       "geocodes": [{"lat":55.90204, "lng":-3.64398}],
       "schemes":[
-        "Business"
+        "Business",
+        "Policy"
       ]
     },
     {
@@ -35,6 +37,7 @@
       "geocodes": [{"lat":52.48142, "lng":-1.89983}],
       "schemes":[
         "Business",
+        "Policy",
         "DigitalAndTechnology",
         "ProjectDelivery"
       ]
@@ -45,6 +48,7 @@
       "geocodes": [{"lat":53.81667, "lng":-3.05}],
       "schemes":[
         "Business",
+        "Policy",
         "Finance",
         "ProjectDelivery"
       ]
@@ -54,7 +58,8 @@
       "name":"Bradford",
       "geocodes": [{"lat":53.79391, "lng":-1.75206}],
       "schemes":[
-        "Business"
+        "Business",
+        "Policy"
       ]
     },
     {
@@ -63,6 +68,7 @@
       "geocodes": [{"lat":51.45523, "lng":-2.59665}],
       "schemes":[
         "Business",
+        "Policy",
         "ProjectDelivery",
         "Commercial",
         "Finance"
@@ -82,6 +88,7 @@
       "geocodes": [{"lat":51.48, "lng":-3.18}],
       "schemes":[
         "Business",
+        "Policy",
         "DigitalAndTechnology"
       ]
     },
@@ -100,6 +107,7 @@
       "geocodes": [{"lat":52.40656, "lng":-1.51217}],
       "schemes":[
         "Business",
+        "Policy",
         "DigitalAndTechnology",
         "ProjectDelivery",
         "Commercial"
@@ -120,7 +128,8 @@
       "name":"Darlington",
       "geocodes": [{"lat":54.52429, "lng":-1.55039}],
       "schemes":[
-        "Business"
+        "Business",
+        "Policy"
       ]
     },
     {
@@ -128,7 +137,8 @@
       "name":"Dover",
       "geocodes": [{"lat":51.12284, "lng":1.31518}],
       "schemes":[
-        "Business"
+        "Business",
+        "Policy"
       ]
     },
     {
@@ -137,6 +147,7 @@
       "geocodes": [{"lat":55.76412, "lng":-4.17669}],
       "schemes":[
         "Business",
+        "Policy",
         "Finance"
       ]
     },
@@ -145,7 +156,8 @@
       "name":"Edinburgh",
       "geocodes": [{"lat":55.95206, "lng":-3.19648}],
       "schemes":[
-        "Business"
+        "Business",
+        "Policy"
       ]
     },
     {
@@ -153,7 +165,8 @@
       "name":"Gartcosh",
       "geocodes": [{"lat":55.9043, "lng":-4.0964}],
       "schemes":[
-        "Business"
+        "Business",
+        "Policy"
       ]
     },
     {
@@ -161,7 +174,8 @@
       "name":"Glasgow",
       "geocodes": [{"lat":55.86515, "lng":-4.25763}],
       "schemes":[
-        "Business"
+        "Business",
+        "Policy"
       ]
     },
     {
@@ -169,7 +183,8 @@
       "name":"Hastings",
       "geocodes": [{"lat":50.85519, "lng":0.57292}],
       "schemes":[
-        "Business"
+        "Business",
+        "Policy"
       ]
     },
     {
@@ -187,6 +202,7 @@
       "geocodes": [{"lat":53.79648, "lng":-1.54785}],
       "schemes":[
         "Business",
+        "Policy",
         "Commercial",
         "Finance",
         "ProjectDelivery",
@@ -203,6 +219,7 @@
       ],
       "schemes":[
         "Business",
+        "Policy",
         "Commercial",
         "DigitalAndTechnology",
         "ProjectDelivery"
@@ -214,6 +231,7 @@
       "geocodes":[{"lat":51.50853, "lng":-0.12574}],
       "schemes":[
         "Business",
+        "Policy",
         "Commercial",
         "DigitalAndTechnology",
         "Finance",
@@ -229,6 +247,7 @@
       ],
       "schemes":[
         "Business",
+        "Policy",
         "Commercial",
         "DigitalAndTechnology",
         "ProjectDelivery"
@@ -240,6 +259,7 @@
       "geocodes":[{"lat":54.97328, "lng":-1.61396}],
       "schemes":[
         "Business",
+        "Policy",
         "DigitalAndTechnology",
         "Finance",
         "ProjectDelivery"
@@ -260,6 +280,7 @@
       "geocodes":[{"lat":52.62783, "lng":1.29834}],
       "schemes":[
         "Business",
+        "Policy",
         "Commercial"
       ]
     },
@@ -269,6 +290,7 @@
       "geocodes":[{"lat":52.9536, "lng":-1.15047}],
       "schemes":[
         "Business",
+        "Policy",
         "ProjectDelivery"
       ]
     },
@@ -278,6 +300,7 @@
       "geocodes":[{"lat":50.376289, "lng":-4.143841}],
       "schemes":[
         "Business",
+        "Policy",
         "ProjectDelivery"
       ]
     },
@@ -311,6 +334,7 @@
       "geocodes":[{"lat":53.38297, "lng":-1.4659}],
       "schemes":[
         "Business",
+        "Policy",
         "Commercial",
         "DigitalAndTechnology",
         "Finance",
@@ -323,6 +347,7 @@
       "geocodes":[{"lat":53.83333, "lng":-1.76667}],
       "schemes":[
         "Business",
+        "Policy",
         "DigitalAndTechnology"
       ]
     },
@@ -332,6 +357,7 @@
       "geocodes":[{"lat":51.53782, "lng":0.71433}],
       "schemes":[
         "Business",
+        "Policy",
         "Finance"
       ]
     },
@@ -344,7 +370,8 @@
         {"lat":55.86326, "lng":-4.31241}
       ],
       "schemes":[
-        "Business"
+        "Business",
+        "Policy"
       ]
     },
     {
@@ -352,7 +379,8 @@
       "name":"St Austell",
       "geocodes":[{"lat":50.3425, "lng":-4.77442}],
       "schemes":[
-        "Business"
+        "Business",
+        "Policy"
       ]
     },
     {
@@ -361,6 +389,7 @@
       "geocodes":[{"lat":53.40979, "lng":-2.15761}],
       "schemes":[
         "Business",
+        "Policy",
         "ProjectDelivery"
       ]
     },
@@ -369,7 +398,8 @@
       "name":"Swansea",
       "geocodes":[{"lat":51.62144, "lng":-3.943646}],
       "schemes":[
-        "Business"
+        "Business",
+        "Policy"
       ]
     },
     {
@@ -378,6 +408,7 @@
       "geocodes":[{"lat":52.67659, "lng":-2.44926}],
       "schemes":[
         "Business",
+        "Policy",
         "Commercial",
         "DigitalAndTechnology",
         "ProjectDelivery"
@@ -388,7 +419,8 @@
       "name":"Torquay",
       "geocodes":[{"lat":50.46384, "lng":-3.51434}],
       "schemes":[
-        "Business"
+        "Business",
+        "Policy"
       ]
     },
     {
@@ -397,6 +429,7 @@
       "geocodes":[{"lat":53.39254, "lng":-2.58024}],
       "schemes":[
         "Business",
+        "Policy",
         "ProjectDelivery"
       ]
     },
@@ -406,6 +439,7 @@
       "geocodes":[{"lat":50.81795, "lng":-0.37538}],
       "schemes":[
         "Business",
+        "Policy",
         "DigitalAndTechnology",
         "Finance"
       ]
@@ -415,7 +449,8 @@
       "name":"Wrexham",
       "geocodes":[{"lat":53.04304, "lng":-2.992494}],
       "schemes":[
-        "Business"
+        "Business",
+        "Policy"
       ]
     },
     {

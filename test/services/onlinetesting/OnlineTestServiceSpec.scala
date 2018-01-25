@@ -133,7 +133,7 @@ class OnlineTestServiceSpec extends PlaySpec with BeforeAndAfterEach with Mockit
   val validInviteDate = new DateTime(2016, 5, 21, 0, 0)
   val validExpireDate = new DateTime(2016, 6, 9, 0, 0)
   val InvitationDate = DateTime.parse("2016-05-11")
-  val ExpirationDate = InvitationDate.plusDays(7)
+  val ExpirationDate = InvitationDate.plusDays(5)
 
   val onlineTestProfile = CubiksTestProfile(
     cubiksUserId = CubiksUserId,
