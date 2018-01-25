@@ -299,7 +299,7 @@ trait OnlineTestService {
     val VerbalTestName = "Logiks Verbal and Numerical (Intermediate) - Verbal"
     val NumericalTestName = "Logiks Verbal and Numerical (Intermediate) - Numerical"
     val CompetencyTestName = "Cubiks Factors"
-    val SituationalTestName = "Civil Service Fast Track Apprentice SJQ – 2017"
+    val SituationalTestName = "Civil Service Fast Track Apprentice SJQ"
 
     val candidateOnlineTestReport = CandidateTestReport(
       appId, "XML",
