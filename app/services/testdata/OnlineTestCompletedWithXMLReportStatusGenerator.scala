@@ -51,13 +51,13 @@ trait OnlineTestCompletedWithXMLReportStatusGenerator extends ConstructiveGenera
   private def generateCandidateTestReport(applicationId: String, setGis: Boolean, testScores: Option[OnlineTestScores]) = {
     def scoreOrDefault(score: Option[Double]) = score.fold(Some(25.0)) { s => Some(s) }
 
-    val verbalTestResult = TestResult("Completed", "Demonstration norm (for software testing purposes only)",
+    val verbalTestResult = TestResult("Completed", "Fast Track 2.0",
       scoreOrDefault(testScores.flatMap(s => s.verbalTScore)), Some(1.0), Some(7.0), None)
-    val numericalTestResult = TestResult("Completed", "Demonstration norm (for software testing purposes only)",
+    val numericalTestResult = TestResult("Completed", "Fast Track 2.0",
       scoreOrDefault(testScores.flatMap(s => s.numericalTScore)), Some(2.0), Some(3.0), None)
-    val competencyTestResult = TestResult("Completed", "CTQ: DEMONSTRATION NORM 1", scoreOrDefault(testScores.flatMap(s => s.competencyTScore)),
+    val competencyTestResult = TestResult("Completed", "Fast Track 2.0", scoreOrDefault(testScores.flatMap(s => s.competencyTScore)),
       None, None, None)
-    val situationalTestResult = TestResult("Completed", "Fast Track 1.0",
+    val situationalTestResult = TestResult("Completed", "Fast Track 2.0",
       scoreOrDefault(testScores.flatMap(s => s.situationalTScore)), Some(11.0), Some(39.0), Some(3.0))
 
     if (setGis) {
