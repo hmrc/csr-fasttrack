@@ -1,18 +1,18 @@
 ﻿POSTCODE,AREA,ASSESSMENT_CENTRE
 BA,Bath,London
-BB,Blackburn,Manchester
+BB,Blackburn,Newcastle
 BH,Bournemouth,London
 BN,Brighton,London
 BR,Bromley,London
 BS,Bristol,London
-BT,Northern Ireland,Manchester
+BT,Northern Ireland,Newcastle
 CB,Cambridge,London
 CF,Cardiff,London
-CH,Chester,Manchester
+CH,Chester,Newcastle
 CO,Colchester,London
 CT,Canterbury,London
 CV,Coventry,London
-CW,Crewe,Manchester
+CW,Crewe,Newcastle
 DA,Dartford,London
 DT,Dorchester,London
 DY,Dudley,London
@@ -22,26 +22,26 @@ HR,Hereford,London
 IP,Ipswich,London
 LD,Llandrindod wells,London
 LE,Leicester,London
-LL,Llandundno,Manchester
+LL,Llandundno,Newcastle
 ME,Rochester,London
 NN,Northampton,London
 NP,Newport,London
 NR,Norwich,London
-OL,Oldham,Manchester
+OL,Oldham,Newcastle
 OX,Oxford,London
 PL,Plymouth,London
 PO,Portsmouth,London
-PR,Preston,Manchester
+PR,Preston,Newcastle
 RG,Reading,London
 RH,Redhill,London
 SA,Swansea,London
-SK,Stockport,Manchester
+SK,Stockport,Newcastle
 SL,Slough,London
 SN,Swindon,London
 SO,Southampton,London
 SP,Salisbury,London
 SS,Southend-on-sea,London
-ST,Stoke-on-Trent,Manchester
+ST,Stoke-on-Trent,Newcastle
 SY,Shrewsbury,London
 TA,Taunton,London
 TF,Telford,London
@@ -50,7 +50,7 @@ TQ,Torquay,London
 TR,Truro,London
 TW,Twickenham,London
 UB,Southall,London
-WN,Wigan,Manchester
+WN,Wigan,Newcastle
 WR,Worcester,London
 WS,Walsall,London
 WV,Wolverhampton,London
@@ -71,13 +71,13 @@ MK,Milton Keynes,London
 LU,Bedfordshire,London
 AB,Aberdeen,Newcastle
 B,Birmingham,London
-FY,Blackpool,Manchester
-BL,Bolton,Manchester
-BD,Bradford,Manchester
+FY,Blackpool,Newcastle
+BL,Bolton,Newcastle
+BD,Bradford,Newcastle
 CA,Carlisle,Newcastle
 TS,Cleveland,Newcastle
 DL,Darlington,Newcastle
-DE,Derby,Manchester
+DE,Derby,Newcastle
 DN,Doncaster,Newcastle
 DG,Dumfries,Newcastle
 DD,Dundee,Newcastle
@@ -102,8 +102,8 @@ LA,Lancaster,Newcastle
 LS,Leeds,Newcastle
 ZE,Lerwick,Newcastle
 LN,Lincoln,Newcastle
-L,Liverpool,Manchester
-M,Manchester,Manchester
+L,Liverpool,Newcastle
+M,Manchester,Newcastle
 ML,Motherwell,Newcastle
 NE,Newcastle upon Tyne,Newcastle
 NG,Nottingham,Newcastle

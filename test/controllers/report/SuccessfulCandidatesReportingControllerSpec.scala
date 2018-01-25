@@ -26,6 +26,7 @@ import model.UniqueIdentifier
 import org.joda.time.LocalDate
 import org.mockito.Matchers.{ eq => eqTo, _ }
 import org.mockito.Mockito._
+import play.api.mvc.Result
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
 import testkit.MockitoImplicits.OngoingStubbingExtension
@@ -40,8 +41,8 @@ class SuccessfulCandidatesReportingControllerSpec extends BaseReportingControlle
       when(contactDetailsRepoMock.findAll).thenReturnAsync(allContactDetailsList)
       when(controller.locationSchemeService.getAllSchemeLocations).thenReturnAsync(allLocationSchemes)
 
-      val response = controller.createSuccessfulCandidatesReport(frameworkId)(request).run
-      val result = contentAsJson(response).as[List[SuccessfulCandidatesReportItem]]
+      val response: Future[Result] = controller.createSuccessfulCandidatesReport(frameworkId)(request).run
+      val result: List[SuccessfulCandidatesReportItem] = contentAsJson(response).as[List[SuccessfulCandidatesReportItem]]
 
       status(response) mustBe OK
 
@@ -102,9 +103,9 @@ class SuccessfulCandidatesReportingControllerSpec extends BaseReportingControlle
     val userId2 = UniqueIdentifier.randomUniqueIdentifier
 
     lazy val applicationPreference1 = newAppPreferences(userId1, appId1)
-    lazy val applicationPreference2 = newAppPreferences(userId2, appId2).copy(locations = List(LocationSchemesExamples.Manchester.id))
+    lazy val applicationPreference2 = newAppPreferences(userId2, appId2).copy(locations = List(LocationSchemesExamples.Bristol.id))
     lazy val expectedApplicationPreference1 = applicationPreference1.copy(locations = List(LocationSchemesExamples.London.locationName))
-    lazy val expectedApplicationPreference2 = applicationPreference2.copy(locations = List(LocationSchemesExamples.Manchester.locationName))
+    lazy val expectedApplicationPreference2 = applicationPreference2.copy(locations = List(LocationSchemesExamples.Bristol.locationName))
     lazy val contactDetailsWithId1 = newContactDetailsWithId(userId1)
     lazy val contactDetailsWithId2 = newContactDetailsWithId(userId2)
     lazy val appPreferencesList = List(applicationPreference1, applicationPreference2)

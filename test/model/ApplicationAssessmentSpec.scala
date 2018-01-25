@@ -27,14 +27,9 @@ class ApplicationAssessmentSpec extends PlaySpec with MockitoSugar {
 
   "Application Assessment" should {
 
-    "map AM to 8:30 for all venues except Manchester and London (Berkeley House)" in {
+    "map AM to 8:30 for all venues except London (Berkeley House)" in {
       val assessment = AssessmentCentreAllocation("appId", "London", Today, "AM", 1, confirmed = true)
       assessment.assessmentDateTime must be(toDateTime(8, 30))
-    }
-
-    "map AM to 9:00 for Manchester" in {
-      val assessment = AssessmentCentreAllocation("appId", "Manchester", Today, "AM", 1, confirmed = true)
-      assessment.assessmentDateTime must be(toDateTime(9, 0))
     }
 
     "map AM to 9:00 for London (Berkeley House)" in {
@@ -42,14 +37,9 @@ class ApplicationAssessmentSpec extends PlaySpec with MockitoSugar {
       assessment.assessmentDateTime must be(toDateTime(9, 0))
     }
 
-    "map PM to 12:30 for all venues except Manchester and London (Berkeley House)" in {
+    "map PM to 12:30 for all venues except London (Berkeley House)" in {
       val assessment = AssessmentCentreAllocation("appId", "London", Today, "PM", 1, confirmed = true)
       assessment.assessmentDateTime must be(toDateTime(12, 30))
-    }
-
-    "map PM to 13:00 for Manchester" in {
-      val assessment = AssessmentCentreAllocation("appId", "Manchester", Today, "PM", 1, confirmed = true)
-      assessment.assessmentDateTime must be(toDateTime(13, 0))
     }
 
     "map PM to 13:00 for London (Berkeley House)" in {

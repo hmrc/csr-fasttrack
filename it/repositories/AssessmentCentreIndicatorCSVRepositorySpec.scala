@@ -48,10 +48,10 @@ class AssessmentCentreIndicatorCSVRepositorySpec extends UnitWithAppSpec with Sh
   }
 
   "Assessment Centre Indicator Repository" should {
-    "contains only Manchester, Newcastle and London assessment centre" in {
+    "contains only Newcastle and London assessment centre" in {
       val actualAssessmentCentres = AssessmentCentreIndicatorCSVRepository.assessmentCentreIndicators
         .values.map(_.assessmentCentre).toSet
-      actualAssessmentCentres mustBe Set("Manchester", "London", "Newcastle")
+      actualAssessmentCentres mustBe Set("London", "Newcastle")
     }
   }
 }
