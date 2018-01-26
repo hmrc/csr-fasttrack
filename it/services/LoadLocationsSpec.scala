@@ -17,7 +17,6 @@
 package services
 
 import org.scalatestplus.play.{ OneAppPerSuite, PlaySpec }
-import play.test.WithApplication
 import repositories.FrameworkRepository.Region
 import repositories._
 
@@ -27,21 +26,21 @@ import scala.concurrent.duration._
 
 class LoadLocationsSpec extends PlaySpec with OneAppPerSuite {
 
-  val timeout: Duration = 1 second
+  val timeout: Duration = 5 second
 
   "load locations " should {
     "load regions" in {
 
-      val yamlRepository = frameworkRepository
+      lazy val yamlRepository = new FrameworkYamlRepository()
 
-      val s: List[Region] = Await.result(yamlRepository.getFrameworksByRegion, timeout)
+      lazy val s: List[Region] = Await.result(yamlRepository.getFrameworksByRegion, timeout)
 
-      val k: List[(String, String)] = s.flatMap { region =>
+      lazy val k: List[(String, String)] = s.flatMap { region =>
         val regionName = region.name
         region.locations.map(location => (location.name, regionName))
       }
 
-      val londonRegion = k.filter(p => p._1 == "London")
+      lazy val londonRegion = k.filter(p => p._1 == "London")
 
       londonRegion.size must be(1)
       londonRegion.head._2 must be("London")
