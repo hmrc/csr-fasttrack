@@ -171,6 +171,13 @@ London:
   - London (Euston Tower):
       description: Euston Tower
       capacities:
+         - date: 15/02/2018
+           amCapacity: 18
+           amMinViableAttendees: 10
+           amPreferredAttendeeMargin: 4
+           pmCapacity: 18
+           pmMinViableAttendees: 10
+           pmPreferredAttendeeMargin: 4
          - date: 07/04/2019
            amCapacity: 18
            amMinViableAttendees: 10
