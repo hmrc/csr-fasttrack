@@ -122,3 +122,6 @@ GET         /fixdata/forcePassmarkReevaluationForOnlineTestComplete      control
 
 GET         /campaign-reset/listCollections                              controllers.FixDataController.listCollections
 GET         /campaign-reset/removeCollection                             controllers.FixDataController.removeCollection(name: String)
+
+# Metrics endpoints
+GET         /metrics/progressStatusCounts                                controllers.metrics.MetricsController.progressStatusCounts
