@@ -19,24 +19,24 @@ package repositories.application
 import java.util.UUID
 import java.util.regex.Pattern
 
-import common.Constants.{No, Yes}
+import common.Constants.{ No, Yes }
 import model.Adjustments._
-import model.AssessmentScheduleCommands.{ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult}
+import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.EvaluationResults._
-import model.Exceptions.{ApplicationNotFound, CannotUpdateReview, LocationPreferencesNotFound, SchemePreferencesNotFound}
+import model.Exceptions.{ ApplicationNotFound, CannotUpdateReview, LocationPreferencesNotFound, SchemePreferencesNotFound }
 import model.Exceptions._
 import model.PersistedObjects.ApplicationForNotification
 import model.Scheme.Scheme
 import model._
-import model.commands.{ApplicationStatusDetails, OnlineTestProgressResponse}
+import model.commands.{ ApplicationStatusDetails, OnlineTestProgressResponse }
 import model.exchange.AssistanceDetails
 import model.persisted.SchemeEvaluationResult
 import org.joda.time.format.DateTimeFormat
-import org.joda.time.{DateTime, LocalDate}
-import play.api.libs.json.{Format, JsNumber, JsObject}
-import reactivemongo.api.{DB, DefaultDB, QueryOpts}
-import reactivemongo.bson.{BSONArray, BSONDocument, _}
+import org.joda.time.{ DateTime, LocalDate }
+import play.api.libs.json.{ Format, JsNumber, JsObject }
+import reactivemongo.api.{ DB, DefaultDB, QueryOpts }
+import reactivemongo.bson.{ BSONArray, BSONDocument, _ }
 import reactivemongo.json.collection.JSONBatchCommands.JSONCountCommand
 import reactivemongo.json.collection.JSONCollection
 import repositories._
@@ -45,7 +45,7 @@ import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 // scalastyle:off number.of.methods
 trait GeneralApplicationRepository {
@@ -128,6 +128,12 @@ trait GeneralApplicationRepository {
   def listCollections()(implicit ec: ExecutionContext): Future[List[String]]
 
   def removeCollection(name: String): Future[Unit]
+
+  def count(implicit ec: scala.concurrent.ExecutionContext) : Future[Int]
+
+  def countByStatus(applicationStatus: ApplicationStatuses.EnumVal): Future[Int]
+
+  def getLatestProgressStatuses: Future[List[String]]
 }
 
 // scalastyle:on number.of.methods
@@ -845,4 +851,26 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   override def removeCollection(name: String): Future[Unit] = {
     mongo().collection[JSONCollection](name).drop()
   }
+
+  override def getLatestProgressStatuses: Future[List[String]] = {
+    val projection = BSONDocument("_id" -> false, "progress-status-timestamp" -> 2)
+    val query = BSONDocument()
+
+    collection.find(query, projection).cursor[BSONDocument]().collect[List]().map { doc =>
+      doc.flatMap { item =>
+        item.getAs[BSONDocument]("progress-status-timestamp").map {
+          _.elements.toList.map { progressStatus =>
+            progressStatus._1 -> progressStatus._2.toString
+          }.sortBy(tup => tup._2).reverse.head._1
+        }
+      }
+    }
+  }
+
+  override def countByStatus(applicationStatus: ApplicationStatuses.EnumVal): Future[Int] = {
+    val query = play.api.libs.json.Json.obj("applicationStatus" -> applicationStatus.name)
+
+    collection.count(Some(query))
+  }
+
 }
