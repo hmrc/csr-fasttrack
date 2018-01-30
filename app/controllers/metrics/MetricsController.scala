@@ -16,23 +16,16 @@
 
 package controllers.metrics
 
+import model.ApplicationStatuses
+import play.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
 import repositories.application.GeneralApplicationRepository
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import repositories._
 
-//import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
-case class ProgressStatusMetrics(
-  SUBMITTED: Int,
-  PHASE1_TESTS_INVITED: Int
-)
-
-object ProgressStatusMetrics {
-  implicit val progressStatusMetricsFormat = Json.format[ProgressStatusMetrics]
-}
+import scala.collection.immutable.SortedMap
+import scala.concurrent.ExecutionContext.Implicits.global
 
 object MetricsController extends MetricsController {
   override val applicationRepo = applicationRepository
@@ -43,21 +36,19 @@ trait MetricsController extends BaseController {
 
   def progressStatusCounts = Action.async {
 
-    val data =
-      """
-        |{
-        |  "TOTAL_APPLICATION_COUNT": 3,
-        |  "CREATED": 1,
-        |  "IN_PROGRESS": 1,
-        |  "SUBMITTED": 1,
-        |  "WITHDRAWN": 0,
-        |  "ONLINE_TEST_INVITED": 1,
-        |  "ONLINE_TEST_STARTED": 1,
-        |  "ONLINE_TEST_COMPLETED": 0
-        |}
-      """.stripMargin
+    for {
+      applicationCount <- applicationRepo.count
+      createdCount <- applicationRepo.countByStatus(ApplicationStatuses.Created)
+      list <- applicationRepo.getLatestProgressStatuses
+    } yield {
+      val listWithCounts = SortedMap[String, Int]() ++ list.groupBy(identity).mapValues(_.size).map {case (k, v) => (k.toUpperCase, v)}
+      val data = listWithCounts ++
+        Map("TOTAL_APPLICATION_COUNT" -> applicationCount) ++
+        Map("CREATED" -> createdCount)
 
-    val result = Ok(Json.parse(data))
-    Future.successful(result)
+      Logger.debug(s"progress status counts data = $data")
+
+      Ok(Json.toJson(data))
+    }
   }
 }
