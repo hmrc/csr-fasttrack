@@ -216,6 +216,8 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       "personal-details.aLevel" -> "1",
       "personal-details.stemLevel" -> "1",
       "personal-details.dateOfBirth" -> "1",
+      "personal-details.civilServant" -> "1",
+      "personal-details.department" -> "1",
       "schemes" -> "1",
       "scheme-locations" -> "1",
       "assessment-centre-passmark-evaluation.competency-average" -> "1",
@@ -439,7 +441,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       .collect[List](Int.MaxValue, stopOnError = true)
 
   def extract(key: String)(root: Option[BSONDocument]) = root.flatMap(_.getAs[String](key))
-  
+
   def allApplicationAndUserIds(frameworkId: String): Future[List[ApplicationUserIdReport]] = {
     val query = BSONDocument("frameworkId" -> frameworkId)
     val projection = BSONDocument(

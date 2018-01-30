@@ -127,6 +127,7 @@ class SuccessfulCandidatesReportingControllerSpec extends BaseReportingControlle
         List(LocationSchemesExamples.London.id),
         PersonalInfo(someRnd("firstname-"), someRnd("lastName-"), someRnd("preferredName-"),
           yesNoRnd, yesNoRnd, Some(new LocalDate("2001-01-01"))),
+        "false",
         summaryScores, schemeEvaluationsLondon, overallEvaluationsLondon)
 
     def newContactDetailsWithId(userId: UniqueIdentifier) = ContactDetailsWithId(
