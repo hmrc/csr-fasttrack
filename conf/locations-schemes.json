@@ -1,16 +1,11 @@
 {
   "locations":[
     {
-      "id":"2657613",
-      "name":"Airdrie/Motherwell/Hamilton",
-      "geocodes":[
-        {"lat":55.86602, "lng":-3.98025},
-        {"lat":55.78924, "lng":-3.99187},
-        {"lat":55.76667, "lng":-4.03333}
-      ],
+      "id":"2657322",
+      "name":"Adershot",
+      "geocodes": [{"lat":51.252931, "lng":-0.77617}],
       "schemes":[
-        "Business",
-        "Policy"
+        "Finance"
       ]
     },
     {
@@ -27,8 +22,7 @@
       "name":"Bathgate",
       "geocodes": [{"lat":55.90204, "lng":-3.64398}],
       "schemes":[
-        "Business",
-        "Policy"
+        "Business"
       ]
     },
     {
@@ -37,9 +31,7 @@
       "geocodes": [{"lat":52.48142, "lng":-1.89983}],
       "schemes":[
         "Business",
-        "Policy",
-        "DigitalAndTechnology",
-        "ProjectDelivery"
+        "Policy"
       ]
     },
     {
@@ -47,19 +39,7 @@
       "name":"Blackpool",
       "geocodes": [{"lat":53.81667, "lng":-3.05}],
       "schemes":[
-        "Business",
-        "Policy",
-        "Finance",
-        "ProjectDelivery"
-      ]
-    },
-    {
-      "id":"2654993",
-      "name":"Bradford",
-      "geocodes": [{"lat":53.79391, "lng":-1.75206}],
-      "schemes":[
-        "Business",
-        "Policy"
+        "Finance"
       ]
     },
     {
@@ -69,17 +49,7 @@
       "schemes":[
         "Business",
         "Policy",
-        "ProjectDelivery",
-        "Commercial",
         "Finance"
-      ]
-    },
-    {
-      "id":"2654142",
-      "name":"Buxton",
-      "geocodes": [{"lat":53.259082, "lng":-1.91483}],
-      "schemes":[
-        "ProjectDelivery"
       ]
     },
     {
@@ -88,8 +58,7 @@
       "geocodes": [{"lat":51.48, "lng":-3.18}],
       "schemes":[
         "Business",
-        "Policy",
-        "DigitalAndTechnology"
+        "ProjectDelivery"
       ]
     },
     {
@@ -97,8 +66,7 @@
       "name":"Corsham",
       "geocodes": [{"lat":51.43433, "lng":-2.18437}],
       "schemes":[
-        "Finance",
-        "ProjectDelivery"
+        "Finance"
       ]
     },
     {
@@ -107,9 +75,8 @@
       "geocodes": [{"lat":52.40656, "lng":-1.51217}],
       "schemes":[
         "Business",
-        "Policy",
         "DigitalAndTechnology",
-        "ProjectDelivery",
+        "Finance",
         "Commercial"
       ]
     },
@@ -118,9 +85,9 @@
       "name":"Croydon",
       "geocodes": [{"lat":51.38333, "lng":-0.1}],
       "schemes":[
-        "Finance",
+        "Policy",
         "ProjectDelivery",
-        "Commercial"
+        "Business"
       ]
     },
     {
@@ -129,15 +96,7 @@
       "geocodes": [{"lat":54.52429, "lng":-1.55039}],
       "schemes":[
         "Business",
-        "Policy"
-      ]
-    },
-    {
-      "id":"2651048",
-      "name":"Dover",
-      "geocodes": [{"lat":51.12284, "lng":1.31518}],
-      "schemes":[
-        "Business",
+        "DigitalAndTechnology",
         "Policy"
       ]
     },
@@ -146,9 +105,7 @@
       "name":"East Kilbride",
       "geocodes": [{"lat":55.76412, "lng":-4.17669}],
       "schemes":[
-        "Business",
-        "Policy",
-        "Finance"
+        "Business"
       ]
     },
     {
@@ -156,16 +113,14 @@
       "name":"Edinburgh",
       "geocodes": [{"lat":55.95206, "lng":-3.19648}],
       "schemes":[
-        "Business",
-        "Policy"
+        "Business"
       ]
     },
     {
-      "id":"7117204",
-      "name":"Gartcosh",
-      "geocodes": [{"lat":55.9043, "lng":-4.0964}],
+      "id":"2650229",
+      "name":"Exeter",
+      "geocodes": [{"lat":50.724423, "lng":-3.5485668}],
       "schemes":[
-        "Business",
         "Policy"
       ]
     },
@@ -175,7 +130,7 @@
       "geocodes": [{"lat":55.86515, "lng":-4.25763}],
       "schemes":[
         "Business",
-        "Policy"
+        "ProjectDelivery"
       ]
     },
     {
@@ -183,8 +138,7 @@
       "name":"Hastings",
       "geocodes": [{"lat":50.85519, "lng":0.57292}],
       "schemes":[
-        "Business",
-        "Policy"
+        "DigitalAndTechnology"
       ]
     },
     {
@@ -192,7 +146,7 @@
       "name":"High Wycombe",
       "geocodes": [{"lat":51.62907, "lng":-0.74934}],
       "schemes":[
-        "Finance",
+        "Business",
         "ProjectDelivery"
       ]
     },
@@ -204,7 +158,6 @@
         "Business",
         "Policy",
         "Commercial",
-        "Finance",
         "ProjectDelivery",
         "DigitalAndTechnology"
       ]
@@ -219,10 +172,10 @@
       ],
       "schemes":[
         "Business",
-        "Policy",
         "Commercial",
         "DigitalAndTechnology",
-        "ProjectDelivery"
+        "ProjectDelivery",
+        "Policy"
       ]
     },
     {
@@ -231,10 +184,10 @@
       "geocodes":[{"lat":51.50853, "lng":-0.12574}],
       "schemes":[
         "Business",
-        "Policy",
         "Commercial",
         "DigitalAndTechnology",
         "Finance",
+        "Policy",
         "ProjectDelivery"
       ]
     },
@@ -247,10 +200,19 @@
       ],
       "schemes":[
         "Business",
-        "Policy",
         "Commercial",
         "DigitalAndTechnology",
+        "Finance",
+        "Policy",
         "ProjectDelivery"
+      ]
+    },
+    {
+      "id":"2643127",
+      "name":"Milton Keynes",
+      "geocodes":[{"lat":52.038137, "lng":-0.7751537}],
+      "schemes":[
+        "Finance"
       ]
     },
     {
@@ -259,7 +221,6 @@
       "geocodes":[{"lat":54.97328, "lng":-1.61396}],
       "schemes":[
         "Business",
-        "Policy",
         "DigitalAndTechnology",
         "Finance",
         "ProjectDelivery"
@@ -270,8 +231,7 @@
       "name":"Newport",
       "geocodes":[{"lat":51.58774, "lng":-2.99835}],
       "schemes":[
-        "Commercial",
-        "ProjectDelivery"
+        "Commercial"
       ]
     },
     {
@@ -279,8 +239,6 @@
       "name":"Norwich",
       "geocodes":[{"lat":52.62783, "lng":1.29834}],
       "schemes":[
-        "Business",
-        "Policy",
         "Commercial"
       ]
     },
@@ -295,21 +253,11 @@
       ]
     },
     {
-      "id":"2640194",
-      "name":"Plymouth",
-      "geocodes":[{"lat":50.376289, "lng":-4.143841}],
-      "schemes":[
-        "Business",
-        "Policy",
-        "ProjectDelivery"
-      ]
-    },
-    {
       "id":"2639996",
       "name":"Portsmouth",
       "geocodes":[{"lat":50.79899, "lng":-1.09125}],
       "schemes":[
-        "ProjectDelivery"
+        "Business"
       ]
     },
     {
@@ -317,15 +265,7 @@
       "name":"Reading",
       "geocodes":[{"lat":51.45625, "lng":-0.97113}],
       "schemes":[
-        "Commercial"
-      ]
-    },
-    {
-      "id":"2638664",
-      "name":"Salisbury",
-      "geocodes":[{"lat":51.0688, "lng":-1.7956900}],
-      "schemes":[
-        "ProjectDelivery"
+        "Policy"
       ]
     },
     {
@@ -334,11 +274,10 @@
       "geocodes":[{"lat":53.38297, "lng":-1.4659}],
       "schemes":[
         "Business",
-        "Policy",
         "Commercial",
         "DigitalAndTechnology",
         "Finance",
-        "ProjectDelivery"
+        "Policy"
       ]
     },
     {
@@ -347,8 +286,16 @@
       "geocodes":[{"lat":53.83333, "lng":-1.76667}],
       "schemes":[
         "Business",
-        "Policy",
-        "DigitalAndTechnology"
+        "DigitalAndTechnology",
+        "ProjectDelivery"
+      ]
+    },
+    {
+      "id":"2637959",
+      "name":"Shrivenham",
+      "geocodes":[{"lat":51.597735, "lng":-1.6693464}],
+      "schemes":[
+        "Finance"
       ]
     },
     {
@@ -362,65 +309,22 @@
       ]
     },
     {
-      "id":"2637197",
-      "name":"Springburn/Newlands/Govan",
-      "geocodes":[
-        {"lat":55.89015, "lng":-4.23324},
-        {"lat":55.8146,  "lng":-4.2799},
-        {"lat":55.86326, "lng":-4.31241}
-      ],
-      "schemes":[
-        "Business",
-        "Policy"
-      ]
-    },
-    {
-      "id":"2638853",
-      "name":"St Austell",
-      "geocodes":[{"lat":50.3425, "lng":-4.77442}],
-      "schemes":[
-        "Business",
-        "Policy"
-      ]
-    },
-    {
-      "id":"2636882",
-      "name":"Stockport",
-      "geocodes":[{"lat":53.40979, "lng":-2.15761}],
-      "schemes":[
-        "Business",
-        "Policy",
-        "ProjectDelivery"
-      ]
-    },
-    {
-      "id":"2636432",
-      "name":"Swansea",
-      "geocodes":[{"lat":51.62144, "lng":-3.943646}],
-      "schemes":[
-        "Business",
-        "Policy"
-      ]
-    },
-    {
       "id":"3345439",
       "name":"Telford",
       "geocodes":[{"lat":52.67659, "lng":-2.44926}],
       "schemes":[
         "Business",
-        "Policy",
-        "Commercial",
+        "Finance",
         "DigitalAndTechnology",
         "ProjectDelivery"
       ]
     },
     {
-      "id":"2635650",
-      "name":"Torquay",
-      "geocodes":[{"lat":50.46384, "lng":-3.51434}],
+      "id":"3345449",
+      "name":"Upavon",
+      "geocodes":[{"lat":51.2779503, "lng":-1.8470276}],
       "schemes":[
-        "Business",
-        "Policy"
+        "Finance"
       ]
     },
     {
@@ -428,9 +332,23 @@
       "name":"Warrington",
       "geocodes":[{"lat":53.39254, "lng":-2.58024}],
       "schemes":[
-        "Business",
-        "Policy",
-        "ProjectDelivery"
+        "Finance"
+      ]
+    },
+    {
+      "id":"2634749",
+      "name":"Weybridge",
+      "geocodes":[{"lat":51.3642629, "lng":-0.4875133}],
+      "schemes":[
+        "Policy"
+      ]
+    },
+    {
+      "id":"2634749",
+      "name":"Whittington",
+      "geocodes":[{"lat":52.6748398, "lng":-1.7672954}],
+      "schemes":[
+        "Finance"
       ]
     },
     {
@@ -439,26 +357,8 @@
       "geocodes":[{"lat":50.81795, "lng":-0.37538}],
       "schemes":[
         "Business",
-        "Policy",
         "DigitalAndTechnology",
         "Finance"
-      ]
-    },
-    {
-      "id":"2633485",
-      "name":"Wrexham",
-      "geocodes":[{"lat":53.04304, "lng":-2.992494}],
-      "schemes":[
-        "Business",
-        "Policy"
-      ]
-    },
-    {
-      "id":"2633373",
-      "name":"Yeovil",
-      "geocodes":[{"lat":50.942061, "lng":-2.633308}],
-      "schemes":[
-        "ProjectDelivery"
       ]
     },
     {
@@ -466,7 +366,7 @@
       "name":"York",
       "geocodes":[{"lat":53.9599, "lng":-1.087298}],
       "schemes":[
-        "DigitalAndTechnology",
+        "Policy",
         "Finance"
       ]
     }
