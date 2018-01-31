@@ -103,6 +103,8 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
       val aLevel = personalDetails.flatMap(_.getAs[Boolean]("aLevel").map(booleanTranslator))
       val stemLevel = personalDetails.flatMap(_.getAs[Boolean]("stemLevel").map(booleanTranslator))
       val dateOfBirth = personalDetails.flatMap(_.getAs[LocalDate]("dateOfBirth"))
+      val civilServant = personalDetails.flatMap(_.getAs[Boolean]("civilServant")).get
+      val civilServantAsString = if (civilServant) { personalDetails.flatMap(_.getAs[String]("department")).get } else { "false" }
 
       val schemes = doc.getAs[List[Scheme]]("schemes").getOrElse(List.empty)
       val schemeLocations = doc.getAs[List[String]]("scheme-locations").getOrElse(List.empty)
@@ -129,6 +131,7 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
         schemes,
         schemeLocations,
         PersonalInfo(firstName, lastName, preferredName, aLevel, stemLevel, dateOfBirth),
+        civilServantAsString,
         CandidateScoresSummary(leadingAndCommunicatingAverage, collaboratingAndPartneringAverage,
           deliveringAtPaceAverage, makingEffectiveDecisionsAverage, changingAndImprovingAverage,
           buildingCapabilityForAllAverage, motivationFitAverage, overallScore),

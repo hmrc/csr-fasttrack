@@ -211,6 +211,7 @@ object ReportExchangeObjects {
     schemes: List[Scheme],
     locations: List[String],
     personalDetails: PersonalInfo,
+    civilServant: String,
     scores: CandidateScoresSummary,
     schemeEvaluation: SchemeEvaluation,
     overallEvaluation: SchemeEvaluation
