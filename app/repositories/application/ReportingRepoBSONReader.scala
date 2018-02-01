@@ -28,6 +28,13 @@ import reactivemongo.bson._
 import repositories._
 
 trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
+
+  implicit val toLatestProgressStatus = bsonReader {
+    (doc: BSONDocument) =>
+      val progress: ProgressResponse = toProgressResponse("").read(doc)
+      LatestProgressStatus(getStatus(progress))
+  }
+
   implicit val toApplicationForCandidateProgressReport = bsonReader {
     (doc: BSONDocument) =>
       val applicationId = doc.getAs[String]("applicationId").getOrElse("")
@@ -123,7 +130,6 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
 
       val schemesEvaluation = evaluation("schemes-evaluation", passmarkEvaluationDoc)
       val overallEvaluation = evaluation("overall-evaluation", passmarkEvaluationDoc)
-
 
       ApplicationPreferencesWithTestResults(
         UniqueIdentifier(userId),
