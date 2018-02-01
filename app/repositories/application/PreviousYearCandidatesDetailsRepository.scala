@@ -115,45 +115,51 @@ abstract class PreviousYearCandidatesDetailsRepository(locationSchemeRepository:
     generateAssessmentScoresHeaders("QAC/Final Written Exercise")
 
 
-  def applicationDetailsStream(): Future[Enumerator[CandidateDetailsReportItem]]
+  def applicationDetailsStream(collectionSuffix: String): Future[Enumerator[CandidateDetailsReportItem]]
 
-  def findMedia(): Future[CsvExtract[String]]
+  def findMedia(collectionSuffix: String): Future[CsvExtract[String]]
 
-  def findContactDetails(): Future[CsvExtract[String]]
+  def findContactDetails(collectionSuffix: String): Future[CsvExtract[String]]
 
-  def findOnlineTestReports(): Future[CsvExtract[String]]
+  def findOnlineTestReports(collectionSuffix: String): Future[CsvExtract[String]]
 
-  def findAssessmentCentreDetails(): Future[CsvExtract[String]]
+  def findAssessmentCentreDetails(collectionSuffix: String): Future[CsvExtract[String]]
 
-  def findAssessmentScores(): Future[CsvExtract[String]]
+  def findAssessmentScores(collectionSuffix: String): Future[CsvExtract[String]]
 
-  def findQuestionnaireDetails(): Future[CsvExtract[String]]
+  def findQuestionnaireDetails(collectionSuffix: String): Future[CsvExtract[String]]
 
 }
 
 class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationSchemeRepository)(implicit mongo: () => DB)
   extends PreviousYearCandidatesDetailsRepository(locationSchemeRepo) {
 
-  val applicationDetailsCollection = mongo().collection[JSONCollection](CollectionNames.APPLICATION_2017)
+  // Default to the current campaign
+  private val defaultSuffix = CollectionNames.suffixForThisCampaign
 
-  val contactDetailsCollection = mongo().collection[JSONCollection](CollectionNames.CONTACT_DETAILS_2017)
+  private def applicationDetailsCollection(collectionSuffix: String) = mongo().collection[JSONCollection](CollectionNames.APPLICATION_PREFIX)
 
-  val mediaCollection = mongo().collection[JSONCollection](CollectionNames.MEDIA_2017)
+  private def contactDetailsCollection(collectionSuffix: String) = mongo().collection[JSONCollection](CollectionNames.CONTACT_DETAILS_PREFIX)
 
-  val questionnaireCollection = mongo().collection[JSONCollection](CollectionNames.QUESTIONNAIRE_2017)
+  private def mediaCollection(collectionSuffix: String) = mongo().collection[JSONCollection](CollectionNames.MEDIA_PREFIX)
 
-  val onlineTestReportsCollection = mongo().collection[JSONCollection](CollectionNames.ONLINE_TEST_REPORT_2017)
+  private def questionnaireCollection(collectionSuffix: String) = mongo().collection[JSONCollection](CollectionNames.QUESTIONNAIRE_PREFIX)
 
-  val assessmentCentresCollection = mongo().collection[JSONCollection](CollectionNames.APPLICATION_ASSESSMENT_2017)
+  private def onlineTestReportsCollection(collectionSuffix: String) =
+    mongo().collection[JSONCollection](CollectionNames.ONLINE_TEST_REPORT_PREFIX)
 
-  val assessmentScoresCollection = mongo().collection[JSONCollection](CollectionNames.APPLICATION_ASSESSMENT_SCORES_2017)
+  private def assessmentCentresCollection(collectionSuffix: String) =
+    mongo().collection[JSONCollection](CollectionNames.APPLICATION_ASSESSMENT_PREFIX)
 
-  override def applicationDetailsStream(): Future[Enumerator[CandidateDetailsReportItem]] = {
+  private def assessmentScoresCollection(collectionSuffix: String) =
+    mongo().collection[JSONCollection](CollectionNames.APPLICATION_ASSESSMENT_SCORES_PREFIX)
+
+  override def applicationDetailsStream(collectionSuffix: String): Future[Enumerator[CandidateDetailsReportItem]] = {
     val projection = Json.obj("_id" -> 0, "progress-status" -> 0)
 
       locationSize.flatMap { locSize =>
         locationSchemeRepo.getSchemesAndLocations.map { schemesAndLocations =>
-          applicationDetailsCollection.find(Json.obj(), projection)
+          applicationDetailsCollection(collectionSuffix).find(Json.obj(), projection)
             .cursor[BSONDocument](ReadPreference.primaryPreferred)
             .enumerate().map { doc =>
               val csvContent = makeRow(
@@ -176,10 +182,10 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
       }
   }
 
-  override def findMedia(): Future[CsvExtract[String]] = {
+  override def findMedia(collectionSuffix: String): Future[CsvExtract[String]] = {
     val projection = Json.obj("_id" -> 0)
 
-    mediaCollection.find(Json.obj(), projection)
+    mediaCollection(collectionSuffix).find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
       .collect[List]().map { docs =>
         val csvRecords = docs.map { doc =>
@@ -192,11 +198,11 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
     }
   }
 
-  override def findContactDetails(): Future[CsvExtract[String]] = {
+  override def findContactDetails(collectionSuffix: String): Future[CsvExtract[String]] = {
 
     val projection = Json.obj("_id" -> 0)
 
-    contactDetailsCollection.find(Json.obj(), projection)
+    contactDetailsCollection(collectionSuffix).find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
       .collect[List]().map { docs =>
         val csvRecords = docs.map { doc =>
@@ -219,7 +225,7 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
       }
   }
 
-  def findQuestionnaireDetails(): Future[CsvExtract[String]] = {
+  def findQuestionnaireDetails(collectionSuffix: String): Future[CsvExtract[String]] = {
     val projection = Json.obj("_id" -> 0)
 
     def getAnswer(question: String, doc: Option[BSONDocument]) = {
@@ -238,7 +244,7 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
       }
     }
 
-    questionnaireCollection.find(Json.obj(), projection)
+    questionnaireCollection(collectionSuffix).find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
       .collect[List]().map { docs =>
       val csvRecords = docs.map { doc =>
@@ -265,7 +271,7 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
     }
   }
 
-  override def findOnlineTestReports(): Future[CsvExtract[String]] = {
+  override def findOnlineTestReports(collectionSuffix: String): Future[CsvExtract[String]] = {
     val projection = Json.obj("_id" -> 0)
 
     def onlineTestScore(test: String, doc: BSONDocument) = {
@@ -279,7 +285,7 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
         Nil
     }
 
-    onlineTestReportsCollection.find(Json.obj(), projection)
+    onlineTestReportsCollection(collectionSuffix).find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
       .collect[List]().map { docs =>
         val csvRecords = docs.map { doc =>
@@ -295,11 +301,11 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
       }
   }
 
-  override def findAssessmentCentreDetails(): Future[CsvExtract[String]] = {
+  override def findAssessmentCentreDetails(collectionSuffix: String): Future[CsvExtract[String]] = {
 
     val projection = Json.obj("_id" -> 0)
 
-    assessmentCentresCollection.find(Json.obj(), projection)
+    assessmentCentresCollection(collectionSuffix).find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
       .collect[List]().map { docs =>
         val csvRecords = docs.map {
@@ -317,11 +323,11 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
       }
   }
 
-  override def findAssessmentScores(): Future[CsvExtract[String]] = {
+  override def findAssessmentScores(collectionSuffix: String): Future[CsvExtract[String]] = {
 
     val projection = Json.obj("_id" -> 0)
 
-    assessmentScoresCollection.find(Json.obj(), projection)
+    assessmentScoresCollection(collectionSuffix).find(Json.obj(), projection)
       .cursor[BSONDocument](ReadPreference.primaryPreferred)
       .collect[List]().map { docs =>
         val csvRecords = docs.map { doc =>

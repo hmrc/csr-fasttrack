@@ -561,8 +561,8 @@ trait ReportingController extends BaseController {
     status
   }
 
-  def streamPrevYearCandidatesDetailsReport: Action[AnyContent] = Action.async { implicit request =>
-    enrichPreviousYearCandidateDetails {
+  def streamPrevYearCandidatesDetailsReport(collectionSuffix: String): Action[AnyContent] = Action.async { implicit request =>
+    enrichPreviousYearCandidateDetails(collectionSuffix, {
       (contactDetails, media, questionnaireDetails, onlineTestReports, assessmentCenterDetails, assessmentScores) => {
 
           val headerFut = prevYearCandidatesDetailsRepository.applicationDetailsHeader.map { appDetailsHeader =>
@@ -577,7 +577,7 @@ trait ReportingController extends BaseController {
             )
           }
 
-          val candidatesStream = prevYearCandidatesDetailsRepository.applicationDetailsStream().map { appEnum =>
+          val candidatesStream = prevYearCandidatesDetailsRepository.applicationDetailsStream(collectionSuffix).map { appEnum =>
             appEnum.map { app =>
               createCandidateInfoBackUpRecord(app, media, contactDetails, questionnaireDetails,
                 onlineTestReports, assessmentCenterDetails, assessmentScores) + "\n"
@@ -590,17 +590,18 @@ trait ReportingController extends BaseController {
           }
         }
       }
-    }
+    })
   }
 
   // scalastyle:off line.size.limit
-  private def enrichPreviousYearCandidateDetails(block: (CsvExtract[String], CsvExtract[String], CsvExtract[String], CsvExtract[String], CsvExtract[String], CsvExtract[String]) => Future[Result]): Future[Result] = {
-    val candidateDetailsFut = prevYearCandidatesDetailsRepository.findContactDetails()
-    val mediaFut = prevYearCandidatesDetailsRepository.findMedia()
-    val questionnaireDetailsFut = prevYearCandidatesDetailsRepository.findQuestionnaireDetails()
-    val onlineTestReportsFut = prevYearCandidatesDetailsRepository.findOnlineTestReports()
-    val assessmentCentreDetailsFut = prevYearCandidatesDetailsRepository.findAssessmentCentreDetails()
-    val assessmentScoresFut = prevYearCandidatesDetailsRepository.findAssessmentScores()
+  private def enrichPreviousYearCandidateDetails(collectionSuffix: String,
+    block: (CsvExtract[String], CsvExtract[String], CsvExtract[String], CsvExtract[String], CsvExtract[String], CsvExtract[String]) => Future[Result]): Future[Result] = {
+    val candidateDetailsFut = prevYearCandidatesDetailsRepository.findContactDetails(collectionSuffix)
+    val mediaFut = prevYearCandidatesDetailsRepository.findMedia(collectionSuffix)
+    val questionnaireDetailsFut = prevYearCandidatesDetailsRepository.findQuestionnaireDetails(collectionSuffix)
+    val onlineTestReportsFut = prevYearCandidatesDetailsRepository.findOnlineTestReports(collectionSuffix)
+    val assessmentCentreDetailsFut = prevYearCandidatesDetailsRepository.findAssessmentCentreDetails(collectionSuffix)
+    val assessmentScoresFut = prevYearCandidatesDetailsRepository.findAssessmentScores(collectionSuffix)
     (for {
       contactDetails <- candidateDetailsFut
       media <- mediaFut
