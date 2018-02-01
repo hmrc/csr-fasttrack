@@ -20,7 +20,7 @@ import model.ApplicationStatuses
 import play.Logger
 import play.api.libs.json.Json
 import play.api.mvc.Action
-import repositories.application.GeneralApplicationRepository
+import repositories.application.{ GeneralApplicationRepository, ReportingRepository }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 import repositories._
 
@@ -29,24 +29,27 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 object MetricsController extends MetricsController {
   override val applicationRepo = applicationRepository
+  override val reportingRepo = reportingRepository
 }
 
 trait MetricsController extends BaseController {
   val applicationRepo: GeneralApplicationRepository
+  val reportingRepo: ReportingRepository
 
   def progressStatusCounts = Action.async {
 
     for {
       applicationCount <- applicationRepo.count
       createdCount <- applicationRepo.countByStatus(ApplicationStatuses.Created)
-      list <- applicationRepo.getLatestProgressStatuses
+      list <- reportingRepo.getLatestProgressStatuses
     } yield {
       val listWithCounts = SortedMap[String, Int]() ++ list.groupBy(identity).mapValues(_.size).map {case (k, v) => (k.toUpperCase, v)}
+
       val data = listWithCounts ++
         Map("TOTAL_APPLICATION_COUNT" -> applicationCount) ++
         Map("CREATED" -> createdCount)
 
-      Logger.debug(s"progress status counts data = $data")
+      Logger.info(s"progress status counts data = $data")
 
       Ok(Json.toJson(data))
     }

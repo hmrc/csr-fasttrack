@@ -84,6 +84,8 @@ object ReportExchangeObjects {
     assessmentCentreIndicator: Option[AssessmentCentreIndicator]
   )
 
+  case class LatestProgressStatus(progress: String)
+
   case class AssessmentCentreIndicatorReport(
     applicationId: Option[String],
     userId: String,

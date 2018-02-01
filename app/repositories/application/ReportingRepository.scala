@@ -65,6 +65,8 @@ trait ReportingRepository {
   def assessmentCentreIndicatorReport: Future[List[AssessmentCentreIndicatorReport]]
 
   def applicationsForAssessmentScoresReport(frameworkId: String): Future[List[ApplicationForAssessmentScoresReport]]
+
+  def getLatestProgressStatuses: Future[List[String]]
 }
 
 class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo: () => DB)
@@ -183,6 +185,14 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
 
   override def applicationsForCandidateProgressReport(frameworkId: String): Future[List[ApplicationForCandidateProgressReport]] =
     applicationsForCandidateProgressReport(BSONDocument("frameworkId" -> frameworkId))
+
+  def getLatestProgressStatuses: Future[List[String]] = {
+    val query = BSONDocument()
+    val projection = BSONDocument("progress-status" -> true)
+    val dataFut = reportQueryWithProjectionsBSON[LatestProgressStatus](query, projection)
+
+    dataFut.map { data => data.map(_.progress) }
+  }
 
   private def applicationsForCandidateProgressReport(query: BSONDocument): Future[List[ApplicationForCandidateProgressReport]] = {
     val projection = BSONDocument(

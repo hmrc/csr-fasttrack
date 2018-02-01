@@ -132,8 +132,6 @@ trait GeneralApplicationRepository {
   def count(implicit ec: scala.concurrent.ExecutionContext) : Future[Int]
 
   def countByStatus(applicationStatus: ApplicationStatuses.EnumVal): Future[Int]
-
-  def getLatestProgressStatuses: Future[List[String]]
 }
 
 // scalastyle:on number.of.methods
@@ -852,25 +850,8 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     mongo().collection[JSONCollection](name).drop()
   }
 
-  override def getLatestProgressStatuses: Future[List[String]] = {
-    val projection = BSONDocument("_id" -> false, "progress-status-timestamp" -> 2)
-    val query = BSONDocument()
-
-    collection.find(query, projection).cursor[BSONDocument]().collect[List]().map { doc =>
-      doc.flatMap { item =>
-        item.getAs[BSONDocument]("progress-status-timestamp").map {
-          _.elements.toList.map { progressStatus =>
-            progressStatus._1 -> progressStatus._2.toString
-          }.sortBy(tup => tup._2).reverse.head._1
-        }
-      }
-    }
-  }
-
   override def countByStatus(applicationStatus: ApplicationStatuses.EnumVal): Future[Int] = {
     val query = play.api.libs.json.Json.obj("applicationStatus" -> applicationStatus.name)
-
     collection.count(Some(query))
   }
-
 }
