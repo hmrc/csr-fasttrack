@@ -45,6 +45,11 @@ trait TestDataGeneratorService {
         firstName = "Service", lastName = "Manager", email = "test_service_manager_1@mailinator.com",
         preferredName = None, role = AuthProviderClient.TechnicalAdminRole
       )
+      _ <- RegisteredStatusGenerator.createUser(
+        generationId = 1,
+        firstName = "Service", lastName = "Manager", email = "test_super_admin@mailinator.com",
+        preferredName = None, role = AuthProviderClient.SuperAdminRole
+      )
     } yield {
       ()
     }
