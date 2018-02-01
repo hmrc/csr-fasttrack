@@ -66,7 +66,8 @@
       "name":"Corsham",
       "geocodes": [{"lat":51.43433, "lng":-2.18437}],
       "schemes":[
-        "Finance"
+        "Finance",
+        "ProjectDelivery"
       ]
     },
     {
