@@ -17,23 +17,27 @@
 package repositories
 
 object CollectionNames {
-  val APPLICATION = "application18test"
-  val APPLICATION_ASSESSMENT = "application-assessment18test"
-  val APPLICATION_ASSESSMENT_SCORES = "application-assessment-scores18test"
-  val ASSESSMENT_CENTRE_PASS_MARK_SETTINGS = "assessment-centre-pass-mark-settings18test"
-  val CONTACT_DETAILS = "contact-details18test"
-  val LOCKS = "locks18test"
-  val MEDIA = "media18test"
-  val ONLINE_TEST_PDF_REPORT = "online-test-pdf-report18test"
-  val PASS_MARK_SETTINGS = "pass-mark-settings18test"
-  val QUESTIONNAIRE = "questionnaire18test"
-  val ONLINE_TEST_REPORT = "online-test-report18test"
 
-  val APPLICATION_2017 = "application17"
-  val APPLICATION_ASSESSMENT_2017 = "application-assessment17"
-  val APPLICATION_ASSESSMENT_SCORES_2017 = "application-assessment-scores17"
-  val CONTACT_DETAILS_2017 = "contact-details17"
-  val MEDIA_2017 = "media17"
-  val QUESTIONNAIRE_2017 = "questionnaire17"
-  val ONLINE_TEST_REPORT_2017 = "online-test-report17"
+  val suffixForThisCampaign = "18test"
+
+  val APPLICATION = s"application$suffixForThisCampaign"
+  val APPLICATION_ASSESSMENT = s"application-assessment$suffixForThisCampaign"
+  val APPLICATION_ASSESSMENT_SCORES = s"application-assessment-scores$suffixForThisCampaign"
+  val ASSESSMENT_CENTRE_PASS_MARK_SETTINGS = s"assessment-centre-pass-mark-settings$suffixForThisCampaign"
+  val CONTACT_DETAILS = s"contact-details$suffixForThisCampaign"
+  val LOCKS = s"locks$suffixForThisCampaign"
+  val MEDIA = s"media$suffixForThisCampaign"
+  val ONLINE_TEST_PDF_REPORT = s"online-test-pdf-report$suffixForThisCampaign"
+  val PASS_MARK_SETTINGS = s"pass-mark-settings$suffixForThisCampaign"
+  val QUESTIONNAIRE = s"questionnaire$suffixForThisCampaign"
+  val ONLINE_TEST_REPORT = s"online-test-report$suffixForThisCampaign"
+
+  // Used by backup report
+  val APPLICATION_PREFIX = "application"
+  val APPLICATION_ASSESSMENT_PREFIX = "application-assessment"
+  val APPLICATION_ASSESSMENT_SCORES_PREFIX = "application-assessment-scores"
+  val CONTACT_DETAILS_PREFIX = "contact-details"
+  val MEDIA_PREFIX = "media"
+  val QUESTIONNAIRE_PREFIX = "questionnaire"
+  val ONLINE_TEST_REPORT_PREFIX = "online-test-report"
 }
