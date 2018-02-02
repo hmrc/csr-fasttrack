@@ -43,7 +43,6 @@ object ApplicationStatusOrder {
     }
 
     val (_, statusName) = combineStatuses(statusMaps(progress))
-
     statusName
   }
 
@@ -77,6 +76,7 @@ object ApplicationStatusOrder {
     (progress.onlineTest.awaitingAllocationNotified, AwaitingAllocationNotifiedProgress.weight,
       AwaitingAllocationNotifiedProgress),
     (progress.onlineTest.allocationUnconfirmed, AllocationUnconfirmedProgress.weight, AllocationUnconfirmedProgress),
+    (progress.onlineTest.allocationExpired, AllocationExpiredProgress.weight, AllocationExpiredProgress),
     (progress.onlineTest.allocationConfirmed, AllocationConfirmedProgress.weight, AllocationConfirmedProgress),
     (progress.assessmentScores.entered, AssessmentScoresEnteredProgress.weight, AssessmentScoresEnteredProgress),
     (progress.failedToAttend, FailedToAttendProgress.weight, FailedToAttendProgress),

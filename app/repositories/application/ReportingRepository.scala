@@ -87,64 +87,6 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
     Candidate(userId, applicationId, None, firstName, lastName, Some(dateOfBirth.toString), None, None, None)
   }
 
-  // scalastyle:off method.length
-  private def findProgress(document: BSONDocument, applicationId: String): ProgressResponse = {
-
-    (document.getAs[BSONDocument]("progress-status") map { root =>
-
-      def getStatus(root: BSONDocument)(key: String) = {
-        root.getAs[Boolean](key).getOrElse(false)
-      }
-
-      def getProgress = getStatus(root) _
-
-      def getQuestionnaire = getStatus(root.getAs[BSONDocument]("questionnaire").getOrElse(BSONDocument())) _
-
-      ProgressResponse(
-        applicationId,
-        personalDetails = getProgress(ProgressStatuses.PersonalDetailsCompletedProgress),
-        hasSchemeLocations = getProgress(ProgressStatuses.SchemeLocationsCompletedProgress),
-        hasSchemes = getProgress(ProgressStatuses.SchemesPreferencesCompletedProgress),
-        assistanceDetails = getProgress(ProgressStatuses.AssistanceDetailsCompletedProgress),
-        review = getProgress(ProgressStatuses.ReviewCompletedProgress),
-        questionnaire = QuestionnaireProgressResponse(
-          diversityStarted = getQuestionnaire(ProgressStatuses.StartDiversityQuestionnaireProgress),
-          diversityCompleted = getQuestionnaire(ProgressStatuses.DiversityQuestionsCompletedProgress),
-          educationCompleted = getQuestionnaire(ProgressStatuses.EducationQuestionsCompletedProgress),
-          occupationCompleted = getQuestionnaire(ProgressStatuses.OccupationQuestionsCompletedProgress)
-        ),
-        submitted = getProgress(ProgressStatuses.SubmittedProgress),
-        withdrawn = getProgress(ProgressStatuses.WithdrawnProgress),
-        OnlineTestProgressResponse(
-          invited = getProgress(ProgressStatuses.OnlineTestInvitedProgress),
-          started = getProgress(ProgressStatuses.OnlineTestStartedProgress),
-          completed = getProgress(ProgressStatuses.OnlineTestCompletedProgress),
-          expired = getProgress(ProgressStatuses.OnlineTestExpiredProgress),
-          awaitingReevaluation = getProgress(ProgressStatuses.AwaitingOnlineTestReevaluationProgress),
-          failed = getProgress(ProgressStatuses.OnlineTestFailedProgress),
-          failedNotified = getProgress(ProgressStatuses.OnlineTestFailedNotifiedProgress),
-          awaitingAllocation = getProgress(ProgressStatuses.AwaitingAllocationProgress),
-          awaitingAllocationNotified = getProgress(ProgressStatuses.AwaitingAllocationNotifiedProgress),
-          allocationConfirmed = getProgress(ProgressStatuses.AllocationConfirmedProgress),
-          allocationUnconfirmed = getProgress(ProgressStatuses.AllocationUnconfirmedProgress)
-        ),
-        failedToAttend = getProgress(ProgressStatuses.FailedToAttendProgress),
-        assessmentScores = AssessmentScores(
-          getProgress(ProgressStatuses.AssessmentScoresEnteredProgress),
-          getProgress(ProgressStatuses.AssessmentScoresAcceptedProgress)
-        ),
-        assessmentCentre = AssessmentCentre(
-          getProgress(ProgressStatuses.AwaitingAssessmentCentreReevaluationProgress),
-          getProgress(ProgressStatuses.AssessmentCentrePassedProgress),
-          getProgress(ProgressStatuses.AssessmentCentreFailedProgress),
-          getProgress(ProgressStatuses.AssessmentCentrePassedNotifiedProgress),
-          getProgress(ProgressStatuses.AssessmentCentreFailedNotifiedProgress)
-        )
-      )
-    }).getOrElse(ProgressResponse(applicationId))
-  }
-  // scalastyle:on method.length
-
   def findByCriteria(
     firstOrPreferredNameOpt: Option[String],
     lastNameOpt: Option[String],

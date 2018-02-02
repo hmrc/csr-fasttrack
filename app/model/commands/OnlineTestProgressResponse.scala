@@ -29,7 +29,8 @@ case class OnlineTestProgressResponse(
   awaitingAllocation: Boolean = false,
   awaitingAllocationNotified: Boolean = false,
   allocationConfirmed: Boolean = false,
-  allocationUnconfirmed: Boolean = false
+  allocationUnconfirmed: Boolean = false,
+  allocationExpired: Boolean = false
 )
 
 object OnlineTestProgressResponse {

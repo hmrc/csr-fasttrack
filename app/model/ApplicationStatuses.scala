@@ -37,6 +37,7 @@ object ApplicationStatuses extends Enum {
   val AwaitingAllocationNotified = EnumVal("AWAITING_ALLOCATION_NOTIFIED")
   val FailedToAttend = EnumVal("FAILED_TO_ATTEND")
   val AllocationUnconfirmed = EnumVal("ALLOCATION_UNCONFIRMED")
+  val AllocationExpired = EnumVal("ALLOCATION_EXPIRED")
   val AllocationConfirmed = EnumVal("ALLOCATION_CONFIRMED")
 
   val AssessmentScoresEntered = EnumVal("ASSESSMENT_SCORES_ENTERED")
