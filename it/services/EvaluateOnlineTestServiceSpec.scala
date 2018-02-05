@@ -34,6 +34,7 @@ import org.scalatestplus.play.OneAppPerSuite
 import play.Logger
 import repositories.application.GeneralApplicationRepository
 import repositories.{ OnlineTestPassMarkSettingsRepository, TestReportRepository }
+import services.evaluation.OnlineTestPassmarkRulesEngine
 import services.onlinetesting.EvaluateOnlineTestService
 import services.passmarksettings.OnlineTestPassMarkSettingsService
 import services.testmodel.{ OnlineTestPassmarkServiceTest, SchemeEvaluationTestResult }
@@ -44,7 +45,7 @@ class EvaluateOnlineTestServiceSpec extends IntegrationSpec with MockitoSugar wi
   lazy val service = new EvaluateOnlineTestService {
     val testReportRepository = mock[TestReportRepository]
     val onlineTestRepository = OnlineIntegrationTestInMemoryRepository
-    val passMarkRulesEngine = EvaluateOnlineTestService.passMarkRulesEngine
+    val passMarkRulesEngine = OnlineTestPassmarkRulesEngine
     val passMarkSettingsService = new OnlineTestPassMarkSettingsService {
       override val onlineTestPassMarkSettingsRepository = mock[OnlineTestPassMarkSettingsRepository]
     }

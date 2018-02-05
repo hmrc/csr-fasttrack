@@ -62,16 +62,6 @@ trait MicroService {
       scalacOptions += "-feature")
     .settings(HeaderPlugin.settingsFor(IntegrationTest))
     .configs(IntegrationTest)
-    .settings(
-      fork in IntegrationTest := false,
-      javaOptions in IntegrationTest += "-Dmongodb.uri=mongodb://localhost:27017/test-fset-fasttrack",
-      javaOptions in IntegrationTest += "-DmaxNumberOfDocuments=10",
-      javaOptions in IntegrationTest += "-Dlogger.resource=logback-test.xml",
-      javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.retries=10",
-      javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.delay.function=fibonacci",
-      javaOptions in IntegrationTest += "-Dmongodb.failoverStrategy.delay.factor=1",
-      javaOptions in IntegrationTest += "-Dtestserver.port=19101"
-    )
     .settings(inConfig(IntegrationTest)(Defaults.testSettings ++ AutomateHeaderPlugin.automateFor(IntegrationTest)): _*)
     .settings(inConfig(IntegrationTest)(Defaults.itSettings))
     // Disable Scalastyle & Scalariform temporarily, as it is currently intermittently failing when building
@@ -87,6 +77,7 @@ trait MicroService {
     // .settings(compileScalastyle := org.scalastyle.sbt.ScalastylePlugin.scalastyle.in(Compile).toTask("").value,
     // (compile in Compile) <<= (compile in Compile) dependsOn compileScalastyle)
     .settings(
+      fork in IntegrationTest := false,
       unmanagedSourceDirectories in IntegrationTest := (baseDirectory in IntegrationTest)(base => Seq(
         base / "it", base / "test/model", base / "test/testkit"
       )).value,
@@ -109,7 +100,7 @@ private object TestPhases {
     tests map {
       test => Group(test.name, Seq(test), SubProcess(ForkOptions(runJVMOptions =
         Seq("-Dtest.name=" + test.name,
-          "-Dmongodb.uri=mongodb://localhost:27017/test-fset-fasttrack",
+          "-Dmongodb.uri=mongodb://localhost:27017/test-fset-fasttrack?rm.nbChannelsPerNode=2&writeConcernJ=false",
           "-DmaxNumberOfDocuments=10",
           "-Dlogger.resource=logback-test.xml",
           "-Dmongodb.failoverStrategy.retries=10",
