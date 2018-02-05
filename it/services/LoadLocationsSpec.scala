@@ -26,21 +26,21 @@ import scala.concurrent.duration._
 
 class LoadLocationsSpec extends PlaySpec with OneAppPerSuite {
 
-  val timeout: Duration = 5 second
+  val timeout: Duration = 1 second
 
   "load locations " should {
     "load regions" in {
 
-      lazy val yamlRepository = new FrameworkYamlRepository()
+      val yamlRepository = new FrameworkYamlRepository()
 
-      lazy val s: List[Region] = Await.result(yamlRepository.getFrameworksByRegion, timeout)
+      val s: List[Region] = Await.result(yamlRepository.getFrameworksByRegion, timeout)
 
-      lazy val k: List[(String, String)] = s.flatMap { region =>
+      val k: List[(String, String)] = s.flatMap { region =>
         val regionName = region.name
         region.locations.map(location => (location.name, regionName))
       }
 
-      lazy val londonRegion = k.filter(p => p._1 == "London")
+      val londonRegion = k.filter(p => p._1 == "London")
 
       londonRegion.size must be(1)
       londonRegion.head._2 must be("London")
