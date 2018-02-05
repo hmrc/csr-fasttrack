@@ -76,7 +76,7 @@ trait TestDataGeneratorController extends BaseController {
       )),
       schemesData = Some(SchemesDataRequest(Some(List(Scheme.Business, Scheme.Commercial, Scheme.Finance,
         Scheme.DigitalAndTechnology, Scheme.ProjectDelivery)))),
-      schemeLocationsData = Some(SchemeLocationsDataRequest(Some(List("2648579", "2646914", "2651513", "2654142", "2655603", "2657613")))),
+      schemeLocationsData = Some(SchemeLocationsDataRequest(Some(List("2648579", "2646914", "2651513", "2654142", "2655603", "2643123")))),
       assistanceDetailsData = Some(AssistanceDetailsDataRequest(
         hasDisability = Some("false"),
         hasDisabilityDescription = Some(Random.hasDisabilityDescription),

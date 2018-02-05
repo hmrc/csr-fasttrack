@@ -231,7 +231,7 @@ class TestDataMongoRepository(implicit mongo: () => DB)
         "stemLevel" -> true,
         "civilServant" -> false
       ),
-      "scheme-locations" -> BSONArray("2643743", "2657613"),
+      "scheme-locations" -> BSONArray("2643743", "2643123"),
       "schemes" -> BSONArray("Commercial", "Business"),
       "assistance-details" -> BSONDocument(
         "hasDisability" -> "Yes",

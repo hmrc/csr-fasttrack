@@ -91,6 +91,8 @@ trait GeneralApplicationRepository {
 
   def allocationExpireDateByApplicationId(applicationId: String): Future[Option[LocalDate]]
 
+  def updateAllocationExpiryDate(applicationId: String, date: LocalDate): Future[Unit]
+
   def updateStatus(applicationId: String, status: ApplicationStatuses.EnumVal): Future[Unit]
 
   def nextApplicationReadyForAssessmentScoreEvaluation(currentPassmarkVersion: String): Future[Option[String]]
@@ -562,6 +564,14 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         doc.getAs[String]("allocation-expire-date").map(d => format.parseDateTime(d).toLocalDate)
       }
     }
+  }
+
+  def updateAllocationExpiryDate(applicationId: String, date: LocalDate): Future[Unit] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    val updateBson = BSONDocument("$set" -> BSONDocument(
+      "allocation-expire-date" -> date
+    ))
+    collection.update(query, updateBson).map(_ => ())
   }
 
   def updateStatus(applicationId: String, status: ApplicationStatuses.EnumVal): Future[Unit] = {

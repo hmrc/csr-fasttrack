@@ -47,7 +47,7 @@ class ReportingMongoRepositorySpec extends MongoRepositorySpec with UUIDFactory 
       userId = userId,
       progress = progressState,
       schemes = List(Scheme.Commercial, Scheme.Business),
-      locationIds = List("2643743", "2657613"),
+      locationIds = List("2643743", "2643123"),
       hasDisability = Some("Yes"),
       gis = Some(false),
       onlineAdjustments = Some(true),
