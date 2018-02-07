@@ -17,7 +17,6 @@
 package services
 
 import org.scalatestplus.play.{ OneAppPerSuite, PlaySpec }
-import play.test.WithApplication
 import repositories.FrameworkRepository.Region
 import repositories._
 
@@ -32,7 +31,7 @@ class LoadLocationsSpec extends PlaySpec with OneAppPerSuite {
   "load locations " should {
     "load regions" in {
 
-      val yamlRepository = frameworkRepository
+      val yamlRepository = new FrameworkYamlRepository()
 
       val s: List[Region] = Await.result(yamlRepository.getFrameworksByRegion, timeout)
 

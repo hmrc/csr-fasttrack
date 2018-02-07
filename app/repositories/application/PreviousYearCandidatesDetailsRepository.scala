@@ -137,22 +137,26 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
   // Default to the current campaign
   private val defaultSuffix = CollectionNames.suffixForThisCampaign
 
-  private def applicationDetailsCollection(collectionSuffix: String) = mongo().collection[JSONCollection](CollectionNames.APPLICATION_PREFIX)
+  private def applicationDetailsCollection(collectionSuffix: String) =
+    mongo().collection[JSONCollection](CollectionNames.APPLICATION_PREFIX + collectionSuffix)
 
-  private def contactDetailsCollection(collectionSuffix: String) = mongo().collection[JSONCollection](CollectionNames.CONTACT_DETAILS_PREFIX)
+  private def contactDetailsCollection(collectionSuffix: String) =
+    mongo().collection[JSONCollection](CollectionNames.CONTACT_DETAILS_PREFIX + collectionSuffix)
 
-  private def mediaCollection(collectionSuffix: String) = mongo().collection[JSONCollection](CollectionNames.MEDIA_PREFIX)
+  private def mediaCollection(collectionSuffix: String) =
+    mongo().collection[JSONCollection](CollectionNames.MEDIA_PREFIX + collectionSuffix)
 
-  private def questionnaireCollection(collectionSuffix: String) = mongo().collection[JSONCollection](CollectionNames.QUESTIONNAIRE_PREFIX)
+  private def questionnaireCollection(collectionSuffix: String) =
+    mongo().collection[JSONCollection](CollectionNames.QUESTIONNAIRE_PREFIX + collectionSuffix)
 
   private def onlineTestReportsCollection(collectionSuffix: String) =
-    mongo().collection[JSONCollection](CollectionNames.ONLINE_TEST_REPORT_PREFIX)
+    mongo().collection[JSONCollection](CollectionNames.ONLINE_TEST_REPORT_PREFIX + collectionSuffix)
 
   private def assessmentCentresCollection(collectionSuffix: String) =
-    mongo().collection[JSONCollection](CollectionNames.APPLICATION_ASSESSMENT_PREFIX)
+    mongo().collection[JSONCollection](CollectionNames.APPLICATION_ASSESSMENT_PREFIX + collectionSuffix)
 
   private def assessmentScoresCollection(collectionSuffix: String) =
-    mongo().collection[JSONCollection](CollectionNames.APPLICATION_ASSESSMENT_SCORES_PREFIX)
+    mongo().collection[JSONCollection](CollectionNames.APPLICATION_ASSESSMENT_SCORES_PREFIX + collectionSuffix)
 
   override def applicationDetailsStream(collectionSuffix: String): Future[Enumerator[CandidateDetailsReportItem]] = {
     val projection = Json.obj("_id" -> 0, "progress-status" -> 0)

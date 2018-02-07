@@ -43,63 +43,73 @@ object MicroserviceLoggingFilter extends LoggingFilter with MicroserviceFilterSu
 
 trait Scheduler extends RunningOfScheduledJobs {
   import config.MicroserviceAppConfig._
+  val sendInvitationJob: SendInvitationJob
+  val expireOnlineTestJob: ExpireOnlineTestJob
+  val sendOnlineTestResultJob: SendOnlineTestResultJob
+  val firstReminderExpiryTestsJob: ReminderExpiryTestsJob
+  val secondReminderExpiryTestsJob: ReminderExpiryTestsJob
+  val retrieveOnlineTestPDFReportJob: RetrieveOnlineTestPDFReportJob
+  val evaluationCandidateScoreJob: EvaluateCandidateScoreJob
+  val confirmAttendanceReminderJob: ConfirmAttendanceReminderJob
+  val evaluateAssessmentScoreJob: EvaluateAssessmentScoreJob
+  val notifyAssessmentCentrePassedOrFailedJob: NotifyAssessmentCentrePassedOrFailedJob
 
-  private lazy val sendInvitationJob: Option[ScheduledJob] =
-    if (sendInvitationJobConfigValues.enabled) Some(SendInvitationJob) else {
+  private lazy val maybeSendInvitationJob: Option[ScheduledJob] =
+    if (sendInvitationJobConfigValues.enabled) Some(sendInvitationJob) else {
       Logger.warn("Send invitation job is disabled")
       None
     }
 
-  private lazy val expireOnlineTestJob: Option[ScheduledJob] =
-    if (expireOnlineTestJobConfigValues.enabled) Some(ExpireOnlineTestJob) else {
+  private lazy val maybeExpireOnlineTestJob: Option[ScheduledJob] =
+    if (expireOnlineTestJobConfigValues.enabled) Some(expireOnlineTestJob) else {
       Logger.warn("Expire online test job is disabled")
       None
     }
 
-  private lazy val sendOnlineTestResultJob: Option[ScheduledJob] =
-    if (sendOnlineTestResultJobConfigValues.enabled) Some(SendOnlineTestResultJob) else {
+  private lazy val maybeSendOnlineTestResultJob: Option[ScheduledJob] =
+    if (sendOnlineTestResultJobConfigValues.enabled) Some(sendOnlineTestResultJob) else {
       Logger.warn("Send online test result job is disabled")
       None
     }
 
-  private lazy val firstReminderOnlineTestJob: Option[ScheduledJob] =
-    if (firstReminderOnlineTestJobConfigValues.enabled) Some(FirstReminderExpiryTestsJob) else {
+  private lazy val maybeFirstReminderOnlineTestJob: Option[ScheduledJob] =
+    if (firstReminderOnlineTestJobConfigValues.enabled) Some(firstReminderExpiryTestsJob) else {
       Logger.warn("first reminder online test job is disabled")
       None
     }
 
-  private lazy val secondReminderOnlineTestJob: Option[ScheduledJob] =
-    if (secondReminderOnlineTestJobConfigValues.enabled) Some(SecondReminderExpiryTestsJob) else {
+  private lazy val maybeSecondReminderOnlineTestJob: Option[ScheduledJob] =
+    if (secondReminderOnlineTestJobConfigValues.enabled) Some(secondReminderExpiryTestsJob) else {
       Logger.warn("second reminder online test job is disabled")
       None
     }
 
-  private lazy val retrieveOnlineTestPDFReportJob: Option[ScheduledJob] =
-    if (retrieveOnlineTestPDFReportJobConfigValues.enabled) Some(RetrieveOnlineTestPDFReportJob) else {
+  private lazy val maybeRetrieveOnlineTestPDFReportJob: Option[ScheduledJob] =
+    if (retrieveOnlineTestPDFReportJobConfigValues.enabled) Some(retrieveOnlineTestPDFReportJob) else {
       Logger.warn("Retrieve Online Test PDF report job is disabled")
       None
     }
 
-  private lazy val evaluateCandidateScoreJob: Option[ScheduledJob] =
-    if (evaluateCandidateScoreJobConfigValues.enabled) Some(EvaluateCandidateScoreJob) else {
+  private lazy val maybeEvaluateCandidateScoreJob: Option[ScheduledJob] =
+    if (evaluateCandidateScoreJobConfigValues.enabled) Some(evaluationCandidateScoreJob) else {
       Logger.warn("Evaluate Candidate Score job is disabled")
       None
     }
 
-  private lazy val confirmAttendanceReminderJob: Option[ScheduledJob] =
-    if (confirmAttendanceReminderJobConfigValues.enabled) Some(ConfirmAttendanceReminderJob) else {
+  private lazy val maybeConfirmAttendanceReminderJob: Option[ScheduledJob] =
+    if (confirmAttendanceReminderJobConfigValues.enabled) Some(confirmAttendanceReminderJob) else {
       Logger.warn("confirm attendance reminder job is disabled")
       None
     }
 
-  private lazy val evaluateAssessmentScoreJob: Option[ScheduledJob] =
-    if (evaluateAssessmentScoreJobConfigValues.enabled) Some(EvaluateAssessmentScoreJob) else {
+  private lazy val maybeEvaluateAssessmentScoreJob: Option[ScheduledJob] =
+    if (evaluateAssessmentScoreJobConfigValues.enabled) Some(evaluateAssessmentScoreJob) else {
       Logger.warn("evaluate assessment score job is disabled")
       None
     }
 
-  private lazy val notifyAssessmentCentrePassedOrFailedJob: Option[ScheduledJob] =
-    if (notifyAssessmentCentrePassedOrFailedJobConfigValues.enabled) Some(NotifyAssessmentCentrePassedOrFailedJob) else {
+  private lazy val maybeNotifyAssessmentCentrePassedOrFailedJob: Option[ScheduledJob] =
+    if (notifyAssessmentCentrePassedOrFailedJobConfigValues.enabled) Some(notifyAssessmentCentrePassedOrFailedJob) else {
       Logger.warn("notify assessment centre passed or failed job is disabled")
       None
     }
@@ -116,9 +126,10 @@ trait Scheduler extends RunningOfScheduledJobs {
   private[config] def evaluateAssessmentScoreJobConfigValues = evaluateAssessmentScoreJobConfig
   private[config] def notifyAssessmentCentrePassedOrFailedJobConfigValues = notifyAssessmentCentrePassedOrFailedJobConfig
 
-  lazy val scheduledJobs = List(sendInvitationJob, expireOnlineTestJob, sendOnlineTestResultJob,
-    retrieveOnlineTestPDFReportJob, evaluateCandidateScoreJob, confirmAttendanceReminderJob,
-    evaluateAssessmentScoreJob, notifyAssessmentCentrePassedOrFailedJob, firstReminderOnlineTestJob, secondReminderOnlineTestJob).flatten
+  lazy val scheduledJobs = List(maybeSendInvitationJob, maybeExpireOnlineTestJob, maybeSendOnlineTestResultJob,
+    maybeRetrieveOnlineTestPDFReportJob, maybeEvaluateCandidateScoreJob, maybeConfirmAttendanceReminderJob,
+    maybeEvaluateAssessmentScoreJob, maybeNotifyAssessmentCentrePassedOrFailedJob, maybeFirstReminderOnlineTestJob,
+    maybeSecondReminderOnlineTestJob).flatten
 }
 
 object MicroserviceGlobal extends DefaultMicroserviceGlobal with Scheduler {
@@ -131,4 +142,15 @@ object MicroserviceGlobal extends DefaultMicroserviceGlobal with Scheduler {
   override val microserviceAuditFilter = MicroserviceAuditFilter
 
   override val authFilter = None
+
+  lazy val sendInvitationJob: SendInvitationJob = SendInvitationJob
+  lazy val expireOnlineTestJob: ExpireOnlineTestJob = ExpireOnlineTestJob
+  lazy val sendOnlineTestResultJob: SendOnlineTestResultJob = SendOnlineTestResultJob
+  lazy val firstReminderExpiryTestsJob: ReminderExpiryTestsJob = FirstReminderExpiryTestsJob
+  lazy val secondReminderExpiryTestsJob: ReminderExpiryTestsJob = SecondReminderExpiryTestsJob
+  lazy val retrieveOnlineTestPDFReportJob: RetrieveOnlineTestPDFReportJob = RetrieveOnlineTestPDFReportJob
+  lazy val evaluationCandidateScoreJob: EvaluateCandidateScoreJob = EvaluateCandidateScoreJob
+  lazy val confirmAttendanceReminderJob: ConfirmAttendanceReminderJob = ConfirmAttendanceReminderJob
+  lazy val evaluateAssessmentScoreJob: EvaluateAssessmentScoreJob = EvaluateAssessmentScoreJob
+  lazy val notifyAssessmentCentrePassedOrFailedJob: NotifyAssessmentCentrePassedOrFailedJob = NotifyAssessmentCentrePassedOrFailedJob
 }
