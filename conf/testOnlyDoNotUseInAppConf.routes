@@ -23,3 +23,4 @@ GET         /candidate-application/invite-candidate                             
 GET         /candidate-application/evaluate-candidate                                   controllers.testdata.TestJobsController.evaluateCandidate
 GET         /candidate-application/send-online-test-result                              controllers.testdata.TestJobsController.sendOnlineTestResult
 GET         /candidate-application/evaluate-assessment                                  controllers.testdata.TestJobsController.evaluateAssessmentScore
+GET         /candidate-application/process-expired-allocations                          controllers.testdata.TestJobsController.processExpiredAllocations

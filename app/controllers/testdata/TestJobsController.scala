@@ -17,6 +17,7 @@
 package controllers.testdata
 
 import play.api.mvc.Action
+import scheduler.allocation.ExpireAllocationJob
 import scheduler.assessment.EvaluateAssessmentScoreJob
 import scheduler.onlinetesting.{ EvaluateCandidateScoreJob, SendInvitationJob, SendOnlineTestResultJob }
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -48,6 +49,12 @@ class TestJobsController extends BaseController {
   def evaluateAssessmentScore = Action.async { implicit request =>
     EvaluateAssessmentScoreJob.tryExecute().map { _ =>
       Ok("Evaluate assessment score job started")
+    }
+  }
+
+  def processExpiredAllocations = Action.async { implicit request =>
+    ExpireAllocationJob.tryExecute().map { _ =>
+      Ok("Expire allocation job started")
     }
   }
 }

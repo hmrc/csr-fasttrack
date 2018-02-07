@@ -18,6 +18,7 @@ package services.application
 
 import connectors.AuthProviderClient
 import connectors.ExchangeObjects.{ AuthProviderUserDetails, UpdateDetailsRequest }
+import model.ApplicationStatuses
 import model.Commands.{ CandidateEditableDetails, WithdrawApplicationRequest }
 import model.Exceptions.NotFoundException
 import play.api.Logger
@@ -100,8 +101,14 @@ trait ApplicationService {
   }
 
   def processExpiredApplications(): Future[Unit] = {
-    Logger.info("\n\n\n\nProcessing expired candidates!!")
-    Future.successful(())
+    Logger.info("Processing expired candidates")
+    appRepository.nextApplicationPendingAllocationExpiry.map { expiringAllocationOpt =>
+      expiringAllocationOpt.map { expiringAllocation =>
+        Logger.info(s"Expiring candidate: $expiringAllocation")
+        appRepository.updateStatus(expiringAllocation.applicationId, ApplicationStatuses.AllocationExpired)
+          .map(_ => ()) // TODO: Notify candidate here(email) :)
+      }
+    }
   }
 
   private def toUpdateDetailsRequest(editRequest: CandidateEditableDetails, user: AuthProviderUserDetails): UpdateDetailsRequest = {

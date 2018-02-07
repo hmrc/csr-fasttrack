@@ -57,6 +57,8 @@ object PersistedObjects {
     preferredName: String
   )
 
+  case class ExpiringAllocation(applicationId: String, userId: String)
+
   case class ApplicationForNotification(
     applicationId: String,
     userId: String,
