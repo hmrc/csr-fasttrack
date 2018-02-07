@@ -16,7 +16,7 @@
 
 package services.application
 
-import connectors.AuthProviderClient
+import connectors.{ AuthProviderClient, CSREmailClient }
 import connectors.ExchangeObjects.{ AuthProviderUserDetails, UpdateDetailsRequest }
 import model.ApplicationStatuses
 import model.Commands.{ CandidateEditableDetails, WithdrawApplicationRequest }
@@ -37,6 +37,7 @@ object ApplicationService extends ApplicationService {
   val personalDetailsRepository = repositories.personalDetailsRepository
   val contactDetailsRepository = repositories.contactDetailsRepository
   val authProviderClient = AuthProviderClient
+  val emailClient = CSREmailClient
 }
 
 trait ApplicationService {
@@ -48,6 +49,7 @@ trait ApplicationService {
   val contactDetailsRepository: ContactDetailsRepository
   val personalDetailsRepository: PersonalDetailsRepository
   val authProviderClient: AuthProviderClient
+  val emailClient: CSREmailClient
   private val UserNotFoundError = Future.failed(new RuntimeException("User not found for the given userId"))
 
   def withdraw(applicationId: String, withdrawRequest: WithdrawApplicationRequest): Future[Unit] = {
@@ -101,12 +103,22 @@ trait ApplicationService {
   }
 
   def processExpiredApplications(): Future[Unit] = {
+    implicit val headerCarrier = HeaderCarrier()
     Logger.info("Processing expired candidates")
     appRepository.nextApplicationPendingAllocationExpiry.map { expiringAllocationOpt =>
       expiringAllocationOpt.map { expiringAllocation =>
+
         Logger.info(s"Expiring candidate: $expiringAllocation")
-        appRepository.updateStatus(expiringAllocation.applicationId, ApplicationStatuses.AllocationExpired)
-          .map(_ => ()) // TODO: Notify candidate here(email) :)
+        authProviderClient.findByUserId(expiringAllocation.userId).map { userOpt =>
+          userOpt.map { user =>
+            for {
+              _ <- appRepository.updateStatus(expiringAllocation.applicationId, ApplicationStatuses.AllocationExpired)
+              msg = s"No email found for user ${expiringAllocation.userId}"
+              _ <- emailClient.sendAssessmentCentreExpired(to = user.email.getOrElse(throw new IllegalStateException(msg)),
+                name = user.preferredName.getOrElse(s"${user.firstName} ${user.lastName}"))
+            } yield ()
+          }
+        }
       }
     }
   }
@@ -114,5 +126,4 @@ trait ApplicationService {
   private def toUpdateDetailsRequest(editRequest: CandidateEditableDetails, user: AuthProviderUserDetails): UpdateDetailsRequest = {
     UpdateDetailsRequest(editRequest.firstName, editRequest.lastName, user.email, Some(editRequest.preferredName), user.role, user.disabled)
   }
-
 }
