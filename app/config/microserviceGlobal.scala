@@ -19,7 +19,7 @@ package config
 import com.typesafe.config.Config
 import net.ceedubs.ficus.Ficus._
 import play.api.{ Application, Logger, Play }
-import scheduler.allocation.ConfirmAttendanceReminderJob
+import scheduler.allocation.{ ConfirmAttendanceReminderJob, ExpireAllocationJob }
 import scheduler.assessment._
 import scheduler.onlinetesting._
 import uk.gov.hmrc.play.config.{ AppName, ControllerConfig }
@@ -51,6 +51,7 @@ trait Scheduler extends RunningOfScheduledJobs {
   val retrieveOnlineTestPDFReportJob: RetrieveOnlineTestPDFReportJob
   val evaluationCandidateScoreJob: EvaluateCandidateScoreJob
   val confirmAttendanceReminderJob: ConfirmAttendanceReminderJob
+  val expireAllocationJob: ExpireAllocationJob
   val evaluateAssessmentScoreJob: EvaluateAssessmentScoreJob
   val notifyAssessmentCentrePassedOrFailedJob: NotifyAssessmentCentrePassedOrFailedJob
 
@@ -102,6 +103,12 @@ trait Scheduler extends RunningOfScheduledJobs {
       None
     }
 
+  private lazy val maybeExpireAllocationJob: Option[ScheduledJob] =
+    if (expireAllocationJobConfigValues.enabled) Some(expireAllocationJob) else {
+      Logger.warn("confirm attendance reminder job is disabled")
+      None
+    }
+
   private lazy val maybeEvaluateAssessmentScoreJob: Option[ScheduledJob] =
     if (evaluateAssessmentScoreJobConfigValues.enabled) Some(evaluateAssessmentScoreJob) else {
       Logger.warn("evaluate assessment score job is disabled")
@@ -123,11 +130,12 @@ trait Scheduler extends RunningOfScheduledJobs {
   private[config] def retrieveOnlineTestPDFReportJobConfigValues = retrieveOnlineTestPDFReportJobConfig
   private[config] def evaluateCandidateScoreJobConfigValues = evaluateCandidateScoreJobConfig
   private[config] def confirmAttendanceReminderJobConfigValues = confirmAttendanceReminderJobConfig
+  private[config] def expireAllocationJobConfigValues = expireAllocationJobConfig
   private[config] def evaluateAssessmentScoreJobConfigValues = evaluateAssessmentScoreJobConfig
   private[config] def notifyAssessmentCentrePassedOrFailedJobConfigValues = notifyAssessmentCentrePassedOrFailedJobConfig
 
   lazy val scheduledJobs = List(maybeSendInvitationJob, maybeExpireOnlineTestJob, maybeSendOnlineTestResultJob,
-    maybeRetrieveOnlineTestPDFReportJob, maybeEvaluateCandidateScoreJob, maybeConfirmAttendanceReminderJob,
+    maybeRetrieveOnlineTestPDFReportJob, maybeEvaluateCandidateScoreJob, maybeConfirmAttendanceReminderJob, maybeExpireAllocationJob,
     maybeEvaluateAssessmentScoreJob, maybeNotifyAssessmentCentrePassedOrFailedJob, maybeFirstReminderOnlineTestJob,
     maybeSecondReminderOnlineTestJob).flatten
 }
@@ -151,6 +159,7 @@ object MicroserviceGlobal extends DefaultMicroserviceGlobal with Scheduler {
   lazy val retrieveOnlineTestPDFReportJob: RetrieveOnlineTestPDFReportJob = RetrieveOnlineTestPDFReportJob
   lazy val evaluationCandidateScoreJob: EvaluateCandidateScoreJob = EvaluateCandidateScoreJob
   lazy val confirmAttendanceReminderJob: ConfirmAttendanceReminderJob = ConfirmAttendanceReminderJob
+  lazy val expireAllocationJob: ExpireAllocationJob = ExpireAllocationJob
   lazy val evaluateAssessmentScoreJob: EvaluateAssessmentScoreJob = EvaluateAssessmentScoreJob
   lazy val notifyAssessmentCentrePassedOrFailedJob: NotifyAssessmentCentrePassedOrFailedJob = NotifyAssessmentCentrePassedOrFailedJob
 }

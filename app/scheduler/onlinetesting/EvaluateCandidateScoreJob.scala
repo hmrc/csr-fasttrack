@@ -18,6 +18,7 @@ package scheduler.onlinetesting
 
 import config.ScheduledJobConfig
 import play.api.Logger
+import scheduler.BasicJobConfig
 import scheduler.clustering.SingleInstanceScheduledJob
 import services.onlinetesting.EvaluateOnlineTestService
 

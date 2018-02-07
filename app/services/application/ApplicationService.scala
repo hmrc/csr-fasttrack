@@ -20,6 +20,7 @@ import connectors.AuthProviderClient
 import connectors.ExchangeObjects.{ AuthProviderUserDetails, UpdateDetailsRequest }
 import model.Commands.{ CandidateEditableDetails, WithdrawApplicationRequest }
 import model.Exceptions.NotFoundException
+import play.api.Logger
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
@@ -96,6 +97,11 @@ trait ApplicationService {
         Map("applicationId" -> applicationId, "editRequest" -> editRequest.toString)
       )
     }
+  }
+
+  def processExpiredApplications(): Future[Unit] = {
+    Logger.info("\n\n\n\nProcessing expired candidates!!")
+    Future.successful(())
   }
 
   private def toUpdateDetailsRequest(editRequest: CandidateEditableDetails, user: AuthProviderUserDetails): UpdateDetailsRequest = {

@@ -14,40 +14,34 @@
  * limitations under the License.
  */
 
-package scheduler.onlinetesting
+package scheduler.allocation
 
 import java.util.concurrent.{ ArrayBlockingQueue, ThreadPoolExecutor, TimeUnit }
 
 import config.ScheduledJobConfig
 import scheduler.BasicJobConfig
 import scheduler.clustering.SingleInstanceScheduledJob
-import services.onlinetesting.OnlineTestService
+import services.application.ApplicationService
 
 import scala.concurrent.{ ExecutionContext, Future }
 
-object SendInvitationJob extends SendInvitationJob {
-  val onlineTestingService = OnlineTestService
+object ExpireAllocationJob extends ExpireAllocationJob {
+  val service = ApplicationService
 }
 
-trait SendInvitationJob extends SingleInstanceScheduledJob with SendInvitationJobConfig {
-  val onlineTestingService: OnlineTestService
+trait ExpireAllocationJob extends SingleInstanceScheduledJob with ExpireAllocationJobConfig {
+  val service: ApplicationService
 
   override implicit val ec = ExecutionContext.fromExecutor(new ThreadPoolExecutor(2, 2, 180, TimeUnit.SECONDS, new ArrayBlockingQueue(4)))
 
   def tryExecute()(implicit ec: ExecutionContext): Future[Unit] = {
-    onlineTestingService.nextApplicationReadyForOnlineTesting().flatMap {
-      case Some(application) =>
-        onlineTestingService.registerAndInviteApplicant(application)
-      case None =>
-        Future.successful(Unit)
-    }
+    service.processExpiredApplications()
   }
 }
 
-trait SendInvitationJobConfig extends BasicJobConfig[ScheduledJobConfig] {
+trait ExpireAllocationJobConfig extends BasicJobConfig[ScheduledJobConfig] {
   this: SingleInstanceScheduledJob =>
-  override val conf = config.MicroserviceAppConfig.sendInvitationJobConfig
-  val configPrefix = "scheduling.online-testing.send-invitation-job."
-  val name = "SendInvitationJob"
-
+  override val conf = config.MicroserviceAppConfig.expireAllocationJobConfig
+  val configPrefix = "allocation-expiry-job"
+  val name = "ExpireAllocationJob"
 }
