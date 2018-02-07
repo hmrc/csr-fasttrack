@@ -97,6 +97,13 @@ trait CSREmailClient extends EmailClient {
       )
     )
 
+  override def sendAssessmentCentreExpired(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit] =
+    sendEmail(
+      to,
+      "csr_app_assessment_centre_expired",
+      Map("name" -> name)
+    )
+
   override def sendAssessmentCentrePassed(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     sendEmail(
       to,
@@ -139,6 +146,7 @@ trait EmailClient extends WSHttp {
     confirmByDate: LocalDate)(implicit hc: HeaderCarrier): Future[Unit]
   def sendReminderToConfirmAttendance(to: String, name: String, assessmentDateTime: DateTime,
     confirmByDate: LocalDate)(implicit hc: HeaderCarrier): Future[Unit]
+  def sendAssessmentCentreExpired(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit]
   def sendAssessmentCentrePassed(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit]
   def sendAssessmentCentreFailed(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit]
   def sendExpiringReminder(template: String, to: String, name: String, expiryDate: DateTime)(implicit hc: HeaderCarrier): Future[Unit]
