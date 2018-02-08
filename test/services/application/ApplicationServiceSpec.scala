@@ -36,6 +36,7 @@ import services.AuditService
 import services.applicationassessment.AssessmentCentreService
 
 import scala.concurrent.{ ExecutionContext, Future }
+import testkit.MockitoImplicits._
 import uk.gov.hmrc.http.HeaderCarrier
 
 class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with MockitoSugar with ScalaFutures {
@@ -70,8 +71,8 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       when(contactDetailsRepositoryMock.find(any[String])).thenReturn(Future.successful(currentContactDetails))
       when(personalDetailsRepositoryMock.find(any[String])).thenReturn(Future.successful(currentPersonalDetails))
       when(authProviderClientMock.findByUserId(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Some(currentUser)))
-      when(authProviderClientMock.update(any[String], any[UpdateDetailsRequest])(any[HeaderCarrier])).thenReturn(Future.successful(()))
-      when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturn(Future.successful(()))
+      when(authProviderClientMock.update(any[String], any[UpdateDetailsRequest])(any[HeaderCarrier])).thenReturnAsync()
+      when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturnAsync()
       when(personalDetailsRepositoryMock.update(any[String], any[String], any[PersonalDetails]))
         .thenReturn(Future.successful(()))
 
@@ -93,8 +94,8 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       when(contactDetailsRepositoryMock.find(any[String])).thenReturn(failedFuture)
       when(personalDetailsRepositoryMock.find(any[String])).thenReturn(Future.successful(currentPersonalDetails))
       when(authProviderClientMock.findByUserId(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Some(currentUser)))
-      when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturn(Future.successful(()))
-      when(authProviderClientMock.update(any[String], any[UpdateDetailsRequest])(any[HeaderCarrier])).thenReturn(Future.successful(()))
+      when(contactDetailsRepositoryMock.update(any[String], any[ContactDetails])).thenReturnAsync()
+      when(authProviderClientMock.update(any[String], any[UpdateDetailsRequest])(any[HeaderCarrier])).thenReturnAsync()
       when(personalDetailsRepositoryMock.update(any[String], any[String], any[PersonalDetails]))
         .thenReturn(Future.successful(()))
 
@@ -114,8 +115,8 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       "inform the candidate with an email" in new ApplicationServiceFixture {
       when(appRepositoryMock.nextApplicationPendingAllocationExpiry).thenReturn(Future.successful(Some(expiringAllocation)))
       when(authProviderClientMock.findByUserId(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Some(currentUser)))
-      when(appRepositoryMock.updateStatus(any[String], any[model.ApplicationStatuses.EnumVal])).thenReturn(Future.successful())
-      when(emailClientMock.sendAssessmentCentreExpired(any[String], any[String])(any[HeaderCarrier])).thenReturn(Future.successful())
+      when(appRepositoryMock.updateStatus(any[String], any[model.ApplicationStatuses.EnumVal])).thenReturnAsync()
+      when(emailClientMock.sendAssessmentCentreExpired(any[String], any[String])(any[HeaderCarrier])).thenReturnAsync()
 
       val result = applicationService.processExpiredApplications()
       result.futureValue mustBe unit
@@ -128,8 +129,8 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       when(appRepositoryMock.nextApplicationPendingAllocationExpiry).thenReturn(Future.successful(Some(expiringAllocation)))
       val user = Some(currentUser.copy(email = None))
       when(authProviderClientMock.findByUserId(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(user))
-      when(appRepositoryMock.updateStatus(any[String], any[model.ApplicationStatuses.EnumVal])).thenReturn(Future.successful())
-      when(emailClientMock.sendAssessmentCentreExpired(any[String], any[String])(any[HeaderCarrier])).thenReturn(Future.successful())
+      when(appRepositoryMock.updateStatus(any[String], any[model.ApplicationStatuses.EnumVal])).thenReturnAsync()
+      when(emailClientMock.sendAssessmentCentreExpired(any[String], any[String])(any[HeaderCarrier])).thenReturnAsync()
 
       val result = applicationService.processExpiredApplications()
       result.futureValue mustBe unit
@@ -158,9 +159,9 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
     val authProviderClientMock = mock[AuthProviderClient]
     val emailClientMock = mock[CSREmailClient]
 
-    when(appRepositoryMock.withdraw(eqTo(applicationId), eqTo(withdrawApplicationRequest))).thenReturn(Future.successful(()))
-    when(appAssessServiceMock.removeFromAssessmentCentreSlot(eqTo(applicationId))).thenReturn(Future.successful(()))
-    when(appAssessServiceMock.deleteAssessmentCentreAllocation(eqTo(applicationId))).thenReturn(Future.successful(()))
+    when(appRepositoryMock.withdraw(eqTo(applicationId), eqTo(withdrawApplicationRequest))).thenReturnAsync()
+    when(appAssessServiceMock.removeFromAssessmentCentreSlot(eqTo(applicationId))).thenReturnAsync()
+    when(appAssessServiceMock.deleteAssessmentCentreAllocation(eqTo(applicationId))).thenReturnAsync()
 
     val applicationService = new ApplicationService {
       val appRepository = appRepositoryMock
