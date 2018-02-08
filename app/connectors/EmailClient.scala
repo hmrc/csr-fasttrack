@@ -102,7 +102,7 @@ trait CSREmailClient extends EmailClient {
       to,
       "csr_app_assessment_centre_expired",
       Map("name" -> name)
-  )
+    )
 
   override def sendAssessmentCentrePassed(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit] = {
     sendEmail(
