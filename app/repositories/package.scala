@@ -15,12 +15,13 @@
  */
 
 import factories.DateTimeFactory
-import model.AdjustmentDetail
+import model.{ AdjustmentDetail, ProgressStatuses }
 import model.CandidateScoresCommands._
 import model.Commands._
 import model.EvaluationResults._
 import model.FlagCandidatePersistedObject.FlagCandidate
-import model.PersistedObjects.{ ContactDetails, PersistedAnswer, _ }
+import model.PersistedObjects.{ ContactDetails, PersistedAnswer }
+import model.commands.OnlineTestProgressResponse
 import org.joda.time.{ DateTime, DateTimeZone, LocalDate }
 import reactivemongo.api.indexes.Index
 import reactivemongo.api.indexes.IndexType.Ascending
@@ -135,6 +136,65 @@ package object repositories {
       elements.toMap
     }
   }
+
+  // scalastyle:off method.length
+  def findProgress(document: BSONDocument, applicationId: String): ProgressResponse = {
+    (document.getAs[BSONDocument]("progress-status") map { root =>
+
+      def getStatus(root: BSONDocument)(key: String) = {
+        root.getAs[Boolean](key).getOrElse(false)
+      }
+
+      def getProgress = getStatus(root) _
+
+      def getQuestionnaire = getStatus(root.getAs[BSONDocument]("questionnaire").getOrElse(BSONDocument())) _
+
+      ProgressResponse(
+        applicationId,
+        personalDetails = getProgress(ProgressStatuses.PersonalDetailsCompletedProgress),
+        hasSchemeLocations = getProgress(ProgressStatuses.SchemeLocationsCompletedProgress),
+        hasSchemes = getProgress(ProgressStatuses.SchemesPreferencesCompletedProgress),
+        assistanceDetails = getProgress(ProgressStatuses.AssistanceDetailsCompletedProgress),
+        review = getProgress(ProgressStatuses.ReviewCompletedProgress),
+        questionnaire = QuestionnaireProgressResponse(
+          diversityStarted = getQuestionnaire(ProgressStatuses.StartDiversityQuestionnaireProgress),
+          diversityCompleted = getQuestionnaire(ProgressStatuses.DiversityQuestionsCompletedProgress),
+          educationCompleted = getQuestionnaire(ProgressStatuses.EducationQuestionsCompletedProgress),
+          occupationCompleted = getQuestionnaire(ProgressStatuses.OccupationQuestionsCompletedProgress)
+        ),
+        submitted = getProgress(ProgressStatuses.SubmittedProgress),
+        withdrawn = getProgress(ProgressStatuses.WithdrawnProgress),
+        OnlineTestProgressResponse(
+          invited = getProgress(ProgressStatuses.OnlineTestInvitedProgress),
+          started = getProgress(ProgressStatuses.OnlineTestStartedProgress),
+          completed = getProgress(ProgressStatuses.OnlineTestCompletedProgress),
+          expired = getProgress(ProgressStatuses.OnlineTestExpiredProgress),
+          awaitingReevaluation = getProgress(ProgressStatuses.AwaitingOnlineTestReevaluationProgress),
+          failed = getProgress(ProgressStatuses.OnlineTestFailedProgress),
+          failedNotified = getProgress(ProgressStatuses.OnlineTestFailedNotifiedProgress),
+          awaitingAllocation = getProgress(ProgressStatuses.AwaitingAllocationProgress),
+          awaitingAllocationNotified = getProgress(ProgressStatuses.AwaitingAllocationNotifiedProgress),
+          allocationConfirmed = getProgress(ProgressStatuses.AllocationConfirmedProgress),
+          allocationUnconfirmed = getProgress(ProgressStatuses.AllocationUnconfirmedProgress),
+          allocationExpired = getProgress(ProgressStatuses.AllocationExpiredProgress)
+        ),
+        failedToAttend = getProgress(ProgressStatuses.FailedToAttendProgress),
+        assessmentScores = AssessmentScores(
+          entered = getProgress(ProgressStatuses.AssessmentScoresEnteredProgress),
+          accepted = getProgress(ProgressStatuses.AssessmentScoresAcceptedProgress)
+        ),
+        assessmentCentre = AssessmentCentre(
+          awaitingReevaluation = getProgress(ProgressStatuses.AwaitingAssessmentCentreReevaluationProgress),
+          passed = getProgress(ProgressStatuses.AssessmentCentrePassedProgress),
+          failed = getProgress(ProgressStatuses.AssessmentCentreFailedProgress),
+          passedNotified = getProgress(ProgressStatuses.AssessmentCentrePassedNotifiedProgress),
+          failedNotified = getProgress(ProgressStatuses.AssessmentCentreFailedNotifiedProgress)
+        )
+      )
+    }).getOrElse(ProgressResponse(applicationId))
+  }
+  // scalastyle:on method.length
+
 
   implicit val withdrawHandler: BSONHandler[BSONDocument, WithdrawApplicationRequest] = Macros.handler[WithdrawApplicationRequest]
   implicit val cdHandler: BSONHandler[BSONDocument, ContactDetails] = Macros.handler[ContactDetails]

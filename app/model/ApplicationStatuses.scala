@@ -35,9 +35,9 @@ object ApplicationStatuses extends Enum {
   val AwaitingOnlineTestReevaluation = EnumVal("AWAITING_ONLINE_TEST_RE_EVALUATION")
   val AwaitingAllocation = EnumVal("AWAITING_ALLOCATION")
   val AwaitingAllocationNotified = EnumVal("AWAITING_ALLOCATION_NOTIFIED")
-  val AllocationExpired = EnumVal("ALLOCATION_EXPIRED")
   val FailedToAttend = EnumVal("FAILED_TO_ATTEND")
   val AllocationUnconfirmed = EnumVal("ALLOCATION_UNCONFIRMED")
+  val AllocationExpired = EnumVal("ALLOCATION_EXPIRED")
   val AllocationConfirmed = EnumVal("ALLOCATION_CONFIRMED")
 
   val AssessmentScoresEntered = EnumVal("ASSESSMENT_SCORES_ENTERED")
