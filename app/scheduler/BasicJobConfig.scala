@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package scheduler.onlinetesting
+package scheduler
 
 import java.util.concurrent.TimeUnit
 

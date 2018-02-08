@@ -22,6 +22,7 @@ import config.ScheduledJobConfig
 import connectors.CSREmailClient
 import model.{ FirstReminder, ReminderNotice, SecondReminder }
 import repositories._
+import scheduler.BasicJobConfig
 import scheduler.clustering.SingleInstanceScheduledJob
 import services.AuditService
 import services.onlinetesting.{ OnlineTestExpiryService, OnlineTestExpiryServiceImpl }

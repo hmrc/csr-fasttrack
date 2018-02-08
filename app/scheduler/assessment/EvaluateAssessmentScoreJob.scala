@@ -17,8 +17,8 @@
 package scheduler.assessment
 
 import config.ScheduledJobConfig
+import scheduler.BasicJobConfig
 import scheduler.clustering.SingleInstanceScheduledJob
-import scheduler.onlinetesting.BasicJobConfig
 import services.applicationassessment.AssessmentCentreService
 
 import scala.concurrent.{ ExecutionContext, Future }

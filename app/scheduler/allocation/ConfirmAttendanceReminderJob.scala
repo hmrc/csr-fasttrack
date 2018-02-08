@@ -19,8 +19,8 @@ package scheduler.allocation
 import java.util.concurrent.{ ArrayBlockingQueue, ThreadPoolExecutor, TimeUnit }
 
 import config.ScheduledJobConfig
+import scheduler.BasicJobConfig
 import scheduler.clustering.SingleInstanceScheduledJob
-import scheduler.onlinetesting.BasicJobConfig
 import services.allocation.CandidateAllocationService
 
 import scala.concurrent.{ ExecutionContext, Future }

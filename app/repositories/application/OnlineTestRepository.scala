@@ -538,6 +538,7 @@ class OnlineTestMongoRepository(dateTime: DateTimeFactory)(implicit mongo: () =>
     val progressStatus = Try(applicationStatus match {
       case AllocationConfirmed => ProgressStatuses.AllocationConfirmedProgress
       case AllocationUnconfirmed => ProgressStatuses.AllocationUnconfirmedProgress
+      case AllocationExpired => ProgressStatuses.AllocationExpiredProgress
     })
 
     val update = (progressStatus: String) => BSONDocument("$set" -> {

@@ -21,6 +21,7 @@ import java.util.concurrent.{ ArrayBlockingQueue, ThreadPoolExecutor, TimeUnit }
 import config.ScheduledJobConfig
 import connectors.CSREmailClient
 import repositories._
+import scheduler.BasicJobConfig
 import scheduler.clustering.SingleInstanceScheduledJob
 import services.AuditService
 import services.onlinetesting.{ OnlineTestExpiryService, OnlineTestExpiryServiceImpl }

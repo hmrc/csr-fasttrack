@@ -21,6 +21,7 @@ import model.PersistedObjects.ContactDetails
 import model.exchange.AssistanceDetails
 import model.{ ApplicationStatuses, AssessmentCentreIndicator }
 import model.persisted.PersonalDetails
+import org.joda.time.LocalDate
 import play.api.libs.json.Json
 import repositories.SchemeInfo
 
@@ -41,7 +42,8 @@ object ExchangeObjects {
     assistanceDetails: Option[AssistanceDetails] = None,
     schemes: Option[List[SchemeInfo]] = None,
     schemeLocations: Option[List[String]] = None,
-    assessmentCentreIndicator: Option[AssessmentCentreIndicator] = None
+    assessmentCentreIndicator: Option[AssessmentCentreIndicator] = None,
+    allocationExpireDate: Option[LocalDate] = None
   )
 
   case class OnlineTestProfileResponse(cubiksUserId: Int, token: String, onlineTestUrl: String)

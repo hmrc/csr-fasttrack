@@ -140,6 +140,9 @@ object MicroserviceAppConfig extends ServicesConfig {
   lazy val notifyAssessmentCentrePassedOrFailedJobConfig =
     configuration.underlying.as[ScheduledJobConfig]("scheduling.notify-assessment-centre-passed-or-failed-job")
 
+  lazy val expireAllocationJobConfig =
+    configuration.underlying.as[ScheduledJobConfig]("scheduling.allocation-expiry-job")
+
   lazy val assessmentCentresLocationsConfig =
     configuration.underlying.as[AssessmentCentresLocationsConfig]("scheduling.online-testing.assessment-centres-locations")
   lazy val assessmentCentresConfig =
