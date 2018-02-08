@@ -16,7 +16,7 @@
 
 package config
 
-import scheduler.allocation.ConfirmAttendanceReminderJob
+import scheduler.allocation.{ ConfirmAttendanceReminderJob, ExpireAllocationJob }
 import scheduler.assessment.{ EvaluateAssessmentScoreJob, NotifyAssessmentCentrePassedOrFailedJob }
 import scheduler.onlinetesting._
 import testkit.UnitWithAppSpec
@@ -52,6 +52,8 @@ class SchedulerSpec extends UnitWithAppSpec {
         val confirmAttendanceReminderJob: ConfirmAttendanceReminderJob = mock[ConfirmAttendanceReminderJob]
         val evaluateAssessmentScoreJob: EvaluateAssessmentScoreJob = mock[EvaluateAssessmentScoreJob]
         val notifyAssessmentCentrePassedOrFailedJob: NotifyAssessmentCentrePassedOrFailedJob = mock[NotifyAssessmentCentrePassedOrFailedJob]
+        val expireAllocationJob: ExpireAllocationJob = mock[ExpireAllocationJob]
+
         override private[config] def sendInvitationJobConfigValues = ScheduledJobConfig(enabled, Some("id"), Some(5), Some(5))
       }
     }

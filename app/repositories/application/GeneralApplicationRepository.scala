@@ -20,13 +20,14 @@ import java.util.UUID
 import java.util.regex.Pattern
 
 import common.Constants.{ No, Yes }
+import factories.DateTimeFactory
 import model.Adjustments._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.EvaluationResults._
 import model.Exceptions.{ ApplicationNotFound, CannotUpdateReview, LocationPreferencesNotFound, SchemePreferencesNotFound }
 import model.Exceptions._
-import model.PersistedObjects.ApplicationForNotification
+import model.PersistedObjects.{ ApplicationForNotification, ExpiringAllocation }
 import model.Scheme.Scheme
 import model._
 import model.commands.{ ApplicationStatusDetails, OnlineTestProgressResponse }
@@ -34,6 +35,7 @@ import model.exchange.AssistanceDetails
 import model.persisted.SchemeEvaluationResult
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{ DateTime, LocalDate }
+import play.api.Logger
 import play.api.libs.json.{ Format, JsNumber, JsObject }
 import reactivemongo.api.{ DB, DefaultDB, QueryOpts }
 import reactivemongo.bson.{ BSONArray, BSONDocument, _ }
@@ -91,6 +93,8 @@ trait GeneralApplicationRepository {
 
   def allocationExpireDateByApplicationId(applicationId: String): Future[Option[LocalDate]]
 
+  def updateAllocationExpiryDate(applicationId: String, date: LocalDate): Future[Unit]
+
   def updateStatus(applicationId: String, status: ApplicationStatuses.EnumVal): Future[Unit]
 
   def nextApplicationReadyForAssessmentScoreEvaluation(currentPassmarkVersion: String): Future[Option[String]]
@@ -132,6 +136,8 @@ trait GeneralApplicationRepository {
   def count(implicit ec: scala.concurrent.ExecutionContext) : Future[Int]
 
   def countByStatus(applicationStatus: ApplicationStatuses.EnumVal): Future[Int]
+
+  def nextApplicationPendingAllocationExpiry: Future[Option[ExpiringAllocation]]
 }
 
 // scalastyle:on number.of.methods
@@ -564,6 +570,14 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     }
   }
 
+  def updateAllocationExpiryDate(applicationId: String, date: LocalDate): Future[Unit] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    val updateBson = BSONDocument("$set" -> BSONDocument(
+      "allocation-expire-date" -> date
+    ))
+    collection.update(query, updateBson).map(_ => ())
+  }
+
   def updateStatus(applicationId: String, status: ApplicationStatuses.EnumVal): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
     val lowercaseStatus = status.toLowerCase
@@ -792,6 +806,20 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
         }
       }
     }.toMap)
+  }
+
+  def nextApplicationPendingAllocationExpiry: Future[Option[ExpiringAllocation]] = {
+    val query = BSONDocument(
+      "allocation-expire-date" -> BSONDocument("$lte" -> LocalDate.now()),
+      "applicationStatus" -> ApplicationStatuses.AllocationUnconfirmed
+    )
+    selectRandom(query).map(_.map(bsonDocToExpiringAllocation))
+  }
+
+  private def bsonDocToExpiringAllocation(doc: BSONDocument) = {
+    val applicationId = doc.getAs[String]("applicationId").get
+    val userId = doc.getAs[String]("userId").get
+    ExpiringAllocation(applicationId, userId)
   }
 
   private def booleanToBSON(schemeName: String, result: Option[Boolean]): BSONDocument = result match {

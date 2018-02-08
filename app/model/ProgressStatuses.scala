@@ -68,6 +68,7 @@ object ProgressStatuses extends Enum {
   val AwaitingAllocationProgress = EnumVal(ApplicationStatuses.AwaitingAllocation.name.toLowerCase, 180)
   val AwaitingAllocationNotifiedProgress = EnumVal(ApplicationStatuses.AwaitingAllocationNotified.name.toLowerCase, 185)
   val AllocationUnconfirmedProgress = EnumVal(ApplicationStatuses.AllocationUnconfirmed.name.toLowerCase, 190)
+  val AllocationExpiredProgress = EnumVal(ApplicationStatuses.AllocationExpired.name.toLowerCase, 195)
 
   val AllocationConfirmedProgress = EnumVal(ApplicationStatuses.AllocationConfirmed.name.toLowerCase, 200)
   val AssessmentScoresEnteredProgress = EnumVal(ApplicationStatuses.AssessmentScoresEntered.name.toLowerCase, 210)

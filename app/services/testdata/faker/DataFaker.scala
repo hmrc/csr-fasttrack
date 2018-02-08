@@ -220,7 +220,7 @@ object DataFaker {
     // TODO: we should consider the schemes to generate de Scheme locations
     def schemeLocations: List[String] = {
       val size = number(Some(6))
-      randList(List("2648579", "2646914", "2651513", "2654142", "2655603", "2657613"), size)
+      randList(List("2648579", "2646914", "2651513", "2654142", "2655603", "2643123"), size)
     }
 
     def hasDisabilityDescription: String = randOne(List("I am too tall", "I am too good", "I get bored easily"))

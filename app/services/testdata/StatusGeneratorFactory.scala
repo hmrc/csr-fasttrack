@@ -46,6 +46,7 @@ object StatusGeneratorFactory {
       case ApplicationStatuses.AwaitingAllocationNotified.name => AwaitingAllocationNotifiedStatusGenerator
       case ApplicationStatuses.AllocationConfirmed.name => AllocationStatusGenerator
       case ApplicationStatuses.AllocationUnconfirmed.name => AllocationStatusGenerator
+      case ApplicationStatuses.AllocationExpired.name => AllocationExpiredStatusGenerator
       case ApplicationStatuses.FailedToAttend.name => FailedToAttendStatusGenerator
       case ApplicationStatuses.AssessmentScoresEntered.name => AssessmentScoresEnteredStatusGenerator
       case ApplicationStatuses.AssessmentScoresAccepted.name => AssessmentScoresAcceptedStatusGenerator
