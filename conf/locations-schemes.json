@@ -160,7 +160,7 @@
         "Policy",
         "Commercial",
         "ProjectDelivery",
-        "DigitalAndTechnology"
+        "Finance"
       ]
     },
     {
@@ -305,8 +305,9 @@
       "geocodes":[{"lat":51.53782, "lng":0.71433}],
       "schemes":[
         "Business",
-        "Policy",
-        "Finance"
+        "Finance",
+        "DigitalAndTechnology",
+        "ProjectDelivery"
       ]
     },
     {
@@ -345,7 +346,7 @@
       ]
     },
     {
-      "id":"2634749",
+      "id":"2634748",
       "name":"Whittington",
       "geocodes":[{"lat":52.6748398, "lng":-1.7672954}],
       "schemes":[
