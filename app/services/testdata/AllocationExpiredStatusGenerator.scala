@@ -66,9 +66,8 @@ trait AllocationExpiredStatusGenerator extends ConstructiveGenerator {
         candidateInPreviousStatus <- previousStatusGenerator.generate(generationId, generatorConfig.copy(confirmedAllocation = false))
         randomAssessment <- getApplicationAssessment(candidateInPreviousStatus)
         _ <- aaRepository.create(List(randomAssessment))
-        expiryDate = randomAssessment.expireDate//.minusYears(2)
+        expiryDate = randomAssessment.expireDate.minusYears(2)
         _ <- otRepository.saveCandidateAllocationStatus(candidateInPreviousStatus.applicationId.get, newStatus, Some(expiryDate))
-//        _ <- appRepository.updateAllocationExpiryDate(candidateInPreviousStatus.applicationId.get, expiryDate)
       } yield {
         candidateInPreviousStatus.copy(
           applicationStatus = newStatus,

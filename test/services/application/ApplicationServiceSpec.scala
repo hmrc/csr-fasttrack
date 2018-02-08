@@ -113,8 +113,8 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
   "process expired applications" should {
     "set candidates who have not confirmed their booking to allocation expired and " +
       "inform the candidate with an email" in new ApplicationServiceFixture {
-      when(appRepositoryMock.nextApplicationPendingAllocationExpiry).thenReturn(Future.successful(Some(expiringAllocation)))
-      when(authProviderClientMock.findByUserId(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(Some(currentUser)))
+      when(appRepositoryMock.nextApplicationPendingAllocationExpiry).thenReturnAsync(Some(expiringAllocation))
+      when(authProviderClientMock.findByUserId(any[String])(any[HeaderCarrier])).thenReturnAsync(Some(currentUser))
       when(appRepositoryMock.updateStatus(any[String], any[model.ApplicationStatuses.EnumVal])).thenReturnAsync()
       when(emailClientMock.sendAssessmentCentreExpired(any[String], any[String])(any[HeaderCarrier])).thenReturnAsync()
 

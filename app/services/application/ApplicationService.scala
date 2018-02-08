@@ -103,7 +103,7 @@ trait ApplicationService {
   }
 
   def processExpiredApplications(): Future[Unit] = {
-    implicit val headerCarrier = HeaderCarrier()
+    implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
     Logger.info("Processing expired candidates")
     appRepository.nextApplicationPendingAllocationExpiry.map { expiringAllocationOpt =>
       expiringAllocationOpt.map { expiringAllocation =>
