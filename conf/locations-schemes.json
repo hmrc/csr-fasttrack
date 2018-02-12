@@ -232,7 +232,8 @@
       "name":"Newport",
       "geocodes":[{"lat":51.58774, "lng":-2.99835}],
       "schemes":[
-        "Commercial"
+        "Commercial",
+        "Policy"
       ]
     },
     {
