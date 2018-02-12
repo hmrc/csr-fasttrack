@@ -59,7 +59,8 @@ object Commands {
       aLevel: Boolean,
       stemLevel: Boolean,
       civilServant: Boolean,
-      department: Option[String]
+      department: Option[String],
+      departmentOther: Option[String]
   ) {
     require(outsideUk && country.isDefined || !outsideUk && postCode.isDefined, "Either post code or country is mandatory")
   }

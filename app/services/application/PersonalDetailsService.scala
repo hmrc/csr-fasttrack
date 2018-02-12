@@ -53,7 +53,8 @@ trait PersonalDetailsService {
     UpdateGeneralDetails(
       pd.firstName, pd.lastName, pd.preferredName, cd.email, pd.dateOfBirth,
       cd.outsideUk, cd.address, cd.postCode, cd.country, cd.phone,
-      pd.aLevel, pd.stemLevel, civilServant = pd.civilServant, pd.department
+      pd.aLevel, pd.stemLevel, civilServant = pd.civilServant, pd.department,
+      pd.departmentOther
     )
   }
 }

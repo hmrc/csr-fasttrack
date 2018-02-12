@@ -37,7 +37,7 @@ class PersonalDetailsServiceSpec extends PlaySpec with MockitoSugar with ScalaFu
 
     "return personal details" in new TestFixture {
       val personalDetails = PersonalDetails("fname", "lname", "prefname", LocalDate.now, aLevel = true, stemLevel = true, civilServant = false,
-        department = None)
+        department = None, departmentOther = None)
       val address = Address("line1", Some("line2"), Some("line3"), Some("line4"))
       val contactDetails = ContactDetails(
         outsideUk = false, address, Some("QQ1 1QQ"): Option[PostCode], None, "test@test.com", Some("0123456789": PhoneNumber)
@@ -51,7 +51,7 @@ class PersonalDetailsServiceSpec extends PlaySpec with MockitoSugar with ScalaFu
 
       inside(result) {
         case UpdateGeneralDetails(
-          fname, lname, prefname, email, dob, _, addr, postcode, _, phone, alevel, stemlevel, isCivilServant, dept) =>
+          fname, lname, prefname, email, dob, _, addr, postcode, _, phone, alevel, stemlevel, isCivilServant, dept, deptOther) =>
           fname mustBe personalDetails.firstName
           lname mustBe personalDetails.lastName
           prefname mustBe personalDetails.preferredName
@@ -64,8 +64,8 @@ class PersonalDetailsServiceSpec extends PlaySpec with MockitoSugar with ScalaFu
           stemlevel mustBe personalDetails.stemLevel
           isCivilServant mustBe personalDetails.civilServant
           dept mustBe personalDetails.department
+          deptOther mustBe personalDetails.departmentOther
       }
-
     }
   }
 

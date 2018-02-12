@@ -28,7 +28,8 @@ case class PersonalDetails(
     aLevel: Boolean = false,
     stemLevel: Boolean = false,
     civilServant: Boolean = false,
-    department: Option[String] = None
+    department: Option[String] = None,
+    departmentOther: Option[String] = None
 ) {
   require((civilServant && department.isDefined) || (!civilServant && department.isEmpty), "Civil Servants must have a department")
 }
