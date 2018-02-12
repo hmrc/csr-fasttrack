@@ -380,9 +380,8 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
     val locationIds = doc.getAs[List[String]]("scheme-locations").getOrElse(Nil)
     val lookupTable = schemesAndLocations.groupBy(_.id).mapValues(_.head)
     locationIds.map(
-      locationId => lookupTable.get(locationId).map(_.locationName)
-      .getOrElse(s"Unknown Location ID: $locationId")
-    ).map(Some(_))
+      locationId => lookupTable.get(locationId).map(_.locationName).orElse(Some(s"Unknown Location ID: $locationId"))
+    )
   }
 
   private def statusTimestamps(doc: BSONDocument): List[Option[String]] = {
