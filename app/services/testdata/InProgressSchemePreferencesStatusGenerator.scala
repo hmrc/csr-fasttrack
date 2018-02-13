@@ -42,7 +42,9 @@ trait InProgressSchemePreferencesStatusGenerator extends ConstructiveGenerator {
       _ <- appRepository.updateSchemes(candidateInPreviousStatus.applicationId.get, schemesData)
     } yield {
       candidateInPreviousStatus.copy(
-        schemes = Some(schemesData.map { scheme => SchemeInfo(scheme, scheme.toString, requiresALevel = false, requiresALevelInStem = false) }),
+        schemes = Some(schemesData.map { scheme => SchemeInfo(scheme, scheme.toString,
+          requiresALevel = false, requiresALevelInStem = false, requiresU18Level3 = false)
+        }),
         schemeLocations = Some(schemeLocationsData)
       )
     }

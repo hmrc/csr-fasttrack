@@ -50,7 +50,7 @@ object Locations {
   implicit val locationsReader: Reads[Locations] = Json.reads[Locations]
 }
 
-case class SchemeInfo(id: Scheme, name: String, requiresALevel: Boolean, requiresALevelInStem: Boolean)
+case class SchemeInfo(id: Scheme, name: String, requiresALevel: Boolean, requiresALevelInStem: Boolean, requiresU18Level3: Boolean)
 
 object SchemeInfo {
   implicit val schemeInfoFormat = Json.format[SchemeInfo]
@@ -71,12 +71,13 @@ trait LocationSchemeRepository {
 
   def schemeInfoList: List[SchemeInfo] = {
     List(
-      SchemeInfo(Business, "Business", requiresALevel = false, requiresALevelInStem = false),
-      SchemeInfo(Commercial, "Commercial", requiresALevel = false, requiresALevelInStem = false),
-      SchemeInfo(DigitalAndTechnology, "Digital, data and technology", requiresALevel = true, requiresALevelInStem = true),
-      SchemeInfo(Finance, "Finance", requiresALevel = false, requiresALevelInStem = false),
-      SchemeInfo(Policy, "Policy", requiresALevel = true, requiresALevelInStem = false),
-      SchemeInfo(ProjectDelivery, "Project delivery", requiresALevel = true, requiresALevelInStem = false)
+      SchemeInfo(Business, "Business", requiresALevel = false, requiresALevelInStem = false, requiresU18Level3 = true),
+      SchemeInfo(Commercial, "Commercial", requiresALevel = false, requiresALevelInStem = false, requiresU18Level3 = false),
+      SchemeInfo(DigitalAndTechnology, "Digital, data and technology", requiresALevel = true, requiresALevelInStem = true,
+        requiresU18Level3 = false),
+      SchemeInfo(Finance, "Finance", requiresALevel = false, requiresALevelInStem = false, requiresU18Level3 = false),
+      SchemeInfo(Policy, "Policy", requiresALevel = true, requiresALevelInStem = false, requiresU18Level3 = false),
+      SchemeInfo(ProjectDelivery, "Project delivery", requiresALevel = true, requiresALevelInStem = false, requiresU18Level3 = false)
     )
   }
 }
