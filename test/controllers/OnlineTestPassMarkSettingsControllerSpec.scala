@@ -118,9 +118,10 @@ class OnlineTestPassMarkSettingsControllerSpec extends PlaySpec with Results wit
   trait TestFixture extends TestFixtureBase {
 
     val testSchemeInfos = List(
-      SchemeInfo(Business, "Business", requiresALevel = true, requiresALevelInStem = true),
-      SchemeInfo(Commercial, "Commercial", requiresALevel = true, requiresALevelInStem = true),
-      SchemeInfo(DigitalAndTechnology, "Digital and technology", requiresALevel = false, requiresALevelInStem = true)
+      SchemeInfo(Business, "Business", requiresALevel = true, requiresALevelInStem = true, requiresU18Level3 = true),
+      SchemeInfo(Commercial, "Commercial", requiresALevel = true, requiresALevelInStem = true, requiresU18Level3 = false),
+      SchemeInfo(DigitalAndTechnology, "Digital and technology", requiresALevel = false, requiresALevelInStem = true,
+        requiresU18Level3 = false)
     )
 
     val testSchemeNames = testSchemeInfos.map(_.id)

@@ -59,11 +59,11 @@ trait TestFixture extends TestFixtureBase {
   )
 
   val AllSchemeInfo = List(
-    SchemeInfo(Business, "Business", requiresALevel = false, requiresALevelInStem = false),
-    SchemeInfo(Commercial, "Commercial", requiresALevel = false, requiresALevelInStem = false),
-    SchemeInfo(DigitalAndTechnology, "Digital and technology", requiresALevel = true, requiresALevelInStem = true),
-    SchemeInfo(Finance, "Finance", requiresALevel = false, requiresALevelInStem = false),
-    SchemeInfo(ProjectDelivery, "Project delivery", requiresALevel = true, requiresALevelInStem = false)
+    SchemeInfo(Business, "Business", requiresALevel = false, requiresALevelInStem = false, requiresU18Level3 = true),
+    SchemeInfo(Commercial, "Commercial", requiresALevel = false, requiresALevelInStem = false, requiresU18Level3 = false),
+    SchemeInfo(DigitalAndTechnology, "Digital and technology", requiresALevel = true, requiresALevelInStem = true, requiresU18Level3 = false),
+    SchemeInfo(Finance, "Finance", requiresALevel = false, requiresALevelInStem = false, requiresU18Level3 = false),
+    SchemeInfo(ProjectDelivery, "Project delivery", requiresALevel = true, requiresALevelInStem = false, requiresU18Level3 = false)
   )
 
   object TestableAssessmentCentrePassMarkSettingsService extends AssessmentCentrePassMarkSettingsService {
