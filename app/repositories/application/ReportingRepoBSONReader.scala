@@ -111,7 +111,13 @@ trait ReportingRepoBSONReader extends CommonBSONDocuments with BaseBSONReader {
       val stemLevel = personalDetails.flatMap(_.getAs[Boolean]("stemLevel").map(booleanTranslator))
       val dateOfBirth = personalDetails.flatMap(_.getAs[LocalDate]("dateOfBirth"))
       val civilServant = personalDetails.flatMap(_.getAs[Boolean]("civilServant")).get
-      val civilServantAsString = if (civilServant) { personalDetails.flatMap(_.getAs[String]("department")).get } else { "false" }
+
+      val dept = if (civilServant) { personalDetails.flatMap(_.getAs[String]("department")).get } else { "false" }
+      val civilServantAsString = if (civilServant && dept == "Other") {
+        personalDetails.flatMap(_.getAs[String]("departmentOther")).get
+      } else {
+        dept
+      }
 
       val schemes = doc.getAs[List[Scheme]]("schemes").getOrElse(List.empty)
       val schemeLocations = doc.getAs[List[String]]("scheme-locations").getOrElse(List.empty)
