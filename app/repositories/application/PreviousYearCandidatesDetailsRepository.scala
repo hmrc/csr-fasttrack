@@ -444,6 +444,14 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
 
   private def personalDetails(doc: BSONDocument): List[Option[String]] = {
     val personalDetails = doc.getAs[BSONDocument]("personal-details")
+
+    val deptOpt = personalDetails.flatMap(_.getAs[String]("department").map(_.toString))
+    val deptOtherOpt = personalDetails.flatMap(_.getAs[String]("departmentOther").map(_.toString))
+    val deptOrOtherDeptOpt = (deptOtherOpt, deptOpt) match {
+      case (Some(_), _) => deptOtherOpt
+      case _ => deptOpt
+    }
+
     List(
       personalDetails.flatMap(_.getAs[String]("firstName")),
       personalDetails.flatMap(_.getAs[String]("lastName")),
@@ -452,7 +460,7 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
       personalDetails.flatMap(pd => mapYesNo(pd.getAs[Boolean]("aLevel"))),
       personalDetails.flatMap(pd => mapYesNo(pd.getAs[Boolean]("stemLevel"))),
       personalDetails.flatMap(pd => mapYesNo(pd.getAs[Boolean]("civilServant"))),
-      personalDetails.flatMap(_.getAs[String]("department").map(_.toString))
+      deptOrOtherDeptOpt
     )
   }
 
@@ -461,5 +469,4 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
       val ret = s.getOrElse(" ").replace("\r", " ").replace("\n", " ").replace("\"", "'")
       "\"" + ret + "\""
     }.mkString(",")
-
 }
