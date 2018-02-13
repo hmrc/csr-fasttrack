@@ -170,6 +170,7 @@ class ReportingMongoRepository(timeZoneService: TimeZoneService)(implicit mongo:
       "personal-details.dateOfBirth" -> "1",
       "personal-details.civilServant" -> "1",
       "personal-details.department" -> "1",
+      "personal-details.departmentOther" -> "1",
       "schemes" -> "1",
       "scheme-locations" -> "1",
       "assessment-centre-passmark-evaluation.competency-average" -> "1",
