@@ -447,10 +447,7 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
 
     val deptOpt = personalDetails.flatMap(_.getAs[String]("department").map(_.toString))
     val deptOtherOpt = personalDetails.flatMap(_.getAs[String]("departmentOther").map(_.toString))
-    val deptOrOtherDeptOpt = (deptOtherOpt, deptOpt) match {
-      case (Some(_), _) => deptOtherOpt
-      case _ => deptOpt
-    }
+    val deptOrOtherDeptOpt = deptOtherOpt.orElse(deptOpt)
 
     List(
       personalDetails.flatMap(_.getAs[String]("firstName")),
