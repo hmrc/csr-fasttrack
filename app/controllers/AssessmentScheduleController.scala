@@ -380,8 +380,9 @@ trait AssessmentScheduleController extends BaseController {
         case ProgressStatuses.AssessmentScoresAcceptedProgress =>
           Future.successful(Conflict(""))
         case _ =>
-          aaService.removeFromAssessmentCentreSlot(applicationId).map { _ =>
-            Ok("")
+          aaService.removeFromAssessmentCentreSlot(applicationId).flatMap { _ =>
+            val statuses = List(ProgressStatuses.AllocationExpiredProgress, ProgressStatuses.AllocationUnconfirmedProgress)
+            applicationRepository.removeProgressStatuses(applicationId, statuses).map(_ => Ok(""))
           }.recover {
             case _: NotFoundException => NotFound(s"Could not find application assessment for application $applicationId")
           }
