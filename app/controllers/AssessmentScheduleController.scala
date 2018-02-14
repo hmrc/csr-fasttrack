@@ -26,7 +26,6 @@ import connectors.ExchangeObjects.AllocationDetails
 import connectors.assessmentschedule.VenueDaySessionCandidate
 import connectors.{ CSREmailClient, EmailClient }
 import model.ApplicationStatuses._
-import model.AssessmentScheduleCommands.ApplicationForAssessmentAllocationResult
 import model.AssessmentScheduleCommands.Implicits.ApplicationForAssessmentAllocationResultFormats
 import model.Commands.AssessmentCentreAllocation
 import model.Commands.Implicits.applicationAssessmentFormat
@@ -39,6 +38,7 @@ import repositories.AssessmentCentreLocation.assessmentCentreVenueFormat
 import repositories._
 import repositories.application._
 import services.AuditService
+import services.application.ApplicationService
 import services.applicationassessment.{ AssessmentCentreScoresService, AssessmentCentreService, AssessorAssessmentScoresService }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
@@ -57,6 +57,7 @@ object AssessmentScheduleController extends AssessmentScheduleController {
   val emailClient = CSREmailClient
   val aaService = AssessmentCentreService
   val assessmentScoresService = AssessorAssessmentScoresService
+  val appService: ApplicationService = ApplicationService
 }
 
 trait AssessmentScheduleController extends BaseController {
@@ -69,6 +70,7 @@ trait AssessmentScheduleController extends BaseController {
   val cdRepository: ContactDetailsRepository
   val emailClient: EmailClient
   val aaService: AssessmentCentreService
+  val appService: ApplicationService
   val assessmentScoresService: AssessmentCentreScoresService
 
   private def calculateUsedCapacity(assessments: Option[List[AssessmentCentreAllocation]], sessionCapacity: Int,
@@ -382,7 +384,7 @@ trait AssessmentScheduleController extends BaseController {
         case _ =>
           aaService.removeFromAssessmentCentreSlot(applicationId).flatMap { _ =>
             val statuses = List(ProgressStatuses.AllocationExpiredProgress, ProgressStatuses.AllocationUnconfirmedProgress)
-            applicationRepository.removeProgressStatuses(applicationId, statuses).map(_ => Ok(""))
+            appService.removeProgressStatuses(applicationId, statuses).map(_ => Ok(""))
           }.recover {
             case _: NotFoundException => NotFound(s"Could not find application assessment for application $applicationId")
           }
