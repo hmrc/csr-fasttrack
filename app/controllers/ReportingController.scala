@@ -26,7 +26,7 @@ import model.ReportExchangeObjects.Implicits._
 import model.ReportExchangeObjects.{ Implicits => _, _ }
 import model.Scheme.Scheme
 import model.persisted.SchemeEvaluationResult
-import model.report.{ AssessmentCentreScoresReportItem, DiversityReportItem, PassMarkReportItem }
+import model.report.{ AssessmentCentreScoresReportItem, DiversityReportItem, DuplicateApplicationsReportItem, PassMarkReportItem }
 import model._
 import model.ApplicationStatuses.AssessmentScoresAccepted
 import play.api.Logger
@@ -37,7 +37,7 @@ import play.api.mvc.{ Action, AnyContent, Request, Result }
 import repositories.application._
 import repositories.{ QuestionnaireRepository, _ }
 import services.locationschemes.LocationSchemeService
-import services.reporting.{ ReportingFormatter, SocioEconomicScoreCalculator }
+import services.reporting.{ DuplicateApplicationGroup, DuplicateDetectionService, ReportingFormatter, SocioEconomicScoreCalculator }
 import uk.gov.hmrc.play.microservice.controller.BaseController
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -60,6 +60,7 @@ object ReportingController extends ReportingController {
   val socioEconomicScoreCalculator: SocioEconomicScoreCalculator.type = SocioEconomicScoreCalculator
   val onlineTestRepository: OnlineTestMongoRepository = repositories.onlineTestRepository
   val assessmentCentreAllocationRepository: AssessmentCentreAllocationMongoRepository = repositories.assessmentCentreAllocationRepository
+  val duplicateDetectionService: DuplicateDetectionService = DuplicateDetectionService
 }
 
 trait ReportingController extends BaseController {
@@ -82,6 +83,7 @@ trait ReportingController extends BaseController {
   val socioEconomicScoreCalculator: SocioEconomicScoreCalculator
   val onlineTestRepository: OnlineTestRepository
   val assessmentCentreAllocationRepository: AssessmentCentreAllocationRepository
+  val duplicateDetectionService: DuplicateDetectionService
 
   def createDiversityReport(frameworkId: String) = Action.async { implicit request =>
     val applicationsFut = reportingRepository.diversityReport(frameworkId)
@@ -443,6 +445,22 @@ trait ReportingController extends BaseController {
     }
 
     reportItems.map( items => Ok(Json.toJson(items)) )
+  }
+
+  def createDuplicateApplicationsReport(): Action[AnyContent] = Action.async { implicit request =>
+    def toReportItem(source: DuplicateApplicationGroup, matchGroup: Int) = {
+      source.candidates.map { c =>
+        DuplicateApplicationsReportItem(c.firstName, c.lastName, c.email, c.latestProgressStatus, source.matchType,
+          matchGroup)
+      }
+    }
+
+    duplicateDetectionService.findAll.map { potentialDuplications =>
+      val result = potentialDuplications.zipWithIndex.flatMap { case (dup, matchGroup) =>
+        toReportItem(dup, matchGroup)
+      }
+      Ok(Json.toJson(result))
+    }
   }
 
   private def buildFullName(firstNameOpt: Option[String], lastNameOpt: Option[String]) =

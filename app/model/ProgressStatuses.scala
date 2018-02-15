@@ -16,6 +16,10 @@
 
 package model
 
+import scala.reflect.runtime.universe._
+
+import model.Commands.ProgressResponse
+
 object ProgressStatuses extends Enum {
 
   type ProgressStatus = Value
