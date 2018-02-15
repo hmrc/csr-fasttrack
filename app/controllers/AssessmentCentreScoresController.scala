@@ -67,7 +67,9 @@ trait AssessmentCentreScoresController extends BaseController {
   val assessmentCentreService: AssessmentCentreService
 
   def getCandidateScores(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
-    assessmentCentreScoresService.getCandidateScores(applicationId).map(scores => Ok(Json.toJson(scores)))
+    assessmentCentreScoresService.getCandidateScores(applicationId)
+      .map(scores => Ok(Json.toJson(scores)))
+      .recover { case _ => InternalServerError(s"Assessment allocation not found for application id $applicationId") }
   }
 
   def getCandidateScoresAndFeedback(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
