@@ -18,7 +18,7 @@ package services.application
 
 import connectors.{ AuthProviderClient, CSREmailClient }
 import connectors.ExchangeObjects.{ AuthProviderUserDetails, UpdateDetailsRequest }
-import model.ApplicationStatuses
+import model.{ ApplicationStatuses, ProgressStatuses }
 import model.Commands.{ CandidateEditableDetails, WithdrawApplicationRequest }
 import model.Exceptions.NotFoundException
 import play.api.Logger
@@ -121,6 +121,10 @@ trait ApplicationService {
         }
       }
     }
+  }
+
+  def removeProgressStatuses(applicationId: String, progressStatuses: List[ProgressStatuses.ProgressStatus]): Future[Unit] = {
+    appRepository.removeProgressStatuses(applicationId, progressStatuses).map(_ => ())
   }
 
   private def toUpdateDetailsRequest(editRequest: CandidateEditableDetails, user: AuthProviderUserDetails): UpdateDetailsRequest = {

@@ -40,13 +40,15 @@ import play.api.test.Helpers._
 import repositories.AssessmentCentreLocation._
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
 import repositories.{ AssessmentCentreLocation, _ }
+import services.application.ApplicationService
 import services.applicationassessment.{ AssessmentCentreScoresService, AssessmentCentreService }
 import testkit.MockitoSugar
 
-import scala.concurrent.Future
+import scala.concurrent.{ ExecutionContext, Future }
 
 class AssessmentScheduleControllerSpec extends PlaySpec with Results
   with MockitoSugar with ScalaFutures {
+  implicit val ec: ExecutionContext = ExecutionContext.global
   val mockAssessmentCentreRepository = mock[AssessmentCentreLocationRepository]
 
   "Get Assessment Schedule" should {
@@ -511,6 +513,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
     val mockContactDetailsRepository = mock[ContactDetailsRepository]
     val mockEmailClient = mock[EmailClient]
     val mockApplicationAssessmentService = mock[AssessmentCentreService]
+    val mockAppService = mock[ApplicationService]
 
     val controller = new AssessmentScheduleController {
       override val aaRepository = mockApplicationAssessmentRepository
@@ -523,6 +526,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
       override val emailClient = mockEmailClient
       override val aaService = mockApplicationAssessmentService
       override val assessmentScoresService: AssessmentCentreScoresService = mockAssessmentCentreScoresService
+      override val appService: ApplicationService = mockAppService
     }
 
     def makeAssessmentScheduleController(op: => Unit) = {
@@ -538,6 +542,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
         override val emailClient = mockEmailClient
         override val aaService = mockApplicationAssessmentService
         override val assessmentScoresService: AssessmentCentreScoresService = mockAssessmentCentreScoresService
+        override val appService: ApplicationService = mockAppService
       }
     }
 
@@ -932,12 +937,14 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
       when(mockApplicationRepository.findProgress(any())).thenReturn(
         Future.successful(ProgressResponse(""))
       )
+      when(mockAppService.removeProgressStatuses(any(), any())).thenReturn(Future.successful(unit))
     }
     def applicationAssessmentRepositoryThatCannotDeleteUnauthorised = {
       when(mockApplicationRepository.findProgress(any())).thenReturn(
         Future.successful(ProgressResponse("", assessmentScores = AssessmentScores(accepted = true)))
       )
       when(mockApplicationAssessmentService.removeFromAssessmentCentreSlot(any())).thenReturn(Future.successful(()))
+      when(mockAppService.removeProgressStatuses(any(), any())).thenReturn(Future.successful(unit))
     }
 
     def applicationAssessmentRepositoryThatCannotDelete = {
@@ -947,6 +954,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
       when(mockApplicationRepository.findProgress(any())).thenReturn(
         Future.successful(ProgressResponse(""))
       )
+      when(mockAppService.removeProgressStatuses(any(), any())).thenReturn(Future.successful(unit))
     }
 
     def onlineTestRepositoryThatCanRemoveAllocationStatus = {
