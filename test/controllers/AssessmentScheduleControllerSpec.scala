@@ -726,8 +726,6 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
       when(mockApplicationRepository.allocationExpireDateByApplicationId(any())).thenReturn(Future.successful(
         Some(LocalDate.parse("2015-04-23"))
       ))
-
-      when(mockAppService.removeProgressStatuses(any(), any())).thenReturn(Future.successful(unit))
     }
 
     def assessmentCentreRepoWithSomeLocationsAndAssessmentCentres = {
@@ -939,12 +937,14 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
       when(mockApplicationRepository.findProgress(any())).thenReturn(
         Future.successful(ProgressResponse(""))
       )
+      when(mockAppService.removeProgressStatuses(any(), any())).thenReturn(Future.successful(unit))
     }
     def applicationAssessmentRepositoryThatCannotDeleteUnauthorised = {
       when(mockApplicationRepository.findProgress(any())).thenReturn(
         Future.successful(ProgressResponse("", assessmentScores = AssessmentScores(accepted = true)))
       )
       when(mockApplicationAssessmentService.removeFromAssessmentCentreSlot(any())).thenReturn(Future.successful(()))
+      when(mockAppService.removeProgressStatuses(any(), any())).thenReturn(Future.successful(unit))
     }
 
     def applicationAssessmentRepositoryThatCannotDelete = {
@@ -954,6 +954,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
       when(mockApplicationRepository.findProgress(any())).thenReturn(
         Future.successful(ProgressResponse(""))
       )
+      when(mockAppService.removeProgressStatuses(any(), any())).thenReturn(Future.successful(unit))
     }
 
     def onlineTestRepositoryThatCanRemoveAllocationStatus = {
