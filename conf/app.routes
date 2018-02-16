@@ -75,6 +75,7 @@ GET         /report/pass-mark-modelling/:frameworkId                     control
 GET         /report/pass-mark-personal-data/:frameworkId                 controllers.ReportingController.createOnlineTestPassMarkWithPersonalDataReport(frameworkId: String)
 GET         /report/successful-candidates/:frameworkId                   controllers.ReportingController.createSuccessfulCandidatesReport(frameworkId: String)
 GET         /report/assessment-scores/:frameworkId                       controllers.ReportingController.createAssessmentCentreScoresReport(frameworkId: String)
+GET         /report/duplicate-applications                               controllers.ReportingController.createDuplicateApplicationsReport()
 GET         /report/candidates-details-stream/previous-year              controllers.ReportingController.streamPrevYearCandidatesDetailsReport(collectionSuffix: String ?= repositories.CollectionNames.suffixForThisCampaign)
 
 GET         /diagnostic/user/:applicationId                              controllers.DiagnosticReportController.getApplicationByApplicationId(applicationId: String)

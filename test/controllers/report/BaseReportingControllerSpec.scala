@@ -25,7 +25,7 @@ import org.mockito.Mockito._
 import repositories._
 import repositories.application.{ OnlineTestRepository, PreviousYearCandidatesDetailsRepository, ReportingRepository }
 import services.locationschemes.LocationSchemeService
-import services.reporting.{ ReportingFormatter, SocioEconomicScoreCalculator }
+import services.reporting.{ DuplicateDetectionService, ReportingFormatter, SocioEconomicScoreCalculator }
 import testkit.UnitWithAppSpec
 
 import scala.concurrent.Future
@@ -56,6 +56,7 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
     ))
     val onlineTestRepositoryMock = mock[OnlineTestRepository]
     val assessmentCentreAllocationRepoMock = mock[AssessmentCentreAllocationRepository]
+    val duplicateDetectionServiceMock = mock[DuplicateDetectionService]
 
     trait ReportingControllerDefaultMocks {
       val locationSchemeService = locationSchemeServiceMock
@@ -85,6 +86,7 @@ class BaseReportingControllerSpec extends UnitWithAppSpec {
       val socioEconomicScoreCalculator = SocioEconomicScoreCalculator
       val onlineTestRepository = onlineTestRepositoryMock
       val assessmentCentreAllocationRepository = assessmentCentreAllocationRepoMock
+      val duplicateDetectionService = duplicateDetectionServiceMock
     }
   }
 }
