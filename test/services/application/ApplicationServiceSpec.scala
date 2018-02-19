@@ -30,7 +30,6 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import play.api.Logger
 import repositories.ContactDetailsRepository
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService

@@ -16,7 +16,6 @@
 
 package services.application
 
-import common.FutureEx
 import connectors.{ AuthProviderClient, CSREmailClient }
 import connectors.ExchangeObjects.{ AuthProviderUserDetails, UpdateDetailsRequest }
 import model.ApplicationStatuses
