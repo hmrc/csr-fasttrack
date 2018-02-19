@@ -46,8 +46,6 @@ object AssessmentCentreLocation {
 }
 
 trait AssessmentCentreLocationRepository {
-  def locationsAndAssessmentCentreMapping: Future[Map[String, String]]
-
   def assessmentCentreCapacities: Future[List[AssessmentCentreLocation]]
 
   def assessmentCentreCapacityDate(venue: String, date: LocalDate): Future[AssessmentCentreVenueCapacityDate]
@@ -68,10 +66,6 @@ trait AssessmentCentreLocationRepositoryImpl extends AssessmentCentreLocationRep
   private lazy val assessmentCentreCapacitiesCached = Future.successful {
     val input = managed(Play.application.resourceAsStream(assessmentCentresConfigPath).get)
     input.acquireAndGet(file => asAssessmentCentreCapacity(new Yaml().load(file)))
-  }
-
-  def locationsAndAssessmentCentreMapping: Future[Map[String, String]] = {
-    locationsAndAssessmentCentreMappingCached
   }
 
   def assessmentCentreCapacities: Future[List[AssessmentCentreLocation]] = {

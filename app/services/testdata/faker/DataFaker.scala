@@ -118,20 +118,6 @@ object DataFaker {
       }
     }
 
-    def region: Future[String] = {
-      AssessmentCentreLocationYamlRepository.locationsAndAssessmentCentreMapping.map { locationsToAssessmentCentres =>
-        val locationToRegion = locationsToAssessmentCentres.values.filterNot(_.startsWith("TestAssessment"))
-        randOne(locationToRegion.toList)
-      }
-    }
-
-    def location(region: String, cannotBe: List[String] = Nil): Future[String] = {
-      AssessmentCentreLocationYamlRepository.locationsAndAssessmentCentreMapping.map { locationsToAssessmentCentres =>
-        val locationsInRegion = locationsToAssessmentCentres.filter(_._2 == region).keys.toList
-        randOne(locationsInRegion, cannotBe)
-      }
-    }
-
     def gender = randOne(List("Male", "Female", "Other", "I don't know/prefer not to say"))
     def sexualOrientation = randOne(List(
       "Heterosexual/straight",
