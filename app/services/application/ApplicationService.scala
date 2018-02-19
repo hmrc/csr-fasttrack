@@ -16,6 +16,7 @@
 
 package services.application
 
+import common.FutureEx
 import connectors.{ AuthProviderClient, CSREmailClient }
 import connectors.ExchangeObjects.{ AuthProviderUserDetails, UpdateDetailsRequest }
 import model.ApplicationStatuses
@@ -25,6 +26,7 @@ import play.api.Logger
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
+import services.application.ApplicationService.InvalidUserIdException
 import services.applicationassessment.AssessmentCentreService
 
 import scala.concurrent.{ ExecutionContext, Future }
@@ -38,6 +40,8 @@ object ApplicationService extends ApplicationService {
   val contactDetailsRepository = repositories.contactDetailsRepository
   val authProviderClient = AuthProviderClient
   val emailClient = CSREmailClient
+
+  case class InvalidUserIdException(msg: String) extends Exception(msg)
 }
 
 trait ApplicationService {
@@ -105,11 +109,11 @@ trait ApplicationService {
   def processExpiredApplications(): Future[Unit] = {
     implicit val headerCarrier: HeaderCarrier = HeaderCarrier()
     Logger.info("Processing expired candidates")
-    appRepository.nextApplicationPendingAllocationExpiry.map { expiringAllocationOpt =>
-      expiringAllocationOpt.map { expiringAllocation =>
 
+    appRepository.nextApplicationPendingAllocationExpiry.flatMap { expiringAllocationOpt =>
+      expiringAllocationOpt.map { expiringAllocation =>
         Logger.info(s"Expiring candidate: $expiringAllocation")
-        authProviderClient.findByUserId(expiringAllocation.userId).map { userOpt =>
+        authProviderClient.findByUserId(expiringAllocation.userId).flatMap { userOpt =>
           userOpt.map { user =>
             for {
               _ <- appRepository.updateStatus(expiringAllocation.applicationId, ApplicationStatuses.AllocationExpired)
@@ -117,9 +121,9 @@ trait ApplicationService {
               _ <- emailClient.sendAssessmentCentreExpired(to = user.email.getOrElse(throw new IllegalStateException(msg)),
                 name = user.preferredName.getOrElse(s"${user.firstName} ${user.lastName}"))
             } yield ()
-          }
+          }.getOrElse(throw InvalidUserIdException(expiringAllocation.userId))
         }
-      }
+      }.getOrElse(Future.successful(()))
     }
   }
 

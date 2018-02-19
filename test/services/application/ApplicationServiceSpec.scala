@@ -30,6 +30,7 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
+import play.api.Logger
 import repositories.ContactDetailsRepository
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService
@@ -112,7 +113,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
 
   "process expired applications" should {
     "set candidates who have not confirmed their booking to allocation expired and " +
-      "inform the candidate with an email" ignore new ApplicationServiceFixture {
+      "inform the candidate with an email" in new ApplicationServiceFixture {
       when(appRepositoryMock.nextApplicationPendingAllocationExpiry).thenReturnAsync(Some(expiringAllocation))
       when(authProviderClientMock.findByUserId(any[String])(any[HeaderCarrier])).thenReturnAsync(Some(currentUser))
       when(appRepositoryMock.updateStatus(any[String], any[model.ApplicationStatuses.EnumVal])).thenReturnAsync()
@@ -125,15 +126,15 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       verify(emailClientMock).sendAssessmentCentreExpired(any[String], any[String])(any[HeaderCarrier])
     }
 
-    "throw an exception if the candidates does not have an email address" in new ApplicationServiceFixture {
+    "throw an exception if the candidate does not have an email address" in new ApplicationServiceFixture {
       when(appRepositoryMock.nextApplicationPendingAllocationExpiry).thenReturn(Future.successful(Some(expiringAllocation)))
       val user = Some(currentUser.copy(email = None))
       when(authProviderClientMock.findByUserId(any[String])(any[HeaderCarrier])).thenReturn(Future.successful(user))
       when(appRepositoryMock.updateStatus(any[String], any[model.ApplicationStatuses.EnumVal])).thenReturnAsync()
       when(emailClientMock.sendAssessmentCentreExpired(any[String], any[String])(any[HeaderCarrier])).thenReturnAsync()
 
-      val result = applicationService.processExpiredApplications()
-      result.futureValue mustBe unit
+      val result = applicationService.processExpiredApplications().failed.futureValue
+      result mustBe a[IllegalStateException]
 
       verify(appRepositoryMock).updateStatus(eqTo(applicationId), eqTo(ApplicationStatuses.AllocationExpired))
       // Exception is thrown before the method is called
