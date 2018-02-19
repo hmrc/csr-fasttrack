@@ -83,4 +83,14 @@ trait LocationSchemeController extends BaseController {
   def removeSchemeLocations(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
     locationSchemeService.removeSchemeLocations(applicationId).map { _ => Ok }
   }
+
+  def getAllSchemeLocations: Action[AnyContent] = Action.async { implicit request =>
+    val allLocationsFut = locationSchemeService.getAllSchemeLocations
+    val reportFut: Future[List[String]] = for {
+      allLocations <- allLocationsFut
+    } yield {
+      allLocations.map(_.locationName).sorted
+    }
+    reportFut.map { report => Ok(Json.toJson(report)) }
+  }
 }

@@ -26,6 +26,7 @@ DELETE      /adjustments/comment/:applicationId                          control
 
 PUT         /media/create                                                controllers.MediaController.addMedia()
 
+GET         /scheme-locations/all                                        controllers.LocationSchemeController.getAllSchemeLocations
 GET         /scheme-locations/eligible                                   controllers.LocationSchemeController.getEligibleSchemeLocations(applicationId: String, latitude: Option[Double] ?= None, longitude: Option[Double] ?= None)
 GET         /scheme-locations/:applicationId                             controllers.LocationSchemeController.getSchemeLocations(applicationId: String)
 PUT         /scheme-locations/:applicationId                             controllers.LocationSchemeController.updateSchemeLocations(applicationId: String)
