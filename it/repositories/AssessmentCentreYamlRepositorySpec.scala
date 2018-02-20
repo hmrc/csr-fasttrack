@@ -36,9 +36,9 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
       venue.venueName mustBe "London (FSAC)"
       venue.venueDescription mustBe "FSAC"
       val capacityDate = venue.capacityDates.head
-      capacityDate.amCapacity mustBe 36
-      capacityDate.pmCapacity mustBe 36
-      capacityDate.date.toString(DateFormat) mustBe "22/4/19"
+      capacityDate.amCapacity mustBe 25
+      capacityDate.pmCapacity mustBe 25
+      capacityDate.date.toString(DateFormat) mustBe "15/3/19"
     }
 
     "reject invalid configuration" in {
@@ -76,7 +76,6 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
   )
 
   "Assessment centre production YAML file" should {
-
     "remain parsable and load" in {
       val repo = new AssessmentCentreLocationRepositoryImpl {
         val assessmentCentresLocationsPath = "assessment-centres-preferred-locations-prod.yaml"
@@ -90,9 +89,9 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
       val venue = assessmentCapacity.venues.find(_.venueDescription == "FSAC").get
       venue.venueName mustBe "London (FSAC)"
       venue.venueDescription mustBe "FSAC"
-      val capacityDate = venue.capacityDates.find(_.date == new LocalDate("2018-04-22")).get
-      capacityDate.amCapacity mustBe 36
-      capacityDate.pmCapacity mustBe 36
+      val capacityDate = venue.capacityDates.find(_.date == new LocalDate("2018-04-24")).get
+      capacityDate.amCapacity mustBe 40
+      capacityDate.pmCapacity mustBe 40
     }
   }
 }
