@@ -550,7 +550,6 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
       applicationAssessmentRepoWithSomeAssessments
       assessmentCentreRepoWithSomeLocations
       applicationRepoWithSomeApplications
-      assessmentCentreRepoWithSomeLocationsAndAssessmentCentres
     }
 
     lazy val assessmentScheduleControllerWithOneVenueDateCandidate = makeAssessmentScheduleController {
@@ -725,12 +724,6 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
 
       when(mockApplicationRepository.allocationExpireDateByApplicationId(any())).thenReturn(Future.successful(
         Some(LocalDate.parse("2015-04-23"))
-      ))
-    }
-
-    def assessmentCentreRepoWithSomeLocationsAndAssessmentCentres = {
-      when(mockAssessmentCentreRepository.locationsAndAssessmentCentreMapping).thenReturn(Future.successful(
-        Map[String, String]("Reading" -> "London")
       ))
     }
 
@@ -912,10 +905,7 @@ class AssessmentScheduleControllerSpec extends PlaySpec with Results
           ))
         )
       )))
-
-      when(mockAssessmentCentreRepository.locationsAndAssessmentCentreMapping).thenReturn(Future.successful(
-        Map[String, String]("Reading" -> "London")
-      ))
+      
     }
 
     def applicationRepositoryWithNoVenueDateCandidates = {
