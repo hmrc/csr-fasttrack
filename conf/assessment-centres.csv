@@ -1,273 +1,40 @@
-Assessment centre location,Venue description,Assessment centre venue,Date,AM Capacity,PM Capacity,AM Minimum Viable Attendees,AM Attendee Safety Margin,PM Minimum Viable Attendees,PM Attendee Safety Margin
-London,Euston Tower,London (Euston Tower),03/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),04/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),05/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),06/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),07/04/17,18,18,10,4,10,4
-London,Euston Tower,London (Euston Tower),08/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),09/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),10/04/17,18,18,10,4,10,4
-London,Euston Tower,London (Euston Tower),11/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),12/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),13/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),14/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),15/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),16/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),17/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),18/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),19/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),20/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),21/04/17,18,18,10,4,10,4
-London,Euston Tower,London (Euston Tower),22/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),23/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),24/04/17,18,18,10,4,10,4
-London,Euston Tower,London (Euston Tower),25/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),26/04/17,18,18,10,4,10,4
-London,Euston Tower,London (Euston Tower),27/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),28/04/17,18,18,10,4,10,4
-London,Euston Tower,London (Euston Tower),29/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),30/04/17,,,,,,
-London,Euston Tower,London (Euston Tower),01/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),02/05/17,18,18,10,4,10,4
-London,Euston Tower,London (Euston Tower),03/05/17,18,18,10,4,10,4
-London,Euston Tower,London (Euston Tower),04/05/17,18,18,10,4,10,4
-London,Euston Tower,London (Euston Tower),05/05/17,18,18,10,4,10,4
-London,Euston Tower,London (Euston Tower),06/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),07/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),08/05/17,18,18,10,4,10,4
-London,Euston Tower,London (Euston Tower),09/05/17,18,18,10,4,10,4
-London,Euston Tower,London (Euston Tower),10/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),11/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),12/05/17,18,18,10,4,10,4
-London,Euston Tower,London (Euston Tower),13/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),14/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),15/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),16/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),17/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),18/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),19/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),20/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),21/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),22/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),23/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),24/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),25/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),26/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),27/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),28/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),29/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),30/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),31/05/17,,,,,,
-London,Euston Tower,London (Euston Tower),01/06/17,,,,,,
-London,Euston Tower,London (Euston Tower),02/06/17,,,,,,
-London,Euston Tower,London (Euston Tower),03/06/17,,,,,,
-London,Euston Tower,London (Euston Tower),04/06/17,,,,,,
-London,Euston Tower,London (Euston Tower),05/06/17,,,,,,
-London,Euston Tower,London (Euston Tower),06/06/17,,,,,,
-London,Euston Tower,London (Euston Tower),07/06/17,,,,,,
-London,Euston Tower,London (Euston Tower),08/06/17,,,,,,
-London,Euston Tower,London (Euston Tower),09/06/17,,,,,,
-London,FSAC,London (FSAC),03/04/17,,,,,,
-London,FSAC,London (FSAC),04/04/17,,,,,,
-London,FSAC,London (FSAC),05/04/17,,,,,,
-London,FSAC,London (FSAC),06/04/17,,,,,,
-London,FSAC,London (FSAC),07/04/17,,,,,,
-London,FSAC,London (FSAC),08/04/17,,,,,,
-London,FSAC,London (FSAC),09/04/17,,,,,,
-London,FSAC,London (FSAC),10/04/17,,,,,,
-London,FSAC,London (FSAC),11/04/17,,,,,,
-London,FSAC,London (FSAC),12/04/17,,,,,,
-London,FSAC,London (FSAC),13/04/17,,,,,,
-London,FSAC,London (FSAC),14/04/17,,,,,,
-London,FSAC,London (FSAC),15/04/17,,,,,,
-London,FSAC,London (FSAC),16/04/17,,,,,,
-London,FSAC,London (FSAC),17/04/17,,,,,,
-London,FSAC,London (FSAC),18/04/17,,,,,,
-London,FSAC,London (FSAC),19/04/17,,,,,,
-London,FSAC,London (FSAC),20/04/17,,,,,,
-London,FSAC,London (FSAC),21/04/17,,,,,,
-London,FSAC,London (FSAC),22/04/17,36,36,20,8,20,8
-London,FSAC,London (FSAC),23/04/17,,,,,,
-London,FSAC,London (FSAC),24/04/17,,,,,,
-London,FSAC,London (FSAC),25/04/17,,,,,,
-London,FSAC,London (FSAC),26/04/17,,,,,,
-London,FSAC,London (FSAC),27/04/17,,,,,,
-London,FSAC,London (FSAC),28/04/17,,,,,,
-London,FSAC,London (FSAC),29/04/17,36,36,20,8,20,8
-London,FSAC,London (FSAC),30/04/17,,,,,,
-London,FSAC,London (FSAC),01/05/17,,,,,,
-London,FSAC,London (FSAC),02/05/17,,,,,,
-London,FSAC,London (FSAC),03/05/17,,,,,,
-London,FSAC,London (FSAC),04/05/17,,,,,,
-London,FSAC,London (FSAC),05/05/17,,,,,,
-London,FSAC,London (FSAC),06/05/17,36,36,20,8,20,8
-London,FSAC,London (FSAC),07/05/17,,,,,,
-London,FSAC,London (FSAC),08/05/17,,,,,,
-London,FSAC,London (FSAC),09/05/17,,,,,,
-London,FSAC,London (FSAC),10/05/17,,,,,,
-London,FSAC,London (FSAC),11/05/17,36,36,20,8,20,8
-London,FSAC,London (FSAC),12/05/17,,,,,,
-London,FSAC,London (FSAC),13/05/17,36,36,20,8,20,8
-London,FSAC,London (FSAC),14/05/17,,,,,,
-London,FSAC,London (FSAC),15/05/17,,,,,,
-London,FSAC,London (FSAC),16/05/17,,,,,,
-London,FSAC,London (FSAC),17/05/17,,,,,,
-London,FSAC,London (FSAC),18/05/17,,,,,,
-London,FSAC,London (FSAC),19/05/17,,,,,,
-London,FSAC,London (FSAC),20/05/17,36,36,20,8,20,8
-London,FSAC,London (FSAC),21/05/17,,,,,,
-London,FSAC,London (FSAC),22/05/17,,,,,,
-London,FSAC,London (FSAC),23/05/17,,,,,,
-London,FSAC,London (FSAC),24/05/17,,,,,,
-London,FSAC,London (FSAC),25/05/17,,,,,,
-London,FSAC,London (FSAC),26/05/17,,,,,,
-London,FSAC,London (FSAC),27/05/17,36,36,20,8,20,8
-London,FSAC,London (FSAC),28/05/17,,,,,,
-London,FSAC,London (FSAC),29/05/17,,,,,,
-London,FSAC,London (FSAC),30/05/17,,,,,,
-London,FSAC,London (FSAC),31/05/17,,,,,,
-London,FSAC,London (FSAC),01/06/17,,,,,,
-London,FSAC,London (FSAC),02/06/17,,,,,,
-London,FSAC,London (FSAC),03/06/17,,,,,,
-London,FSAC,London (FSAC),04/06/17,,,,,,
-London,FSAC,London (FSAC),05/06/17,36,36,20,8,20,8
-London,FSAC,London (FSAC),06/06/17,36,36,20,8,20,8
-London,FSAC,London (FSAC),07/06/17,36,36,20,8,20,8
-London,FSAC,London (FSAC),08/06/17,36,36,20,8,20,8
-London,FSAC,London (FSAC),09/06/17,36,36,20,8,20,8
-Newcastle,Longbenton,Newcastle (Longbenton),03/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),04/04/17,18,18,10,4,10,4
-Newcastle,Longbenton,Newcastle (Longbenton),05/04/17,18,18,10,4,10,4
-Newcastle,Longbenton,Newcastle (Longbenton),06/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),07/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),08/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),09/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),10/04/17,18,18,10,4,10,4
-Newcastle,Longbenton,Newcastle (Longbenton),11/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),12/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),13/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),14/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),15/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),16/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),17/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),18/04/17,18,18,10,4,10,4
-Newcastle,Longbenton,Newcastle (Longbenton),19/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),20/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),21/04/17,18,18,10,4,10,4
-Newcastle,Longbenton,Newcastle (Longbenton),22/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),23/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),24/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),25/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),26/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),27/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),28/04/17,18,18,10,4,10,4
-Newcastle,Longbenton,Newcastle (Longbenton),29/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),30/04/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),01/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),02/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),03/05/17,18,18,10,4,10,4
-Newcastle,Longbenton,Newcastle (Longbenton),04/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),05/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),06/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),07/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),08/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),09/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),10/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),11/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),12/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),13/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),14/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),15/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),16/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),17/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),18/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),19/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),20/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),21/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),22/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),23/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),24/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),25/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),26/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),27/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),28/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),29/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),30/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),31/05/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),01/06/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),02/06/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),03/06/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),04/06/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),05/06/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),06/06/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),07/06/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),08/06/17,,,,,,
-Newcastle,Longbenton,Newcastle (Longbenton),09/06/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),03/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),04/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),05/04/17,36,36,20,8,20,8
-Newcastle,FSAC,Newcastle (FSAC),06/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),07/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),08/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),09/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),10/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),11/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),12/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),13/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),14/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),15/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),16/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),17/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),18/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),19/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),20/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),21/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),22/04/17,36,36,20,8,20,8
-Newcastle,FSAC,Newcastle (FSAC),23/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),24/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),25/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),26/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),27/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),28/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),29/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),30/04/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),01/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),02/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),03/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),04/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),05/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),06/05/17,36,36,20,8,20,8
-Newcastle,FSAC,Newcastle (FSAC),07/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),08/05/17,36,36,20,8,20,8
-Newcastle,FSAC,Newcastle (FSAC),09/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),10/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),11/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),12/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),13/05/17,36,36,20,8,20,8
-Newcastle,FSAC,Newcastle (FSAC),14/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),15/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),16/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),17/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),18/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),19/05/17,36,36,20,8,20,8
-Newcastle,FSAC,Newcastle (FSAC),20/05/17,36,36,20,8,20,8
-Newcastle,FSAC,Newcastle (FSAC),21/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),22/05/17,36,36,20,8,20,8
-Newcastle,FSAC,Newcastle (FSAC),23/05/17,36,36,20,8,20,8
-Newcastle,FSAC,Newcastle (FSAC),24/05/17,36,36,20,8,20,8
-Newcastle,FSAC,Newcastle (FSAC),25/05/17,36,36,20,8,20,8
-Newcastle,FSAC,Newcastle (FSAC),26/05/17,36,36,20,8,20,8
-Newcastle,FSAC,Newcastle (FSAC),27/05/17,36,36,20,8,20,8
-Newcastle,FSAC,Newcastle (FSAC),28/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),29/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),30/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),31/05/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),01/06/17,36,36,20,8,20,8
-Newcastle,FSAC,Newcastle (FSAC),02/06/17,36,36,20,8,20,8
-Newcastle,FSAC,Newcastle (FSAC),03/06/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),04/06/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),05/06/17,36,36,20,8,20,8
-Newcastle,FSAC,Newcastle (FSAC),06/06/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),07/06/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),08/06/17,,,,,,
-Newcastle,FSAC,Newcastle (FSAC),09/06/17,,,,,,
+Assessment centre location,Venue description,Assessment centre venue,Date,AM Capacity,PM Capacity,AM Minimum Viability,AM Safety Margins,PM Minimum Viability,PM Safety Margins
+London,FSAC,London (FSAC),03/15/2018,25,25,15,6,15,6
+London,FSAC,London (FSAC),03/16/2018,25,25,15,6,15,6
+London,FSAC,London (FSAC),03/20/2018,25,25,15,6,15,6
+London,FSAC,London (FSAC),03/21/2018,25,25,15,6,15,6
+London,FSAC,London (FSAC),03/22/2018,25,25,15,6,15,6
+London,FSAC,London (FSAC),04/09/2018,40,40,20,10,20,10
+London,FSAC,London (FSAC),04/10/2018,40,40,20,10,20,10
+London,FSAC,London (FSAC),04/11/2018,40,40,20,10,20,10
+London,FSAC,London (FSAC),04/12/2018,40,40,20,10,20,10
+London,FSAC,London (FSAC),04/16/2018,40,40,20,10,20,10
+London,FSAC,London (FSAC),04/17/2018,40,40,20,10,20,10
+London,FSAC,London (FSAC),04/18/2018,40,40,20,10,20,10
+London,FSAC,London (FSAC),04/19/2018,40,40,20,10,20,10
+London,FSAC,London (FSAC),04/23/2018,40,40,20,10,20,10
+London,FSAC,London (FSAC),04/24/2018,40,40,20,10,20,10
+London,FSAC,London (FSAC),04/25/2018,40,40,20,10,20,10
+London,FSAC,London (FSAC),04/26/2018,40,40,20,10,20,10
+London,FSAC,London (FSAC),04/30/2018,40,40,20,10,20,10
+London,FSAC,London (FSAC),05/01/2018,40,40,20,10,20,10
+London,FSAC,London (FSAC),05/02/2018,40,40,20,10,20,10
+London,FSAC,London (FSAC),05/03/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),03/15/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),03/16/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),03/20/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),03/21/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),03/22/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),04/09/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),04/10/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),04/11/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),04/12/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),04/17/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),04/18/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),04/19/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),04/24/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),04/25/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),04/26/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),05/01/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),05/02/2018,40,40,20,10,20,10
+Newcastle,FSAC,Newcastle (FSAC),05/03/2018,40,40,20,10,20,10

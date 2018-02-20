@@ -2,357 +2,281 @@ Newcastle:
   - Newcastle (FSAC):
       description: FSAC
       capacities:
-         - date: 05/04/2019
-           amCapacity: 36
+         - date: 15/03/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 22/04/2019
-           amCapacity: 36
+           pmPreferredAttendeeMargin: 10
+         - date: 16/03/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 06/05/2019
-           amCapacity: 36
+           pmPreferredAttendeeMargin: 10
+         - date: 20/03/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 08/05/2019
-           amCapacity: 36
+           pmPreferredAttendeeMargin: 10
+         - date: 21/03/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 13/05/2019
-           amCapacity: 36
+           pmPreferredAttendeeMargin: 10
+         - date: 22/03/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 19/05/2019
-           amCapacity: 36
+           pmPreferredAttendeeMargin: 10
+         - date: 09/04/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 20/05/2019
-           amCapacity: 36
-           amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
-           pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 22/05/2019
-           amCapacity: 36
-           amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
-           pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 23/05/2019
-           amCapacity: 36
-           amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
-           pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 24/05/2019
-           amCapacity: 36
-           amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
-           pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 25/05/2019
-           amCapacity: 36
-           amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
-           pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 26/05/2019
-           amCapacity: 36
-           amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
-           pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 27/05/2019
-           amCapacity: 36
-           amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
-           pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 01/06/2019
-           amCapacity: 36
-           amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
-           pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 02/06/2019
-           amCapacity: 36
-           amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
-           pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 05/06/2019
-           amCapacity: 36
-           amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
-           pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-  - Newcastle (Longbenton):
-      description: Longbenton
-      capacities:
-         - date: 04/04/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
-         - date: 05/04/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
+           pmPreferredAttendeeMargin: 10
          - date: 10/04/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
+           amCapacity: 40
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 10
+         - date: 11/04/2019
+           amCapacity: 40
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 10
+         - date: 12/04/2019
+           amCapacity: 40
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 10
+         - date: 17/04/2019
+           amCapacity: 40
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 10
          - date: 18/04/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
-         - date: 21/04/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
-         - date: 28/04/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
+           amCapacity: 40
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 10
+         - date: 19/04/2019
+           amCapacity: 40
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 10
+         - date: 24/04/2019
+           amCapacity: 40
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 10
+         - date: 25/04/2019
+           amCapacity: 40
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 10
+         - date: 26/04/2019
+           amCapacity: 40
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 10
+         - date: 01/05/2019
+           amCapacity: 40
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 10
+         - date: 02/05/2019
+           amCapacity: 40
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 10
          - date: 03/05/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
+           amCapacity: 40
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 10
 
 London:
-  - London (Euston Tower):
-      description: Euston Tower
-      capacities:
-         - date: 15/02/2018
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
-         - date: 07/04/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
-         - date: 10/04/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
-         - date: 21/04/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
-         - date: 24/04/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
-         - date: 26/04/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
-         - date: 28/04/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
-         - date: 02/05/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
-         - date: 03/05/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
-         - date: 04/05/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
-         - date: 05/05/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
-         - date: 08/05/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
-         - date: 09/05/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
-         - date: 12/05/2019
-           amCapacity: 18
-           amMinViableAttendees: 10
-           amPreferredAttendeeMargin: 4
-           pmCapacity: 18
-           pmMinViableAttendees: 10
-           pmPreferredAttendeeMargin: 4
   - London (FSAC):
       description: FSAC
       capacities:
-         - date: 22/04/2019
-           amCapacity: 36
+         - date: 15/03/2019
+           amCapacity: 25
+           amMinViableAttendees: 15
+           amPreferredAttendeeMargin: 6
+           pmCapacity: 25
+           pmMinViableAttendees: 15
+           pmPreferredAttendeeMargin: 6
+         - date: 16/03/2019
+           amCapacity: 25
+           amMinViableAttendees: 15
+           amPreferredAttendeeMargin: 6
+           pmCapacity: 25
+           pmMinViableAttendees: 15
+           pmPreferredAttendeeMargin: 6
+         - date: 20/03/2019
+           amCapacity: 25
+           amMinViableAttendees: 15
+           amPreferredAttendeeMargin: 6
+           pmCapacity: 25
+           pmMinViableAttendees: 15
+           pmPreferredAttendeeMargin: 6
+         - date: 21/03/2019
+           amCapacity: 25
+           amMinViableAttendees: 15
+           amPreferredAttendeeMargin: 6
+           pmCapacity: 25
+           pmMinViableAttendees: 15
+           pmPreferredAttendeeMargin: 6
+         - date: 22/03/2019
+           amCapacity: 25
+           amMinViableAttendees: 15
+           amPreferredAttendeeMargin: 6
+           pmCapacity: 25
+           pmMinViableAttendees: 15
+           pmPreferredAttendeeMargin: 6
+         - date: 09/04/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 29/04/2019
-           amCapacity: 36
+           pmPreferredAttendeeMargin: 10
+         - date: 10/04/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 06/05/2019
-           amCapacity: 36
+           pmPreferredAttendeeMargin: 10
+         - date: 11/04/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 11/05/2019
-           amCapacity: 36
+           pmPreferredAttendeeMargin: 10
+         - date: 12/04/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 13/05/2019
-           amCapacity: 36
+           pmPreferredAttendeeMargin: 10
+         - date: 16/04/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 20/05/2019
-           amCapacity: 36
+           pmPreferredAttendeeMargin: 10
+         - date: 17/04/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 27/05/2019
-           amCapacity: 36
+           pmPreferredAttendeeMargin: 10
+         - date: 18/04/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 05/06/2019
-           amCapacity: 36
+           pmPreferredAttendeeMargin: 10
+         - date: 19/04/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 06/06/2019
-           amCapacity: 36
+           pmPreferredAttendeeMargin: 10
+         - date: 23/04/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 07/06/2019
-           amCapacity: 36
+           pmPreferredAttendeeMargin: 10
+         - date: 24/04/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 08/06/2019
-           amCapacity: 36
+           pmPreferredAttendeeMargin: 10
+         - date: 25/04/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
-         - date: 09/06/2019
-           amCapacity: 36
+           pmPreferredAttendeeMargin: 10
+         - date: 26/04/2019
+           amCapacity: 40
            amMinViableAttendees: 20
-           amPreferredAttendeeMargin: 8
-           pmCapacity: 36
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
            pmMinViableAttendees: 20
-           pmPreferredAttendeeMargin: 8
+           pmPreferredAttendeeMargin: 10
+         - date: 30/04/2019
+           amCapacity: 40
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 10
+         - date: 01/05/2019
+           amCapacity: 40
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 10
+         - date: 02/05/2019
+           amCapacity: 40
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 10
+         - date: 03/05/2019
+           amCapacity: 40
+           amMinViableAttendees: 20
+           amPreferredAttendeeMargin: 10
+           pmCapacity: 40
+           pmMinViableAttendees: 20
+           pmPreferredAttendeeMargin: 10
