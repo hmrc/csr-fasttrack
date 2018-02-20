@@ -21,7 +21,6 @@ import model.exchange.AssistanceDetailsExamples
 import model.ApplicationValidator
 import org.joda.time.LocalDate
 import org.scalatestplus.play.PlaySpec
-import repositories.FrameworkRepository.{ CandidateHighestQualification, Framework, Location, Region }
 
 class ApplicationValidatorSpec extends PlaySpec {
 
@@ -71,50 +70,4 @@ object ApplicationValidatorSpec {
     stemLevel = true, civilServant = false, department = None)
 
   def assistanceDetails = AssistanceDetailsExamples.DisabilityGisAndAdjustments
-
-  def regions = List(
-    Region(
-      "London",
-      List(Location(
-        "London",
-        List(Framework("Business", CandidateHighestQualification(2)), Framework("IT", CandidateHighestQualification(3)))
-      ), Location(
-        "Reading",
-        List(Framework("Logistics", CandidateHighestQualification(1)))
-      ))
-    ),
-    Region(
-      "Kent",
-      List(Location(
-        "Some Area",
-        List(Framework("Business", CandidateHighestQualification(2)), Framework("IT", CandidateHighestQualification(3)))
-      ), Location(
-        "Other Area",
-        List(Framework("Logistics", CandidateHighestQualification(1)))
-      ))
-    )
-  )
-
-  def regionsNoStem = List(
-    Region(
-      "London",
-      List(Location(
-        "London",
-        List(Framework("Business", CandidateHighestQualification(2)))
-      ), Location(
-        "Reading",
-        List(Framework("Logistics", CandidateHighestQualification(1)))
-      ))
-    ),
-    Region(
-      "Kent",
-      List(Location(
-        "Some Area",
-        List(Framework("Business", CandidateHighestQualification(2)))
-      ), Location(
-        "Other Area",
-        List(Framework("Logistics", CandidateHighestQualification(1)))
-      ))
-    )
-  )
 }

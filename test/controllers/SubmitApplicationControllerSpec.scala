@@ -32,7 +32,6 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatestplus.play.{ OneAppPerSuite, PlaySpec }
 import play.api.mvc._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories.FrameworkRepository.{ CandidateHighestQualification, Framework, Location, Region }
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, PersonalDetailsRepository }
 import services.AuditService

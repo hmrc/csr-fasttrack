@@ -24,7 +24,7 @@ import org.scalatest.BeforeAndAfterEach
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mock.MockitoSugar
 import org.scalatestplus.play.PlaySpec
-import repositories.{ FrameworkRepository, OnlineTestPassMarkSettingsRepository }
+import repositories.OnlineTestPassMarkSettingsRepository
 
 import scala.concurrent.{ ExecutionContext, Future }
 import uk.gov.hmrc.http.HeaderCarrier
@@ -56,7 +56,6 @@ class OnlineTestPassMarkSettingsServiceSpec extends PlaySpec with BeforeAndAfter
   object Fixtures {
     implicit val hc = HeaderCarrier()
 
-    val fwRepositoryMock = mock[FrameworkRepository]
     val pmsRepositoryMockNoSettings = mock[OnlineTestPassMarkSettingsRepository]
     val pmsRepositoryMockWithSettings = mock[OnlineTestPassMarkSettingsRepository]
 
@@ -84,12 +83,10 @@ class OnlineTestPassMarkSettingsServiceSpec extends PlaySpec with BeforeAndAfter
 
     val passMarkSettingsServiceNoSettings = new OnlineTestPassMarkSettingsService {
       val onlineTestPassMarkSettingsRepository: OnlineTestPassMarkSettingsRepository = pmsRepositoryMockNoSettings
-      val fwRepository: FrameworkRepository = fwRepositoryMock
     }
 
     val passMarkSettingsServiceWithSettings = new OnlineTestPassMarkSettingsService {
       val onlineTestPassMarkSettingsRepository: OnlineTestPassMarkSettingsRepository = pmsRepositoryMockWithSettings
-      val fwRepository: FrameworkRepository = fwRepositoryMock
     }
   }
 

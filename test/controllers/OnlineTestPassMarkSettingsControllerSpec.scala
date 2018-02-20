@@ -31,7 +31,7 @@ import play.api.libs.json.Json
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test.{ FakeHeaders, FakeRequest, Helpers }
-import repositories.{ FrameworkRepository, LocationSchemeRepository, OnlineTestPassMarkSettingsRepository, SchemeInfo }
+import repositories.{ LocationSchemeRepository, OnlineTestPassMarkSettingsRepository, SchemeInfo }
 
 import scala.concurrent.Future
 import scala.language.postfixOps

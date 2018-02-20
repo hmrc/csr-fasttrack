@@ -26,37 +26,6 @@ import testkit.IntegrationSpec
 class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSugar with OneAppPerSuite {
   val DateFormat = "d/M/yy"
 
-  "Locations and assessment centre mapping" should {
-    "return non empty mapping" in {
-      val mapping = AssessmentCentreLocationYamlRepository.locationsAndAssessmentCentreMapping.futureValue
-      mapping must not be empty
-      mapping("London") mustBe "London"
-      mapping("Cardiff") mustBe "Bristol"
-    }
-
-    "be consistent with regions-locations-frameworks" in {
-      val allLocationsFromFrameworkRepo = allLocationsFromFrameworkRepository
-      val locationToAssessmentCentre = AssessmentCentreLocationYamlRepository.locationsAndAssessmentCentreMapping.futureValue.keys.toSet
-
-      val missingLocationsInFrameworkRepo = locationToAssessmentCentre.diff(allLocationsFromFrameworkRepo)
-      val missingLocationsInAssessmentCentresMapping = allLocationsFromFrameworkRepo.diff(locationToAssessmentCentre)
-
-      if (missingLocationsInFrameworkRepo.nonEmpty) {
-        Logger.error("Missing: " + missingLocationsInFrameworkRepo.mkString(","))
-      }
-      if (missingLocationsInFrameworkRepo.nonEmpty) {
-        Logger.error("Missing: " + missingLocationsInAssessmentCentresMapping.mkString(","))
-      }
-
-      withClue("missingLocationsInAssessmentCentresMapping") {
-        missingLocationsInAssessmentCentresMapping mustBe empty
-      }
-      withClue("missingLocationsInFrameworkRepo") {
-        missingLocationsInFrameworkRepo mustBe empty
-      }
-    }
-  }
-
   "Assessment centre capacities" should {
     "return non empty mapping" in {
       val capacities = AssessmentCentreLocationYamlRepository.assessmentCentreCapacities.futureValue
@@ -125,13 +94,5 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
       capacityDate.amCapacity mustBe 36
       capacityDate.pmCapacity mustBe 36
     }
-  }
-
-  def allLocationsFromFrameworkRepository = {
-    val frameworkRepository = new FrameworkYamlRepository
-    (for {
-      r <- frameworkRepository.getFrameworksByRegion.futureValue
-      l <- r.locations
-    } yield l.name).toSet
   }
 }
