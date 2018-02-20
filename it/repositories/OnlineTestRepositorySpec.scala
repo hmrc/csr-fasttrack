@@ -487,7 +487,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
         cubiksUserId = Some(123)
       )
 
-      onlineTestRepo.completeOnlineTest(123, 174, isGis = false).futureValue
+      onlineTestRepo.completeOnlineTest(123, 131, isGis = false).futureValue
 
       val testAfterFirstCallback = onlineTestRepo.getCubiksTestProfile(123).futureValue
       val applicationAfterFirstCallback = helperRepo.findByUserId(appIdWithUserId.userId, "frameworkId").futureValue
@@ -513,7 +513,7 @@ class OnlineTestRepositorySpec extends MongoRepositorySpec {
         cubiksUserId = Some(123)
       )
 
-      onlineTestRepo.completeOnlineTest(123, 174, isGis = true).futureValue
+      onlineTestRepo.completeOnlineTest(123, 131, isGis = true).futureValue
 
       val testAfterFirstCallback = onlineTestRepo.getCubiksTestProfile(123).futureValue
       val applicationAfterFirstCallback = helperRepo.findByUserId(appIdWithUserId.userId, "frameworkId").futureValue
