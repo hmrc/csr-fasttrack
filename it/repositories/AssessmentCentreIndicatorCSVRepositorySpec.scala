@@ -8,7 +8,7 @@ class AssessmentCentreIndicatorCSVRepositorySpec extends UnitWithAppSpec with Sh
   "North South Indicator Repository" should {
     "parse file with expected number of post code areas" in {
       val result = AssessmentCentreIndicatorCSVRepository.assessmentCentreIndicators
-      result.size mustBe 121
+      result.size mustBe 124
     }
   }
 
