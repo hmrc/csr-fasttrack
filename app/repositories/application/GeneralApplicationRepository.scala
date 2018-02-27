@@ -58,6 +58,8 @@ trait GeneralApplicationRepository {
 
   def find(applicationIds: List[String]): Future[List[Candidate]]
 
+  def findAllUserIds: Future[List[String]]
+
   def findProgress(applicationId: String): Future[ProgressResponse]
 
   def findApplicationStatusDetails(applicationId: String): Future[ApplicationStatusDetails]
@@ -241,6 +243,13 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     }).getOrElse(ProgressResponse(applicationId))
   }
   // scalastyle:on method.length
+
+  override def findAllUserIds: Future[List[String]] = {
+    val query = BSONDocument()
+    val projection = BSONDocument("userId" -> true, "_id" -> false)
+
+    collection.find(query, projection).cursor[BSONDocument]().collect[List]().map(_.map( _.getAs[String]("userId").getOrElse("") ))
+  }
 
   override def findProgress(applicationId: String): Future[ProgressResponse] = {
     val query = BSONDocument("applicationId" -> applicationId)
