@@ -53,7 +53,7 @@ abstract class PreviousYearCandidatesDetailsRepository(locationSchemeRepository:
 
   lazy val applicationDetailsHeader = {
     locationHeader.map { locHeader =>
-      "FrameworkId,Application status,First name,Last name,Preferred name,Date of birth," +
+      "FrameworkId,ApplicationId,Application status,First name,Last name,Preferred name,Date of birth," +
         "A level,Stem level,Civil servant,Civil Service department," + schemesHeader + "," + locHeader + "," +
         "Has disability,Disability description,GIS,Needs support for online assessment," +
         "Support for online assessment description,Needs support at venue,Support at venue description," +
@@ -168,6 +168,7 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
             .enumerate().map { doc =>
               val csvContent = makeRow(
                   List(doc.getAs[String]("frameworkId")) :::
+                  List(Some(doc.getAs[String]("applicationId").getOrElse(""))) :::
                   List(doc.getAs[String]("applicationStatus")) :::
                   personalDetails(doc) :::
                   schemePreferences(doc).padTo(Scheme.AllSchemes.size, None) :::
