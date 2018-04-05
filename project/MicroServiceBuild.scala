@@ -28,8 +28,8 @@ private object Versions {
   val microserviceBootstrapVersion  = "6.13.0"
   val ficus                         = "1.1.2"
   val hmrcScheduler                 = "4.1.0"
-  val hmrcTestVersion               = "1.8.0"
-  val playReactivemongoVersion      = "5.1.0"
+  val hmrcTestVersion               = "2.4.0"
+  val playReactivemongoVersion      = "5.2.0"
   val guice                         = "4.0.0"
 
   val scalatest                     = "2.2.6"
