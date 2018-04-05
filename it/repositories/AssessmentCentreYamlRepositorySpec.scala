@@ -90,8 +90,8 @@ class AssessmentCentreYamlRepositorySpec extends IntegrationSpec with MockitoSug
       venue.venueName mustBe "London (FSAC)"
       venue.venueDescription mustBe "FSAC"
       val capacityDate = venue.capacityDates.find(_.date == new LocalDate("2018-04-24")).get
-      capacityDate.amCapacity mustBe 40
-      capacityDate.pmCapacity mustBe 40
+      capacityDate.amCapacity mustBe 42
+      capacityDate.pmCapacity mustBe 42
     }
   }
 }
