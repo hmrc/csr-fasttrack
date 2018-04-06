@@ -75,15 +75,13 @@ trait AssessmentCentreIndicatorController extends BaseController {
     val msg = s"Candidate whose application id = $applicationId cannot be updated to $assessmentCentre " +
       "because there is no assessment-centre-indicator"
 
-    val future = (for {
+    val future = for {
       assessmentCentreIndicator <- appRepository.findAssessmentCentreIndicator(applicationId)
-    } yield {
 
-      val aci = assessmentCentreIndicator.getOrElse(throw new IllegalStateException(msg))
-      val londonAci = AssessmentCentreIndicator(aci.area, assessmentCentre, aci.version)
-
-      appRepository.updateAssessmentCentreIndicator(applicationId, londonAci)
-    }).flatMap(identity)
+      aci = assessmentCentreIndicator.getOrElse(throw new IllegalStateException(msg))
+      londonAci = AssessmentCentreIndicator(aci.area, assessmentCentre, aci.version)
+      _ <- appRepository.updateAssessmentCentreIndicator(applicationId, londonAci)
+    } yield ()
 
     future.map( _ => Ok(s"Updated candidate's assessment centre to $assessmentCentre whose applicationId = $applicationId") )
       .recover{ case _ => Forbidden(msg) }
