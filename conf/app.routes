@@ -121,6 +121,7 @@ POST        /fixdata/extendExpiredOnlineTests                            control
 GET         /fixdata/countNoDateScoresAndFeedback                        controllers.FixDataController.countNoDateScoresAndFeedback()
 GET         /fixdata/fixNoDateScoresAndFeedback                          controllers.FixDataController.fixNoDateScoresAndFeedback()
 GET         /fixdata/forcePassmarkReevaluationForOnlineTestComplete      controllers.FixDataController.forcePassmarkReevaluationForOnlineTestComplete(applicationId: String)
+GET         /fixdata/assignCandidateToLondonAssessmentCentre             controllers.AssessmentCentreIndicatorController.assignCandidateToLondonAssessmentCentre(applicationId: String)
 
 GET         /campaign-reset/listCollections                              controllers.FixDataController.listCollections
 GET         /campaign-reset/removeCollection                             controllers.FixDataController.removeCollection(name: String)
