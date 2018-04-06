@@ -18,6 +18,7 @@ package controllers
 
 import common.FutureEx
 import controllers.AssessmentCentreIndicatorController.ApplicationReadyForUpdate
+import model.AssessmentCentreIndicator
 import play.api.mvc.Action
 import repositories.{ AssessmentCentreIndicatorCSVRepository, AssessmentCentreIndicatorRepository, ContactDetailsRepository }
 import repositories.application.GeneralApplicationRepository
@@ -69,4 +70,20 @@ trait AssessmentCentreIndicatorController extends BaseController {
     }
   }
 
+  def assignCandidateToLondonAssessmentCentre(applicationId: String) = Action.async { implicit request =>
+    val assessmentCentre = "London"
+    val msg = s"Candidate whose application id = $applicationId cannot be updated to $assessmentCentre " +
+      "because there is no assessment-centre-indicator"
+
+    val future = for {
+      assessmentCentreIndicator <- appRepository.findAssessmentCentreIndicator(applicationId)
+
+      aci = assessmentCentreIndicator.getOrElse(throw new IllegalStateException(msg))
+      londonAci = AssessmentCentreIndicator(aci.area, assessmentCentre, aci.version)
+      _ <- appRepository.updateAssessmentCentreIndicator(applicationId, londonAci)
+    } yield ()
+
+    future.map( _ => Ok(s"Updated candidate's assessment centre to $assessmentCentre whose applicationId = $applicationId") )
+      .recover{ case _ => Forbidden(msg) }
+  }
 }
