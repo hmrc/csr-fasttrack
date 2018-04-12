@@ -1,125 +1,125 @@
-﻿POSTCODE,AREA,ASSESSMENT_CENTRE
-AB,Aberdeen,Newcastle
-AL,St Albans,London
-B,Birmingham,Newcastle
-BA,Bath,London
-BB,Blackburn,Newcastle
-BD,Bradford,Newcastle
-BH,Bournemouth,London
-BL,Bolton,Newcastle
-BN,Brighton,London
-BR,Bromley,London
-BS,Bristol,London
-BT,Belfast,Newcastle
-CA,Carlisle,Newcastle
-CB,Cambridge,London
-CF,Cardiff,London
-CH,Chester,Newcastle
-CM,Chelmsford,Newcastle
-CO,Colchester,London
-CR,Croydon,London
-CT,Canterbury,London
-CV,Coventry,Newcastle
-CW,Crewe,Newcastle
-DA,Dartford,London
-DD,Dundee,Newcastle
-DE,Derby,Newcastle
-DG,Dumfries,Newcastle
-DH,Durham,Newcastle
-DL,Darlington,Newcastle
-DN,Doncaster,Newcastle
-DT,Dorchester,London
-DY,Dudley,Newcastle
-E,East London,London
-EC,East Central london,London
-EH,Edinburgh,Newcastle
-EN,Enfield,London
-EX,Exeter,London
-FK,Falkirk,Newcastle
-FY,Blackpool,Newcastle
-G,Glasgow,Newcastle
-GL,Gloucester,London
-GU,Guildford,Newcastle
-GY,Guernsey,Newcastle
-HA,Harrow,Newcastle
-HD,Huddersfield,Newcastle
-HG,Harrogate,Newcastle
-HP,Hemel Hempstead,Newcastle
-HR,Hereford,London
-HS,Stornoway,Newcastle
-HU,Hull,Newcastle
-HX,Halifax,Newcastle
-IG,Ilford,London
-IM,Isle of Man,Newcastle
-IP,Ipswich,London
-IV,Inverness,Newcastle
-JE,Jersey,Newcastle
-KA,Kilmarnock,Newcastle
-KT,Kingston-u-Thames,London
-KW,Wick,Newcastle
-KY,Dunfermline,Newcastle
-L,Liverpool,Newcastle
-LA,Lancaster,Newcastle
-LD,Llandrindod wells,London
-LE,Leicester,Newcastle
-LL,Wrexham,London
-LN,Lincoln,Newcastle
-LS,Leeds,Newcastle
-LU,Luton,London
-M,Manchester,Newcastle
-ME,Rochester,London
-MK,Milton Keynes,London
-ML,Motherwell,Newcastle
-N,North London,London
-NE,Newcastle,Newcastle
-NG,Nottingham,Newcastle
-NN,Northampton,Newcastle
-NP,Newport,London
-NR,Norwich,London
-NW,Northwest London,London
-OL,Oldham,Newcastle
-OX,Oxford,London
-PA,Paisley,Newcastle
-PE,Peterborough,Newcastle
-PH,Perth,Newcastle
-PL,Plymouth,London
-PO,Portsmouth,London
-PR,Preston,Newcastle
-RG,Reading,London
-RH,Redhill,London
-RM,Romford,London
-S,Sheffield,Newcastle
-SA,Swansea,London
-SE,South East london,London
-SG,Stevenage,Newcastle
-SK,Stockport,Newcastle
-SL,Slough,London
-SM,Sutton,London
-SN,Swindon,London
-SO,Southampton,Newcastle
-SP,Salisbury,London
-SR,Sunderland,Newcastle
-SS,Southend-on-Sea,London
-ST,Stoke-on-Trent,Newcastle
-SW,Southwest London,London
-SY,Shrewsbury,Newcastle
-TA,Taunton,London
-TD,Galashiels,Newcastle
-TF,Telford,London
-TN,Tunbridge Wells,London
-TQ,Torquay,London
-TR,Truro,London
-TS,Middlesbrough,Newcastle
-TW,Twickenham,London
-UB,Southall,London
-W,West London,London
-WA,Warrington,Newcastle
-WC,Western Central London,London
-WD,Watford,Newcastle
-WF,Wakefield,Newcastle
-WN,Wigan,Newcastle
-WR,Worcester,London
-WS,Walsall,Newcastle
-WV,Wolverhampton,Newcastle
-YO,York,Newcastle
+﻿POSTCODE,AREA,ASSESSMENT_CENTRE,
+AB,Aberdeen,Newcastle,
+AL,St Albans,London,
+B,Birmingham,London,
+BA,Bath,London,
+BB,Blackburn,Newcastle,
+BD,Bradford,Newcastle,
+BH,Bournemouth,London,
+BL,Bolton,Newcastle,
+BN,Brighton,London,
+BR,Bromley,London,
+BS,Bristol,London,
+BT,Belfast,Newcastle,
+CA,Carlisle,Newcastle,
+CB,Cambridge,London,
+CF,Cardiff,London,
+CH,Chester,Newcastle,
+CM,Chelmsford,London,
+CO,Colchester,London,
+CR,Croydon,London,
+CT,Canterbury,London,
+CV,Coventry,London,
+CW,Crewe,London,
+DA,Dartford,London,
+DD,Dundee,Newcastle,
+DE,Derby,London,
+DG,Dumfries,Newcastle,
+DH,Durham,Newcastle,
+DL,Darlington,Newcastle,
+DN,Doncaster,London,
+DT,Dorchester,London,
+DY,Dudley,London,
+E,East London,London,
+EC,East Central london,London,
+EH,Edinburgh,Newcastle,
+EN,Enfield,London,
+EX,Exeter,London,
+FK,Falkirk,Newcastle,
+FY,Blackpool,Newcastle,
+G,Glasgow,Newcastle,
+GL,Gloucester,London,
+GU,Guildford,London,
+GY,Guernsey,Newcastle,
+HA,Harrow,Newcastle,
+HD,Huddersfield,Newcastle,
+HG,Harrogate,Newcastle,
+HP,Hemel Hempstead,London,
+HR,Hereford,London,
+HS,Stornoway,Newcastle,
+HU,Hull,Newcastle,
+HX,Halifax,Newcastle,
+IG,Ilford,London,
+IM,Isle of Man,Newcastle,
+IP,Ipswich,London,
+IV,Inverness,Newcastle,
+JE,Jersey,Newcastle,
+KA,Kilmarnock,Newcastle,
+KT,Kingston-u-Thames,London,
+KW,Wick,Newcastle,
+KY,Dunfermline,Newcastle,
+L,Liverpool,Newcastle,
+LA,Lancaster,Newcastle,
+LD,Llandrindod wells,London,
+LE,Leicester,London,
+LL,Wrexham,London,
+LN,Lincoln,Newcastle,
+LS,Leeds,Newcastle,
+LU,Luton,London,
+M,Manchester,Newcastle,
+ME,Rochester,London,
+MK,Milton Keynes,London,
+ML,Motherwell,Newcastle,
+N,North London,London,
+NE,Newcastle,Newcastle,
+NG,Nottingham,London,
+NN,Northampton,London,
+NP,Newport,London,
+NR,Norwich,London,
+NW,Northwest London,London,
+OL,Oldham,Newcastle,
+OX,Oxford,London,
+PA,Paisley,Newcastle,
+PE,Peterborough,London,
+PH,Perth,Newcastle,
+PL,Plymouth,London,
+PO,Portsmouth,London,
+PR,Preston,Newcastle,
+RG,Reading,London,
+RH,Redhill,London,
+RM,Romford,London,
+S,Sheffield,Newcastle,
+SA,Swansea,London,
+SE,South East london,London,
+SG,Stevenage,London,
+SK,Stockport,London,
+SL,Slough,London,
+SM,Sutton,London,
+SN,Swindon,London,
+SO,Southampton,London,
+SP,Salisbury,London,
+SR,Sunderland,Newcastle,
+SS,Southend-on-Sea,London,
+ST,Stoke-on-Trent,London,
+SW,Southwest London,London,
+SY,Shrewsbury,Newcastle,
+TA,Taunton,London,
+TD,Galashiels,Newcastle,
+TF,Telford,London,
+TN,Tunbridge Wells,London,
+TQ,Torquay,London,
+TR,Truro,London,
+TS,Middlesbrough,Newcastle,
+TW,Twickenham,London,
+UB,Southall,London,
+W,West London,London,
+WA,Warrington,Newcastle,
+WC,Western Central London,London,
+WD,Watford,London,
+WF,Wakefield,Newcastle,
+WN,Wigan,Newcastle,
+WR,Worcester,London,
+WS,Walsall,Newcastle,
+WV,Wolverhampton,Newcastle,
+YO,York,Newcastle,
 ZE,Lerwick,Newcastle
