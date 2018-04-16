@@ -22,10 +22,10 @@ import model.Exceptions.{ AdjustmentsCommentNotFound, LocationPreferencesNotFoun
 import model._
 import model.commands.ApplicationStatusDetails
 import model.persisted.{ OnlineTestPassmarkEvaluation, SchemeEvaluationResult }
-import org.joda.time.{ DateTime, DateTimeZone }
+import org.joda.time.{ DateTime, DateTimeZone, LocalDate }
 import reactivemongo.bson.BSONDocument
 import reactivemongo.json.ImplicitBSONHandlers
-import repositories.{ BSONDateTimeHandler, CollectionNames }
+import repositories.{ BSONDateTimeHandler, BSONLocalDateHandler, CollectionNames }
 import services.GBTimeZoneService
 import testkit.MongoRepositorySpec
 
@@ -260,11 +260,39 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
     }
   }
 
-  def createApplicationWithAllFields(userId: String, appId: String, frameworkId: String,
-    appStatus: ApplicationStatuses.EnumVal = ApplicationStatuses.Submitted,
-    progressStatusBSON: BSONDocument = buildProgressStatusBSON()
-  ) = {
-    val application = BSONDocument(
+  "Allocation Expiry" must {
+    "find candidates that are eligible for expiry" in {
+      val appBsonDoc = createApplicationBSON("userId", "appId", "frameworkId",
+        ApplicationStatuses.AllocationUnconfirmed,
+        buildProgressStatusBSON(Map(ProgressStatuses.AllocationUnconfirmedProgress -> DateTime.now))
+      ) ++ BSONDocument("allocation-expire-date" -> LocalDate.now().minusDays(1))
+      createApplicationWithAppBSON(appBsonDoc)
+      val appForExpiryOpt = repository.nextApplicationPendingAllocationExpiry.futureValue
+      appForExpiryOpt.isDefined mustBe true
+    }
+
+    "not return candidate that hasn't expired" in {
+      val appBsonDoc1 = createApplicationBSON("userId", "appId", "frameworkId",
+        ApplicationStatuses.AllocationUnconfirmed,
+        buildProgressStatusBSON(Map(ProgressStatuses.AllocationUnconfirmedProgress -> DateTime.now))
+      ) ++ BSONDocument("allocation-expire-date" -> LocalDate.now())
+      val appBsonDoc2 = createApplicationBSON("userId2", "appId2", "frameworkId",
+        ApplicationStatuses.AllocationUnconfirmed,
+        buildProgressStatusBSON(Map(ProgressStatuses.AllocationUnconfirmedProgress -> DateTime.now))
+      ) ++ BSONDocument("allocation-expire-date" -> LocalDate.now().plusDays(1))
+
+      createApplicationWithAppBSON(appBsonDoc1)
+      createApplicationWithAppBSON(appBsonDoc2)
+
+      val appForExpiryOpt = repository.nextApplicationPendingAllocationExpiry.futureValue
+      appForExpiryOpt.isDefined mustBe false
+    }
+  }
+
+  def createApplicationBSON(userId: String, appId: String, frameworkId: String,
+                            appStatus: ApplicationStatuses.EnumVal = ApplicationStatuses.Submitted,
+                            progressStatusBSON: BSONDocument = buildProgressStatusBSON()): BSONDocument = {
+    BSONDocument(
       "applicationId" -> appId,
       "userId" -> userId,
       "frameworkId" -> frameworkId,
@@ -298,8 +326,19 @@ class GeneralApplicationMongoRepositorySpec extends MongoRepositorySpec with UUI
       ),
       "issue" -> "this candidate has changed the email"
     ) ++ progressStatusBSON
+  }
+
+  def createApplicationWithAllFields(userId: String, appId: String, frameworkId: String,
+    appStatus: ApplicationStatuses.EnumVal = ApplicationStatuses.Submitted,
+    progressStatusBSON: BSONDocument = buildProgressStatusBSON()
+  ) = {
+    val application = createApplicationBSON(userId, appId, frameworkId, appStatus, progressStatusBSON)
 
     repository.collection.insert(application).futureValue
+  }
+
+  def createApplicationWithAppBSON(applicationBson: BSONDocument) = {
+    repository.collection.insert(applicationBson).futureValue
   }
 
   private def buildProgressStatusBSON(statusesAndDates: Map[ProgressStatuses.EnumVal, DateTime] =
