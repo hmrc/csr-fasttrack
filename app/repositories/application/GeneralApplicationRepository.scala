@@ -810,7 +810,7 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
 
   def nextApplicationPendingAllocationExpiry: Future[Option[ExpiringAllocation]] = {
     val query = BSONDocument(
-      "allocation-expire-date" -> BSONDocument("$lte" -> LocalDate.now()),
+      "allocation-expire-date" -> BSONDocument("$lt" -> LocalDate.now()),
       "applicationStatus" -> ApplicationStatuses.AllocationUnconfirmed
     )
     selectRandom(query).map(_.map(bsonDocToExpiringAllocation))

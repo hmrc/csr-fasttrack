@@ -89,17 +89,18 @@ package object repositories {
   /** Create indexes */
   Await.result(initIndexes, 20 seconds)
 
+  /** Implicit transformation for DateTime **/
   implicit object BSONDateTimeHandler extends BSONHandler[BSONDateTime, DateTime] {
     def read(time: BSONDateTime) = new DateTime(time.value, DateTimeZone.UTC)
 
     def write(jdtime: DateTime) = BSONDateTime(jdtime.getMillis)
   }
 
-  /** Implicit transformation for the DateTime **/
+  /** Implicit transformation for LocalDate **/
   implicit object BSONLocalDateHandler extends BSONHandler[BSONString, LocalDate] {
-    def read(time: BSONString) = LocalDate.parse(time.value)
+    def read(date: BSONString) = LocalDate.parse(date.value)
 
-    def write(jdtime: LocalDate) = BSONString(jdtime.toString("yyyy-MM-dd"))
+    def write(date: LocalDate) = BSONString(date.toString("yyyy-MM-dd"))
   }
 
   /** Implicit transformation for the Candidate **/
