@@ -62,4 +62,13 @@ abstract class FixDataController(fixDataService: FixDataService) extends BaseCon
     fixDataService.removeCollection(name).map(_ => Ok)
   }
 
+  def findAdminWithdrawnApplicationsNotEmailed(): Action[AnyContent] = Action.async { implicit request =>
+    fixDataService.findAdminWithdrawnApplicationsNotEmailed.map(applicationIds => Ok(Json.toJson(applicationIds)))
+  }
+
+  def emailAdminWithdrawnApplicationNotEmailed(applicationId: String)
+  : Action[AnyContent] = Action.async { implicit request =>
+    fixDataService.emailAdminWithdrawnApplicationNotEmailed(applicationId).map(_ => Ok)
+  }
+
 }

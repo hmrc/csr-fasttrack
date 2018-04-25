@@ -131,6 +131,16 @@ trait CSREmailClient extends EmailClient {
       )
     )
   }
+
+  override def sendAdminWithdrawnEmail(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit] = {
+    sendEmail(
+      to,
+      "fset_fasttrack_app_withdrawn_by_service_team",
+      Map(
+        "name" -> name
+      )
+    )
+  }
 }
 
 trait EmailClient extends WSHttp {
@@ -150,6 +160,7 @@ trait EmailClient extends WSHttp {
   def sendAssessmentCentrePassed(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit]
   def sendAssessmentCentreFailed(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit]
   def sendExpiringReminder(template: String, to: String, name: String, expiryDate: DateTime)(implicit hc: HeaderCarrier): Future[Unit]
+  def sendAdminWithdrawnEmail(to: String, name: String)(implicit hc: HeaderCarrier): Future[Unit]
 }
 
 object EmailDateFormatter {

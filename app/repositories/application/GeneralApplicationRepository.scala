@@ -36,7 +36,7 @@ import model.persisted.SchemeEvaluationResult
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{ DateTime, LocalDate }
 import play.api.Logger
-import play.api.libs.json.{ Format, JsNumber, JsObject }
+import play.api.libs.json.{ Json, Format, JsNumber, JsObject }
 import reactivemongo.api.{ DB, DefaultDB, QueryOpts }
 import reactivemongo.bson.{ BSONArray, BSONDocument, _ }
 import reactivemongo.json.collection.JSONBatchCommands.JSONCountCommand
@@ -140,6 +140,10 @@ trait GeneralApplicationRepository {
   def countByStatus(applicationStatus: ApplicationStatuses.EnumVal): Future[Int]
 
   def nextApplicationPendingAllocationExpiry: Future[Option[ExpiringAllocation]]
+
+  def findAdminWithdrawnApplicationsNotEmailed: Future[List[String]]
+
+  def markAdminWithdrawnApplicationAsEmailed(applicationId: String): Future[Unit]
 }
 
 // scalastyle:on number.of.methods
@@ -888,7 +892,26 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
   }
 
   override def countByStatus(applicationStatus: ApplicationStatuses.EnumVal): Future[Int] = {
-    val query = play.api.libs.json.Json.obj("applicationStatus" -> applicationStatus.name)
+    val query = Json.obj("applicationStatus" -> applicationStatus.name)
     collection.count(Some(query))
+  }
+
+  def findAdminWithdrawnApplicationsNotEmailed: Future[List[String]] = {
+    val query = BSONDocument("$and" -> BSONArray(
+        BSONDocument("adminWithdrawnApplicationEmailed" -> BSONDocument("$exists" -> false)),
+        BSONDocument("applicationStatus" -> ApplicationStatuses.Withdrawn.toString),
+        BSONDocument("withdraw.withdrawer" -> BSONDocument("$ne" -> "Candidate"))
+      )
+    )
+
+    collection.find(query, BSONDocument("_id" -> 0, "applicationId" -> 1))
+      .cursor[BSONDocument]().collect[List]().map(_.map(_.getAs[String]("applicationId").get))
+  }
+
+  def markAdminWithdrawnApplicationAsEmailed(applicationId: String): Future[Unit] = {
+    val selector = BSONDocument("applicationId" -> applicationId)
+    val update = BSONDocument("$set" -> BSONDocument("adminWithdrawnApplicationEmailed" -> true))
+
+    collection.update(selector, update).map(_ => ())
   }
 }

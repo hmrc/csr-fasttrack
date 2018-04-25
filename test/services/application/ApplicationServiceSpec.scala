@@ -50,9 +50,7 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       verify(appAssessServiceMock).deleteAssessmentCentreAllocation(eqTo(applicationId))
       verify(auditServiceMock).logEventNoRequest("ApplicationWithdrawn", withdrawAuditDetails)
     }
-  }
 
-  "withdraw an application" should {
     "work when there is a not found exception deleting application assessment and log audit event" in new ApplicationServiceFixture {
       when(appAssessServiceMock.removeFromAssessmentCentreSlot(eqTo(applicationId))).thenReturn(
         Future.failed(new NotFoundException(s"No application assessments were found with applicationId $applicationId"))
@@ -62,6 +60,22 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
       result.futureValue mustBe unit
 
       verify(appAssessServiceMock).deleteAssessmentCentreAllocation(eqTo(applicationId))
+      verify(auditServiceMock).logEventNoRequest("ApplicationWithdrawn", withdrawAuditDetails)
+    }
+
+    "email the user if a service user was the withdrawer" in new ApplicationServiceFixture {
+      val result = applicationService.withdraw(applicationId, withdrawApplicationRequestServiceTeam)
+      result.futureValue mustBe unit
+
+      verify(emailClientMock).sendAdminWithdrawnEmail(eqTo(emailAddress), eqTo(candidate.nameForEmail))(any[HeaderCarrier])
+      verify(auditServiceMock).logEventNoRequest("ApplicationWithdrawn", serviceTeamWithdrawAuditDetails)
+    }
+
+    "not email the user if the candidate is the withdrawer" in new ApplicationServiceFixture {
+      val result = applicationService.withdraw(applicationId, withdrawApplicationRequest)
+      result.futureValue mustBe unit
+
+      verify(emailClientMock, times(0)).sendAdminWithdrawnEmail(any[String](), any[String]())(any[HeaderCarrier])
       verify(auditServiceMock).logEventNoRequest("ApplicationWithdrawn", withdrawAuditDetails)
     }
   }
@@ -148,7 +162,10 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
     val unit = ()
     val applicationId = "1111-1111"
     val userId = "a22b033f-846c-4712-9d19-357819f7491c"
+    val candidate = Candidate(userId, Some(applicationId), None, Some("Test"), Some("Candidate"), Some("PreferredName"), None, None, None)
+    val emailAddress = "foo@bar.com"
     val withdrawApplicationRequest = WithdrawApplicationRequest("reason", Some("other reason"), "Candidate")
+    val withdrawApplicationRequestServiceTeam = WithdrawApplicationRequest("reason", Some("other reason"), "Service Team")
     val expiringAllocation = ExpiringAllocation(applicationId , userId)
 
     val appRepositoryMock = mock[GeneralApplicationRepository]
@@ -159,9 +176,16 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
     val authProviderClientMock = mock[AuthProviderClient]
     val emailClientMock = mock[CSREmailClient]
 
-    when(appRepositoryMock.withdraw(eqTo(applicationId), eqTo(withdrawApplicationRequest))).thenReturnAsync()
+    when(appRepositoryMock.withdraw(eqTo(applicationId), any[WithdrawApplicationRequest])).thenReturnAsync()
     when(appAssessServiceMock.removeFromAssessmentCentreSlot(eqTo(applicationId))).thenReturnAsync()
     when(appAssessServiceMock.deleteAssessmentCentreAllocation(eqTo(applicationId))).thenReturnAsync()
+    when(appRepositoryMock.find(eqTo(applicationId))).thenReturnAsync(
+      Some(candidate)
+    )
+    when(contactDetailsRepositoryMock.find(eqTo(userId))).thenReturnAsync(ContactDetails(
+      outsideUk = false, Address("Foo"), Some("AB1 2CD"), None, emailAddress, None
+    ))
+    when(emailClientMock.sendAdminWithdrawnEmail(any[String], any[String])(any[HeaderCarrier])).thenReturnAsync()
 
     val applicationService = new ApplicationService {
       val appRepository = appRepositoryMock
@@ -225,6 +249,8 @@ class ApplicationServiceSpec extends PlaySpec with BeforeAndAfterEach with Mocki
     val failedFuture = Future.failed(error)
 
     val withdrawAuditDetails = Map("applicationId" -> applicationId, "withdrawRequest" -> withdrawApplicationRequest.toString)
+    val serviceTeamWithdrawAuditDetails = Map("applicationId" -> applicationId, "withdrawRequest" -> withdrawApplicationRequestServiceTeam.toString)
     val editAuditDetails = Map("applicationId" -> applicationId, "editRequest" -> editedDetails.toString)
   }
 }
+

@@ -17,6 +17,7 @@
 package services
 
 import config.DataFixupConfig
+import connectors.EmailClient
 import connectors.PassMarkExchangeObjects.OnlineTestPassmarkSettings
 import model.Commands.ProgressResponse
 import model.Exceptions.PassMarkSettingsNotFound
@@ -26,7 +27,7 @@ import model.{ ApplicationStatuses, EmptyRequestHeader, Scheme }
 import model.persisted.SchemeEvaluationResult
 import org.joda.time.DateTime
 import play.api.test.Helpers._
-import repositories.{ AssessorApplicationAssessmentScoresMongoRepository, OnlineTestPassMarkSettingsRepository }
+import repositories.{ AssessorApplicationAssessmentScoresMongoRepository, ContactDetailsRepository, OnlineTestPassMarkSettingsRepository }
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
 import testkit.{ MockitoSugar, UnitSpec }
 import org.mockito.Matchers._
@@ -132,6 +133,8 @@ class FixDataServiceSpec extends UnitSpec {
     val mockAssessorApplicationAssessmentScoresMongoRepository = mock[AssessorApplicationAssessmentScoresMongoRepository]
     val mockOnlineTestRepository = mock[OnlineTestRepository]
     val mockOnlineTestExtensionService = mock[OnlineTestExtensionService]
+    val mockContactDetailsRepository = mock[ContactDetailsRepository]
+    val mockEmailClient = mock[EmailClient]
 
     val service = new FixDataService {
       val appRepo = mockAppRepo
@@ -141,6 +144,8 @@ class FixDataServiceSpec extends UnitSpec {
       val assessmentScoresRepo: AssessorApplicationAssessmentScoresMongoRepository = mockAssessorApplicationAssessmentScoresMongoRepository
       val onlineTestingRepo: OnlineTestRepository = mockOnlineTestRepository
       val onlineTestExtensionService: OnlineTestExtensionService = mockOnlineTestExtensionService
+      val cdRepo: ContactDetailsRepository = mockContactDetailsRepository
+      val emailClient: EmailClient = mockEmailClient
     }
 
     when(mockConfig.isValid("appId")).thenReturn(true)

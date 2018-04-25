@@ -140,7 +140,11 @@ object Commands {
     dateOfBirth: Option[LocalDate], postCode: Option[PostCode])
 
   case class Candidate(userId: String, applicationId: Option[String], email: Option[String], firstName: Option[String], lastName: Option[String],
-    preferredName: Option[String], dateOfBirth: Option[LocalDate], address: Option[Address], postCode: Option[PostCode])
+    preferredName: Option[String], dateOfBirth: Option[LocalDate], address: Option[Address], postCode: Option[PostCode]) {
+
+    // Firstname and lastname are compulsory fields on signup...
+    def nameForEmail: String = preferredName.getOrElse(firstName.get) + " " + lastName.get
+  }
 
   case class AssessmentCentreAllocation(applicationId: String, venue: String, date: LocalDate, session: String, slot: Int, confirmed: Boolean) {
     val assessmentDateTime = {

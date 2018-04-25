@@ -55,16 +55,24 @@ trait ApplicationService {
   val emailClient: CSREmailClient
   private val UserNotFoundError = Future.failed(new RuntimeException("User not found for the given userId"))
 
-  def withdraw(applicationId: String, withdrawRequest: WithdrawApplicationRequest): Future[Unit] = {
-    appRepository.withdraw(applicationId, withdrawRequest).flatMap { _ =>
-      auditService.logEventNoRequest(
+  def withdraw(applicationId: String, withdrawRequest: WithdrawApplicationRequest)(implicit hc: HeaderCarrier): Future[Unit] = {
+    for {
+      _ <- appRepository.withdraw(applicationId, withdrawRequest)
+      _ = auditService.logEventNoRequest(
         "ApplicationWithdrawn",
         Map("applicationId" -> applicationId, "withdrawRequest" -> withdrawRequest.toString)
       )
-      appAssessService.deleteAssessmentCentreAllocation(applicationId).recover {
+      _ <- appAssessService.deleteAssessmentCentreAllocation(applicationId).recover {
         case _: NotFoundException => ()
       }
-    }
+      candidate <- appRepository.find(applicationId).map(_.get)
+      contactDetails <- contactDetailsRepository.find(candidate.userId)
+      _ <- if (withdrawRequest.withdrawer != "Candidate") {
+        emailClient.sendAdminWithdrawnEmail(contactDetails.email, candidate.nameForEmail)
+      } else {
+        Future.successful(())
+      }
+    } yield (())
   }
 
   def editDetails(userId: String, applicationId: String, editRequest: CandidateEditableDetails)(implicit hc: HeaderCarrier): Future[Unit] = {

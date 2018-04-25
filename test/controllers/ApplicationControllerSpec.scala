@@ -186,7 +186,7 @@ class ApplicationControllerSpec extends UnitWithAppSpec {
     val mockApplicationRepository = mock[GeneralApplicationRepository]
     val mockApplicationService = mock[ApplicationService]
     val mockGeneralApplicationRepository = mock[GeneralApplicationRepository]
-    when(mockApplicationService.withdraw(eqTo(applicationId), eqTo(withdrawApplicationRequest))).thenReturnAsync()
+    when(mockApplicationService.withdraw(eqTo(applicationId), eqTo(withdrawApplicationRequest))(any[HeaderCarrier])).thenReturnAsync()
     when(mockApplicationRepository.review(eqTo(applicationId))).thenReturnAsync()
 
     object TestApplicationController extends ApplicationController {
