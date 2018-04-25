@@ -17,10 +17,11 @@
 package services
 
 import config.DataFixupConfig
+import connectors.{ CSREmailClient, EmailClient }
 import controllers.OnlineTestExtension
 import model.ApplicationStatuses
 import model.EvaluationResults.Green
-import model.Exceptions.{ InvalidStatusException, PassMarkSettingsNotFound }
+import model.Exceptions.{ ApplicationNotFound, InvalidStatusException, PassMarkSettingsNotFound }
 import model.persisted.SchemeEvaluationResult
 import play.api.libs.json.{ JsString, JsValue, Json }
 import play.api.mvc.{ RequestHeader, Result, Results }
@@ -28,6 +29,7 @@ import repositories._
 import repositories.application._
 import services.onlinetesting.OnlineTestExtensionService
 import play.api.mvc.Results._
+import services.FixDataService.ApplicationHasAlreadyBeenEmailedException
 import services.applicationassessment.{ AssessorAssessmentCentreScoresService, AssessorAssessmentScoresService }
 
 import scala.concurrent.Future
@@ -40,8 +42,12 @@ object FixDataService extends FixDataService {
   val onlineTestingRepo: OnlineTestRepository = onlineTestRepository
   val onlineTestExtensionService: OnlineTestExtensionService = OnlineTestExtensionService
   val assessmentScoresRepo: AssessorApplicationAssessmentScoresMongoRepository = assessorAssessmentScoresRepository
-  val auditService = AuditService
-  val progressToAssessmentCentreConfig = config.MicroserviceAppConfig.progressToAssessmentCentreConfig
+  val auditService: AuditService.type = AuditService
+  val progressToAssessmentCentreConfig: DataFixupConfig = config.MicroserviceAppConfig.progressToAssessmentCentreConfig
+  val emailClient: CSREmailClient.type = CSREmailClient
+  val cdRepo: ContactDetailsRepository = contactDetailsRepository
+
+  case class ApplicationHasAlreadyBeenEmailedException(message: String) extends Exception(message)
 }
 
 trait FixDataService {
@@ -52,6 +58,8 @@ trait FixDataService {
   def assessmentScoresRepo: AssessorApplicationAssessmentScoresMongoRepository
   def auditService: AuditService
   def progressToAssessmentCentreConfig: DataFixupConfig
+  def emailClient: EmailClient
+  def cdRepo: ContactDetailsRepository
 
   def progressToAssessmentCentre(appId: String)(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
     if (progressToAssessmentCentreConfig.isValid(appId)) {
@@ -104,11 +112,27 @@ trait FixDataService {
     }
   }
 
+  def findAdminWithdrawnApplicationsNotEmailed()(implicit hc: HeaderCarrier, rh: RequestHeader): Future[List[String]] = {
+    appRepo.findAdminWithdrawnApplicationsNotEmailed
+  }
+
+  def emailAdminWithdrawnApplicationNotEmailed(applicationId: String)(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
+    for {
+      verifyUnemailed <- this.findAdminWithdrawnApplicationsNotEmailed().map(_.filter(_ == applicationId))
+      _ = if (verifyUnemailed.isEmpty) throw ApplicationHasAlreadyBeenEmailedException(applicationId)
+      candidateOpt <- appRepo.find(applicationId)
+      candidate = candidateOpt.getOrElse(throw ApplicationNotFound(applicationId))
+      contactDetails <- cdRepo.find(candidate.userId)
+      _ <- emailClient.sendAdminWithdrawnEmail(contactDetails.email, candidate.nameForEmail)
+      _ <- appRepo.markAdminWithdrawnApplicationAsEmailed(applicationId)
+    } yield ()
+  }
+
   def listCollections: Future[String] = {
     appRepo.listCollections.map(_.mkString("\n"))
   }
 
-  def removeCollection(name: String) = {
+  def removeCollection(name: String): Future[Unit] = {
     appRepo.removeCollection(name)
   }
 }

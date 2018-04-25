@@ -123,6 +123,10 @@ GET         /fixdata/fixNoDateScoresAndFeedback                          control
 GET         /fixdata/forcePassmarkReevaluationForOnlineTestComplete      controllers.FixDataController.forcePassmarkReevaluationForOnlineTestComplete(applicationId: String)
 GET         /fixdata/assignCandidateToLondonAssessmentCentre             controllers.AssessmentCentreIndicatorController.assignCandidateToLondonAssessmentCentre(applicationId: String)
 
+GET         /fixdata/findAdminWithdrawnApplicationsNotEmailed                   controllers.FixDataController.findAdminWithdrawnApplicationsNotEmailed
+GET         /fixdata/emailAdminWithdrawnApplicationNotEmailed                   controllers.FixDataController.emailAdminWithdrawnApplicationNotEmailed(applicationId: String)
+
+
 GET         /campaign-reset/listCollections                              controllers.FixDataController.listCollections
 GET         /campaign-reset/removeCollection                             controllers.FixDataController.removeCollection(name: String)
 
