@@ -16,7 +16,7 @@
 
 package repositories.application
 
-import model.Commands.{ CandidateDetailsReportItem, CsvExtract }
+import model.Commands.{ CandidateDetailsReportItem, CsvExtract, WithdrawApplicationRequest }
 import model.{ AssessmentCentreIndicator, Scheme }
 import org.joda.time.{ DateTime, LocalDate }
 import play.api.Logger
@@ -59,7 +59,9 @@ abstract class PreviousYearCandidatesDetailsRepository(locationSchemeRepository:
         "Support for online assessment description,Needs support at venue,Support at venue description," +
         "Cubiks user id,Participant Schedule ID,Cubiks Invitation Datetime,Cubiks Expiration Datetime,Cubiks Started Datetime," +
         "Cubiks Completed Datetime,Cubiks test url,Cubiks token,Cubiks XML Report Saved,Cubiks PDF Report Saved," +
-        "Assessment centre area,Assessment centre,Assessment centre indicator version," + appStatusesTimestamp + "," + appStatusesDate
+        "Assessment centre area,Assessment centre,Assessment centre indicator version," + appStatusesTimestamp + "," + appStatusesDate +
+      ",Candidate or admin withdrawal?,Tell us why you're withdrawing,More information about your withdrawal," +
+        "Admin comment,FTAC Indicator area,FTAC Indicator Assessment Centre,FTAC Indicator version"
     }
   }
 
@@ -166,6 +168,12 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
           applicationDetailsCollection(collectionSuffix).find(Json.obj(), projection)
             .cursor[BSONDocument](ReadPreference.primaryPreferred)
             .enumerate().map { doc =>
+
+              // Get withdrawer
+              val withdrawalInfo = doc.getAs[WithdrawApplicationRequest]("withdraw")
+            
+              val ftacIndicator = doc.getAs[AssessmentCentreIndicator]("assessment-centre-indicator")
+
               val csvContent = makeRow(
                   List(doc.getAs[String]("frameworkId")) :::
                   List(Some(doc.getAs[String]("applicationId").getOrElse(""))) :::
@@ -176,7 +184,15 @@ class PreviousYearCandidatesDetailsMongoRepository(locationSchemeRepo: LocationS
                   assistanceDetails(doc) :::
                   onlineTestDetails(doc) :::
                   assessmentCentreIndicator(doc) :::
-                  statusTimestamps(doc): _*
+                  statusTimestamps(doc):::
+                  List(withdrawalInfo.map(_.withdrawer)) :::
+                  List(withdrawalInfo.map(_.reason)) :::
+                  List(withdrawalInfo.map(_.otherReason.getOrElse(""))) :::
+                  List(doc.getAs[String]("issue")) :::
+                  List(ftacIndicator.map(_.area)) :::
+                  List(ftacIndicator.map(_.assessmentCentre)) :::
+                  List(ftacIndicator.map(_.version.getOrElse("")))
+                    : _*
               )
             CandidateDetailsReportItem(
               doc.getAs[String]("applicationId").getOrElse(""),
