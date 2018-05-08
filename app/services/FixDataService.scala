@@ -135,4 +135,10 @@ trait FixDataService {
   def removeCollection(name: String): Future[Unit] = {
     appRepo.removeCollection(name)
   }
+
+  def setAssessmentCentrePassedNotified(applicationId: String)(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
+    for {
+      _ <- appRepo.updateStatus(applicationId, ApplicationStatuses.AssessmentCentrePassedNotified)
+    } yield ()
+  }
 }
