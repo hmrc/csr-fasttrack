@@ -23,7 +23,6 @@ import uk.gov.hmrc.play.microservice.controller.BaseController
 import services.FixDataService
 
 import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
 
 object FixDataController extends FixDataController(FixDataService)
 
@@ -71,4 +70,7 @@ abstract class FixDataController(fixDataService: FixDataService) extends BaseCon
     fixDataService.emailAdminWithdrawnApplicationNotEmailed(applicationId).map(_ => Ok)
   }
 
+  def setAssessmentCentrePassedNotified(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    fixDataService.setAssessmentCentrePassedNotified(applicationId).map(_ => Ok)
+  }
 }
