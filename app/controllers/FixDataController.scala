@@ -76,7 +76,6 @@ abstract class FixDataController(fixDataService: FixDataService) extends BaseCon
   }
 
   def rollbackToAwaitingAllocationNotifiedFromFailedToAttend(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
-
     val statusesToRemove = List(
       ProgressStatuses.AllocationConfirmedProgress,
       ProgressStatuses.FailedToAttendProgress
