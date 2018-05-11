@@ -135,6 +135,20 @@ Newcastle:
            pmCapacity: 42
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 10
+         - date: 23/05/2019
+           amCapacity: 36
+           amMinViableAttendees: 16
+           amPreferredAttendeeMargin: 8
+           pmCapacity: 36
+           pmMinViableAttendees: 16
+           pmPreferredAttendeeMargin: 8
+         - date: 24/05/2019
+           amCapacity: 36
+           amMinViableAttendees: 16
+           amPreferredAttendeeMargin: 8
+           pmCapacity: 36
+           pmMinViableAttendees: 16
+           pmPreferredAttendeeMargin: 8
          
 
 London:
@@ -288,3 +302,17 @@ London:
            pmCapacity: 42
            pmMinViableAttendees: 20
            pmPreferredAttendeeMargin: 10
+         - date: 23/05/2019
+           amCapacity: 36
+           amMinViableAttendees: 16
+           amPreferredAttendeeMargin: 8
+           pmCapacity: 36
+           pmMinViableAttendees: 16
+           pmPreferredAttendeeMargin: 8
+         - date: 24/05/2019
+           amCapacity: 36
+           amMinViableAttendees: 16
+           amPreferredAttendeeMargin: 8
+           pmCapacity: 36
+           pmMinViableAttendees: 16
+           pmPreferredAttendeeMargin: 8
