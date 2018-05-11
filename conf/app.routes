@@ -127,6 +127,7 @@ GET         /fixdata/findAdminWithdrawnApplicationsNotEmailed            control
 GET         /fixdata/emailAdminWithdrawnApplicationNotEmailed            controllers.FixDataController.emailAdminWithdrawnApplicationNotEmailed(applicationId: String)
 
 GET         /fixdata/setAssessmentCentrePassedNotified                   controllers.FixDataController.setAssessmentCentrePassedNotified(applicationId: String)
+GET         /fixdata/rollback-to-awaiting-allocation-notified-from-failed-to-attend controllers.FixDataController.rollbackToAwaitingAllocationNotifiedFromFailedToAttend(applicationId: String)
 
 GET         /campaign-reset/listCollections                              controllers.FixDataController.listCollections
 GET         /campaign-reset/removeCollection                             controllers.FixDataController.removeCollection(name: String)

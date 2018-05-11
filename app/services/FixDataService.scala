@@ -19,7 +19,7 @@ package services
 import config.DataFixupConfig
 import connectors.{ CSREmailClient, EmailClient }
 import controllers.OnlineTestExtension
-import model.ApplicationStatuses
+import model.{ ApplicationStatuses, ProgressStatuses }
 import model.EvaluationResults.Green
 import model.Exceptions.{ ApplicationNotFound, InvalidStatusException, PassMarkSettingsNotFound }
 import model.persisted.SchemeEvaluationResult
@@ -139,6 +139,16 @@ trait FixDataService {
   def setAssessmentCentrePassedNotified(applicationId: String)(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
     for {
       _ <- appRepo.updateStatus(applicationId, ApplicationStatuses.AssessmentCentrePassedNotified)
+    } yield ()
+  }
+
+  def rollbackToAwaitingAllocationNotifiedFromFailedToAttend(applicationId: String, progressStatuses: List[ProgressStatuses.ProgressStatus])
+    (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
+    for {
+      _ <- assessmentScoresRepo.removeDocument(applicationId)
+      _ <- appRepo.removeProgressStatuses(applicationId, progressStatuses)
+      _ <- appRepo.removeProgressStatusDates(applicationId, progressStatuses)
+      _ <- appRepo.updateStatus(applicationId, ApplicationStatuses.AwaitingAllocationNotified)
     } yield ()
   }
 }
