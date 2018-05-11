@@ -17,6 +17,7 @@
 package controllers
 
 import model.Exceptions.PassMarkSettingsNotFound
+import model.ProgressStatuses
 import play.api.libs.json.Json
 import play.api.mvc.{ Action, AnyContent }
 import uk.gov.hmrc.play.microservice.controller.BaseController
@@ -72,5 +73,15 @@ abstract class FixDataController(fixDataService: FixDataService) extends BaseCon
 
   def setAssessmentCentrePassedNotified(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
     fixDataService.setAssessmentCentrePassedNotified(applicationId).map(_ => Ok)
+  }
+
+  def rollbackToAwaitingAllocationNotifiedFromFailedToAttend(applicationId: String): Action[AnyContent] = Action.async { implicit request =>
+    val statusesToRemove = List(
+      ProgressStatuses.AllocationConfirmedProgress,
+      ProgressStatuses.FailedToAttendProgress
+    )
+    fixDataService.rollbackToAwaitingAllocationNotifiedFromFailedToAttend(applicationId, statusesToRemove).map(_ =>
+      Ok(s"Successfully rolled $applicationId back to ${ProgressStatuses.AwaitingAllocationNotifiedProgress}")
+    )
   }
 }

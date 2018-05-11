@@ -125,6 +125,9 @@ trait GeneralApplicationRepository {
 
   def removeProgressStatuses(applicationId: String, progressStatuses: List[ProgressStatuses.ProgressStatus]): Future[Unit]
 
+  // TODO: should this be part of removeProgressStatuses?
+  def removeProgressStatusDates(applicationId: String, progressStatuses: List[ProgressStatuses.ProgressStatus]): Future[Unit]
+
   def resetStatusToContinueOnlineTests(applicationId: String): Future[Unit]
 
   def progressToAssessmentCentre(applicationId: String, evaluationResult: List[SchemeEvaluationResult], version: String): Future[Unit]
@@ -280,6 +283,19 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val unsetDoc = BSONDocument("$unset" -> BSONDocument(statusesToUnset))
 
     val validator = singleUpdateValidator(applicationId, actionDesc = "removing progress and app status")
+
+    collection.update(query, unsetDoc) map validator
+  }
+
+  def removeProgressStatusDates(applicationId: String, progressStatuses: List[ProgressStatuses.ProgressStatus]): Future[Unit] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+
+    val statusDatesToUnset = progressStatuses.map { progressStatus =>
+        s"progress-status-dates.${progressStatus.name}" -> BSONString("")
+    }
+
+    val unsetDoc = BSONDocument("$unset" -> BSONDocument(statusDatesToUnset))
+    val validator = singleUpdateValidator(applicationId, actionDesc = "removing progress status dates")
 
     collection.update(query, unsetDoc) map validator
   }

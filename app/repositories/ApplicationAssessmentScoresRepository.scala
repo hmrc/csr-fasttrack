@@ -260,4 +260,9 @@ trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {
 
     collection.update(query, update).map(validator)
   }
+
+  def removeDocument(applicationId: String): Future[Unit] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    collection.remove(query, firstMatchOnly = false).map( _ => () )
+  }
 }
