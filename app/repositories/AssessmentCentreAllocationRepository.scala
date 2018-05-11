@@ -38,6 +38,8 @@ trait AssessmentCentreAllocationRepository {
   def create(applications: List[AssessmentCentreAllocation]): Future[Seq[AssessmentCentreAllocation]]
   def confirmAllocation(applicationId: String): Future[Unit]
   def delete(applicationId: String): Future[Unit]
+  // This version does not throw an exception of no document was found
+  def deleteNoCheck(applicationId: String): Future[Unit]
 }
 
 class AssessmentCentreAllocationMongoRepository()(implicit mongo: () => DB)
@@ -102,6 +104,11 @@ class AssessmentCentreAllocationMongoRepository()(implicit mongo: () => DB)
         ()
       }
     }
+  }
+
+  override def deleteNoCheck(applicationId: String): Future[Unit] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    collection.remove(query, firstMatchOnly = false).map( _ => () )
   }
 
   private def getApplicationAssessments(query: BSONDocument) = {
