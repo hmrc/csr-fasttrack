@@ -19,7 +19,7 @@ package repositories
 import factories.{ DateTimeFactory, UUIDFactory }
 import model.AssessmentExercise.AssessmentExercise
 import model.CandidateScoresCommands._
-import model.Exceptions.{ ApplicationNotFound, NotFoundException }
+import model.Exceptions.ApplicationNotFound
 import model.{ AssessmentExercise, CandidateScoresCommands }
 import play.api.Logger
 import play.api.libs.json.Json
@@ -263,14 +263,6 @@ trait ApplicationAssessmentScoresRepository extends ReactiveRepositoryHelpers {
 
   def removeDocument(applicationId: String): Future[Unit] = {
     val query = BSONDocument("applicationId" -> applicationId)
-
-    collection.remove(query, firstMatchOnly = false).map { writeResult =>
-      if (writeResult.n == 0) {
-        val msg = s"No ${CollectionNames.APPLICATION_ASSESSMENT_SCORES} document was found with applicationId $applicationId"
-        throw new NotFoundException(msg)
-      } else {
-        ()
-      }
-    }
+    collection.remove(query, firstMatchOnly = false).map( _ => () )
   }
 }
