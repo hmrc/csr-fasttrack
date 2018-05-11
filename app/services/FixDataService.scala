@@ -42,6 +42,7 @@ object FixDataService extends FixDataService {
   val onlineTestingRepo: OnlineTestRepository = onlineTestRepository
   val onlineTestExtensionService: OnlineTestExtensionService = OnlineTestExtensionService
   val assessmentScoresRepo: AssessorApplicationAssessmentScoresMongoRepository = assessorAssessmentScoresRepository
+  val assessmentCentreAllocationRepo: AssessmentCentreAllocationMongoRepository = assessmentCentreAllocationRepository
   val auditService: AuditService.type = AuditService
   val progressToAssessmentCentreConfig: DataFixupConfig = config.MicroserviceAppConfig.progressToAssessmentCentreConfig
   val emailClient: CSREmailClient.type = CSREmailClient
@@ -56,6 +57,7 @@ trait FixDataService {
   def onlineTestingRepo: OnlineTestRepository
   def onlineTestExtensionService: OnlineTestExtensionService
   def assessmentScoresRepo: AssessorApplicationAssessmentScoresMongoRepository
+  def assessmentCentreAllocationRepo: AssessmentCentreAllocationMongoRepository
   def auditService: AuditService
   def progressToAssessmentCentreConfig: DataFixupConfig
   def emailClient: EmailClient
@@ -146,6 +148,7 @@ trait FixDataService {
     (implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
     for {
       _ <- assessmentScoresRepo.removeDocument(applicationId)
+      _ <- assessmentCentreAllocationRepo.deleteNoCheck(applicationId)
       _ <- appRepo.removeProgressStatuses(applicationId, progressStatuses)
       _ <- appRepo.removeProgressStatusDates(applicationId, progressStatuses)
       _ <- appRepo.updateStatus(applicationId, ApplicationStatuses.AwaitingAllocationNotified)

@@ -27,7 +27,7 @@ import model.{ ApplicationStatuses, EmptyRequestHeader, Scheme }
 import model.persisted.SchemeEvaluationResult
 import org.joda.time.DateTime
 import play.api.test.Helpers._
-import repositories.{ AssessorApplicationAssessmentScoresMongoRepository, ContactDetailsRepository, OnlineTestPassMarkSettingsRepository }
+import repositories.{ AssessmentCentreAllocationMongoRepository, AssessorApplicationAssessmentScoresMongoRepository, ContactDetailsRepository, OnlineTestPassMarkSettingsRepository }
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
 import testkit.{ MockitoSugar, UnitSpec }
 import org.mockito.Matchers._
@@ -122,7 +122,6 @@ class FixDataServiceSpec extends UnitSpec {
     }
   }
 
-
   trait TestFixture {
     implicit val hc = HeaderCarrier()
     implicit val rh = EmptyRequestHeader
@@ -131,6 +130,7 @@ class FixDataServiceSpec extends UnitSpec {
     val mockAuditService = mock[AuditService]
     val mockConfig = mock[DataFixupConfig]
     val mockAssessorApplicationAssessmentScoresMongoRepository = mock[AssessorApplicationAssessmentScoresMongoRepository]
+    val mockAssessmentCentreAllocationMongoRepository = mock[AssessmentCentreAllocationMongoRepository]
     val mockOnlineTestRepository = mock[OnlineTestRepository]
     val mockOnlineTestExtensionService = mock[OnlineTestExtensionService]
     val mockContactDetailsRepository = mock[ContactDetailsRepository]
@@ -142,6 +142,7 @@ class FixDataServiceSpec extends UnitSpec {
       val auditService = mockAuditService
       val progressToAssessmentCentreConfig = mockConfig
       val assessmentScoresRepo: AssessorApplicationAssessmentScoresMongoRepository = mockAssessorApplicationAssessmentScoresMongoRepository
+      val assessmentCentreAllocationRepo: AssessmentCentreAllocationMongoRepository = mockAssessmentCentreAllocationMongoRepository
       val onlineTestingRepo: OnlineTestRepository = mockOnlineTestRepository
       val onlineTestExtensionService: OnlineTestExtensionService = mockOnlineTestExtensionService
       val cdRepo: ContactDetailsRepository = mockContactDetailsRepository
