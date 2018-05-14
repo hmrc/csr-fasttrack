@@ -80,7 +80,8 @@ abstract class FixDataController(fixDataService: FixDataService) extends BaseCon
       ProgressStatuses.AllocationConfirmedProgress,
       ProgressStatuses.AllocationUnconfirmedProgress,
       ProgressStatuses.AllocationExpiredProgress,
-      ProgressStatuses.FailedToAttendProgress
+      ProgressStatuses.FailedToAttendProgress,
+      ProgressStatuses.WithdrawnProgress
     )
     fixDataService.rollbackToAwaitingAllocationNotifiedFromFailedToAttend(applicationId, statusesToRemove).map(_ =>
       Ok(s"Successfully rolled $applicationId back to ${ProgressStatuses.AwaitingAllocationNotifiedProgress}")

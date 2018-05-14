@@ -28,7 +28,7 @@ import model.persisted.SchemeEvaluationResult
 import org.joda.time.DateTime
 import play.api.test.Helpers._
 import repositories.{ AssessmentCentreAllocationMongoRepository, AssessorApplicationAssessmentScoresMongoRepository, ContactDetailsRepository, OnlineTestPassMarkSettingsRepository }
-import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository }
+import repositories.application.{ FlagCandidateRepository, GeneralApplicationRepository, OnlineTestRepository }
 import testkit.{ MockitoSugar, UnitSpec }
 import org.mockito.Matchers._
 import org.mockito.Mockito._
@@ -135,6 +135,7 @@ class FixDataServiceSpec extends UnitSpec {
     val mockOnlineTestExtensionService = mock[OnlineTestExtensionService]
     val mockContactDetailsRepository = mock[ContactDetailsRepository]
     val mockEmailClient = mock[EmailClient]
+    val mockFlagCandidateRepository = mock[FlagCandidateRepository]
 
     val service = new FixDataService {
       val appRepo = mockAppRepo
@@ -147,6 +148,7 @@ class FixDataServiceSpec extends UnitSpec {
       val onlineTestExtensionService: OnlineTestExtensionService = mockOnlineTestExtensionService
       val cdRepo: ContactDetailsRepository = mockContactDetailsRepository
       val emailClient: EmailClient = mockEmailClient
+      val flagCandidateRepo: FlagCandidateRepository = mockFlagCandidateRepository
     }
 
     when(mockConfig.isValid("appId")).thenReturn(true)

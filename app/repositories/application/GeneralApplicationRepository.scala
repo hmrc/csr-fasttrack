@@ -79,6 +79,8 @@ trait GeneralApplicationRepository {
 
   def withdraw(applicationId: String, reason: WithdrawApplicationRequest): Future[Unit]
 
+  def removeWithdrawReasonNoCheck(applicationId: String): Future[Unit]
+
   def review(applicationId: String): Future[Unit]
 
   def updateQuestionnaireStatus(applicationId: String, sectionKey: String): Future[Unit]
@@ -469,6 +471,13 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     ))
 
     collection.update(query, applicationStatusBSON, upsert = false) map { _ => () }
+  }
+
+  override def removeWithdrawReasonNoCheck(applicationId: String): Future[Unit] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    val unsetBson = BSONDocument("$unset" -> BSONDocument("withdraw" -> ""))
+
+    collection.update(query, unsetBson) map { _ => () }
   }
 
   override def updateQuestionnaireStatus(applicationId: String, sectionKey: String): Future[Unit] = {
