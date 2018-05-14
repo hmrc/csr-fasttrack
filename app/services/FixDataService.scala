@@ -47,6 +47,7 @@ object FixDataService extends FixDataService {
   val progressToAssessmentCentreConfig: DataFixupConfig = config.MicroserviceAppConfig.progressToAssessmentCentreConfig
   val emailClient: CSREmailClient.type = CSREmailClient
   val cdRepo: ContactDetailsRepository = contactDetailsRepository
+  val flagCandidateRepo: FlagCandidateRepository = flagCandidateRepository
 
   case class ApplicationHasAlreadyBeenEmailedException(message: String) extends Exception(message)
 }
@@ -62,6 +63,7 @@ trait FixDataService {
   def progressToAssessmentCentreConfig: DataFixupConfig
   def emailClient: EmailClient
   def cdRepo: ContactDetailsRepository
+  def flagCandidateRepo: FlagCandidateRepository
 
   def progressToAssessmentCentre(appId: String)(implicit hc: HeaderCarrier, rh: RequestHeader): Future[Unit] = {
     if (progressToAssessmentCentreConfig.isValid(appId)) {
@@ -153,6 +155,8 @@ trait FixDataService {
       _ <- appRepo.removeProgressStatusDates(applicationId, progressStatuses)
       _ <- appRepo.removeAllocationExpiryDateNoCheck(applicationId)
       _ <- appRepo.removeAllocationReminderSentDateNoCheck(applicationId)
+      _ <- appRepo.removeWithdrawReasonNoCheck(applicationId)
+      _ <- flagCandidateRepo.removeNoCheck(applicationId)
       _ <- appRepo.updateStatus(applicationId, ApplicationStatuses.AwaitingAllocationNotified)
     } yield ()
   }

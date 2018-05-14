@@ -35,6 +35,8 @@ trait FlagCandidateRepository {
   def save(flagCandidate: FlagCandidate): Future[Unit]
 
   def remove(appId: String): Future[Unit]
+
+  def removeNoCheck(appId: String): Future[Unit]
 }
 
 class FlagCandidateMongoRepository(implicit mongo: () => DB)
@@ -69,9 +71,15 @@ class FlagCandidateMongoRepository(implicit mongo: () => DB)
     collection.update(query, result, upsert = false).map(validateResult(appId))
   }
 
+  def removeNoCheck(appId: String): Future[Unit] = {
+    val query = BSONDocument("applicationId" -> appId)
+    val result = BSONDocument("$unset" -> BSONDocument("issue" -> ""))
+
+    collection.update(query, result).map( _ => () )
+  }
+
   private def validateResult(appId: String)(writeResult: UpdateWriteResult) = writeResult.n match {
     case 0 => throw new NotFoundException(s"No application found with applicationId=$appId")
     case _ => ()
   }
-
 }
