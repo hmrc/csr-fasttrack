@@ -152,6 +152,7 @@ trait FixDataService {
       _ <- appRepo.removeProgressStatuses(applicationId, progressStatuses)
       _ <- appRepo.removeProgressStatusDates(applicationId, progressStatuses)
       _ <- appRepo.removeAllocationExpiryDateNoCheck(applicationId)
+      _ <- appRepo.removeAllocationReminderSentDateNoCheck(applicationId)
       _ <- appRepo.updateStatus(applicationId, ApplicationStatuses.AwaitingAllocationNotified)
     } yield ()
   }

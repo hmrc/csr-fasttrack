@@ -99,6 +99,8 @@ trait GeneralApplicationRepository {
 
   def removeAllocationExpiryDateNoCheck(applicationId: String): Future[Unit]
 
+  def removeAllocationReminderSentDateNoCheck(applicationId: String): Future[Unit]
+
   def updateStatus(applicationId: String, status: ApplicationStatuses.EnumVal): Future[Unit]
 
   def nextApplicationReadyForAssessmentScoreEvaluation(currentPassmarkVersion: String): Future[Option[String]]
@@ -613,6 +615,14 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     val query = BSONDocument("applicationId" -> applicationId)
     val unsetBson = BSONDocument("$unset" -> BSONDocument(
       "allocation-expire-date" -> BSONString("")
+    ))
+    collection.update(query, unsetBson).map(_ => ())
+  }
+
+  def removeAllocationReminderSentDateNoCheck(applicationId: String): Future[Unit] = {
+    val query = BSONDocument("applicationId" -> applicationId)
+    val unsetBson = BSONDocument("$unset" -> BSONDocument(
+      "allocation-reminder-sent-date" -> BSONString("")
     ))
     collection.update(query, unsetBson).map(_ => ())
   }
