@@ -25,20 +25,19 @@ object MicroServiceBuild extends Build with MicroService {
 
 private object Versions {
 
-  val microserviceBootstrapVersion  = "6.13.0"
-  val ficus                         = "1.1.2"
-  val hmrcScheduler                 = "4.1.0"
-  val hmrcTestVersion               = "2.4.0"
-  val playReactivemongoVersion      = "5.2.0"
-  val guice                         = "4.0.0"
+  val hmrcMicroserviceBootstrapVersion = "8.3.0"
+  val hmrcSchedulerVersion             = "4.1.0"
+  val hmrcTestVersion                  = "2.4.0"
+  val ficus                            = "1.1.2"
+  val playReactivemongoVersion         = "5.2.0"
+  val guice                            = "4.0.0"
 
-  val scalatest                     = "2.2.6"
-  val pegdown                       = "1.6.0"
-  val mockito                       = "1.10.19"
-  val scalatestplus                 = "1.5.1"
-  val specs2                        = "3.6.5"
+  val scalatest                        = "2.2.6"
+  val pegdown                          = "1.6.0"
+  val mockito                          = "1.10.19"
+  val scalatestplus                    = "1.5.1"
+  val specs2                           = "3.6.5"
 }
-
 
 private object AppDependencies {
   import Versions._
@@ -46,8 +45,8 @@ private object AppDependencies {
 
   val compile = Seq(
     "uk.gov.hmrc" %% "play-reactivemongo" % playReactivemongoVersion,
-    "uk.gov.hmrc" %% "microservice-bootstrap" % microserviceBootstrapVersion,
-    "uk.gov.hmrc" %% "play-scheduling" % hmrcScheduler,
+    "uk.gov.hmrc" %% "microservice-bootstrap" % hmrcMicroserviceBootstrapVersion,
+    "uk.gov.hmrc" %% "play-scheduling" % hmrcSchedulerVersion,
     "org.webjars" %% "webjars-play" % "2.3.0",
     "org.webjars" % "bootstrap" % "3.1.1",
     "org.webjars" % "jquery" % "1.11.0",
@@ -77,6 +76,4 @@ private object AppDependencies {
   object IntegrationTest extends TestDependencies("it")
 
   def apply() = compile ++ Test.test ++ IntegrationTest.test
-
 }
-
