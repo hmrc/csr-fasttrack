@@ -26,6 +26,7 @@ import model.ReportExchangeObjects
 import play.api.libs.json.Format
 import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.{ BSONDocument, BSONDouble, BSONObjectID, BSONString }
+import reactivemongo.play.json.ImplicitBSONHandlers._
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 

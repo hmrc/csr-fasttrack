@@ -24,9 +24,11 @@ import play.api.libs.iteratee.Enumerator
 import play.api.libs.json.Json
 import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.BSONDocument
-import reactivemongo.json.collection.JSONCollection
+import reactivemongo.play.json.collection.JSONCollection
+//import reactivemongo.json.collection.JSONCollection
 import repositories.{ CollectionNames, LocationSchemeRepository, LocationSchemes }
-import reactivemongo.json.ImplicitBSONHandlers._
+//import reactivemongo.json.ImplicitBSONHandlers._
+import reactivemongo.play.json.ImplicitBSONHandlers._
 import repositories._
 
 import scala.concurrent.ExecutionContext.Implicits.global

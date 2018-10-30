@@ -22,6 +22,7 @@ import model.Exceptions.{ NotFoundException, TooManyEntries }
 import org.joda.time.LocalDate
 import reactivemongo.api.DB
 import reactivemongo.bson.{ BSONDocument, BSONObjectID }
+import reactivemongo.play.json.ImplicitBSONHandlers._
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 

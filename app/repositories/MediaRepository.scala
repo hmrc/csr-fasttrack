@@ -22,6 +22,7 @@ import model.Exceptions.CannotAddMedia
 import reactivemongo.api.DB
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{ BSONDocument, BSONObjectID }
+import reactivemongo.play.json.ImplicitBSONHandlers._
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 

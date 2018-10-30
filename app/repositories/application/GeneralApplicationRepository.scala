@@ -19,29 +19,40 @@ package repositories.application
 import java.util.UUID
 import java.util.regex.Pattern
 
-import common.Constants.{ No, Yes }
-import factories.DateTimeFactory
-import model.Adjustments._
+//import common.Constants.{ No, Yes }
+//import factories.DateTimeFactory
+//import model.Adjustments._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
-import model.EvaluationResults._
+import model.Commands.Implicits.withdrawApplicationRequestFormats
+//import model.EvaluationResults._
+import model.EvaluationResults.CompetencyAverageResult
 import model.Exceptions.{ ApplicationNotFound, CannotUpdateReview, LocationPreferencesNotFound, SchemePreferencesNotFound }
 import model.Exceptions._
 import model.PersistedObjects.{ ApplicationForNotification, ExpiringAllocation }
 import model.Scheme.Scheme
 import model._
 import model.commands.{ ApplicationStatusDetails, OnlineTestProgressResponse }
-import model.exchange.AssistanceDetails
+//import model.exchange.AssistanceDetails
 import model.persisted.SchemeEvaluationResult
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{ DateTime, LocalDate }
-import play.api.Logger
-import play.api.libs.json.{ Json, Format, JsNumber, JsObject }
+//import play.api.Logger
+import play.api.libs.json.{ Format, JsNumber, JsObject, Json }
 import reactivemongo.api.{ DB, DefaultDB, QueryOpts }
 import reactivemongo.bson.{ BSONArray, BSONDocument, _ }
-import reactivemongo.json.collection.JSONBatchCommands.JSONCountCommand
-import reactivemongo.json.collection.JSONCollection
-import repositories._
+import reactivemongo.play.json.collection.JSONBatchCommands.JSONCountCommand
+import reactivemongo.play.json.collection.JSONCollection
+//import reactivemongo.json.collection.JSONBatchCommands.JSONCountCommand
+//import reactivemongo.json.collection.JSONCollection
+import reactivemongo.play.json.ImplicitBSONHandlers._
+//import repositories._
+import repositories.CollectionNames
+import repositories.RandomSelection
+import repositories.ReactiveRepositoryHelpers
+import repositories.BSONDateTimeHandler
+import repositories.BSONLocalDateHandler
+
 import services.TimeZoneService
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats

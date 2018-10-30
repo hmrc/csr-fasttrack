@@ -20,8 +20,10 @@ import model.PersistedObjects
 import model.PersistedObjects.{ PersistedAnswer, PersistedQuestion }
 import play.api.libs.json._
 import reactivemongo.api.DB
-import reactivemongo.bson.Producer.nameValue2Producer
+//import reactivemongo.bson.Producer.nameValue2Producer
+import reactivemongo.bson.Producer.element2Producer//nameValue2Producer
 import reactivemongo.bson._
+import reactivemongo.play.json.ImplicitBSONHandlers._
 import services.reporting.SocioEconomicScoreCalculator
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats

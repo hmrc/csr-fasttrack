@@ -23,6 +23,7 @@ import model.ApplicationStatuses.BSONEnumHandler
 import org.joda.time.{ DateTime, LocalDate }
 import reactivemongo.api.DB
 import reactivemongo.bson.{ BSONArray, BSONBoolean, BSONDocument, BSONObjectID }
+import reactivemongo.play.json.ImplicitBSONHandlers._
 import repositories._
 import uk.gov.hmrc.mongo.ReactiveRepository
 

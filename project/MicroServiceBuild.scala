@@ -29,7 +29,7 @@ private object Versions {
   val hmrcSchedulerVersion             = "4.1.0"
   val hmrcTestVersion                  = "2.4.0"
   val ficus                            = "1.1.2"
-  val playReactivemongoVersion         = "5.2.0"
+  val playReactivemongoVersion         = "6.2.0"
   val guice                            = "4.0.0"
 
   val scalatest                        = "2.2.6"

@@ -17,15 +17,21 @@
 package repositories.application
 
 import model.Exceptions.PersonalDetailsNotFound
-import model.{ ApplicationStatuses, PersistedObjects, ProgressStatuses }
+//import model.{ ApplicationStatuses, PersistedObjects, ProgressStatuses }
+import model.{ ApplicationStatuses, ProgressStatuses }
 import model.ApplicationStatuses.BSONEnumHandler
 import model.PersistedObjects.PersonalDetailsWithUserId
-import model.PersistedObjects.Implicits._
+//import model.PersistedObjects.Implicits._
 import model.persisted.PersonalDetails
-import org.joda.time.{ DateTime, LocalDate }
+//import org.joda.time.{ DateTime, LocalDate }
+import org.joda.time.DateTime
 import reactivemongo.api.DB
 import reactivemongo.bson.{ BSONDocument, _ }
-import repositories._
+import reactivemongo.play.json.ImplicitBSONHandlers._
+//import repositories._
+import repositories.CollectionNames
+import repositories.BSONDateTimeHandler
+import repositories.ReactiveRepositoryHelpers
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 

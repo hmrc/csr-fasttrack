@@ -32,6 +32,7 @@ import org.joda.time.LocalDate
 import play.api.libs.json.Format
 import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID, BSONRegex, _ }
+import reactivemongo.play.json.ImplicitBSONHandlers._
 import repositories.{ CollectionNames, RandomSelection, ReactiveRepositoryHelpers, _ }
 import services.TimeZoneService
 import uk.gov.hmrc.mongo.ReactiveRepository
