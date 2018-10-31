@@ -79,16 +79,53 @@ class QuestionnaireMongoRepository(socioEconomicCalculator: SocioEconomicScoreCa
         val applicationId = d.getAs[String]("applicationId").get
         val questionsDoc = d.getAs[BSONDocument]("questions")
 
-        val qAndA = questionsDoc.toList.flatMap(_.elements).map {
-          case (question, _) =>
-            val answer = getAnswer(questionsDoc, question).getOrElse("Unknown")
-            (question, answer)
+//        val qAndA = Map.empty[String, String]
+        val qAndA = questionsDoc.toList.flatMap(_.elements).map { elem =>
+//          case (question, _) =>
+//            val answer = getAnswer(questionsDoc, question).getOrElse("Unknown")
+          val question = elem.name
+          val answer = getAnswer(questionsDoc, question).getOrElse("Unknown")
+          (question, answer)
         }.toMap
         applicationId -> qAndA
       }.toMap
     }
     queryResult
   }
+
+  def diversityReportX: Future[Map[String, Map[String, String]]] = {
+
+    val query = BSONDocument()
+    val queryResult = collection.find(query).cursor[BSONDocument]().collect[List]().map { listOfDocs =>
+      listOfDocs.map { d =>
+        val applicationId = d.getAs[String]("applicationId").get
+        val questionsDoc = d.getAs[BSONDocument]("questions")
+
+        //        val qAndA = Map.empty[String, String]
+
+        val aa: List[BSONDocument] = questionsDoc.toList
+
+
+        //        val bb: List[Stream[(String, BSONValue)]] = aa.map { bb => bb.elements }
+//        val bb: List[(String, BSONValue)] = aa.flatMap { bb => bb.elements }
+        val bb: List[BSONElement] = aa.flatMap { bb => bb.elements }
+
+        val cc: List[(String, String)] = bb.map { elem =>
+          val question = elem.name
+          val answer = getAnswer(questionsDoc, question).getOrElse("Unknown")
+//          case (question, _) =>
+//            val answer = getAnswer(questionsDoc, question).getOrElse("Unknown")
+            (question, answer)
+        }
+
+        val dd: Map[String, String] = cc.toMap
+
+        applicationId -> dd
+      }.toMap
+    }
+    queryResult
+  }
+
 
   override def passMarkReport: Future[Map[String, Map[String, String]]] = {
     diversityReport

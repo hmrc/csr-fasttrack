@@ -25,8 +25,8 @@ import java.util.regex.Pattern
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
 import model.Commands.Implicits.withdrawApplicationRequestFormats
-//import model.EvaluationResults._
-import model.EvaluationResults.CompetencyAverageResult
+import model.EvaluationResults._
+//import model.EvaluationResults.CompetencyAverageResult
 import model.Exceptions.{ ApplicationNotFound, CannotUpdateReview, LocationPreferencesNotFound, SchemePreferencesNotFound }
 import model.Exceptions._
 import model.PersistedObjects.{ ApplicationForNotification, ExpiringAllocation }
@@ -46,12 +46,8 @@ import reactivemongo.play.json.collection.JSONCollection
 //import reactivemongo.json.collection.JSONBatchCommands.JSONCountCommand
 //import reactivemongo.json.collection.JSONCollection
 import reactivemongo.play.json.ImplicitBSONHandlers._
-//import repositories._
-import repositories.CollectionNames
-import repositories.RandomSelection
-import repositories.ReactiveRepositoryHelpers
+import repositories._
 import repositories.BSONDateTimeHandler
-import repositories.BSONLocalDateHandler
 
 import services.TimeZoneService
 import uk.gov.hmrc.mongo.ReactiveRepository

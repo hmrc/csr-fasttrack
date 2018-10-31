@@ -29,7 +29,8 @@ import model.persisted.{ CubiksTestProfile, OnlineTestPassmarkEvaluation, Scheme
 import org.joda.time.{ DateTime, DateTimeZone }
 import reactivemongo.api.commands.WriteResult
 import reactivemongo.bson.{ BSONArray, BSONDocument }
-import reactivemongo.json.ImplicitBSONHandlers
+//import reactivemongo.json.ImplicitBSONHandlers
+import reactivemongo.play.json.ImplicitBSONHandlers
 import repositories.application.{ GeneralApplicationMongoRepository, OnlineTestMongoRepository }
 import services.GBTimeZoneService
 import testkit.MongoRepositorySpec

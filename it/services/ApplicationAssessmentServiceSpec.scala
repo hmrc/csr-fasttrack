@@ -35,7 +35,8 @@ import org.scalatest.mock.MockitoSugar
 import play.Logger
 import play.api.libs.json._
 import reactivemongo.bson.BSONDocument
-import reactivemongo.json.ImplicitBSONHandlers
+//import reactivemongo.json.ImplicitBSONHandlers
+import reactivemongo.play.json.ImplicitBSONHandlers
 import repositories._
 import repositories.application.{ GeneralApplicationRepository, OnlineTestRepository, PersonalDetailsRepository }
 import services.applicationassessment.AssessmentCentreService

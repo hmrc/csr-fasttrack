@@ -20,7 +20,8 @@ import factories.UUIDFactory
 import model.Exceptions.NotFoundException
 import model.FlagCandidatePersistedObject.FlagCandidate
 import reactivemongo.bson.BSONDocument
-import reactivemongo.json.ImplicitBSONHandlers
+//import reactivemongo.json.ImplicitBSONHandlers
+import reactivemongo.play.json.ImplicitBSONHandlers
 import repositories.CollectionNames
 import services.GBTimeZoneService
 import testkit.MongoRepositorySpec

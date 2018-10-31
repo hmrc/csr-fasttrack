@@ -5,7 +5,8 @@ import model.Exceptions.ApplicationNotFound
 import model.exchange.AssistanceDetails
 import model.persisted.ApplicationAssistanceDetails
 import reactivemongo.bson.BSONDocument
-import reactivemongo.json.ImplicitBSONHandlers
+//import reactivemongo.json.ImplicitBSONHandlers
+import reactivemongo.play.json.ImplicitBSONHandlers
 import repositories.CollectionNames
 import testkit.MongoRepositorySpec
 
