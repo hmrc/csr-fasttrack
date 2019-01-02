@@ -421,38 +421,44 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     }
   }
 
-  override def findApplicationsForAssessmentAllocation(locations: List[String], start: Int,
-    end: Int): Future[ApplicationForAssessmentAllocationResult] = {
+  override def findApplicationsForAssessmentAllocation(
+    locations: List[String], start: Int, end: Int
+  ): Future[ApplicationForAssessmentAllocationResult] = {
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingAllocationNotified),
       BSONDocument("assessment-centre-indicator.assessmentCentre" -> BSONDocument("$in" -> locations))
     ))
 
-    collection.runCommand(JSONCountCommand.Count(query)).flatMap { c =>
-      val count = c.count
+    // mongo 3.2 -> 3.4
+    if(start > end) {
+      Future.successful(ApplicationForAssessmentAllocationResult(List.empty, 0))
+    } else {
+      collection.runCommand(JSONCountCommand.Count(query)).flatMap { c =>
+        val count = c.count
 
-      if (count == 0) {
-        Future.successful(ApplicationForAssessmentAllocationResult(List.empty, 0))
-      } else {
-        val projection = BSONDocument(
-          "userId" -> true,
-          "applicationId" -> true,
-          "personal-details.firstName" -> true,
-          "personal-details.lastName" -> true,
-          "personal-details.dateOfBirth" -> true,
-          "assistance-details.needsSupportAtVenue" -> true,
-          "online-tests.invitationDate" -> true
-        )
-        val sort = new JsObject(Map("online-tests.invitationDate" -> JsNumber(1)))
+        if (count == 0) {
+          Future.successful(ApplicationForAssessmentAllocationResult(List.empty, 0))
+        } else {
+          val projection = BSONDocument(
+            "userId" -> true,
+            "applicationId" -> true,
+            "personal-details.firstName" -> true,
+            "personal-details.lastName" -> true,
+            "personal-details.dateOfBirth" -> true,
+            "assistance-details.needsSupportAtVenue" -> true,
+            "online-tests.invitationDate" -> true
+          )
+          val sort = new JsObject(Map("online-tests.invitationDate" -> JsNumber(1)))
 
-        collection.find(query, projection).sort(sort).options(QueryOpts(skipN = start)).cursor[BSONDocument]().collect[List](end - start + 1).
-          map { docList =>
-            docList.map { doc =>
-              bsonDocToApplicationsForAssessmentAllocation(doc)
-            }
-          }.flatMap { result =>
+          collection.find(query, projection).sort(sort).options(QueryOpts(skipN = start)).cursor[BSONDocument]().collect[List](end - start + 1).
+            map { docList =>
+              docList.map { doc =>
+                bsonDocToApplicationsForAssessmentAllocation(doc)
+              }
+            }.flatMap { result =>
             Future.successful(ApplicationForAssessmentAllocationResult(result, count))
           }
+        }
       }
     }
   }

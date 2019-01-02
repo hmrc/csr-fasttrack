@@ -147,7 +147,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       lazy val testData = new TestDataMongoRepository()
       testData.createApplications(200, onlyAwaitingAllocation = true).futureValue
 
-      val result =  applicationRepo.findApplicationsForAssessmentAllocation(List("London"), 2, 1).futureValue
+      val result = applicationRepo.findApplicationsForAssessmentAllocation(List("London"), 2, 1).futureValue
       result mustBe a[ApplicationForAssessmentAllocationResult]
       result.result mustBe empty
     }
