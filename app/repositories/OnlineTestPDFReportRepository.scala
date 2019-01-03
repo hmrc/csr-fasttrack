@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,7 +20,8 @@ import model.PersistedObjects.Implicits._
 import model.PersistedObjects.OnlineTestPDFReport
 import reactivemongo.api.DB
 import reactivemongo.bson.{ BSONBinary, BSONDocument, BSONObjectID, Subtype }
-import reactivemongo.json.collection.JSONCollection
+//import reactivemongo.json.collection.JSONCollection
+import reactivemongo.play.json.ImplicitBSONHandlers._
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
 

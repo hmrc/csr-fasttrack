@@ -27,8 +27,10 @@ import org.mockito.Matchers._
 import org.mockito.Mockito._
 import org.scalatest.mock.MockitoSugar
 import reactivemongo.bson.BSONDocument
-import reactivemongo.json.ImplicitBSONHandlers
-import reactivemongo.json.collection.JSONCollection
+//import reactivemongo.json.ImplicitBSONHandlers
+//import reactivemongo.json.collection.JSONCollection
+import reactivemongo.play.json.collection.JSONCollection
+import reactivemongo.play.json.ImplicitBSONHandlers
 import repositories._
 import testkit.MongoRepositorySpec
 import uk.gov.hmrc.http.HeaderCarrier

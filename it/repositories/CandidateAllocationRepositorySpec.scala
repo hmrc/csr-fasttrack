@@ -21,11 +21,11 @@ import model.ApplicationStatuses
 import model.ApplicationStatuses._
 import org.joda.time.{DateTime, LocalDate}
 import reactivemongo.bson.BSONDocument
-import reactivemongo.json.ImplicitBSONHandlers
+//import reactivemongo.json.ImplicitBSONHandlers
+import reactivemongo.play.json.ImplicitBSONHandlers
 import repositories.application.{CandidateAllocationMongoRepository, GeneralApplicationMongoRepository}
 import services.GBTimeZoneService
 import testkit.MongoRepositorySpec
-
 
 class CandidateAllocationRepositorySpec extends MongoRepositorySpec {
 

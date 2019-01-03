@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ import org.joda.time.LocalDate
 import play.api.libs.json.Format
 import reactivemongo.api.{ DB, ReadPreference }
 import reactivemongo.bson.{ BSONArray, BSONDocument, BSONObjectID, BSONRegex, _ }
+import reactivemongo.play.json.ImplicitBSONHandlers._
 import repositories.{ CollectionNames, RandomSelection, ReactiveRepositoryHelpers, _ }
 import services.TimeZoneService
 import uk.gov.hmrc.mongo.ReactiveRepository

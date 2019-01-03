@@ -24,7 +24,8 @@ import model.commands.ApplicationStatusDetails
 import model.persisted.{ OnlineTestPassmarkEvaluation, SchemeEvaluationResult }
 import org.joda.time.{ DateTime, DateTimeZone, LocalDate }
 import reactivemongo.bson.BSONDocument
-import reactivemongo.json.ImplicitBSONHandlers
+//import reactivemongo.json.ImplicitBSONHandlers
+import reactivemongo.play.json.ImplicitBSONHandlers
 import repositories.{ BSONDateTimeHandler, BSONLocalDateHandler, CollectionNames }
 import services.GBTimeZoneService
 import testkit.MongoRepositorySpec

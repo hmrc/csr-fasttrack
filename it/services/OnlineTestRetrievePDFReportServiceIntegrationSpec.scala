@@ -27,8 +27,10 @@ import org.scalatestplus.play.OneAppPerSuite
 import play.api.libs.json.Json
 import reactivemongo.api.DefaultDB
 import reactivemongo.bson.BSONDocument
-import reactivemongo.json.ImplicitBSONHandlers._
-import reactivemongo.json.collection.JSONCollection
+import reactivemongo.play.json.collection.JSONCollection
+import reactivemongo.play.json.ImplicitBSONHandlers._
+//import reactivemongo.json.ImplicitBSONHandlers._
+//import reactivemongo.json.collection.JSONCollection
 import repositories._
 import repositories.application.GeneralApplicationMongoRepository
 import testkit.IntegrationSpec

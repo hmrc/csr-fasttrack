@@ -23,7 +23,8 @@ import model.EvaluationResults.{ AssessmentRuleCategoryResult, CompetencyAverage
 import model.Exceptions.ApplicationNotFound
 import model.ReportExchangeObjects._
 import reactivemongo.bson.BSONDocument
-import reactivemongo.json.ImplicitBSONHandlers
+//import reactivemongo.json.ImplicitBSONHandlers
+import reactivemongo.play.json.ImplicitBSONHandlers
 import repositories.application.{ GeneralApplicationMongoRepository, TestDataMongoRepository }
 import services.GBTimeZoneService
 import testkit.MongoRepositorySpec
@@ -146,7 +147,7 @@ class ApplicationRepositorySpec extends MongoRepositorySpec {
       lazy val testData = new TestDataMongoRepository()
       testData.createApplications(200, onlyAwaitingAllocation = true).futureValue
 
-      val result =  applicationRepo.findApplicationsForAssessmentAllocation(List("London"), 2, 1).futureValue
+      val result = applicationRepo.findApplicationsForAssessmentAllocation(List("London"), 2, 1).futureValue
       result mustBe a[ApplicationForAssessmentAllocationResult]
       result.result mustBe empty
     }

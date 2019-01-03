@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 HM Revenue & Customs
+ * Copyright 2019 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,29 +19,36 @@ package repositories.application
 import java.util.UUID
 import java.util.regex.Pattern
 
-import common.Constants.{ No, Yes }
-import factories.DateTimeFactory
-import model.Adjustments._
+//import common.Constants.{ No, Yes }
+//import factories.DateTimeFactory
+//import model.Adjustments._
 import model.AssessmentScheduleCommands.{ ApplicationForAssessmentAllocation, ApplicationForAssessmentAllocationResult }
 import model.Commands._
+import model.Commands.Implicits.withdrawApplicationRequestFormats
 import model.EvaluationResults._
+//import model.EvaluationResults.CompetencyAverageResult
 import model.Exceptions.{ ApplicationNotFound, CannotUpdateReview, LocationPreferencesNotFound, SchemePreferencesNotFound }
 import model.Exceptions._
 import model.PersistedObjects.{ ApplicationForNotification, ExpiringAllocation }
 import model.Scheme.Scheme
 import model._
 import model.commands.{ ApplicationStatusDetails, OnlineTestProgressResponse }
-import model.exchange.AssistanceDetails
+//import model.exchange.AssistanceDetails
 import model.persisted.SchemeEvaluationResult
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.{ DateTime, LocalDate }
-import play.api.Logger
-import play.api.libs.json.{ Json, Format, JsNumber, JsObject }
+//import play.api.Logger
+import play.api.libs.json.{ Format, JsNumber, JsObject, Json }
 import reactivemongo.api.{ DB, DefaultDB, QueryOpts }
 import reactivemongo.bson.{ BSONArray, BSONDocument, _ }
-import reactivemongo.json.collection.JSONBatchCommands.JSONCountCommand
-import reactivemongo.json.collection.JSONCollection
+import reactivemongo.play.json.collection.JSONBatchCommands.JSONCountCommand
+import reactivemongo.play.json.collection.JSONCollection
+//import reactivemongo.json.collection.JSONBatchCommands.JSONCountCommand
+//import reactivemongo.json.collection.JSONCollection
+import reactivemongo.play.json.ImplicitBSONHandlers._
 import repositories._
+import repositories.BSONDateTimeHandler
+
 import services.TimeZoneService
 import uk.gov.hmrc.mongo.ReactiveRepository
 import uk.gov.hmrc.mongo.json.ReactiveMongoFormats
@@ -414,38 +421,44 @@ class GeneralApplicationMongoRepository(timeZoneService: TimeZoneService)(implic
     }
   }
 
-  override def findApplicationsForAssessmentAllocation(locations: List[String], start: Int,
-    end: Int): Future[ApplicationForAssessmentAllocationResult] = {
+  override def findApplicationsForAssessmentAllocation(
+    locations: List[String], start: Int, end: Int
+  ): Future[ApplicationForAssessmentAllocationResult] = {
     val query = BSONDocument("$and" -> BSONArray(
       BSONDocument("applicationStatus" -> ApplicationStatuses.AwaitingAllocationNotified),
       BSONDocument("assessment-centre-indicator.assessmentCentre" -> BSONDocument("$in" -> locations))
     ))
 
-    collection.runCommand(JSONCountCommand.Count(query)).flatMap { c =>
-      val count = c.count
+    // mongo 3.2 -> 3.4
+    if(start > end) {
+      Future.successful(ApplicationForAssessmentAllocationResult(List.empty, 0))
+    } else {
+      collection.runCommand(JSONCountCommand.Count(query)).flatMap { c =>
+        val count = c.count
 
-      if (count == 0) {
-        Future.successful(ApplicationForAssessmentAllocationResult(List.empty, 0))
-      } else {
-        val projection = BSONDocument(
-          "userId" -> true,
-          "applicationId" -> true,
-          "personal-details.firstName" -> true,
-          "personal-details.lastName" -> true,
-          "personal-details.dateOfBirth" -> true,
-          "assistance-details.needsSupportAtVenue" -> true,
-          "online-tests.invitationDate" -> true
-        )
-        val sort = new JsObject(Map("online-tests.invitationDate" -> JsNumber(1)))
+        if (count == 0) {
+          Future.successful(ApplicationForAssessmentAllocationResult(List.empty, 0))
+        } else {
+          val projection = BSONDocument(
+            "userId" -> true,
+            "applicationId" -> true,
+            "personal-details.firstName" -> true,
+            "personal-details.lastName" -> true,
+            "personal-details.dateOfBirth" -> true,
+            "assistance-details.needsSupportAtVenue" -> true,
+            "online-tests.invitationDate" -> true
+          )
+          val sort = new JsObject(Map("online-tests.invitationDate" -> JsNumber(1)))
 
-        collection.find(query, projection).sort(sort).options(QueryOpts(skipN = start)).cursor[BSONDocument]().collect[List](end - start + 1).
-          map { docList =>
-            docList.map { doc =>
-              bsonDocToApplicationsForAssessmentAllocation(doc)
-            }
-          }.flatMap { result =>
+          collection.find(query, projection).sort(sort).options(QueryOpts(skipN = start)).cursor[BSONDocument]().collect[List](end - start + 1).
+            map { docList =>
+              docList.map { doc =>
+                bsonDocToApplicationsForAssessmentAllocation(doc)
+              }
+            }.flatMap { result =>
             Future.successful(ApplicationForAssessmentAllocationResult(result, count))
           }
+        }
       }
     }
   }

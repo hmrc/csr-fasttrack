@@ -19,9 +19,9 @@ package repositories
 import model.Exceptions.NotFoundException
 import org.joda.time.LocalDate
 import reactivemongo.bson.BSONDocument
-import reactivemongo.json.ImplicitBSONHandlers
+//import reactivemongo.json.ImplicitBSONHandlers
+import reactivemongo.play.json.ImplicitBSONHandlers
 import testkit.MongoRepositorySpec
-
 
 class ApplicationAssessmentRepositorySpec extends MongoRepositorySpec {
   import ImplicitBSONHandlers._
