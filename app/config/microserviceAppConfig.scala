@@ -18,6 +18,7 @@ package config
 
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
+import play.api.Play
 import play.api.Play.{ configuration, current }
 import play.api.libs.json.Json
 import uk.gov.hmrc.play.config.{ RunMode, ServicesConfig }
@@ -153,4 +154,7 @@ object MicroserviceAppConfig extends ServicesConfig {
 
   lazy val progressToAssessmentCentreConfig =
     configuration.underlying.as[DataFixupConfig]("microservice.dataFixup.progressToAssessmentCentre")
+
+  override val mode = Play.current.mode
+  override val runModeConfiguration = Play.current.configuration
 }

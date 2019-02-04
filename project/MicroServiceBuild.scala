@@ -25,8 +25,8 @@ object MicroServiceBuild extends Build with MicroService {
 
 private object Versions {
 
-  val hmrcMicroserviceBootstrapVersion = "8.3.0"
-  val hmrcSchedulerVersion             = "4.1.0"
+  val hmrcMicroserviceBootstrapVersion = "9.1.0"
+  val hmrcSchedulerVersion             = "5.4.0"
   val hmrcTestVersion                  = "2.4.0"
   val ficus                            = "1.1.2"
   val playReactivemongoVersion         = "6.2.0"
