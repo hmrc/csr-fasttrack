@@ -16,6 +16,8 @@
 
 package config
 
+import com.typesafe.config.Config
+import play.api.Play
 import play.api.Play.current
 import play.api.libs.ws.{ WS, WSClient }
 import uk.gov.hmrc.http.{ HttpDelete, HttpGet, HttpPost, HttpPut }
@@ -28,6 +30,8 @@ trait WSHttp extends HttpGet with WSGet with HttpPut with WSPut with HttpPost wi
   // Disable implicit _outbound_ auditing.
   override val hooks = NoneRequired
   val playWS: WSClient = WS.client
+  override val configuration: Option[Config] = Option(Play.current.configuration.underlying)
+  override val appNameConfiguration = Play.current.configuration
 }
 
 object WSHttp extends WSHttp

@@ -19,6 +19,7 @@ package scheduled
 import java.util.UUID
 
 import org.joda.time.Duration
+import play.api.Play
 import repositories._
 import uk.gov.hmrc.play.config.RunMode
 
@@ -53,7 +54,8 @@ trait LockKeeper {
 
 }
 
-object LockKeeper extends RunMode {
+object LockKeeper {
+
   private implicit val connection = {
     MongoDbConnection.mongoConnector.db
   }
